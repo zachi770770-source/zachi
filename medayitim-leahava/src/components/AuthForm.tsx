@@ -66,10 +66,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
     setLoading(true);
     try {
       if (isSignup) {
+        // Route the email-confirmation link through /auth/callback, carrying
+        // the (already-sanitised) intended destination as ?next=.
+        const next = encodeURIComponent(resolveRedirect());
+        const emailRedirectTo = `${window.location.origin}/auth/callback?next=${next}`;
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName.trim() } },
+          options: {
+            data: { full_name: fullName.trim() },
+            emailRedirectTo,
+          },
         });
         if (signUpError) throw signUpError;
 

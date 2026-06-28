@@ -87,7 +87,9 @@ npm run typecheck  # בדיקת טיפוסים
    לבדיקות מהירות אפשר לכבות *Confirm email* (Authentication → Sign In / Providers).
 4. אם *Confirm email* מופעל — תחת **Authentication → URL Configuration** הוסיפו ל-**Redirect URLs**
    את הכתובת `http://localhost:3000/auth/callback` (ובפרודקשן את כתובת הדומיין המקבילה).
-   האפליקציה כוללת route ב-`/auth/callback` שמבצע `exchangeCodeForSession` ומפנה בחזרה לאזור האישי.
+   ההרשמה (`signUp`) שולחת `emailRedirectTo` שמכוון את קישור האישור ישירות ל-`/auth/callback`,
+   שם מתבצע `exchangeCodeForSession` והפנייה חזרה לאזור האישי (היעד מנוקה דרך `safeRedirect`).
+   לכן חובה שהכתובת הזו תופיע ב-Redirect URLs, אחרת Supabase יחסום את ההפנייה.
 
 ---
 
