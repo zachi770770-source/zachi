@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  /* Warm neutral palette — calm, mature, trustworthy */
+  --color-sand-50: #faf8f5;
+  --color-sand-100: #f3efe9;
+  --color-sand-200: #e8e1d6;
+  --color-sand-300: #d8cdbc;
+
+  --color-clay-400: #b79b86;
+  --color-clay-500: #9a7d68;
+  --color-clay-600: #7e6451;
+
+  --color-sage-100: #e8eee8;
+  --color-sage-500: #6f8a73;
+  --color-sage-600: #56705b;
+
+  --color-ink-700: #4a443d;
+  --color-ink-800: #36322c;
+  --color-ink-900: #262320;
+
+  --font-sans: var(--font-heebo), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-sand-50);
+  color: var(--color-ink-800);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Comfortable reading defaults for long Hebrew text blocks */
+p {
+  line-height: 1.75;
+}
+
+/* Subtle focus ring that fits the warm palette */
+:focus-visible {
+  outline: 2px solid var(--color-sage-500);
+  outline-offset: 2px;
+}
