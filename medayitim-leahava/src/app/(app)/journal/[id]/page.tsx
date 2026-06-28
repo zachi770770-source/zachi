@@ -43,12 +43,17 @@ export default async function JournalEntryPage({
   if (kind !== "situation" && kind !== "tool") notFound();
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) notFound();
 
   if (kind === "situation") {
     const { data } = await supabase
       .from("situations")
       .select("*")
       .eq("id", realId)
+      .eq("user_id", user.id)
       .maybeSingle();
     if (!data) notFound();
     const s = data as Situation;
@@ -88,6 +93,7 @@ export default async function JournalEntryPage({
     .from("tool_entries")
     .select("*")
     .eq("id", realId)
+    .eq("user_id", user.id)
     .maybeSingle();
   if (!data) notFound();
   const entry = data as ToolEntry;

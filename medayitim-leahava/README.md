@@ -85,6 +85,9 @@ npm run typecheck  # בדיקת טיפוסים
    ומוסיפה טריגר שיוצר שורת פרופיל אוטומטית בהרשמה.
 3. תחת **Authentication → Providers** ודאו ש-Email מופעל.
    לבדיקות מהירות אפשר לכבות *Confirm email* (Authentication → Sign In / Providers).
+4. אם *Confirm email* מופעל — תחת **Authentication → URL Configuration** הוסיפו ל-**Redirect URLs**
+   את הכתובת `http://localhost:3000/auth/callback` (ובפרודקשן את כתובת הדומיין המקבילה).
+   האפליקציה כוללת route ב-`/auth/callback` שמבצע `exchangeCodeForSession` ומפנה בחזרה לאזור האישי.
 
 ---
 

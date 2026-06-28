@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { RELATIONSHIP_STAGES, type RelationshipStage } from "@/lib/types";
 import { TOOL_BY_SLUG, type ToolMeta } from "@/lib/tools";
@@ -50,19 +50,21 @@ function suggestTool(
 
 export function SituationForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
-
-  const initialStage = searchParams.get("stage") ?? "";
-  const validInitial = RELATIONSHIP_STAGES.includes(
-    initialStage as RelationshipStage,
-  )
-    ? initialStage
-    : "";
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [stage, setStage] = useState<string>(validInitial);
+  const [stage, setStage] = useState<string>("");
+
+  // Pre-select the stage from the ?stage= query param (set on the dashboard).
+  // Read on the client so the form still renders on the server.
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("stage");
+    if (param && RELATIONSHIP_STAGES.includes(param as RelationshipStage)) {
+      setStage(param);
+    }
+  }, []);
+
   const [intensity, setIntensity] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -4,7 +4,10 @@ import { JournalList } from "./JournalList";
 
 export default async function JournalPage() {
   const supabase = await createClient();
-  const items = await getJournalItems(supabase);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const items = await getJournalItems(supabase, user!.id);
 
   return (
     <div className="flex flex-col gap-6">

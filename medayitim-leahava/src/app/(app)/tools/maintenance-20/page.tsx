@@ -34,9 +34,18 @@ export default function Maintenance20Page() {
   useEffect(() => {
     let active = true;
     (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        if (active) setLoading(false);
+        return;
+      }
+
       const { data, error: loadError } = await supabase
         .from("weekly_maintenance")
         .select("*")
+        .eq("user_id", user.id)
         .eq("week_start", weekStart)
         .maybeSingle();
 
@@ -88,6 +97,7 @@ export default function Maintenance20Page() {
           .from("weekly_maintenance")
           .update(payload)
           .eq("id", existingId)
+          .eq("user_id", user.id)
           .select("id")
           .single()
       : supabase

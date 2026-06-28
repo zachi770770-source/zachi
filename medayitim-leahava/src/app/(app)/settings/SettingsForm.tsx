@@ -82,12 +82,6 @@ export function SettingsForm() {
     router.refresh();
   }
 
-  function handleDeleteAccount() {
-    alert(
-      "מחיקת חשבון תהיה זמינה בקרוב. בינתיים אפשר לפנות אלינו לבקשת מחיקה.",
-    );
-  }
-
   if (loading) {
     return (
       <Card>
@@ -140,16 +134,16 @@ export function SettingsForm() {
 
       <Card>
         <h2 className="text-lg font-semibold text-ink-900">חשבון</h2>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button variant="secondary" onClick={handleSignOut} type="button">
             התנתקות
           </Button>
-          <Button variant="danger" onClick={handleDeleteAccount} type="button">
-            מחיקת חשבון
+          <Button variant="danger" type="button" disabled aria-disabled="true">
+            מחיקת חשבון (בקרוב)
           </Button>
         </div>
         <p className="mt-3 text-xs text-clay-500">
-          מחיקת חשבון היא פעולה בלתי הפיכה. הכלי יתווסף בקרוב.
+          מחיקת חשבון תתאפשר בקרוב. עד אז אפשר לפנות אלינו לבקשת מחיקה.
         </p>
       </Card>
     </div>

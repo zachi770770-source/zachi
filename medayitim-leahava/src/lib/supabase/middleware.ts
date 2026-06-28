@@ -7,7 +7,6 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/situation",
-  "/tools",
   "/journal",
   "/settings",
 ];
@@ -57,9 +56,14 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const isProtected = PROTECTED_PREFIXES.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
-  );
+  // The tools library (/tools) is public read-only; individual tool pages
+  // (/tools/<slug>) require auth because they save to the user's account.
+  const isToolAction = pathname.startsWith("/tools/");
+  const isProtected =
+    isToolAction ||
+    PROTECTED_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(`${p}/`),
+    );
   const isAuthRoute = AUTH_ROUTES.includes(pathname);
 
   if (!user && isProtected) {

@@ -8,16 +8,20 @@ import { toolTitle } from "./tools";
  */
 export async function getJournalItems(
   supabase: SupabaseClient,
+  userId: string,
   limit?: number,
 ): Promise<JournalItem[]> {
+  // Scope explicitly by user_id in addition to RLS (defense in depth).
   const [situationsRes, entriesRes] = await Promise.all([
     supabase
       .from("situations")
       .select("*")
+      .eq("user_id", userId)
       .order("created_at", { ascending: false }),
     supabase
       .from("tool_entries")
       .select("*")
+      .eq("user_id", userId)
       .order("created_at", { ascending: false }),
   ]);
 

@@ -1,18 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { safeRedirect } from "@/lib/redirect";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 
 type Mode = "login" | "signup";
 
+/** Reads and sanitises the ?redirect param at submit time (client-only). */
+function resolveRedirect(): string {
+  if (typeof window === "undefined") return "/dashboard";
+  const param = new URLSearchParams(window.location.search).get("redirect");
+  return safeRedirect(param);
+}
+
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [fullName, setFullName] = useState("");
@@ -23,7 +30,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [info, setInfo] = useState<string | null>(null);
 
   const isSignup = mode === "signup";
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
+
+  // Surface the ?error=auth notice sent by the auth callback on failure.
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("error");
+    if (param === "auth") {
+      setError("אישור ההתחברות נכשל. נסו להתחבר שוב.");
+    }
+  }, []);
 
   function validate(): string | null {
     if (isSignup && fullName.trim().length < 2) {
@@ -75,7 +89,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         if (signInError) throw signInError;
       }
 
-      router.push(redirectTo);
+      router.push(resolveRedirect());
       router.refresh();
     } catch (err) {
       setError(translateAuthError(err));

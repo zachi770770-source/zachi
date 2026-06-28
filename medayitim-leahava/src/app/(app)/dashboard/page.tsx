@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     .eq("id", user!.id)
     .maybeSingle();
 
-  const recent = await getJournalItems(supabase, 3);
+  const recent = await getJournalItems(supabase, user!.id, 3);
 
   const firstName = profile?.full_name?.split(" ")[0];
 
