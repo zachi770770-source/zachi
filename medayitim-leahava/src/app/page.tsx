@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
 import { Card, CardTitle, CardBody } from "@/components/ui/Card";
+import { SiteFooter } from "@/components/PublicShell";
 import { TOOLS } from "@/lib/tools";
 
 const FEATURED = [
@@ -88,19 +89,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-10 border-t border-sand-200 bg-sand-100/60">
-        <div className="mx-auto max-w-5xl px-4 py-8 text-center text-sm text-clay-500">
-          <p className="font-medium text-ink-700">מדייטים לאהבה</p>
-          <p className="mx-auto mt-3 max-w-2xl leading-relaxed">
-            הכלים כאן נועדו לעזור לחשוב בבהירות ולבחור בבגרות. הם אינם מהווים
-            ייעוץ או טיפול פסיכולוגי ואינם תחליף לעזרה מקצועית. במצבים של אלימות,
-            פחד, שליטה, השפלה או סכנה — יש לפנות לעזרה מקצועית.
-          </p>
-          <p className="mt-4 text-xs text-clay-400">
-            © {new Date().getFullYear()} מדייטים לאהבה
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

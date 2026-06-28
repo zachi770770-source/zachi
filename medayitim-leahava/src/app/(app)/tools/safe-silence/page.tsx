@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { Card } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -94,6 +95,13 @@ export default function SafeSilencePage() {
         </p>
         <p className="mt-3 text-xs text-clay-500">
           זהו שיקוף לחשיבה אישית, לא אבחנה לגבי הקשר.
+        </p>
+        <p className="mt-3 text-sm text-ink-700">
+          אם השקט מלווה בפחד, שליטה או מחיקה עצמית —{" "}
+          <Link href="/help" className="font-medium text-clay-600 underline">
+            קבלת עזרה מקצועית ובטיחותית
+          </Link>
+          .
         </p>
 
         {error && (

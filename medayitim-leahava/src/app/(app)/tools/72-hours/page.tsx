@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { Card } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -49,6 +50,12 @@ export default function SeventyTwoHoursPage() {
           אם יש אלימות, השפלה, פחד או שליטה — לא משתמשים בכלי הזה כדי להישאר.
           פונים לעזרה מקצועית. {SAFETY_NOTE}
         </p>
+        <Link
+          href="/help"
+          className="mt-3 inline-block text-sm font-medium text-amber-900 underline"
+        >
+          קבלת עזרה מקצועית ובטיחותית
+        </Link>
       </Card>
 
       <Card>
