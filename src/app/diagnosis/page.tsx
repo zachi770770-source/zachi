@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { DIAGNOSIS_QUESTIONS } from "@/content/questions";
 import { useAppStore } from "@/store/useAppStore";
 import { scoreDiagnosis } from "@/lib/scoring";
+import { track } from "@/services/analytics/providerFactory";
 
 export default function DiagnosisPage() {
   const router = useRouter();
@@ -25,10 +26,15 @@ export default function DiagnosisPage() {
 
   const next = () => {
     if (index < DIAGNOSIS_QUESTIONS.length - 1) {
+      track("diagnosis_question_answered", { index, value });
       setIndex((i) => i + 1);
     } else {
       const result = scoreDiagnosis(answers, segment ?? "dating");
       addDiagnosis(result);
+      track("diagnosis_completed", {
+        dominantVoice: result.dominantVoice,
+      });
+      track("dominant_voice_detected", { voice: result.dominantVoice });
       router.push("/diagnosis/result");
     }
   };

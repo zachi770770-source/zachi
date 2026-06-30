@@ -20,8 +20,10 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Quote } from "@/components/ui/Quote";
 import { useCoachStore } from "@/store/useCoachStore";
 import { useAppStore } from "@/store/useAppStore";
-import { askCoachClient } from "@/services/ai/coachClient";
+import { streamCoachClient } from "@/services/ai/coachClient";
+import { track } from "@/services/analytics/providerFactory";
 import { findTool } from "@/content/tools";
+import type { CoachResponse } from "@/types";
 import type { CoachIntent } from "@/types";
 
 const INTENTS: Array<{
@@ -67,11 +69,19 @@ export default function CoachPage() {
   const appState = useAppStore();
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
+  const [liveText, setLiveText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, pending]);
+  }, [messages, pending, liveText]);
+
+  const formatFinal = (response: CoachResponse): string => {
+    if (response.safetyTriggered) {
+      return `🛡 ${response.facts}\n\n${response.story}\n\n${response.nextAction}`;
+    }
+    return `**מה העובדות?**\n${response.facts}\n\n**מה הסיפור שאתה אולי מספר?**\n${response.story}\n\n**הפעולה הבאה הבריאה:**\n${response.nextAction}`;
+  };
 
   const handleSend = async () => {
     if (!intent || !text.trim() || pending) return;
@@ -84,9 +94,13 @@ export default function CoachPage() {
     });
     setText("");
     setPending(true);
+    setLiveText("");
+    track("coach_message_sent", { intent });
 
     try {
-      const response = await askCoachClient(
+      let finalResponse: CoachResponse | undefined;
+      let accumulated = "";
+      for await (const chunk of streamCoachClient(
         intent,
         userText,
         messages,
@@ -96,20 +110,31 @@ export default function CoachPage() {
           toolUsage: appState.toolUsage,
           catches: appState.catches,
         },
-      );
+      )) {
+        if (chunk.type === "delta" && chunk.text) {
+          accumulated += chunk.text;
+          setLiveText(accumulated);
+        } else if (chunk.type === "done" || chunk.type === "safety") {
+          finalResponse = chunk.finalResponse;
+        }
+      }
 
-      const composedContent = response.safetyTriggered
-        ? `🛡 ${response.facts}\n\n${response.story}\n\n${response.nextAction}`
-        : `**מה העובדות?**\n${response.facts}\n\n**מה הסיפור שאתה אולי מספר?**\n${response.story}\n\n**הפעולה הבאה הבריאה:**\n${response.nextAction}`;
+      if (!finalResponse) {
+        finalResponse = {
+          facts: accumulated || "לא הצלחתי להחזיר תשובה.",
+          story: "",
+          nextAction: "נסה שוב.",
+        };
+      }
 
       addMessage({
         role: "assistant",
-        content: composedContent,
+        content: formatFinal(finalResponse),
         intent,
-        toolSuggestionSlug: response.toolSuggestion?.slug,
+        toolSuggestionSlug: finalResponse.toolSuggestion?.slug,
         timestamp: new Date().toISOString(),
       });
-    } catch (e) {
+    } catch {
       addMessage({
         role: "assistant",
         content: "אופס, משהו השתבש. ננסה שוב?",
@@ -117,6 +142,7 @@ export default function CoachPage() {
       });
     } finally {
       setPending(false);
+      setLiveText("");
     }
   };
 
@@ -207,12 +233,25 @@ export default function CoachPage() {
           ))}
 
         {pending && (
-          <Card tone="muted" className="max-w-[85%]">
-            <div className="flex items-center gap-2 text-ink-400">
-              <span className="size-2 bg-clay-300 rounded-full animate-pulse" />
-              <span className="size-2 bg-clay-300 rounded-full animate-pulse" style={{ animationDelay: "0.2s" }} />
-              <span className="size-2 bg-clay-300 rounded-full animate-pulse" style={{ animationDelay: "0.4s" }} />
-            </div>
+          <Card tone="default" className="max-w-[92%]">
+            {liveText ? (
+              <p className="text-ink-700 leading-relaxed whitespace-pre-wrap text-sm">
+                {liveText}
+                <span className="inline-block w-1 h-4 bg-clay-400 mr-0.5 align-middle animate-pulse" />
+              </p>
+            ) : (
+              <div className="flex items-center gap-2 text-ink-400">
+                <span className="size-2 bg-clay-300 rounded-full animate-pulse" />
+                <span
+                  className="size-2 bg-clay-300 rounded-full animate-pulse"
+                  style={{ animationDelay: "0.2s" }}
+                />
+                <span
+                  className="size-2 bg-clay-300 rounded-full animate-pulse"
+                  style={{ animationDelay: "0.4s" }}
+                />
+              </div>
+            )}
           </Card>
         )}
       </div>

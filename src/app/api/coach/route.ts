@@ -1,12 +1,13 @@
 /**
  * /api/coach
  *
- * נקודת הקצה היחידה לקריאות AI ב-Phase 2.
- * הקליינט שולח: { intent, userText, history, memory }
- * השרת מבצע: safety → RAG retrieval → Claude → quote guard → response.
+ * נקודת הקצה היחידה לקריאות AI ב-Phase 2+.
  *
- * Memory מועבר מהקליינט (Phase 1: localStorage),
- * וב-Phase 2 (כשיהיה Auth) יבוא ישירות מ-Supabase לפי auth.uid().
+ * Modes:
+ * - Default: מחזיר תשובה שלמה כ-JSON.
+ * - Streaming (?stream=1): SSE שמשגר deltas של טקסט, ובסוף ה-finalResponse המובנה.
+ *
+ * הקליינט בוחר את המצב לפי תמיכת הספק.
  */
 
 import { NextResponse } from "next/server";
@@ -24,6 +25,9 @@ interface CoachRequestBody {
 }
 
 export async function POST(request: Request) {
+  const url = new URL(request.url);
+  const isStreaming = url.searchParams.get("stream") === "1";
+
   let body: CoachRequestBody;
   try {
     body = (await request.json()) as CoachRequestBody;
@@ -47,12 +51,54 @@ export async function POST(request: Request) {
 
   try {
     const provider = await getAIProvider();
-    const response = await provider.chat({
+    const chatInput: ChatInput = {
       intent: body.intent,
       userText: body.userText,
       history: body.history ?? [],
       memory: body.memory,
-    });
+    };
+
+    if (isStreaming && provider.stream) {
+      // Server-Sent Events stream
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of provider.stream!(chatInput)) {
+              const line = `data: ${JSON.stringify(chunk)}\n\n`;
+              controller.enqueue(encoder.encode(line));
+            }
+            controller.close();
+          } catch (err) {
+            const errorChunk = {
+              type: "done",
+              finalResponse: {
+                facts: "משהו השתבש בצד שלנו.",
+                story: "",
+                nextAction: "נסה שוב בעוד דקה.",
+              },
+            };
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(errorChunk)}\n\n`),
+            );
+            controller.close();
+            // eslint-disable-next-line no-console
+            console.error("[/api/coach stream] error:", err);
+          }
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache, no-transform",
+          connection: "keep-alive",
+        },
+      });
+    }
+
+    // Non-streaming fallback
+    const response = await provider.chat(chatInput);
     return NextResponse.json(response);
   } catch (err) {
     // eslint-disable-next-line no-console

@@ -7,7 +7,7 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk";
-import type { IAIProvider, ChatInput } from "../IAIProvider";
+import type { IAIProvider, ChatInput, StreamChunk } from "../IAIProvider";
 import type { CoachResponse } from "@/types/ai";
 import { buildSystemPrompt } from "@/prompts/systemPrompt";
 import {
@@ -100,6 +100,67 @@ export class ClaudeProvider implements IAIProvider {
     // 7. Parse 4-section response
     return parseStructuredResponse(guarded);
   }
+
+  async *stream(input: ChatInput): AsyncIterable<StreamChunk> {
+    const safety = detectSafety(input.userText);
+    if (safety.triggered) {
+      yield {
+        type: "safety",
+        finalResponse: {
+          ...SAFETY_RESPONSE,
+          safetyTriggered: true,
+          toolSuggestion: undefined,
+        },
+      };
+      return;
+    }
+
+    const excerpts = await retrieveExcerpts({
+      query: input.userText,
+      intent: input.intent,
+      topK: 6,
+    });
+
+    const systemPrompt = buildSystemPrompt({
+      intent: input.intent,
+      userText: input.userText,
+      memory: input.memory,
+      excerpts,
+      history: input.history.map((m) => ({ role: m.role, content: m.content })),
+    });
+
+    const streamResponse = await this.client.messages.stream({
+      model: MODEL,
+      max_tokens: MAX_OUTPUT_TOKENS,
+      system: systemPrompt,
+      messages: [
+        ...input.history.slice(-6).map((m) => ({ role: m.role, content: m.content })),
+        { role: "user" as const, content: input.userText },
+      ],
+    });
+
+    let accumulated = "";
+    for await (const event of streamResponse) {
+      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        const delta = event.delta.text;
+        accumulated += delta;
+        yield { type: "delta", text: delta };
+      }
+    }
+
+    const { text: guarded } = applyQuoteGuard(
+      accumulated,
+      excerpts.map((e) => e.content),
+    );
+    const final = isOutputClean(guarded)
+      ? parseStructuredResponse(guarded)
+      : {
+          ...fallbackResponse(),
+          toolSuggestion: { slug: "whos-driving", reason: "התחל מכאן." },
+        };
+
+    yield { type: "done", finalResponse: final };
+  }
 }
 
 /**
@@ -149,3 +210,4 @@ function parseStructuredResponse(text: string): CoachResponse {
 function stripMarkdown(s: string): string {
   return s.replace(/^\*+|\*+$/g, "").replace(/^#+\s*/gm, "").trim();
 }
+

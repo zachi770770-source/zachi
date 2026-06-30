@@ -12,11 +12,13 @@ import { Badge } from "@/components/ui/Badge";
 import { ToolField } from "@/components/tools/ToolField";
 import { findTool } from "@/content/tools";
 import { useAppStore } from "@/store/useAppStore";
+import { track } from "@/services/analytics/providerFactory";
+import type { CatchEntry } from "@/types";
 
 export default function ToolPage() {
   const params = useParams<{ slug: string }>();
   const tool = findTool(params.slug);
-  const { addToolUsage } = useAppStore();
+  const { addToolUsage, addCatch, addMaintenance, addGoal } = useAppStore();
   const [values, setValues] = useState<Record<string, string | number>>({});
   const [result, setResult] = useState<{
     reflection: string;
@@ -39,6 +41,7 @@ export default function ToolPage() {
   });
 
   const handleSubmit = () => {
+    if (!tool) return;
     const r = tool.resultBuilder(values);
     setResult(r);
     addToolUsage({
@@ -47,6 +50,40 @@ export default function ToolPage() {
       reflection: r.reflection,
       timestamp: new Date().toISOString(),
     });
+    track("tool_completed", { tool: tool.slug });
+
+    // צד אפקטים ספציפיים לכלים בודדים
+    if (tool.slug === "whos-driving" && values.voice && values.when) {
+      const c: CatchEntry = {
+        id: `c_${Date.now()}`,
+        when: values.when as CatchEntry["when"],
+        voice: values.voice as CatchEntry["voice"],
+        note: String(values.situation ?? ""),
+        timestamp: new Date().toISOString(),
+      };
+      addCatch(c);
+      track("catch_logged", { when: c.when, voice: c.voice });
+    }
+
+    if (tool.slug === "twenty-min") {
+      addMaintenance({
+        id: `m_${Date.now()}`,
+        whatWorked: String(values.worked ?? ""),
+        overload: String(values.overload ?? ""),
+        fixThisWeek: String(values.fix ?? ""),
+        timestamp: new Date().toISOString(),
+      });
+      track("maintenance_session_completed");
+      if (values.fix) {
+        addGoal({
+          id: `g_${Date.now()}`,
+          text: String(values.fix),
+          source: "tool",
+          setAt: new Date().toISOString(),
+        });
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

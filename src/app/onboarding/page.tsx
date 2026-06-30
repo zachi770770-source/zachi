@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Quote } from "@/components/ui/Quote";
 import { useAppStore } from "@/store/useAppStore";
 import { SEGMENT_OPTIONS } from "@/content/questions";
+import { track } from "@/services/analytics/providerFactory";
 import type { UserSegment } from "@/types";
 
 type Step = "welcome" | "segment" | "privacy";
@@ -23,6 +24,10 @@ export default function OnboardingPage() {
     setSegment(selected);
     setAnalyticsConsent(consent);
     setOnboarded(true);
+    if (consent) {
+      track("onboarding_segment_chosen", { segment: selected });
+      track("onboarding_completed");
+    }
     router.push("/");
   };
 
