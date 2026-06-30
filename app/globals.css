@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F5EFE6;
+  --foreground: #1A1614;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "kern", "liga", "calt";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@layer components {
+  .container-prose {
+    @apply mx-auto w-full max-w-3xl px-5 sm:px-8;
+  }
+  .container-wide {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-burgundy-600 px-7 py-3.5 text-base font-medium text-cream-50 shadow-card transition-all hover:bg-burgundy-700 hover:shadow-cardHover active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-burgundy-600/30 bg-transparent px-7 py-3.5 text-base font-medium text-burgundy-700 transition-all hover:bg-burgundy-600/5 hover:border-burgundy-600/60 active:scale-[0.98];
+  }
+  .card {
+    @apply rounded-2xl bg-cream-50 p-7 shadow-card transition-shadow hover:shadow-cardHover;
+  }
+  .section-heading {
+    @apply font-display text-3xl sm:text-4xl font-semibold text-ink-900 leading-tight;
+  }
+  .eyebrow {
+    @apply inline-block text-xs sm:text-sm uppercase tracking-[0.18em] text-burgundy-700 font-medium;
+  }
+}

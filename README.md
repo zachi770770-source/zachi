@@ -1,166 +1,70 @@
-# Outlook Email Automation
+# מדייטים לאהבה — אפליקציה אישית
 
-כלי Python לשליחת אימיילים דרך Outlook/Office 365 עם תמיכה ב:
-- **SMTP** — לחשבונות Outlook.com / Hotmail
-- **Microsoft Graph API** — לחשבונות Office 365 / Azure AD
+אפליקציית Next.js בעברית RTL לזיהוי מוכנות, דפוסים ובניית קשר נכון, מבוססת על הספר והשיטה ׳מדייטים לאהבה׳.
 
----
+**העיקרון:** דייטינג הוא חיפוש. אהבה היא בנייה.
 
-## התקנה
+## מה כלול ב־MVP
 
-```bash
-pip install -r requirements.txt
-cp .env.example .env
-# ערוך את .env עם הפרטים שלך
-```
+1. **דף ראשי** — Hero, ערכים מרכזיים, שאלות מנחות.
+2. **אבחון בן 12 שאלות** — חישוב ציון מוכנות והתאמה לאחד מארבעה פרופילים:
+   - מחפש/ת ביטחון
+   - רץ/ה מהר מדי
+   - נמנע/ת מקרבה
+   - בשל/ה לבנייה
+3. **דף תוצאות** — ציון, פרופיל, שלוש המלצות מעשיות, וכלי הבא מהשיטה.
+4. **דף כלים** — חמישה כלים מעשיים: עובדה·סיפור·פעולה, מבחן שלושת השערים, מדרג הגבולות, תחזוקת ה־20, נוהל 72 שעות.
+5. **דף השיטה** — חמשת עמודי הבנייה והעקרון המרכזי.
 
----
-
-## הגדרת `.env`
-
-### שיטה 1: SMTP (Outlook.com / Hotmail)
-
-```env
-BACKEND=smtp
-SMTP_USER=your_email@outlook.com
-SMTP_PASSWORD=your_app_password
-SMTP_HOST=smtp-mail.outlook.com
-SMTP_PORT=587
-```
-
-> **הערה:** Microsoft חסמה כניסה עם סיסמה רגילה. יש להפעיל **App Password**:  
-> Account Settings → Security → Advanced Security → App passwords
-
-### שיטה 2: Microsoft Graph API (Office 365)
-
-1. פתח [Azure Portal](https://portal.azure.com) → **App registrations** → **New registration**
-2. תחת **API permissions** הוסף: `Mail.Send` (Application permission)
-3. לחץ **Grant admin consent**
-4. צור **Client secret** תחת **Certificates & secrets**
-
-```env
-BACKEND=graph
-AZURE_TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-AZURE_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-AZURE_CLIENT_SECRET=your-secret-value
-SENDER_EMAIL=sender@yourdomain.com
-```
-
----
-
-## שימוש
-
-### שליחת אימייל פשוט
+## הרצה מקומית
 
 ```bash
-# טקסט רגיל
-python main.py send --to "user@example.com" --subject "שלום" --body "מה שלומך?"
-
-# HTML
-python main.py send --to "user@example.com" --subject "שלום" --body "<h1>שלום!</h1>" --html
-
-# עם קבצים מצורפים
-python main.py send --to "user@example.com" --subject "דוח" --body "ראה מצורף" \
-  --attach report.pdf invoice.xlsx
-
-# עם CC ו-BCC
-python main.py send --to "user@example.com" --subject "שלום" --body "גוף" \
-  --cc "mgr@example.com" --bcc "audit@example.com"
+npm install
+npm run dev
 ```
 
-### שליחה עם תבנית (Jinja2)
+הגלישה: http://localhost:3000
+
+## בנייה לפרודקשן
 
 ```bash
-# תבנית פשוטה
-python main.py send-template \
-  --to "user@example.com" \
-  --subject "ברוך הבא!" \
-  --template welcome \
-  --name "ישראל" \
-  --message "תודה שנרשמת לשירות."
-
-# עם הקשר מלא ב-JSON
-python main.py send-template \
-  --to "user@example.com" \
-  --subject "ברוך הבא!" \
-  --template welcome \
-  --context '{"name": "ישראל", "message": "ברוך הבא!", "action_url": "https://example.com"}'
+npm run build
+npm start
 ```
 
-### שליחה המונית מ-CSV
+## דיפלוי לוורסל
 
-הכן קובץ `contacts.csv`:
+הפרויקט מוכן לדיפלוי בוורסל בלי שום הגדרה נוספת — Vercel מזהה Next.js אוטומטית.
 
-```csv
-email,name,message
-user1@example.com,ישראל,ברוך הבא לשירות
-user2@example.com,שרה,תודה על הרשמתך
+## מבנה
+
+```
+app/
+  layout.tsx       # RTL, פונטים, navbar+footer
+  page.tsx         # דף ראשי
+  quiz/page.tsx    # אבחון + תוצאות
+  tools/page.tsx   # ארגז הכלים
+  method/page.tsx  # השיטה
+components/
+  SiteNav.tsx
+  SiteFooter.tsx
+lib/
+  quiz.ts          # שאלות, פרופילים, חישוב ציון
 ```
 
-```bash
-python main.py bulk \
-  --csv contacts.csv \
-  --template welcome \
-  --subject "ברוך הבא!" \
-  --delay 1.0
-```
+## טכנולוגיות
 
-### בדיקת החיבור
+- Next.js 14 (App Router)
+- React 18
+- TypeScript
+- Tailwind CSS
+- Heebo + Frank Ruhl Libre (Google Fonts)
 
-```bash
-python main.py test
-```
+## הערות
 
----
+- אין מסד נתונים. כל המידע נשמר רק זמנית בזיכרון הדפדפן בזמן האבחון.
+- אין הרשמה ואין אימות.
+- אין שום שירות חיצוני נדרש להפעלה.
+- הכלי הוא חינוכי ואינו מחליף טיפול או ייעוץ מקצועי.
 
-## יצירת תבניות מותאמות אישית
-
-צור קבצים בתיקיית `templates/`:
-- `my_template.html` — גרסת HTML (עם Jinja2)
-- `my_template.txt` — גרסת טקסט רגיל
-
-```html
-<!-- templates/my_template.html -->
-<h1>שלום {{ name }}</h1>
-<p>{{ message }}</p>
-```
-
-שימוש:
-```bash
-python main.py send-template --to "user@example.com" --subject "נושא" \
-  --template my_template --name "ישראל" --message "הודעה"
-```
-
----
-
-## שימוש כספריה
-
-```python
-from outlook_mailer import Mailer, BulkSender
-
-mailer = Mailer()
-
-# שליחה פשוטה
-mailer.send(
-    to=["user@example.com"],
-    subject="שלום",
-    body_html="<p>הודעה</p>",
-)
-
-# שליחה עם תבנית
-mailer.send_template(
-    to="user@example.com",
-    subject="ברוך הבא",
-    template_name="welcome",
-    context={"name": "ישראל", "message": "ברוך הבא!"},
-)
-
-# שליחה המונית
-sender = BulkSender(mailer, delay=0.5)
-results = sender.send_from_csv(
-    csv_path="contacts.csv",
-    template_name="welcome",
-    subject="ברוך הבא!",
-)
-print(results)  # {"success": [...], "failed": [...]}
-```
+הקוד הישן של כלי המיילים של Outlook נשמר בתיקיית `archive-old-python-mailer/`.
