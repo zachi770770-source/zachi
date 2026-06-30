@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Quote } from "@/components/ui/Quote";
 import { useCoachStore } from "@/store/useCoachStore";
 import { useAppStore } from "@/store/useAppStore";
-import { askCoach } from "@/services/ai/coachService";
+import { askCoachClient } from "@/services/ai/coachClient";
 import { findTool } from "@/content/tools";
 import type { CoachIntent } from "@/types";
 
@@ -86,8 +86,10 @@ export default function CoachPage() {
     setPending(true);
 
     try {
-      const response = await askCoach(
-        { intent, userText, history: messages },
+      const response = await askCoachClient(
+        intent,
+        userText,
+        messages,
         {
           segment: appState.segment,
           diagnosisHistory: appState.diagnosisHistory,

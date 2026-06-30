@@ -142,12 +142,19 @@ export default function ProgressPage() {
           כל פעם שאתם מזהים את הדפוס אחרי שכבר פעל — אתם מקצרים את הזמן עד שתזהו אותו תוך כדי.
         </Quote>
 
-        <div className="pt-6 border-t border-sand-200">
+        <div className="pt-6 border-t border-sand-200 space-y-2">
           <p className="text-xs text-ink-400 mb-3">פרטיות וזיכרון</p>
-          <Button onClick={handleReset} variant="ghost" size="sm">
-            <Trash2 className="size-3.5" />
-            למחוק את כל מה שנשמר במכשיר
-          </Button>
+          <Link href="/profile/memory">
+            <Button variant="outline" size="sm">
+              לראות מה המאמן זוכר
+            </Button>
+          </Link>
+          <div>
+            <Button onClick={handleReset} variant="ghost" size="sm">
+              <Trash2 className="size-3.5" />
+              למחוק את כל מה שנשמר במכשיר
+            </Button>
+          </div>
         </div>
       </div>
     </main>
