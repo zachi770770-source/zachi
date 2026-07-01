@@ -1,0 +1,43 @@
+name: medayitim-leahava
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "medayitim-leahava/**"
+      - ".github/workflows/medayitim-leahava.yml"
+  pull_request:
+    paths:
+      - "medayitim-leahava/**"
+      - ".github/workflows/medayitim-leahava.yml"
+
+defaults:
+  run:
+    working-directory: medayitim-leahava
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: medayitim-leahava/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck (tsc --noEmit)
+        run: npm run typecheck
+
+      - name: Build (next build)
+        env:
+          # Placeholder values so Next.js build doesn't fail on missing env.
+          # Real values live only in the deploy target (Vercel/Netlify/self-hosted).
+          # These are NOT credentials; the URL is a syntactically valid dummy.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder_anon_key_for_build_only
+        run: npm run build
