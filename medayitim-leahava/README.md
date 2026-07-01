@@ -39,6 +39,10 @@
 
 ## הרצה מקומית
 
+> להוראות הפעלה מפורטות עם פרויקט Supabase קיים, כולל בדיקות אימות
+> שכל שלב עבד (מיגרציה, signup, journal, export, delete) — ראה
+> [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md).
+
 דרישות מוקדמות: Node.js 18.18+ (מומלץ 20+), חשבון [Supabase](https://supabase.com).
 
 ```bash
