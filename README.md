@@ -6,6 +6,26 @@
 
 ---
 
+## Quick reference
+
+דוגמה אחת קצרה לכל פקודה (הוסיפו `--dry-run` כדי לראות תצוגה מקדימה
+בלי לשלוח, בלי צורך ב-credentials):
+
+```bash
+# 1. שליחה חד-פעמית
+python main.py send --to "you@example.com" --subject "hi" --body "hello"
+
+# 2. שליחה מתבנית Jinja2
+python main.py send-template --to "you@example.com" --subject "welcome" \
+  --template welcome --name "ישראל" --message "ברוך הבא"
+
+# 3. שליחה המונית מ-CSV (עם retries אוטומטיים)
+python main.py bulk --csv contacts.csv --template welcome \
+  --subject "welcome" --delay 1.0 --max-retries 2
+```
+
+---
+
 ## התקנה
 
 ```bash
