@@ -8,14 +8,53 @@ from pathlib import Path
 from tqdm import tqdm
 
 from .mailer import Mailer
+from .templates import TemplateManager
 
 logger = logging.getLogger(__name__)
 
 
 class BulkSender:
-    def __init__(self, mailer: Mailer, delay: float = 0.5) -> None:
+    def __init__(
+        self,
+        mailer: Mailer | None,
+        delay: float = 0.5,
+        max_retries: int = 2,
+        retry_backoff: float = 2.0,
+    ) -> None:
         self._mailer = mailer
         self._delay = delay
+        self._max_retries = max_retries
+        self._retry_backoff = retry_backoff
+
+    def _send_with_retry(
+        self,
+        email: str,
+        subject: str,
+        template_name: str,
+        context: dict,
+    ) -> None:
+        if self._mailer is None:
+            raise RuntimeError("BulkSender has no mailer configured")
+        attempt = 0
+        while True:
+            try:
+                self._mailer.send_template(
+                    to=email,
+                    subject=subject,
+                    template_name=template_name,
+                    context=context,
+                )
+                return
+            except Exception as exc:
+                if attempt >= self._max_retries:
+                    raise
+                wait = self._retry_backoff * (2 ** attempt)
+                logger.warning(
+                    "Retry %d/%d for %s after %.1fs — %s",
+                    attempt + 1, self._max_retries, email, wait, exc,
+                )
+                time.sleep(wait)
+                attempt += 1
 
     def send_from_csv(
         self,
@@ -23,6 +62,7 @@ class BulkSender:
         template_name: str,
         subject: str,
         base_context: dict | None = None,
+        dry_run: bool = False,
     ) -> dict[str, list[str]]:
         """
         Send templated emails to all rows in a CSV file.
@@ -45,17 +85,22 @@ class BulkSender:
             raise ValueError("CSV must have an 'email' column")
 
         results: dict[str, list[str]] = {"success": [], "failed": []}
+        tpl_manager = TemplateManager() if dry_run else None
 
         for row in tqdm(rows, desc="Sending emails", unit="email"):
             email = row["email"].strip()
             context = {**(base_context or {}), **row}
+            if dry_run:
+                try:
+                    tpl_manager.render(template_name, context)  # type: ignore[union-attr]
+                    logger.info("[dry-run] Would send to %s", email)
+                    results["success"].append(email)
+                except Exception as exc:
+                    logger.error("[dry-run] Template failed for %s: %s", email, exc)
+                    results["failed"].append(email)
+                continue
             try:
-                self._mailer.send_template(
-                    to=email,
-                    subject=subject,
-                    template_name=template_name,
-                    context=context,
-                )
+                self._send_with_retry(email, subject, template_name, context)
                 results["success"].append(email)
                 logger.info("Sent to %s", email)
             except Exception as exc:

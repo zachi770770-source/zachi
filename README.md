@@ -111,6 +111,35 @@ python main.py bulk \
 python main.py test
 ```
 
+### תצוגה מקדימה בלי לשלוח (Dry-run)
+
+לכל אחת מהפקודות `send`, `send-template`, ו-`bulk` יש דגל `--dry-run`
+שמדפיס מה היה נשלח בלי לפנות לחשבון. שימושי לאימות תבניות ותוכן CSV
+לפני שליחה בפועל:
+
+```bash
+python main.py send-template --to "user@example.com" --subject "hi" \
+  --template welcome --name "ישראל" --message "בדיקה" --dry-run
+
+python main.py bulk --csv contacts.csv --template welcome \
+  --subject "hi" --dry-run
+```
+
+### ניסיונות חוזרים בשליחה המונית
+
+הפקודה `bulk` תומכת ב-`--max-retries N` (ברירת מחדל: 2). כישלון זמני
+מנוסה שוב עם backoff מעריכי; כתובת שנכשלת בכל הניסיונות מופיעה ברשימת
+ה-failed המוחזרת.
+
+---
+
+## בדיקות (Tests)
+
+```bash
+pip install pytest
+python -m pytest tests/
+```
+
 ---
 
 ## יצירת תבניות מותאמות אישית
