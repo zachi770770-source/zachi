@@ -4,6 +4,29 @@
 - **SMTP** — לחשבונות Outlook.com / Hotmail
 - **Microsoft Graph API** — לחשבונות Office 365 / Azure AD
 
+> להוראות הפעלה מלאות עם credentials (בחירת backend, יצירת `.env`,
+> `python main.py test`, פתרון תקלות) — ראו [SETUP.md](./SETUP.md).
+
+---
+
+## Quick reference
+
+דוגמה אחת קצרה לכל פקודה (הוסיפו `--dry-run` כדי לראות תצוגה מקדימה
+בלי לשלוח, בלי צורך ב-credentials):
+
+```bash
+# 1. שליחה חד-פעמית
+python main.py send --to "you@example.com" --subject "hi" --body "hello"
+
+# 2. שליחה מתבנית Jinja2
+python main.py send-template --to "you@example.com" --subject "welcome" \
+  --template welcome --name "ישראל" --message "ברוך הבא"
+
+# 3. שליחה המונית מ-CSV (עם retries אוטומטיים)
+python main.py bulk --csv contacts.csv --template welcome \
+  --subject "welcome" --delay 1.0 --max-retries 2
+```
+
 ---
 
 ## התקנה
@@ -109,6 +132,35 @@ python main.py bulk \
 
 ```bash
 python main.py test
+```
+
+### תצוגה מקדימה בלי לשלוח (Dry-run)
+
+לכל אחת מהפקודות `send`, `send-template`, ו-`bulk` יש דגל `--dry-run`
+שמדפיס מה היה נשלח בלי לפנות לחשבון. שימושי לאימות תבניות ותוכן CSV
+לפני שליחה בפועל:
+
+```bash
+python main.py send-template --to "user@example.com" --subject "hi" \
+  --template welcome --name "ישראל" --message "בדיקה" --dry-run
+
+python main.py bulk --csv contacts.csv --template welcome \
+  --subject "hi" --dry-run
+```
+
+### ניסיונות חוזרים בשליחה המונית
+
+הפקודה `bulk` תומכת ב-`--max-retries N` (ברירת מחדל: 2). כישלון זמני
+מנוסה שוב עם backoff מעריכי; כתובת שנכשלת בכל הניסיונות מופיעה ברשימת
+ה-failed המוחזרת.
+
+---
+
+## בדיקות (Tests)
+
+```bash
+pip install pytest
+python -m pytest tests/
 ```
 
 ---

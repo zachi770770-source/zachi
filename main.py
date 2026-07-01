@@ -17,7 +17,6 @@ logging.basicConfig(
 def cmd_send(args: argparse.Namespace) -> None:
     from outlook_mailer import Mailer
 
-    mailer = Mailer()
     to = [e.strip() for e in args.to.split(",")]
     cc = [e.strip() for e in args.cc.split(",")] if args.cc else None
     bcc = [e.strip() for e in args.bcc.split(",")] if args.bcc else None
@@ -26,6 +25,17 @@ def cmd_send(args: argparse.Namespace) -> None:
     body_html = args.body if args.html else ""
     body_text = "" if args.html else args.body
 
+    if args.dry_run:
+        print("[dry-run] Would send:")
+        print(f"  to:   {to}")
+        if cc: print(f"  cc:   {cc}")
+        if bcc: print(f"  bcc:  {bcc}")
+        print(f"  subj: {args.subject}")
+        print(f"  type: {'HTML' if args.html else 'text'}")
+        if attachments: print(f"  attach: {attachments}")
+        return
+
+    mailer = Mailer()
     mailer.send(
         to=to,
         subject=args.subject,
@@ -41,7 +51,6 @@ def cmd_send(args: argparse.Namespace) -> None:
 def cmd_send_template(args: argparse.Namespace) -> None:
     from outlook_mailer import Mailer
 
-    mailer = Mailer()
     to = [e.strip() for e in args.to.split(",")]
 
     context = json.loads(args.context) if args.context else {}
@@ -50,6 +59,20 @@ def cmd_send_template(args: argparse.Namespace) -> None:
     if args.message:
         context["message"] = args.message
 
+    if args.dry_run:
+        from outlook_mailer.templates import TemplateManager
+
+        html, text = TemplateManager().render(args.template, context)
+        print("[dry-run] Would send template:")
+        print(f"  to:       {to}")
+        print(f"  subject:  {args.subject}")
+        print(f"  template: {args.template}")
+        print(f"  context:  {context}")
+        preview = (html or text)[:200]
+        print(f"  preview:  {preview}{'...' if len(html or text) > 200 else ''}")
+        return
+
+    mailer = Mailer()
     mailer.send_template(
         to=to,
         subject=args.subject,
@@ -63,16 +86,18 @@ def cmd_send_template(args: argparse.Namespace) -> None:
 def cmd_bulk(args: argparse.Namespace) -> None:
     from outlook_mailer import BulkSender, Mailer
 
-    mailer = Mailer()
     base_context = json.loads(args.context) if args.context else {}
-    sender = BulkSender(mailer, delay=args.delay)
+    mailer = None if args.dry_run else Mailer()
+    sender = BulkSender(mailer, delay=args.delay, max_retries=args.max_retries)
     results = sender.send_from_csv(
         csv_path=args.csv,
         template_name=args.template,
         subject=args.subject,
         base_context=base_context,
+        dry_run=args.dry_run,
     )
-    print(f"✓ Done — success: {len(results['success'])}, failed: {len(results['failed'])}")
+    prefix = "[dry-run] " if args.dry_run else ""
+    print(f"✓ {prefix}Done — success: {len(results['success'])}, failed: {len(results['failed'])}")
     if results["failed"]:
         print("Failed addresses:")
         for addr in results["failed"]:
@@ -112,6 +137,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_send.add_argument("--attach", nargs="+", metavar="FILE", help="Attachment paths")
     p_send.add_argument("--cc", help="CC recipients, comma-separated")
     p_send.add_argument("--bcc", help="BCC recipients, comma-separated")
+    p_send.add_argument("--dry-run", action="store_true", help="Preview without sending")
     p_send.set_defaults(func=cmd_send)
 
     # ── send-template ─────────────────────────────────────────────────────────
@@ -123,6 +149,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_tpl.add_argument("--message", help="Message body (shortcut for --context)")
     p_tpl.add_argument("--context", help="JSON string with template variables")
     p_tpl.add_argument("--attach", nargs="+", metavar="FILE")
+    p_tpl.add_argument("--dry-run", action="store_true", help="Render preview without sending")
     p_tpl.set_defaults(func=cmd_send_template)
 
     # ── bulk ──────────────────────────────────────────────────────────────────
@@ -132,6 +159,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_bulk.add_argument("--subject", required=True)
     p_bulk.add_argument("--context", help="JSON string with base context variables")
     p_bulk.add_argument("--delay", type=float, default=0.5, help="Delay in seconds between sends")
+    p_bulk.add_argument("--max-retries", type=int, default=2, help="Retries per failed send")
+    p_bulk.add_argument("--dry-run", action="store_true",
+                        help="Render templates but do not send")
     p_bulk.set_defaults(func=cmd_bulk)
 
     # ── test ──────────────────────────────────────────────────────────────────
