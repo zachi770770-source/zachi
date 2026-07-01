@@ -4,6 +4,9 @@
 - **SMTP** — לחשבונות Outlook.com / Hotmail
 - **Microsoft Graph API** — לחשבונות Office 365 / Azure AD
 
+> להוראות הפעלה מלאות עם credentials (בחירת backend, יצירת `.env`,
+> `python main.py test`, פתרון תקלות) — ראו [SETUP.md](./SETUP.md).
+
 ---
 
 ## Quick reference
