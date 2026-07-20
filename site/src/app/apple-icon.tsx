@@ -1,0 +1,37 @@
+import { ImageResponse } from "next/og";
+
+export const size = { width: 180, height: 180 };
+export const contentType = "image/png";
+
+async function loadHebrewSerifFont() {
+  const { readFile } = await import("node:fs/promises");
+  const { fileURLToPath } = await import("node:url");
+  const fontPath = fileURLToPath(new URL("./fonts/FrankRuhlLibre-Bold-static.ttf", import.meta.url));
+  return readFile(fontPath);
+}
+
+export default async function AppleIcon() {
+  const serifFont = await loadHebrewSerifFont();
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#7a1f2b",
+          color: "#fdf8f3",
+          fontFamily: "SerifHe",
+          fontSize: 96,
+          fontWeight: 700,
+        }}
+      >
+        מ
+      </div>
+    ),
+    { ...size, fonts: [{ name: "SerifHe", data: serifFont, style: "normal", weight: 700 }] }
+  );
+}

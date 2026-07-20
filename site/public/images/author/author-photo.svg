@@ -1,0 +1,6 @@
+<svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="תמונת מחבר זמנית">
+  <rect width="800" height="800" fill="#f2ece1"/>
+  <circle cx="400" cy="330" r="130" fill="#cbb99f"/>
+  <path d="M180 700c0-140 100-220 220-220s220 80 220 220" fill="#cbb99f"/>
+  <text x="400" y="760" text-anchor="middle" fill="#5c4f47" font-family="Georgia, 'Times New Roman', serif" font-size="20">להחלפה: src/config/site.ts → author.photo</text>
+</svg>
