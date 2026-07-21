@@ -29,7 +29,7 @@ export const siteConfig = {
     name: "PLACEHOLDER — שם המחבר/ת",
     shortBio:
       "PLACEHOLDER — כמה משפטים על המחבר/ת יופיעו כאן. יש להחליף בטקסט אמיתי בקובץ src/content/author.ts.",
-    photo: "/images/author/author-photo.jpg",
+    photo: "/images/author/author-photo.svg",
     photoAlt: "PLACEHOLDER — תמונת המחבר/ת של מדייטים לאהבה",
   },
 
@@ -54,12 +54,11 @@ export const siteConfig = {
   },
 
   images: {
-    cover: "/images/book/cover-front.jpg",
+    cover: "/images/book/cover-front.svg",
     coverAlt: `כריכת הספר "מדייטים לאהבה"`,
-    mockup3d: "/images/book/mockup-3d.jpg",
+    mockup3d: "/images/book/mockup-3d.svg",
     mockup3dAlt: `הדמיית תלת-ממד של הספר "מדייטים לאהבה"`,
-    ogImage: "/og-image.png",
-    workbookMockup: "/images/bonus/workbook-mockup.jpg",
+    workbookMockup: "/images/bonus/workbook-mockup.svg",
     workbookMockupAlt: "הדמיית חוברת העבודה הדיגיטלית המצורפת לספר",
   },
 
