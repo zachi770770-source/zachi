@@ -13,13 +13,13 @@ export function Hero() {
       <Container>
         <div className="grid items-center gap-6 md:grid-cols-2 md:gap-14">
           <div className="order-1 flex flex-col items-start gap-5 text-start sm:gap-6">
-            <span className="text-sm font-semibold uppercase tracking-wide text-brand">
+            <span className="text-sm font-semibold uppercase tracking-wide text-brand-hover">
               {hero.eyebrow}
             </span>
             <h1 className="text-balance font-serif text-5xl font-bold leading-[1.1] sm:text-6xl">
               {hero.title}
             </h1>
-            <p className="text-balance font-serif text-xl text-brand sm:text-2xl">
+            <p className="text-balance font-serif text-xl text-brand-hover sm:text-2xl">
               {hero.tagline}
             </p>
             <p className="max-w-xl text-lg leading-[1.75] text-foreground-muted sm:text-xl">

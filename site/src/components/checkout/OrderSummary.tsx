@@ -28,7 +28,7 @@ export function OrderSummary({ totals }: { totals: OrderTotals }) {
 
       <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
         <span className="font-semibold">סה&quot;כ לתשלום</span>
-        <span className="font-serif text-xl font-semibold text-brand">
+        <span className="font-serif text-xl font-semibold text-brand-hover">
           {formatPrice(totals.total)}
         </span>
       </div>

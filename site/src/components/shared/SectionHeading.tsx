@@ -24,7 +24,7 @@ export function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <span className="text-sm font-semibold uppercase tracking-wide text-brand">
+        <span className="text-sm font-semibold uppercase tracking-wide text-brand-hover">
           {eyebrow}
         </span>
       ) : null}

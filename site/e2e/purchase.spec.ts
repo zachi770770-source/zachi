@@ -32,7 +32,9 @@ test.describe("מסלול רכישה בסיסי", () => {
     await page.getByRole("button", { name: "מעבר לתשלום" }).click();
 
     await expect(page).toHaveURL(/\/checkout\/pay\//);
-    await expect(page.getByText("מסך תשלום לדוגמה")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "מסך תשלום לדוגמה (Demo)" })
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "סימולציה: תשלום הצליח" }).click();
 

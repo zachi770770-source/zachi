@@ -104,7 +104,7 @@ export function CookieConsent() {
               variant="ghost"
               size="sm"
               onClick={rejectNonEssential}
-              aria-label="דחיית עוגיות לא הכרחיות"
+              aria-label="רק הכרחי - דחיית עוגיות לא הכרחיות"
             >
               רק הכרחי
             </Button>

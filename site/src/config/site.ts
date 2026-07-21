@@ -42,7 +42,7 @@ export const siteConfig = {
     shortBio:
       "PLACEHOLDER — כמה משפטים על המחבר/ת יופיעו כאן. יש להחליף בטקסט אמיתי בקובץ src/content/author.ts.",
     photo: "/images/author/author-photo.svg",
-    photoAlt: "PLACEHOLDER — תמונת המחבר/ת של מדייטים לאהבה",
+    photoAlt: "תמונת המחבר/ת של מדייטים לאהבה",
   },
 
   contact: {

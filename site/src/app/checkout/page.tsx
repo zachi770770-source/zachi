@@ -19,17 +19,18 @@ export const dynamic = "force-dynamic";
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ quantity?: string }>;
+  searchParams: Promise<{ quantity?: string; payment?: string }>;
 }) {
-  const { quantity } = await searchParams;
+  const { quantity, payment } = await searchParams;
   const initialQuantity = Number(quantity) || 1;
+  const paymentFailed = payment === "failed";
 
   return (
     <Container className="py-10 sm:py-16">
       <h1 className="mb-8 font-serif text-3xl font-semibold">
         השלמת הרכישה
       </h1>
-      <CheckoutClient initialQuantity={initialQuantity} />
+      <CheckoutClient initialQuantity={initialQuantity} paymentFailed={paymentFailed} />
     </Container>
   );
 }

@@ -34,7 +34,7 @@ export function QuantitySelector({
               className={cn(
                 "flex flex-col items-center gap-0.5 rounded-md border px-3 py-2.5 text-center text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
                 selected
-                  ? "border-brand bg-brand-muted text-brand"
+                  ? "border-brand bg-brand-muted text-brand-hover"
                   : "border-border-strong text-foreground-muted hover:border-brand/50"
               )}
             >

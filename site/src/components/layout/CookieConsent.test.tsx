@@ -36,7 +36,9 @@ describe("CookieConsent", () => {
     const user = userEvent.setup();
     render(<CookieConsent />);
 
-    await user.click(screen.getByRole("button", { name: "דחיית עוגיות לא הכרחיות" }));
+    await user.click(
+      screen.getByRole("button", { name: "רק הכרחי - דחיית עוגיות לא הכרחיות" })
+    );
 
     expect(
       screen.queryByRole("region", { name: "הסכמה לשימוש בעוגיות" })

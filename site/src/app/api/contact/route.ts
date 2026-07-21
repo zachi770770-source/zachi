@@ -40,11 +40,9 @@ export async function POST(request: NextRequest) {
    * אין כרגע ספק שליחת מייל מחובר. הפנייה נרשמת ליומן השרת לצורך
    * הדגמה בלבד. לפני עלייה לפרודקשן, יש לחבר כאן שירות שליחת מייל
    * אמיתי (למשל Resend / Postmark / SMTP) כדי שהפנייה תגיע בפועל.
+   * אין רושמים שם, נושא או פרטי קשר - הם עלולים להכיל מידע מזהה.
    */
-  console.log("[contact] פנייה חדשה (לא נשלחה בפועל - יש לחבר ספק מייל):", {
-    name: parsed.data.name,
-    subject: parsed.data.subject,
-  });
+  console.log("[contact] פנייה חדשה (לא נשלחה בפועל - יש לחבר ספק מייל)");
 
   return NextResponse.json({ success: true });
 }
