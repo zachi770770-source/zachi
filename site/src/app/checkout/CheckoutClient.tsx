@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 
 import { calculateOrderTotals } from "@/lib/pricing";
 import { siteConfig } from "@/config/site";
@@ -9,9 +8,7 @@ import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { QuantitySelector } from "@/components/purchase/QuantitySelector";
 
-export function CheckoutClient() {
-  const searchParams = useSearchParams();
-  const initialQuantity = Number(searchParams.get("quantity")) || 1;
+export function CheckoutClient({ initialQuantity }: { initialQuantity: number }) {
   const [quantity, setQuantity] = React.useState(
     Math.min(Math.max(initialQuantity, 1), 20)
   );

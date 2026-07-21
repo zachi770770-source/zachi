@@ -23,8 +23,8 @@ class LoggingNewsletterProvider implements NewsletterProvider {
   readonly name = "logging-only";
 
   async subscribe(subscriber: NewsletterSubscriber) {
+    // אין רושמים את כתובת המייל עצמה ליומן - רק את העובדה שהייתה הרשמה.
     console.log("[newsletter] נרשם חדש (לא נשלח לספק אמיתי):", {
-      email: subscriber.email,
       marketingConsent: subscriber.marketingConsent,
     });
     return { success: true };

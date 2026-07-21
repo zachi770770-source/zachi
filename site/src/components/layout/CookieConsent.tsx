@@ -82,22 +82,31 @@ export function CookieConsent() {
       <div
         role="region"
         aria-label="הסכמה לשימוש בעוגיות"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:p-5"
+        className="fixed inset-x-0 bottom-0 z-50 max-h-[45vh] overflow-y-auto border-t border-border bg-surface p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:p-5"
       >
-        <div className="container-page flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="container-page flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <p className="text-sm leading-relaxed text-foreground-muted">
-            אנו משתמשים בעוגיות הכרחיות להפעלת האתר, ובעוגיות אנליטיקה
-            ושיווק רק לאחר אישורכם. ניתן לשנות את ההעדפות בכל עת.{" "}
+            עוגיות הכרחיות תמיד פעילות. עוגיות נוספות רק לאחר אישורכם -{" "}
             <a href="/privacy" className="underline hover:text-foreground">
               מדיניות פרטיות
             </a>
           </p>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => setManageOpen(true)}>
-              ניהול העדפות
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setManageOpen(true)}
+              aria-label="ניהול העדפות עוגיות"
+            >
+              ניהול
             </Button>
-            <Button variant="ghost" size="sm" onClick={rejectNonEssential}>
-              דחיית לא הכרחי
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={rejectNonEssential}
+              aria-label="דחיית עוגיות לא הכרחיות"
+            >
+              רק הכרחי
             </Button>
             <Button size="sm" onClick={acceptAll}>
               אישור הכל

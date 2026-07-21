@@ -82,9 +82,10 @@ test("cookie consent: accept all hides the banner without crashing the app", asy
   const errors = trackErrors(page);
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await expect(page.getByText("ניהול העדפות")).toBeVisible();
+  const consentBanner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
+  await expect(consentBanner).toBeVisible();
   await page.getByRole("button", { name: "אישור הכל" }).click();
-  await expect(page.getByText("ניהול העדפות")).toBeHidden();
+  await expect(consentBanner).toBeHidden();
 
   // regression guard: a bad useSyncExternalStore snapshot previously crashed
   // the whole React tree here with "Maximum update depth exceeded".
@@ -98,7 +99,7 @@ test("cookie consent: accept all hides the banner without crashing the app", asy
   });
 
   await page.reload({ waitUntil: "networkidle" });
-  await expect(page.getByText("ניהול העדפות")).toBeHidden();
+  await expect(consentBanner).toBeHidden();
 });
 
 test("sticky purchase bar appears after scrolling past the hero, dismisses, and is hidden on /checkout", async ({

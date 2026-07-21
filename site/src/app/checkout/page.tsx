@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
@@ -11,15 +10,26 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CheckoutPage() {
+/**
+ * ה-render חייב להיות דינמי כי הכמות ההתחלתית תלויה ב-query string
+ * האמיתי של הבקשה (מגיע מ-PurchaseCard: /checkout?quantity=N).
+ */
+export const dynamic = "force-dynamic";
+
+export default async function CheckoutPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ quantity?: string }>;
+}) {
+  const { quantity } = await searchParams;
+  const initialQuantity = Number(quantity) || 1;
+
   return (
     <Container className="py-10 sm:py-16">
       <h1 className="mb-8 font-serif text-3xl font-semibold">
         השלמת הרכישה
       </h1>
-      <Suspense fallback={<div className="text-foreground-muted">טוען...</div>}>
-        <CheckoutClient />
-      </Suspense>
+      <CheckoutClient initialQuantity={initialQuantity} />
     </Container>
   );
 }

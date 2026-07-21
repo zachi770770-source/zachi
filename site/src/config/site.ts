@@ -11,9 +11,21 @@
 
 export const currency = "ILS" as const;
 
+/**
+ * כתובת הבסיס של האתר. יש להגדיר NEXT_PUBLIC_SITE_URL בסביבת הפרודקשן
+ * (חובה - בלעדיה ה-canonical, ה-OG tags, ה-sitemap וכתובות ה-redirect
+ * של הסליקה יצביעו לכתובת שגויה). כרשת ביטחון בלבד - אם המשתנה לא
+ * הוגדר אך האתר רץ ב-Vercel, נשתמש בכתובת ה-deployment האוטומטית של
+ * Vercel (VERCEL_URL) במקום ליפול חזרה ל-localhost בפרודקשן.
+ */
+function resolveSiteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+}
+
 export const siteConfig = {
-  /** כתובת הבסיס של האתר. יש להגדיר NEXT_PUBLIC_SITE_URL בסביבת הפרודקשן. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: resolveSiteUrl(),
 
   bookTitle: "מדייטים לאהבה",
   tagline: "דייטינג הוא חיפוש. אהבה היא בנייה.",

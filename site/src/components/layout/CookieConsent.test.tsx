@@ -14,7 +14,9 @@ describe("CookieConsent", () => {
 
   it("shows the banner on first visit", () => {
     render(<CookieConsent />);
-    expect(screen.getByText("ניהול העדפות")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "הסכמה לשימוש בעוגיות" })
+    ).toBeInTheDocument();
   });
 
   it("accepting all cookies hides the banner without crashing and persists consent", async () => {
@@ -23,7 +25,9 @@ describe("CookieConsent", () => {
 
     await user.click(screen.getByRole("button", { name: "אישור הכל" }));
 
-    expect(screen.queryByText("ניהול העדפות")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "הסכמה לשימוש בעוגיות" })
+    ).not.toBeInTheDocument();
     const stored = JSON.parse(window.localStorage.getItem("cookie-consent") ?? "{}");
     expect(stored).toEqual({ necessary: true, analytics: true, marketing: true });
   });
@@ -32,9 +36,11 @@ describe("CookieConsent", () => {
     const user = userEvent.setup();
     render(<CookieConsent />);
 
-    await user.click(screen.getByRole("button", { name: "דחיית לא הכרחי" }));
+    await user.click(screen.getByRole("button", { name: "דחיית עוגיות לא הכרחיות" }));
 
-    expect(screen.queryByText("ניהול העדפות")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "הסכמה לשימוש בעוגיות" })
+    ).not.toBeInTheDocument();
     const stored = JSON.parse(window.localStorage.getItem("cookie-consent") ?? "{}");
     expect(stored).toEqual({ necessary: true, analytics: false, marketing: false });
   });
@@ -45,6 +51,8 @@ describe("CookieConsent", () => {
       JSON.stringify({ necessary: true, analytics: false, marketing: false })
     );
     render(<CookieConsent />);
-    expect(screen.queryByText("ניהול העדפות")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "הסכמה לשימוש בעוגיות" })
+    ).not.toBeInTheDocument();
   });
 });

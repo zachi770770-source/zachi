@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const newsletterSchema = z.object({
-  firstName: z.string().trim().min(2, "יש להזין שם פרטי").max(60),
+  firstName: z.string().trim().min(2, "יש להזין שם פרטי").max(60, "השם ארוך מדי"),
   email: z.string().trim().toLowerCase().email("יש להזין כתובת אימייל תקינה"),
   contentConsent: z
     .boolean()
