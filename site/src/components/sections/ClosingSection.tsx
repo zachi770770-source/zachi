@@ -12,7 +12,12 @@ export function ClosingSection() {
           <p className="text-balance font-serif text-2xl leading-relaxed sm:text-3xl">
             {closing.title}
           </p>
-          <Button asChild size="lg" variant="secondary">
+          <Button
+            asChild
+            size="lg"
+            variant="secondary"
+            className="bg-background text-brand hover:opacity-90"
+          >
             <Link href="/#purchase">{closing.cta}</Link>
           </Button>
         </div>
