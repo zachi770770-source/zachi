@@ -3,29 +3,30 @@
 /*
  * מערכת העיצוב של "מדייטים לאהבה".
  * כל הצבעים מוגדרים כמשתני CSS כדי לאפשר שינוי מיתוג במקום אחד.
- * גוון בסיס: שמנת בהירה ונקייה, פחם כהה לטקסט, טרקוטה עמוקה כהדגשה בלבד.
+ * פלטה סגורה בת 9 גוונים בלבד: שמנת (65%), פחם (25%), טרקוטה (8%), זית (2%).
+ * אין להוסיף גוון שאינו אחד מתשעת אלה בשום מקום בקוד.
  */
 :root {
-  --color-background: #fbf8f3;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f3efe6;
-  --color-foreground: #1c1f22;
-  --color-foreground-muted: #3a3f43;
+  --color-background: #f7f3ec;
+  --color-surface: #f7f3ec;
+  --color-surface-muted: #e9ded0;
+  --color-foreground: #25282b;
+  --color-foreground-muted: #5f625f;
 
-  --color-border: #e2dcd0;
-  --color-border-strong: #b3a690;
+  --color-border: #d8cbbe;
+  --color-border-strong: #d8cbbe;
 
-  --color-brand: #a04f2a;
-  --color-brand-foreground: #fbf8f3;
-  --color-brand-hover: #7e3d20;
-  --color-brand-muted: #f1ddd0;
+  --color-brand: #a94f3d;
+  --color-brand-foreground: #fff9f2;
+  --color-brand-hover: #8f3f31;
+  --color-brand-muted: #e9ded0;
 
-  --color-secondary: #6e7062;
-  --color-secondary-foreground: #fbf8f3;
-  --color-secondary-muted: #eceae2;
+  --color-secondary: #72745e;
+  --color-secondary-foreground: #fff9f2;
+  --color-secondary-muted: #e9ded0;
 
-  --color-accent: #8f8a6f;
-  --color-accent-foreground: #1c1f22;
+  --color-accent: #72745e;
+  --color-accent-foreground: #25282b;
 
   --color-success: #2f6b46;
   --color-success-foreground: #f1f8f3;

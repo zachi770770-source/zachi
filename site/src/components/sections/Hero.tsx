@@ -9,7 +9,7 @@ import { TrustBar } from "@/components/sections/TrustBar";
 
 export function Hero() {
   return (
-    <section className="border-b border-border bg-gradient-to-b from-surface-muted to-background py-8 sm:py-14">
+    <section className="border-b border-border bg-surface-muted py-8 sm:py-14">
       <Container>
         <div className="grid items-center gap-6 md:grid-cols-2 md:gap-14">
           <div className="order-1 flex flex-col items-start gap-5 text-start sm:gap-6">
