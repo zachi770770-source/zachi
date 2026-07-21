@@ -22,7 +22,7 @@ export default async function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#5a1420",
+          background: "#7b1e2b",
           color: "#fdf8f3",
           fontFamily: "SerifHe",
           fontSize: 96,
