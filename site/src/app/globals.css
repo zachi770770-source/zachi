@@ -3,29 +3,29 @@
 /*
  * מערכת העיצוב של "מדייטים לאהבה".
  * כל הצבעים מוגדרים כמשתני CSS כדי לאפשר שינוי מיתוג במקום אחד.
- * גוון בסיס: קרם חם, בורדו עמוק כצבע דגש, ירוק-זית כצבע משני.
+ * גוון בסיס: שמנת-חול חמה, בורדו כהה מאוד כצבע מוביל, טקסט שחור-דיו.
  */
 :root {
-  --color-background: #faf6f0;
+  --color-background: #f6f0e3;
   --color-surface: #ffffff;
-  --color-surface-muted: #f2ece1;
-  --color-foreground: #241b17;
-  --color-foreground-muted: #5c4f47;
+  --color-surface-muted: #f1e8e1;
+  --color-foreground: #1c1815;
+  --color-foreground-muted: #5c5248;
 
-  --color-border: #e4d9c9;
-  --color-border-strong: #cbb99f;
+  --color-border: #ded5c7;
+  --color-border-strong: #c4b7a3;
 
-  --color-brand: #7a1f2b;
-  --color-brand-foreground: #fdf8f3;
-  --color-brand-hover: #631822;
-  --color-brand-muted: #f4e4e2;
+  --color-brand: #5a1420;
+  --color-brand-foreground: #f8f2e8;
+  --color-brand-hover: #451019;
+  --color-brand-muted: #ecdcdb;
 
-  --color-secondary: #3f4a3a;
-  --color-secondary-foreground: #fdf8f3;
-  --color-secondary-muted: #e7ece3;
+  --color-secondary: #6b5d4f;
+  --color-secondary-foreground: #f8f2e8;
+  --color-secondary-muted: #e9e3da;
 
-  --color-accent: #b08a3e;
-  --color-accent-foreground: #241b17;
+  --color-accent: #8a7259;
+  --color-accent-foreground: #1c1815;
 
   --color-success: #2f6b46;
   --color-success-foreground: #f1f8f3;
