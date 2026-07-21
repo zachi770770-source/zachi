@@ -17,16 +17,6 @@ import type { ConsentCategories } from "@/lib/analytics";
 
 const STORAGE_KEY = "cookie-consent";
 
-function readConsent(): ConsentCategories | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as ConsentCategories) : null;
-  } catch {
-    return null;
-  }
-}
-
 function writeConsent(consent: ConsentCategories) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
   window.dispatchEvent(new Event("cookie-consent-changed"));
@@ -41,23 +31,30 @@ function subscribeToConsent(callback: () => void) {
   };
 }
 
-function getConsentSnapshot() {
-  return readConsent();
+/**
+ * מחזיר את מחרוזת ה-JSON הגולמית מ-localStorage, ולא אובייקט מפוענח.
+ * useSyncExternalStore דורש שה-snapshot יחזיר ערך יציב (===) כל עוד
+ * שום דבר לא השתנה בפועל - JSON.parse היה יוצר אובייקט חדש בכל קריאה
+ * וגורם ל-loop אינסופי של re-render (React error #185).
+ */
+function getConsentRawSnapshot() {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(STORAGE_KEY);
 }
 
-function getServerConsentSnapshot() {
+function getServerConsentRawSnapshot() {
   return null;
 }
 
 export function CookieConsent() {
   // מבוסס useSyncExternalStore ולא useState+useEffect, כי מדובר בסנכרון
   // עם מקור חיצוני אמיתי (localStorage) שיכול להשתנות גם מלשוניות אחרות.
-  const consent = React.useSyncExternalStore(
+  const consentRaw = React.useSyncExternalStore(
     subscribeToConsent,
-    getConsentSnapshot,
-    getServerConsentSnapshot
+    getConsentRawSnapshot,
+    getServerConsentRawSnapshot
   );
-  const visible = siteConfig.features.cookieConsent && !consent;
+  const visible = siteConfig.features.cookieConsent && !consentRaw;
 
   const [manageOpen, setManageOpen] = React.useState(false);
   const [analytics, setAnalytics] = React.useState(false);
