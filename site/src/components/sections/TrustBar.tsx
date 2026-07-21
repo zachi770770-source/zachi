@@ -14,12 +14,12 @@ export function TrustBar() {
   if (items.length === 0) return null;
 
   return (
-    <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-foreground-muted">
+    <ul className="flex flex-wrap items-center gap-x-8 gap-y-3 text-base font-medium text-foreground">
       {items.map((item) => {
         const Icon = ICONS[item.id] ?? ShieldCheck;
         return (
-          <li key={item.id} className="flex items-center gap-1.5">
-            <Icon className="h-4 w-4 text-brand" aria-hidden="true" />
+          <li key={item.id} className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-brand" aria-hidden="true" />
             {item.label}
           </li>
         );

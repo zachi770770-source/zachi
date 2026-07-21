@@ -9,20 +9,20 @@ import { TrustBar } from "@/components/sections/TrustBar";
 
 export function Hero() {
   return (
-    <section className="border-b border-border bg-gradient-to-b from-surface-muted to-background py-10 sm:py-16">
+    <section className="border-b border-border bg-gradient-to-b from-surface-muted to-background py-8 sm:py-14">
       <Container>
-        <div className="grid items-center gap-10 md:grid-cols-2 md:gap-14">
-          <div className="order-1 flex flex-col items-start gap-6 text-start">
+        <div className="grid items-center gap-6 md:grid-cols-2 md:gap-14">
+          <div className="order-1 flex flex-col items-start gap-5 text-start sm:gap-6">
             <span className="text-sm font-semibold uppercase tracking-wide text-brand">
               {hero.eyebrow}
             </span>
-            <h1 className="text-balance font-serif text-4xl font-semibold leading-[1.15] sm:text-5xl">
+            <h1 className="text-balance font-serif text-5xl font-bold leading-[1.1] sm:text-6xl">
               {hero.title}
             </h1>
             <p className="text-balance font-serif text-xl text-brand sm:text-2xl">
               {hero.tagline}
             </p>
-            <p className="max-w-xl text-lg leading-relaxed text-foreground-muted">
+            <p className="max-w-xl text-lg leading-[1.75] text-foreground-muted sm:text-xl">
               {hero.description}
             </p>
 
@@ -39,7 +39,7 @@ export function Hero() {
           </div>
 
           <div className="order-2 flex justify-center md:order-2">
-            <div className="relative w-full max-w-[320px] sm:max-w-[360px]">
+            <div className="relative w-full max-w-[240px] sm:max-w-[300px]">
               <div
                 className="absolute inset-0 -z-10 translate-y-6 rounded-[2rem] bg-brand/10 blur-2xl"
                 aria-hidden="true"
