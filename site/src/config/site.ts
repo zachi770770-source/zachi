@@ -12,6 +12,12 @@
 export const currency = "ILS" as const;
 
 /**
+ * מחיר המהדורה הדיגיטלית בש"ח - מקור האמת היחיד לחישוב הזמנה דיגיטלית.
+ * מחיר המהדורה המודפסת טרם נקבע ולכן אינו מוגדר כאן (ראו products.formats).
+ */
+const digitalPrice = 98;
+
+/**
  * כתובת הבסיס של האתר. יש להגדיר NEXT_PUBLIC_SITE_URL בסביבת הפרודקשן
  * (חובה - בלעדיה ה-canonical, ה-OG tags, ה-sitemap וכתובות ה-redirect
  * של הסליקה יצביעו לכתובת שגויה). כרשת ביטחון בלבד - אם המשתנה לא
@@ -38,9 +44,10 @@ export const siteConfig = {
   },
 
   author: {
-    name: "PLACEHOLDER — שם המחבר/ת",
+    // ניסוח ניטרלי עד שיסופק שם אמיתי - אין להמציא שם או זהות של אדם.
+    name: "מחבר/ת הספר",
     shortBio:
-      "PLACEHOLDER — כמה משפטים על המחבר/ת יופיעו כאן. יש להחליף בטקסט אמיתי בקובץ src/content/author.ts.",
+      "הספר מדייטים לאהבה מציע דרך מעשית לעבור מחיפוש מתמיד אחר האדם הנכון אל בנייה מודעת של קשר טוב.",
     photo: "/images/author/author-photo.svg",
     photoAlt: "תמונת המחבר/ת של מדייטים לאהבה",
   },
@@ -74,11 +81,86 @@ export const siteConfig = {
     workbookMockupAlt: "הדמיית חוברת העבודה הדיגיטלית המצורפת לספר",
   },
 
-  /** מחיר ומשלוח - מקור האמת היחיד לחישובי הזמנה. */
+  /**
+   * פרטי המהדורה הדיגיטלית - נמסרת כקובץ להורדה ובמייל לאחר תשלום מאובטח.
+   */
+  digital: {
+    isDigital: true,
+    /**
+     * הפעילו `formatsConfirmed` אך ורק כאשר קובצי המוצר הסופיים קיימים
+     * בפועל. כל עוד false - האתר לא יטען שהפורמטים מוכנים, אלא ידבר על
+     * "קובץ דיגיטלי" בלבד.
+     */
+    formatsConfirmed: false,
+    /** יוצג רק כאשר formatsConfirmed=true. */
+    formats: ["PDF", "EPUB"] as const,
+    deliveryMethod: "קישור הורדה מאובטח + עותק במייל",
+    devices: "נייד, טאבלט, מחשב וקוראים אלקטרוניים תואמים",
+  },
+
+  /**
+   * מהדורות המוצר. הספר נמכר בשני פורמטים נפרדים - דיגיטלי ומודפס - וכן
+   * חבילה המשלבת את שניהם. כל מהדורה מנוהלת כאן בלבד.
+   *
+   * יושרה: מחיר המהדורה המודפסת ועלות המשלוח טרם נקבעו. עד שייקבעו ערכים
+   * אמיתיים, `physical` ו-`bundle` מסומנים `available: false`, מוצגים כ"בקרוב"
+   * ואי אפשר לשלם עליהם. אין להמציא מחיר או מחיר משלוח. כדי לפתוח מהדורה:
+   * הזינו מחיר אמיתי, קבעו מדיניות משלוח (ראו `shipping`) והפכו את `available`
+   * ל-true.
+   */
+  products: {
+    /** הפורמט שנבחר כברירת מחדל בבורר. */
+    defaultFormat: "digital" as "digital" | "physical" | "bundle",
+    formats: {
+      digital: {
+        id: "digital" as const,
+        label: "ספר דיגיטלי",
+        shortLabel: "דיגיטלי",
+        tagline: "גישה מיידית לקריאה בכל מכשיר",
+        /** מחיר המהדורה - מקור האמת לחישוב הזמנה. */
+        price: digitalPrice as number | null,
+        available: true,
+        /** האם נדרשת כתובת למשלוח פיזי. */
+        requiresShipping: false,
+      },
+      physical: {
+        id: "physical" as const,
+        label: "ספר מודפס",
+        shortLabel: "מודפס",
+        tagline: "עותק פיזי שיישלח אליכם בדואר",
+        /** טרם נקבע - אין להמציא. יוגדר לפני פתיחת המהדורה. */
+        price: null as number | null,
+        available: false,
+        requiresShipping: true,
+      },
+      bundle: {
+        id: "bundle" as const,
+        label: "דיגיטלי + מודפס",
+        shortLabel: "שניהם",
+        tagline: "לקרוא כבר עכשיו דיגיטלית ולקבל גם עותק מודפס",
+        /** תלוי במחיר המהדורה המודפסת - טרם נקבע. */
+        price: null as number | null,
+        available: false,
+        requiresShipping: true,
+      },
+    },
+  },
+
+  /**
+   * משלוח - רלוונטי אך ורק למהדורה מודפסת. הערכים טרם נקבעו; כל עוד המהדורה
+   * המודפסת אינה available, בלוק זה אינו בשימוש בפועל. אין להמציא ערכים.
+   */
+  shipping: {
+    flatRate: null as number | null,
+    freeShippingThreshold: null as number | null,
+    estimatedDeliveryText: "",
+  },
+
+  /** מחיר - מקור האמת היחיד לחישובי הזמנה (מהדורה דיגיטלית). */
   commerce: {
     currency,
-    /** PLACEHOLDER — מחיר עותק בודד בש"ח. יש לעדכן למחיר האמיתי. */
-    price: 98,
+    /** מחיר המהדורה הדיגיטלית בש"ח. */
+    price: digitalPrice,
     /**
      * מחיר "לפני הנחה" - יוצג רק אם `compareAtPrice` גדול מ-`price` וגם
      * `showCompareAtPrice` מופעל. אין להמציא הנחה שלא התקיימה בפועל.
@@ -86,23 +168,19 @@ export const siteConfig = {
     compareAtPrice: null as number | null,
     showCompareAtPrice: false,
 
-    /** PLACEHOLDER — עלות משלוח קבועה בש"ח. */
-    shippingFlatRate: 25,
-    /** מעל סכום זה המשלוח חינם. `null` = אין מבצע משלוח חינם. */
-    freeShippingThreshold: null as number | null,
-    /** PLACEHOLDER — טווח זמן אספקה משוער, כפי שיוצג ללקוח. */
-    estimatedDeliveryText: "3–7 ימי עסקים",
-
     availability: "in_stock" as "in_stock" | "preorder" | "out_of_stock",
 
-    /** הצעות כמות. כל הצעה ניתנת להפעלה/כיבוי בנפרד. */
+    /**
+     * הצעות כמות = מספר עותקי גישה (לרכישה עצמית או כמתנה דיגיטלית).
+     * כל הצעה ניתנת להפעלה/כיבוי בנפרד.
+     */
     quantityOffers: [
       { quantity: 1, label: "עותק אחד", enabled: true, note: undefined as string | undefined },
       {
         quantity: 2,
         label: "שני עותקים",
         enabled: true,
-        note: "מתנה לאדם שחשוב לכם",
+        note: "מתנה דיגיטלית לאדם שחשוב לכם",
       },
       {
         quantity: 3,
@@ -116,11 +194,16 @@ export const siteConfig = {
     giftDedicationEnabled: false,
   },
 
-  /** שורת האמון מתחת לכפתורי ה-CTA ב-Hero. כל פריט ניתן לכיבוי בנפרד. */
+  /**
+   * שורת נתונים אמיתיים בלבד מתחת ל-CTA ב-Hero. אין טענות שאינן נכונות.
+   * "secure-payment" מסומן demoHidden: כל עוד מחובר ספק תשלום הדגמה (Mock)
+   * אין להציג "תשלום מאובטח", והרכיב מסתיר אותו אוטומטית.
+   */
   trustBar: [
-    { id: "secure-payment", label: "תשלום מאובטח", enabled: true },
-    { id: "shipping", label: "משלוח לכל הארץ", enabled: true },
-    { id: "workbook", label: "כולל חוברת עבודה דיגיטלית", enabled: true },
+    { id: "secure-payment", label: "תשלום מאובטח", enabled: true, demoHidden: true },
+    { id: "download", label: "גישה בהורדה ובמייל", enabled: true },
+    { id: "devices", label: "קריאה בנייד, בטאבלט ובמחשב", enabled: true },
+    { id: "guest", label: "מהדורה דיגיטלית — גישה מיידית", enabled: true },
   ],
 
   bonus: {
@@ -128,8 +211,8 @@ export const siteConfig = {
     title: "חוברת העבודה של מדייטים לאהבה",
     /** האם החוברת כלולה במחיר הספר כברירת מחדל. */
     includedInPrice: true,
-    format: "קובץ PDF דיגיטלי, למימוש עצמי במחשב או בטלפון",
-    deliveryTiming: "נשלחת במייל מיד לאחר אישור התשלום",
+    format: "קובץ דיגיטלי למילוי עצמי במחשב או בטלפון",
+    deliveryTiming: "נכללת בגישה שתישלח אליכם במייל",
     personalUseOnly: true,
   },
 
@@ -152,6 +235,17 @@ export const siteConfig = {
 
   /** האם סביבת התשלום היא הדגמה בלבד (אין ספק סליקה אמיתי מחובר). */
   isPaymentDemoMode: (process.env.PAYMENT_PROVIDER ?? "mock") === "mock",
+
+  /**
+   * מצב Pre-launch: האתר ציבורי אך המכירה סגורה. כל עוד false — אי אפשר
+   * ליצור הזמנה, לבצע תשלום (גם לא Mock) או להגיע ל-checkout; ה-CTA מציג
+   * "המכירה תיפתח בקרוב". יש להפוך ל-true רק לאחר חיבור כריכה סופית, קובץ
+   * ספר, סליקה אמיתית ו-fulfillment מלא.
+   */
+  salesOpen: false,
+
+  /** תווית מחיר לתקופת ה-Pre-launch. */
+  preLaunchPriceLabel: "בקרוב — הספר הדיגיטלי ב-98 ₪",
 } as const;
 
 export type SiteConfig = typeof siteConfig;

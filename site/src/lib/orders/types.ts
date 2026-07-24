@@ -3,28 +3,36 @@
  * ה-route handlers תחת app/api/checkout ו-app/api/webhooks.
  */
 
+import type { ProductFormat } from "@/lib/pricing";
+
 export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled";
 
+/**
+ * סטטוס אספקה. מהדורה דיגיטלית: לאחר תשלום מאומת מוענקת גישה
+ * (access_granted). מהדורה מודפסת/חבילה: נשלחת ואז נמסרת.
+ */
 export type FulfillmentStatus =
   | "unfulfilled"
-  | "processing"
+  | "access_granted"
   | "shipped"
   | "delivered"
   | "cancelled";
 
+export type OrderItem = {
+  title: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+/** כתובת למשלוח - קיימת רק בהזמנות של מהדורה מודפסת/חבילה. */
 export type ShippingAddress = {
+  phone: string;
   city: string;
   street: string;
   houseNumber: string;
   apartment?: string;
   zip?: string;
   courierNotes?: string;
-};
-
-export type OrderItem = {
-  title: string;
-  quantity: number;
-  unitPrice: number;
 };
 
 export type Order = {
@@ -34,16 +42,20 @@ export type Order = {
   updatedAt: string;
 
   customerName: string;
-  phone: string;
   email: string;
-  shippingAddress: ShippingAddress;
+
+  /** המהדורה שנרכשה. */
+  format: ProductFormat;
 
   items: OrderItem[];
   subtotal: number;
-  shipping: number;
   discount: number;
+  shipping: number;
   total: number;
   currency: string;
+
+  /** קיים רק כאשר המהדורה דורשת משלוח. */
+  shippingAddress?: ShippingAddress;
 
   paymentStatus: PaymentStatus;
   fulfillmentStatus: FulfillmentStatus;

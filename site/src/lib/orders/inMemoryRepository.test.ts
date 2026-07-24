@@ -6,14 +6,13 @@ import type { CreateOrderInput } from "@/lib/orders/types";
 function makeInput(overrides: Partial<CreateOrderInput> = {}): CreateOrderInput {
   return {
     customerName: "ישראל ישראלי",
-    phone: "0501234567",
     email: "test@example.com",
-    shippingAddress: { city: "תל אביב", street: "הרצל", houseNumber: "10" },
+    format: "digital",
     items: [{ title: "מדייטים לאהבה", quantity: 1, unitPrice: 98 }],
     subtotal: 98,
-    shipping: 25,
     discount: 0,
-    total: 123,
+    shipping: 0,
+    total: 98,
     currency: "ILS",
     paymentProvider: "mock",
     idempotencyKey: "key-1",

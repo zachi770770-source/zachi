@@ -82,36 +82,39 @@ export function CookieConsent() {
       <div
         role="region"
         aria-label="הסכמה לשימוש בעוגיות"
-        className="fixed inset-x-0 bottom-0 z-50 max-h-[45vh] overflow-y-auto border-t border-border bg-surface p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:p-5"
+        className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:px-4"
       >
-        <div className="container-page flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <p className="text-sm leading-relaxed text-foreground-muted">
-            עוגיות הכרחיות תמיד פעילות. עוגיות נוספות רק לאחר אישורכם -{" "}
-            <a href="/privacy" className="underline hover:text-foreground">
-              מדיניות פרטיות
-            </a>
-          </p>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setManageOpen(true)}
-              aria-label="ניהול העדפות עוגיות"
-            >
-              ניהול
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={rejectNonEssential}
-              aria-label="רק הכרחי - דחיית עוגיות לא הכרחיות"
-            >
-              רק הכרחי
-            </Button>
-            <Button size="sm" onClick={acceptAll}>
-              אישור הכל
-            </Button>
-          </div>
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 rounded-xl border border-border-strong bg-surface/95 px-4 py-2 shadow-[0_16px_40px_-24px_rgba(34,38,43,0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-4">
+        <p className="text-[13px] leading-snug text-foreground-muted sm:flex-1">
+          אנו משתמשים בעוגיות כדי לשפר את החוויה; נוספות רק לאחר אישורכם.{" "}
+          <a
+            href="/privacy"
+            className="text-brand-hover underline underline-offset-2 hover:text-foreground"
+          >
+            מדיניות פרטיות
+          </a>
+        </p>
+        <div className="flex flex-wrap gap-2 sm:shrink-0">
+          <Button size="sm" onClick={acceptAll}>
+            אישור הכל
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={rejectNonEssential}
+            aria-label="רק הכרחי - דחיית עוגיות לא הכרחיות"
+          >
+            רק הכרחי
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setManageOpen(true)}
+            aria-label="ניהול העדפות עוגיות"
+          >
+            ניהול
+          </Button>
+        </div>
         </div>
       </div>
 

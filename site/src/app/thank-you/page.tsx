@@ -65,6 +65,13 @@ export default async function ThankYouPage({
           מספר הזמנה: <span className="font-semibold text-foreground">{order.orderNumber}</span>
         </p>
 
+        {isPaid && siteConfig.isPaymentDemoMode ? (
+          <p className="mx-auto mt-5 max-w-md rounded-xl border border-warning/30 bg-warning-foreground px-4 py-3 text-sm text-warning">
+            הזמנה זו נוצרה במצב הדגמה. לא בוצע חיוב אמיתי ולא יישלח מוצר בפועל
+            עד לחיבור ספק תשלום ואספקה פעילים.
+          </p>
+        ) : null}
+
         {isPaid ? (
           <>
             <div className="mt-8 rounded-lg border border-border bg-surface-muted p-6 text-start">
@@ -85,29 +92,33 @@ export default async function ThankYouPage({
               </div>
 
               <h3 className="mt-5 font-serif text-base font-semibold">
-                כתובת למשלוח
+                {order.shippingAddress ? "פרטי המשלוח" : "איך מקבלים את הספר"}
               </h3>
-              <p className="mt-1 text-sm text-foreground-muted">
-                {order.shippingAddress.street} {order.shippingAddress.houseNumber}
-                {order.shippingAddress.apartment
-                  ? `, דירה ${order.shippingAddress.apartment}`
-                  : ""}
-                , {order.shippingAddress.city}
-                {order.shippingAddress.zip ? ` ${order.shippingAddress.zip}` : ""}
-              </p>
+              {order.shippingAddress ? (
+                <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
+                  {siteConfig.isPaymentDemoMode
+                    ? "במצב הדגמה לא יישלח מוצר בפועל. בגרסה החיה, לאחר תשלום מאומת המהדורה המודפסת תישלח לכתובת שהזנתם."
+                    : `המהדורה המודפסת תישלח אל ${order.shippingAddress.street} ${order.shippingAddress.houseNumber}, ${order.shippingAddress.city}. נעדכן אתכם במייל ${order.email}.`}
+                </p>
+              ) : (
+                <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
+                  {siteConfig.isPaymentDemoMode
+                    ? "במצב הדגמה לא נשלח קובץ בפועל. בגרסה החיה, לאחר תשלום מאומת יישלח קישור הורדה מאובטח לכתובת המייל שלכם."
+                    : `הגישה לספר נשלחת ל${order.email} — ${siteConfig.digital.deliveryMethod}. אין משלוח ואין המתנה.`}
+                </p>
+              )}
             </div>
 
             <div className="mt-6 flex flex-col gap-2 text-sm text-foreground-muted">
               <p className="flex items-center justify-center gap-2">
                 <Mail className="h-4 w-4" aria-hidden="true" />
-                אישור הזמנה נשלח לכתובת {order.email}
+                {siteConfig.isPaymentDemoMode
+                  ? `במצב חי, עדכון יישלח לכתובת ${order.email}`
+                  : `עדכון נשלח לכתובת ${order.email}`}
               </p>
-              <p>
-                זמן אספקה משוער: {siteConfig.commerce.estimatedDeliveryText}
-              </p>
-              {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice ? (
-                <p>חוברת העבודה הדיגיטלית {siteConfig.bonus.deliveryTiming}.</p>
-              ) : null}
+              {order.shippingAddress ? null : (
+                <p>קריאה ב{siteConfig.digital.devices}.</p>
+              )}
             </div>
           </>
         ) : (

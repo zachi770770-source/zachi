@@ -1,59 +1,88 @@
-import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
+import { BookCover } from "@/components/shared/BookCover";
 import { TrustBar } from "@/components/sections/TrustBar";
 
+/**
+ * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
+ * מיושר אנכית למרכז. יחידת תוכן רציפה אחת.
+ *
+ * מצב Pre-launch: ה-CTA אינו מטעה — "המכירה תיפתח בקרוב", והמחיר מוצג
+ * כ"בקרוב". כאשר salesOpen יהפוך ל-true, יש להחזיר את כפתור הרכישה הפעיל.
+ */
 export function Hero() {
   return (
-    <section className="border-b border-border bg-surface-muted py-8 sm:py-14">
-      <Container>
-        <div className="grid items-center gap-6 md:grid-cols-2 md:gap-14">
-          <div className="order-1 flex flex-col items-start gap-5 text-start sm:gap-6">
-            <span className="text-sm font-semibold uppercase tracking-wide text-brand-hover">
-              {hero.eyebrow}
-            </span>
-            <h1 className="text-balance font-serif text-5xl font-bold leading-[1.1] sm:text-6xl">
-              {hero.title}
+    <section className="relative overflow-hidden">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/50 to-background" />
+        <div className="absolute -top-40 start-[10%] h-[520px] w-[520px] rounded-full bg-brand/[0.06] blur-[120px]" />
+      </div>
+
+      <Container className="flex min-h-[calc(100svh-76px)] items-start py-6 lg:items-center lg:py-16">
+        <div className="grid w-full items-center gap-y-6 lg:grid-cols-[54fr_46fr] lg:gap-x-20">
+          {/* תוכן — יחידה רציפה אחת (ימין בדסקטופ, שני במובייל) */}
+          <div className="order-2 flex flex-col items-start lg:order-1">
+            <span className="kicker">{hero.eyebrow}</span>
+
+            <h1 className="type-display mt-5 text-foreground">
+              אהבה לא רק מוצאים.
+              <br />
+              <span className="text-brand-hover">בונים אותה.</span>
             </h1>
-            <p className="text-balance font-serif text-xl text-brand-hover sm:text-2xl">
-              {hero.tagline}
-            </p>
-            <p className="max-w-xl text-lg leading-[1.75] text-foreground-muted sm:text-xl">
-              {hero.description}
+
+            <p className="mt-4 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted">
+              מאת צחי חן
             </p>
 
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/#purchase">{hero.primaryCta}</Link>
+            <p className="mt-4 max-w-[44ch] text-[19px] leading-[1.55] text-foreground-muted">
+              לומדים לחפש, להשוות ולבחון — אבל כמעט אף אחד לא מלמד אותנו איך
+              בונים קשר טוב אחרי שפוגשים אדם נכון.
+            </p>
+
+            <p className="mt-6 text-[16px] font-semibold text-brand-hover">
+              {siteConfig.preLaunchPriceLabel}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Button
+                size="lg"
+                disabled
+                aria-disabled="true"
+                className="h-14 px-7 text-[17px]"
+              >
+                המכירה תיפתח בקרוב
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/preview">{hero.secondaryCta}</Link>
-              </Button>
+              <Link
+                href="/#sample"
+                className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                לקריאת טעימה
+                <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
+              </Link>
             </div>
 
-            <TrustBar />
+            <TrustBar className="mt-8" />
           </div>
 
-          <div className="order-2 flex justify-center md:order-2">
-            <div className="relative w-full max-w-[240px] sm:max-w-[300px]">
-              <div
-                className="absolute inset-0 -z-10 translate-y-6 rounded-[2rem] bg-brand/10 blur-2xl"
-                aria-hidden="true"
-              />
-              <Image
-                src={siteConfig.images.mockup3d}
-                alt={siteConfig.images.mockup3dAlt}
-                width={640}
-                height={900}
-                priority
-                unoptimized
-                className="h-auto w-full rounded-lg shadow-xl"
-              />
-            </div>
+          {/* ספר — במרכז האנכי, מוצג במלואו (שמאל בדסקטופ, ראשון במובייל) */}
+          <div className="order-1 flex justify-center lg:order-2 lg:justify-start">
+            <figure className="flex flex-col items-center gap-2 lg:gap-3">
+              <div className="relative w-[118px] sm:w-[200px] lg:w-[250px]">
+                <div
+                  aria-hidden="true"
+                  className="absolute -bottom-4 start-1/2 h-7 w-[72%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/22 blur-2xl"
+                />
+                <BookCover priority className="w-full" />
+              </div>
+              <figcaption className="text-[11px] uppercase tracking-[0.12em] text-foreground-muted sm:text-[12px]">
+                עטיפה זמנית · הכריכה הסופית בקרוב
+              </figcaption>
+            </figure>
           </div>
         </div>
       </Container>

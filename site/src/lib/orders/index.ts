@@ -34,4 +34,11 @@ export function getOrderRepository(): OrderRepository {
   return globalForOrders.orderRepository;
 }
 
-export type { Order, CreateOrderInput, OrderItem, ShippingAddress, PaymentStatus, FulfillmentStatus } from "@/lib/orders/types";
+export type {
+  Order,
+  CreateOrderInput,
+  OrderItem,
+  ShippingAddress,
+  PaymentStatus,
+  FulfillmentStatus,
+} from "@/lib/orders/types";

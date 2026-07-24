@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
+import { siteConfig } from "@/config/site";
 import { getPaymentProvider } from "@/lib/payments";
 import { signMockWebhookBody } from "@/lib/payments/mockProvider";
 import { processPaymentWebhook } from "@/lib/payments/processWebhook";
@@ -19,6 +20,10 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ sessionId: string }> }
 ) {
+  if (!siteConfig.salesOpen) {
+    return NextResponse.json({ error: "המכירה עדיין לא נפתחה" }, { status: 403 });
+  }
+
   const provider = getPaymentProvider();
   if (!provider.isDemo) {
     return NextResponse.json({ error: "לא זמין" }, { status: 404 });

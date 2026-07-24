@@ -16,6 +16,7 @@ export function ProductSchema() {
         name: siteConfig.bookTitle,
         description: siteConfig.description,
         image: `${siteConfig.url}${siteConfig.images.cover}`,
+        category: "ספר דיגיטלי",
         offers: {
           "@type": "Offer",
           url: `${siteConfig.url}/#purchase`,
@@ -24,6 +25,7 @@ export function ProductSchema() {
           availability:
             AVAILABILITY_MAP[siteConfig.commerce.availability] ??
             "https://schema.org/InStock",
+          itemCondition: "https://schema.org/NewCondition",
         },
       }}
     />

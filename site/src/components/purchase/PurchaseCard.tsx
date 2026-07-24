@@ -3,102 +3,95 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { CreditCard, Truck, Package } from "lucide-react";
+import { FileText, Download, Smartphone, Package } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
-import { calculateOrderTotals, formatPrice } from "@/lib/pricing";
-import { trackEvent } from "@/lib/analytics";
+import type { ProductFormat } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { QuantitySelector } from "@/components/purchase/QuantitySelector";
+import { FormatSelector } from "@/components/purchase/FormatSelector";
 
+/**
+ * מצב Pre-launch: האתר ציבורי אך המכירה סגורה. אין מעבר ל-checkout ואין
+ * תשלום. המחיר מוצג כ"בקרוב" וה-CTA אינו מטעה. כאשר salesOpen יופעל, יש
+ * להחזיר את זרימת הרכישה הפעילה.
+ */
 export function PurchaseCard() {
-  const router = useRouter();
-  const [quantity, setQuantity] = React.useState(1);
-  const totals = calculateOrderTotals(quantity);
-
-  function handleBuy() {
-    trackEvent("add_to_cart", { quantity });
-    router.push(`/checkout?quantity=${quantity}`);
-  }
+  const [format, setFormat] = React.useState<ProductFormat>(
+    siteConfig.products.defaultFormat
+  );
 
   return (
     <div
       id="purchase"
-      className="scroll-mt-24 rounded-xl border border-border bg-surface p-6 shadow-sm sm:p-8"
+      className="scroll-mt-24 overflow-hidden rounded-lg border border-border-strong bg-surface"
     >
-      <div className="flex flex-col gap-6 sm:flex-row">
-        <Image
-          src={siteConfig.images.cover}
-          alt={siteConfig.images.coverAlt}
-          width={300}
-          height={450}
-          unoptimized
-          className="mx-auto h-auto w-32 shrink-0 rounded-md shadow-md sm:mx-0 sm:w-36"
-        />
-
-        <div className="flex flex-1 flex-col gap-4">
+      <div className="grid sm:grid-cols-[minmax(0,1fr)_14rem]">
+        <div className="order-2 flex flex-col gap-6 p-8 sm:order-1 sm:p-10">
           <div>
-            <h3 className="font-serif text-xl font-semibold">
+            <h3 className="type-quote text-[26px] font-bold text-foreground">
               {siteConfig.bookTitle}
             </h3>
-            <p className="text-sm text-foreground-muted">ספר מודפס, כריכה רכה</p>
+            <p className="mt-1 text-[15px] text-foreground-muted">
+              מאת צחי חן · המכירה תיפתח בקרוב
+            </p>
           </div>
 
-          <div className="flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-semibold text-brand">
-              {formatPrice(siteConfig.commerce.price)}
-            </span>
-            {siteConfig.commerce.showCompareAtPrice &&
-            siteConfig.commerce.compareAtPrice ? (
-              <span className="text-base text-foreground-muted line-through">
-                {formatPrice(siteConfig.commerce.compareAtPrice)}
-              </span>
+          <FormatSelector value={format} onChange={setFormat} />
+
+          <div className="border-t border-foreground/12 pt-5">
+            <p className="type-quote text-[26px] font-bold text-brand-hover">
+              {siteConfig.preLaunchPriceLabel}
+            </p>
+          </div>
+
+          <ul className="flex flex-col gap-2.5 text-[15px] text-foreground-muted">
+            <li className="flex items-center gap-2.5">
+              <FileText className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              קובץ דיגיטלי לקריאה עצמית
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Download className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              {siteConfig.digital.deliveryMethod}
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              קריאה ב{siteConfig.digital.devices}
+            </li>
+            {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice ? (
+              <li className="flex items-center gap-2.5">
+                <Package className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+                כולל חוברת עבודה דיגיטלית
+              </li>
             ) : null}
-            <span className="text-sm text-foreground-muted">לעותק</span>
-          </div>
-
-          <ul className="flex flex-col gap-1.5 text-sm text-foreground-muted">
-            <li className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-brand" aria-hidden="true" />
-              {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice
-                ? "כולל חוברת עבודה דיגיטלית"
-                : "הספר המודפס בלבד"}
-            </li>
-            <li className="flex items-center gap-2">
-              <Truck className="h-4 w-4 text-brand" aria-hidden="true" />
-              משלוח: {formatPrice(siteConfig.commerce.shippingFlatRate)} ·
-              זמן אספקה משוער {siteConfig.commerce.estimatedDeliveryText}
-            </li>
-            <li className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-brand" aria-hidden="true" />
-              תשלום מאובטח · מצב הדגמה בסביבת פיתוח
-            </li>
           </ul>
 
-          <Separator />
-
-          <QuantitySelector value={quantity} onChange={setQuantity} />
-
-          <div className="flex items-center justify-between rounded-md bg-surface-muted px-4 py-3 text-sm">
-            <span className="text-foreground-muted">סה&quot;כ לתשלום</span>
-            <span className="font-serif text-lg font-semibold">
-              {formatPrice(totals.total)}
-            </span>
-          </div>
-
-          <Button size="lg" onClick={handleBuy} className="w-full sm:w-auto">
-            לרכישה - {formatPrice(totals.total)}
+          <Button size="lg" disabled aria-disabled="true" className="h-14 w-full text-[17px]">
+            המכירה תיפתח בקרוב
           </Button>
 
-          <p className="text-xs text-foreground-muted">
-            לפרטי משלוח, ביטולים והחזרות ראו{" "}
-            <Link href="/shipping-returns" className="underline hover:text-foreground">
-              מדיניות משלוחים והחזרות
+          <p className="text-[13px] leading-relaxed text-foreground-muted">
+            האתר בשלב טרום-השקה. עם פתיחת המכירה תתאפשר רכישה מאובטחת של
+            המהדורה הדיגיטלית. למדיניות המוצר ראו{" "}
+            <Link
+              href="/shipping-returns"
+              className="text-brand-hover underline underline-offset-2 hover:text-foreground"
+            >
+              מדיניות מוצר, משלוחים וביטולים
             </Link>
             .
           </p>
+        </div>
+
+        {/* עטיפה */}
+        <div className="order-1 flex items-center justify-center border-b border-border-strong bg-surface-muted p-8 sm:order-2 sm:border-b-0 sm:border-s">
+          <Image
+            src={siteConfig.images.cover}
+            alt={siteConfig.images.coverAlt}
+            width={300}
+            height={450}
+            unoptimized
+            className="h-auto w-36 rounded-sm shadow-[0_18px_36px_-22px_rgba(43,36,31,0.6)] sm:w-full sm:max-w-[180px]"
+          />
         </div>
       </div>
     </div>

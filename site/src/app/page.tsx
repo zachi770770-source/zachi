@@ -2,19 +2,16 @@ import type { Metadata } from "next";
 
 import { siteConfig } from "@/config/site";
 import { Hero } from "@/components/sections/Hero";
-import { ProblemSection } from "@/components/sections/ProblemSection";
-import { BigIdeaSection } from "@/components/sections/BigIdeaSection";
-import { MethodSection } from "@/components/sections/MethodSection";
+import { ThesisSection } from "@/components/sections/ThesisSection";
+import { AudienceSection } from "@/components/sections/AudienceSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
-import { ToolsSection } from "@/components/sections/ToolsSection";
-import { BookPreviewTeaser } from "@/components/sections/BookPreviewTeaser";
-import { PurchaseSection } from "@/components/sections/PurchaseSection";
-import { BonusSection } from "@/components/sections/BonusSection";
-import { Testimonials } from "@/components/sections/Testimonials";
-import { AuthorSection } from "@/components/sections/AuthorSection";
-import { FaqTeaser } from "@/components/sections/FaqTeaser";
+import { MethodSection } from "@/components/sections/MethodSection";
+import { InsideBookSection } from "@/components/sections/InsideBookSection";
+import { SampleSection } from "@/components/sections/SampleSection";
+import { BehindSection } from "@/components/sections/BehindSection";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
-import { ClosingSection } from "@/components/sections/ClosingSection";
+import { FaqTeaser } from "@/components/sections/FaqTeaser";
+import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
 
@@ -30,19 +27,16 @@ export default function HomePage() {
       <BookSchema />
       <ProductSchema />
       <Hero />
-      <ProblemSection />
-      <BigIdeaSection />
-      <MethodSection />
+      <ThesisSection />
+      <AudienceSection />
       <OutcomesSection />
-      <ToolsSection />
-      <BookPreviewTeaser />
-      <PurchaseSection />
-      <BonusSection />
-      <Testimonials />
-      <AuthorSection />
-      <FaqTeaser />
+      <MethodSection />
+      <InsideBookSection />
+      <SampleSection />
+      <BehindSection />
       <NewsletterSection />
-      <ClosingSection />
+      <FaqTeaser />
+      <PurchaseSection />
     </>
   );
 }

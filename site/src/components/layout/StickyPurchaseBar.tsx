@@ -16,6 +16,8 @@ export function StickyPurchaseBar() {
   const pathname = usePathname();
   const eligibleRoute = VISIBLE_ROUTES.has(pathname ?? "");
 
+  // במצב Pre-launch אין רכישה — הפס אינו מוצג כדי לא להטעות.
+  if (!siteConfig.salesOpen) return null;
   if (!siteConfig.features.stickyPurchaseBar || !eligibleRoute) return null;
 
   // ה-key ממחזר (remount) את הרכיב בכל שינוי נתיב, כך ש"הוסתר על ידי
@@ -49,7 +51,7 @@ function StickyPurchaseBarContent() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur animate-slide-up lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur animate-slide-up lg:hidden"
       role="region"
       aria-label="רכישה מהירה"
     >

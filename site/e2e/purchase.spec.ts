@@ -1,46 +1,39 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("מסלול רכישה בסיסי", () => {
-  test("כניסה לעמוד הבית, רכישה, checkout ותשלום מוצלח מגיעים לעמוד תודה", async ({
+test.describe("Pre-launch: המכירה סגורה", () => {
+  test("אין כפתור רכישה פעיל, /checkout חסום, ו-API יוצר-הזמנה מחזיר 403", async ({
     page,
+    request,
   }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "מדייטים לאהבה"
+      "בונים אותה"
     );
 
-    await page.getByRole("link", { name: "לרכישת הספר" }).first().click();
-    await expect(page.locator("#purchase")).toBeInViewport();
-
-    await page.getByRole("radio", { name: /שני עותקים/ }).click();
-
-    await page
-      .locator("#purchase")
-      .getByRole("button", { name: /לרכישה/ })
-      .click();
-
-    await expect(page).toHaveURL(/\/checkout\?quantity=2/);
-
-    await page.getByLabel("שם מלא").fill("ישראל ישראלי");
-    await page.getByLabel("טלפון").fill("0501234567");
-    await page.getByLabel("אימייל").fill("test@example.com");
-    await page.getByLabel("יישוב").fill("תל אביב");
-    await page.getByLabel("רחוב").fill("הרצל");
-    await page.getByLabel("מספר בית").fill("10");
-    await page.getByLabel(/קראתי ואני מסכים/).click();
-
-    await page.getByRole("button", { name: "מעבר לתשלום" }).click();
-
-    await expect(page).toHaveURL(/\/checkout\/pay\//);
+    // ה-CTA אינו מטעה: כפתור "המכירה תיפתח בקרוב" (מושבת), לא קישור לתשלום.
     await expect(
-      page.getByRole("heading", { name: "מסך תשלום לדוגמה (Demo)" })
+      page.getByRole("button", { name: "המכירה תיפתח בקרוב" }).first()
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "סימולציה: תשלום הצליח" }).click();
-
-    await expect(page).toHaveURL(/\/thank-you\?order=/);
+    // /checkout מציג עמוד "המכירה עדיין לא נפתחה", ללא טופס.
+    await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
     await expect(
-      page.getByRole("heading", { name: "תודה! ההזמנה התקבלה בהצלחה" })
+      page.getByRole("heading", { name: "המכירה עדיין לא נפתחה" })
     ).toBeVisible();
+    await expect(page.getByLabel("שם מלא")).toHaveCount(0);
+
+    // חסימת צד-שרת: אי אפשר ליצור הזמנה.
+    const res = await request.post("/api/checkout", {
+      data: {
+        format: "digital",
+        fullName: "בדיקה",
+        email: "test@example.com",
+        quantity: 1,
+        agreeToTerms: true,
+        marketingConsent: false,
+        idempotencyKey: "abcdefghij123456",
+      },
+    });
+    expect(res.status()).toBe(403);
   });
 });

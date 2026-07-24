@@ -8,12 +8,17 @@ export function formatPrice(amount: number, currency: string = siteConfig.commer
   }).format(amount);
 }
 
+/** מזהי המהדורות הנתמכות. */
+export type ProductFormat = keyof typeof siteConfig.products.formats;
+
 export type OrderTotals = {
+  format: ProductFormat;
   quantity: number;
   unitPrice: number;
   subtotal: number;
-  shipping: number;
   discount: number;
+  /** עלות משלוח - תמיד 0 למהדורה דיגיטלית. */
+  shipping: number;
   total: number;
   currency: string;
 };
@@ -21,26 +26,41 @@ export type OrderTotals = {
 /**
  * חישוב סכום ההזמנה - תמיד מבוצע בצד השרת (בתוך route handlers) ולעולם לא
  * נסמך על מחיר שמגיע מהלקוח, כדי למנוע מניפולציה על המחיר בדפדפן.
+ *
+ * המשלוח מתווסף אך ורק למהדורה שמסומנת `requiresShipping` וכאשר הוגדרה
+ * תעריף משלוח אמיתי ב-config. כל עוד `shipping.flatRate` הוא null (טרם נקבע)
+ * לא מתווספת עלות משלוח - אין להמציא מחיר משלוח.
  */
-export function calculateOrderTotals(quantity: number): OrderTotals {
+export function calculateOrderTotals(
+  quantity: number,
+  format: ProductFormat = siteConfig.products.defaultFormat
+): OrderTotals {
   const safeQuantity = Math.min(Math.max(Math.trunc(quantity), 1), 20);
-  const unitPrice = siteConfig.commerce.price;
+  const definition = siteConfig.products.formats[format];
+  // מחיר null = מהדורה שטרם תומחרה; מתייחסים אליה כאפס עד שייקבע מחיר אמיתי.
+  const unitPrice = definition.price ?? 0;
   const subtotal = unitPrice * safeQuantity;
-
-  const freeShipping =
-    siteConfig.commerce.freeShippingThreshold !== null &&
-    subtotal >= siteConfig.commerce.freeShippingThreshold;
-
-  const shipping = freeShipping ? 0 : siteConfig.commerce.shippingFlatRate;
   const discount = 0;
-  const total = subtotal + shipping - discount;
+
+  let shipping = 0;
+  if (definition.requiresShipping) {
+    const flatRate = siteConfig.shipping.flatRate;
+    const threshold = siteConfig.shipping.freeShippingThreshold;
+    if (flatRate != null) {
+      const qualifiesForFree = threshold != null && subtotal >= threshold;
+      shipping = qualifiesForFree ? 0 : flatRate;
+    }
+  }
+
+  const total = subtotal - discount + shipping;
 
   return {
+    format,
     quantity: safeQuantity,
     unitPrice,
     subtotal,
-    shipping,
     discount,
+    shipping,
     total,
     currency: siteConfig.commerce.currency,
   };
