@@ -84,7 +84,7 @@ export function CookieConsent() {
         aria-label="הסכמה לשימוש בעוגיות"
         className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:px-4"
       >
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-2.5 rounded-xl border border-border-strong bg-surface/92 px-4 py-2.5 shadow-[0_16px_40px_-24px_rgba(34,38,43,0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-4 sm:py-2">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 rounded-xl border border-border-strong bg-surface/95 px-4 py-2 shadow-[0_16px_40px_-24px_rgba(34,38,43,0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-4">
         <p className="text-[13px] leading-snug text-foreground-muted sm:flex-1">
           אנו משתמשים בעוגיות כדי לשפר את החוויה; נוספות רק לאחר אישורכם.{" "}
           <a
