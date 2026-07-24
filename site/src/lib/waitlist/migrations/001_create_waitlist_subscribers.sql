@@ -17,3 +17,13 @@ create table if not exists waitlist_subscribers (
 
 create index if not exists waitlist_subscribers_status_idx
   on waitlist_subscribers (status);
+
+-- ── נעילת גישה (Supabase) ────────────────────────────────────────────
+-- האפליקציה מתחברת ישירות ל-Postgres (Transaction Pooler) עם תפקיד הבעלים,
+-- ולכן היא ממשיכה לעבוד. אנו נועלים את הטבלה מפני ה-PostgREST הציבורי:
+-- מפעילים RLS (ללא policies → דחייה מלאה) ומבטלים כל הרשאה מ-anon/authenticated,
+-- כך שאי אפשר לקרוא או לייצא כתובות אימייל דרך ה-API הציבורי.
+alter table public.waitlist_subscribers enable row level security;
+alter table public.waitlist_subscribers force row level security;
+
+revoke all on table public.waitlist_subscribers from anon, authenticated;
