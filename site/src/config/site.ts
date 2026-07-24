@@ -118,10 +118,16 @@ export const siteConfig = {
   },
 
   /** שורת האמון מתחת לכפתורי ה-CTA ב-Hero. כל פריט ניתן לכיבוי בנפרד. */
+  /**
+   * שורת נתונים אמיתיים בלבד. אין להוסיף כאן טענות שאינן נכונות.
+   * "secure-payment" מסומן demoHidden: כל עוד מחובר ספק תשלום הדגמה (Mock)
+   * אין להציג "תשלום מאובטח", והרכיב מסתיר אותו אוטומטית.
+   */
   trustBar: [
-    { id: "secure-payment", label: "תשלום מאובטח", enabled: true },
+    { id: "secure-payment", label: "תשלום מאובטח", enabled: true, demoHidden: true },
     { id: "shipping", label: "משלוח לכל הארץ", enabled: true },
     { id: "workbook", label: "כולל חוברת עבודה דיגיטלית", enabled: true },
+    { id: "guest", label: "ללא צורך בהרשמה", enabled: true },
   ],
 
   bonus: {

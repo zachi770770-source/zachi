@@ -1,20 +1,13 @@
-<svg width="600" height="900" viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="כריכת הספר מדייטים לאהבה">
-  <rect width="600" height="900" fill="#a94f3d"/>
-  <rect x="34" y="34" width="532" height="832" fill="none" stroke="#d8cbbe" stroke-width="1.5"/>
-  <rect x="46" y="46" width="508" height="808" fill="none" stroke="#d8cbbe" stroke-width="0.75"/>
-
-  <line x1="245" y1="175" x2="283" y2="175" stroke="#d8cbbe" stroke-width="1"/>
-  <polygon points="300,166 309,175 300,184 291,175" fill="#d8cbbe"/>
-  <line x1="317" y1="175" x2="355" y2="175" stroke="#d8cbbe" stroke-width="1"/>
-
-  <text x="300" y="430" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="600" letter-spacing="1">מדייטים</text>
-  <text x="300" y="505" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="600" letter-spacing="1">לאהבה</text>
-
-  <line x1="230" y1="545" x2="370" y2="545" stroke="#d8cbbe" stroke-width="1.5"/>
-
-  <text x="300" y="600" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-style="italic">דייטינג הוא חיפוש. אהבה היא בנייה.</text>
-
-  <line x1="245" y1="795" x2="283" y2="795" stroke="#d8cbbe" stroke-width="1"/>
-  <polygon points="300,786 309,795 300,804 291,795" fill="#d8cbbe"/>
-  <line x1="317" y1="795" x2="355" y2="795" stroke="#d8cbbe" stroke-width="1"/>
+<svg width="600" height="900" viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="עטיפת הספר מדייטים לאהבה">
+  <rect width="600" height="900" fill="#f6f1e8"/>
+  <!-- מוטיב: שני חצאי-טבעת שנפגשים עם רווח קטן — מחיפוש לבנייה -->
+  <g fill="none" stroke-width="15" stroke-linecap="round">
+    <path d="M 306 182 A 68 68 0 0 1 306 318" stroke="#22262b"/>
+    <path d="M 294 182 A 68 68 0 0 0 294 318" stroke="#a65c3e"/>
+  </g>
+  <text x="300" y="452" text-anchor="middle" fill="#22262b" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="80" font-weight="800" letter-spacing="-2">מדייטים</text>
+  <text x="300" y="540" text-anchor="middle" fill="#22262b" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="80" font-weight="800" letter-spacing="-2">לאהבה</text>
+  <line x1="238" y1="588" x2="362" y2="588" stroke="#c9bda6" stroke-width="2"/>
+  <text x="300" y="632" text-anchor="middle" fill="#5c5f5c" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="23" font-weight="500">דייטינג הוא חיפוש. אהבה היא בנייה.</text>
+  <text x="300" y="822" text-anchor="middle" fill="#8a8272" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="500" letter-spacing="3">מדריך מעשי לדייטינג ולזוגיות</text>
 </svg>

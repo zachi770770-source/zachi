@@ -65,6 +65,13 @@ export default async function ThankYouPage({
           מספר הזמנה: <span className="font-semibold text-foreground">{order.orderNumber}</span>
         </p>
 
+        {isPaid && siteConfig.isPaymentDemoMode ? (
+          <p className="mx-auto mt-5 max-w-md rounded-xl border border-warning/30 bg-warning-foreground px-4 py-3 text-sm text-warning">
+            הזמנה זו נוצרה במצב הדגמה. לא בוצע חיוב אמיתי ולא יישלח מוצר בפועל
+            עד לחיבור ספק תשלום ואספקה פעילים.
+          </p>
+        ) : null}
+
         {isPaid ? (
           <>
             <div className="mt-8 rounded-lg border border-border bg-surface-muted p-6 text-start">

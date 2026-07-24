@@ -6,7 +6,7 @@ test.describe("מסלול רכישה בסיסי", () => {
   }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "מדייטים לאהבה"
+      "להתחיל לבנות"
     );
 
     await page.getByRole("link", { name: "לרכישת הספר" }).first().click();

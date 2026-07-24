@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CreditCard, Truck, Package } from "lucide-react";
+import { Truck, Package, BadgeInfo } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { calculateOrderTotals, formatPrice } from "@/lib/pricing";
@@ -17,6 +17,7 @@ export function PurchaseCard() {
   const router = useRouter();
   const [quantity, setQuantity] = React.useState(1);
   const totals = calculateOrderTotals(quantity);
+  const demo = siteConfig.isPaymentDemoMode;
 
   function handleBuy() {
     trackEvent("add_to_cart", { quantity });
@@ -26,28 +27,20 @@ export function PurchaseCard() {
   return (
     <div
       id="purchase"
-      className="scroll-mt-24 rounded-xl border border-border bg-surface p-6 shadow-sm sm:p-8"
+      className="scroll-mt-24 overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_40px_80px_-50px_rgba(34,38,43,0.4)]"
     >
-      <div className="flex flex-col gap-6 sm:flex-row">
-        <Image
-          src={siteConfig.images.cover}
-          alt={siteConfig.images.coverAlt}
-          width={300}
-          height={450}
-          unoptimized
-          className="mx-auto h-auto w-32 shrink-0 rounded-md shadow-md sm:mx-0 sm:w-36"
-        />
-
-        <div className="flex flex-1 flex-col gap-4">
+      <div className="grid sm:grid-cols-[minmax(0,1fr)_15rem]">
+        {/* פרטים + רכישה */}
+        <div className="order-2 flex flex-col gap-5 p-8 sm:order-1 sm:p-10">
           <div>
-            <h3 className="font-serif text-xl font-semibold">
-              {siteConfig.bookTitle}
-            </h3>
-            <p className="text-sm text-foreground-muted">ספר מודפס, כריכה רכה</p>
+            <h3 className="text-2xl font-bold">{siteConfig.bookTitle}</h3>
+            <p className="mt-1 text-[15px] text-foreground-muted">
+              ספר מודפס, כריכה רכה
+            </p>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-semibold text-brand">
+            <span className="type-quote text-4xl font-semibold text-brand-hover">
               {formatPrice(siteConfig.commerce.price)}
             </span>
             {siteConfig.commerce.showCompareAtPrice &&
@@ -56,49 +49,70 @@ export function PurchaseCard() {
                 {formatPrice(siteConfig.commerce.compareAtPrice)}
               </span>
             ) : null}
-            <span className="text-sm text-foreground-muted">לעותק</span>
+            <span className="text-[15px] text-foreground-muted">לעותק</span>
           </div>
 
-          <ul className="flex flex-col gap-1.5 text-sm text-foreground-muted">
-            <li className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-brand" aria-hidden="true" />
+          <ul className="flex flex-col gap-2.5 text-[15px] text-foreground-muted">
+            <li className="flex items-center gap-2.5">
+              <Package className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
               {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice
                 ? "כולל חוברת עבודה דיגיטלית"
                 : "הספר המודפס בלבד"}
             </li>
-            <li className="flex items-center gap-2">
-              <Truck className="h-4 w-4 text-brand" aria-hidden="true" />
-              משלוח: {formatPrice(siteConfig.commerce.shippingFlatRate)} ·
-              זמן אספקה משוער {siteConfig.commerce.estimatedDeliveryText}
+            <li className="flex items-center gap-2.5">
+              <Truck className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              משלוח {formatPrice(siteConfig.commerce.shippingFlatRate)} · אספקה
+              משוערת {siteConfig.commerce.estimatedDeliveryText}
             </li>
-            <li className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-brand" aria-hidden="true" />
-              תשלום מאובטח · מצב הדגמה בסביבת פיתוח
-            </li>
+            {demo ? (
+              <li className="flex items-center gap-2.5">
+                <BadgeInfo
+                  className="h-[18px] w-[18px] text-brand"
+                  aria-hidden="true"
+                />
+                מצב הדגמה · התשלום אינו פעיל עדיין
+              </li>
+            ) : null}
           </ul>
 
           <Separator />
 
           <QuantitySelector value={quantity} onChange={setQuantity} />
 
-          <div className="flex items-center justify-between rounded-md bg-surface-muted px-4 py-3 text-sm">
+          <div className="flex items-center justify-between rounded-xl bg-surface-muted px-4 py-3 text-[15px]">
             <span className="text-foreground-muted">סה&quot;כ לתשלום</span>
-            <span className="font-serif text-lg font-semibold">
-              {formatPrice(totals.total)}
-            </span>
+            <span className="text-xl font-bold">{formatPrice(totals.total)}</span>
           </div>
 
-          <Button size="lg" onClick={handleBuy} className="w-full sm:w-auto">
-            לרכישה - {formatPrice(totals.total)}
+          <Button size="lg" onClick={handleBuy} className="w-full">
+            לרכישה · {formatPrice(totals.total)}
           </Button>
 
-          <p className="text-xs text-foreground-muted">
+          <p className="text-[13px] leading-relaxed text-foreground-muted">
+            {demo
+              ? "מצב הדגמה: לא תתבצע חיוב בפועל. "
+              : null}
             לפרטי משלוח, ביטולים והחזרות ראו{" "}
-            <Link href="/shipping-returns" className="underline hover:text-foreground">
+            <Link
+              href="/shipping-returns"
+              className="text-brand-hover underline underline-offset-2 hover:text-foreground"
+            >
               מדיניות משלוחים והחזרות
             </Link>
             .
           </p>
+        </div>
+
+        {/* עטיפה */}
+        <div className="order-1 flex items-center justify-center bg-surface-muted p-8 sm:order-2">
+          <Image
+            src={siteConfig.images.cover}
+            alt={siteConfig.images.coverAlt}
+            width={300}
+            height={450}
+            unoptimized
+            className="h-auto w-40 rounded-md shadow-[0_20px_40px_-24px_rgba(34,38,43,0.55)] sm:w-full sm:max-w-[190px]"
+          />
         </div>
       </div>
     </div>

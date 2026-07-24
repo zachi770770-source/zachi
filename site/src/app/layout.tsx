@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Assistant, Frank_Ruhl_Libre } from "next/font/google";
+import { Heebo, Noto_Serif_Hebrew } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import { Header } from "@/components/layout/Header";
@@ -9,17 +9,21 @@ import { CookieConsent } from "@/components/layout/CookieConsent";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 
-const bodyFont = Assistant({
+/**
+ * Heebo משמש לממשק, לגוף ולכותרות המרכזיות.
+ * Noto Serif Hebrew שמור אך ורק לציטוט/משפט התזה המרכזי.
+ */
+const bodyFont = Heebo({
   variable: "--font-body",
   subsets: ["hebrew", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const headingFont = Frank_Ruhl_Libre({
-  variable: "--font-heading",
+const quoteFont = Noto_Serif_Hebrew({
+  variable: "--font-quote",
   subsets: ["hebrew", "latin"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -61,7 +65,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#f7f3ec",
+  themeColor: "#fbf8f3",
 };
 
 export default function RootLayout({
@@ -74,7 +78,7 @@ export default function RootLayout({
       lang="he"
       dir="rtl"
       data-scroll-behavior="smooth"
-      className={`${bodyFont.variable} ${headingFont.variable}`}
+      className={`${bodyFont.variable} ${quoteFont.variable}`}
     >
       <body className="flex min-h-svh flex-col bg-background text-foreground antialiased">
         <SkipToContent />

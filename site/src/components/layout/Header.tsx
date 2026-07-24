@@ -7,42 +7,48 @@ import { MobileMenu } from "@/components/layout/MobileMenu";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-20">
-        <Link
-          href="/"
-          className="flex flex-col leading-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-        >
-          <span className="font-serif text-lg font-semibold sm:text-xl">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
+      <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-20 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+        {/* לוגו (מימין ב-RTL) */}
+        <div className="flex items-center lg:justify-start">
+          <Link
+            href="/"
+            className="font-sans text-lg font-extrabold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand sm:text-xl"
+          >
             {siteConfig.bookTitle}
-          </span>
-          <span className="hidden text-xs text-foreground-muted sm:block">
-            {siteConfig.tagline}
-          </span>
-        </Link>
+          </Link>
+        </div>
 
+        {/* ניווט (במרכז) */}
         <nav
           aria-label="ניווט ראשי"
-          className="hidden items-center gap-7 lg:flex"
+          className="hidden items-center gap-8 lg:flex lg:justify-center"
         >
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              className="text-[15px] font-medium text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          <Button asChild>
+        {/* CTA (משמאל ב-RTL) */}
+        <div className="hidden lg:flex lg:justify-end">
+          <Button asChild size="sm" className="h-11 px-5 text-[15px]">
             <Link href="/#purchase">לרכישת הספר</Link>
           </Button>
         </div>
 
-        <MobileMenu />
+        {/* מובייל: כפתור רכישה קומפקטי + המבורגר */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <Button asChild size="sm" className="h-10 px-4 text-sm">
+            <Link href="/#purchase">רכישה</Link>
+          </Button>
+          <MobileMenu />
+        </div>
       </div>
     </header>
   );

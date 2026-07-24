@@ -1,28 +1,42 @@
-import { CheckCircle2 } from "lucide-react";
-
 import { Container } from "@/components/shared/Container";
-import { SectionHeading } from "@/components/shared/SectionHeading";
+import { Reveal } from "@/components/shared/Reveal";
 import { outcomes } from "@/content/book";
 
+/**
+ * "מה ישתנה אחרי הקריאה" - שתי עמודות עם מספור גדול, ללא כרטיסים.
+ */
 export function OutcomesSection() {
   return (
-    <section className="bg-surface-muted py-16 sm:py-24" aria-labelledby="outcomes-heading">
+    <section
+      id="outcomes"
+      className="scroll-mt-20 bg-surface-muted py-24 sm:py-32"
+      aria-labelledby="outcomes-heading"
+    >
       <Container>
-        <SectionHeading title={outcomes.title} headingId="outcomes-heading" />
+        <Reveal className="max-w-2xl">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+            אחרי הקריאה
+          </span>
+          <h2 id="outcomes-heading" className="type-h2 mt-4">
+            {outcomes.title}
+          </h2>
+        </Reveal>
 
-        <ul className="mx-auto mt-10 grid max-w-4xl gap-x-10 gap-y-5 sm:grid-cols-2">
-          {outcomes.items.map((item) => (
-            <li key={item} className="flex items-start gap-3">
-              <CheckCircle2
-                className="mt-0.5 h-5 w-5 shrink-0 text-secondary"
+        <Reveal className="mt-14 grid gap-x-16 gap-y-10 sm:grid-cols-2">
+          {outcomes.items.map((item, index) => (
+            <div key={item} className="flex items-start gap-5">
+              <span
+                className="type-quote w-10 shrink-0 text-3xl leading-none text-brand tabular-nums"
                 aria-hidden="true"
-              />
-              <span className="text-base leading-relaxed text-foreground">
-                {item}
+              >
+                {String(index + 1).padStart(2, "0")}
               </span>
-            </li>
+              <p className="text-[19px] leading-relaxed text-foreground">
+                {item}
+              </p>
+            </div>
           ))}
-        </ul>
+        </Reveal>
       </Container>
     </section>
   );
