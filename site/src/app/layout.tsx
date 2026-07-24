@@ -23,7 +23,7 @@ const bodyFont = Heebo({
 const quoteFont = Noto_Serif_Hebrew({
   variable: "--font-quote",
   subsets: ["hebrew", "latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 

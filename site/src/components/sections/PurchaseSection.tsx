@@ -15,7 +15,7 @@ export function PurchaseSection() {
     >
       <Container>
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+          <span className="kicker">
             הצעד הבא
           </span>
           <h2 id="purchase-heading" className="type-h2 mt-4">

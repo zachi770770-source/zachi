@@ -17,7 +17,7 @@ export function FaqTeaser() {
       <Container>
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:gap-20">
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+            <span className="kicker">
               שאלות נפוצות
             </span>
             <h2 id="faq-heading" className="type-h2 mt-4">

@@ -16,7 +16,7 @@ export function InsideBookSection() {
       <Container>
         <div className="grid gap-14 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-20">
           <Reveal>
-            <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+            <span className="kicker">
               מה יש בתוך הספר
             </span>
             <h2 id="inside-heading" className="type-h2 mt-4">

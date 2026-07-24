@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
+import { SearchToBuild } from "@/components/shared/SearchToBuild";
 import { TrustBar } from "@/components/sections/TrustBar";
 
 export function Hero() {
@@ -14,49 +15,30 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden">
-      {/* רקע אווירה מלא-רוחב: מוטיב "מחיפוש לבנייה" + זוהר רך מאחורי העטיפה */}
+      {/* אווירה: שכבת גרעין + זוהר חם מאחורי העטיפה + מוטיב מלא-רוחב */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-surface-muted via-background to-background" />
-        <div className="absolute -top-32 left-[14%] h-[560px] w-[560px] rounded-full bg-brand/[0.08] blur-3xl" />
-        <svg
-          className="absolute inset-x-0 top-0 h-full w-full opacity-[0.55]"
-          viewBox="0 0 1440 760"
-          preserveAspectRatio="xMidYMid slice"
-          fill="none"
-        >
-          <path
-            d="M-40 150 C 480 250, 620 470, 1480 430"
-            stroke="var(--color-border-strong)"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M-40 610 C 480 520, 620 470, 1480 430"
-            stroke="var(--color-border-strong)"
-            strokeWidth="1.5"
-          />
-          <circle cx="1180" cy="440" r="5" fill="var(--color-brand)" />
-        </svg>
+        <div className="absolute -top-40 start-[6%] h-[620px] w-[620px] rounded-full bg-brand/[0.09] blur-[110px]" />
+        <div className="absolute bottom-0 end-[10%] h-[420px] w-[420px] rounded-full bg-secondary/[0.07] blur-[100px]" />
+        <div className="grain-layer absolute inset-0 opacity-[0.035] mix-blend-multiply" />
       </div>
 
-      <Container className="flex min-h-[660px] items-center py-16 sm:py-20 lg:min-h-[760px] lg:py-24">
-        <div className="grid w-full items-center gap-12 lg:grid-cols-[1.02fr_minmax(0,30rem)] lg:gap-16">
+      <Container className="flex min-h-[640px] flex-col justify-center py-16 sm:py-20 lg:min-h-[780px] lg:py-24">
+        <div className="grid w-full items-center gap-14 lg:grid-cols-[1.05fr_minmax(0,29rem)] lg:gap-16">
           {/* מסר (ימין ב-RTL) */}
-          <div className="order-1 flex max-w-[640px] flex-col items-start">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/70 px-3.5 py-1.5 text-[13px] font-semibold text-brand-hover">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
-              {hero.eyebrow}
-            </span>
+          <div className="order-1 flex max-w-[660px] flex-col items-start">
+            <span className="kicker">{hero.eyebrow}</span>
 
-            <h1 className="type-h1 mt-6 text-[clamp(2.875rem,5.6vw,5.25rem)]">
+            <h1 className="type-display mt-6 text-foreground">
               {hero.headlineTop}
               <br />
-              {hero.headlineBottom}
+              <span className="text-brand-hover">{hero.headlineBottom}</span>
             </h1>
 
-            <p className="type-quote mt-6 text-[clamp(1.4rem,2.3vw,1.9rem)] leading-snug text-brand-hover">
-              {hero.tagline}
-            </p>
-            <p className="type-lead mt-6 max-w-[47ch] text-foreground-muted">
+            {/* המוטיב החתום — בדיוק במקום שבו המילים עוברות מחיפוש לבנייה */}
+            <SearchToBuild className="mt-7 h-9 w-[260px] max-w-full text-foreground/70" />
+
+            <p className="type-lead mt-7 max-w-[48ch] text-foreground-muted">
               {hero.description}
             </p>
 
@@ -87,21 +69,29 @@ export function Hero() {
             <TrustBar className="mt-8" />
           </div>
 
-          {/* עטיפה (שמאל ב-RTL), על "במה" רכה שנותנת לה נוכחות ועומק */}
+          {/* העטיפה כאובייקט מואר: זוהר, במה וצל קרקע אליפטי */}
           <div className="order-2 flex justify-center lg:justify-end">
-            <div className="relative">
+            <div className="relative flex w-[240px] items-end justify-center sm:w-[300px] lg:w-[380px]">
               <div
                 aria-hidden="true"
-                className="absolute inset-x-6 -bottom-6 top-10 -z-10 rounded-[2rem] bg-gradient-to-b from-brand/[0.10] to-secondary/[0.08] blur-2xl"
+                className="absolute -inset-x-10 -top-10 bottom-6 -z-10 rounded-[50%] bg-[radial-gradient(closest-side,rgba(166,92,62,0.18),transparent_72%)]"
               />
-              <BookCover
-                priority
-                className="w-[240px] sm:w-[300px] lg:w-[380px]"
+              <BookCover priority className="w-full" />
+              {/* צל קרקע רך שנותן לספר לעמוד על משטח */}
+              <div
+                aria-hidden="true"
+                className="absolute -bottom-4 h-8 w-[78%] rounded-[50%] bg-foreground/25 blur-2xl"
               />
             </div>
           </div>
         </div>
       </Container>
+
+      {/* קו סיום עדין שמחבר אל הסקשן הבא */}
+      <div
+        aria-hidden="true"
+        className="mx-auto h-px w-full max-w-[77.5rem] bg-gradient-to-l from-transparent via-border-strong to-transparent"
+      />
     </section>
   );
 }

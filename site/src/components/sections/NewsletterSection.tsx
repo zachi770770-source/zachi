@@ -10,7 +10,7 @@ export function NewsletterSection() {
       <Container>
         <div className="mx-auto grid max-w-4xl items-center gap-8 rounded-3xl border border-border bg-surface px-8 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:px-12">
           <div>
-            <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+            <span className="kicker">
               טעימה חינמית
             </span>
             <h2

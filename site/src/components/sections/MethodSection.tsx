@@ -20,7 +20,7 @@ export function MethodSection() {
     >
       <Container>
         <Reveal className="max-w-2xl">
-          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+          <span className="kicker">
             השיטה
           </span>
           <h2 id="method-heading" className="type-h2 mt-4">

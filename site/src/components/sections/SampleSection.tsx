@@ -18,7 +18,7 @@ export function SampleSection() {
     >
       <Container>
         <Reveal className="mx-auto max-w-3xl text-center">
-          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+          <span className="kicker">
             טעימה מהספר
           </span>
           <h2 id="sample-heading" className="type-h2 mt-4">

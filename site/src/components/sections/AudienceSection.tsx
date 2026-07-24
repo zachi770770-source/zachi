@@ -18,7 +18,7 @@ export function AudienceSection() {
       <Container>
         <div className="grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
           <Reveal className="lg:sticky lg:top-28 lg:self-start">
-            <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-hover">
+            <span className="kicker">
               למי הספר הזה
             </span>
             <h2 id="audience-heading" className="type-h2 mt-4">

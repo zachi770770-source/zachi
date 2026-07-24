@@ -4,6 +4,7 @@ import { siteConfig } from "@/config/site";
 import { navLinks } from "@/config/nav";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "@/components/layout/MobileMenu";
+import { BrandMark } from "@/components/shared/BrandMark";
 
 export function Header() {
   return (
@@ -16,18 +17,7 @@ export function Header() {
             className="group flex items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             aria-label={`${siteConfig.bookTitle} — לעמוד הבית`}
           >
-            <svg
-              className="h-7 w-7 shrink-0"
-              viewBox="0 0 40 40"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle cx="20" cy="20" r="18" fill="var(--color-brand-muted)" />
-              <g fill="none" strokeWidth="3.4" strokeLinecap="round">
-                <path d="M22 9 A 11 11 0 0 0 22 31" stroke="var(--color-foreground)" />
-                <path d="M18 9 A 11 11 0 0 1 18 31" stroke="var(--color-brand)" />
-              </g>
-            </svg>
+            <BrandMark withRing className="h-8 w-8 shrink-0 text-foreground" />
             <span className="font-sans text-lg font-extrabold tracking-tight sm:text-xl">
               {siteConfig.bookTitle}
             </span>
