@@ -77,10 +77,10 @@ export function Hero() {
                 className="absolute -inset-x-10 -top-10 bottom-6 -z-10 rounded-[50%] bg-[radial-gradient(closest-side,rgba(166,92,62,0.18),transparent_72%)]"
               />
               <BookCover priority className="w-full" />
-              {/* צל קרקע רך שנותן לספר לעמוד על משטח */}
+              {/* צל קרקע חם שנותן לספר לעמוד על משטח */}
               <div
                 aria-hidden="true"
-                className="absolute -bottom-4 h-8 w-[78%] rounded-[50%] bg-foreground/25 blur-2xl"
+                className="absolute -bottom-4 h-8 w-[78%] rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
               />
             </div>
           </div>

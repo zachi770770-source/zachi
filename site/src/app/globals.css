@@ -11,8 +11,8 @@
   --color-surface-muted: #f4efe6;
   --color-foreground: #22262b;
   --color-foreground-muted: #5c5f5c;
-  /* פחם עמוק וחם לאזורים קולנועיים */
-  --color-ink: #15181c;
+  /* פחם חם (אספרסו) — מייצג את שלב ה"חיפוש" במינון מצומצם בלבד. */
+  --color-ink: #2c2319;
 
   --color-border: #e7e0d4;
   --color-border-strong: #d6ccbb;

@@ -82,12 +82,11 @@ export function CookieConsent() {
       <div
         role="region"
         aria-label="הסכמה לשימוש בעוגיות"
-        className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-3 sm:pb-5"
+        className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-2.5 sm:px-4 sm:pb-3"
       >
-        <div className="mx-auto flex max-h-[46vh] w-full max-w-3xl flex-col gap-3 overflow-y-auto rounded-2xl border border-border-strong bg-surface/95 p-4 shadow-[0_24px_60px_-24px_rgba(34,38,43,0.55)] backdrop-blur sm:flex-row sm:items-center sm:gap-5 sm:p-5">
-        <p className="text-[13.5px] leading-relaxed text-foreground-muted sm:flex-1">
-          אנו משתמשים בעוגיות כדי לשפר את החוויה. עוגיות הכרחיות תמיד פעילות,
-          נוספות רק לאחר אישורכם.{" "}
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-2.5 rounded-xl border border-border-strong bg-surface/92 px-4 py-2.5 shadow-[0_16px_40px_-24px_rgba(34,38,43,0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-4 sm:py-2">
+        <p className="text-[13px] leading-snug text-foreground-muted sm:flex-1">
+          אנו משתמשים בעוגיות כדי לשפר את החוויה; נוספות רק לאחר אישורכם.{" "}
           <a
             href="/privacy"
             className="text-brand-hover underline underline-offset-2 hover:text-foreground"

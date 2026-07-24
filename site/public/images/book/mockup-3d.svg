@@ -1,9 +1,9 @@
 <svg width="620" height="930" viewBox="0 0 620 930" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="עטיפת הספר מדייטים לאהבה">
   <defs>
     <linearGradient id="ground" x1="0" y1="0" x2="0.35" y2="1">
-      <stop offset="0" stop-color="#2a3037"/>
-      <stop offset="0.5" stop-color="#20252a"/>
-      <stop offset="1" stop-color="#14181c"/>
+      <stop offset="0" stop-color="#3a2f24"/>
+      <stop offset="0.5" stop-color="#2b2319"/>
+      <stop offset="1" stop-color="#1d1710"/>
     </linearGradient>
     <radialGradient id="glow" cx="0.5" cy="0.33" r="0.6">
       <stop offset="0" stop-color="#c56a45" stop-opacity="0.30"/>
