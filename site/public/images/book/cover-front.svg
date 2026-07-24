@@ -3,10 +3,18 @@
   <rect x="34" y="34" width="532" height="832" fill="none" stroke="#d8cbbe" stroke-width="1.5"/>
   <rect x="46" y="46" width="508" height="808" fill="none" stroke="#d8cbbe" stroke-width="0.75"/>
 
-  <text x="300" y="430" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="600">מדייטים</text>
-  <text x="300" y="505" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="600">לאהבה</text>
+  <line x1="245" y1="175" x2="283" y2="175" stroke="#d8cbbe" stroke-width="1"/>
+  <polygon points="300,166 309,175 300,184 291,175" fill="#d8cbbe"/>
+  <line x1="317" y1="175" x2="355" y2="175" stroke="#d8cbbe" stroke-width="1"/>
+
+  <text x="300" y="430" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="600" letter-spacing="1">מדייטים</text>
+  <text x="300" y="505" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="600" letter-spacing="1">לאהבה</text>
 
   <line x1="230" y1="545" x2="370" y2="545" stroke="#d8cbbe" stroke-width="1.5"/>
 
   <text x="300" y="600" text-anchor="middle" fill="#fff9f2" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-style="italic">דייטינג הוא חיפוש. אהבה היא בנייה.</text>
+
+  <line x1="245" y1="795" x2="283" y2="795" stroke="#d8cbbe" stroke-width="1"/>
+  <polygon points="300,786 309,795 300,804 291,795" fill="#d8cbbe"/>
+  <line x1="317" y1="795" x2="355" y2="795" stroke="#d8cbbe" stroke-width="1"/>
 </svg>

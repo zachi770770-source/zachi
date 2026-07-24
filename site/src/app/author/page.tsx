@@ -10,8 +10,8 @@ import { PersonSchema } from "@/components/schema/PersonSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata: Metadata = {
-  title: "על המחבר",
-  description: `היכרות עם ${siteConfig.author.name}, מחבר/ת הספר ${siteConfig.bookTitle}.`,
+  title: "על הספר",
+  description: `למה נכתב הספר ${siteConfig.bookTitle}, למי הוא מיועד ומה תיקחו ממנו.`,
   alternates: { canonical: "/author" },
 };
 
@@ -33,15 +33,15 @@ export default function AuthorPage() {
           width={200}
           height={200}
           unoptimized
-          className="h-40 w-40 rounded-full object-cover shadow-md"
+          className="h-40 w-40 rounded-full object-cover ring-1 ring-border-strong"
         />
-        <div>
-          <h1 className="font-serif text-3xl font-semibold sm:text-4xl">
+        <div className="flex flex-col items-center gap-3">
+          <span className="text-sm font-semibold uppercase tracking-wide text-brand-hover">
             {siteConfig.author.name}
-          </h1>
-          <p className="mt-2 text-lg text-foreground-muted">
+          </span>
+          <h1 className="font-serif text-3xl font-semibold sm:text-4xl">
             {authorContent.sectionTitle}
-          </p>
+          </h1>
         </div>
       </div>
 
