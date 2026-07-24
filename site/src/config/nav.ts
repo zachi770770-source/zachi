@@ -15,6 +15,6 @@ export const footerLinks = {
   legal: [
     { href: "/terms", label: "תקנון" },
     { href: "/privacy", label: "מדיניות פרטיות" },
-    { href: "/shipping-returns", label: "משלוחים, ביטולים והחזרות" },
+    { href: "/shipping-returns", label: "מדיניות מוצר, משלוחים וביטולים" },
   ],
 };

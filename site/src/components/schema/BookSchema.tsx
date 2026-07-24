@@ -10,7 +10,7 @@ export function BookSchema() {
         name: siteConfig.bookTitle,
         description: siteConfig.description,
         inLanguage: "he",
-        bookFormat: "https://schema.org/Paperback",
+        bookFormat: "https://schema.org/EBook",
         image: `${siteConfig.url}${siteConfig.images.cover}`,
         url: siteConfig.url,
         author: {

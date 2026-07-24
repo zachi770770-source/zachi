@@ -1,21 +1,50 @@
 import { z } from "zod";
 
-const israeliPhoneRegex = /^0\d{1,2}-?\d{3}-?\d{4}$/;
+import { siteConfig } from "@/config/site";
 
-export const checkoutSchema = z.object({
-  fullName: z
-    .string()
-    .trim()
-    .min(2, "יש להזין שם מלא")
-    .max(80, "השם ארוך מדי"),
-  phone: z
-    .string()
-    .trim()
-    .regex(israeliPhoneRegex, "יש להזין מספר טלפון ישראלי תקין"),
+/**
+ * מספר טלפון ישראלי תקין: מכיל רק ספרות, רווחים ומקפים, מתחיל ב-0,
+ * וכולל 9-10 ספרות בפועל (לאחר הסרת מפרידים).
+ */
+function isValidIsraeliPhone(raw: string): boolean {
+  if (!/^[\d\s-]+$/.test(raw)) return false;
+  const digits = raw.replace(/\D/g, "");
+  return digits.startsWith("0") && digits.length >= 9 && digits.length <= 10;
+}
+
+/** רשימת מזהי המהדורות התקינים, נגזרת מה-config. */
+const formatIds = Object.keys(siteConfig.products.formats) as [
+  string,
+  ...string[]
+];
+
+/**
+ * שדות הטופס. המהדורה הדיגיטלית דורשת שם ואימייל בלבד; מהדורה מודפסת או
+ * חבילה דורשות גם כתובת למשלוח. שדות הכתובת מוגדרים כאן כאופציונליים,
+ * ונאכפים באופן מותנה דרך `requireShippingWhenNeeded` רק כאשר הפורמט
+ * הנבחר דורש משלוח.
+ */
+export const checkoutObject = z.object({
+  format: z.enum(formatIds),
+  fullName: z.string().trim().min(2, "יש להזין שם מלא").max(80, "השם ארוך מדי"),
   email: z.string().trim().toLowerCase().email("יש להזין כתובת אימייל תקינה"),
-  city: z.string().trim().min(2, "יש להזין יישוב").max(60, "שם היישוב ארוך מדי"),
-  street: z.string().trim().min(2, "יש להזין רחוב").max(80, "שם הרחוב ארוך מדי"),
-  houseNumber: z.string().trim().min(1, "יש להזין מספר בית").max(10, "מספר הבית ארוך מדי"),
+  quantity: z
+    .coerce
+    .number()
+    .int("הכמות חייבת להיות מספר שלם")
+    .min(1, "יש לבחור כמות של עותק אחד לפחות")
+    .max(20, "לא ניתן להזמין יותר מ-20 עותקים בהזמנה אחת"),
+
+  // שדות משלוח - נדרשים רק כאשר הפורמט דורש משלוח (ראו הרפיינמנט למטה).
+  phone: z.string().trim().optional().or(z.literal("")),
+  city: z.string().trim().max(60, "שם היישוב ארוך מדי").optional().or(z.literal("")),
+  street: z.string().trim().max(80, "שם הרחוב ארוך מדי").optional().or(z.literal("")),
+  houseNumber: z
+    .string()
+    .trim()
+    .max(10, "מספר הבית ארוך מדי")
+    .optional()
+    .or(z.literal("")),
   apartment: z
     .string()
     .trim()
@@ -26,15 +55,10 @@ export const checkoutSchema = z.object({
   courierNotes: z
     .string()
     .trim()
-    .max(300, "ההערה ארוכה מדי (עד 300 תווים)")
+    .max(200, "ההערה ארוכה מדי (עד 200 תווים)")
     .optional()
     .or(z.literal("")),
-  quantity: z
-    .coerce
-    .number()
-    .int("הכמות חייבת להיות מספר שלם")
-    .min(1, "יש לבחור כמות של עותק אחד לפחות")
-    .max(20, "לא ניתן להזמין יותר מ-20 עותקים בהזמנה אחת"),
+
   giftDedication: z
     .string()
     .trim()
@@ -47,5 +71,55 @@ export const checkoutSchema = z.object({
   marketingConsent: z.boolean(),
   idempotencyKey: z.string().min(10, "מזהה בקשה לא תקין"),
 });
+
+type CheckoutShape = {
+  format?: string;
+  phone?: string;
+  city?: string;
+  street?: string;
+  houseNumber?: string;
+};
+
+/**
+ * אכיפת שדות משלוח כאשר הפורמט הנבחר דורש משלוח (מודפס/חבילה).
+ * משמש הן את הסכימה המלאה (צד שרת) והן את סכימת הטופס (צד לקוח), כדי
+ * שהלוגיקה תישמר במקום אחד בלבד.
+ */
+export function requireShippingWhenNeeded(
+  data: CheckoutShape,
+  ctx: z.RefinementCtx
+) {
+  const format = (data.format ??
+    siteConfig.products.defaultFormat) as keyof typeof siteConfig.products.formats;
+  const definition = siteConfig.products.formats[format];
+  if (!definition?.requiresShipping) return;
+
+  const required: Array<[keyof CheckoutShape, string]> = [
+    ["phone", "יש להזין מספר טלפון ליצירת קשר לגבי המשלוח"],
+    ["city", "יש להזין יישוב"],
+    ["street", "יש להזין רחוב"],
+    ["houseNumber", "יש להזין מספר בית"],
+  ];
+  for (const [field, message] of required) {
+    if (!data[field]) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message, path: [field] });
+    }
+  }
+  if (data.phone && !isValidIsraeliPhone(data.phone)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "מספר הטלפון אינו תקין",
+      path: ["phone"],
+    });
+  }
+}
+
+/** הסכימה המלאה - צד שרת (route handler). */
+export const checkoutSchema = checkoutObject.superRefine(requireShippingWhenNeeded);
+
+/** סכימת הטופס - ללא quantity ו-idempotencyKey (מתווספים מחוץ לטופס). */
+export const checkoutFormSchema = checkoutObject
+  .omit({ idempotencyKey: true, quantity: true })
+  .superRefine(requireShippingWhenNeeded);
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

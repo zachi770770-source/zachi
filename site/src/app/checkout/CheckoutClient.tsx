@@ -4,6 +4,7 @@ import * as React from "react";
 import { AlertCircle } from "lucide-react";
 
 import { calculateOrderTotals } from "@/lib/pricing";
+import type { ProductFormat } from "@/lib/pricing";
 import { siteConfig } from "@/config/site";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
@@ -11,16 +12,18 @@ import { QuantitySelector } from "@/components/purchase/QuantitySelector";
 
 export function CheckoutClient({
   initialQuantity,
+  initialFormat,
   paymentFailed = false,
 }: {
   initialQuantity: number;
+  initialFormat: ProductFormat;
   paymentFailed?: boolean;
 }) {
   const [quantity, setQuantity] = React.useState(
     Math.min(Math.max(initialQuantity, 1), 20)
   );
 
-  const totals = calculateOrderTotals(quantity);
+  const totals = calculateOrderTotals(quantity, initialFormat);
 
   if (siteConfig.commerce.availability === "out_of_stock") {
     return (
@@ -48,7 +51,7 @@ export function CheckoutClient({
         <div className="rounded-lg border border-border bg-surface p-5">
           <QuantitySelector value={quantity} onChange={setQuantity} />
         </div>
-        <CheckoutForm quantity={quantity} />
+        <CheckoutForm quantity={quantity} format={initialFormat} />
       </div>
 
       <div className="order-1 lg:order-2">

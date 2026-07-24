@@ -76,7 +76,7 @@ export const bigIdea = {
 };
 
 export const method = {
-  title: "שלושה שלבים, לא שלושה עשר פרקים",
+  title: "שלושה שלבים שהופכים חיפוש אקראי לבנייה מכוונת",
   description: "השיטה שבספר בנויה כמסלול קצר וקל לזכור.",
   linkLabel: "ראו מה מחכה לכם בתוך הספר",
   steps: [

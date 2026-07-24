@@ -9,7 +9,8 @@ import { z } from "zod";
 import { Loader2, AlertCircle } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
-import { checkoutSchema } from "@/lib/validation/checkout";
+import { checkoutFormSchema } from "@/lib/validation/checkout";
+import type { ProductFormat } from "@/lib/pricing";
 import { trackEvent } from "@/lib/analytics";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,8 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
-const formSchema = checkoutSchema.omit({ idempotencyKey: true, quantity: true });
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof checkoutFormSchema>;
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -29,10 +29,18 @@ function FieldError({ message }: { message?: string }) {
   );
 }
 
-export function CheckoutForm({ quantity }: { quantity: number }) {
+export function CheckoutForm({
+  quantity,
+  format,
+}: {
+  quantity: number;
+  format: ProductFormat;
+}) {
   const router = useRouter();
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const idempotencyKeyRef = React.useRef<string>("");
+
+  const requiresShipping = siteConfig.products.formats[format].requiresShipping;
 
   React.useEffect(() => {
     idempotencyKeyRef.current = crypto.randomUUID();
@@ -44,20 +52,25 @@ export function CheckoutForm({ quantity }: { quantity: number }) {
     control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(checkoutFormSchema),
     defaultValues: {
+      format,
       marketingConsent: false,
+      giftDedication: "",
+      phone: "",
+      city: "",
+      street: "",
+      houseNumber: "",
       apartment: "",
       zip: "",
       courierNotes: "",
-      giftDedication: "",
     },
   });
 
   const onSubmit = React.useCallback(
     async (values: FormValues) => {
       setSubmitError(null);
-      trackEvent("begin_checkout", { quantity });
+      trackEvent("begin_checkout", { quantity, format });
 
       if (!idempotencyKeyRef.current) {
         idempotencyKeyRef.current = crypto.randomUUID();
@@ -69,6 +82,7 @@ export function CheckoutForm({ quantity }: { quantity: number }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...values,
+            format,
             quantity,
             idempotencyKey: idempotencyKeyRef.current,
           }),
@@ -90,7 +104,7 @@ export function CheckoutForm({ quantity }: { quantity: number }) {
         setSubmitError("בעיית תקשורת. בדקו את החיבור לאינטרנט ונסו שוב.");
       }
     },
-    [quantity, router]
+    [quantity, format, router]
   );
 
   const onFormSubmit = React.useCallback(
@@ -110,8 +124,22 @@ export function CheckoutForm({ quantity }: { quantity: number }) {
         </div>
       ) : null}
 
+      <input type="hidden" {...register("format")} />
+
+      {requiresShipping ? (
+        <div className="rounded-xl bg-surface-muted p-4 text-[14px] leading-relaxed text-foreground-muted">
+          בחרתם מהדורה מודפסת. נזדקק לפרטי המשלוח שלכם וכן לכתובת מייל
+          למעקב אחר ההזמנה.
+        </div>
+      ) : (
+        <div className="rounded-xl bg-surface-muted p-4 text-[14px] leading-relaxed text-foreground-muted">
+          זוהי מהדורה דיגיטלית. אנחנו צריכים רק שם וכתובת מייל — הגישה
+          לספר תישלח לכתובת שתזינו כאן. אין צורך בכתובת למשלוח.
+        </div>
+      )}
+
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="sm:col-span-2">
+        <div>
           <Label htmlFor="fullName">שם מלא</Label>
           <Input
             id="fullName"
@@ -123,19 +151,9 @@ export function CheckoutForm({ quantity }: { quantity: number }) {
         </div>
 
         <div>
-          <Label htmlFor="phone">טלפון</Label>
-          <Input
-            id="phone"
-            type="tel"
-            autoComplete="tel"
-            aria-invalid={!!errors.phone}
-            {...register("phone")}
-          />
-          <FieldError message={errors.phone?.message} />
-        </div>
-
-        <div>
-          <Label htmlFor="email">אימייל</Label>
+          <Label htmlFor="email">
+            אימייל {requiresShipping ? "(למעקב אחר ההזמנה)" : "(לקבלת הגישה)"}
+          </Label>
           <Input
             id="email"
             type="email"
@@ -146,53 +164,75 @@ export function CheckoutForm({ quantity }: { quantity: number }) {
           <FieldError message={errors.email?.message} />
         </div>
 
-        <div className="sm:col-span-2">
-          <Label htmlFor="city">יישוב</Label>
-          <Input
-            id="city"
-            autoComplete="address-level2"
-            aria-invalid={!!errors.city}
-            {...register("city")}
-          />
-          <FieldError message={errors.city?.message} />
-        </div>
+        {requiresShipping ? (
+          <>
+            <div>
+              <Label htmlFor="phone">טלפון</Label>
+              <Input
+                id="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                aria-invalid={!!errors.phone}
+                {...register("phone")}
+              />
+              <FieldError message={errors.phone?.message} />
+            </div>
 
-        <div>
-          <Label htmlFor="street">רחוב</Label>
-          <Input
-            id="street"
-            autoComplete="address-line1"
-            aria-invalid={!!errors.street}
-            {...register("street")}
-          />
-          <FieldError message={errors.street?.message} />
-        </div>
+            <div>
+              <Label htmlFor="city">יישוב</Label>
+              <Input
+                id="city"
+                autoComplete="address-level2"
+                aria-invalid={!!errors.city}
+                {...register("city")}
+              />
+              <FieldError message={errors.city?.message} />
+            </div>
 
-        <div className="grid grid-cols-2 gap-5">
-          <div>
-            <Label htmlFor="houseNumber">מספר בית</Label>
-            <Input
-              id="houseNumber"
-              aria-invalid={!!errors.houseNumber}
-              {...register("houseNumber")}
-            />
-            <FieldError message={errors.houseNumber?.message} />
-          </div>
-          <div>
-            <Label htmlFor="apartment">דירה (אופציונלי)</Label>
-            <Input id="apartment" {...register("apartment")} />
-          </div>
-        </div>
+            <div>
+              <Label htmlFor="street">רחוב</Label>
+              <Input
+                id="street"
+                autoComplete="address-line1"
+                aria-invalid={!!errors.street}
+                {...register("street")}
+              />
+              <FieldError message={errors.street?.message} />
+            </div>
 
-        <div>
-          <Label htmlFor="zip">מיקוד (אופציונלי)</Label>
-          <Input id="zip" autoComplete="postal-code" {...register("zip")} />
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="houseNumber">מספר בית</Label>
+                <Input
+                  id="houseNumber"
+                  aria-invalid={!!errors.houseNumber}
+                  {...register("houseNumber")}
+                />
+                <FieldError message={errors.houseNumber?.message} />
+              </div>
+              <div>
+                <Label htmlFor="apartment">דירה (אופציונלי)</Label>
+                <Input id="apartment" {...register("apartment")} />
+              </div>
+            </div>
 
-        <div className="sm:col-span-2">
-          <Label htmlFor="courierNotes">הערות לשליח (אופציונלי)</Label>
-          <Textarea id="courierNotes" rows={3} {...register("courierNotes")} />
-        </div>
+            <div>
+              <Label htmlFor="zip">מיקוד (אופציונלי)</Label>
+              <Input
+                id="zip"
+                autoComplete="postal-code"
+                inputMode="numeric"
+                {...register("zip")}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label htmlFor="courierNotes">הערות לשליח (אופציונלי)</Label>
+              <Textarea id="courierNotes" rows={2} {...register("courierNotes")} />
+            </div>
+          </>
+        ) : null}
 
         {siteConfig.commerce.giftDedicationEnabled ? (
           <div className="sm:col-span-2">

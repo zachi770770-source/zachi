@@ -34,23 +34,23 @@ export class PostgresOrderRepository implements OrderRepository {
 
     const { rows } = await this.db.query<Order>(
       `insert into orders (
-         customer_name, phone, email, shipping_address, items,
-         subtotal, shipping, discount, total, currency,
+         customer_name, email, format, items,
+         subtotal, discount, shipping, total, currency, shipping_address,
          payment_provider, idempotency_key, marketing_consent, notes, gift_dedication,
          payment_status, fulfillment_status
        ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'pending','unfulfilled')
        returning *`,
       [
         input.customerName,
-        input.phone,
         input.email,
-        JSON.stringify(input.shippingAddress),
+        input.format,
         JSON.stringify(input.items),
         input.subtotal,
-        input.shipping,
         input.discount,
+        input.shipping,
         input.total,
         input.currency,
+        input.shippingAddress ? JSON.stringify(input.shippingAddress) : null,
         input.paymentProvider,
         input.idempotencyKey,
         input.marketingConsent,

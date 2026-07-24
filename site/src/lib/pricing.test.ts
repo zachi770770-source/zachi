@@ -4,18 +4,24 @@ import { calculateOrderTotals, formatPrice } from "@/lib/pricing";
 import { siteConfig } from "@/config/site";
 
 describe("calculateOrderTotals", () => {
-  it("computes subtotal, shipping and total for a single copy", () => {
+  it("computes subtotal and total for a single copy (digital, no shipping)", () => {
     const totals = calculateOrderTotals(1);
+    expect(totals.format).toBe("digital");
     expect(totals.quantity).toBe(1);
     expect(totals.unitPrice).toBe(siteConfig.commerce.price);
     expect(totals.subtotal).toBe(siteConfig.commerce.price);
-    expect(totals.shipping).toBe(siteConfig.commerce.shippingFlatRate);
-    expect(totals.total).toBe(totals.subtotal + totals.shipping);
+    expect(totals.shipping).toBe(0);
+    expect(totals.total).toBe(totals.subtotal - totals.discount + totals.shipping);
   });
 
   it("multiplies subtotal by quantity", () => {
     const totals = calculateOrderTotals(3);
     expect(totals.subtotal).toBe(siteConfig.commerce.price * 3);
+  });
+
+  it("adds no shipping cost while the physical rate is unset (never invents a price)", () => {
+    const totals = calculateOrderTotals(1, "physical");
+    expect(totals.shipping).toBe(0);
   });
 
   it("clamps quantity to a minimum of 1", () => {

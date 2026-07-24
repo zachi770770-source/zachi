@@ -4,24 +4,30 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Truck, Package, BadgeInfo } from "lucide-react";
+import { FileText, Download, Smartphone, Package, BadgeInfo } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { calculateOrderTotals, formatPrice } from "@/lib/pricing";
+import type { ProductFormat } from "@/lib/pricing";
 import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { QuantitySelector } from "@/components/purchase/QuantitySelector";
+import { FormatSelector } from "@/components/purchase/FormatSelector";
 
 export function PurchaseCard() {
   const router = useRouter();
+  const [format, setFormat] = React.useState<ProductFormat>(
+    siteConfig.products.defaultFormat
+  );
   const [quantity, setQuantity] = React.useState(1);
-  const totals = calculateOrderTotals(quantity);
+  const totals = calculateOrderTotals(quantity, format);
   const demo = siteConfig.isPaymentDemoMode;
+  const isDigital = format === "digital";
 
   function handleBuy() {
-    trackEvent("add_to_cart", { quantity });
-    router.push(`/checkout?quantity=${quantity}`);
+    trackEvent("add_to_cart", { quantity, format });
+    router.push(`/checkout?quantity=${quantity}&format=${format}`);
   }
 
   return (
@@ -35,15 +41,18 @@ export function PurchaseCard() {
           <div>
             <h3 className="text-2xl font-bold">{siteConfig.bookTitle}</h3>
             <p className="mt-1 text-[15px] text-foreground-muted">
-              ספר מודפס, כריכה רכה
+              זמין כמהדורה דיגיטלית — מהדורה מודפסת בקרוב
             </p>
           </div>
 
+          <FormatSelector value={format} onChange={setFormat} />
+
           <div className="flex items-baseline gap-2">
             <span className="type-quote text-4xl font-semibold text-brand-hover">
-              {formatPrice(siteConfig.commerce.price)}
+              {formatPrice(totals.unitPrice)}
             </span>
-            {siteConfig.commerce.showCompareAtPrice &&
+            {isDigital &&
+            siteConfig.commerce.showCompareAtPrice &&
             siteConfig.commerce.compareAtPrice ? (
               <span className="text-base text-foreground-muted line-through">
                 {formatPrice(siteConfig.commerce.compareAtPrice)}
@@ -52,28 +61,40 @@ export function PurchaseCard() {
             <span className="text-[15px] text-foreground-muted">לעותק</span>
           </div>
 
-          <ul className="flex flex-col gap-2.5 text-[15px] text-foreground-muted">
-            <li className="flex items-center gap-2.5">
-              <Package className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-              {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice
-                ? "כולל חוברת עבודה דיגיטלית"
-                : "הספר המודפס בלבד"}
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Truck className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-              משלוח {formatPrice(siteConfig.commerce.shippingFlatRate)} · אספקה
-              משוערת {siteConfig.commerce.estimatedDeliveryText}
-            </li>
-            {demo ? (
+          {isDigital ? (
+            <ul className="flex flex-col gap-2.5 text-[15px] text-foreground-muted">
               <li className="flex items-center gap-2.5">
-                <BadgeInfo
-                  className="h-[18px] w-[18px] text-brand"
-                  aria-hidden="true"
-                />
-                מצב הדגמה · התשלום אינו פעיל עדיין
+                <FileText className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+                ספר דיגיטלי
+                {siteConfig.digital.formatsConfirmed
+                  ? ` · ${siteConfig.digital.formats.join(" + ")}`
+                  : ""}
               </li>
-            ) : null}
-          </ul>
+              <li className="flex items-center gap-2.5">
+                <Download className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+                {siteConfig.digital.deliveryMethod}
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+                קריאה ב{siteConfig.digital.devices}
+              </li>
+              {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice ? (
+                <li className="flex items-center gap-2.5">
+                  <Package className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+                  כולל חוברת עבודה דיגיטלית
+                </li>
+              ) : null}
+              {demo ? (
+                <li className="flex items-center gap-2.5">
+                  <BadgeInfo
+                    className="h-[18px] w-[18px] text-brand"
+                    aria-hidden="true"
+                  />
+                  מצב הדגמה · התשלום אינו פעיל עדיין
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
 
           <Separator />
 
@@ -89,15 +110,14 @@ export function PurchaseCard() {
           </Button>
 
           <p className="text-[13px] leading-relaxed text-foreground-muted">
-            {demo
-              ? "מצב הדגמה: לא תתבצע חיוב בפועל. "
-              : null}
-            לפרטי משלוח, ביטולים והחזרות ראו{" "}
+            {demo ? "מצב הדגמה: לא יתבצע חיוב בפועל. " : null}
+            לאחר תשלום מאובטח נשלח אליכם את הגישה למהדורה הדיגיטלית במייל.
+            למדיניות המוצר, ביטולים והחזרים ראו{" "}
             <Link
               href="/shipping-returns"
               className="text-brand-hover underline underline-offset-2 hover:text-foreground"
             >
-              מדיניות משלוחים והחזרות
+              מדיניות מוצר, משלוחים וביטולים
             </Link>
             .
           </p>

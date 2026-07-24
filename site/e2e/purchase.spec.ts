@@ -19,14 +19,11 @@ test.describe("מסלול רכישה בסיסי", () => {
       .getByRole("button", { name: /לרכישה/ })
       .click();
 
-    await expect(page).toHaveURL(/\/checkout\?quantity=2/);
+    await expect(page).toHaveURL(/\/checkout\?quantity=2&format=digital/);
 
+    // מהדורה דיגיטלית - נדרשים שם ואימייל בלבד, ללא פרטי משלוח.
     await page.getByLabel("שם מלא").fill("ישראל ישראלי");
-    await page.getByLabel("טלפון").fill("0501234567");
-    await page.getByLabel("אימייל").fill("test@example.com");
-    await page.getByLabel("יישוב").fill("תל אביב");
-    await page.getByLabel("רחוב").fill("הרצל");
-    await page.getByLabel("מספר בית").fill("10");
+    await page.getByLabel(/אימייל/).fill("test@example.com");
     await page.getByLabel(/קראתי ואני מסכים/).click();
 
     await page.getByRole("button", { name: "מעבר לתשלום" }).click();

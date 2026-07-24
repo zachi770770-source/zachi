@@ -1,13 +1,13 @@
-import { ShieldCheck, Truck, BookOpenCheck, UserRoundCheck } from "lucide-react";
+import { ShieldCheck, Download, Smartphone, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 
 const ICONS: Record<string, LucideIcon> = {
   "secure-payment": ShieldCheck,
-  shipping: Truck,
-  workbook: BookOpenCheck,
-  guest: UserRoundCheck,
+  download: Download,
+  devices: Smartphone,
+  guest: Sparkles,
 };
 
 export function TrustBar({ className }: { className?: string }) {
@@ -29,7 +29,7 @@ export function TrustBar({ className }: { className?: string }) {
       }
     >
       {items.map((item, index) => {
-        const Icon = ICONS[item.id] ?? BookOpenCheck;
+        const Icon = ICONS[item.id] ?? ShieldCheck;
         return (
           <li key={item.id} className="flex items-center gap-2">
             {index > 0 ? (
