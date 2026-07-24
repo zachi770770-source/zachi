@@ -4,7 +4,7 @@
  */
 
 export const hero = {
-  eyebrow: "מדריך מעשי לדייטינג ולזוגיות",
+  eyebrow: "מדריך מעשי לדייטינג, לבחירה ולזוגיות",
   headlineTop: "להפסיק לחפש.",
   headlineBottom: "להתחיל לבנות.",
   title: "מדייטים לאהבה",

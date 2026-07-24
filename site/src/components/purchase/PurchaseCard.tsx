@@ -65,8 +65,8 @@ export function PurchaseCard() {
             ) : null}
           </ul>
 
-          <Button size="lg" disabled aria-disabled="true" className="h-14 w-full text-[17px]">
-            המכירה תיפתח בקרוב
+          <Button asChild size="lg" className="h-14 w-full text-[17px]">
+            <Link href="/preview">לקריאת טעימה מהספר</Link>
           </Button>
 
           <p className="text-[13px] leading-relaxed text-foreground-muted">

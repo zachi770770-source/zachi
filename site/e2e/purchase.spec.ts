@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Pre-launch: המכירה סגורה", () => {
-  test("אין כפתור רכישה פעיל, /checkout חסום, ו-API יוצר-הזמנה מחזיר 403", async ({
+test.describe("Pre-launch: המכירה סגורה, טעימה היא הפעולה הראשית", () => {
+  test("Hero מוביל לטעימה, אין רכישה פעילה, /checkout חסום, API יוצר-הזמנה מחזיר 403", async ({
     page,
     request,
   }) => {
@@ -10,12 +10,13 @@ test.describe("Pre-launch: המכירה סגורה", () => {
       "בונים אותה"
     );
 
-    // ה-CTA אינו מטעה: כפתור "המכירה תיפתח בקרוב" (מושבת), לא קישור לתשלום.
+    // הפעולה הראשית ב-Hero: קריאת טעימה (פעילה). אין כפתור רכישה disabled.
     await expect(
-      page.getByRole("button", { name: "המכירה תיפתח בקרוב" }).first()
+      page.getByRole("link", { name: "לקריאת טעימה מהספר" }).first()
     ).toBeVisible();
+    await expect(page.getByText("המכירה נפתחת בקרוב").first()).toBeVisible();
 
-    // /checkout מציג עמוד "המכירה עדיין לא נפתחה", ללא טופס.
+    // /checkout מציג "המכירה עדיין לא נפתחה", ללא טופס הזמנה/תשלום.
     await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
     await expect(
       page.getByRole("heading", { name: "המכירה עדיין לא נפתחה" })

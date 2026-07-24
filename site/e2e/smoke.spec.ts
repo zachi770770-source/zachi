@@ -134,7 +134,7 @@ test("newsletter form submits successfully", async ({ page }) => {
   await expect(page.getByText("נרשמתם בהצלחה")).toBeVisible();
 });
 
-test("checkout is closed during pre-launch (no form, no payment)", async ({
+test("checkout closed shows waitlist, not an order/payment form", async ({
   page,
 }) => {
   await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
@@ -142,9 +142,13 @@ test("checkout is closed during pre-launch (no form, no payment)", async ({
   await expect(
     page.getByRole("heading", { name: "המכירה עדיין לא נפתחה" })
   ).toBeVisible();
-  // אין טופס וללא הדגמת תשלום.
+  // אין טופס הזמנה/תשלום.
   await expect(page.getByLabel("שם מלא")).toHaveCount(0);
-  await expect(page.getByLabel(/אימייל/)).toHaveCount(0);
+  // יש רשימת המתנה: שדה אימייל + כפתור הרשמה.
+  await expect(page.getByLabel("כתובת אימייל")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" })
+  ).toBeVisible();
 });
 
 test("sitemap, robots and manifest are served correctly", async ({ request }) => {

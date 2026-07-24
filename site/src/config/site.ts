@@ -237,14 +237,17 @@ export const siteConfig = {
   isPaymentDemoMode: (process.env.PAYMENT_PROVIDER ?? "mock") === "mock",
 
   /**
-   * מצב Pre-launch: האתר ציבורי אך המכירה סגורה. כל עוד false — אי אפשר
-   * ליצור הזמנה, לבצע תשלום (גם לא Mock) או להגיע ל-checkout; ה-CTA מציג
-   * "המכירה תיפתח בקרוב". יש להפוך ל-true רק לאחר חיבור כריכה סופית, קובץ
-   * ספר, סליקה אמיתית ו-fulfillment מלא.
+   * מכירה פעילה — נשלט ממשתנה הסביבה השרתי SALES_ENABLED. כל עוד false:
+   * אי אפשר ליצור הזמנה, לבצע תשלום (גם לא Mock) או להגיע ל-checkout,
+   * והאתר במצב Pre-launch. יש להפוך ל-true רק לאחר חיבור כריכה סופית,
+   * קובץ ספר, סליקה אמיתית ו-fulfillment מלא (כולל DATABASE_URL).
    */
-  salesOpen: false,
+  salesOpen: process.env.SALES_ENABLED === "true",
 
-  /** תווית מחיר לתקופת ה-Pre-launch. */
+  /** שורת סטטוס ל-Hero בתקופת ה-Pre-launch (אינה כפתור). */
+  preLaunchStatusLine: "המכירה נפתחת בקרוב · הספר הדיגיטלי 98 ₪",
+
+  /** תווית מחיר לכרטיס הרכישה בתקופת ה-Pre-launch. */
   preLaunchPriceLabel: "בקרוב — הספר הדיגיטלי ב-98 ₪",
 } as const;
 

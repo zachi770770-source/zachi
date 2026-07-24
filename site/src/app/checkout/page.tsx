@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
-import { Button } from "@/components/ui/button";
+import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { CheckoutClient } from "@/app/checkout/CheckoutClient";
 
 export const metadata: Metadata = {
@@ -22,21 +22,34 @@ export default async function CheckoutPage({
 }: {
   searchParams: Promise<{ quantity?: string; payment?: string; format?: string }>;
 }) {
-  // מצב Pre-launch: המכירה סגורה — אין טופס ואין הדגמת תשלום.
+  // מצב Pre-launch: המכירה סגורה — אין טופס תשלום/הזמנה, רק רשימת המתנה.
   if (!siteConfig.salesOpen) {
     return (
-      <Container className="flex min-h-[60svh] flex-col items-center justify-center py-16 text-center">
-        <span className="kicker justify-center">טרום-השקה</span>
-        <h1 className="type-h2 mt-4 max-w-[20ch] text-foreground">
-          המכירה עדיין לא נפתחה
-        </h1>
-        <p className="mt-5 max-w-[48ch] text-[18px] leading-relaxed text-foreground-muted">
-          אנחנו בשלבי ההשקה האחרונים. עם פתיחת המכירה תתאפשר רכישה מאובטחת של
-          המהדורה הדיגיטלית של {siteConfig.bookTitle}.
-        </p>
-        <Button asChild size="lg" className="mt-8 h-14 px-8 text-[17px]">
-          <Link href="/">חזרה לעמוד הבית</Link>
-        </Button>
+      <Container className="flex flex-col items-center py-16 sm:py-20">
+        <div className="w-full max-w-md text-center">
+          <span className="kicker justify-center">טרום-השקה</span>
+          <h1 className="type-h2 mt-4 text-foreground">המכירה עדיין לא נפתחה</h1>
+          <p className="mt-5 text-[18px] leading-relaxed text-foreground-muted">
+            השאירו אימייל ונעדכן אתכם ראשונים כשהמהדורה הדיגיטלית תיפתח לרכישה.
+          </p>
+          <div className="mt-8 text-start">
+            <WaitlistForm source="checkout_closed" />
+          </div>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <Link
+              href="/preview"
+              className="text-[16px] font-semibold text-brand-hover underline underline-offset-4 hover:text-foreground"
+            >
+              לקריאת טעימה מהספר
+            </Link>
+            <Link
+              href="/"
+              className="text-[14px] text-foreground-muted underline underline-offset-4 hover:text-foreground"
+            >
+              חזרה לעמוד הבית
+            </Link>
+          </div>
+        </div>
       </Container>
     );
   }
