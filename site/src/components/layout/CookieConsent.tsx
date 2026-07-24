@@ -82,9 +82,10 @@ export function CookieConsent() {
       <div
         role="region"
         aria-label="הסכמה לשימוש בעוגיות"
-        className="fixed inset-x-3 bottom-3 z-50 max-h-[40vh] overflow-y-auto rounded-2xl border border-border bg-surface p-4 shadow-[0_20px_50px_-24px_rgba(34,38,43,0.5)] sm:inset-x-auto sm:bottom-5 sm:start-5 sm:w-[440px] sm:max-w-[calc(100vw-2.5rem)]"
+        className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-3 sm:pb-5"
       >
-        <p className="text-[13.5px] leading-relaxed text-foreground-muted">
+        <div className="mx-auto flex max-h-[46vh] w-full max-w-3xl flex-col gap-3 overflow-y-auto rounded-2xl border border-border-strong bg-surface/95 p-4 shadow-[0_24px_60px_-24px_rgba(34,38,43,0.55)] backdrop-blur sm:flex-row sm:items-center sm:gap-5 sm:p-5">
+        <p className="text-[13.5px] leading-relaxed text-foreground-muted sm:flex-1">
           אנו משתמשים בעוגיות כדי לשפר את החוויה. עוגיות הכרחיות תמיד פעילות,
           נוספות רק לאחר אישורכם.{" "}
           <a
@@ -94,7 +95,7 @@ export function CookieConsent() {
             מדיניות פרטיות
           </a>
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 sm:shrink-0">
           <Button size="sm" onClick={acceptAll}>
             אישור הכל
           </Button>
@@ -114,6 +115,7 @@ export function CookieConsent() {
           >
             ניהול
           </Button>
+        </div>
         </div>
       </div>
 

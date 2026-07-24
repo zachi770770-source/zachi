@@ -12,17 +12,27 @@ export function ThesisSection() {
   return (
     <section
       id="thesis"
-      className="texture-dots scroll-mt-20 bg-foreground py-24 text-background sm:py-32"
+      className="relative scroll-mt-20 bg-foreground text-background"
       aria-labelledby="thesis-heading"
     >
+      {/* מעבר רך מהרקע הבהיר של ה-Hero אל אזור הפחם */}
+      <div
+        aria-hidden="true"
+        className="h-16 w-full bg-gradient-to-b from-background to-foreground sm:h-24"
+      />
+
+      <div className="texture-dots pb-24 pt-8 sm:pb-32 sm:pt-12">
       <Container>
         <Reveal className="mx-auto max-w-3xl text-center">
+          <span className="mx-auto mb-5 flex h-9 w-9 items-center justify-center rounded-full border border-brand/40 bg-brand/[0.12]">
+            <span className="h-2 w-2 rounded-full bg-brand" aria-hidden="true" />
+          </span>
           <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-foreground/70">
             הרעיון המרכזי
           </span>
           <h2
             id="thesis-heading"
-            className="type-quote mt-6 text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.08] text-background"
+            className="type-quote mt-5 text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.08] text-background"
           >
             דייטינג הוא חיפוש.
             <br />
@@ -75,6 +85,7 @@ export function ThesisSection() {
           })}
         </Reveal>
       </Container>
+      </div>
     </section>
   );
 }

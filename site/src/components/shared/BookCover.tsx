@@ -22,8 +22,8 @@ export function BookCover({
         <Image
           src={siteConfig.images.mockup3d}
           alt={siteConfig.images.mockup3dAlt}
-          width={640}
-          height={900}
+          width={620}
+          height={930}
           priority={priority}
           unoptimized
           className="book-cover__img"

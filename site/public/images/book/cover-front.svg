@@ -1,13 +1,48 @@
-<svg width="600" height="900" viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="עטיפת הספר מדייטים לאהבה">
-  <rect width="600" height="900" fill="#f6f1e8"/>
-  <!-- מוטיב: שני חצאי-טבעת שנפגשים עם רווח קטן — מחיפוש לבנייה -->
-  <g fill="none" stroke-width="15" stroke-linecap="round">
-    <path d="M 306 182 A 68 68 0 0 1 306 318" stroke="#22262b"/>
-    <path d="M 294 182 A 68 68 0 0 0 294 318" stroke="#a65c3e"/>
+<svg width="620" height="930" viewBox="0 0 620 930" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="עטיפת הספר מדייטים לאהבה">
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#252a30"/>
+      <stop offset="0.55" stop-color="#1f2429"/>
+      <stop offset="1" stop-color="#171b1f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.34" r="0.62">
+      <stop offset="0" stop-color="#a65c3e" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#a65c3e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arcWarm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e08a5f"/>
+      <stop offset="1" stop-color="#b25f3d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- קרקע -->
+  <rect x="0" y="0" width="620" height="930" rx="9" fill="url(#ground)"/>
+  <rect x="0" y="0" width="620" height="930" rx="9" fill="url(#glow)"/>
+
+  <!-- קו מסגרת עדין -->
+  <rect x="30" y="30" width="560" height="870" rx="4" fill="none" stroke="#a65c3e" stroke-opacity="0.34" stroke-width="1.5"/>
+
+  <!-- כותרת עליונה -->
+  <text x="310" y="132" text-anchor="middle" fill="#e9dfce" fill-opacity="0.62" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="21" font-weight="600" letter-spacing="6">מדריך מעשי · דייטינג וזוגיות</text>
+
+  <!-- אמבלם: מעגל משני חצאים — מחיפוש (פתוח) לבנייה (נסגר) -->
+  <g transform="translate(310,332)">
+    <circle r="118" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1.5"/>
+    <g fill="none" stroke-width="22" stroke-linecap="round">
+      <path d="M 8 -96 A 96 96 0 0 0 8 96" stroke="#efe7d8" stroke-opacity="0.9"/>
+      <path d="M -8 -96 A 96 96 0 0 1 -8 96" stroke="url(#arcWarm)"/>
+    </g>
+    <circle cx="0" cy="-96" r="9" fill="#e9dfce"/>
+    <circle cx="0" cy="96" r="9" fill="#e08a5f"/>
   </g>
-  <text x="300" y="452" text-anchor="middle" fill="#22262b" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="80" font-weight="800" letter-spacing="-2">מדייטים</text>
-  <text x="300" y="540" text-anchor="middle" fill="#22262b" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="80" font-weight="800" letter-spacing="-2">לאהבה</text>
-  <line x1="238" y1="588" x2="362" y2="588" stroke="#c9bda6" stroke-width="2"/>
-  <text x="300" y="632" text-anchor="middle" fill="#5c5f5c" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="23" font-weight="500">דייטינג הוא חיפוש. אהבה היא בנייה.</text>
-  <text x="300" y="822" text-anchor="middle" fill="#8a8272" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="500" letter-spacing="3">מדריך מעשי לדייטינג ולזוגיות</text>
+
+  <!-- כותרת ראשית -->
+  <text x="310" y="588" text-anchor="middle" fill="#f6efe3" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="104" font-weight="800" letter-spacing="-3">מדייטים</text>
+  <text x="310" y="694" text-anchor="middle" fill="#f6efe3" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="104" font-weight="800" letter-spacing="-3">לאהבה</text>
+
+  <!-- מפריד -->
+  <line x1="262" y1="742" x2="358" y2="742" stroke="#a65c3e" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- תת-כותרת / תזה -->
+  <text x="310" y="798" text-anchor="middle" fill="#d8cebc" fill-opacity="0.82" font-family="Heebo, 'Segoe UI', Arial, sans-serif" font-size="28" font-weight="500">דייטינג הוא חיפוש. אהבה היא בנייה.</text>
 </svg>
