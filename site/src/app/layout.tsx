@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Heebo, Noto_Serif_Hebrew } from "next/font/google";
+import { Heebo, Frank_Ruhl_Libre } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import { Header } from "@/components/layout/Header";
@@ -20,10 +20,10 @@ const bodyFont = Heebo({
   display: "swap",
 });
 
-const quoteFont = Noto_Serif_Hebrew({
+const quoteFont = Frank_Ruhl_Libre({
   variable: "--font-quote",
   subsets: ["hebrew", "latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "700", "800", "900"],
   display: "swap",
 });
 

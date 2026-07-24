@@ -82,7 +82,7 @@ export function CookieConsent() {
       <div
         role="region"
         aria-label="הסכמה לשימוש בעוגיות"
-        className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-2.5 sm:px-4 sm:pb-3"
+        className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:px-4"
       >
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-2.5 rounded-xl border border-border-strong bg-surface/92 px-4 py-2.5 shadow-[0_16px_40px_-24px_rgba(34,38,43,0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-4 sm:py-2">
         <p className="text-[13px] leading-snug text-foreground-muted sm:flex-1">

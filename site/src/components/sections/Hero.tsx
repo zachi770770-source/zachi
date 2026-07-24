@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Clock3, ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowDown } from "lucide-react";
 
 import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
@@ -8,92 +8,94 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { SearchToBuild } from "@/components/shared/SearchToBuild";
-import { TrustBar } from "@/components/sections/TrustBar";
 
 /**
- * Hero כ"עמוד שער" של ספר: כותרת רצה על קו מסטהד, כותרת סריף ענקית ברוחב
- * מלא, מוטיב "מחיפוש לבנייה", ומתחת — טור טקסט לצד לוחית העטיפה. שפה
- * עריכתית (קווי שיער, מספור, קפיטלייז) במקום כרטיסים מעוגלים.
+ * Hero — כמעט מסך מלא (100svh). כותרת שער רחבה, "קו הבנייה" (SearchToBuild)
+ * כחתימה, ומתחת: בלוק מוצר (עטיפה + 98 ₪ + CTA) לצד טקסט הסבר. במובייל בלוק
+ * המוצר מופיע ראשון, כך שבמסך הראשון רואים כותרת, ספר, 98 ₪ ו-CTA.
  */
 export function Hero() {
   const digitalPrice = siteConfig.products.formats.digital.price;
+  const priceLabel = digitalPrice != null ? formatPrice(digitalPrice) : "";
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative flex min-h-[100svh] flex-col overflow-hidden">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/60 to-background" />
-        <div className="grain-layer absolute inset-0 opacity-[0.04] mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/50 to-background" />
+        <div className="absolute -top-40 start-[8%] h-[560px] w-[560px] rounded-full bg-brand/[0.07] blur-[120px]" />
       </div>
 
-      <Container className="pt-5 sm:pt-7">
-        {/* קו מסטהד עליון */}
-        <div className="flex items-center justify-between gap-4 border-b border-foreground/15 pb-4">
+      <Container className="flex flex-1 flex-col">
+        {/* קו מסטהד */}
+        <div className="flex items-center justify-between gap-4 border-b border-foreground/12 py-4">
           <span className="kicker">{hero.eyebrow}</span>
-          <span className="hidden text-[12px] uppercase tracking-[0.16em] text-foreground-muted sm:block">
-            מדייטים לאהבה
+          <span className="hidden text-[12px] font-medium uppercase tracking-[0.16em] text-foreground-muted sm:block">
+            מהדורה דיגיטלית · 2026
           </span>
         </div>
 
-        {/* כותרת שער ברוחב מלא */}
-        <h1 className="type-display mt-8 text-foreground sm:mt-10">
-          {hero.headlineTop}
-          <br />
-          <span className="text-brand-hover">{hero.headlineBottom}</span>
-        </h1>
-
-        {/* מוטיב מחיפוש לבנייה על קו שיער מלא-רוחב */}
-        <div className="mt-8 flex items-center gap-5 sm:mt-10">
-          <SearchToBuild className="h-9 w-[220px] shrink-0 text-foreground/70 sm:w-[260px]" />
-          <span className="h-px flex-1 bg-foreground/12" aria-hidden="true" />
+        {/* כותרת שער + קו הבנייה */}
+        <div className="pt-8 sm:pt-10">
+          <h1 className="type-display text-foreground">
+            להפסיק לחפש.
+            <br />
+            <span className="text-brand-hover">להתחיל לבנות.</span>
+          </h1>
+          <div className="mt-7 flex items-center gap-4">
+            <SearchToBuild className="h-8 w-[200px] shrink-0 text-foreground/70 sm:w-[240px]" />
+            <span className="h-px flex-1 bg-foreground/12" aria-hidden="true" />
+          </div>
         </div>
 
-        {/* מתחת לשער: טקסט (ימין) + לוחית עטיפה (שמאל) */}
-        <div className="grid gap-x-14 gap-y-12 pb-16 pt-12 lg:grid-cols-[1fr_minmax(0,22rem)] lg:pb-24">
-          <div className="flex flex-col">
-            <p className="type-lead max-w-[48ch] text-foreground-muted">
+        {/* בלוק מוצר (עטיפה+מחיר+CTA) + טקסט */}
+        <div className="grid flex-1 items-center gap-x-14 gap-y-8 py-6 lg:gap-y-10 lg:py-10 lg:grid-cols-[1fr_minmax(0,23rem)]">
+          {/* טקסט (ימין בדסקטופ, שני במובייל) */}
+          <div className="order-2 lg:order-1">
+            <p className="max-w-[42ch] text-[19px] leading-[1.65] text-foreground-muted sm:text-[20px]">
               {hero.description}
             </p>
+            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-foreground/12 pt-5 text-[14.5px] text-foreground-muted">
+              <span>קובץ דיגיטלי לקריאה ב{siteConfig.digital.devices}</span>
+              <span aria-hidden="true" className="h-1 w-1 rounded-full bg-border-strong" />
+              <span>הגישה נשלחת במייל לאחר התשלום</span>
+            </div>
+          </div>
 
-            <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-              <Button asChild size="lg" className="h-14 px-8 text-base">
-                <Link href="/#purchase">
-                  {hero.primaryCta}
-                  {digitalPrice != null ? ` · ${formatPrice(digitalPrice)}` : ""}
-                </Link>
+          {/* בלוק מוצר (שמאל בדסקטופ, ראשון במובייל). במסך הראשון במובייל
+              רואים ספר, 98 ₪ (בתוך ה-CTA) ו-CTA. */}
+          <div className="order-1 flex flex-col items-center gap-5 lg:order-2 lg:gap-6">
+            <figure className="flex flex-col items-center gap-2">
+              <div className="relative w-[140px] sm:w-[220px] lg:w-[300px]">
+                <div
+                  aria-hidden="true"
+                  className="absolute -bottom-4 start-1/2 h-7 w-[74%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/22 blur-2xl"
+                />
+                <BookCover priority className="w-full" />
+              </div>
+              <figcaption className="text-[11px] uppercase tracking-[0.12em] text-foreground-muted sm:text-[12px]">
+                עטיפה זמנית · הכריכה הסופית בקרוב
+              </figcaption>
+            </figure>
+
+            <div className="flex w-full max-w-[320px] flex-col items-center gap-3">
+              <Button asChild size="lg" className="h-14 w-full px-4 text-[16px] sm:text-[17px]">
+                <Link href="/#purchase">לרכישת הספר הדיגיטלי — {priceLabel}</Link>
               </Button>
               <Link
                 href="/#sample"
-                className="group inline-flex items-center gap-2 text-[15px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                {hero.secondaryCta}
+                לקריאת טעימה
                 <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>
-
-            {/* שתי מהדורות — כשורת מפרט עם קווי הפרדה, לא צ'יפים */}
-            <div className="mt-10 grid grid-cols-1 border-y border-foreground/15 text-[14.5px] sm:grid-cols-2">
-              <div className="flex items-center gap-2.5 border-b border-foreground/10 py-3.5 sm:border-b-0 sm:border-e sm:pe-6">
-                <Check className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-                <span className="font-semibold text-foreground">מהדורה דיגיטלית</span>
-                <span className="text-foreground-muted">— זמינה עכשיו</span>
-              </div>
-              <div className="flex items-center gap-2.5 py-3.5 sm:ps-6">
-                <Clock3 className="h-4 w-4 shrink-0 text-foreground-muted" aria-hidden="true" />
-                <span className="font-semibold text-foreground">מהדורה מודפסת</span>
-                <span className="text-foreground-muted">— בקרוב</span>
-              </div>
-            </div>
-
-            <TrustBar className="mt-7" />
           </div>
+        </div>
 
-          {/* לוחית עטיפה עם כיתוב כן (Placeholder עד שתסופק הכריכה האמיתית) */}
-          <figure className="mx-auto flex w-full max-w-[340px] flex-col items-center gap-4 lg:mx-0 lg:items-start">
-            <BookCover priority className="w-[230px] sm:w-[300px] lg:w-full" />
-            <figcaption className="text-[12px] uppercase tracking-[0.14em] text-foreground-muted">
-              עטיפה לדוגמה · הכריכה הסופית בקרוב
-            </figcaption>
-          </figure>
+        {/* רמז להמשך (סטטי — ללא אנימציה אינסופית) */}
+        <div className="flex items-center justify-center gap-2 pb-6 text-[13px] text-foreground-muted">
+          <ArrowDown className="h-4 w-4 text-brand" aria-hidden="true" />
+          <span>דייטינג הוא חיפוש. אהבה היא בנייה.</span>
         </div>
       </Container>
     </section>

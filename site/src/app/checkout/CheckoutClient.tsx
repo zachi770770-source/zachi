@@ -48,9 +48,11 @@ export function CheckoutClient({
             נשמרו ויש להזין אותם מחדש.
           </div>
         ) : null}
-        <div className="rounded-lg border border-border bg-surface p-5">
-          <QuantitySelector value={quantity} onChange={setQuantity} />
-        </div>
+        {siteConfig.products.formats[initialFormat].requiresShipping ? (
+          <div className="rounded-lg border border-border bg-surface p-5">
+            <QuantitySelector value={quantity} onChange={setQuantity} />
+          </div>
+        ) : null}
         <CheckoutForm quantity={quantity} format={initialFormat} />
       </div>
 

@@ -6,21 +6,24 @@
  * Heebo לכל הממשק והכותרות; Noto Serif Hebrew לציטוט התזה בלבד.
  */
 :root {
-  --color-background: #fbf8f3;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f4efe6;
-  --color-foreground: #22262b;
-  --color-foreground-muted: #5c5f5c;
-  /* פחם חם (אספרסו) — מייצג את שלב ה"חיפוש" במינון מצומצם בלבד. */
+  /* נייר חם — אין שחור קר ואין משטח כהה גדול. */
+  --color-background: #fbf7f0;
+  --color-surface: #fffdf9;
+  --color-surface-muted: #f3eadf;
+  --color-foreground: #2b241f;
+  --color-foreground-muted: #5f574e;
+  /* פחם-אספרסו חם — לאובייקט העטיפה בלבד, לא כמשטח דומיננטי. */
   --color-ink: #2c2319;
 
-  --color-border: #e7e0d4;
-  --color-border-strong: #d6ccbb;
+  --color-border: #e7ddcf;
+  --color-border-strong: #d8cbb6;
 
-  --color-brand: #a65c3e;
-  --color-brand-foreground: #fff9f2;
-  --color-brand-hover: #8a4830;
-  --color-brand-muted: #f2e4db;
+  /* טרקוטה: הגוון עובר AA לבן על מילוי כפתור וגם כאקסנט חם. */
+  --color-brand: #ad5836;
+  --color-brand-foreground: #fffdf9;
+  /* טרקוטה כהה לפעולות/קישורים — עובר AA על קרם. */
+  --color-brand-hover: #8f4626;
+  --color-brand-muted: #f1e2d6;
 
   --color-secondary: #6e7062;
   --color-secondary-foreground: #fff9f2;
@@ -144,6 +147,19 @@
     background: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 1.0625rem; /* 17px רצפת קריאות */
+    line-height: 1.65;
+  }
+
+  /* תחושת נייר כמעט בלתי נראית (≈2%) — לא נקראת כ"טקסטורה". */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
   }
 
   h1,
@@ -188,25 +204,25 @@
    */
   .type-display {
     font-family: var(--font-quote);
-    font-weight: 700;
-    font-size: clamp(3rem, 6.4vw, 5.75rem); /* 48px → 92px */
-    line-height: 1.02;
-    letter-spacing: -0.015em;
+    font-weight: 800;
+    font-size: clamp(2.75rem, 6.5vw, 6rem); /* 44px (מובייל) → 96px (דסקטופ) */
+    line-height: 1;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
   .type-h1 {
     font-family: var(--font-quote);
-    font-weight: 700;
-    font-size: clamp(2.75rem, 5.4vw, 5rem);
-    line-height: 1.04;
-    letter-spacing: -0.015em;
+    font-weight: 800;
+    font-size: clamp(2.75rem, 6.5vw, 6rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
   .type-h2 {
     font-family: var(--font-quote);
     font-weight: 700;
-    font-size: clamp(2.1rem, 3.6vw, 3.4rem); /* 34px → 54px */
-    line-height: 1.1;
+    font-size: clamp(2.125rem, 4.2vw, 4rem); /* 34px (מובייל) → 64px (דסקטופ) */
+    line-height: 1.06;
     letter-spacing: -0.01em;
     text-wrap: balance;
   }

@@ -1,71 +1,21 @@
-import { ArrowLeft, ArrowDown } from "lucide-react";
-
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { BrandMark } from "@/components/shared/BrandMark";
 import { bigIdea } from "@/content/book";
 
 /**
- * "מחיפוש לבנייה" כפריסה עריכתית: דיפטיך המחולק בקו שיער מרכזי, לא בכרטיסים.
- * צד החיפוש מאופק (טקסט וסימנים דהויים), צד הבנייה חם (טרקוטה) — הניגוד
- * הטיפוגרפי עצמו מספר את המעבר, על רקע שמנת חמה.
+ * רגע השיא — סצנה עריכתית אחת אנכית: רעש החיפוש (מילים מפוזרות מהתוכן),
+ * העצירה והתובנה ("דייטינג הוא חיפוש → אהבה היא בנייה"), ואז שלושה עקרונות
+ * בנייה מסודרים. אין דיפטיך ואין כרטיסים. התנועה היא reveal חד-פעמי
+ * (opacity/transform) שהופך לסטטי תחת prefers-reduced-motion.
  */
-type ThesisColumnData = (typeof bigIdea.columns)[number];
 
-function ThesisColumn({
-  col,
-  isBuild,
-}: {
-  col: ThesisColumnData;
-  isBuild: boolean;
-}) {
-  return (
-    <div className={isBuild ? "sm:ps-14" : "sm:pe-14"}>
-      <div className="flex items-baseline gap-3">
-        <span
-          className={
-            "text-[12px] font-semibold uppercase tracking-[0.18em] " +
-            (isBuild ? "text-brand-hover" : "text-foreground-muted")
-          }
-        >
-          {isBuild ? "בנייה" : "חיפוש"}
-        </span>
-        <span className="h-px flex-1 bg-foreground/12" aria-hidden="true" />
-      </div>
-      <h3
-        className={
-          "type-quote mt-4 text-[26px] font-semibold " +
-          (isBuild ? "text-foreground" : "text-foreground/80")
-        }
-      >
-        {col.title}
-      </h3>
-      <ul className="mt-6 flex flex-col divide-y divide-foreground/10">
-        {col.items.map((item) => (
-          <li
-            key={item}
-            className={
-              "flex items-baseline gap-3 py-3 text-[17px] leading-relaxed " +
-              (isBuild ? "text-foreground" : "text-foreground-muted")
-            }
-          >
-            <span
-              aria-hidden="true"
-              className={
-                "mt-2 h-1.5 w-1.5 shrink-0 rounded-full " +
-                (isBuild ? "bg-brand" : "bg-foreground/25")
-              }
-            />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+// מילות "רעש" קצרות — נלקחות מתוך התוכן הקיים (צד החיפוש) בלבד.
+const NOISE = ["בוחנים", "משווים", "עוד התאמה", "מחפשים ודאות", "מה חסר?", "האם זה הוא?", "עוד דייט"];
 
 export function ThesisSection() {
-  const [search, build] = bigIdea.columns;
+  const build = bigIdea.columns[1];
+  const principles = build.items.slice(0, 3);
 
   return (
     <section
@@ -74,61 +24,71 @@ export function ThesisSection() {
       aria-labelledby="thesis-heading"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -bottom-32 start-[-8%] h-[620px] w-[620px] rounded-full bg-brand/[0.10] blur-[130px]" />
-        <div className="grain-layer absolute inset-0 opacity-[0.03] mix-blend-multiply" />
+        <div className="absolute -bottom-32 start-[-8%] h-[560px] w-[560px] rounded-full bg-brand/[0.10] blur-[130px]" />
       </div>
 
       <div className="py-24 sm:py-32">
         <Container>
-          <Reveal className="mx-auto max-w-3xl text-center">
-            <BrandMark className="mx-auto h-10 w-10 text-foreground/85" />
-            <span className="kicker mt-5 justify-center">הרעיון המרכזי</span>
-            <h2
-              id="thesis-heading"
-              className="type-quote mt-5 text-[clamp(2.75rem,6vw,5rem)] font-bold leading-[1.05] text-foreground"
-            >
-              דייטינג הוא חיפוש.
-              <br />
-              <span className="text-brand-hover">אהבה היא בנייה.</span>
-            </h2>
-            <p className="mx-auto mt-8 max-w-[54ch] text-[clamp(1.05rem,1.4vw,1.28rem)] leading-relaxed text-foreground-muted">
-              {bigIdea.clarification}
-            </p>
+          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <Reveal>
+              <BrandMark className="mx-auto h-9 w-9 text-foreground/80" />
+              <span className="kicker mt-5 justify-center">הרעיון המרכזי</span>
+            </Reveal>
+
+            {/* שלב 1 — רעש החיפוש: מילים מפוזרות ומעומעמות */}
+            <Reveal className="mt-10 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3">
+              {NOISE.map((w, i) => (
+                <span
+                  key={w}
+                  className="text-foreground/45"
+                  style={{
+                    fontSize: `${15 + (i % 3) * 4}px`,
+                    transform: `translateY(${(i % 2 === 0 ? -1 : 1) * (4 + (i % 3) * 3)}px)`,
+                  }}
+                >
+                  {w}
+                </span>
+              ))}
+            </Reveal>
+
+            {/* שלב 2 — העצירה והתובנה */}
+            <Reveal className="mt-12">
+              <p className="type-quote text-[clamp(1.75rem,3vw,2.5rem)] font-medium text-foreground/70">
+                דייטינג הוא חיפוש.
+              </p>
+              {/* קו הבנייה — אנכי, מחבר בין החיפוש לבנייה */}
+              <span
+                aria-hidden="true"
+                className="mx-auto my-6 block h-14 w-px bg-gradient-to-b from-foreground/20 to-brand"
+              />
+              <h2
+                id="thesis-heading"
+                className="type-h2 text-brand-hover"
+              >
+                אהבה היא בנייה.
+              </h2>
+            </Reveal>
+
+            <Reveal className="mt-8 max-w-[54ch]">
+              <p className="text-[clamp(1.05rem,1.4vw,1.28rem)] leading-relaxed text-foreground-muted">
+                {bigIdea.clarification}
+              </p>
+            </Reveal>
+          </div>
+
+          {/* שלב 3 — שלושה עקרונות בנייה, מסודרים (לא תיבות) */}
+          <Reveal className="mx-auto mt-16 grid max-w-4xl gap-x-12 gap-y-8 border-t border-foreground/15 pt-12 sm:grid-cols-3">
+            {principles.map((item, i) => (
+              <div key={item} className="flex flex-col gap-3">
+                <span className="type-quote text-3xl font-bold text-brand tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="text-[18px] leading-relaxed text-foreground">{item}</p>
+              </div>
+            ))}
           </Reveal>
 
-          {/* דיפטיך: חיפוש | בנייה, מופרד בקו שיער מרכזי */}
-          <Reveal className="relative mx-auto mt-16 max-w-4xl border-y border-foreground/15 sm:mt-20">
-            <div className="grid gap-y-10 py-10 sm:grid-cols-2 sm:gap-y-0 sm:py-14">
-              <ThesisColumn col={search} isBuild={false} />
-              <ThesisColumn col={build} isBuild={true} />
-            </div>
-
-            {/* קו שיער אנכי + חץ מעבר (דסקטופ) */}
-            <span
-              aria-hidden="true"
-              className="absolute inset-y-10 start-1/2 hidden w-px -translate-x-1/2 bg-foreground/15 sm:block"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute start-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 bg-surface-muted px-2 text-brand sm:block"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </span>
-
-            {/* מפריד + חץ (מובייל) */}
-            <span
-              aria-hidden="true"
-              className="absolute inset-x-8 top-1/2 -translate-y-1/2 border-t border-foreground/15 sm:hidden"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface-muted px-2 py-1 text-brand sm:hidden"
-            >
-              <ArrowDown className="h-5 w-5" />
-            </span>
-          </Reveal>
-
-          <Reveal className="mx-auto mt-10 max-w-2xl text-center">
+          <Reveal className="mx-auto mt-12 max-w-2xl text-center">
             <p className="text-[15px] leading-relaxed text-foreground-muted">
               {bigIdea.caveat}
             </p>

@@ -12,14 +12,13 @@ test.describe("מסלול רכישה בסיסי", () => {
     await page.getByRole("link", { name: "לרכישת הספר" }).first().click();
     await expect(page.locator("#purchase")).toBeInViewport();
 
-    await page.getByRole("radio", { name: /שני עותקים/ }).click();
-
+    // המהדורה הדיגיטלית אינה כמות — אין בורר עותקים.
     await page
       .locator("#purchase")
-      .getByRole("button", { name: /לרכישה/ })
+      .getByRole("button", { name: /לרכישת הספר הדיגיטלי/ })
       .click();
 
-    await expect(page).toHaveURL(/\/checkout\?quantity=2&format=digital/);
+    await expect(page).toHaveURL(/\/checkout\?format=digital/);
 
     // מהדורה דיגיטלית - נדרשים שם ואימייל בלבד, ללא פרטי משלוח.
     await page.getByLabel("שם מלא").fill("ישראל ישראלי");

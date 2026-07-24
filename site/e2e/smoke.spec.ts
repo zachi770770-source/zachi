@@ -142,13 +142,19 @@ test("newsletter form submits successfully", async ({ page }) => {
   await expect(page.getByText("נרשמתם בהצלחה")).toBeVisible();
 });
 
-test("quantity selector on checkout updates the order total", async ({ page }) => {
-  await page.goto("/checkout?quantity=1", { waitUntil: "networkidle" });
-  const summary = page.locator('text=סה"כ לתשלום').locator("..");
-  const totalBefore = await summary.innerText();
+test("digital checkout asks only name + email (no quantity, no address)", async ({
+  page,
+}) => {
+  await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
 
-  await page.getByRole("radio", { name: /שני עותקים/ }).click();
-  await expect(summary).not.toHaveText(totalBefore);
+  // אין בורר כמות ואין שדות משלוח במהדורה דיגיטלית.
+  await expect(page.getByRole("radio", { name: /עותקים/ })).toHaveCount(0);
+  await expect(page.getByLabel("יישוב")).toHaveCount(0);
+  await expect(page.getByLabel("רחוב")).toHaveCount(0);
+
+  // רק שם ואימייל.
+  await expect(page.getByLabel("שם מלא")).toBeVisible();
+  await expect(page.getByLabel(/אימייל/)).toBeVisible();
 });
 
 test("sitemap, robots and manifest are served correctly", async ({ request }) => {
