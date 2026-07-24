@@ -1,0 +1,18 @@
+<svg width="500" height="700" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="עמוד לדוגמה מהספר מדייטים לאהבה">
+  <rect width="500" height="700" fill="#f7f3ec"/>
+  <rect x="0.5" y="0.5" width="499" height="699" fill="none" stroke="#d8cbbe"/>
+  <text x="250" y="60" text-anchor="middle" fill="#a94f3d" font-family="Georgia, serif" font-size="14" letter-spacing="2">חלק שני</text>
+  <text x="250" y="100" text-anchor="middle" fill="#25282b" font-family="Georgia, serif" font-size="26" font-weight="600">עוברים את השער</text>
+  <g fill="#d8cbbe">
+    <rect x="60" y="150" width="360" height="10" rx="3"/>
+    <rect x="60" y="175" width="380" height="10" rx="3"/>
+    <rect x="60" y="200" width="320" height="10" rx="3"/>
+    <rect x="60" y="245" width="380" height="10" rx="3"/>
+    <rect x="60" y="270" width="360" height="10" rx="3"/>
+    <rect x="60" y="295" width="380" height="10" rx="3"/>
+    <rect x="60" y="320" width="300" height="10" rx="3"/>
+    <rect x="60" y="365" width="380" height="10" rx="3"/>
+    <rect x="60" y="390" width="340" height="10" rx="3"/>
+  </g>
+  <text x="250" y="660" text-anchor="middle" fill="#5f625f" font-family="Georgia, serif" font-size="13">64</text>
+</svg>

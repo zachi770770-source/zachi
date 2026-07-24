@@ -1,0 +1,40 @@
+import type { Metadata } from "next";
+
+import { siteConfig } from "@/config/site";
+import { faqItems } from "@/content/faq";
+import { Container } from "@/components/shared/Container";
+import { Faq } from "@/components/faq/Faq";
+import { FaqSchema } from "@/components/schema/FaqSchema";
+import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+
+export const metadata: Metadata = {
+  title: "שאלות נפוצות",
+  description: `כל מה שרציתם לדעת על הספר ${siteConfig.bookTitle}: התאמה, משלוח, תשלום ועוד.`,
+  alternates: { canonical: "/faq" },
+};
+
+export default function FaqPage() {
+  return (
+    <Container className="py-10 sm:py-16">
+      <FaqSchema />
+      <BreadcrumbSchema
+        items={[
+          { name: "בית", path: "/" },
+          { name: "שאלות נפוצות", path: "/faq" },
+        ]}
+      />
+      <div className="mx-auto max-w-2xl">
+        <h1 className="font-serif text-3xl font-semibold sm:text-4xl">
+          שאלות נפוצות
+        </h1>
+        <p className="mt-3 text-lg text-foreground-muted">
+          לפני שרוכשים - כל התשובות במקום אחד.
+        </p>
+
+        <div className="mt-8">
+          <Faq items={faqItems} />
+        </div>
+      </div>
+    </Container>
+  );
+}
