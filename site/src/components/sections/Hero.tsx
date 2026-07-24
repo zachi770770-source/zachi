@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 
 import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
-import { formatPrice } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
@@ -11,12 +10,12 @@ import { TrustBar } from "@/components/sections/TrustBar";
 
 /**
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
- * מיושר אנכית למרכז. יחידת תוכן רציפה אחת, בלי לפזר מרכיבים לגובה המסך.
+ * מיושר אנכית למרכז. יחידת תוכן רציפה אחת.
+ *
+ * מצב Pre-launch: ה-CTA אינו מטעה — "המכירה תיפתח בקרוב", והמחיר מוצג
+ * כ"בקרוב". כאשר salesOpen יהפוך ל-true, יש להחזיר את כפתור הרכישה הפעיל.
  */
 export function Hero() {
-  const digitalPrice = siteConfig.products.formats.digital.price;
-  const priceLabel = digitalPrice != null ? formatPrice(digitalPrice) : "";
-
   return (
     <section className="relative overflow-hidden">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
@@ -31,9 +30,9 @@ export function Hero() {
             <span className="kicker">{hero.eyebrow}</span>
 
             <h1 className="type-display mt-5 text-foreground">
-              להפסיק לחפש.
+              אהבה לא רק מוצאים.
               <br />
-              <span className="text-brand-hover">להתחיל לבנות.</span>
+              <span className="text-brand-hover">בונים אותה.</span>
             </h1>
 
             <p className="mt-4 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted">
@@ -45,9 +44,18 @@ export function Hero() {
               בונים קשר טוב אחרי שפוגשים אדם נכון.
             </p>
 
-            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Button asChild size="lg" className="h-14 px-7 text-[17px]">
-                <Link href="/#purchase">לרכישת הספר — {priceLabel}</Link>
+            <p className="mt-6 text-[16px] font-semibold text-brand-hover">
+              {siteConfig.preLaunchPriceLabel}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Button
+                size="lg"
+                disabled
+                aria-disabled="true"
+                className="h-14 px-7 text-[17px]"
+              >
+                המכירה תיפתח בקרוב
               </Button>
               <Link
                 href="/#sample"

@@ -102,9 +102,7 @@ test("cookie consent: accept all hides the banner without crashing the app", asy
   await expect(consentBanner).toBeHidden();
 });
 
-test("sticky purchase bar appears after scrolling past the hero, dismisses, and is hidden on /checkout", async ({
-  page,
-}) => {
+test("sticky purchase bar is hidden during pre-launch", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "אישור הכל" }).click();
@@ -112,14 +110,8 @@ test("sticky purchase bar appears after scrolling past the hero, dismisses, and 
   const bar = page.getByRole("region", { name: "רכישה מהירה" });
   await expect(bar).toBeHidden();
 
+  // גם לאחר גלילה מעבר ל-Hero — אין פס רכישה במצב טרום-השקה.
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.5));
-  await expect(bar).toBeVisible();
-
-  await page.getByRole("button", { name: "סגירת פס הרכישה" }).click();
-  await expect(bar).toBeHidden();
-
-  await page.goto("/checkout", { waitUntil: "networkidle" });
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await expect(bar).toBeHidden();
 });
 
@@ -142,19 +134,17 @@ test("newsletter form submits successfully", async ({ page }) => {
   await expect(page.getByText("נרשמתם בהצלחה")).toBeVisible();
 });
 
-test("digital checkout asks only name + email (no quantity, no address)", async ({
+test("checkout is closed during pre-launch (no form, no payment)", async ({
   page,
 }) => {
   await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
 
-  // אין בורר כמות ואין שדות משלוח במהדורה דיגיטלית.
-  await expect(page.getByRole("radio", { name: /עותקים/ })).toHaveCount(0);
-  await expect(page.getByLabel("יישוב")).toHaveCount(0);
-  await expect(page.getByLabel("רחוב")).toHaveCount(0);
-
-  // רק שם ואימייל.
-  await expect(page.getByLabel("שם מלא")).toBeVisible();
-  await expect(page.getByLabel(/אימייל/)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "המכירה עדיין לא נפתחה" })
+  ).toBeVisible();
+  // אין טופס וללא הדגמת תשלום.
+  await expect(page.getByLabel("שם מלא")).toHaveCount(0);
+  await expect(page.getByLabel(/אימייל/)).toHaveCount(0);
 });
 
 test("sitemap, robots and manifest are served correctly", async ({ request }) => {

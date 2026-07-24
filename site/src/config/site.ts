@@ -235,6 +235,17 @@ export const siteConfig = {
 
   /** האם סביבת התשלום היא הדגמה בלבד (אין ספק סליקה אמיתי מחובר). */
   isPaymentDemoMode: (process.env.PAYMENT_PROVIDER ?? "mock") === "mock",
+
+  /**
+   * מצב Pre-launch: האתר ציבורי אך המכירה סגורה. כל עוד false — אי אפשר
+   * ליצור הזמנה, לבצע תשלום (גם לא Mock) או להגיע ל-checkout; ה-CTA מציג
+   * "המכירה תיפתח בקרוב". יש להפוך ל-true רק לאחר חיבור כריכה סופית, קובץ
+   * ספר, סליקה אמיתית ו-fulfillment מלא.
+   */
+  salesOpen: false,
+
+  /** תווית מחיר לתקופת ה-Pre-launch. */
+  preLaunchPriceLabel: "בקרוב — הספר הדיגיטלי ב-98 ₪",
 } as const;
 
 export type SiteConfig = typeof siteConfig;

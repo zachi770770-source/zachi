@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { siteConfig } from "@/config/site";
 import { getPaymentProvider } from "@/lib/payments";
 import { getOrderRepository } from "@/lib/orders";
 
@@ -7,6 +8,10 @@ export async function GET(
   _request: Request,
   context: { params: Promise<{ sessionId: string }> }
 ) {
+  if (!siteConfig.salesOpen) {
+    return NextResponse.json({ error: "המכירה עדיין לא נפתחה" }, { status: 403 });
+  }
+
   const provider = getPaymentProvider();
   if (!provider.isDemo) {
     return NextResponse.json({ error: "לא זמין" }, { status: 404 });

@@ -16,6 +16,8 @@ export function StickyPurchaseBar() {
   const pathname = usePathname();
   const eligibleRoute = VISIBLE_ROUTES.has(pathname ?? "");
 
+  // במצב Pre-launch אין רכישה — הפס אינו מוצג כדי לא להטעות.
+  if (!siteConfig.salesOpen) return null;
   if (!siteConfig.features.stickyPurchaseBar || !eligibleRoute) return null;
 
   // ה-key ממחזר (remount) את הרכיב בכל שינוי נתיב, כך ש"הוסתר על ידי

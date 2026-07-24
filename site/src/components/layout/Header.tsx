@@ -43,14 +43,14 @@ export function Header() {
         {/* CTA (משמאל ב-RTL) */}
         <div className="hidden lg:flex lg:justify-end">
           <Button asChild size="sm" className="h-11 px-5 text-[15px]">
-            <Link href="/#purchase">לרכישת הספר</Link>
+            <Link href="/#purchase">{siteConfig.salesOpen ? "לרכישת הספר" : "בקרוב"}</Link>
           </Button>
         </div>
 
         {/* מובייל: כפתור רכישה קומפקטי + המבורגר */}
         <div className="flex items-center gap-2 lg:hidden">
           <Button asChild size="sm" className="h-10 px-4 text-sm">
-            <Link href="/#purchase">רכישה</Link>
+            <Link href="/#purchase">{siteConfig.salesOpen ? "רכישה" : "בקרוב"}</Link>
           </Button>
           <MobileMenu />
         </div>

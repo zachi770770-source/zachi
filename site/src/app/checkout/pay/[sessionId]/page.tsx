@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { use } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, ShieldAlert, Loader2 } from "lucide-react";
 
+import { siteConfig } from "@/config/site";
 import { formatPrice } from "@/lib/pricing";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
@@ -66,6 +68,21 @@ export default function MockPaymentPage({
       setError("הסימולציה נכשלה. נסו שוב.");
       setPending(null);
     }
+  }
+
+  // מצב Pre-launch: אין הצגת מסך תשלום/הדגמה באתר הציבורי.
+  if (!siteConfig.salesOpen) {
+    return (
+      <Container className="flex min-h-[60svh] flex-col items-center justify-center py-16 text-center">
+        <h1 className="type-h2 text-foreground">המכירה עדיין לא נפתחה</h1>
+        <p className="mt-4 max-w-[46ch] text-[18px] leading-relaxed text-foreground-muted">
+          האתר בשלב טרום-השקה. עם פתיחת המכירה תתאפשר רכישה מאובטחת.
+        </p>
+        <Button asChild size="lg" className="mt-6 h-14 px-8 text-[17px]">
+          <Link href="/">חזרה לעמוד הבית</Link>
+        </Button>
+      </Container>
+    );
   }
 
   return (

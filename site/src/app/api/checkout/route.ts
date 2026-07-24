@@ -8,6 +8,14 @@ import { getPaymentProvider } from "@/lib/payments";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest) {
+  // מצב Pre-launch: אין יצירת הזמנה כלל בצד השרת.
+  if (!siteConfig.salesOpen) {
+    return NextResponse.json(
+      { error: "המכירה עדיין לא נפתחה" },
+      { status: 403 }
+    );
+  }
+
   const ip = getClientIp(request.headers);
   const rateLimit = checkRateLimit(`checkout:${ip}`, {
     limit: 10,

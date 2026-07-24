@@ -3,30 +3,22 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FileText, Download, Smartphone, Package, BadgeInfo } from "lucide-react";
+import { FileText, Download, Smartphone, Package } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
-import { calculateOrderTotals, formatPrice } from "@/lib/pricing";
 import type { ProductFormat } from "@/lib/pricing";
-import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { FormatSelector } from "@/components/purchase/FormatSelector";
 
+/**
+ * מצב Pre-launch: האתר ציבורי אך המכירה סגורה. אין מעבר ל-checkout ואין
+ * תשלום. המחיר מוצג כ"בקרוב" וה-CTA אינו מטעה. כאשר salesOpen יופעל, יש
+ * להחזיר את זרימת הרכישה הפעילה.
+ */
 export function PurchaseCard() {
-  const router = useRouter();
   const [format, setFormat] = React.useState<ProductFormat>(
     siteConfig.products.defaultFormat
   );
-  // המהדורה הדיגיטלית אינה "כמות" — קובץ יחיד. הכמות תמיד 1.
-  const totals = calculateOrderTotals(1, format);
-  const demo = siteConfig.isPaymentDemoMode;
-  const isDigital = format === "digital";
-
-  function handleBuy() {
-    trackEvent("add_to_cart", { format });
-    router.push(`/checkout?format=${format}`);
-  }
 
   return (
     <div
@@ -40,60 +32,46 @@ export function PurchaseCard() {
               {siteConfig.bookTitle}
             </h3>
             <p className="mt-1 text-[15px] text-foreground-muted">
-              זמין כמהדורה דיגיטלית — מהדורה מודפסת בקרוב
+              מאת צחי חן · המכירה תיפתח בקרוב
             </p>
           </div>
 
           <FormatSelector value={format} onChange={setFormat} />
 
-          <div className="flex items-baseline gap-2 border-t border-foreground/12 pt-5">
-            <span className="type-quote text-[40px] font-bold text-brand-hover">
-              {formatPrice(totals.unitPrice)}
-            </span>
-            {isDigital ? (
-              <span className="text-[15px] text-foreground-muted">
-                מחיר סופי · ללא משלוח
-              </span>
-            ) : null}
+          <div className="border-t border-foreground/12 pt-5">
+            <p className="type-quote text-[26px] font-bold text-brand-hover">
+              {siteConfig.preLaunchPriceLabel}
+            </p>
           </div>
 
-          {isDigital ? (
-            <ul className="flex flex-col gap-2.5 text-[15px] text-foreground-muted">
+          <ul className="flex flex-col gap-2.5 text-[15px] text-foreground-muted">
+            <li className="flex items-center gap-2.5">
+              <FileText className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              קובץ דיגיטלי לקריאה עצמית
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Download className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              {siteConfig.digital.deliveryMethod}
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              קריאה ב{siteConfig.digital.devices}
+            </li>
+            {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice ? (
               <li className="flex items-center gap-2.5">
-                <FileText className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                קובץ דיגיטלי לקריאה עצמית
+                <Package className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+                כולל חוברת עבודה דיגיטלית
               </li>
-              <li className="flex items-center gap-2.5">
-                <Download className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                {siteConfig.digital.deliveryMethod}
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                קריאה ב{siteConfig.digital.devices}
-              </li>
-              {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice ? (
-                <li className="flex items-center gap-2.5">
-                  <Package className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                  כולל חוברת עבודה דיגיטלית
-                </li>
-              ) : null}
-              {demo ? (
-                <li className="flex items-center gap-2.5">
-                  <BadgeInfo className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                  מצב הדגמה · התשלום אינו פעיל עדיין
-                </li>
-              ) : null}
-            </ul>
-          ) : null}
+            ) : null}
+          </ul>
 
-          <Button size="lg" onClick={handleBuy} className="h-14 w-full text-[17px]">
-            לרכישת הספר הדיגיטלי — {formatPrice(totals.total)}
+          <Button size="lg" disabled aria-disabled="true" className="h-14 w-full text-[17px]">
+            המכירה תיפתח בקרוב
           </Button>
 
           <p className="text-[13px] leading-relaxed text-foreground-muted">
-            {demo ? "מצב הדגמה: לא יתבצע חיוב בפועל. " : null}
-            לאחר התשלום נשלח אליכם את הגישה למהדורה הדיגיטלית במייל. למדיניות
-            המוצר, ביטולים והחזרים ראו{" "}
+            האתר בשלב טרום-השקה. עם פתיחת המכירה תתאפשר רכישה מאובטחת של
+            המהדורה הדיגיטלית. למדיניות המוצר ראו{" "}
             <Link
               href="/shipping-returns"
               className="text-brand-hover underline underline-offset-2 hover:text-foreground"
