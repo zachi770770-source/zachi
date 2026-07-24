@@ -21,9 +21,12 @@ create index if not exists waitlist_subscribers_status_idx
 -- ── נעילת גישה (Supabase) ────────────────────────────────────────────
 -- האפליקציה מתחברת ישירות ל-Postgres (Transaction Pooler) עם תפקיד הבעלים,
 -- ולכן היא ממשיכה לעבוד. אנו נועלים את הטבלה מפני ה-PostgREST הציבורי:
--- מפעילים RLS (ללא policies → דחייה מלאה) ומבטלים כל הרשאה מ-anon/authenticated,
--- כך שאי אפשר לקרוא או לייצא כתובות אימייל דרך ה-API הציבורי.
+-- מפעילים RLS (ללא policies → דחייה דרך ה-API הציבורי) ומבטלים כל הרשאה
+-- מ-public/anon/authenticated, כך שאי אפשר לקרוא או לייצא אימיילים דרך ה-API.
+--
+-- שימו לב: אין להשתמש ב-FORCE RLS. ללא policies הוא מכפיף גם את בעל הטבלה
+-- וחוסם את חיבור השרת. RLS רגיל מספיק כי חיבור השרת הוא בתפקיד הבעלים.
 alter table public.waitlist_subscribers enable row level security;
-alter table public.waitlist_subscribers force row level security;
 
-revoke all on table public.waitlist_subscribers from anon, authenticated;
+revoke all on table public.waitlist_subscribers
+  from public, anon, authenticated;
