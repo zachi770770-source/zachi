@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { waitlistSchema } from "@/lib/validation/waitlist";
 import { InMemoryWaitlistRepository } from "@/lib/waitlist/memoryRepository";
+import {
+  classifyWaitlistDbError,
+  formatWaitlistDbErrorLog,
+} from "@/lib/waitlist/diagnostics";
 import { POST } from "@/app/api/waitlist/route";
 
 const g = globalThis as unknown as Record<string, unknown>;
@@ -114,5 +118,56 @@ describe("POST /api/waitlist", () => {
       makeRequest({ email: "a@b.com", consent: true }, { "content-type": "text/plain" })
     );
     expect(res.status).toBe(415);
+  });
+});
+
+describe("classifyWaitlistDbError", () => {
+  it("classifies a Postgres auth failure (28P01) as a connection error", () => {
+    const d = classifyWaitlistDbError({ name: "error", code: "28P01" });
+    expect(d).toMatchObject({
+      name: "error",
+      code: "28P01",
+      stage: "connection",
+      classification: "authentication_failed",
+    });
+  });
+
+  it("classifies a missing relation (42P01) as an upsert error", () => {
+    const d = classifyWaitlistDbError({ name: "error", code: "42P01" });
+    expect(d).toMatchObject({ stage: "upsert", classification: "relation_missing" });
+  });
+
+  it("classifies permission_denied (42501) as an upsert error", () => {
+    const d = classifyWaitlistDbError({ name: "error", code: "42501" });
+    expect(d).toMatchObject({ stage: "upsert", classification: "permission_denied" });
+  });
+
+  it("reads a network code from error.cause.code (host_not_found)", () => {
+    const d = classifyWaitlistDbError({ name: "AggregateError", cause: { code: "ENOTFOUND" } });
+    expect(d).toMatchObject({
+      code: "none",
+      causeCode: "ENOTFOUND",
+      stage: "connection",
+      classification: "host_not_found",
+    });
+  });
+
+  it("classifies any certificate error as ssl_error", () => {
+    const d = classifyWaitlistDbError({ name: "Error", code: "SELF_SIGNED_CERT_IN_CHAIN" });
+    expect(d).toMatchObject({ stage: "connection", classification: "ssl_error" });
+  });
+
+  it("falls back to unknown when there is no code", () => {
+    const d = classifyWaitlistDbError(new Error("boom"));
+    expect(d).toMatchObject({ code: "none", causeCode: "none", classification: "unknown" });
+  });
+
+  it("never leaks message or stack in the formatted log line", () => {
+    const err = new Error("secret connection string postgres://user:pass@host/db");
+    const line = formatWaitlistDbErrorLog(classifyWaitlistDbError(err));
+    expect(line).not.toContain("secret");
+    expect(line).not.toContain("postgres://");
+    expect(line).not.toContain("pass");
+    expect(line.startsWith("[waitlist] persistence error")).toBe(true);
   });
 });

@@ -5,6 +5,10 @@ import {
   WAITLIST_CONSENT_VERSION,
 } from "@/lib/validation/waitlist";
 import { getWaitlistRepository } from "@/lib/waitlist";
+import {
+  classifyWaitlistDbError,
+  formatWaitlistDbErrorLog,
+} from "@/lib/waitlist/diagnostics";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 const MAX_BODY_BYTES = 2_000;
@@ -81,9 +85,11 @@ export async function POST(request: Request) {
       source: parsed.data.source,
       consentVersion: WAITLIST_CONSENT_VERSION,
     });
-  } catch {
-    // לא לחשוף stack trace / DATABASE_URL. לא לכתוב את כתובת האימייל ללוג.
-    console.error("[waitlist] persistence error");
+  } catch (err) {
+    // אבחון מאובטח: מדפיסים רק מטא-נתונים לא-רגישים (name / code / cause.code /
+    // שלב / סיווג). לעולם לא message / stack / DATABASE_URL / host / user /
+    // password / connection string, ולא את כתובת האימייל.
+    console.error(formatWaitlistDbErrorLog(classifyWaitlistDbError(err)));
     return NextResponse.json(
       { error: "אירעה תקלה בשמירת הפרטים. נסו שוב." },
       { status: 500 }
