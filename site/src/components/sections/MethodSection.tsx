@@ -22,22 +22,23 @@ export function MethodSection() {
           headingId="method-heading"
         />
 
-        <ol className="mt-12 grid gap-6 sm:grid-cols-3">
+        <ol className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3">
           {method.steps.map((step, index) => {
             const Icon = ICONS[index];
             return (
               <li
                 key={step.number}
-                className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-7"
+                className="relative flex flex-col gap-3 bg-surface p-7 pt-6"
               >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-brand-foreground">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <span className="font-serif text-sm text-foreground-muted">
-                    שלב {step.number}
-                  </span>
-                </div>
+                <span
+                  className="pointer-events-none absolute -top-2 start-6 font-serif text-7xl font-semibold text-border-strong/60"
+                  aria-hidden="true"
+                >
+                  {step.number}
+                </span>
+                <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-brand text-brand-foreground">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
                 <h3 className="font-serif text-xl font-semibold">
                   {step.title}
                 </h3>

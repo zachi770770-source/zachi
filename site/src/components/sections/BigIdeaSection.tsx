@@ -12,9 +12,12 @@ export function BigIdeaSection() {
     >
       <Container>
         <div className="mx-auto max-w-3xl text-center">
+          <span className="text-sm font-semibold uppercase tracking-wide text-brand-hover">
+            הרעיון המרכזי
+          </span>
           <h2
             id="big-idea-heading"
-            className="text-balance font-serif text-3xl font-semibold sm:text-4xl"
+            className="mt-3 text-balance font-serif text-4xl font-semibold leading-[1.2] sm:text-5xl"
           >
             {bigIdea.title}
           </h2>

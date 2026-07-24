@@ -10,12 +10,9 @@ export function OutcomesSection() {
       <Container>
         <SectionHeading title={outcomes.title} headingId="outcomes-heading" />
 
-        <ul className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
+        <ul className="mx-auto mt-10 grid max-w-4xl gap-x-10 gap-y-5 sm:grid-cols-2">
           {outcomes.items.map((item) => (
-            <li
-              key={item}
-              className="flex items-start gap-3 rounded-lg bg-surface p-5 shadow-sm"
-            >
+            <li key={item} className="flex items-start gap-3">
               <CheckCircle2
                 className="mt-0.5 h-5 w-5 shrink-0 text-secondary"
                 aria-hidden="true"

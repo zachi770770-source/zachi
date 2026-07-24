@@ -13,12 +13,16 @@ export function ProblemSection() {
             {problem.title}
           </h2>
 
-          <ul className="mx-auto mt-10 grid gap-4 sm:grid-cols-2">
+          <ul className="mx-auto mt-10 grid gap-x-10 gap-y-5 sm:grid-cols-2">
             {problem.situations.map((situation) => (
               <li
                 key={situation}
-                className="rounded-md border-s-2 border-brand bg-surface-muted px-4 py-3 text-base leading-relaxed text-foreground-muted"
+                className="flex gap-3 border-t border-border pt-4 text-base leading-relaxed text-foreground-muted"
               >
+                <span
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
+                  aria-hidden="true"
+                />
                 {situation}
               </li>
             ))}
