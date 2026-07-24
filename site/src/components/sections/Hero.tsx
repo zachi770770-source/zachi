@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Clock3 } from "lucide-react";
+import { Check, Clock3, ArrowLeft } from "lucide-react";
 
 import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
@@ -10,88 +10,92 @@ import { BookCover } from "@/components/shared/BookCover";
 import { SearchToBuild } from "@/components/shared/SearchToBuild";
 import { TrustBar } from "@/components/sections/TrustBar";
 
+/**
+ * Hero כ"עמוד שער" של ספר: כותרת רצה על קו מסטהד, כותרת סריף ענקית ברוחב
+ * מלא, מוטיב "מחיפוש לבנייה", ומתחת — טור טקסט לצד לוחית העטיפה. שפה
+ * עריכתית (קווי שיער, מספור, קפיטלייז) במקום כרטיסים מעוגלים.
+ */
 export function Hero() {
   const digitalPrice = siteConfig.products.formats.digital.price;
 
   return (
     <section className="relative overflow-hidden">
-      {/* אווירה: שכבת גרעין + זוהר חם מאחורי העטיפה + מוטיב מלא-רוחב */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted via-background to-background" />
-        <div className="absolute -top-40 start-[6%] h-[620px] w-[620px] rounded-full bg-brand/[0.09] blur-[110px]" />
-        <div className="absolute bottom-0 end-[10%] h-[420px] w-[420px] rounded-full bg-secondary/[0.07] blur-[100px]" />
-        <div className="grain-layer absolute inset-0 opacity-[0.035] mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/60 to-background" />
+        <div className="grain-layer absolute inset-0 opacity-[0.04] mix-blend-multiply" />
       </div>
 
-      <Container className="flex min-h-[640px] flex-col justify-center py-16 sm:py-20 lg:min-h-[780px] lg:py-24">
-        <div className="grid w-full items-center gap-14 lg:grid-cols-[1.05fr_minmax(0,29rem)] lg:gap-16">
-          {/* מסר (ימין ב-RTL) */}
-          <div className="order-1 flex max-w-[660px] flex-col items-start">
-            <span className="kicker">{hero.eyebrow}</span>
+      <Container className="pt-5 sm:pt-7">
+        {/* קו מסטהד עליון */}
+        <div className="flex items-center justify-between gap-4 border-b border-foreground/15 pb-4">
+          <span className="kicker">{hero.eyebrow}</span>
+          <span className="hidden text-[12px] uppercase tracking-[0.16em] text-foreground-muted sm:block">
+            מדייטים לאהבה
+          </span>
+        </div>
 
-            <h1 className="type-display mt-6 text-foreground">
-              {hero.headlineTop}
-              <br />
-              <span className="text-brand-hover">{hero.headlineBottom}</span>
-            </h1>
+        {/* כותרת שער ברוחב מלא */}
+        <h1 className="type-display mt-8 text-foreground sm:mt-10">
+          {hero.headlineTop}
+          <br />
+          <span className="text-brand-hover">{hero.headlineBottom}</span>
+        </h1>
 
-            {/* המוטיב החתום — בדיוק במקום שבו המילים עוברות מחיפוש לבנייה */}
-            <SearchToBuild className="mt-7 h-9 w-[260px] max-w-full text-foreground/70" />
+        {/* מוטיב מחיפוש לבנייה על קו שיער מלא-רוחב */}
+        <div className="mt-8 flex items-center gap-5 sm:mt-10">
+          <SearchToBuild className="h-9 w-[220px] shrink-0 text-foreground/70 sm:w-[260px]" />
+          <span className="h-px flex-1 bg-foreground/12" aria-hidden="true" />
+        </div>
 
-            <p className="type-lead mt-7 max-w-[48ch] text-foreground-muted">
+        {/* מתחת לשער: טקסט (ימין) + לוחית עטיפה (שמאל) */}
+        <div className="grid gap-x-14 gap-y-12 pb-16 pt-12 lg:grid-cols-[1fr_minmax(0,22rem)] lg:pb-24">
+          <div className="flex flex-col">
+            <p className="type-lead max-w-[48ch] text-foreground-muted">
               {hero.description}
             </p>
 
-            <div className="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
               <Button asChild size="lg" className="h-14 px-8 text-base">
                 <Link href="/#purchase">
                   {hero.primaryCta}
                   {digitalPrice != null ? ` · ${formatPrice(digitalPrice)}` : ""}
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-base">
-                <Link href="/#sample">{hero.secondaryCta}</Link>
-              </Button>
+              <Link
+                href="/#sample"
+                className="group inline-flex items-center gap-2 text-[15px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                {hero.secondaryCta}
+                <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
+              </Link>
             </div>
 
-            {/* שתי מהדורות — ברור מיד */}
-            <div className="mt-6 flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-muted px-3 py-1.5 text-[13px] font-semibold text-brand-hover">
-                <Check className="h-3.5 w-3.5" aria-hidden="true" />
-                מהדורה דיגיטלית — זמינה עכשיו
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border-strong px-3 py-1.5 text-[13px] font-medium text-foreground-muted">
-                <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
-                מהדורה מודפסת — בקרוב
-              </span>
+            {/* שתי מהדורות — כשורת מפרט עם קווי הפרדה, לא צ'יפים */}
+            <div className="mt-10 grid grid-cols-1 border-y border-foreground/15 text-[14.5px] sm:grid-cols-2">
+              <div className="flex items-center gap-2.5 border-b border-foreground/10 py-3.5 sm:border-b-0 sm:border-e sm:pe-6">
+                <Check className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+                <span className="font-semibold text-foreground">מהדורה דיגיטלית</span>
+                <span className="text-foreground-muted">— זמינה עכשיו</span>
+              </div>
+              <div className="flex items-center gap-2.5 py-3.5 sm:ps-6">
+                <Clock3 className="h-4 w-4 shrink-0 text-foreground-muted" aria-hidden="true" />
+                <span className="font-semibold text-foreground">מהדורה מודפסת</span>
+                <span className="text-foreground-muted">— בקרוב</span>
+              </div>
             </div>
 
-            <TrustBar className="mt-8" />
+            <TrustBar className="mt-7" />
           </div>
 
-          {/* העטיפה כאובייקט מואר: זוהר, במה וצל קרקע אליפטי */}
-          <div className="order-2 flex justify-center lg:justify-end">
-            <div className="relative flex w-[240px] items-end justify-center sm:w-[300px] lg:w-[380px]">
-              <div
-                aria-hidden="true"
-                className="absolute -inset-x-10 -top-10 bottom-6 -z-10 rounded-[50%] bg-[radial-gradient(closest-side,rgba(166,92,62,0.18),transparent_72%)]"
-              />
-              <BookCover priority className="w-full" />
-              {/* צל קרקע חם שנותן לספר לעמוד על משטח */}
-              <div
-                aria-hidden="true"
-                className="absolute -bottom-4 h-8 w-[78%] rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
-              />
-            </div>
-          </div>
+          {/* לוחית עטיפה עם כיתוב כן (Placeholder עד שתסופק הכריכה האמיתית) */}
+          <figure className="mx-auto flex w-full max-w-[340px] flex-col items-center gap-4 lg:mx-0 lg:items-start">
+            <BookCover priority className="w-[230px] sm:w-[300px] lg:w-full" />
+            <figcaption className="text-[12px] uppercase tracking-[0.14em] text-foreground-muted">
+              עטיפה לדוגמה · הכריכה הסופית בקרוב
+            </figcaption>
+          </figure>
         </div>
       </Container>
-
-      {/* קו סיום עדין שמחבר אל הסקשן הבא */}
-      <div
-        aria-hidden="true"
-        className="mx-auto h-px w-full max-w-[77.5rem] bg-gradient-to-l from-transparent via-border-strong to-transparent"
-      />
     </section>
   );
 }
