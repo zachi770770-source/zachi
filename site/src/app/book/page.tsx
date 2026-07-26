@@ -1,4 +1,5 @@
 import { siteConfig } from "@/config/site";
+import { bigIdea } from "@/content/book";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
@@ -40,6 +41,10 @@ export default function BookPage() {
             <h1 className="type-h1 mt-4">מה יש בספר, ואיך הוא עובד</h1>
             <p className="type-lead mt-6 text-foreground-muted">
               {siteConfig.description}
+            </p>
+            {/* נקודת האיזון של הגישה, הועברה לכאן מהשער כדי לשמור על עמוד בית חיובי. */}
+            <p className="mx-auto mt-6 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted/90">
+              {bigIdea.clarification}
             </p>
           </Reveal>
         </Container>

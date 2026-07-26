@@ -10,12 +10,12 @@ test.describe("Pre-launch: המכירה סגורה", () => {
       "בונים אותה"
     );
 
-    // מצב טרום-השקה: ה-CTA הראשי פעיל ומוביל לרשימת ההמתנה — לא כפתור חסום ולא תשלום.
-    const waitlistCta = page
-      .getByRole("link", { name: "קבלו עדכון כשהספר יוצא" })
+    // מצב טרום-השקה: הפעולה המרכזית מזמינה לקרוא טעימה — לא כפתור רכישה חסום ולא תשלום.
+    const sampleCta = page
+      .getByRole("link", { name: "לקריאת טעימה מהספר" })
       .first();
-    await expect(waitlistCta).toBeVisible();
-    await expect(waitlistCta).toHaveAttribute("href", "/#waitlist");
+    await expect(sampleCta).toBeVisible();
+    await expect(sampleCta).toHaveAttribute("href", "/preview");
     // אין קישור רכישה פעיל אל התשלום כל עוד המכירה סגורה.
     await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
 

@@ -21,10 +21,10 @@ const PHOTO_ALT = "צחי חן, מחבר הספר מדייטים לאהבה";
 const PHOTO_SIZES = "(min-width: 1024px) 380px, (min-width: 640px) 360px, 78vw";
 
 export default function AuthorPage() {
-  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/#waitlist";
-  const primaryLabel = siteConfig.salesOpen
-    ? "לרכישת הספר"
-    : "קבלו עדכון כשהספר יוצא";
+  // פעולה מרכזית אחת בעמוד המחבר: לקרוא טעימה. ההרשמה לרשימת ההמתנה
+  // מרוכזת בסוף הטעימה. כשהמכירה נפתחת — הפעולה המרכזית הופכת לרכישה.
+  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/preview";
+  const primaryLabel = siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר";
 
   return (
     <Container className="py-12 sm:py-16 lg:py-20">
@@ -101,16 +101,19 @@ export default function AuthorPage() {
         <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">
           <Link href={primaryHref}>{primaryLabel}</Link>
         </Button>
-        <Link
-          href="/preview"
-          className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-        >
-          לקריאת טעימה מהספר
-          <ArrowLeft
-            className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5"
-            aria-hidden="true"
-          />
-        </Link>
+        {/* לאחר פתיחת המכירה, הטעימה נשארת פעולה משנית לצד הרכישה. */}
+        {siteConfig.salesOpen ? (
+          <Link
+            href="/preview"
+            className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            לקריאת טעימה מהספר
+            <ArrowLeft
+              className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5"
+              aria-hidden="true"
+            />
+          </Link>
+        ) : null}
       </div>
     </Container>
   );

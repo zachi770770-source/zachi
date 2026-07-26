@@ -40,26 +40,27 @@ export function Hero() {
               מאת צחי חן
             </p>
 
-            <p className="mt-4 max-w-[44ch] text-[21px] leading-[1.6] text-foreground/80">
-              לומדים לחפש, להשוות ולבחון, אבל כמעט אף אחד לא מלמד אותנו איך
-              בונים קשר טוב אחרי שפוגשים אדם נכון.
+            <p className="mt-4 max-w-[46ch] text-[21px] leading-[1.6] text-foreground/80">
+              {hero.subhead}
             </p>
 
             <p className="mt-6 text-[16px] font-semibold text-brand-hover">
               {siteConfig.preLaunchPriceLabel}
             </p>
 
+            {/* פעולה מרכזית אחת: לקרוא טעימה (או לרכוש כשהמכירה פתוחה).
+                פעולה משנית קלה: למצוא את המסלול המתאים. אין שני כפתורים שווי-משקל. */}
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
               <Button asChild size="lg" className="h-14 px-7 text-[17px]">
-                <Link href={siteConfig.salesOpen ? "/book#purchase" : "/#waitlist"}>
-                  {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}
+                <Link href={siteConfig.salesOpen ? "/book#purchase" : "/preview"}>
+                  {siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר"}
                 </Link>
               </Button>
               <Link
-                href="/#sample"
+                href="/#stations"
                 className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                לקריאת טעימה מהספר
+                למצוא את המסלול שלי
                 <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>

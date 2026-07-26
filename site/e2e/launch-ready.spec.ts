@@ -3,15 +3,27 @@ import { test, expect } from "@playwright/test";
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
-  test("waitlist: CTA scrolls to the form, which submits successfully", async ({ page }) => {
+  test("home: one primary CTA (sample) + a light secondary (find my path)", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
-    // ה-CTA הראשי מוביל לרשימת ההמתנה.
-    await page.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" }).first().click();
-    const waitlist = page.locator("#waitlist");
-    await expect(waitlist).toBeVisible();
+    // פעולה מרכזית אחת: לקריאת טעימה. הבקשה להירשם מרוכזת בסוף הטעימה.
+    const primary = page.getByRole("link", { name: "לקריאת טעימה מהספר" }).first();
+    await expect(primary).toBeVisible();
+    await expect(primary).toHaveAttribute("href", "/preview");
 
-    // מילוי ושליחה → הודעת הצלחה (מאגר בזיכרון בבדיקות), בלי לפתוח מכירה.
+    // פעולה משנית קלה: למצוא את המסלול המתאים (התחנות), לא כפתור שווה-משקל.
+    const secondary = page.getByRole("link", { name: "למצוא את המסלול שלי" });
+    await expect(secondary).toHaveAttribute("href", "/#stations");
+
+    // אין כפתור רכישה פעיל במצב טרום-השקה.
+    await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
+  });
+
+  test("home newsletter section: the waitlist form still submits successfully", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    const waitlist = page.locator("#waitlist");
+    await waitlist.scrollIntoViewIfNeeded();
+    await expect(waitlist).toBeVisible();
     await waitlist.getByLabel("כתובת אימייל").fill("dana@example.com");
     await waitlist.getByRole("checkbox").click();
     await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
@@ -44,17 +56,17 @@ test.describe("Launch-readiness", () => {
     await context.close();
   });
 
-  test("author page: real photo, personal header, waitlist CTA (pre-launch)", async ({ page }) => {
+  test("author page: real photo, personal header, sample CTA (pre-launch)", async ({ page }) => {
     await page.goto("/author", { waitUntil: "networkidle" });
     await expect(page.getByRole("heading", { level: 1 })).toContainText("למה כתבתי");
     const img = page.getByAltText("צחי חן, מחבר הספר מדייטים לאהבה");
     await expect(img).toBeVisible();
     const currentSrc = await img.evaluate((el) => (el as HTMLImageElement).currentSrc);
     expect(currentSrc).toMatch(/zachi-chen-\d+\.(avif|webp|jpg)/);
-    const cta = page.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" });
+    // פעולה מרכזית אחת בעמוד המחבר: לקריאת טעימה (לא הרשמה, שמרוכזת בסוף הטעימה).
+    const cta = page.getByRole("link", { name: "לקריאת טעימה מהספר" });
     await expect(cta).toBeVisible();
-    await expect(cta).toHaveAttribute("href", "/#waitlist");
-    await expect(page.getByRole("link", { name: "לקריאת טעימה מהספר" })).toBeVisible();
+    await expect(cta).toHaveAttribute("href", "/preview");
   });
 
   test("cookie banner reserves space and does not cover the footer", async ({ page }) => {
@@ -230,13 +242,13 @@ test.describe("Launch-readiness", () => {
     await expect(refrain).toContainText("דייטינג הוא חיפוש.");
     await expect(refrain).toContainText("אהבה היא בנייה.");
 
-    // ה-CTA הראשי נשאר ברור ופעיל.
+    // ה-CTA הראשי (לקריאת טעימה) נשאר ברור ופעיל.
     await expect(
-      page.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" }).first()
+      page.getByRole("link", { name: "לקריאת טעימה מהספר" }).first()
     ).toBeVisible();
   });
 
-  test("stations: home cards link to dedicated pages, which cross-link and CTA to the waitlist", async ({
+  test("stations: home cards link to dedicated pages, which cross-link and CTA to the sample", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
@@ -249,10 +261,10 @@ test.describe("Launch-readiness", () => {
     await expect(page).toHaveURL(/\/before-relationship$/);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("לפני קשר");
 
-    // פירורי לחם נגישים + CTA לרשימת ההמתנה במצב טרום-השקה.
+    // פירורי לחם נגישים + פעולה מרכזית: לקריאת הטעימה שמתאימה לי (טרום-השקה).
     await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
-    const cta = page.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" });
-    await expect(cta).toHaveAttribute("href", "/waitlist");
+    const cta = page.getByRole("link", { name: "לקריאת הטעימה שמתאימה לי" });
+    await expect(cta).toHaveAttribute("href", "/preview");
 
     // מעבר לתחנה אחרת דרך הקישורים בתחתית.
     await page.getByRole("link", { name: /בתוך קשר/ }).first().click();
