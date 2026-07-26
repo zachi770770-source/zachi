@@ -29,7 +29,8 @@ export type AnalyticsEventName =
   | "waitlist_signup"
   | "stuck_open"
   | "stuck_select"
-  | "stuck_to_sample";
+  | "stuck_to_sample"
+  | "compass_ask";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
 

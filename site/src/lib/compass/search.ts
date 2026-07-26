@@ -34,6 +34,14 @@ type Row = {
  *
  * הפונקציה מסומנת server-only ולכן לא ניתנת לייבוא מהדפדפן.
  */
+/** האם קיימת גרסת ספר פעילה? בדיקה זולה לפני צריכת מכסה/קריאה למודל. */
+export async function hasActiveVersion(db: SqlClient): Promise<boolean> {
+  const res = await db.query(
+    `select 1 from compass_book_versions where status = 'active' limit 1`
+  );
+  return res.rows.length > 0;
+}
+
 export async function searchCompass(
   db: SqlClient,
   question: string,

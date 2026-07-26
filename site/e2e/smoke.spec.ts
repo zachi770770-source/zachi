@@ -16,6 +16,7 @@ const STATIC_ROUTES = [
   "/inside-relationship",
   "/waitlist",
   "/preview",
+  "/compass",
   "/author",
   "/faq",
   "/contact",
@@ -163,6 +164,15 @@ test("legacy URLs 301-redirect to the most relevant page", async ({ request }) =
     const location = res.headers()["location"] ?? "";
     expect(new URL(location, "http://localhost").pathname, `target for ${from}`).toBe(to);
   }
+});
+
+test("/compass exists; while inert it shows a dignified coming-soon (no fixture)", async ({ page }) => {
+  const res = await page.goto("/compass", { waitUntil: "networkidle" });
+  expect(res?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("יש לכם שאלה");
+  // ללא ספק מודל/מסד בסביבת הבדיקה → מצב „בקרוב”, לא תיבת שאלה פעילה.
+  await expect(page.getByText("המצפן ייפתח בקרוב")).toBeVisible();
+  await expect(page.locator("#compass-question")).toHaveCount(0);
 });
 
 test("/book is a real page (not a redirect) with the deep-dive content", async ({ page }) => {

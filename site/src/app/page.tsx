@@ -6,6 +6,7 @@ import { StationsSection } from "@/components/sections/StationsSection";
 import { BookHubLink } from "@/components/sections/BookHubLink";
 import { StuckSelector } from "@/components/interactive/StuckSelector";
 import { SampleSection } from "@/components/sections/SampleSection";
+import { CompassCard } from "@/components/compass/CompassCard";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { BookSchema } from "@/components/schema/BookSchema";
@@ -37,6 +38,7 @@ export default function HomePage() {
       <BookHubLink />
       <StuckSelector variant="compact" />
       <SampleSection />
+      <CompassCard />
       <AuthorTeaser />
       <NewsletterSection />
     </>
