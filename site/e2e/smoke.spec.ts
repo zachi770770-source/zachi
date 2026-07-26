@@ -128,11 +128,10 @@ test("contact form submits successfully", async ({ page }) => {
 test("waitlist form submits successfully", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   const waitlist = page.locator("#waitlist");
-  await waitlist.getByLabel("שם פרטי").fill("בודקת");
-  await waitlist.getByLabel("אימייל", { exact: false }).first().fill("waitlisttest@example.com");
-  await waitlist.getByLabel(/שתעדכנו אותי במייל כשהספר יוצא/).click();
+  await waitlist.getByLabel("כתובת אימייל").fill("waitlisttest@example.com");
+  await waitlist.getByRole("checkbox").click();
   await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
-  await expect(page.getByText(/נרשמתם לרשימת ההמתנה/)).toBeVisible();
+  await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
 });
 
 test("checkout is closed during pre-launch (no form, no payment)", async ({

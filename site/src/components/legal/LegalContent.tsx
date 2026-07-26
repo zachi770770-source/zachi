@@ -12,6 +12,14 @@ export function LegalContent({
   updatedAt: string;
   sections: LegalSection[];
 }) {
+  // כל עוד פרטי העוסק/החברה, הכתובת ואמצעי הקשר הם PLACEHOLDER — המסמך אינו
+  // מוצג כשלם, אלא כגרסת מסגרת. אין להמציא פרטים אלה.
+  const legalDetailsPending =
+    siteConfig.business.legalName.includes("PLACEHOLDER") ||
+    siteConfig.business.address.includes("PLACEHOLDER") ||
+    siteConfig.contact.email.includes("PLACEHOLDER") ||
+    siteConfig.contact.email.includes("example.com");
+
   return (
     <Container className="py-10 sm:py-16">
       <div className="prose-book mx-auto">
@@ -24,6 +32,14 @@ export function LegalContent({
           <p className="mt-6 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm leading-relaxed text-foreground-muted">
             האתר נמצא כעת בשלב טרום-השקה, והמכירה טרם נפתחה. הסעיפים העוסקים
             ברכישה, בתשלום, במסירה, במשלוח ובביטול יחולו החל ממועד פתיחת המכירה.
+          </p>
+        ) : null}
+
+        {legalDetailsPending ? (
+          <p className="mt-4 rounded-lg border border-brand/30 bg-brand-muted px-4 py-3 text-sm leading-relaxed text-foreground">
+            זוהי גרסת מסגרת של המסמך. פרטי העוסק/החברה, הכתובת הרשומה ואמצעי הקשר
+            הרשמיים יתווספו ויאושרו לפני ההשקה. אין לראות במסמך זה ייעוץ משפטי או
+            מסמך סופי.
           </p>
         ) : null}
 

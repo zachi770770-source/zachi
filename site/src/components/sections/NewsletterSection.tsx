@@ -1,6 +1,6 @@
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
-import { NewsletterForm } from "@/components/forms/NewsletterForm";
+import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 
 export function NewsletterSection() {
   if (!siteConfig.features.newsletter) return null;
@@ -26,7 +26,7 @@ export function NewsletterSection() {
             </p>
           </div>
           <div className="w-full text-start">
-            <NewsletterForm />
+            <WaitlistForm source="homepage" />
           </div>
         </div>
       </Container>

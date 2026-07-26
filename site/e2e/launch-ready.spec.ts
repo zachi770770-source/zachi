@@ -11,14 +11,11 @@ test.describe("Launch-readiness", () => {
     const waitlist = page.locator("#waitlist");
     await expect(waitlist).toBeVisible();
 
-    // מילוי ושליחה → הודעת הצלחה, בלי לפתוח מכירה.
-    await waitlist.getByLabel("שם פרטי").fill("דנה");
-    await waitlist.getByLabel("אימייל").fill("dana@example.com");
-    await waitlist
-      .getByLabel("אני מסכים/ה שתעדכנו אותי במייל כשהספר יוצא")
-      .check();
+    // מילוי ושליחה → הודעת הצלחה (מאגר בזיכרון בבדיקות), בלי לפתוח מכירה.
+    await waitlist.getByLabel("כתובת אימייל").fill("dana@example.com");
+    await waitlist.getByRole("checkbox").click();
     await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
-    await expect(page.getByText(/נרשמתם לרשימת ההמתנה/)).toBeVisible();
+    await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
   });
 
   test("accessibility statement page exists and is linked from the footer", async ({ page }) => {

@@ -25,7 +25,8 @@ export type AnalyticsEventName =
   | "payment_failure"
   | "purchase"
   | "faq_open"
-  | "newsletter_signup";
+  | "newsletter_signup"
+  | "waitlist_signup";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
 
