@@ -4,6 +4,7 @@ import { siteConfig } from "@/config/site";
 
 const staticRoutes = [
   { path: "/", priority: 1, changeFrequency: "weekly" as const },
+  { path: "/book", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/before-relationship", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/starting-again", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/inside-relationship", priority: 0.8, changeFrequency: "monthly" as const },

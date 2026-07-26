@@ -21,7 +21,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 export function StationPage({ station }: { station: Station }) {
   // CTA לפי מצב המכירה — אותה לוגיקה כמו בכל האתר. במצב טרום-השקה מפנה
   // לדף רשימת ההמתנה הייעודי; כשהמכירה נפתחת — לרכישה.
-  const primaryHref = siteConfig.salesOpen ? "/#purchase" : "/waitlist";
+  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/waitlist";
   const primaryLabel = siteConfig.salesOpen
     ? "לרכישת הספר"
     : "קבלו עדכון כשהספר יוצא";

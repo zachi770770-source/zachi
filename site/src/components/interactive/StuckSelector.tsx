@@ -21,8 +21,18 @@ const VALID_IDS = new Set(stuckSelector.states.map((s) => s.id));
  * במחשב כל האפשרויות גלויות תחת התוצאה; במובייל, לאחר בחירה, נשארת האפשרות
  * הנבחרת בלבד עם קישור „שינוי הבחירה”. נגישות: radiogroup נטיבי (חיצי
  * מקלדת), אזור תוצאה עם aria-live. עובד גם ללא אנימציה.
+ *
+ * variant="compact" (עמוד הבית כשער): גרסה קצרה — התוצאה מציגה זיהוי,
+ * עיקרון, שאלה ל-CTA טעימה, ומפנה לעמוד הספר המלא. רשימת הפרקים
+ * המפורטת מוצגת רק ב-variant="full" (למשל בעמוד ייעודי), כדי לשמור על
+ * בית ניתן לסריקה בלי לאבד את התוכן — הוא נשאר זמין ב-/book וב-/preview.
  */
-export function StuckSelector() {
+export function StuckSelector({
+  variant = "full",
+}: {
+  variant?: "full" | "compact";
+}) {
+  const compact = variant === "compact";
   const [selected, setSelected] = React.useState<StuckState["id"] | null>(null);
   // מובייל בלבד: לאחר בחירה מקפלים את שאר האפשרויות ומציגים „שינוי הבחירה”.
   const [collapsed, setCollapsed] = React.useState(false);
@@ -169,7 +179,10 @@ export function StuckSelector() {
           {active ? (
             <article
               key={active.id}
-              className="stuck-answer rounded-3xl border border-border bg-surface px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:min-h-[24rem] sm:px-10 sm:py-10 sm:pb-10"
+              className={
+                "stuck-answer rounded-3xl border border-border bg-surface px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:py-10 sm:pb-10 " +
+                (compact ? "" : "sm:min-h-[24rem]")
+              }
             >
               <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
                 בחרתם
@@ -191,21 +204,23 @@ export function StuckSelector() {
                   </div>
                 </div>
 
-                <div className="flex gap-4">
-                  <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />
-                  <div>
-                    <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
-                      {stuckSelector.ui.chaptersLabel}
-                    </h3>
-                    <ul className="mt-2 flex flex-col gap-1.5">
-                      {active.chapters.map((chapter) => (
-                        <li key={chapter} className="text-[1.1rem] leading-relaxed text-foreground/90">
-                          {chapter}
-                        </li>
-                      ))}
-                    </ul>
+                {compact ? null : (
+                  <div className="flex gap-4">
+                    <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />
+                    <div>
+                      <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
+                        {stuckSelector.ui.chaptersLabel}
+                      </h3>
+                      <ul className="mt-2 flex flex-col gap-1.5">
+                        {active.chapters.map((chapter) => (
+                          <li key={chapter} className="text-[1.1rem] leading-relaxed text-foreground/90">
+                            {chapter}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="flex gap-4">
                   <HelpCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />

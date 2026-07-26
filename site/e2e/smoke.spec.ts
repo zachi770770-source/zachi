@@ -153,7 +153,6 @@ test("checkout is closed during pre-launch (no form, no payment)", async ({
 
 test("legacy URLs 301-redirect to the most relevant page", async ({ request }) => {
   const cases: [string, string][] = [
-    ["/book", "/"],
     ["/about", "/author"],
     ["/articles", "/faq"],
     ["/articles/some-old-post", "/faq"],
@@ -164,6 +163,14 @@ test("legacy URLs 301-redirect to the most relevant page", async ({ request }) =
     const location = res.headers()["location"] ?? "";
     expect(new URL(location, "http://localhost").pathname, `target for ${from}`).toBe(to);
   }
+});
+
+test("/book is a real page (not a redirect) with the deep-dive content", async ({ page }) => {
+  const res = await page.goto("/book", { waitUntil: "domcontentloaded" });
+  expect(res?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("מה יש בספר, ואיך הוא עובד");
+  // התוכן שהועבר מהבית מופיע כאן (כלים + מהדורות), ולא נשאר בבית.
+  await expect(page.getByText("כלים מעשיים בפנים")).toBeVisible();
 });
 
 test("home page has the canonical title and unique social metadata", async ({ page }) => {

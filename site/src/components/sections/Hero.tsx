@@ -51,7 +51,7 @@ export function Hero() {
 
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
               <Button asChild size="lg" className="h-14 px-7 text-[17px]">
-                <Link href={siteConfig.salesOpen ? "/#purchase" : "/#waitlist"}>
+                <Link href={siteConfig.salesOpen ? "/book#purchase" : "/#waitlist"}>
                   {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}
                 </Link>
               </Button>

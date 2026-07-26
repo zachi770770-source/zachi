@@ -34,7 +34,7 @@ export function ProductSchema() {
         ...base,
         offers: {
           "@type": "Offer",
-          url: `${siteConfig.url}/#purchase`,
+          url: `${siteConfig.url}/book#purchase`,
           priceCurrency: siteConfig.commerce.currency,
           price: siteConfig.commerce.price,
           availability:

@@ -1,6 +1,6 @@
 export const navLinks = [
-  { href: "/#thesis", label: "על הספר" },
-  { href: "/#method", label: "השיטה" },
+  { href: "/#thesis", label: "הרעיון" },
+  { href: "/book", label: "הספר" },
   { href: "/#sample", label: "טעימה" },
   { href: "/faq", label: "שאלות נפוצות" },
 ] as const;

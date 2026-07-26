@@ -125,7 +125,7 @@ export function SampleReader() {
     }
   };
 
-  const primaryHref = siteConfig.salesOpen ? "/#purchase" : "/waitlist";
+  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/waitlist";
   const primaryLabel = siteConfig.salesOpen
     ? "לרכישת הספר"
     : "קבלו עדכון כשהספר יוצא";
