@@ -100,17 +100,20 @@ export function StuckSelector() {
           <h2 id="stuck-heading" className="type-h2 mt-4">
             {stuckSelector.title}
           </h2>
-          <p className="type-lead mt-5 text-[1.2rem] text-foreground-muted sm:text-[1.3rem]">
+          <p
+            id="stuck-intro"
+            className="type-lead mt-5 text-[1.2rem] text-foreground-muted sm:text-[1.3rem]"
+          >
             {stuckSelector.intro}
           </p>
         </div>
 
         <fieldset className="mx-auto mt-10 max-w-4xl border-0 p-0 sm:mt-12">
-          <legend className="sr-only">{stuckSelector.intro}</legend>
           <div
             ref={groupRef}
             role="radiogroup"
-            aria-label={stuckSelector.title}
+            aria-labelledby="stuck-heading"
+            aria-describedby="stuck-intro"
             className="grid gap-4 sm:grid-cols-2 sm:gap-5"
           >
             {stuckSelector.states.map((state) => {
