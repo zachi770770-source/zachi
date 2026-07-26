@@ -3,6 +3,7 @@ import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { StationsSection } from "@/components/sections/StationsSection";
+import { StuckSelector } from "@/components/interactive/StuckSelector";
 import { AudienceSection } from "@/components/sections/AudienceSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { MethodSection } from "@/components/sections/MethodSection";
@@ -32,6 +33,7 @@ export default function HomePage() {
       <Hero />
       <ThesisSection />
       <StationsSection />
+      <StuckSelector />
       <AudienceSection />
       <OutcomesSection />
       <MethodSection />

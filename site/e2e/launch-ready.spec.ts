@@ -70,6 +70,58 @@ test.describe("Launch-readiness", () => {
     expect(Math.abs(pad - h)).toBeLessThanOrEqual(4);
   });
 
+  test("stuck selector: reveals one curated answer, is shareable, and changeable", async ({
+    page,
+  }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    const section = page.locator("#stuck");
+    await expect(
+      section.getByRole("heading", { name: /איפה אתם נתקעים/ })
+    ).toBeVisible();
+
+    // אף תשובה אינה מוצגת לפני בחירה (לא כל התשובות יחד).
+    await expect(section.locator("article")).toHaveCount(0);
+
+    // בחירה → תשובה אחת עם עיקרון, פרק, שאלה, טעימה והבהרה.
+    await page.getByText("כשאין סערה, נדמה לי שאין משיכה.", { exact: true }).click();
+    const answer = section.locator("article");
+    await expect(answer).toBeVisible();
+    await expect(answer).toContainText("עיקרון מתוך הספר");
+    await expect(answer).toContainText("חלק שני: עוברים את השער");
+    await expect(answer).toContainText("זו נקודת מחשבה ראשונית, לא אבחון");
+    await expect(
+      answer.getByRole("link", { name: "לקריאת טעימה מהספר" })
+    ).toBeVisible();
+    // הבחירה משוקפת ב-URL לשיתוף.
+    await expect(page).toHaveURL(/[?&]stuck=calm/);
+
+    // אפשר להחליף בחירה — עדיין רק תשובה אחת.
+    await page.getByText("אני מחפש ודאות שלא מגיעה.", { exact: true }).click();
+    await expect(section.locator("article")).toHaveCount(1);
+    await expect(section.locator("article")).toContainText("ודאות");
+    await expect(page).toHaveURL(/[?&]stuck=certainty/);
+  });
+
+  test("stuck selector: a shared URL preselects the matching answer", async ({ page }) => {
+    await page.goto("/?stuck=in-relationship", { waitUntil: "networkidle" });
+    const answer = page.locator("#stuck article");
+    await expect(answer).toBeVisible();
+    await expect(answer).toContainText("אהבה אינה מסתיימת ברגע שמוצאים");
+    await expect(page.locator("#stuck input:checked")).toHaveValue("in-relationship");
+  });
+
+  test("stuck selector: keyboard selection works (native radiogroup)", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    const firstRadio = page.locator('#stuck input[type="radio"]').first();
+    await firstRadio.focus();
+    await page.keyboard.press("Space");
+    await expect(page.locator("#stuck article")).toBeVisible();
+    // חצי המקלדת מזיזים ובוחרים את האפשרות הבאה (התנהגות רדיו נטיבית).
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#stuck input:checked")).toHaveCount(1);
+    await expect(page.locator("#stuck article")).toBeVisible();
+  });
+
   test("hero: opening thoughts are decorative, the refrain remains, CTA stays active", async ({
     page,
   }) => {
