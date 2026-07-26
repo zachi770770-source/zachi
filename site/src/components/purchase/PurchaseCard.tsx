@@ -87,8 +87,8 @@ export function PurchaseCard() {
           <Image
             src={siteConfig.images.cover}
             alt={siteConfig.images.coverAlt}
-            width={300}
-            height={450}
+            width={1400}
+            height={2073}
             unoptimized
             className="h-auto w-36 rounded-sm shadow-[0_18px_36px_-22px_rgba(43,36,31,0.6)] sm:w-full sm:max-w-[180px]"
           />
