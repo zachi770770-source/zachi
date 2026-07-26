@@ -57,7 +57,7 @@ export function MobileMenu() {
           <div className="mt-auto">
             <Button asChild size="lg" className="w-full">
               <Link
-                href={siteConfig.salesOpen ? "/#purchase" : "/#waitlist"}
+                href={siteConfig.salesOpen ? "/#purchase" : "/waitlist"}
                 onClick={() => setOpen(false)}
               >
                 {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}

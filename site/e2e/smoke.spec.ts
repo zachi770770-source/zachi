@@ -11,6 +11,10 @@ function trackErrors(page: Page) {
 
 const STATIC_ROUTES = [
   "/",
+  "/before-relationship",
+  "/starting-again",
+  "/inside-relationship",
+  "/waitlist",
   "/preview",
   "/author",
   "/faq",

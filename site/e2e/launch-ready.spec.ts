@@ -70,10 +70,53 @@ test.describe("Launch-readiness", () => {
     expect(Math.abs(pad - h)).toBeLessThanOrEqual(4);
   });
 
+  test("stations: home cards link to dedicated pages, which cross-link and CTA to the waitlist", async ({
+    page,
+  }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+
+    // כרטיס „לפני קשר” בעמוד הבית מוביל לדף הייעודי (ולא לעוגן פנימי).
+    await page
+      .getByRole("link", { name: /לפני קשר/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/before-relationship$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("לפני קשר");
+
+    // פירורי לחם נגישים + CTA לרשימת ההמתנה במצב טרום-השקה.
+    await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
+    const cta = page.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" });
+    await expect(cta).toHaveAttribute("href", "/waitlist");
+
+    // מעבר לתחנה אחרת דרך הקישורים בתחתית.
+    await page.getByRole("link", { name: /בתוך קשר/ }).first().click();
+    await expect(page).toHaveURL(/\/inside-relationship$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("בתוך קשר");
+  });
+
+  test("waitlist: dedicated page saves a real signup", async ({ page }) => {
+    await page.goto("/waitlist", { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { level: 1, name: "קבלו עדכון כשהספר יוצא" })).toBeVisible();
+    await page.getByLabel("כתובת אימייל").fill("station-signup@example.com");
+    await page.getByRole("checkbox").click();
+    await page.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+    await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
+  });
+
   test("RTL + no horizontal overflow on home and key pages (mobile)", async ({ browser }) => {
     const context = await browser.newContext({ viewport: MOBILE });
     const page = await context.newPage();
-    for (const path of ["/", "/author", "/faq", "/accessibility", "/checkout"]) {
+    for (const path of [
+      "/",
+      "/before-relationship",
+      "/starting-again",
+      "/inside-relationship",
+      "/waitlist",
+      "/author",
+      "/faq",
+      "/accessibility",
+      "/checkout",
+    ]) {
       await page.goto(path, { waitUntil: "networkidle" });
       await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
       const overflow = await page.evaluate(

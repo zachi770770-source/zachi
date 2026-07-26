@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
@@ -7,7 +8,7 @@ import { stations } from "@/content/book";
 /**
  * "באיזו תחנה אתם נמצאים?" - שלוש נקודות פתיחה לאותו ספר ואותו מסע
  * (לפני קשר / מתחילים מחדש / בתוך קשר). מבהיר שמדובר בספר אחד עם רעיון
- * מאחד, וכל מסלול מפנה לאזור רלוונטי באותו עמוד.
+ * מאחד, וכל כרטיס מוביל לדף התחנה הייעודי שלו.
  */
 export function StationsSection() {
   return (
@@ -27,9 +28,10 @@ export function StationsSection() {
 
         <Reveal className="mt-14 grid gap-6 md:grid-cols-3">
           {stations.tracks.map((track) => (
-            <div
+            <Link
               key={track.id}
-              className="flex flex-col rounded-2xl border border-border bg-surface p-7 sm:p-8"
+              href={track.href}
+              className="group flex flex-col rounded-2xl border border-border bg-surface p-7 transition-colors hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-8"
             >
               <h3 className="font-serif text-2xl font-semibold text-foreground">
                 {track.title}
@@ -37,14 +39,14 @@ export function StationsSection() {
               <p className="mt-4 flex-1 text-[17px] leading-relaxed text-foreground-muted">
                 {track.description}
               </p>
-              <a
-                href={track.href}
-                className="mt-6 inline-flex items-center gap-2 text-[15px] font-semibold text-brand transition-colors hover:text-brand-hover"
-              >
+              <span className="mt-6 inline-flex items-center gap-2 text-[15px] font-semibold text-brand transition-colors group-hover:text-brand-hover">
                 {track.linkLabel}
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </a>
-            </div>
+                <ArrowLeft
+                  className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </span>
+            </Link>
           ))}
         </Reveal>
       </Container>
