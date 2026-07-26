@@ -897,7 +897,8 @@ details[open] .faq-answer {
   font-weight: 700;
   font-size: 2rem;
   line-height: 1;
-  color: color-mix(in srgb, var(--color-brand) 60%, transparent);
+  /* מספרים דקורטיביים אך גלויים — צבע כהה מספיק ל-3:1 (WCAG 1.4.3, טקסט גדול). */
+  color: color-mix(in srgb, var(--color-brand) 85%, transparent);
   font-variant-numeric: tabular-nums;
 }
 .book-map__chapter {
