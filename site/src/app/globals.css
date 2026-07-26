@@ -437,6 +437,23 @@
   }
 }
 
+/* מעבר קצר ועדין לכרטיס תשובת „איפה אתם נתקעים?” — opacity + translateY
+ * מינימלי, משך קצר, ללא קפיצת גובה. מכובד אוטומטית תחת prefers-reduced-motion
+ * (הכלל הגלובלי מכווץ את משך האנימציה למצב הסופי). */
+@keyframes stuckAnswerIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.stuck-answer {
+  animation: stuckAnswerIn 240ms ease-out both;
+}
+
 /* שדרוג: אנימציות מונָעות-גלילה (נתמך ב-Chromium; שאר הדפדפנים מקבלים
  * את המצב הבסיסי הסטטי לעיל). הטווח קצר — רק ~42vh הראשונים — כדי שלא
  * תהיה תנועה בזמן קריאת תוכן ארוך בהמשך העמוד. */

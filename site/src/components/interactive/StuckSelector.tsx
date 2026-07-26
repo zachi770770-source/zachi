@@ -17,13 +17,17 @@ const VALID_IDS = new Set(stuckSelector.states.map((s) => s.id));
  * גישת הספר (התוכן ב-src/content/stuck.ts). אין אבחון, ציון או הבטחה.
  *
  * חוויית משתמש: ללא הרשמה, ללא שמירה בשרת. הבחירה ניתנת להחלפה בכל רגע,
- * ומשוקפת ב-URL (?stuck=<id>) לצורך שיתוף — דרך history.replaceState בלבד,
- * בלי ניווט שרת. נגישות: radiogroup נטיבי (חיצי מקלדת), אזור תוצאה עם
- * aria-live. עובד גם ללא אנימציה (התוכן מוצג תמיד; ה-fade הוא קישוט בלבד).
+ * ומשוקפת ב-URL (?stuck=<id>) לצורך שיתוף — דרך history.replaceState בלבד.
+ * במחשב כל האפשרויות גלויות תחת התוצאה; במובייל, לאחר בחירה, נשארת האפשרות
+ * הנבחרת בלבד עם קישור „שינוי הבחירה”. נגישות: radiogroup נטיבי (חיצי
+ * מקלדת), אזור תוצאה עם aria-live. עובד גם ללא אנימציה.
  */
 export function StuckSelector() {
   const [selected, setSelected] = React.useState<StuckState["id"] | null>(null);
+  // מובייל בלבד: לאחר בחירה מקפלים את שאר האפשרויות ומציגים „שינוי הבחירה”.
+  const [collapsed, setCollapsed] = React.useState(false);
   const sectionRef = React.useRef<HTMLElement>(null);
+  const groupRef = React.useRef<HTMLDivElement>(null);
   const openedRef = React.useRef(false);
 
   // קריאת בחירה משותפת מה-URL בטעינה (שיתוף קישור), ללא ניווט שרת.
@@ -34,6 +38,7 @@ export function StuckSelector() {
     if (raw && VALID_IDS.has(raw as StuckState["id"])) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- סנכרון חד-פעמי מה-URL בטעינה
       setSelected(raw as StuckState["id"]);
+      setCollapsed(true);
     }
   }, []);
 
@@ -59,11 +64,23 @@ export function StuckSelector() {
 
   const choose = React.useCallback((id: StuckState["id"]) => {
     setSelected(id);
+    setCollapsed(true);
     trackEvent("stuck_select", { option: id });
     // עדכון ה-URL לשיתוף — בלי לרענן, בלי לגלול, בלי שרת.
     const url = new URL(window.location.href);
     url.searchParams.set(URL_PARAM, id);
     window.history.replaceState(null, "", url.toString());
+  }, []);
+
+  // „שינוי הבחירה” (מובייל) — מחזיר את כל האפשרויות ומעביר פוקוס לקבוצה.
+  const expand = React.useCallback(() => {
+    setCollapsed(false);
+    requestAnimationFrame(() => {
+      const group = groupRef.current;
+      if (!group) return;
+      group.scrollIntoView({ block: "nearest" });
+      group.querySelector<HTMLInputElement>('input[type="radio"]')?.focus();
+    });
   }, []);
 
   const active = selected
@@ -74,33 +91,41 @@ export function StuckSelector() {
     <section
       ref={sectionRef}
       id="stuck"
-      className="scroll-mt-24 py-20 sm:py-28"
+      className="scroll-mt-24 py-14 sm:py-20 lg:py-24"
       aria-labelledby="stuck-heading"
     >
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-3xl text-center">
           <span className="kicker">נקודת מבט</span>
           <h2 id="stuck-heading" className="type-h2 mt-4">
             {stuckSelector.title}
           </h2>
-          <p className="type-lead mt-5 text-foreground-muted">
+          <p className="type-lead mt-5 text-[1.2rem] text-foreground-muted sm:text-[1.3rem]">
             {stuckSelector.intro}
           </p>
         </div>
 
-        <fieldset className="mx-auto mt-12 max-w-4xl border-0 p-0">
+        <fieldset className="mx-auto mt-10 max-w-4xl border-0 p-0 sm:mt-12">
           <legend className="sr-only">{stuckSelector.intro}</legend>
           <div
+            ref={groupRef}
             role="radiogroup"
             aria-label={stuckSelector.title}
-            className="grid gap-4 sm:grid-cols-2"
+            className="grid gap-4 sm:grid-cols-2 sm:gap-5"
           >
             {stuckSelector.states.map((state) => {
               const checked = selected === state.id;
+              // במובייל, לאחר בחירה, מוסתרות האפשרויות שלא נבחרו (במחשב תמיד גלויות).
+              const hiddenOnMobile = collapsed && !checked;
               return (
                 <label
                   key={state.id}
-                  className="group relative flex cursor-pointer items-center gap-3 rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-brand/40 hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-brand-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:p-6"
+                  className={
+                    "group relative min-h-[76px] cursor-pointer items-center gap-4 rounded-2xl border bg-surface px-5 py-5 transition-colors hover:border-brand/40 hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-brand-muted has-[:checked]:shadow-[0_1px_0_rgba(169,79,61,0.12)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:px-6 sm:py-6 " +
+                    (checked ? "border-brand" : "border-border") +
+                    " " +
+                    (hiddenOnMobile ? "hidden sm:flex" : "flex")
+                  }
                 >
                   <input
                     type="radio"
@@ -112,52 +137,66 @@ export function StuckSelector() {
                   />
                   <span
                     aria-hidden="true"
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-border-strong transition-colors group-has-[:checked]:border-brand"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-border-strong transition-colors group-has-[:checked]:border-brand"
                   >
-                    <span className="h-2.5 w-2.5 scale-0 rounded-full bg-brand transition-transform group-has-[:checked]:scale-100" />
+                    <span className="h-3 w-3 scale-0 rounded-full bg-brand transition-transform group-has-[:checked]:scale-100" />
                   </span>
-                  <span className="text-start text-[17px] font-medium leading-snug text-foreground">
+                  <span className="text-start text-[18px] font-medium leading-snug text-foreground sm:text-[19px]">
                     {state.option}
                   </span>
                 </label>
               );
             })}
           </div>
+
+          {/* מובייל: קישור „שינוי הבחירה” המחזיר את כל האפשרויות */}
+          {collapsed && active ? (
+            <button
+              type="button"
+              onClick={expand}
+              className="mt-4 inline-flex items-center gap-2 rounded-md px-2 py-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:hidden"
+            >
+              שינוי הבחירה
+            </button>
+          ) : null}
         </fieldset>
 
         {/* אזור התשובה — נקרא ע"י קורא מסך (aria-live). מוצג רק המצב הנבחר. */}
-        <div aria-live="polite" className="mx-auto mt-8 max-w-3xl">
+        <div aria-live="polite" className="mx-auto mt-8 max-w-[44rem] sm:mt-10">
           {active ? (
             <article
               key={active.id}
-              className="animate-fade-in rounded-3xl border border-border bg-surface p-6 sm:p-9"
+              className="stuck-answer rounded-3xl border border-border bg-surface px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:min-h-[24rem] sm:px-10 sm:py-10 sm:pb-10"
             >
-              <p className="text-[1.15rem] font-medium leading-relaxed text-foreground">
+              <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
+                בחרתם
+              </p>
+              <p className="mt-2.5 text-[1.4rem] font-semibold leading-[1.4] text-foreground sm:text-[1.65rem]">
                 {active.identification}
               </p>
 
-              <div className="mt-7 flex flex-col gap-6">
-                <div className="flex gap-3.5">
+              <div className="mt-8 flex flex-col gap-7">
+                <div className="flex gap-4">
                   <Compass className="mt-0.5 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />
                   <div>
                     <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
                       {stuckSelector.ui.principleLabel}
                     </h3>
-                    <p className="mt-1.5 text-[1.05rem] leading-relaxed text-foreground/90">
+                    <p className="mt-2 text-[1.1rem] leading-[1.75] text-foreground/90">
                       {active.principle}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-3.5">
+                <div className="flex gap-4">
                   <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />
                   <div>
                     <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
                       {stuckSelector.ui.chaptersLabel}
                     </h3>
-                    <ul className="mt-1.5 flex flex-col gap-1">
+                    <ul className="mt-2 flex flex-col gap-1.5">
                       {active.chapters.map((chapter) => (
-                        <li key={chapter} className="text-[1.05rem] text-foreground/90">
+                        <li key={chapter} className="text-[1.1rem] leading-relaxed text-foreground/90">
                           {chapter}
                         </li>
                       ))}
@@ -165,21 +204,21 @@ export function StuckSelector() {
                   </div>
                 </div>
 
-                <div className="flex gap-3.5">
+                <div className="flex gap-4">
                   <HelpCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />
                   <div>
                     <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
                       {stuckSelector.ui.questionLabel}
                     </h3>
-                    <p className="mt-1.5 font-serif text-[1.15rem] italic leading-relaxed text-foreground">
+                    <p className="mt-2 font-serif text-[1.2rem] italic leading-[1.6] text-foreground">
                       {active.question}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-col items-start gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
-                <Button asChild size="lg" className="w-full sm:w-auto">
+              <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                <Button asChild size="lg" className="h-[56px] w-full px-8 text-[17px] sm:w-auto">
                   <Link
                     href={stuckSelector.sampleHref}
                     onClick={() => trackEvent("stuck_to_sample", { option: active.id })}
@@ -188,12 +227,12 @@ export function StuckSelector() {
                     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                   </Link>
                 </Button>
-                <p className="text-sm text-foreground-muted">
+                <p className="hidden text-sm text-foreground-muted sm:block">
                   {stuckSelector.ui.changeHint}
                 </p>
               </div>
 
-              <p className="mt-6 rounded-xl bg-surface-muted px-4 py-3 text-[13px] leading-relaxed text-foreground-muted">
+              <p className="mt-7 border-t border-border pt-5 text-[13.5px] leading-relaxed text-foreground-muted">
                 {stuckSelector.disclaimer}
               </p>
             </article>

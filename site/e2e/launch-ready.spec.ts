@@ -110,6 +110,36 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator("#stuck input:checked")).toHaveValue("in-relationship");
   });
 
+  test("stuck selector: mobile collapses to the chosen option with a change link", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ viewport: MOBILE });
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "networkidle" });
+    const options = page.locator("#stuck label");
+    await expect(options).toHaveCount(4);
+
+    await page.getByText("כשאין סערה, נדמה לי שאין משיכה.", { exact: true }).click();
+    // רק האפשרות שנבחרה נשארת גלויה במובייל.
+    await expect(options.filter({ visible: true })).toHaveCount(1);
+    const change = page.getByRole("button", { name: "שינוי הבחירה" });
+    await expect(change).toBeVisible();
+
+    // „שינוי הבחירה” מחזיר את כל ארבע האפשרויות.
+    await change.click();
+    await expect(options.filter({ visible: true })).toHaveCount(4);
+    await context.close();
+  });
+
+  test("stuck selector: reduced-motion still reveals the answer", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto("/?stuck=calm", { waitUntil: "networkidle" });
+    await expect(page.locator("#stuck article")).toBeVisible();
+    await expect(page.locator("#stuck article")).toContainText("עיקרון מתוך הספר");
+    await context.close();
+  });
+
   test("stuck selector: keyboard selection works (native radiogroup)", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const firstRadio = page.locator('#stuck input[type="radio"]').first();
