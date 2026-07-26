@@ -24,21 +24,21 @@ export function TrustBar({ className }: { className?: string }) {
   return (
     <ul
       className={
-        "flex flex-wrap items-center gap-x-5 gap-y-2 text-[15px] text-foreground-muted" +
+        "flex flex-wrap items-center gap-x-6 gap-y-3 text-[16.5px] leading-relaxed text-foreground/75" +
         (className ? ` ${className}` : "")
       }
     >
       {items.map((item, index) => {
         const Icon = ICONS[item.id] ?? ShieldCheck;
         return (
-          <li key={item.id} className="flex items-center gap-2">
+          <li key={item.id} className="flex items-center gap-2.5">
             {index > 0 ? (
               <span
                 className="hidden h-1 w-1 rounded-full bg-border-strong sm:inline-block"
                 aria-hidden="true"
               />
             ) : null}
-            <Icon className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+            <Icon className="h-5 w-5 text-brand" aria-hidden="true" />
             {item.label}
           </li>
         );

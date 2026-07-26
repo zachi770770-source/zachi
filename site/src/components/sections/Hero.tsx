@@ -25,7 +25,7 @@ export function Hero() {
       </div>
 
       <Container className="flex min-h-[calc(100svh-76px)] items-start py-6 lg:items-center lg:py-16">
-        <div className="grid w-full items-center gap-y-6 lg:grid-cols-[54fr_46fr] lg:gap-x-20">
+        <div className="grid w-full items-center gap-y-6 lg:grid-cols-[52fr_48fr] lg:gap-x-16">
           {/* תוכן — יחידה רציפה אחת (ימין בדסקטופ, שני במובייל) */}
           <div className="order-2 flex flex-col items-start lg:order-1">
             <span className="kicker">{hero.eyebrow}</span>
@@ -40,7 +40,7 @@ export function Hero() {
               מאת צחי חן
             </p>
 
-            <p className="mt-4 max-w-[44ch] text-[19px] leading-[1.55] text-foreground-muted">
+            <p className="mt-4 max-w-[44ch] text-[21px] leading-[1.6] text-foreground/80">
               לומדים לחפש, להשוות ולבחון — אבל כמעט אף אחד לא מלמד אותנו איך
               בונים קשר טוב אחרי שפוגשים אדם נכון.
             </p>
@@ -79,7 +79,7 @@ export function Hero() {
             </div>
 
             <figure className="hero-book flex flex-col items-center gap-3 lg:gap-4">
-              <div className="relative w-[118px] sm:w-[200px] lg:w-[250px]">
+              <div className="relative w-[134px] sm:w-[226px] lg:w-[284px]">
                 <div
                   aria-hidden="true"
                   className="absolute -bottom-4 start-1/2 h-7 w-[72%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/22 blur-2xl"

@@ -79,13 +79,14 @@ test.describe("Launch-readiness", () => {
     const thoughts = page.locator(".hero-thoughts");
     await expect(thoughts).toHaveAttribute("aria-hidden", "true");
     for (const thought of [
-      "אולי אין מספיק משיכה",
       "אולי יש מישהו מתאים יותר",
       "למה אני עדיין לא בטוח?",
       "איך יודעים אם נכון להמשיך?",
     ]) {
       await expect(page.locator(".hero-thought", { hasText: thought })).toHaveCount(1);
     }
+    // רק שלוש המחשבות החזקות — לא נותרה מחשבה רביעית.
+    await expect(page.locator(".hero-thought")).toHaveCount(3);
 
     // המסר שנשאר קיים וקריא.
     const refrain = page.locator(".hero-refrain");
