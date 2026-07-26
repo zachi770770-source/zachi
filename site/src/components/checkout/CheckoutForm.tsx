@@ -133,7 +133,7 @@ export function CheckoutForm({
         </div>
       ) : (
         <div className="rounded-xl bg-surface-muted p-4 text-[14px] leading-relaxed text-foreground-muted">
-          זוהי מהדורה דיגיטלית. אנחנו צריכים רק שם וכתובת מייל — הגישה
+          זוהי מהדורה דיגיטלית. אנחנו צריכים רק שם וכתובת מייל, הגישה
           לספר תישלח לכתובת שתזינו כאן. אין צורך בכתובת למשלוח.
         </div>
       )}

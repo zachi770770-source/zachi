@@ -18,7 +18,7 @@ import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
 
 export const metadata = pageMetadata({
-  title: `${siteConfig.bookTitle} — ספר מעשי לדייטינג ולזוגיות | ${siteConfig.author.name}`,
+  title: `${siteConfig.bookTitle}: ספר מעשי לדייטינג ולזוגיות | ${siteConfig.author.name}`,
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,

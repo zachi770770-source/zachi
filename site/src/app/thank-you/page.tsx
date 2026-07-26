@@ -104,7 +104,7 @@ export default async function ThankYouPage({
                 <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
                   {siteConfig.isPaymentDemoMode
                     ? "במצב הדגמה לא נשלח קובץ בפועל. בגרסה החיה, לאחר תשלום מאומת יישלח קישור הורדה מאובטח לכתובת המייל שלכם."
-                    : `הגישה לספר נשלחת ל${order.email} — ${siteConfig.digital.deliveryMethod}. אין משלוח ואין המתנה.`}
+                    : `הגישה לספר נשלחת ל${order.email}, ${siteConfig.digital.deliveryMethod}. אין משלוח ואין המתנה.`}
                 </p>
               )}
             </div>

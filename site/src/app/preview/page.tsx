@@ -7,7 +7,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   title: "הצצה לספר",
-  description: `טעימה נגישה מתוך ${siteConfig.bookTitle} — קטע לקריאה, העיקרון המרכזי ומפת שלושת חלקי הספר.`,
+  description: `טעימה נגישה מתוך ${siteConfig.bookTitle}, קטע לקריאה, העיקרון המרכזי ומפת שלושת חלקי הספר.`,
   path: "/preview",
   ogType: "article",
 });

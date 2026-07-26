@@ -36,7 +36,7 @@ export const siteConfig = {
   bookTitle: "מדייטים לאהבה",
   tagline: "דייטינג הוא חיפוש. אהבה היא בנייה.",
   description:
-    "ספר אחד לשלוש תחנות בדרך לאהבה: רווקים שרוצים להיכנס לקשר, גרושים שמתחילים מחדש וזוגות שרוצים להעמיק את הקשר. דייטינג הוא חיפוש; אהבה נבנית — ובתוך קשר אנחנו פוגשים גם את עצמנו.",
+    "ספר אחד לשלוש תחנות בדרך לאהבה: רווקים שרוצים להיכנס לקשר, גרושים שמתחילים מחדש וזוגות שרוצים להעמיק את הקשר. דייטינג הוא חיפוש; אהבה נבנית, ובתוך קשר אנחנו פוגשים גם את עצמנו.",
 
   /** גרסת שנה דינמית לזכויות היוצרים בפוטר - אין צורך לעדכן ידנית. */
   get copyrightYear() {
@@ -48,7 +48,7 @@ export const siteConfig = {
     // אין לייחס לצחי חן הכשרה, מקצוע טיפולי או תארים שאינם קיימים.
     name: "צחי חן",
     shortBio:
-      "צחי חן זיהה קושי משותף אצל רווקים, גרושים וזוגות — ומתוכו כתב את מדייטים לאהבה: דרך מעשית להבין שאהבה טובה נבנית ולא רק נמצאת, ושבתוך קשר אנחנו פוגשים גם את עצמנו.",
+      "צחי חן זיהה קושי משותף אצל רווקים, גרושים וזוגות, ומתוכו כתב את מדייטים לאהבה: דרך מעשית להבין שאהבה טובה נבנית ולא רק נמצאת, ושבתוך קשר אנחנו פוגשים גם את עצמנו.",
     photo: "/images/author/zachi-chen-960.jpg",
     photoAlt: "צחי חן, מחבר הספר מדייטים לאהבה",
     /**
@@ -73,10 +73,10 @@ export const siteConfig = {
 
   business: {
     /** שם העסק/העוסק לצורך הצהרות משפטיות. */
-    legalName: "PLACEHOLDER — שם העסק / עוסק מורשה",
+    legalName: "PLACEHOLDER: שם העסק / עוסק מורשה",
     /** מספר עוסק מורשה/ח.פ, אם רלוונטי. */
     registrationNumber: "",
-    address: "PLACEHOLDER — כתובת רשומה",
+    address: "PLACEHOLDER: כתובת רשומה",
   },
 
   images: {
@@ -210,7 +210,7 @@ export const siteConfig = {
     { id: "secure-payment", label: "תשלום מאובטח", enabled: true, demoHidden: true },
     { id: "download", label: "גישה בהורדה ובמייל", enabled: true },
     { id: "devices", label: "קריאה בנייד, בטאבלט ובמחשב", enabled: true },
-    { id: "guest", label: "מהדורה דיגיטלית — גישה מיידית", enabled: true },
+    { id: "guest", label: "מהדורה דיגיטלית: גישה מיידית", enabled: true },
   ],
 
   bonus: {
@@ -252,7 +252,7 @@ export const siteConfig = {
   salesOpen: false,
 
   /** תווית מחיר לתקופת ה-Pre-launch. */
-  preLaunchPriceLabel: "בקרוב — הספר הדיגיטלי ב-98 ₪",
+  preLaunchPriceLabel: "בקרוב: הספר הדיגיטלי ב-98 ₪",
 } as const;
 
 export type SiteConfig = typeof siteConfig;
