@@ -11,6 +11,7 @@
  */
 
 export type AnalyticsEventName =
+  | "waitlist_signup"
   | "view_home"
   | "view_product"
   | "click_buy_hero"

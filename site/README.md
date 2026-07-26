@@ -153,6 +153,42 @@ HMAC), בלי לבצע שום חיוב. מסך זה מסומן בבירור כ-D
 4. עדכנו את `getOrderRepository()` ב-`src/lib/orders/index.ts`
    להחזיר את המימוש החדש במקום `InMemoryOrderRepository`.
 
+## אחסון ואספקת הספר הדיגיטלי (Supabase Storage)
+
+שכבת האחסון של קובץ הספר בנויה כמודול **שרת בלבד** תחת
+`src/lib/storage/` (`import "server-only"`). היא קוראת אך ורק את חמשת
+משתני הסביבה `SUPABASE_URL`, `SUPABASE_SECRET_KEY`,
+`BOOK_STORAGE_BUCKET`, `BOOK_PDF_PATH`, `BOOK_DOWNLOAD_TTL_SECONDS`,
+ומייצרת **קישור חתום זמני** לכל אספקה מורשית.
+
+עקרונות אבטחה שנאכפים בקוד:
+
+- **ה-bucket חייב להישאר פרטי.** משתמשים אך ורק ב-`createSignedUrl` -
+  לעולם לא ב-`getPublicUrl`.
+- **`SUPABASE_SECRET_KEY` הוא שרתי בלבד.** לעולם לא `NEXT_PUBLIC_`, ולעולם
+  לא מיובא לתוך קומפוננטת client. ה-client מאותחל עם
+  `persistSession=false` ו-`autoRefreshToken=false`.
+- קישור חתום מונפק **אך ורק** כאשר סופק אובייקט הזמנה עם
+  `paymentStatus === "paid"` (`issueBookDownloadUrl`). `pending` /
+  `failed` / `cancelled` / חסר / לא ידוע נדחים. כתובת מייל בלבד אינה הרשאה.
+- ה-TTL מוגבל ל-60–900 שניות (ברירת מחדל בטוחה 900). ערך חסר → 900;
+  ערך לא חוקי או מעל 900 → כישלון סגור.
+- הקישור נוצר טרי בכל אספקה, **אינו נשמר ב-DB ואינו מוחזק במטמון**.
+  נתיב האובייקט הקבוע אינו נחשף לדפדפן.
+- שגיאות מסווגות למטא-נתונים בטוחים בלבד (`diagnostics.ts`) - לעולם לא
+  זולגים URL, מפתחות, שם bucket, נתיב, הודעת ספק או stack ללוגים או ללקוח.
+- קובץ ה-PDF אינו נמצא ב-`/public`, ב-Git, ב-frontend bundle או ב-build output.
+
+`verifyBookStorage()` היא בדיקת מוכנוּת שרתית פנימית (לא endpoint ציבורי)
+שמחזירה בוליאנים בלבד ולעולם לא את הקישור החתום.
+
+> **מוכנוּת אחסון אינה אומרת שהמכירה או ה-fulfillment מוכנים.** כל עוד
+> `SALES_ENABLED=false` אין באתר כפתור הורדה ואין endpoint הורדה ציבורי.
+> טרם קיימת נקודת הורדה ציבורית - יש להוסיפה רק כאשר יקיים מנגנון
+> token חד-פעמי מאובטח קריפטוגרפית הקשור להזמנה משולמת מתמשכת.
+
+פירוט מלא: ראו [`docs/BOOK_STORAGE.md`](docs/BOOK_STORAGE.md).
+
 ## אנליטיקה ועוגיות
 
 - `src/lib/analytics.ts` - שכבת הפשטה לאירועי אנליטיקה

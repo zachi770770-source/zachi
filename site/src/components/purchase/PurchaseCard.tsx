@@ -65,8 +65,8 @@ export function PurchaseCard() {
             ) : null}
           </ul>
 
-          <Button size="lg" disabled aria-disabled="true" className="h-14 w-full text-[17px]">
-            המכירה תיפתח בקרוב
+          <Button asChild size="lg" className="h-14 w-full text-[17px]">
+            <Link href="/preview">לקריאת טעימה מהספר</Link>
           </Button>
 
           <p className="text-[13px] leading-relaxed text-foreground-muted">
@@ -87,8 +87,8 @@ export function PurchaseCard() {
           <Image
             src={siteConfig.images.cover}
             alt={siteConfig.images.coverAlt}
-            width={300}
-            height={450}
+            width={1400}
+            height={2100}
             unoptimized
             className="h-auto w-36 rounded-sm shadow-[0_18px_36px_-22px_rgba(43,36,31,0.6)] sm:w-full sm:max-w-[180px]"
           />

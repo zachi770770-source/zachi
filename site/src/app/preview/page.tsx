@@ -7,6 +7,7 @@ import { preview } from "@/content/book";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { PreviewGallery } from "@/components/preview/PreviewGallery";
+import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata: Metadata = {
@@ -61,24 +62,38 @@ export default function PreviewPage() {
         </div>
       </div>
 
-      <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-4 rounded-xl border border-border bg-surface-muted p-8 text-center">
-        <p className="text-lg text-foreground-muted">
-          קראתם עד כאן? זה בדיוק המקום להמשיך.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button asChild size="lg">
-            <Link href="/#purchase">{preview.ctaLabel}</Link>
-          </Button>
-          {preview.sampleChapterPdfUrl ? (
-            <Button asChild size="lg" variant="outline">
-              <a href={preview.sampleChapterPdfUrl} target="_blank" rel="noreferrer">
-                <FileDown className="h-4 w-4" aria-hidden="true" />
-                הורדת פרק לדוגמה
-              </a>
+      {siteConfig.salesOpen ? (
+        <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-4 rounded-xl border border-border bg-surface-muted p-8 text-center">
+          <p className="text-lg text-foreground-muted">
+            קראתם עד כאן? זה בדיוק המקום להמשיך.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button asChild size="lg">
+              <Link href="/#purchase">{preview.ctaLabel}</Link>
             </Button>
-          ) : null}
+            {preview.sampleChapterPdfUrl ? (
+              <Button asChild size="lg" variant="outline">
+                <a href={preview.sampleChapterPdfUrl} target="_blank" rel="noreferrer">
+                  <FileDown className="h-4 w-4" aria-hidden="true" />
+                  הורדת פרק לדוגמה
+                </a>
+              </Button>
+            ) : null}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="mx-auto mt-14 max-w-md text-center">
+          <h2 className="type-quote text-[26px] font-bold text-foreground">
+            רוצים לדעת כשהספר יוצא?
+          </h2>
+          <p className="mt-3 text-[17px] leading-relaxed text-foreground-muted">
+            השאירו אימייל ונשלח לכם עדכון כשהמהדורה הדיגיטלית תיפתח.
+          </p>
+          <div className="mt-6 text-start">
+            <WaitlistForm source="sample" />
+          </div>
+        </div>
+      )}
     </Container>
   );
 }
