@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Next מספק את "server-only" כמודול וירטואלי; בבדיקות מפנים ל-stub ריק.
+      "server-only": path.resolve(__dirname, "./vitest-stubs/server-only.ts"),
     },
   },
   test: {
