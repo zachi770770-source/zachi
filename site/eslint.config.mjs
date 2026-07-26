@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // סקריפט build-time server-only (Production Gate) — לא חלק מקוד האפליקציה.
+    "scripts/**",
   ]),
 ]);
 
