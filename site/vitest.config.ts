@@ -7,6 +7,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // `server-only` זורק כברירת מחדל מחוץ לתנאי react-server. בבדיקות אנו
+      // ממפים אותו למודול ריק כדי לבדוק מודולים שרתיים ללא שבירת גבול השרת.
+      "server-only": path.resolve(__dirname, "./test/server-only-stub.ts"),
     },
   },
   test: {
