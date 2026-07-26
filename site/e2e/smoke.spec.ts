@@ -70,9 +70,9 @@ test("mobile menu opens and closes", async ({ page }) => {
   await expect(page.getByRole("button", { name: "סגירת תפריט" })).toBeHidden();
 });
 
-test("FAQ accordion opens an answer", async ({ page }) => {
+test("FAQ (native details) opens an answer", async ({ page }) => {
   await page.goto("/faq", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "למי הספר מתאים?" }).click();
+  await page.getByText("למי הספר מתאים?", { exact: true }).click();
   await expect(page.getByText(/שלוש תחנות בדרך לאהבה/)).toBeVisible();
 });
 
@@ -125,13 +125,14 @@ test("contact form submits successfully", async ({ page }) => {
   await expect(page.getByText("ההודעה נשלחה בהצלחה")).toBeVisible();
 });
 
-test("newsletter form submits successfully", async ({ page }) => {
+test("waitlist form submits successfully", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.getByLabel("שם פרטי").fill("בודקת");
-  await page.getByLabel("אימייל", { exact: false }).first().fill("newslettertest@example.com");
-  await page.getByLabel(/אני מסכים\/ה לקבל את התוכן/).click();
-  await page.getByRole("button", { name: "שליחת הטעימה החינמית" }).click();
-  await expect(page.getByText("נרשמתם בהצלחה")).toBeVisible();
+  const waitlist = page.locator("#waitlist");
+  await waitlist.getByLabel("שם פרטי").fill("בודקת");
+  await waitlist.getByLabel("אימייל", { exact: false }).first().fill("waitlisttest@example.com");
+  await waitlist.getByLabel(/שתעדכנו אותי במייל כשהספר יוצא/).click();
+  await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+  await expect(page.getByText(/נרשמתם לרשימת ההמתנה/)).toBeVisible();
 });
 
 test("checkout is closed during pre-launch (no form, no payment)", async ({

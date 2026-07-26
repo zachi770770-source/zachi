@@ -93,7 +93,15 @@ export function Footer() {
             © {siteConfig.copyrightYear} {siteConfig.bookTitle}. כל הזכויות
             שמורות.
           </p>
-          <p>האתר בבנייה מתמדת לשיפור הנגישות עבור כלל המשתמשים.</p>
+          <p>
+            אנו פועלים לשיפור הנגישות באופן מתמשך.{" "}
+            <Link
+              href="/accessibility"
+              className="underline underline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              הצהרת נגישות
+            </Link>
+          </p>
         </div>
       </Container>
     </footer>

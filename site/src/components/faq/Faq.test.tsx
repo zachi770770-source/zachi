@@ -10,22 +10,21 @@ const items = [
 ];
 
 describe("Faq", () => {
-  it("renders every question, collapsed by default", () => {
+  it("renders every question and keeps answers in the DOM (crawlable, no-JS)", () => {
     render(<Faq items={items} />);
-    const trigger = screen.getByRole("button", { name: "שאלה ראשונה?" });
-    expect(trigger).toBeInTheDocument();
-    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText("שאלה ראשונה?")).toBeInTheDocument();
     expect(screen.getByText("שאלה שנייה?")).toBeInTheDocument();
+    // התשובות נמצאות ב-HTML גם לפני פתיחה — נגישות וסריקה גם ללא JavaScript.
+    expect(screen.getByText("תשובה ראשונה.")).toBeInTheDocument();
+    expect(screen.getByText("תשובה שנייה.")).toBeInTheDocument();
   });
 
-  it("reveals the answer when a question is opened", async () => {
+  it("opens a question via the native details/summary toggle", async () => {
     const user = userEvent.setup();
-    render(<Faq items={items} />);
-
-    const trigger = screen.getByRole("button", { name: "שאלה ראשונה?" });
-    await user.click(trigger);
-
-    expect(trigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("תשובה ראשונה.")).toBeVisible();
+    const { container } = render(<Faq items={items} />);
+    const details = container.querySelectorAll("details");
+    expect(details[0].open).toBe(false);
+    await user.click(screen.getByText("שאלה ראשונה?"));
+    expect(details[0].open).toBe(true);
   });
 });

@@ -37,11 +37,14 @@ export default function AuthorPage() {
         />
         <div className="flex flex-col items-center gap-3">
           <span className="text-sm font-semibold uppercase tracking-wide text-brand-hover">
-            {siteConfig.author.name}
+            {siteConfig.author.name} — מחבר {siteConfig.bookTitle}
           </span>
           <h1 className="font-serif text-3xl font-semibold sm:text-4xl">
             {authorContent.sectionTitle}
           </h1>
+          <p className="font-serif text-lg italic text-foreground-muted">
+            {siteConfig.tagline}
+          </p>
         </div>
       </div>
 

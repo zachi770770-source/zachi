@@ -12,8 +12,9 @@ import { TrustBar } from "@/components/sections/TrustBar";
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
  * מיושר אנכית למרכז. יחידת תוכן רציפה אחת.
  *
- * מצב Pre-launch: ה-CTA אינו מטעה — "המכירה תיפתח בקרוב", והמחיר מוצג
- * כ"בקרוב". כאשר salesOpen יהפוך ל-true, יש להחזיר את כפתור הרכישה הפעיל.
+ * מצב Pre-launch: ה-CTA הראשי פעיל ומזמין להצטרף לרשימת ההמתנה
+ * ("קבלו עדכון כשהספר יוצא") ומגלגל אל טופס ההרשמה. אין כפתור רכישה חסום.
+ * כאשר salesOpen יהפוך ל-true, אותו כפתור הופך אוטומטית ל"לרכישת הספר".
  */
 export function Hero() {
   return (
@@ -49,19 +50,16 @@ export function Hero() {
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Button
-                size="lg"
-                disabled
-                aria-disabled="true"
-                className="h-14 px-7 text-[17px]"
-              >
-                המכירה תיפתח בקרוב
+              <Button asChild size="lg" className="h-14 px-7 text-[17px]">
+                <Link href={siteConfig.salesOpen ? "/#purchase" : "/#waitlist"}>
+                  {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}
+                </Link>
               </Button>
               <Link
                 href="/#sample"
                 className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                לקריאת טעימה
+                לקריאת טעימה מהספר
                 <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>

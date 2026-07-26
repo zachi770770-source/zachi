@@ -10,10 +10,14 @@ test.describe("Pre-launch: המכירה סגורה", () => {
       "בונים אותה"
     );
 
-    // ה-CTA אינו מטעה: כפתור "המכירה תיפתח בקרוב" (מושבת), לא קישור לתשלום.
-    await expect(
-      page.getByRole("button", { name: "המכירה תיפתח בקרוב" }).first()
-    ).toBeVisible();
+    // מצב טרום-השקה: ה-CTA הראשי פעיל ומוביל לרשימת ההמתנה — לא כפתור חסום ולא תשלום.
+    const waitlistCta = page
+      .getByRole("link", { name: "קבלו עדכון כשהספר יוצא" })
+      .first();
+    await expect(waitlistCta).toBeVisible();
+    await expect(waitlistCta).toHaveAttribute("href", "/#waitlist");
+    // אין קישור רכישה פעיל אל התשלום כל עוד המכירה סגורה.
+    await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
 
     // /checkout מציג עמוד "המכירה עדיין לא נפתחה", ללא טופס.
     await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
