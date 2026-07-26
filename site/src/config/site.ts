@@ -73,9 +73,9 @@ export const siteConfig = {
   },
 
   images: {
-    cover: "/images/book/cover-front.svg",
+    cover: "/images/book-cover-final.webp",
     coverAlt: `כריכת הספר "מדייטים לאהבה"`,
-    mockup3d: "/images/book/mockup-3d.svg",
+    mockup3d: "/images/book-cover-final.webp",
     mockup3dAlt: `הדמיית תלת-ממד של הספר "מדייטים לאהבה"`,
     workbookMockup: "/images/bonus/workbook-mockup.svg",
     workbookMockupAlt: "הדמיית חוברת העבודה הדיגיטלית המצורפת לספר",

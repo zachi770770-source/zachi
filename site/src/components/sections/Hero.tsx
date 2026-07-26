@@ -79,9 +79,6 @@ export function Hero() {
                 />
                 <BookCover priority className="w-full" />
               </div>
-              <figcaption className="text-[11px] uppercase tracking-[0.12em] text-foreground-muted sm:text-[12px]">
-                עטיפה זמנית · הכריכה הסופית בקרוב
-              </figcaption>
             </figure>
           </div>
         </div>
