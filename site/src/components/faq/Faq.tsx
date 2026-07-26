@@ -30,7 +30,7 @@ export function Faq({ items }: { items: FaqItem[] }) {
               aria-hidden="true"
             />
           </summary>
-          <p className="pb-5 pe-8 text-base leading-relaxed text-foreground-muted">
+          <p className="faq-answer pb-5 pe-8 text-base leading-relaxed text-foreground-muted">
             {item.answer}
           </p>
         </details>

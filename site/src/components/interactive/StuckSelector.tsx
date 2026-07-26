@@ -10,7 +10,18 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 
 const URL_PARAM = "stuck";
+const STORAGE_KEY = "stuck:last";
 const VALID_IDS = new Set(stuckSelector.states.map((s) => s.id));
+
+/** קריאה בטוחה מ-localStorage (עלול להיחסם/לזרוק במצב פרטי). */
+function readStored(): StuckState["id"] | null {
+  try {
+    const v = window.localStorage.getItem(STORAGE_KEY);
+    return v && VALID_IDS.has(v as StuckState["id"]) ? (v as StuckState["id"]) : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * „איפה אתם נתקעים?” — בורר רפלקטיבי עם ארבעה מצבים קבועים ומבוקרים מתוך
@@ -44,10 +55,15 @@ export function StuckSelector({
   // ה-setState כאן מכוון: אי אפשר לקרוא את window ב-initializer של useState
   // (הרכיב עובר גם SSR), ולכן מסנכרנים מה-URL פעם אחת אחרי ה-mount.
   React.useEffect(() => {
+    // עדיפות ל-URL (קישור משותף); אחרת נשחזר את הבחירה האחרונה מהמכשיר.
     const raw = new URLSearchParams(window.location.search).get(URL_PARAM);
-    if (raw && VALID_IDS.has(raw as StuckState["id"])) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- סנכרון חד-פעמי מה-URL בטעינה
-      setSelected(raw as StuckState["id"]);
+    const restored =
+      raw && VALID_IDS.has(raw as StuckState["id"])
+        ? (raw as StuckState["id"])
+        : readStored();
+    if (restored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- סנכרון חד-פעמי בטעינה
+      setSelected(restored);
       setCollapsed(true);
     }
   }, []);
@@ -80,6 +96,12 @@ export function StuckSelector({
     const url = new URL(window.location.href);
     url.searchParams.set(URL_PARAM, id);
     window.history.replaceState(null, "", url.toString());
+    // שמירה מקומית — כדי לשחזר את הבחירה בביקור הבא (ללא שרת, ללא מעקב).
+    try {
+      window.localStorage.setItem(STORAGE_KEY, id);
+    } catch {
+      /* מצב פרטי/חסום — פשוט לא שומרים */
+    }
   }, []);
 
   // „שינוי הבחירה” (מובייל) — מחזיר את כל האפשרויות ומעביר פוקוס לקבוצה.
