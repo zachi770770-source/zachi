@@ -15,7 +15,7 @@ export function Header() {
           <Link
             href="/"
             className="group flex items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            aria-label={`${siteConfig.bookTitle} — לעמוד הבית`}
+            aria-label={`${siteConfig.bookTitle}, לעמוד הבית`}
           >
             <BrandMark withRing className="h-8 w-8 shrink-0 text-foreground" />
             <span className="font-sans text-lg font-extrabold tracking-tight sm:text-xl">

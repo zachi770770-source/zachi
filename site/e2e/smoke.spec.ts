@@ -168,7 +168,7 @@ test("legacy URLs 301-redirect to the most relevant page", async ({ request }) =
 
 test("home page has the canonical title and unique social metadata", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page).toHaveTitle("מדייטים לאהבה — ספר מעשי לדייטינג ולזוגיות | צחי חן");
+  await expect(page).toHaveTitle("מדייטים לאהבה: ספר מעשי לדייטינג ולזוגיות | צחי חן");
   // WebSite + Book structured data present.
   const ldTypes = await page.$$eval('script[type="application/ld+json"]', (els) =>
     els.map((e) => JSON.parse(e.textContent || "{}")["@type"])

@@ -70,7 +70,7 @@ export default function AuthorPage() {
 
         <div className="order-2 flex flex-col items-start text-start">
           <span className="kicker">
-            {siteConfig.author.name} — מחבר {siteConfig.bookTitle}
+            {siteConfig.author.name}, מחבר {siteConfig.bookTitle}
           </span>
           <h1 className="mt-4 font-serif text-[clamp(1.95rem,4.2vw,2.85rem)] font-semibold leading-[1.15] text-foreground">
             {authorContent.sectionTitle}

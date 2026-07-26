@@ -47,7 +47,7 @@ export function InsideBookSection() {
             <div className="rounded-2xl bg-surface-muted p-8 sm:p-10">
               <h3 className="text-xl font-bold">כלים מעשיים בפנים</h3>
               <p className="mt-2 text-[16px] leading-relaxed text-foreground-muted">
-                הספר אינו רק רעיוני — אלה כמה מהכלים שתמצאו בתוכו.
+                הספר אינו רק רעיוני, אלה כמה מהכלים שתמצאו בתוכו.
               </p>
               <ul className="mt-6 flex flex-col gap-3">
                 {tools.items.slice(0, 5).map((tool) => (

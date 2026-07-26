@@ -7,7 +7,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   title: "הצהרת נגישות",
-  description: `הצהרת הנגישות של אתר ${siteConfig.bookTitle} — ההתאמות שבוצעו וכיצד לפנות אלינו.`,
+  description: `הצהרת הנגישות של אתר ${siteConfig.bookTitle}: ההתאמות שבוצעו וכיצד לפנות אלינו.`,
   path: "/accessibility",
 });
 
@@ -20,7 +20,7 @@ const adaptations = [
   "לכל שדות הטפסים יש תוויות מקושרות; הודעות שגיאה והצלחה מוקראות לקוראי מסך (aria-live / role).",
   "טקסט חלופי (alt) לתמונות התוכן.",
   "התאמת ניגודיות צבעים לקריאוּת גם בגופן ובכפתורים.",
-  "כיבוד העדפת המערכת להפחתת תנועה (prefers-reduced-motion) — האנימציות מצטמצמות אוטומטית.",
+  "כיבוד העדפת המערכת להפחתת תנועה (prefers-reduced-motion), האנימציות מצטמצמות אוטומטית.",
   "ניהול עוגיות מבוסס-הסכמה, ללא הפעלת עוגיות לא-הכרחיות ללא אישור המשתמש.",
 ];
 

@@ -44,8 +44,8 @@ export function OrderSummary({ totals }: { totals: OrderTotals }) {
 
       <p className="mt-3 text-xs leading-relaxed text-foreground-muted">
         {requiresShipping
-          ? "מהדורה מודפסת — תישלח לכתובת שתזינו."
-          : "מהדורה דיגיטלית — הגישה תישלח לכתובת המייל שהזנתם. ללא משלוח."}
+          ? "מהדורה מודפסת: תישלח לכתובת שתזינו."
+          : "מהדורה דיגיטלית: הגישה תישלח לכתובת המייל שהזנתם. ללא משלוח."}
         {siteConfig.bonus.enabled && siteConfig.bonus.includedInPrice
           ? " כולל את חוברת העבודה הדיגיטלית."
           : null}
