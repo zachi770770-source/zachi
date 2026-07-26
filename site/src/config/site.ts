@@ -49,7 +49,7 @@ export const siteConfig = {
     name: "צחי חן",
     shortBio:
       "צחי חן זיהה קושי משותף אצל רווקים, גרושים וזוגות — ומתוכו כתב את מדייטים לאהבה: דרך מעשית להבין שאהבה טובה נבנית ולא רק נמצאת, ושבתוך קשר אנחנו פוגשים גם את עצמנו.",
-    photo: "/images/author/author-photo.svg",
+    photo: "/images/author/zachi-chen-960.jpg",
     photoAlt: "צחי חן, מחבר הספר מדייטים לאהבה",
   },
 

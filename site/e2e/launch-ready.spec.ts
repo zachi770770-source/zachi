@@ -44,6 +44,32 @@ test.describe("Launch-readiness", () => {
     await context.close();
   });
 
+  test("author page: real photo, personal header, waitlist CTA (pre-launch)", async ({ page }) => {
+    await page.goto("/author", { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("למה כתבתי");
+    const img = page.getByAltText("צחי חן, מחבר הספר מדייטים לאהבה");
+    await expect(img).toBeVisible();
+    const currentSrc = await img.evaluate((el) => (el as HTMLImageElement).currentSrc);
+    expect(currentSrc).toMatch(/zachi-chen-\d+\.(avif|webp|jpg)/);
+    const cta = page.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" });
+    await expect(cta).toBeVisible();
+    await expect(cta).toHaveAttribute("href", "/#waitlist");
+    await expect(page.getByRole("link", { name: "לקריאת טעימה מהספר" })).toBeVisible();
+  });
+
+  test("cookie banner reserves space and does not cover the footer", async ({ page }) => {
+    await page.goto("/author", { waitUntil: "networkidle" });
+    const banner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
+    await expect(banner).toBeVisible();
+    // הגוף שומר מקום בתחתית בגובה הבאנר בפועל, כך שהבאנר לא מכסה תוכן/פוטר.
+    const pad = await page.evaluate(
+      () => parseFloat(getComputedStyle(document.body).paddingBottom) || 0
+    );
+    const h = (await banner.boundingBox())!.height;
+    expect(pad).toBeGreaterThan(0);
+    expect(Math.abs(pad - h)).toBeLessThanOrEqual(4);
+  });
+
   test("RTL + no horizontal overflow on home and key pages (mobile)", async ({ browser }) => {
     const context = await browser.newContext({ viewport: MOBILE });
     const page = await context.newPage();
