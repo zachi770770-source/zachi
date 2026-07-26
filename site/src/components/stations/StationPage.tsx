@@ -19,12 +19,12 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
  * כל שלושת הדפים חולקים את אותה שפה חזותית ואת אותו רכיב — ללא כפילות קוד.
  */
 export function StationPage({ station }: { station: Station }) {
-  // CTA לפי מצב המכירה — אותה לוגיקה כמו בכל האתר. במצב טרום-השקה מפנה
-  // לדף רשימת ההמתנה הייעודי; כשהמכירה נפתחת — לרכישה.
-  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/waitlist";
+  // פעולה מרכזית אחת לדף התחנה: לקרוא את הטעימה שמתאימה לקורא. בקשת ההרשמה
+  // לרשימת ההמתנה מרוכזת בסוף עמוד הטעימה, לא כאן. כשהמכירה נפתחת — רכישה.
+  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/preview";
   const primaryLabel = siteConfig.salesOpen
     ? "לרכישת הספר"
-    : "קבלו עדכון כשהספר יוצא";
+    : "לקריאת הטעימה שמתאימה לי";
 
   const others = stationOrder
     .filter((id) => id !== station.id)
@@ -173,16 +173,19 @@ export function StationPage({ station }: { station: Station }) {
           <Button asChild size="lg" className="w-full px-7 sm:w-auto">
             <Link href={primaryHref}>{primaryLabel}</Link>
           </Button>
-          <Link
-            href="/preview"
-            className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
-            {stationsUi.sampleCta}
-            <ArrowLeft
-              className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5"
-              aria-hidden="true"
-            />
-          </Link>
+          {/* לאחר פתיחת המכירה, הטעימה נשארת כפעולה משנית לצד הרכישה. */}
+          {siteConfig.salesOpen ? (
+            <Link
+              href="/preview"
+              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              {stationsUi.sampleCta}
+              <ArrowLeft
+                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5"
+                aria-hidden="true"
+              />
+            </Link>
+          ) : null}
         </section>
       </div>
 

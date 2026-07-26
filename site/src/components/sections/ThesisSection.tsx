@@ -71,7 +71,7 @@ export function ThesisSection() {
 
             <Reveal className="mt-8 max-w-[54ch]">
               <p className="text-[clamp(1.05rem,1.4vw,1.28rem)] leading-relaxed text-foreground-muted">
-                {bigIdea.clarification}
+                {bigIdea.promise}
               </p>
             </Reveal>
           </div>
