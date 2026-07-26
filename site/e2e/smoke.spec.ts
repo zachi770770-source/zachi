@@ -151,6 +151,32 @@ test("checkout is closed during pre-launch (no form, no payment)", async ({
   await expect(page.getByLabel(/אימייל/)).toHaveCount(0);
 });
 
+test("legacy URLs 301-redirect to the most relevant page", async ({ request }) => {
+  const cases: [string, string][] = [
+    ["/book", "/"],
+    ["/about", "/author"],
+    ["/articles", "/faq"],
+    ["/articles/some-old-post", "/faq"],
+  ];
+  for (const [from, to] of cases) {
+    const res = await request.get(from, { maxRedirects: 0 });
+    expect(res.status(), `status for ${from}`).toBe(301);
+    const location = res.headers()["location"] ?? "";
+    expect(new URL(location, "http://localhost").pathname, `target for ${from}`).toBe(to);
+  }
+});
+
+test("home page has the canonical title and unique social metadata", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveTitle("מדייטים לאהבה — ספר מעשי לדייטינג ולזוגיות | צחי חן");
+  // WebSite + Book structured data present.
+  const ldTypes = await page.$$eval('script[type="application/ld+json"]', (els) =>
+    els.map((e) => JSON.parse(e.textContent || "{}")["@type"])
+  );
+  expect(ldTypes).toContain("WebSite");
+  expect(ldTypes).toContain("Book");
+});
+
 test("sitemap, robots and manifest are served correctly", async ({ request }) => {
   const sitemap = await request.get("/sitemap.xml");
   expect(sitemap.status()).toBe(200);

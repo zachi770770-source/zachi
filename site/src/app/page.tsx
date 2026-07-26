@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
-
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { StationsSection } from "@/components/sections/StationsSection";
@@ -15,16 +14,19 @@ import { FaqTeaser } from "@/components/sections/FaqTeaser";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
+import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
 
-export const metadata: Metadata = {
-  title: siteConfig.tagline,
+export const metadata = pageMetadata({
+  title: `${siteConfig.bookTitle} — ספר מעשי לדייטינג ולזוגיות | ${siteConfig.author.name}`,
   description: siteConfig.description,
-  alternates: { canonical: "/" },
-};
+  path: "/",
+  absoluteTitle: true,
+});
 
 export default function HomePage() {
   return (
     <>
+      <WebSiteSchema />
       <BookSchema />
       <ProductSchema />
       <Hero />

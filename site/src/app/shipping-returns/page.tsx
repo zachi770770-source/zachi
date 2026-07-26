@@ -1,14 +1,13 @@
-import type { Metadata } from "next";
-
+import { pageMetadata } from "@/lib/seo";
 import { shippingReturnsContent } from "@/content/legal";
 import { LegalContent } from "@/components/legal/LegalContent";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "מדיניות מוצר, משלוחים וביטולים",
   description:
     "אופן מסירת המהדורה הדיגיטלית, משלוח המהדורה המודפסת ומדיניות הביטולים באתר מדייטים לאהבה.",
-  alternates: { canonical: "/shipping-returns" },
-};
+  path: "/shipping-returns",
+});
 
 export default function ShippingReturnsPage() {
   return <LegalContent {...shippingReturnsContent} />;

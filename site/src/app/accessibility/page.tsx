@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "הצהרת נגישות",
   description: `הצהרת הנגישות של אתר ${siteConfig.bookTitle} — ההתאמות שבוצעו וכיצד לפנות אלינו.`,
-  alternates: { canonical: "/accessibility" },
-};
+  path: "/accessibility",
+});
 
 /** ההתאמות המפורטות כאן מיושמות בפועל באתר. אין לרשום כאן התאמה שלא בוצעה. */
 const adaptations = [

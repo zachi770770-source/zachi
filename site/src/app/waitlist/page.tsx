@@ -1,24 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
+import { pageMetadata } from "@/lib/seo";
 import { waitlistPage } from "@/content/stations";
 import { Container } from "@/components/shared/Container";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: waitlistPage.metaTitle,
   description: waitlistPage.metaDescription,
-  alternates: { canonical: "/waitlist" },
-  openGraph: {
-    type: "website",
-    locale: "he_IL",
-    url: "/waitlist",
-    title: waitlistPage.metaTitle,
-    description: waitlistPage.metaDescription,
-  },
-};
+  path: "/waitlist",
+  absoluteTitle: true,
+});
 
 export default function WaitlistPage() {
   return (

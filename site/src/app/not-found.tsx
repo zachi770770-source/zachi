@@ -15,14 +15,17 @@ export default function NotFound() {
       </h1>
       <p className="mt-3 max-w-md text-lg leading-relaxed text-foreground-muted">
         נראה שהעמוד שחיפשתם לא קיים, או שהקישור השתנה. אפשר לחזור לעמוד
-        הבית, או לקפוץ ישר לרכישת הספר.
+        הבית, לקרוא טעימה מהספר, או להצטרף לרשימת ההמתנה.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Button asChild size="lg">
           <Link href="/">חזרה לעמוד הבית</Link>
         </Button>
         <Button asChild size="lg" variant="outline">
-          <Link href="/#purchase">לרכישת הספר</Link>
+          <Link href="/preview">לקריאת טעימה</Link>
+        </Button>
+        <Button asChild size="lg" variant="ghost">
+          <Link href="/waitlist">לרשימת ההמתנה</Link>
         </Button>
       </div>
     </Container>

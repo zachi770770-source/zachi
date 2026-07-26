@@ -47,6 +47,19 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      {
+        // נכסי תמונה סטטיים ב-/public אינם ממותגים בגיבוב, אך משתנים לעיתים
+        // רחוקות. ברירת המחדל של Vercel ל-/public היא must-revalidate; כאן
+        // נותנים cache ארוך עם stale-while-revalidate כדי לזרז טעינה חוזרת
+        // בלי לחסום עדכון עתידי של קובץ.
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=2592000",
+          },
+        ],
+      },
     ];
   },
 };

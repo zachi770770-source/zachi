@@ -1,19 +1,20 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { FileDown } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 import { preview } from "@/content/book";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { PreviewGallery } from "@/components/preview/PreviewGallery";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "הצצה לספר",
   description: `תוכן העניינים וקטע לדוגמה מתוך הספר ${siteConfig.bookTitle}.`,
-  alternates: { canonical: "/preview" },
-};
+  path: "/preview",
+  ogType: "article",
+});
 
 export default function PreviewPage() {
   return (

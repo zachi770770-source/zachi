@@ -1,14 +1,13 @@
-import type { Metadata } from "next";
-
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { ContactForm } from "@/components/forms/ContactForm";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "יצירת קשר",
   description: `יצירת קשר בנוגע לספר ${siteConfig.bookTitle} או להזמנה קיימת.`,
-  alternates: { canonical: "/contact" },
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

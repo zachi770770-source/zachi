@@ -1,19 +1,20 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 import { authorContent } from "@/content/author";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { PersonSchema } from "@/components/schema/PersonSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "על המחבר",
   description: `צחי חן מספר למה כתב את ${siteConfig.bookTitle}, למי הספר נכתב ומה מטרתו.`,
-  alternates: { canonical: "/author" },
-};
+  path: "/author",
+  ogType: "article",
+});
 
 const PHOTO_ALT = "צחי חן, מחבר הספר מדייטים לאהבה";
 const PHOTO_SIZES = "(min-width: 1024px) 380px, (min-width: 640px) 360px, 78vw";
