@@ -12,8 +12,9 @@ import { TrustBar } from "@/components/sections/TrustBar";
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
  * מיושר אנכית למרכז. יחידת תוכן רציפה אחת.
  *
- * מצב Pre-launch: ה-CTA אינו מטעה — "המכירה תיפתח בקרוב", והמחיר מוצג
- * כ"בקרוב". כאשר salesOpen יהפוך ל-true, יש להחזיר את כפתור הרכישה הפעיל.
+ * מצב Pre-launch: ה-CTA הראשי פעיל ומזמין להצטרף לרשימת ההמתנה
+ * ("קבלו עדכון כשהספר יוצא") ומגלגל אל טופס ההרשמה. אין כפתור רכישה חסום.
+ * כאשר salesOpen יהפוך ל-true, אותו כפתור הופך אוטומטית ל"לרכישת הספר".
  */
 export function Hero() {
   return (
@@ -24,7 +25,7 @@ export function Hero() {
       </div>
 
       <Container className="flex min-h-[calc(100svh-76px)] items-start py-6 lg:items-center lg:py-16">
-        <div className="grid w-full items-center gap-y-6 lg:grid-cols-[54fr_46fr] lg:gap-x-20">
+        <div className="grid w-full items-center gap-y-6 lg:grid-cols-[52fr_48fr] lg:gap-x-16">
           {/* תוכן — יחידה רציפה אחת (ימין בדסקטופ, שני במובייל) */}
           <div className="order-2 flex flex-col items-start lg:order-1">
             <span className="kicker">{hero.eyebrow}</span>
@@ -39,7 +40,7 @@ export function Hero() {
               מאת צחי חן
             </p>
 
-            <p className="mt-4 max-w-[44ch] text-[19px] leading-[1.55] text-foreground-muted">
+            <p className="mt-4 max-w-[44ch] text-[21px] leading-[1.6] text-foreground/80">
               לומדים לחפש, להשוות ולבחון — אבל כמעט אף אחד לא מלמד אותנו איך
               בונים קשר טוב אחרי שפוגשים אדם נכון.
             </p>
@@ -49,19 +50,16 @@ export function Hero() {
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Button
-                size="lg"
-                disabled
-                aria-disabled="true"
-                className="h-14 px-7 text-[17px]"
-              >
-                המכירה תיפתח בקרוב
+              <Button asChild size="lg" className="h-14 px-7 text-[17px]">
+                <Link href={siteConfig.salesOpen ? "/#purchase" : "/#waitlist"}>
+                  {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}
+                </Link>
               </Button>
               <Link
                 href="/#sample"
                 className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                לקריאת טעימה
+                לקריאת טעימה מהספר
                 <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>
@@ -69,16 +67,31 @@ export function Hero() {
             <TrustBar className="mt-8" />
           </div>
 
-          {/* ספר — במרכז האנכי, מוצג במלואו (שמאל בדסקטופ, ראשון במובייל) */}
-          <div className="order-1 flex justify-center lg:order-2 lg:justify-start">
-            <figure className="flex flex-col items-center gap-2 lg:gap-3">
-              <div className="relative w-[118px] sm:w-[200px] lg:w-[250px]">
+          {/* ספר — „הבמה”: הרעש (מחשבות) מתפזר בגלילה והכריכה מקבלת נוכחות */}
+          <div className="hero-stage order-1 flex items-center justify-center lg:order-2 lg:self-stretch">
+            {/* שכבת המחשבות — דקורטיבית בלבד, מחוץ להיררכיית התוכן */}
+            <div className="hero-thoughts" aria-hidden="true">
+              {hero.openingThoughts.map((thought, i) => (
+                <span key={thought} className={`hero-thought hero-thought--${i + 1}`}>
+                  {thought}
+                </span>
+              ))}
+            </div>
+
+            <figure className="hero-book flex flex-col items-center gap-3 lg:gap-4">
+              <div className="relative w-[134px] sm:w-[226px] lg:w-[284px]">
                 <div
                   aria-hidden="true"
                   className="absolute -bottom-4 start-1/2 h-7 w-[72%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/22 blur-2xl"
                 />
                 <BookCover priority className="w-full" />
               </div>
+              <figcaption className="hero-refrain">
+                <span className="hero-refrain__line">{hero.refrain[0]}</span>
+                <span className="hero-refrain__line hero-refrain__line--accent">
+                  {hero.refrain[1]}
+                </span>
+              </figcaption>
             </figure>
           </div>
         </div>

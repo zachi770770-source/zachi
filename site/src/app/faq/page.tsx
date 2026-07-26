@@ -1,17 +1,16 @@
-import type { Metadata } from "next";
-
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 import { faqItems } from "@/content/faq";
 import { Container } from "@/components/shared/Container";
 import { Faq } from "@/components/faq/Faq";
 import { FaqSchema } from "@/components/schema/FaqSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "שאלות נפוצות",
   description: `כל מה שרציתם לדעת על הספר ${siteConfig.bookTitle}: התאמה, משלוח, תשלום ועוד.`,
-  alternates: { canonical: "/faq" },
-};
+  path: "/faq",
+});
 
 export default function FaqPage() {
   return (

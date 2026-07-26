@@ -7,16 +7,31 @@ const AVAILABILITY_MAP: Record<string, string> = {
   out_of_stock: "https://schema.org/OutOfStock",
 };
 
+/**
+ * Product structured data — נתונים אמיתיים בלבד. אין דירוגים, ביקורות
+ * או זמינות מומצאים. כל עוד המכירה סגורה (`salesOpen=false`) אין הצעת
+ * מכר פעילה, ולכן לא נוצר בלוק `offers` עם זמינות/מחיר שאי אפשר לרכוש
+ * בפועל — רק כשהמכירה נפתחת מתווספת ההצעה עם המחיר והזמינות האמיתיים.
+ */
 export function ProductSchema() {
+  const base = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: siteConfig.bookTitle,
+    description: siteConfig.description,
+    image: `${siteConfig.url}${siteConfig.images.cover}`,
+    category: "ספר דיגיטלי",
+    brand: { "@type": "Brand", name: siteConfig.bookTitle },
+  } as const;
+
+  if (!siteConfig.salesOpen) {
+    return <JsonLd data={base} />;
+  }
+
   return (
     <JsonLd
       data={{
-        "@context": "https://schema.org",
-        "@type": "Product",
-        name: siteConfig.bookTitle,
-        description: siteConfig.description,
-        image: `${siteConfig.url}${siteConfig.images.cover}`,
-        category: "ספר דיגיטלי",
+        ...base,
         offers: {
           "@type": "Offer",
           url: `${siteConfig.url}/#purchase`,

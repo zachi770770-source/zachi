@@ -27,13 +27,13 @@ export function Header() {
         {/* ניווט (במרכז) */}
         <nav
           aria-label="ניווט ראשי"
-          className="hidden items-center gap-8 lg:flex lg:justify-center"
+          className="hidden items-center gap-7 lg:flex lg:justify-center"
         >
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-[15px] font-medium text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              className="rounded-md px-1.5 py-2 text-[16px] font-medium text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               {link.label}
             </Link>
@@ -43,14 +43,18 @@ export function Header() {
         {/* CTA (משמאל ב-RTL) */}
         <div className="hidden lg:flex lg:justify-end">
           <Button asChild size="sm" className="h-11 px-5 text-[15px]">
-            <Link href="/#purchase">{siteConfig.salesOpen ? "לרכישת הספר" : "בקרוב"}</Link>
+            <Link href={siteConfig.salesOpen ? "/#purchase" : "/waitlist"}>
+              {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון"}
+            </Link>
           </Button>
         </div>
 
         {/* מובייל: כפתור רכישה קומפקטי + המבורגר */}
         <div className="flex items-center gap-2 lg:hidden">
           <Button asChild size="sm" className="h-10 px-4 text-sm">
-            <Link href="/#purchase">{siteConfig.salesOpen ? "רכישה" : "בקרוב"}</Link>
+            <Link href={siteConfig.salesOpen ? "/#purchase" : "/waitlist"}>
+              {siteConfig.salesOpen ? "רכישה" : "עדכנו אותי"}
+            </Link>
           </Button>
           <MobileMenu />
         </div>

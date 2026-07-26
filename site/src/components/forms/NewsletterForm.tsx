@@ -61,7 +61,7 @@ export function NewsletterForm() {
         className="flex items-center gap-2 rounded-md border border-success/30 bg-success-foreground px-4 py-3 text-sm text-success"
       >
         <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-        נרשמתם בהצלחה. בדקו את תיבת המייל שלכם.
+        נרשמתם לרשימת ההמתנה. נעדכן אתכם ברגע שהספר יוצא.
       </div>
     );
   }
@@ -121,7 +121,7 @@ export function NewsletterForm() {
           )}
         />
         <Label htmlFor="contentConsent" className="font-normal leading-relaxed">
-          אני מסכים/ה לקבל את התוכן במייל
+          אני מסכים/ה שתעדכנו אותי במייל כשהספר יוצא
         </Label>
       </div>
       <FieldError message={errors.contentConsent?.message} />
@@ -150,9 +150,20 @@ export function NewsletterForm() {
             נרשם/ת...
           </>
         ) : (
-          "שליחת הטעימה החינמית"
+          "עדכנו אותי כשהספר יוצא"
         )}
       </Button>
+
+      <p className="text-xs leading-relaxed text-foreground-muted">
+        פרטיכם נשמרים לצורך העדכון בלבד. ראו את{" "}
+        <a
+          href="/privacy"
+          className="underline underline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        >
+          מדיניות הפרטיות
+        </a>
+        .
+      </p>
     </form>
   );
 }

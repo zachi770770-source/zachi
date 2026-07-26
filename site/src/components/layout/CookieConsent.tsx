@@ -59,6 +59,31 @@ export function CookieConsent() {
   const [manageOpen, setManageOpen] = React.useState(false);
   const [analytics, setAnalytics] = React.useState(false);
   const [marketing, setMarketing] = React.useState(false);
+  const bannerRef = React.useRef<HTMLDivElement>(null);
+
+  // הבאנר הוא fixed בתחתית — שומרים לו מקום בתחתית העמוד לפי הגובה בפועל,
+  // כדי שלא יכסה את ה-CTA, הפוטר או תוכן אחר בשום רוחב או מצב טקסט.
+  React.useEffect(() => {
+    if (!visible) {
+      document.body.style.paddingBottom = "";
+      return;
+    }
+    const el = bannerRef.current;
+    if (!el) return;
+    const apply = () => {
+      document.body.style.paddingBottom = `${el.offsetHeight}px`;
+    };
+    apply();
+    const ro =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(apply) : null;
+    ro?.observe(el);
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      document.body.style.paddingBottom = "";
+    };
+  }, [visible]);
 
   function acceptAll() {
     writeConsent({ necessary: true, analytics: true, marketing: true });
@@ -80,6 +105,7 @@ export function CookieConsent() {
   return (
     <>
       <div
+        ref={bannerRef}
         role="region"
         aria-label="הסכמה לשימוש בעוגיות"
         className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:px-4"

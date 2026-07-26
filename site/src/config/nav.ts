@@ -16,5 +16,6 @@ export const footerLinks = {
     { href: "/terms", label: "תקנון" },
     { href: "/privacy", label: "מדיניות פרטיות" },
     { href: "/shipping-returns", label: "מדיניות מוצר, משלוחים וביטולים" },
+    { href: "/accessibility", label: "הצהרת נגישות" },
   ],
 };

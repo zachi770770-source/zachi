@@ -11,6 +11,10 @@ function trackErrors(page: Page) {
 
 const STATIC_ROUTES = [
   "/",
+  "/before-relationship",
+  "/starting-again",
+  "/inside-relationship",
+  "/waitlist",
   "/preview",
   "/author",
   "/faq",
@@ -70,10 +74,10 @@ test("mobile menu opens and closes", async ({ page }) => {
   await expect(page.getByRole("button", { name: "סגירת תפריט" })).toBeHidden();
 });
 
-test("FAQ accordion opens an answer", async ({ page }) => {
+test("FAQ (native details) opens an answer", async ({ page }) => {
   await page.goto("/faq", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "למי הספר מתאים?" }).click();
-  await expect(page.getByText(/לכל מי שנמצא בתהליך/)).toBeVisible();
+  await page.getByText("למי הספר מתאים?", { exact: true }).click();
+  await expect(page.getByText(/שלוש תחנות בדרך לאהבה/)).toBeVisible();
 });
 
 test("cookie consent: accept all hides the banner without crashing the app", async ({
@@ -125,13 +129,13 @@ test("contact form submits successfully", async ({ page }) => {
   await expect(page.getByText("ההודעה נשלחה בהצלחה")).toBeVisible();
 });
 
-test("newsletter form submits successfully", async ({ page }) => {
+test("waitlist form submits successfully", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.getByLabel("שם פרטי").fill("בודקת");
-  await page.getByLabel("אימייל", { exact: false }).first().fill("newslettertest@example.com");
-  await page.getByLabel(/אני מסכים\/ה לקבל את התוכן/).click();
-  await page.getByRole("button", { name: "שליחת הטעימה החינמית" }).click();
-  await expect(page.getByText("נרשמתם בהצלחה")).toBeVisible();
+  const waitlist = page.locator("#waitlist");
+  await waitlist.getByLabel("כתובת אימייל").fill("waitlisttest@example.com");
+  await waitlist.getByRole("checkbox").click();
+  await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+  await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
 });
 
 test("checkout is closed during pre-launch (no form, no payment)", async ({
@@ -145,6 +149,32 @@ test("checkout is closed during pre-launch (no form, no payment)", async ({
   // אין טופס וללא הדגמת תשלום.
   await expect(page.getByLabel("שם מלא")).toHaveCount(0);
   await expect(page.getByLabel(/אימייל/)).toHaveCount(0);
+});
+
+test("legacy URLs 301-redirect to the most relevant page", async ({ request }) => {
+  const cases: [string, string][] = [
+    ["/book", "/"],
+    ["/about", "/author"],
+    ["/articles", "/faq"],
+    ["/articles/some-old-post", "/faq"],
+  ];
+  for (const [from, to] of cases) {
+    const res = await request.get(from, { maxRedirects: 0 });
+    expect(res.status(), `status for ${from}`).toBe(301);
+    const location = res.headers()["location"] ?? "";
+    expect(new URL(location, "http://localhost").pathname, `target for ${from}`).toBe(to);
+  }
+});
+
+test("home page has the canonical title and unique social metadata", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveTitle("מדייטים לאהבה — ספר מעשי לדייטינג ולזוגיות | צחי חן");
+  // WebSite + Book structured data present.
+  const ldTypes = await page.$$eval('script[type="application/ld+json"]', (els) =>
+    els.map((e) => JSON.parse(e.textContent || "{}")["@type"])
+  );
+  expect(ldTypes).toContain("WebSite");
+  expect(ldTypes).toContain("Book");
 });
 
 test("sitemap, robots and manifest are served correctly", async ({ request }) => {

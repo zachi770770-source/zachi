@@ -24,7 +24,7 @@ export function Footer() {
 
           <div className="grid grid-cols-2 gap-8 sm:flex sm:gap-16">
             <div className="flex flex-col gap-3">
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-[15px] font-semibold text-foreground">
                 מידע
               </span>
               <ul className="flex flex-col gap-2">
@@ -32,7 +32,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      className="inline-block py-1 text-[15px] text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                     >
                       {link.label}
                     </Link>
@@ -42,7 +42,7 @@ export function Footer() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-[15px] font-semibold text-foreground">
                 מדיניות
               </span>
               <ul className="flex flex-col gap-2">
@@ -50,7 +50,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      className="inline-block py-1 text-[15px] text-foreground-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                     >
                       {link.label}
                     </Link>
@@ -88,12 +88,20 @@ export function Footer() {
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-2 border-t border-border pt-6 text-xs text-foreground-muted sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-border pt-6 text-[13px] text-foreground-muted sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {siteConfig.copyrightYear} {siteConfig.bookTitle}. כל הזכויות
             שמורות.
           </p>
-          <p>האתר בבנייה מתמדת לשיפור הנגישות עבור כלל המשתמשים.</p>
+          <p>
+            אנו פועלים לשיפור הנגישות באופן מתמשך.{" "}
+            <Link
+              href="/accessibility"
+              className="underline underline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              הצהרת נגישות
+            </Link>
+          </p>
         </div>
       </Container>
     </footer>

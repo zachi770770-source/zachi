@@ -26,5 +26,8 @@ export default defineConfig({
     url: "http://localhost:3100",
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    // מאגר רשימת המתנה בזיכרון לבדיקות בלבד (לא DB אמיתי). SALES_ENABLED נשאר
+    // כבוי כדי לבדוק את מצב ה-Pre-launch.
+    env: { WAITLIST_ALLOW_MEMORY: "true" },
   },
 });

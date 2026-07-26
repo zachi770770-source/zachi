@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
-
+import { pageMetadata } from "@/lib/seo";
 import { termsContent } from "@/content/legal";
 import { LegalContent } from "@/components/legal/LegalContent";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "תקנון האתר",
   description: "תקנון השימוש באתר מדייטים לאהבה.",
-  alternates: { canonical: "/terms" },
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return <LegalContent {...termsContent} />;
