@@ -67,9 +67,18 @@ export function Hero() {
             <TrustBar className="mt-8" />
           </div>
 
-          {/* ספר — במרכז האנכי, מוצג במלואו (שמאל בדסקטופ, ראשון במובייל) */}
-          <div className="order-1 flex justify-center lg:order-2 lg:justify-start">
-            <figure className="flex flex-col items-center gap-2 lg:gap-3">
+          {/* ספר — „הבמה”: הרעש (מחשבות) מתפזר בגלילה והכריכה מקבלת נוכחות */}
+          <div className="hero-stage order-1 flex items-center justify-center lg:order-2 lg:self-stretch">
+            {/* שכבת המחשבות — דקורטיבית בלבד, מחוץ להיררכיית התוכן */}
+            <div className="hero-thoughts" aria-hidden="true">
+              {hero.openingThoughts.map((thought, i) => (
+                <span key={thought} className={`hero-thought hero-thought--${i + 1}`}>
+                  {thought}
+                </span>
+              ))}
+            </div>
+
+            <figure className="hero-book flex flex-col items-center gap-3 lg:gap-4">
               <div className="relative w-[118px] sm:w-[200px] lg:w-[250px]">
                 <div
                   aria-hidden="true"
@@ -77,6 +86,12 @@ export function Hero() {
                 />
                 <BookCover priority className="w-full" />
               </div>
+              <figcaption className="hero-refrain">
+                <span className="hero-refrain__line">{hero.refrain[0]}</span>
+                <span className="hero-refrain__line hero-refrain__line--accent">
+                  {hero.refrain[1]}
+                </span>
+              </figcaption>
             </figure>
           </div>
         </div>

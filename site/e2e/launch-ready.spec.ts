@@ -70,6 +70,34 @@ test.describe("Launch-readiness", () => {
     expect(Math.abs(pad - h)).toBeLessThanOrEqual(4);
   });
 
+  test("hero: opening thoughts are decorative, the refrain remains, CTA stays active", async ({
+    page,
+  }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+
+    // שכבת המחשבות דקורטיבית בלבד — מסומנת aria-hidden ומחוץ לעץ הנגישות.
+    const thoughts = page.locator(".hero-thoughts");
+    await expect(thoughts).toHaveAttribute("aria-hidden", "true");
+    for (const thought of [
+      "אולי אין מספיק משיכה",
+      "אולי יש מישהו מתאים יותר",
+      "למה אני עדיין לא בטוח?",
+      "איך יודעים אם נכון להמשיך?",
+    ]) {
+      await expect(page.locator(".hero-thought", { hasText: thought })).toHaveCount(1);
+    }
+
+    // המסר שנשאר קיים וקריא.
+    const refrain = page.locator(".hero-refrain");
+    await expect(refrain).toContainText("דייטינג הוא חיפוש.");
+    await expect(refrain).toContainText("אהבה היא בנייה.");
+
+    // ה-CTA הראשי נשאר ברור ופעיל.
+    await expect(
+      page.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" }).first()
+    ).toBeVisible();
+  });
+
   test("stations: home cards link to dedicated pages, which cross-link and CTA to the waitlist", async ({
     page,
   }) => {
