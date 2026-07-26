@@ -21,7 +21,7 @@ const PHOTO_ALT = "צחי חן, מחבר הספר מדייטים לאהבה";
 const PHOTO_SIZES = "(min-width: 1024px) 380px, (min-width: 640px) 360px, 78vw";
 
 export default function AuthorPage() {
-  const primaryHref = siteConfig.salesOpen ? "/#purchase" : "/#waitlist";
+  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/#waitlist";
   const primaryLabel = siteConfig.salesOpen
     ? "לרכישת הספר"
     : "קבלו עדכון כשהספר יוצא";

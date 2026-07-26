@@ -136,12 +136,13 @@ test.describe("Launch-readiness", () => {
     // אף תשובה אינה מוצגת לפני בחירה (לא כל התשובות יחד).
     await expect(section.locator("article")).toHaveCount(0);
 
-    // בחירה → תשובה אחת עם עיקרון, פרק, שאלה, טעימה והבהרה.
+    // בחירה → תשובה אחת עם עיקרון, שאלה, טעימה והבהרה. בגרסת הבית הקצרה
+    // (variant="compact") רשימת הפרקים אינה מוצגת — היא נשארת ב-/preview וב-/book.
     await page.getByText("כשאין סערה, נדמה לי שאין משיכה.", { exact: true }).click();
     const answer = section.locator("article");
     await expect(answer).toBeVisible();
     await expect(answer).toContainText("עיקרון מתוך הספר");
-    await expect(answer).toContainText("חלק שני: עוברים את השער");
+    await expect(answer).not.toContainText("חלק שני: עוברים את השער");
     await expect(answer).toContainText("זו נקודת מחשבה ראשונית, לא אבחון");
     await expect(
       answer.getByRole("link", { name: "לקריאת טעימה מהספר" })

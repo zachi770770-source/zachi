@@ -3,16 +3,11 @@ import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { StationsSection } from "@/components/sections/StationsSection";
+import { BookHubLink } from "@/components/sections/BookHubLink";
 import { StuckSelector } from "@/components/interactive/StuckSelector";
-import { AudienceSection } from "@/components/sections/AudienceSection";
-import { OutcomesSection } from "@/components/sections/OutcomesSection";
-import { MethodSection } from "@/components/sections/MethodSection";
-import { InsideBookSection } from "@/components/sections/InsideBookSection";
 import { SampleSection } from "@/components/sections/SampleSection";
-import { BehindSection } from "@/components/sections/BehindSection";
+import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
-import { FaqTeaser } from "@/components/sections/FaqTeaser";
-import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
@@ -24,6 +19,12 @@ export const metadata = pageMetadata({
   absoluteTitle: true,
 });
 
+/**
+ * עמוד הבית כשער מרכזי: ניתן לסריקה מהירה, עם מסלול ברור לדפים הייעודיים.
+ * רק Hero, תקציר הרעיון, שלוש התחנות, „איפה אתם נתקעים?” (גרסה קצרה),
+ * טעימה קצרה, טיזר מחבר ורשימת המתנה. הפירוט המלא (שיטה, מבנה, כלים,
+ * תוצאות, מהדורות) עבר ל-/book; הסיפור המלא ל-/author; ה-FAQ ל-/faq.
+ */
 export default function HomePage() {
   return (
     <>
@@ -33,16 +34,11 @@ export default function HomePage() {
       <Hero />
       <ThesisSection />
       <StationsSection />
-      <StuckSelector />
-      <AudienceSection />
-      <OutcomesSection />
-      <MethodSection />
-      <InsideBookSection />
+      <BookHubLink />
+      <StuckSelector variant="compact" />
       <SampleSection />
-      <BehindSection />
+      <AuthorTeaser />
       <NewsletterSection />
-      <FaqTeaser />
-      <PurchaseSection />
     </>
   );
 }

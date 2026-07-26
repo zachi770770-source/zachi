@@ -8,13 +8,13 @@ import type { NextRequest } from "next/server";
  *
  * שים לב: אף אחת מהכתובות האלה לא קיימה כעמוד באתר או בהיסטוריית הפרויקט,
  * ולכן אין תוכן ישן לשחזר — ההפניה מובילה לעמוד הרלוונטי ביותר:
- *   /book     → עמוד הבית (עמוד הספר הפעיל)
  *   /about    → /author (על המחבר)
  *   /articles → /faq (העמוד המידעי הקרוב ביותר; אין באתר בלוג/מאמרים)
  * פרמטרי query (כגון UTM) נשמרים לצורך שיוך.
+ *
+ * הערה: /book הוא כעת עמוד אמיתי (הספר לעומק), ולכן אינו מופיע כאן כהפניה.
  */
 const REDIRECTS: Record<string, string> = {
-  "/book": "/",
   "/about": "/author",
   "/articles": "/faq",
 };
@@ -40,5 +40,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/book", "/about", "/articles", "/articles/:path*"],
+  matcher: ["/about", "/articles", "/articles/:path*"],
 };

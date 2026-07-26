@@ -64,7 +64,7 @@ export function MethodSection() {
 
         <Reveal className="mt-14">
           <Link
-            href="/#inside"
+            href="#inside"
             className="inline-flex items-center gap-2 text-[17px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             {method.linkLabel}

@@ -43,7 +43,7 @@ export function Header() {
         {/* CTA (משמאל ב-RTL) */}
         <div className="hidden lg:flex lg:justify-end">
           <Button asChild size="sm" className="h-11 px-5 text-[15px]">
-            <Link href={siteConfig.salesOpen ? "/#purchase" : "/waitlist"}>
+            <Link href={siteConfig.salesOpen ? "/book#purchase" : "/waitlist"}>
               {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון"}
             </Link>
           </Button>
@@ -52,7 +52,7 @@ export function Header() {
         {/* מובייל: כפתור רכישה קומפקטי + המבורגר */}
         <div className="flex items-center gap-2 lg:hidden">
           <Button asChild size="sm" className="h-10 px-4 text-sm">
-            <Link href={siteConfig.salesOpen ? "/#purchase" : "/waitlist"}>
+            <Link href={siteConfig.salesOpen ? "/book#purchase" : "/waitlist"}>
               {siteConfig.salesOpen ? "רכישה" : "עדכנו אותי"}
             </Link>
           </Button>
