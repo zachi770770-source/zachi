@@ -34,6 +34,14 @@ type Row = {
  *
  * הפונקציה מסומנת server-only ולכן לא ניתנת לייבוא מהדפדפן.
  */
+/** מחזיר את מזהה הגרסה הפעילה (או null). בדיקה זולה לפני צריכת מכסה/מודל. */
+export async function getActiveVersion(db: SqlClient): Promise<string | null> {
+  const res = await db.query(
+    `select version from compass_book_versions where status = 'active' limit 1`
+  );
+  return (res.rows[0] as { version?: string } | undefined)?.version ?? null;
+}
+
 export async function searchCompass(
   db: SqlClient,
   question: string,
