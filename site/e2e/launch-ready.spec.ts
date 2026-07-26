@@ -111,18 +111,17 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator(".book-map__examines").first()).toBeVisible();
   });
 
-  test("author audio: no placeholder while there is no file, transcript shown, no fake audio", async ({
+  test("author page: single author story, no audio block or duplication while file is missing", async ({
     page,
   }) => {
     await page.goto("/author", { waitUntil: "networkidle" });
-    await expect(
-      page.getByRole("heading", { name: "למה כתבתי את הספר הזה" })
-    ).toBeVisible();
-    // אין קובץ שמע → אין נגן audio ואין placeholder (מיקרופון/„תתווסף בקרוב”),
-    // רק הדברים בכתב תחת כותרת מכובדת.
+    // סיפור המחבר מופיע פעם אחת בלבד — אין בלוק „תמלול” כפול.
+    await expect(page.getByText(/גם כשאנחנו מכירים את עצמנו היטב/)).toHaveCount(1);
+    // אין קובץ שמע → אין רכיב שמע, אין כותרת שנייה, אין תמלול ואין placeholder.
     await expect(page.locator("audio")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "למה כתבתי את הספר הזה" })).toHaveCount(0);
+    await expect(page.locator("#author-audio-transcript")).toHaveCount(0);
     await expect(page.getByText(/תתווסף/)).toHaveCount(0);
-    await expect(page.locator("#author-audio-transcript")).toBeVisible();
   });
 
   test("stuck selector: reveals one curated answer, is shareable, and changeable", async ({
