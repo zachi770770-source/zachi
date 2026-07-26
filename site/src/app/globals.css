@@ -591,6 +591,9 @@
   border-radius: 1.5rem;
   background: var(--reader-bg);
   color: var(--reader-fg);
+}
+/* מעברי הצבע נדלקים רק אחרי ה-mount → אין הבזק בהיר בטעינת העדפה שמורה. */
+.sample-reader.is-ready {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .sample-reader[data-reader-theme="dark"] {
@@ -783,7 +786,7 @@
 .book-map__station {
   display: flex;
   gap: 1.25rem;
-  padding: 2rem 0;
+  padding: 1.7rem 0;
   border-top: 1px solid var(--color-border);
 }
 .book-map__station:last-child {
@@ -792,7 +795,7 @@
 @media (min-width: 640px) {
   .book-map__station {
     gap: 2rem;
-    padding: 2.4rem 0;
+    padding: 1.9rem 0;
   }
 }
 .book-map__order {
@@ -800,13 +803,13 @@
   font-weight: 700;
   font-size: 2rem;
   line-height: 1;
-  color: color-mix(in srgb, var(--color-brand) 55%, transparent);
+  color: color-mix(in srgb, var(--color-brand) 60%, transparent);
   font-variant-numeric: tabular-nums;
 }
 .book-map__chapter {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--color-foreground-muted);
 }
 .book-map__name {
@@ -820,13 +823,16 @@
   margin-top: 0.6rem;
   font-family: var(--font-quote);
   font-style: italic;
-  font-size: 1.05rem;
+  font-weight: 500;
+  font-size: 1.16rem;
+  line-height: 1.5;
   color: var(--color-brand-hover);
 }
 .book-map__line {
-  margin-top: 0.5rem;
-  line-height: 1.7;
-  color: var(--color-foreground-muted);
+  margin-top: 0.55rem;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--color-foreground) 82%, transparent);
 }
 
 @supports (animation-timeline: view()) {

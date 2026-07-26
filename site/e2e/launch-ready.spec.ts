@@ -111,15 +111,18 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator(".book-map__examines").first()).toBeVisible();
   });
 
-  test("author audio: dignified placeholder + transcript, no fake audio", async ({ page }) => {
+  test("author audio: no placeholder while there is no file, transcript shown, no fake audio", async ({
+    page,
+  }) => {
     await page.goto("/author", { waitUntil: "networkidle" });
     await expect(
       page.getByRole("heading", { name: "למה כתבתי את הספר הזה" })
     ).toBeVisible();
-    // אין קובץ שמע אמיתי → אין נגן audio, מוצג placeholder + תמלול.
+    // אין קובץ שמע → אין נגן audio ואין placeholder (מיקרופון/„תתווסף בקרוב”),
+    // רק הדברים בכתב תחת כותרת מכובדת.
     await expect(page.locator("audio")).toHaveCount(0);
-    await expect(page.getByText(/ההקלטה של צחי חן תתווסף/)).toBeVisible();
-    await expect(page.getByText(/קריאת התמלול/)).toBeVisible();
+    await expect(page.getByText(/תתווסף/)).toHaveCount(0);
+    await expect(page.locator("#author-audio-transcript")).toBeVisible();
   });
 
   test("stuck selector: reveals one curated answer, is shareable, and changeable", async ({

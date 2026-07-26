@@ -16,6 +16,11 @@ const STEP = 0.1;
 
 type Theme = "light" | "dark";
 
+// טעינת ההעדפה לפני ה-paint (useLayoutEffect) כדי למנוע הבזק בהיר לפני
+// המעבר למצב כהה. בשרת אין layout effect — נופלים ל-useEffect.
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+
 /** מ״הערכת זמן קריאה: ספירת מילים בפועל / קצב עברי סביר. */
 function estimateMinutes() {
   const words = [
@@ -41,17 +46,17 @@ export function SampleReader() {
   const [scale, setScale] = React.useState(1);
   const [theme, setTheme] = React.useState<Theme>("light");
   const [progress, setProgress] = React.useState(0);
+  const rootRef = React.useRef<HTMLDivElement>(null);
   const articleRef = React.useRef<HTMLElement>(null);
   const minutes = React.useMemo(() => estimateMinutes(), []);
 
-  // טעינת העדפות מקומיות + אירוע צפייה אנונימי.
-  React.useEffect(() => {
+  // טעינת העדפות מקומיות לפני ה-paint — ללא הבזק בהיר.
+  useIsomorphicLayoutEffect(() => {
     try {
       const raw = localStorage.getItem(PREFS_KEY);
       if (raw) {
         const p = JSON.parse(raw) as { scale?: number; theme?: Theme };
         if (typeof p.scale === "number") {
-          // eslint-disable-next-line react-hooks/set-state-in-effect -- טעינת העדפה מקומית פעם אחת
           setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, p.scale)));
         }
         if (p.theme === "dark" || p.theme === "light") {
@@ -61,6 +66,12 @@ export function SampleReader() {
     } catch {
       /* localStorage לא זמין — נשארים בברירת המחדל */
     }
+  }, []);
+
+  // אירוע צפייה אנונימי + הדלקת מעברי הצבע רק אחרי ה-mount (דרך ה-DOM,
+  // ללא state) כדי שהחלת ההעדפה השמורה לא תיראה כהבזק מבהיר לכהה.
+  React.useEffect(() => {
+    rootRef.current?.classList.add("is-ready");
     trackEvent("view_sample");
   }, []);
 
@@ -121,6 +132,7 @@ export function SampleReader() {
 
   return (
     <div
+      ref={rootRef}
       className="sample-reader"
       data-reader-theme={theme}
       style={{ ["--reader-fs" as string]: String(scale) }}

@@ -9,17 +9,17 @@ import { Container } from "@/components/shared/Container";
  */
 export function BookMap() {
   return (
-    <section className="book-map py-16 sm:py-20" aria-labelledby="book-map-heading">
+    <section className="book-map py-14 sm:py-16" aria-labelledby="book-map-heading">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <span className="kicker">{bookMap.eyebrow}</span>
           <h2 id="book-map-heading" className="type-h2 mt-4">
             {bookMap.title}
           </h2>
-          <p className="type-lead mt-5 text-foreground-muted">{bookMap.intro}</p>
+          <p className="type-lead mt-4 text-foreground-muted">{bookMap.intro}</p>
         </div>
 
-        <ol className="book-map__list mx-auto mt-12 max-w-3xl">
+        <ol className="book-map__list mx-auto mt-9 max-w-3xl">
           {bookMap.stations.map((station) => (
             <li key={station.order} className="book-map__station">
               <span className="book-map__order" aria-hidden="true">

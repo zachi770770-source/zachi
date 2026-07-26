@@ -80,14 +80,8 @@ export const bookMap = {
   ],
 };
 
-/** תוכן רכיב „למה כתבתי את הספר הזה” (שמע). */
+/** תוכן רכיב „למה כתבתי את הספר הזה”. eyebrow מוצג רק כאשר יש שמע אמיתי. */
 export const authorAudio = {
   eyebrow: "בקולו של המחבר",
   title: "למה כתבתי את הספר הזה",
-  /** placeholder מכובד כל עוד אין קובץ שמע אמיתי של צחי חן. */
-  pendingNote: "ההקלטה של צחי חן תתווסף כאן בקרוב. בינתיים, אפשר לקרוא את הדברים.",
-  transcriptLabel: "התמלול",
-  transcriptToggle: "קריאת התמלול",
-  playLabel: "השמעה",
-  pauseLabel: "השהיה",
 };
