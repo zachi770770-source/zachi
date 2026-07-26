@@ -99,6 +99,27 @@ export async function consumeQuota(db: SqlClient, subjectHash: string): Promise<
   return toState(cur.rows[0] as never, false);
 }
 
+/**
+ * מגלגל אחורה שאלה אחת שנצרכה (reserve) כאשר לא הופקה תשובה בפועל — שאלה
+ * ללא מקור, סירוב, כשל ספק או timeout. מוריד את שני המונים (לא מתחת ל-0).
+ * כך „שמורה” אטומית שלא הבשילה לתשובה אינה עולה למשתמש שאלה מהמכסה.
+ */
+export async function refundQuota(db: SqlClient, subjectHash: string): Promise<QuotaState> {
+  const res = await db.query(
+    `update compass_usage set
+        window_count   = greatest(0, window_count - 1),
+        lifetime_count = greatest(0, lifetime_count - 1),
+        updated_at     = now()
+      where subject_hash = $1
+      returning greatest(0, $2 - case when now() - window_start >= interval '24 hours'
+                                      then 0 else window_count end) as remaining_day,
+                greatest(0, $3 - lifetime_count) as remaining_lifetime`,
+    [subjectHash, COMPASS_LIMITS.perDay, COMPASS_LIMITS.lifetime]
+  );
+  const state = toState(res.rows[0] as never, true);
+  return { ...state, allowed: state.remaining > 0 };
+}
+
 /** קריאה בלבד — כמה נותר, בלי לצרוך (להצגת המונה בטעינת העמוד). */
 export async function peekQuota(db: SqlClient, subjectHash: string): Promise<QuotaState> {
   const res = await db.query(

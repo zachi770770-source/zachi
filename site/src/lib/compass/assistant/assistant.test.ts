@@ -14,7 +14,9 @@ type Row = {
   score: number;
 };
 
-function mockDb(rows: Row[], activeVersion: string | null = "888"): SqlClient {
+const REQUIRED = "medaytim-laahava-888-final";
+
+function mockDb(rows: Row[], activeVersion: string | null = REQUIRED): SqlClient {
   return {
     async query(text: string) {
       if (/where status = 'active'/.test(text)) {
@@ -60,6 +62,17 @@ describe("askCompass", () => {
   it("מחזיר „לא זמין” כשאין גרסת ספר פעילה (לא fixture)", async () => {
     const res = await askCompass(mockDb([row(0.5)], null), "איך בונים אמון?", provider("x"));
     expect(res.answer).toEqual({ status: "unavailable", reason: "no-active-book" });
+  });
+
+  it("מחזיר „לא זמין” כשהגרסה הפעילה אינה בדיוק הגרסה הנדרשת", async () => {
+    const gen = vi.fn();
+    const res = await askCompass(
+      mockDb([row(0.6)], "some-other-version"),
+      "איך בונים אמון?",
+      { model: "m", generate: gen as never }
+    );
+    expect(res.answer).toEqual({ status: "unavailable", reason: "no-active-book" });
+    expect(gen).not.toHaveBeenCalled(); // לא קוראים למודל על גרסה לא נכונה
   });
 
   it("מסרב כשאין התאמה מספקת", async () => {

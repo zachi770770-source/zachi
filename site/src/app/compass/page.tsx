@@ -1,18 +1,22 @@
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { compass } from "@/content/compass";
-import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
+import { COMPASS_LIMITS, isCompassFeatureEnabled } from "@/lib/compass/assistant/config";
 import { Container } from "@/components/shared/Container";
 import { CompassConsole } from "@/components/compass/CompassConsole";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-export const metadata = pageMetadata({
-  title: "המצפן של מדייטים לאהבה",
-  description:
-    "שאלו מספר שאלות ממוקדות וקבלו כיוון קצר המבוסס על עקרונות הספר מדייטים לאהבה. טעימה מהגישה, לא תחליף לקריאת הספר.",
-  path: "/compass",
-  ogType: "article",
-});
+export const metadata = {
+  ...pageMetadata({
+    title: "המצפן של מדייטים לאהבה",
+    description:
+      "שאלו מספר שאלות ממוקדות וקבלו כיוון קצר המבוסס על עקרונות הספר מדייטים לאהבה. טעימה מהגישה, לא תחליף לקריאת הספר.",
+    path: "/compass",
+    ogType: "article",
+  }),
+  // כל עוד המצפן אינו פעיל — noindex,nofollow, כדי שלא ייכנס לאינדוקס בטרם עת.
+  ...(isCompassFeatureEnabled() ? {} : { robots: { index: false, follow: false } }),
+};
 
 /**
  * עמוד „המצפן”. העמוד קיים תמיד; הזמינות בפועל (ספק מודל + גרסת ספר פעילה)

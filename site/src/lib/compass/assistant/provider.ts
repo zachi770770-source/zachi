@@ -7,7 +7,11 @@ import type {
   CompassProvider,
   CompassProviderInput,
 } from "@/lib/compass/assistant/types";
-import { compassModel, hasProviderKey } from "@/lib/compass/assistant/config";
+import {
+  compassModel,
+  hasProviderKey,
+  COMPASS_PROVIDER_TIMEOUT_MS,
+} from "@/lib/compass/assistant/config";
 
 /**
  * שכבת ספק המודל. מופשטת מאחורי CompassProvider כדי שאפשר יהיה להחליף מודל
@@ -24,8 +28,9 @@ class AnthropicCompassProvider implements CompassProvider {
 
   constructor(apiKey: string, model: string) {
     this.model = model;
-    // maxRetries נמוך: שגיאה מוחזרת מהר ולא תוקעת את הבקשה.
-    this.client = new Anthropic({ apiKey, maxRetries: 1 });
+    // maxRetries נמוך + timeout (מ״ש): שגיאה/timeout מוחזרים מהר; הראוט
+    // מגלגל אחורה את המכסה שנצרכה כך ש-timeout לא „עולה” שאלה.
+    this.client = new Anthropic({ apiKey, maxRetries: 1, timeout: COMPASS_PROVIDER_TIMEOUT_MS });
   }
 
   async generate(input: CompassProviderInput): Promise<CompassCompletion> {

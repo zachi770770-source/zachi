@@ -166,6 +166,24 @@ test("legacy URLs 301-redirect to the most relevant page", async ({ request }) =
   }
 });
 
+test("/api/compass sets a secure anonymous cookie (HttpOnly, SameSite=Lax, Path=/, Max-Age)", async ({
+  request,
+}) => {
+  const res = await request.get("/api/compass");
+  expect(res.status()).toBe(200);
+  const setCookies = res
+    .headersArray()
+    .filter((h) => h.name.toLowerCase() === "set-cookie")
+    .map((h) => h.value)
+    .filter((v) => v.startsWith("compass_uid="));
+  expect(setCookies.length).toBeGreaterThan(0);
+  const cookie = setCookies[0];
+  expect(cookie).toMatch(/HttpOnly/i);
+  expect(cookie).toMatch(/SameSite=Lax/i);
+  expect(cookie).toMatch(/Path=\//i);
+  expect(cookie).toMatch(/Max-Age=\d+/i);
+});
+
 test("/compass exists; while inert it shows a dignified coming-soon (no fixture)", async ({ page }) => {
   const res = await page.goto("/compass", { waitUntil: "networkidle" });
   expect(res?.status()).toBe(200);

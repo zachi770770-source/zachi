@@ -4,18 +4,25 @@ import { compassQuestionSchema } from "@/lib/validation/compass";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { getCompassDb } from "@/lib/compass/assistant/db";
 import { getCompassProvider } from "@/lib/compass/assistant/provider";
-import { hasActiveVersion } from "@/lib/compass/search";
+import { getActiveVersion } from "@/lib/compass/search";
 import { askCompass } from "@/lib/compass/assistant/assistant";
-import { ensureQuotaSchema, consumeQuota, peekQuota } from "@/lib/compass/assistant/quota";
+import {
+  ensureQuotaSchema,
+  consumeQuota,
+  refundQuota,
+  peekQuota,
+} from "@/lib/compass/assistant/quota";
 import {
   SUBJECT_COOKIE,
   newSubjectId,
   hashSubject,
   subjectCookieOptions,
 } from "@/lib/compass/assistant/identity";
+import type { SqlClient } from "@/lib/compass/types";
 import {
   COMPASS_LIMITS,
   isCompassFeatureEnabled,
+  requiredBookVersion,
 } from "@/lib/compass/assistant/config";
 
 export const runtime = "nodejs";
@@ -55,19 +62,27 @@ const LIMITS_PAYLOAD = {
   maxQuestionChars: COMPASS_LIMITS.maxQuestionChars,
 };
 
-/** מצב זמינות משותף ל-GET/POST: התכונה פעילה + ספק + מסד + גרסת ספר פעילה. */
-async function resolveAvailability() {
-  if (!isCompassFeatureEnabled()) return { available: false as const, db: null };
+/** זמינות בסיסית: התכונה פעילה + מסד + ספק מודל. אינה בודקת גרסה. */
+function resolveAvailability(): { available: boolean; db: SqlClient | null } {
+  if (!isCompassFeatureEnabled()) return { available: false, db: null };
   const db = getCompassDb();
-  if (!db) return { available: false as const, db: null };
-  if (!getCompassProvider()) return { available: false as const, db: null };
-  return { available: true as const, db };
+  if (!db) return { available: false, db: null };
+  if (!getCompassProvider()) return { available: false, db: null };
+  return { available: true, db };
+}
+
+/**
+ * הגרסה הפעילה חייבת להיות *בדיוק* הגרסה הנדרשת — לא מספיק שקיימת גרסה
+ * פעילה כלשהי. אחרת ה-API „לא זמין”.
+ */
+async function requiredVersionActive(db: SqlClient): Promise<boolean> {
+  return (await getActiveVersion(db)) === requiredBookVersion();
 }
 
 /** GET — מצב וזמינות + כמה שאלות נותרו (לטעינת העמוד). לא צורך מכסה. */
 export async function GET(request: Request) {
   const { id, isNew } = readSubject(request);
-  const { available, db } = await resolveAvailability();
+  const { available, db } = resolveAvailability();
 
   if (!available || !db) {
     return withSubjectCookie(
@@ -79,8 +94,7 @@ export async function GET(request: Request) {
 
   try {
     await ensureQuotaSchema(db);
-    const active = await hasActiveVersion(db);
-    if (!active) {
+    if (!(await requiredVersionActive(db))) {
       return withSubjectCookie(
         NextResponse.json({ available: false, limits: LIMITS_PAYLOAD }),
         id,
@@ -133,7 +147,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "שאלה לא תקינה", limits: LIMITS_PAYLOAD }, { status: 400 });
   }
-  // honeypot מולא → מתנהגים כהצלחה נייטרלית בלי לצרוך מכסה או לקרוא למודל.
+  // honeypot מולא → תגובה נייטרלית בלי לצרוך מכסה או לקרוא למודל.
   if (parsed.data.company && parsed.data.company.length > 0) {
     return NextResponse.json({ available: true, status: "refused", answer: "", limits: LIMITS_PAYLOAD });
   }
@@ -142,33 +156,29 @@ export async function POST(request: Request) {
   const subjectHash = hashSubject(id);
   const question = parsed.data.question;
 
-  const { available, db } = await resolveAvailability();
-  if (!available || !db) {
-    // „לא זמין” — לעולם לא תוכן פיקצ׳ר. אינו צורך מכסה.
-    return withSubjectCookie(
+  const unavailable = () =>
+    withSubjectCookie(
       NextResponse.json({ available: false, status: "unavailable", limits: LIMITS_PAYLOAD }),
       id,
       isNew
     );
-  }
+
+  const { available, db } = resolveAvailability();
+  if (!available || !db) return unavailable(); // „לא זמין”, בלי לצרוך מכסה
 
   const provider = getCompassProvider();
 
   try {
     await ensureQuotaSchema(db);
 
-    // אין גרסת ספר פעילה → „לא זמין”, בלי לצרוך מכסה ובלי לקרוא למודל.
-    if (!(await hasActiveVersion(db))) {
-      return withSubjectCookie(
-        NextResponse.json({ available: false, status: "unavailable", limits: LIMITS_PAYLOAD }),
-        id,
-        isNew
-      );
-    }
+    // הגרסה הפעילה חייבת להיות בדיוק הנדרשת → אחרת „לא זמין”, בלי לצרוך.
+    if (!(await requiredVersionActive(db))) return unavailable();
 
-    // שער מכסה לפני קריאה למודל.
-    const gate = await peekQuota(db, subjectHash);
-    if (gate.remaining <= 0) {
+    // *שמורה* אטומית: upsert יחיד. גם תחת בקשות מקבילות, לכל היותר perDay
+    // שמורות מצליחות (ה-WHERE נכשל לאחר שהמונה הגיע לתקרה) — אין עקיפה
+    // בכמה בקשות במקביל.
+    const reserved = await consumeQuota(db, subjectHash);
+    if (!reserved.allowed) {
       return withSubjectCookie(
         NextResponse.json(
           { available: true, status: "limit", answer: LIMIT_MESSAGE, remaining: 0, limits: LIMITS_PAYLOAD },
@@ -179,54 +189,61 @@ export async function POST(request: Request) {
       );
     }
 
-    // צריכה אטומית (מונעת מרוץ/כרטיסיות מרובות).
-    const quota = await consumeQuota(db, subjectHash);
-    if (!quota.allowed) {
+    // מגלגל אחורה את השמורה כאשר לא הופקה תשובה בפועל (ללא מקור/כשל/timeout).
+    const refundAnd = async <T>(build: (remaining: number) => T): Promise<T> => {
+      const back = await refundQuota(db, subjectHash);
+      return build(back.remaining);
+    };
+
+    try {
+      const { answer } = await askCompass(db, question, provider);
+
+      if (answer.status === "answered") {
+        return withSubjectCookie(
+          NextResponse.json({
+            available: true,
+            status: "answered",
+            answer: answer.text,
+            citation: answer.citation,
+            remaining: reserved.remaining, // השמורה נשמרת
+            limits: LIMITS_PAYLOAD,
+          }),
+          id,
+          isNew
+        );
+      }
+      if (answer.status === "refused") {
+        // „שאלה ללא מקור” / חסימת הגנת-ספר → לא צורך מכסה (refund).
+        return withSubjectCookie(
+          await refundAnd((remaining) =>
+            NextResponse.json({
+              available: true,
+              status: "refused",
+              answer: answer.text,
+              remaining,
+              limits: LIMITS_PAYLOAD,
+            })
+          ),
+          id,
+          isNew
+        );
+      }
+      // „לא זמין” (מרוץ נדיר) → refund.
+      await refundQuota(db, subjectHash);
+      return unavailable();
+    } catch {
+      // כשל ספק / timeout → refund (לא צורך מכסה).
       return withSubjectCookie(
-        NextResponse.json(
-          { available: true, status: "limit", answer: LIMIT_MESSAGE, remaining: 0, limits: LIMITS_PAYLOAD },
-          { status: 429 }
+        await refundAnd((remaining) =>
+          NextResponse.json(
+            { error: "אירעה תקלה זמנית. נסו שוב.", remaining, limits: LIMITS_PAYLOAD },
+            { status: 502 }
+          )
         ),
         id,
         isNew
       );
     }
-
-    const { answer } = await askCompass(db, question, provider);
-
-    if (answer.status === "answered") {
-      return withSubjectCookie(
-        NextResponse.json({
-          available: true,
-          status: "answered",
-          answer: answer.text,
-          citation: answer.citation,
-          remaining: quota.remaining,
-          limits: LIMITS_PAYLOAD,
-        }),
-        id,
-        isNew
-      );
-    }
-    if (answer.status === "refused") {
-      return withSubjectCookie(
-        NextResponse.json({
-          available: true,
-          status: "refused",
-          answer: answer.text,
-          remaining: quota.remaining,
-          limits: LIMITS_PAYLOAD,
-        }),
-        id,
-        isNew
-      );
-    }
-    // תיאורטית לא אמור לקרות (זמינות אושרה) — מטופל כ„לא זמין”.
-    return withSubjectCookie(
-      NextResponse.json({ available: false, status: "unavailable", limits: LIMITS_PAYLOAD }),
-      id,
-      isNew
-    );
   } catch (err) {
     // לוג מאובטח: שם השגיאה בלבד. לעולם לא message/stack/key/DSN/שאלה/תשובה.
     console.error(`compass_error name=${(err as { name?: string })?.name ?? "unknown"}`);

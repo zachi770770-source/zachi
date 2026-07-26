@@ -4,7 +4,7 @@ import type { SqlClient } from "@/lib/compass/types";
 import { searchCompass } from "@/lib/compass/search";
 import type { CompassAnswer, CompassProvider, CompassCompletion } from "@/lib/compass/assistant/types";
 import { getCompassProvider } from "@/lib/compass/assistant/provider";
-import { COMPASS_INSUFFICIENT_ANSWER } from "@/lib/compass/assistant/config";
+import { COMPASS_INSUFFICIENT_ANSWER, requiredBookVersion } from "@/lib/compass/assistant/config";
 import {
   COMPASS_SYSTEM_PROMPT,
   COMPASS_PROTECTION_REFUSAL,
@@ -47,7 +47,8 @@ export async function askCompass(
   }
 
   const search = await searchCompass(db, q);
-  if (search.bookVersion === null) {
+  // חייבת להיות גרסה פעילה, והיא חייבת להיות *בדיוק* הגרסה הנדרשת (888).
+  if (search.bookVersion === null || search.bookVersion !== requiredBookVersion()) {
     return { answer: { status: "unavailable", reason: "no-active-book" } };
   }
   if (!search.matched || search.results.length === 0) {

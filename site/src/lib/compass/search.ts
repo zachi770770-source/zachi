@@ -34,12 +34,12 @@ type Row = {
  *
  * הפונקציה מסומנת server-only ולכן לא ניתנת לייבוא מהדפדפן.
  */
-/** האם קיימת גרסת ספר פעילה? בדיקה זולה לפני צריכת מכסה/קריאה למודל. */
-export async function hasActiveVersion(db: SqlClient): Promise<boolean> {
+/** מחזיר את מזהה הגרסה הפעילה (או null). בדיקה זולה לפני צריכת מכסה/מודל. */
+export async function getActiveVersion(db: SqlClient): Promise<string | null> {
   const res = await db.query(
-    `select 1 from compass_book_versions where status = 'active' limit 1`
+    `select version from compass_book_versions where status = 'active' limit 1`
   );
-  return res.rows.length > 0;
+  return (res.rows[0] as { version?: string } | undefined)?.version ?? null;
 }
 
 export async function searchCompass(
