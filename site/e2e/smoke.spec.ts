@@ -73,7 +73,7 @@ test("mobile menu opens and closes", async ({ page }) => {
 test("FAQ accordion opens an answer", async ({ page }) => {
   await page.goto("/faq", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "למי הספר מתאים?" }).click();
-  await expect(page.getByText(/לכל מי שנמצא בתהליך/)).toBeVisible();
+  await expect(page.getByText(/שלוש תחנות בדרך לאהבה/)).toBeVisible();
 });
 
 test("cookie consent: accept all hides the banner without crashing the app", async ({

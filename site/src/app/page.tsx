@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { Hero } from "@/components/sections/Hero";
 import { ThesisSection } from "@/components/sections/ThesisSection";
+import { StationsSection } from "@/components/sections/StationsSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { MethodSection } from "@/components/sections/MethodSection";
@@ -28,6 +29,7 @@ export default function HomePage() {
       <ProductSchema />
       <Hero />
       <ThesisSection />
+      <StationsSection />
       <AudienceSection />
       <OutcomesSection />
       <MethodSection />

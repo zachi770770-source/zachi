@@ -1,0 +1,53 @@
+import { ArrowLeft } from "lucide-react";
+
+import { Container } from "@/components/shared/Container";
+import { Reveal } from "@/components/shared/Reveal";
+import { stations } from "@/content/book";
+
+/**
+ * "באיזו תחנה אתם נמצאים?" - שלוש נקודות פתיחה לאותו ספר ואותו מסע
+ * (לפני קשר / מתחילים מחדש / בתוך קשר). מבהיר שמדובר בספר אחד עם רעיון
+ * מאחד, וכל מסלול מפנה לאזור רלוונטי באותו עמוד.
+ */
+export function StationsSection() {
+  return (
+    <section
+      id="stations"
+      className="scroll-mt-20 py-24 sm:py-32"
+      aria-labelledby="stations-heading"
+    >
+      <Container>
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <span className="kicker">{stations.eyebrow}</span>
+          <h2 id="stations-heading" className="type-h2 mt-4">
+            {stations.title}
+          </h2>
+          <p className="type-lead mt-5 text-foreground-muted">{stations.intro}</p>
+        </Reveal>
+
+        <Reveal className="mt-14 grid gap-6 md:grid-cols-3">
+          {stations.tracks.map((track) => (
+            <div
+              key={track.id}
+              className="flex flex-col rounded-2xl border border-border bg-surface p-7 sm:p-8"
+            >
+              <h3 className="font-serif text-2xl font-semibold text-foreground">
+                {track.title}
+              </h3>
+              <p className="mt-4 flex-1 text-[17px] leading-relaxed text-foreground-muted">
+                {track.description}
+              </p>
+              <a
+                href={track.href}
+                className="mt-6 inline-flex items-center gap-2 text-[15px] font-semibold text-brand transition-colors hover:text-brand-hover"
+              >
+                {track.linkLabel}
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </a>
+            </div>
+          ))}
+        </Reveal>
+      </Container>
+    </section>
+  );
+}
