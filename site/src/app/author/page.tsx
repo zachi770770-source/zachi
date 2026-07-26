@@ -7,6 +7,7 @@ import { authorContent } from "@/content/author";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AuthorAudio } from "@/components/author/AuthorAudio";
+import { AuthorPageView } from "@/components/author/AuthorPageView";
 import { PersonSchema } from "@/components/schema/PersonSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
@@ -28,6 +29,7 @@ export default function AuthorPage() {
 
   return (
     <Container className="py-12 sm:py-16 lg:py-20">
+      <AuthorPageView />
       <PersonSchema />
       <BreadcrumbSchema
         items={[

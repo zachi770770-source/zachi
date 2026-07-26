@@ -2,35 +2,39 @@
 
 /*
  * מערכת העיצוב של "מדייטים לאהבה".
- * שמנת בהירה כרקע, פחם לטקסט, טרקוטה כצבע דגש בלבד, זית כמשני עדין.
+ * נייר ניטרלי בהיר כרקע, פחם לטקסט, מרווה קריר כמשני (בנדים ופוטר עמוק),
+ * וטרקוטה כצבע מותג והדגשה בלבד: CTA ראשי, קישורים, בחירה ותגים.
  * Heebo לכל הממשק והכותרות; Noto Serif Hebrew לציטוט התזה בלבד.
  */
 :root {
-  /* נייר חם — אין שחור קר ואין משטח כהה גדול. */
-  --color-background: #fbf7f0;
-  --color-surface: #fffdf9;
-  --color-surface-muted: #f3eadf;
-  --color-foreground: #2b241f;
-  --color-foreground-muted: #5f574e;
-  /* פחם-אספרסו חם — לאובייקט העטיפה בלבד, לא כמשטח דומיננטי. */
-  --color-ink: #2c2319;
+  /* נייר ניטרלי בהיר — לא קרם צהוב. הבסיס כבר לא חום. */
+  --color-background: #f5f4f1;
+  --color-surface: #fdfdfc;
+  /* משטח משני קריר-בהיר (כחול-אפור) — הבנדים המתחלפים נקראים קרירים. */
+  --color-surface-muted: #e7ece6;
+  /* פחם ניטרלי לטקסט — לא אספרסו חום. */
+  --color-foreground: #24272c;
+  --color-foreground-muted: #575c63;
+  /* פחם ניטרלי לצל אובייקט העטיפה בלבד. */
+  --color-ink: #262a2f;
 
-  --color-border: #e7ddcf;
-  --color-border-strong: #d8cbb6;
+  /* מסגרות אפור-כחלחל קריר במקום בז'. */
+  --color-border: #d4dbd2;
+  --color-border-strong: #bcc6ba;
 
-  /* טרקוטה: הגוון עובר AA לבן על מילוי כפתור וגם כאקסנט חם. */
+  /* טרקוטה — צבע מותג והדגשה בלבד: CTA ראשי, קישורים, בחירה, תגים. */
   --color-brand: #ad5836;
-  --color-brand-foreground: #fffdf9;
-  /* טרקוטה כהה לפעולות/קישורים — עובר AA על קרם. */
+  --color-brand-foreground: #fdfdfc;
   --color-brand-hover: #8f4626;
   --color-brand-muted: #f1e2d6;
 
-  --color-secondary: #6e7062;
-  --color-secondary-foreground: #fff9f2;
-  --color-secondary-muted: #eceadf;
+  /* משני קריר ומובהק — כחול-אפור עמוק. משטחי-עומק (פוטר) וכפתורים משניים. */
+  --color-secondary: #47624f;
+  --color-secondary-foreground: #f2f6f0;
+  --color-secondary-muted: #dde5db;
 
-  --color-accent: #6e7062;
-  --color-accent-foreground: #22262b;
+  --color-accent: #47624f;
+  --color-accent-foreground: #f2f6f0;
 
   --color-success: #2f6b46;
   --color-success-foreground: #f1f8f3;
@@ -681,10 +685,10 @@ details[open] .faq-answer {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .sample-reader[data-reader-theme="dark"] {
-  --reader-bg: #201b17;
-  --reader-fg: #ece3d6;
-  --reader-fg-muted: #b3a898;
-  --reader-border: #3a332b;
+  --reader-bg: #1f2124;
+  --reader-fg: #e8e6e0;
+  --reader-fg-muted: #a8adb2;
+  --reader-border: #343840;
   --reader-accent: #db8c6a;
   --reader-surface-2: #2a241f;
 }

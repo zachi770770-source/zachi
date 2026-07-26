@@ -51,6 +51,8 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           return;
         }
         trackEvent("waitlist_signup", { source }); // ללא כתובת אימייל
+        // ייחוס מסלול הטעימה: הרשמה שהגיעה מסוף עמוד ההצצה.
+        if (source === "preview") trackEvent("waitlist_from_preview");
         setStatus("success");
       } catch {
         setStatus("error");

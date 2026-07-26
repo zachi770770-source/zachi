@@ -1,13 +1,13 @@
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
-import { ThesisSection } from "@/components/sections/ThesisSection";
 import { StationsSection } from "@/components/sections/StationsSection";
-import { BookHubLink } from "@/components/sections/BookHubLink";
 import { StuckSelector } from "@/components/interactive/StuckSelector";
+import { BookHubLink } from "@/components/sections/BookHubLink";
 import { SampleSection } from "@/components/sections/SampleSection";
-import { CompassCard } from "@/components/compass/CompassCard";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
+import { Testimonials } from "@/components/sections/Testimonials";
+import { CompassCard } from "@/components/compass/CompassCard";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
@@ -21,10 +21,12 @@ export const metadata = pageMetadata({
 });
 
 /**
- * עמוד הבית כשער מרכזי: ניתן לסריקה מהירה, עם מסלול ברור לדפים הייעודיים.
- * רק Hero, תקציר הרעיון, שלוש התחנות, „איפה אתם נתקעים?” (גרסה קצרה),
- * טעימה קצרה, טיזר מחבר ורשימת המתנה. הפירוט המלא (שיטה, מבנה, כלים,
- * תוצאות, מהדורות) עבר ל-/book; הסיפור המלא ל-/author; ה-FAQ ל-/faq.
+ * עמוד הבית כשער ניווט קצר וניתן לסריקה מהירה. הוא מחזיק רק את מה שמכוון
+ * את הקורא הלאה: Hero, שלוש התחנות, „איפה אתם נתקעים?”, טיזר קצר לספר,
+ * טיזר קצר לטעימה, טיזר מחבר קצר מאוד (2 עד 3 שורות) ו-CTA לרשימת ההמתנה.
+ * רכיב ההמלצות מרונדר רק כשיש שלוש המלצות מאושרות (אחרת null). כל הפירוט
+ * המלא חי בדפים הייעודיים ולא משוכפל כאן: השיטה, מבנה הספר, הכלים, התוצאות
+ * והמהדורות ב-/book; הטעימה המלאה ב-/preview; סיפור המחבר ב-/author.
  */
 export default function HomePage() {
   return (
@@ -33,13 +35,13 @@ export default function HomePage() {
       <BookSchema />
       <ProductSchema />
       <Hero />
-      <ThesisSection />
       <StationsSection />
-      <BookHubLink />
       <StuckSelector variant="compact" />
+      <BookHubLink />
       <SampleSection />
-      <CompassCard />
       <AuthorTeaser />
+      <Testimonials />
+      <CompassCard />
       <NewsletterSection />
     </>
   );
