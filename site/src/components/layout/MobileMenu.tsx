@@ -26,7 +26,7 @@ export function MobileMenu() {
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-[2px] data-[state=open]:animate-fade-in lg:hidden" />
         <DialogPrimitive.Content
-          className="fixed inset-y-0 start-0 z-50 flex w-[min(85vw,22rem)] flex-col gap-6 bg-surface p-6 shadow-lg focus:outline-none lg:hidden"
+          className="fixed inset-y-0 start-0 z-50 flex w-[min(85vw,22rem)] flex-col gap-6 overscroll-contain bg-surface p-6 shadow-lg focus:outline-none data-[state=open]:animate-drawer-in lg:hidden"
           aria-describedby={undefined}
         >
           <div className="flex items-center justify-between">

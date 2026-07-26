@@ -177,6 +177,20 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator("#stuck input:checked")).toHaveValue("in-relationship");
   });
 
+  test("stuck selector: remembers the last choice locally on a fresh visit (no URL param)", async ({
+    page,
+  }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    await page.getByText("כשאין סערה, נדמה לי שאין משיכה.", { exact: true }).click();
+    await expect(page).toHaveURL(/[?&]stuck=calm/);
+
+    // ביקור חדש בלי פרמטר ב-URL → הבחירה משוחזרת מהמכשיר (localStorage).
+    await page.goto("/", { waitUntil: "networkidle" });
+    await expect(page).not.toHaveURL(/stuck=/);
+    await expect(page.locator("#stuck input:checked")).toHaveValue("calm");
+    await expect(page.locator("#stuck article")).toBeVisible();
+  });
+
   test("stuck selector: mobile collapses to the chosen option with a change link", async ({
     browser,
   }) => {
