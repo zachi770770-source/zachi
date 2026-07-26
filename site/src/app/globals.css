@@ -561,3 +561,302 @@
     transform: none;
   }
 }
+
+/* ===================================================================
+ * חוויית הטעימה: מצב קריאה נגיש (SampleReader), מפת הספר (BookMap)
+ * ומעברי View Transitions. גובה ה-header נשמר כמשתנה כדי שסרגל הקורא
+ * ייצמד מתחתיו.
+ * =================================================================== */
+:root {
+  --header-height: 64px;
+}
+@media (min-width: 640px) {
+  :root {
+    --header-height: 76px;
+  }
+}
+
+.sample-reader {
+  --reader-fs: 1;
+  --reader-bg: var(--color-surface);
+  --reader-fg: var(--color-foreground);
+  --reader-fg-muted: var(--color-foreground-muted);
+  --reader-border: var(--color-border);
+  --reader-accent: var(--color-brand-hover);
+  --reader-surface-2: var(--color-surface-muted);
+  position: relative;
+  margin-inline: auto;
+  max-width: 46rem;
+  border: 1px solid var(--reader-border);
+  border-radius: 1.5rem;
+  background: var(--reader-bg);
+  color: var(--reader-fg);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.sample-reader[data-reader-theme="dark"] {
+  --reader-bg: #201b17;
+  --reader-fg: #ece3d6;
+  --reader-fg-muted: #b3a898;
+  --reader-border: #3a332b;
+  --reader-accent: #db8c6a;
+  --reader-surface-2: #2a241f;
+}
+
+.reader-toolbar {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  padding: 0.7rem 1rem;
+  background: color-mix(in srgb, var(--reader-bg) 90%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--reader-border);
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+.reader-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--reader-fg-muted);
+  border-radius: 0.375rem;
+  padding: 0.35rem 0.25rem;
+  transition: color 0.2s ease;
+}
+.reader-back:hover {
+  color: var(--reader-fg);
+}
+.reader-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.reader-time {
+  font-size: 0.82rem;
+  color: var(--reader-fg-muted);
+  white-space: nowrap;
+}
+.reader-fontgroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding-inline: 0.15rem;
+  border-inline: 1px solid var(--reader-border);
+}
+.reader-fonticon {
+  font-family: var(--font-quote);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--reader-fg-muted);
+  padding-inline: 0.1rem;
+}
+.reader-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.25rem;
+  width: 2.25rem;
+  border-radius: 0.5rem;
+  color: var(--reader-fg);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+.reader-btn:hover {
+  background: var(--reader-surface-2);
+}
+.reader-btn:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+.reader-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.reader-progress {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--reader-border);
+}
+.reader-progress__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-brand);
+  transform-origin: right center;
+  transition: transform 0.08s linear;
+}
+
+.reader-content {
+  padding: 1.75rem 1.5rem 2.75rem;
+  font-size: calc(1.15rem * var(--reader-fs));
+  line-height: 1.9;
+  color: var(--reader-fg);
+}
+@media (min-width: 640px) {
+  .reader-content {
+    padding: 2.5rem 3rem 3.5rem;
+  }
+}
+.reader-title {
+  font-family: var(--font-quote);
+  font-weight: 700;
+  font-size: 1.75em;
+  line-height: 1.2;
+  margin-top: 0.7rem;
+  color: var(--reader-fg);
+}
+.reader-intro {
+  margin-top: 0.6em;
+  font-size: 0.92em;
+  color: var(--reader-fg-muted);
+}
+.reader-lead {
+  margin-top: 1.4em;
+  font-size: 1.1em;
+  font-weight: 500;
+  color: var(--reader-fg);
+}
+.reader-p {
+  margin-top: 1.05em;
+  color: var(--reader-fg);
+}
+.reader-principle {
+  margin-top: 1.6em;
+  padding: 1.1em 1.2em;
+  border-radius: 1rem;
+  border-inline-start: 3px solid var(--reader-accent);
+  background: var(--reader-surface-2);
+}
+.reader-principle__label {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.66em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--reader-accent);
+}
+.reader-principle__text {
+  margin-top: 0.5em;
+  font-family: var(--font-quote);
+  font-size: 1.1em;
+  line-height: 1.55;
+  color: var(--reader-fg);
+}
+.reader-question {
+  margin-top: 1.5em;
+  font-family: var(--font-quote);
+  font-style: italic;
+  font-size: 1.12em;
+  color: var(--reader-accent);
+}
+.reader-ending {
+  margin-top: 1.5em;
+  font-weight: 500;
+}
+.reader-closing {
+  margin-top: 2em;
+  border-top: 1px solid var(--reader-border);
+  padding-top: 1.4em;
+}
+.reader-closing__prompt {
+  font-family: var(--font-quote);
+  font-size: 1.15em;
+  font-weight: 600;
+  color: var(--reader-fg);
+}
+.reader-closing__note {
+  margin-top: 0.5em;
+  font-size: 0.82em;
+  color: var(--reader-fg-muted);
+}
+.reader-cta {
+  margin-top: 1.8em;
+}
+
+/* ===== מפת הספר החיה ===== */
+.book-map__station {
+  display: flex;
+  gap: 1.25rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--color-border);
+}
+.book-map__station:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+@media (min-width: 640px) {
+  .book-map__station {
+    gap: 2rem;
+    padding: 2.4rem 0;
+  }
+}
+.book-map__order {
+  font-family: var(--font-quote);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--color-brand) 55%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+.book-map__chapter {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-foreground-muted);
+}
+.book-map__name {
+  margin-top: 0.2rem;
+  font-family: var(--font-quote);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+  color: var(--color-foreground);
+}
+.book-map__examines {
+  margin-top: 0.6rem;
+  font-family: var(--font-quote);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--color-brand-hover);
+}
+.book-map__line {
+  margin-top: 0.5rem;
+  line-height: 1.7;
+  color: var(--color-foreground-muted);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .book-map__station {
+      animation: mapReveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+    @keyframes mapReveal {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+}
+
+/* ===== View Transitions (עם fallback) ===== */
+@view-transition {
+  navigation: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

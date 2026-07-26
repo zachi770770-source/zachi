@@ -6,6 +6,7 @@ import { pageMetadata } from "@/lib/seo";
 import { authorContent } from "@/content/author";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
+import { AuthorAudio } from "@/components/author/AuthorAudio";
 import { PersonSchema } from "@/components/schema/PersonSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
@@ -91,6 +92,9 @@ export default function AuthorPage() {
           </p>
         ))}
       </div>
+
+      {/* „למה כתבתי את הספר הזה” — שמע בקולו של המחבר (או placeholder + תמלול) */}
+      <AuthorAudio />
 
       {/* קריאה לפעולה */}
       <div className="mx-auto mt-12 flex max-w-[64ch] flex-col items-start gap-x-8 gap-y-4 border-t border-border pt-8 sm:flex-row sm:items-center">

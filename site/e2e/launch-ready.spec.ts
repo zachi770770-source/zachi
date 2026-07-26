@@ -70,6 +70,58 @@ test.describe("Launch-readiness", () => {
     expect(Math.abs(pad - h)).toBeLessThanOrEqual(4);
   });
 
+  test("sample reader: accessible text, font size + theme persist, progress, back", async ({
+    page,
+  }) => {
+    await page.goto("/preview", { waitUntil: "networkidle" });
+    const reader = page.locator(".sample-reader");
+    await expect(reader).toBeVisible();
+
+    // תוכן HTML נגיש (לא תמונות): כותרת, קטע וסיום קיימים כטקסט.
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("כמה עמודים");
+    await expect(reader).toContainText("בזמן שקראתם, על איזה קשר או דייט חשבתם?");
+    await expect(page.getByRole("progressbar")).toBeVisible();
+    await expect(page.getByText(/דק׳ קריאה/)).toBeVisible();
+
+    // הגדלת כתב → שינוי המשתנה --reader-fs.
+    const scale0 = await reader.evaluate((el) => getComputedStyle(el).getPropertyValue("--reader-fs"));
+    await page.getByRole("button", { name: "הגדלת גודל הכתב" }).click();
+    const scale1 = await reader.evaluate((el) => getComputedStyle(el).getPropertyValue("--reader-fs"));
+    expect(Number(scale1)).toBeGreaterThan(Number(scale0));
+
+    // מצב כהה — משפיע על אזור הקריאה בלבד, ונשמר מקומית.
+    await page.getByRole("button", { name: "מצב קריאה כהה" }).click();
+    await expect(reader).toHaveAttribute("data-reader-theme", "dark");
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(page.locator(".sample-reader")).toHaveAttribute("data-reader-theme", "dark");
+
+    // כפתור חזרה ברור.
+    await expect(reader.getByRole("link", { name: /חזרה לעמוד הבית/ })).toBeVisible();
+  });
+
+  test("book map: three parts, each with a chapter, an examining question and a line", async ({
+    page,
+  }) => {
+    await page.goto("/preview", { waitUntil: "networkidle" });
+    const stations = page.locator(".book-map__station");
+    await expect(stations).toHaveCount(3);
+    await expect(stations.nth(0)).toContainText("מזהים את הרעש");
+    await expect(stations.nth(1)).toContainText("עוברים את השער");
+    await expect(stations.nth(2)).toContainText("מתחילים לבנות");
+    await expect(page.locator(".book-map__examines").first()).toBeVisible();
+  });
+
+  test("author audio: dignified placeholder + transcript, no fake audio", async ({ page }) => {
+    await page.goto("/author", { waitUntil: "networkidle" });
+    await expect(
+      page.getByRole("heading", { name: "למה כתבתי את הספר הזה" })
+    ).toBeVisible();
+    // אין קובץ שמע אמיתי → אין נגן audio, מוצג placeholder + תמלול.
+    await expect(page.locator("audio")).toHaveCount(0);
+    await expect(page.getByText(/ההקלטה של צחי חן תתווסף/)).toBeVisible();
+    await expect(page.getByText(/קריאת התמלול/)).toBeVisible();
+  });
+
   test("stuck selector: reveals one curated answer, is shareable, and changeable", async ({
     page,
   }) => {
