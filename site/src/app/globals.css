@@ -690,7 +690,7 @@ details[open] .faq-answer {
   --reader-fg-muted: #a8adb2;
   --reader-border: #343840;
   --reader-accent: #db8c6a;
-  --reader-surface-2: #2a241f;
+  --reader-surface-2: #282b30;
 }
 
 .reader-toolbar {
@@ -712,7 +712,7 @@ details[open] .faq-answer {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--reader-fg-muted);
@@ -755,8 +755,9 @@ details[open] .faq-answer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 2.5rem;
-  width: 2.5rem;
+  /* אזור לחיצה ≥44px למובייל (WCAG 2.5.5 / הנחיית המגע). */
+  height: 2.75rem;
+  width: 2.75rem;
   border-radius: 0.5rem;
   color: var(--reader-fg);
   transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.06s ease;
