@@ -50,9 +50,17 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           setError(data?.error ?? "אירעה תקלה. נסו שוב.");
           return;
         }
-        trackEvent("waitlist_signup", { source }); // ללא כתובת אימייל
-        // ייחוס מסלול הטעימה: הרשמה שהגיעה מסוף עמוד ההצצה.
-        if (source === "preview") trackEvent("waitlist_from_preview");
+        const data = (await res.json().catch(() => null)) as
+          | { created?: boolean }
+          | null;
+        // מדווחים על הרשמה רק כשהשרת אישר שנוצרה רשומה חדשה (created:true).
+        // הרשמה חוזרת (created:false), honeypot, דחייה או כשל אינם מדווחים.
+        if (data?.created === true) {
+          trackEvent("waitlist_signup", { source }); // ללא כתובת אימייל
+          // ייחוס מסלול הטעימה: הרשמה חדשה שהגיעה מסוף עמוד ההצצה.
+          if (source === "preview") trackEvent("waitlist_from_preview");
+        }
+        // חוויית המשתמש זהה בכל מקרה של הצלחה (חדש או קיים).
         setStatus("success");
       } catch {
         setStatus("error");

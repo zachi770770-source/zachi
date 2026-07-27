@@ -1,4 +1,4 @@
-import type { WaitlistAddInput, WaitlistRepository } from "@/lib/waitlist/types";
+import type { WaitlistAddInput, WaitlistAddResult, WaitlistRepository } from "@/lib/waitlist/types";
 import {
   classifyWaitlistDbError,
   formatWaitlistDbErrorLog,
@@ -72,7 +72,7 @@ export class PostgresWaitlistRepository implements WaitlistRepository {
     return this.schemaReady;
   }
 
-  async add(input: WaitlistAddInput): Promise<void> {
+  async add(input: WaitlistAddInput): Promise<WaitlistAddResult> {
     // מוודאים שהסכימה קיימת. אם יצירתה נכשלה עדיין מנסים לכתוב — ייתכן
     // שהטבלה כבר קיימת ממיגרציה ידנית; שגיאת כתיבה אמיתית תטופל ע"י הקורא.
     try {
@@ -81,7 +81,10 @@ export class PostgresWaitlistRepository implements WaitlistRepository {
       // נמשיך לניסיון הכתיבה בכל מקרה.
     }
 
-    await this.db.query(
+    // `xmax = 0` ב-RETURNING מבחין בין INSERT (שורה חדשה, xmax=0) לבין
+    // עדכון ב-ON CONFLICT (xmax != 0). כך אנו יודעים אם באמת נוצרה רשומה
+    // חדשה, בלי שאילתת קיום נפרדת ובלי מרוץ תנאים.
+    const res = await this.db.query(
       `insert into waitlist_subscribers
          (email_normalized, email_original, source, consent_version, consent_at, status)
        values ($1, $2, $3, $4, now(), 'active')
@@ -90,7 +93,8 @@ export class PostgresWaitlistRepository implements WaitlistRepository {
              source = excluded.source,
              consent_version = excluded.consent_version,
              consent_at = now(),
-             updated_at = now()`,
+             updated_at = now()
+       returning (xmax = 0) as created`,
       [
         input.emailNormalized,
         input.emailOriginal,
@@ -98,6 +102,9 @@ export class PostgresWaitlistRepository implements WaitlistRepository {
         input.consentVersion,
       ]
     );
+
+    const row = res.rows[0] as { created?: boolean } | undefined;
+    return { created: row?.created === true };
   }
 
   async unsubscribe(emailNormalized: string): Promise<void> {

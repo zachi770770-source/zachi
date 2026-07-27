@@ -78,7 +78,9 @@ describe("PostgresWaitlistRepository self-provisioning", () => {
     const db = new MockSql();
     db.failHardening = true;
     const repo = new PostgresWaitlistRepository(db);
-    await expect(repo.add(input)).resolves.toBeUndefined(); // no throw
+    await expect(repo.add(input)).resolves.toMatchObject({
+      created: expect.any(Boolean),
+    }); // no throw, returns the created flag
     expect(insertCalls(db)).toHaveLength(1);
   });
 
