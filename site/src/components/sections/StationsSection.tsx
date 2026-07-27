@@ -14,7 +14,7 @@ export function StationsSection() {
   return (
     <section
       id="stations"
-      className="scroll-mt-20 py-24 sm:py-32"
+      className="scroll-mt-20 py-14 sm:py-16"
       aria-labelledby="stations-heading"
     >
       <Container>
@@ -26,7 +26,7 @@ export function StationsSection() {
           <p className="type-lead mt-5 text-foreground-muted">{stations.intro}</p>
         </Reveal>
 
-        <Reveal className="mt-14 grid gap-6 md:grid-cols-3">
+        <Reveal className="mt-10 grid gap-6 md:grid-cols-3">
           {stations.tracks.map((track) => (
             <Link
               key={track.id}

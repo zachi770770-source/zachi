@@ -24,13 +24,13 @@ export function Hero() {
         <div className="absolute -top-40 start-[10%] h-[520px] w-[520px] rounded-full bg-brand/[0.06] blur-[120px]" />
       </div>
 
-      <Container className="flex min-h-[calc(100svh-76px)] items-start py-6 lg:items-center lg:py-16">
-        <div className="grid w-full items-center gap-y-6 lg:grid-cols-[52fr_48fr] lg:gap-x-16">
+      <Container className="flex min-h-[calc(74svh-76px)] items-start py-5 lg:items-center lg:py-8">
+        <div className="grid w-full items-center gap-y-5 lg:grid-cols-[52fr_48fr] lg:gap-x-16">
           {/* תוכן — יחידה רציפה אחת (ימין בדסקטופ, שני במובייל) */}
           <div className="order-2 flex flex-col items-start lg:order-1">
             <span className="kicker">{hero.eyebrow}</span>
 
-            <h1 className="type-display mt-5 text-foreground">
+            <h1 className="type-display mt-4 text-foreground">
               אהבה לא רק מוצאים.
               <br />
               <span className="text-brand-hover">בונים אותה.</span>
@@ -65,7 +65,7 @@ export function Hero() {
               </Link>
             </div>
 
-            <TrustBar className="mt-8" />
+            <TrustBar className="mt-7" />
           </div>
 
           {/* ספר — „הבמה”: הרעש (מחשבות) מתפזר בגלילה והכריכה מקבלת נוכחות */}

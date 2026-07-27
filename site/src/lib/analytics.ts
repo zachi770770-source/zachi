@@ -30,7 +30,11 @@ export type AnalyticsEventName =
   | "stuck_open"
   | "stuck_select"
   | "stuck_to_sample"
-  | "compass_ask";
+  | "compass_ask"
+  | "preview_opened"
+  | "preview_reached_end"
+  | "waitlist_from_preview"
+  | "author_page_opened";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
 

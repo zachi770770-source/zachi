@@ -3,6 +3,7 @@ import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { SampleReader } from "@/components/preview/SampleReader";
 import { BookMap } from "@/components/preview/BookMap";
+import { PreviewClosing } from "@/components/preview/PreviewClosing";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
@@ -27,6 +28,7 @@ export default function PreviewPage() {
       </Container>
 
       <BookMap />
+      <PreviewClosing />
     </>
   );
 }

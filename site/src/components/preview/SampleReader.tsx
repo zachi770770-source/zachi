@@ -48,6 +48,7 @@ export function SampleReader() {
   const [progress, setProgress] = React.useState(0);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const articleRef = React.useRef<HTMLElement>(null);
+  const completedRef = React.useRef(false);
   const minutes = React.useMemo(() => estimateMinutes(), []);
 
   // טעינת העדפות מקומיות לפני ה-paint — ללא הבזק בהיר.
@@ -73,6 +74,7 @@ export function SampleReader() {
   React.useEffect(() => {
     rootRef.current?.classList.add("is-ready");
     trackEvent("view_sample");
+    trackEvent("preview_opened");
   }, []);
 
   // שמירת העדפות — מקומית בלבד.
@@ -94,7 +96,14 @@ export function SampleReader() {
       const rect = el.getBoundingClientRect();
       const scrollable = rect.height - window.innerHeight;
       const ratio = scrollable > 0 ? (0 - rect.top) / scrollable : 0;
-      setProgress(Math.min(1, Math.max(0, ratio)));
+      const clamped = Math.min(1, Math.max(0, ratio));
+      setProgress(clamped);
+      // „הגעה לסוף העמוד” — נמדד פעם אחת בלבד בכל טעינת עמוד. אינו טוען
+      // שהטעימה נקראה במלואה, רק שהגולש גלל עד הסוף. אינו שומר תוכן.
+      if (!completedRef.current && clamped >= 0.985) {
+        completedRef.current = true;
+        trackEvent("preview_reached_end");
+      }
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);

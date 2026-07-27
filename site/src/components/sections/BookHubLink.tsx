@@ -21,6 +21,12 @@ export function BookHubLink() {
             <p className="mt-2 text-[16px] leading-relaxed text-foreground-muted">
               השיטה, מבנה הספר, הכלים המעשיים ומה משתנה אחרי הקריאה, בעמוד אחד.
             </p>
+            <Link
+              href="/preview"
+              className="mt-3 inline-block text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              או קראו טעימה קצרה מהספר
+            </Link>
           </div>
           <Button asChild size="lg" variant="outline" className="shrink-0">
             <Link href="/book">
