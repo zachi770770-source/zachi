@@ -12,7 +12,9 @@
     "test:e2e": "playwright test",
     "compass": "tsx scripts/compass.ts",
     "import:preflight": "tsx scripts/compass-preflight.ts",
-    "import:book": "tsx scripts/compass-preflight.ts && tsx scripts/import-book.ts"
+    "import:preflight:local": "tsx --env-file=.env.import scripts/compass-preflight.ts",
+    "import:book": "tsx scripts/compass-preflight.ts && tsx --tsconfig tsconfig.scripts.json scripts/import-book.ts",
+    "import:book:local": "tsx --env-file=.env.import scripts/compass-preflight.ts && tsx --env-file=.env.import --tsconfig tsconfig.scripts.json scripts/import-book.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
