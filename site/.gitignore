@@ -34,6 +34,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...but the import env TEMPLATE (names only, no values) is committed on purpose.
+!.env.import.example
+
+# ── Section 6: local book import — never commit the book, artifacts, or secrets ──
+# כל הורדת ה-PDF, הטקסט המחולץ וקבצי ה-chunks נכתבים כאן ומוחרגים לגמרי.
+.import-tmp/
 
 # vercel
 .vercel
