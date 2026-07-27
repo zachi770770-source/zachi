@@ -5,16 +5,28 @@
  * צ׳אט ואין ספק מודל. תוכן הספר אינו נחשף לדפדפן — כל הקוד כאן רץ בשרת.
  */
 
+/** סוג החלק בספר. משמש לאימות מבנה (מבוא / 13 פרקים / סיום / נספחים). */
+export type SectionType = "intro" | "chapter" | "conclusion" | "appendix";
+
 /** מקור הספר המובנה — נטען ע"י סקריפט הייבוא מהגרסה המאושרת. */
 export interface BookSourceSection {
   /** שם הסעיף (אופציונלי). */
   name?: string | null;
   /** פסקאות הסעיף, לפי הסדר. */
   paragraphs: string[];
+  /** עמוד התחלה/סיום של הסעיף במקור (לעקיבות; אופציונלי). */
+  pageStart?: number | null;
+  pageEnd?: number | null;
 }
 export interface BookSourceChapter {
+  /**
+   * מספר החלק לסדר. לפרק אמיתי זהו מספר הפרק (1..13); למבוא/סיום/נספח
+   * זהו מספר סידורי לצורך סדר בלבד (ההבחנה נעשית לפי `type`).
+   */
   number: number;
   name: string;
+  /** סוג החלק. ברירת מחדל: "chapter". */
+  type?: SectionType;
   sections: BookSourceSection[];
 }
 export interface BookSource {
@@ -27,14 +39,24 @@ export interface BookSource {
 /** קטע סמנטי אחרי חלוקה — יחידת האחסון והחיפוש. */
 export interface BookChunk {
   bookVersion: string;
+  /** סוג החלק שאליו שייך הקטע. */
+  sectionType: SectionType;
   chapterNumber: number;
   chapterName: string;
   sectionName: string | null;
   /** סדר הקטע בתוך הגרסה (רציף, מ-1). */
   sectionOrder: number;
+  /** עמוד התחלה/סיום של הקטע במקור (null אם לא ידוע). */
+  pageStart: number | null;
+  pageEnd: number | null;
   content: string;
   /** sha256 של התוכן — לזיהוי שינויים בין גרסאות. */
   checksum: string;
+  /**
+   * מזהה יציב ודטרמיניסטי לקטע (זהה בין ייבוא חוזר של אותו מבנה):
+   * sha256(version|sectionType|chapterNumber|localOrder).
+   */
+  stableChunkId: string;
 }
 
 /** תוצאת חיפוש בודדת — קטע קצר בלבד, לעולם לא פרק שלם. */

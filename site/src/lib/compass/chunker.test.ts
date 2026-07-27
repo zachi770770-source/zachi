@@ -14,7 +14,57 @@ describe("chunkBook", () => {
       expect(c.chapterName).toBeTruthy();
       expect(c.content.trim()).toBe(c.content);
       expect(c.checksum).toMatch(/^[a-f0-9]{64}$/);
+      expect(c.stableChunkId).toMatch(/^[a-f0-9]{64}$/);
+      // ברירת המחדל של הפיקסצ'ר (ללא type מפורש) היא "chapter".
+      expect(c.sectionType).toBe("chapter");
     });
+  });
+
+  it("carries section type and page range from the source", () => {
+    const src: BookSource = {
+      version: "v",
+      chapters: [
+        {
+          number: 1,
+          name: "פתח דבר",
+          type: "intro",
+          sections: [{ paragraphs: ["פתיחה קצרה."], pageStart: 7, pageEnd: 9 }],
+        },
+        {
+          number: 1,
+          name: "פרק ראשון",
+          sections: [{ paragraphs: ["גוף הפרק."], pageStart: 11, pageEnd: 20 }],
+        },
+      ],
+    };
+    const chunks = chunkBook(src);
+    expect(chunks).toHaveLength(2);
+    expect(chunks[0].sectionType).toBe("intro");
+    expect(chunks[0].pageStart).toBe(7);
+    expect(chunks[0].pageEnd).toBe(9);
+    expect(chunks[1].sectionType).toBe("chapter");
+    expect(chunks[1].pageStart).toBe(11);
+  });
+
+  it("gives each part its own stableChunkId namespace (no collision across types)", () => {
+    // מבוא ופרק החולקים אותו number לא מייצרים מזהה יציב זהה.
+    const src: BookSource = {
+      version: "v",
+      chapters: [
+        { number: 1, name: "מבוא", type: "intro", sections: [{ paragraphs: ["א."] }] },
+        { number: 1, name: "פרק", type: "chapter", sections: [{ paragraphs: ["ב."] }] },
+      ],
+    };
+    const [intro, chapter] = chunkBook(src);
+    expect(intro.stableChunkId).not.toBe(chapter.stableChunkId);
+  });
+
+  it("stableChunkId is deterministic and structure-stable across re-imports", () => {
+    const a = chunkBook(sampleBook);
+    const b = chunkBook(sampleBook);
+    expect(a.map((c) => c.stableChunkId)).toEqual(b.map((c) => c.stableChunkId));
+    // מזהים ייחודיים בתוך גרסה (בסיס לאילוץ ה-unique ב-DB).
+    expect(new Set(a.map((c) => c.stableChunkId)).size).toBe(a.length);
   });
 
   it("keeps every chunk within the hard size limit", () => {

@@ -45,18 +45,29 @@ export async function getActiveVersion(db: SqlClient): Promise<string | null> {
 export async function searchCompass(
   db: SqlClient,
   question: string,
-  opts: { minScore?: number } = {}
+  opts: { minScore?: number; bookVersion?: string } = {}
 ): Promise<CompassSearchResponse> {
   const q = (question ?? "").trim();
   const minScore = opts.minScore ?? DEFAULT_MIN_SCORE;
   if (!q) return { matched: false, bookVersion: null, results: [] };
 
-  // גרסה פעילה יחידה — מונע ערבוב גרסאות בתשובה אחת.
-  const versionRes = await db.query(
-    `select version from compass_book_versions where status = 'active' limit 1`
-  );
-  const bookVersion =
-    (versionRes.rows[0] as { version?: string } | undefined)?.version ?? null;
+  // ברירת מחדל: הגרסה הפעילה היחידה (מונע ערבוב גרסאות בתשובה אחת).
+  // עקיפה: `opts.bookVersion` מכוונת לגרסה מפורשת ללא תלות בסטטוס — לשימוש
+  // הערכה/כיול בלבד בצד השרת (הראוט הציבורי לעולם אינו מעביר אותה), כדי
+  // לאמת גרסה מיובאת עוד לפני הפעלתה.
+  let bookVersion: string | null;
+  let activeOnly: boolean;
+  if (opts.bookVersion) {
+    bookVersion = opts.bookVersion;
+    activeOnly = false;
+  } else {
+    const versionRes = await db.query(
+      `select version from compass_book_versions where status = 'active' limit 1`
+    );
+    bookVersion =
+      (versionRes.rows[0] as { version?: string } | undefined)?.version ?? null;
+    activeOnly = true;
+  }
   if (!bookVersion) return { matched: false, bookVersion: null, results: [] };
 
   // דירוג ממושקל ומנורמל ל-0..1 (דגל 32 = rank/(rank+1)).
@@ -65,10 +76,10 @@ export async function searchCompass(
             ts_rank_cd(search_tsv, query, 32) as score
        from compass_book_sections,
             websearch_to_tsquery('simple', $1) query
-      where book_version = $2 and is_active and search_tsv @@ query
+      where book_version = $2 and (not $4 or is_active) and search_tsv @@ query
       order by score desc
       limit $3`,
-    [q, bookVersion, FETCH_LIMIT]
+    [q, bookVersion, FETCH_LIMIT, activeOnly]
   );
 
   const perChapter = new Map<number, number>();

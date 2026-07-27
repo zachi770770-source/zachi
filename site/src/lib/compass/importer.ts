@@ -60,17 +60,22 @@ export async function importVersion(
     for (const c of chunks) {
       await db.query(
         `insert into compass_book_sections
-           (book_version, chapter_number, chapter_name, section_name,
-            section_order, content, checksum, is_active)
-         values ($1, $2, $3, $4, $5, $6, $7, false)`,
+           (book_version, section_type, chapter_number, chapter_name, section_name,
+            section_order, page_start, page_end, content, checksum,
+            stable_chunk_id, is_active)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false)`,
         [
           c.bookVersion,
+          c.sectionType,
           c.chapterNumber,
           c.chapterName,
           c.sectionName,
           c.sectionOrder,
+          c.pageStart,
+          c.pageEnd,
           c.content,
           c.checksum,
+          c.stableChunkId,
         ]
       );
     }

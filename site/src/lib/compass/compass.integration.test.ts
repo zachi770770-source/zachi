@@ -52,6 +52,27 @@ suite("compass knowledge layer (real Postgres)", () => {
     expect(r.results).toHaveLength(0);
   });
 
+  it("2b. import persists section metadata (type / pages / stable id)", async () => {
+    const rows = await client.query(
+      `select section_type, page_start, page_end, stable_chunk_id
+         from compass_book_sections
+        where book_version = $1`,
+      [sampleBook.version]
+    );
+    expect(rows.rows.length).toBeGreaterThan(0);
+    for (const raw of rows.rows) {
+      const row = raw as {
+        section_type: string;
+        stable_chunk_id: string | null;
+      };
+      expect(["intro", "chapter", "conclusion", "appendix"]).toContain(row.section_type);
+      expect(row.stable_chunk_id).toMatch(/^[a-f0-9]{64}$/);
+    }
+    // מזהה יציב ייחודי בתוך הגרסה (אילוץ ה-unique ב-DB).
+    const ids = (rows.rows as Array<{ stable_chunk_id: string }>).map((r) => r.stable_chunk_id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it("3. too-general question → bounded, never the whole book", async () => {
     const r = await searchCompass(pool, "קשר");
     expect(r.results.length).toBeLessThanOrEqual(5);

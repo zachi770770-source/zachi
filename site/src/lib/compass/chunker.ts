@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { BookChunk, BookSource } from "@/lib/compass/types";
+import type { BookChunk, BookSource, BookSourceChapter } from "@/lib/compass/types";
 
 /** יעד גודל קטע (תווים) — מספיק להקשר, קצר מכדי להיות פרק שלם. */
 const TARGET_CHARS = 900;
@@ -55,24 +55,37 @@ function packSentences(paragraph: string): string[] {
 export function chunkBook(source: BookSource): BookChunk[] {
   const chunks: BookChunk[] = [];
   let order = 0;
+  // מונה מקומי לכל חלק (type+number) — בסיס ל-stableChunkId היציב.
+  const localCount = new Map<string, number>();
 
   const push = (
-    chapterNumber: number,
-    chapterName: string,
+    chapter: BookSourceChapter,
     sectionName: string | null,
+    pageStart: number | null,
+    pageEnd: number | null,
     content: string
   ) => {
     const trimmed = content.trim();
     if (!trimmed) return;
     order += 1;
+    const sectionType = chapter.type ?? "chapter";
+    const partKey = `${sectionType}:${chapter.number}`;
+    const localOrder = (localCount.get(partKey) ?? 0) + 1;
+    localCount.set(partKey, localOrder);
     chunks.push({
       bookVersion: source.version,
-      chapterNumber,
-      chapterName,
+      sectionType,
+      chapterNumber: chapter.number,
+      chapterName: chapter.name,
       sectionName,
       sectionOrder: order,
+      pageStart,
+      pageEnd,
       content: trimmed,
       checksum: sha256(trimmed),
+      stableChunkId: sha256(
+        `${source.version}|${sectionType}|${chapter.number}|${localOrder}`
+      ),
     });
   };
 
@@ -80,11 +93,13 @@ export function chunkBook(source: BookSource): BookChunk[] {
     for (const section of chapter.sections) {
       const sectionName = section.name ? normalize(section.name) : null;
       const paragraphs = section.paragraphs.map(normalize).filter(Boolean);
+      const ps = section.pageStart ?? null;
+      const pe = section.pageEnd ?? null;
 
       let buf = "";
       const flush = () => {
         if (buf) {
-          push(chapter.number, chapter.name, sectionName, buf);
+          push(chapter, sectionName, ps, pe, buf);
           buf = "";
         }
       };
@@ -93,7 +108,7 @@ export function chunkBook(source: BookSource): BookChunk[] {
         if (para.length > MAX_CHARS) {
           flush();
           for (const piece of packSentences(para)) {
-            push(chapter.number, chapter.name, sectionName, piece);
+            push(chapter, sectionName, ps, pe, piece);
           }
           continue;
         }
