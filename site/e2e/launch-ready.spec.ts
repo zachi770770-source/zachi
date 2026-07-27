@@ -3,20 +3,23 @@ import { test, expect } from "@playwright/test";
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
-  test("home: one primary CTA (sample) + a light secondary (find my path)", async ({ page }) => {
+  test("home hero: one primary CTA (sample) + a light secondary (waitlist), no home anchor", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
+    const hero = page.locator("section").first();
 
-    // פעולה מרכזית אחת: לקריאת טעימה. הבקשה להירשם מרוכזת בסוף הטעימה.
-    const primary = page.getByRole("link", { name: "לקריאת טעימה מהספר" }).first();
+    // פעולה ראשית אחת: לקריאת טעימה → /preview (עמוד אמיתי).
+    const primary = hero.getByRole("link", { name: "לקריאת טעימה מהספר" });
     await expect(primary).toBeVisible();
     await expect(primary).toHaveAttribute("href", "/preview");
 
-    // פעולה משנית קלה: למצוא את המסלול המתאים (התחנות), לא כפתור שווה-משקל.
-    const secondary = page.getByRole("link", { name: "למצוא את המסלול שלי" });
-    await expect(secondary).toHaveAttribute("href", "/#stations");
+    // פעולה משנית קלה: רשימת המתנה → /waitlist (עמוד אמיתי, לא עוגן לבית).
+    const secondary = hero.getByRole("link", { name: "קבלו עדכון כשהספר יוצא" });
+    await expect(secondary).toHaveAttribute("href", "/waitlist");
 
-    // אין כפתור רכישה פעיל במצב טרום-השקה.
-    await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
+    // אין עוגן פנימי לבית ב-Hero, ואין כפתור רכישה פעיל בטרום-השקה.
+    await expect(hero.getByRole("link", { name: "למצוא את המסלול שלי" })).toHaveCount(0);
+    await expect(hero.locator('a[href="/#stations"]')).toHaveCount(0);
+    await expect(hero.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
   });
 
   test("home newsletter section: the waitlist form still submits successfully", async ({ page }) => {

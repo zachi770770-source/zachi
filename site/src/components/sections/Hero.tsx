@@ -12,11 +12,20 @@ import { TrustBar } from "@/components/sections/TrustBar";
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
  * מיושר אנכית למרכז. יחידת תוכן רציפה אחת.
  *
- * מצב Pre-launch: ה-CTA הראשי פעיל ומזמין להצטרף לרשימת ההמתנה
- * ("קבלו עדכון כשהספר יוצא") ומגלגל אל טופס ההרשמה. אין כפתור רכישה חסום.
- * כאשר salesOpen יהפוך ל-true, אותו כפתור הופך אוטומטית ל"לרכישת הספר".
+ * מצב Pre-launch (reader-first): פעולה ראשית אחת — לקרוא טעימה (/preview),
+ * ולצדה פעולה משנית קלה — להצטרף לרשימת ההמתנה (/waitlist). אין כפתור רכישה
+ * חסום ואין עוגן פנימי לבית. כאשר salesOpen יהפוך ל-true, הפעולה הראשית
+ * הופכת ל"לרכישת הספר" (/book#purchase) והטעימה עוברת לפעולה המשנית.
  */
 export function Hero() {
+  const salesOpen = siteConfig.salesOpen;
+  const primaryCta = salesOpen
+    ? { label: "לרכישת הספר", href: "/book#purchase" }
+    : { label: "לקריאת טעימה מהספר", href: "/preview" };
+  const secondaryCta = salesOpen
+    ? { label: "לקריאת טעימה מהספר", href: "/preview" }
+    : { label: "קבלו עדכון כשהספר יוצא", href: "/waitlist" };
+
   return (
     <section className="relative overflow-hidden">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
@@ -48,19 +57,18 @@ export function Hero() {
               {siteConfig.preLaunchPriceLabel}
             </p>
 
-            {/* פעולה מרכזית אחת: לקרוא טעימה (או לרכוש כשהמכירה פתוחה).
-                פעולה משנית קלה: למצוא את המסלול המתאים. אין שני כפתורים שווי-משקל. */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+            {/* פעולה ראשית אחת (לקרוא טעימה, או לרכוש כשהמכירה פתוחה) ולצדה
+                פעולה משנית קלה (רשימת המתנה). אין שני כפתורים שווי-משקל ואין
+                עוגן פנימי לבית — שני היעדים הם עמודים אמיתיים. */}
+            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
               <Button asChild size="lg" className="h-14 px-7 text-[17px]">
-                <Link href={siteConfig.salesOpen ? "/book#purchase" : "/preview"}>
-                  {siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר"}
-                </Link>
+                <Link href={primaryCta.href}>{primaryCta.label}</Link>
               </Button>
               <Link
-                href="/#stations"
-                className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                href={secondaryCta.href}
+                className="group inline-flex min-h-[44px] items-center gap-2 py-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                למצוא את המסלול שלי
+                {secondaryCta.label}
                 <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>
