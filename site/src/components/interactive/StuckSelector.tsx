@@ -91,7 +91,9 @@ export function StuckSelector({
   const choose = React.useCallback((id: StuckState["id"]) => {
     setSelected(id);
     setCollapsed(true);
-    trackEvent("stuck_select", { option: id });
+    // מדווחים שהתבצעה בחירה (מדד מעורבות), אך לא איזו — הבחירה עצמה היא
+    // רפלקציה אישית ואינה נשלחת לשום שרת/אנליטיקה (ראו קריטריון הפרטיות).
+    trackEvent("stuck_select");
     // עדכון ה-URL לשיתוף — בלי לרענן, בלי לגלול, בלי שרת.
     const url = new URL(window.location.href);
     url.searchParams.set(URL_PARAM, id);
@@ -189,7 +191,7 @@ export function StuckSelector({
             <button
               type="button"
               onClick={expand}
-              className="mt-4 inline-flex items-center gap-2 rounded-md px-2 py-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:hidden"
+              className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-md px-2 py-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:hidden"
             >
               שינוי הבחירה
             </button>
@@ -261,7 +263,7 @@ export function StuckSelector({
                 <Button asChild size="lg" className="h-[56px] w-full px-8 text-[17px] sm:w-auto">
                   <Link
                     href={stuckSelector.sampleHref}
-                    onClick={() => trackEvent("stuck_to_sample", { option: active.id })}
+                    onClick={() => trackEvent("stuck_to_sample")}
                   >
                     {stuckSelector.ui.sampleCta}
                     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
