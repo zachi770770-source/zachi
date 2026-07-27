@@ -72,31 +72,83 @@ export interface CleanOptions {
   headerMaxLen?: number;
 }
 
+/** סיכום הניקויים שבוצעו — לדוח בלבד. */
+export interface CleaningStats {
+  /** שורות שהוסרו כמספרי עמוד. */
+  pageNumbersRemoved: number;
+  /** כותרות רצות שזוהו (מנורמלות) והוסרו. */
+  runningHeaders: string[];
+  /** מספר מופעים של כותרות רצות שהוסרו (על פני כל העמודים). */
+  runningHeadersRemoved: number;
+  /** שורות כפולות עוקבות שהוסרו. */
+  duplicatesRemoved: number;
+  /** שורות שבהן תוקן ריווח-אותיות משובש. */
+  letterSpacingFixed: number;
+  /** סך שורות לפני/אחרי (אינדיקציה כללית). */
+  linesBefore: number;
+  linesAfter: number;
+}
+
 /**
- * מנקה עמודים (כל עמוד = מערך שורות) ומחזיר עמודים נקיים. לא מוחק תוכן
- * ממשי — רק מספרי עמוד, כותרות רצות, כפילויות עוקבות ורווחים משובשים.
+ * מנקה עמודים ומחזיר גם את התוכן הנקי וגם סיכום מפורט של מה שהוסר/תוקן.
+ * לא מוחק תוכן ממשי — רק מספרי עמוד, כותרות רצות, כפילויות עוקבות ורווחים
+ * משובשים.
  */
-export function cleanPages(pages: string[][], opts: CleanOptions = {}): string[][] {
+export function cleanPagesDetailed(
+  pages: string[][],
+  opts: CleanOptions = {}
+): { pages: string[][]; stats: CleaningStats } {
   const headers = detectRunningHeaders(
     pages,
     opts.headerMinFraction ?? 0.3,
     opts.headerMaxLen ?? 60
   );
+  const stats: CleaningStats = {
+    pageNumbersRemoved: 0,
+    runningHeaders: [...headers].sort(),
+    runningHeadersRemoved: 0,
+    duplicatesRemoved: 0,
+    letterSpacingFixed: 0,
+    linesBefore: 0,
+    linesAfter: 0,
+  };
 
-  return pages.map((lines) => {
+  const cleaned = pages.map((lines) => {
     const out: string[] = [];
     let prev: string | null = null;
     for (const raw of lines) {
-      let line = normalizeSpaces(fixLetterSpacing(raw));
-      line = normalizeSpaces(line);
+      stats.linesBefore += 1;
+      const fixed = fixLetterSpacing(raw);
+      if (fixed !== raw) stats.letterSpacingFixed += 1;
+      const line = normalizeSpaces(fixed);
       if (!line) continue;
-      if (isPageNumber(line)) continue;
-      if (headers.has(line)) continue;
+      if (isPageNumber(line)) {
+        stats.pageNumbersRemoved += 1;
+        continue;
+      }
+      if (headers.has(line)) {
+        stats.runningHeadersRemoved += 1;
+        continue;
+      }
       // שורה כפולה עוקבת (ארטיפקט) — מדלגים על החזרה המיידית.
-      if (prev !== null && line === prev) continue;
+      if (prev !== null && line === prev) {
+        stats.duplicatesRemoved += 1;
+        continue;
+      }
       out.push(line);
       prev = line;
     }
     return out;
   });
+
+  stats.linesAfter = cleaned.reduce((n, p) => n + p.length, 0);
+  return { pages: cleaned, stats };
+}
+
+/**
+ * מנקה עמודים (כל עמוד = מערך שורות) ומחזיר עמודים נקיים. לא מוחק תוכן
+ * ממשי — רק מספרי עמוד, כותרות רצות, כפילויות עוקבות ורווחים משובשים.
+ */
+export function cleanPages(pages: string[][], opts: CleanOptions = {}): string[][] {
+  return cleanPagesDetailed(pages, opts).pages;
 }

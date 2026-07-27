@@ -29,7 +29,7 @@ import { Pool } from "pg";
 import type { BookSource, SectionType } from "@/lib/compass/types";
 import { chunkBook } from "@/lib/compass/chunker";
 import { importVersion, activateVersion } from "@/lib/compass/importer";
-import { cleanPages } from "@/lib/compass/extract/clean";
+import { cleanPagesDetailed } from "@/lib/compass/extract/clean";
 import {
   detectStructure,
   summarizeStructure,
@@ -129,11 +129,21 @@ async function main() {
 
   // 3) ניקוי.
   log("3/9 מנקה רעש טכני (מספרי עמוד/כותרות רצות/כפילויות/רווחים)…");
-  const cleanedLines = cleanPages(pdf.pages.map((p) => p.lines));
+  const { pages: cleanedLines, stats: cleaning } = cleanPagesDetailed(
+    pdf.pages.map((p) => p.lines)
+  );
   const cleanPagesInput: CleanPage[] = pdf.pages.map((p, i) => ({
     pageNumber: p.pageNumber,
     lines: cleanedLines[i],
   }));
+  log(`    שורות: ${cleaning.linesBefore} → ${cleaning.linesAfter}`);
+  log(`    מספרי עמוד שהוסרו: ${cleaning.pageNumbersRemoved}`);
+  log(
+    `    כותרות רצות שזוהו: ${cleaning.runningHeaders.length} (${cleaning.runningHeadersRemoved} מופעים הוסרו)`
+  );
+  for (const h of cleaning.runningHeaders) log(`      – "${h}"`);
+  log(`    שורות כפולות עוקבות שהוסרו: ${cleaning.duplicatesRemoved}`);
+  log(`    שורות עם תיקון ריווח-אותיות: ${cleaning.letterSpacingFixed}`);
 
   // 4) זיהוי מבנה + אימות.
   log("4/9 מזהה מבנה (מבוא/פרקים/סיום/נספחים)…");
@@ -154,6 +164,23 @@ async function main() {
   log("5/9 מחלק לקטעים ומייבא כ-inactive…");
   const chunks = chunkBook(source);
   if (chunks.length === 0) fail("לא נוצרו קטעים מהמקור.");
+  // פילוח chunks לפי חלק — לדוח. בדיקת "פרק ריק" (0 chunks) חוסמת.
+  const perChapter = new Map<string, { label: string; count: number }>();
+  for (const c of chunks) {
+    const key = `${c.sectionType}:${c.chapterNumber}:${c.chapterName}`;
+    const cur = perChapter.get(key);
+    if (cur) cur.count += 1;
+    else perChapter.set(key, { label: `${c.sectionType} ${c.chapterNumber} — ${c.chapterName}`, count: 1 });
+  }
+  log(`    סך ${chunks.length} chunks. פילוח לפי חלק:`);
+  for (const { label, count } of perChapter.values()) log(`      · ${label}: ${count}`);
+  // כל חלק שזוהה חייב להניב לפחות chunk אחד (אין פרק ריק).
+  for (const ch of source.chapters) {
+    const total = ch.sections.reduce((n, s) => n + s.paragraphs.length, 0);
+    if (total === 0) {
+      fail(`חלק ריק ללא תוכן: ${ch.type ?? "chapter"} ${ch.number} — ${ch.name}.`);
+    }
+  }
   // שומר snapshot של המקור לבדיקה ידנית (מוחרג-Git; לא נכנס למאגר).
   await writeFile(
     path.join(TMP_DIR, `${VERSION}.source.json`),
@@ -171,17 +198,29 @@ async function main() {
     const res = await importVersion(client, source);
     log(`    יובאו ${res.sectionCount} קטעים לגרסה "${res.version}" (inactive).`);
 
-    // 6) בדיקות שלמות.
+    // 6) בדיקות שלמות: ספירה, כפילויות, מטא-דאטה חסר, תוכן ריק.
     log("6/9 בדיקות שלמות…");
-    const dbCount = await client.query(
-      `select count(*)::int as n from compass_book_sections where book_version = $1`,
+    const integrity = await client.query(
+      `select
+         count(*)::int                                              as n,
+         count(*) filter (where content is null or btrim(content) = '')::int as empty,
+         count(*) filter (where section_type is null or stable_chunk_id is null
+                              or chapter_number is null or chapter_name is null)::int as missing_meta,
+         (count(*) - count(distinct stable_chunk_id))::int          as dup_ids
+       from compass_book_sections where book_version = $1`,
       [VERSION]
     );
-    const n = (dbCount.rows[0] as { n: number }).n;
-    if (n !== chunks.length) {
-      fail(`אי-התאמה בספירת קטעים: DB=${n}, צפוי=${chunks.length}.`);
-    }
-    log(`    ${n} קטעים במסד — תואם לחלוקה.`);
+    const iv = integrity.rows[0] as {
+      n: number;
+      empty: number;
+      missing_meta: number;
+      dup_ids: number;
+    };
+    if (iv.n !== chunks.length) fail(`אי-התאמה בספירת קטעים: DB=${iv.n}, צפוי=${chunks.length}.`);
+    if (iv.empty > 0) fail(`${iv.empty} קטעים עם תוכן ריק.`);
+    if (iv.missing_meta > 0) fail(`${iv.missing_meta} קטעים עם metadata חסר.`);
+    if (iv.dup_ids > 0) fail(`${iv.dup_ids} מזהי-קטע (stable_chunk_id) כפולים.`);
+    log(`    ${iv.n} קטעים במסד — תואם לחלוקה; 0 ריקים, 0 metadata חסר, 0 כפילויות.`);
 
     // 7) 30 שאלות + כיול (מול הגרסה המיובאת, עוד לפני הפעלה).
     log("7/9 מריץ 30 שאלות + כיול סף…");

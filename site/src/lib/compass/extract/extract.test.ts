@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { orderPageLines, type PositionedText } from "@/lib/compass/extract/reading-order";
-import { cleanPages, fixLetterSpacing } from "@/lib/compass/extract/clean";
+import { cleanPages, cleanPagesDetailed, fixLetterSpacing } from "@/lib/compass/extract/clean";
 import {
   parseHeading,
   linesToParagraphs,
@@ -60,6 +60,23 @@ describe("cleanPages", () => {
       expect(page).not.toContain(header);
       expect(page.some((l) => /^\d+$/.test(l))).toBe(false);
     }
+  });
+
+  it("reports a cleaning summary (page numbers / headers / dups / spacing)", () => {
+    const header = "מדייטים לאהבה";
+    const pages: string[][] = [
+      [header, "ש ל ו ם לכולם.", "1"],
+      [header, "תוכן.", "תוכן.", "2"],
+      [header, "עוד תוכן.", "3"],
+      [header, "סוף.", "4"],
+    ];
+    const { stats } = cleanPagesDetailed(pages);
+    expect(stats.runningHeaders).toContain(header);
+    expect(stats.runningHeadersRemoved).toBe(4);
+    expect(stats.pageNumbersRemoved).toBe(4);
+    expect(stats.duplicatesRemoved).toBe(1);
+    expect(stats.letterSpacingFixed).toBe(1);
+    expect(stats.linesAfter).toBeLessThan(stats.linesBefore);
   });
 });
 
