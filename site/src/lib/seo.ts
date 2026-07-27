@@ -34,6 +34,17 @@ export function pageMetadata({
     ? title
     : `${title} | ${siteConfig.bookTitle}`;
 
+  // תמונת השיתוף המשותפת (נוצרת ב-app/opengraph-image.tsx, 1200x630).
+  // מצוינת במפורש בכל עמוד: כשעמוד מגדיר openGraph משלו, Next אינו יורש
+  // אוטומטית את תמונת ה-file-convention מה-root, ולכן בלעדיה עמודי המשנה
+  // נותרו ללא og:image/twitter:image. metadataBase הופך אותה לכתובת מלאה.
+  const ogImage = {
+    url: "/opengraph-image",
+    width: 1200,
+    height: 630,
+    alt: `${siteConfig.bookTitle} · ${siteConfig.tagline}`,
+  };
+
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
@@ -45,11 +56,13 @@ export function pageMetadata({
       siteName: siteConfig.bookTitle,
       title: socialTitle,
       description,
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: socialTitle,
       description,
+      images: [ogImage.url],
     },
   };
 }
