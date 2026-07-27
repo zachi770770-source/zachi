@@ -48,6 +48,16 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
+        // עמוד התשלום הדינמי (/checkout/pay/[id]) הוא טרנזקציוני ולעולם לא
+        // אמור להיכנס לאינדקס. X-Robots-Tag בצד השרת נוכח בכל תגובה לכל
+        // מזהה סשן, ואינו תלוי ב-robots.txt (שחסימה בו דווקא מונעת מהסורק
+        // לקרוא את ההנחיה). ה-robots.txt נפתח לנתיב זה כדי שההנחיה תיקרא.
+        source: "/checkout/pay/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+        ],
+      },
+      {
         // נכסי תמונה סטטיים ב-/public אינם ממותגים בגיבוב, אך משתנים לעיתים
         // רחוקות. ברירת המחדל של Vercel ל-/public היא must-revalidate; כאן
         // נותנים cache ארוך עם stale-while-revalidate כדי לזרז טעינה חוזרת

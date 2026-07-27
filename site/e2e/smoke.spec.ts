@@ -226,3 +226,34 @@ test("sitemap, robots and manifest are served correctly", async ({ request }) =>
   const manifestJson = await manifest.json();
   expect(manifestJson.dir).toBe("rtl");
 });
+
+test("every dynamic /checkout/pay/[id] response carries X-Robots-Tag noindex,nofollow,noarchive", async ({
+  request,
+}) => {
+  // מזהי סשן מגוונים — מוכיח שההנחיה חלה על כל URL דינמי, לא על אחד ספציפי.
+  const ids = [
+    "abc123",
+    "00000000-0000-0000-0000-000000000000",
+    "some-session-id",
+    "1",
+  ];
+  for (const id of ids) {
+    const res = await request.get(`/checkout/pay/${id}`);
+    const tag = (res.headers()["x-robots-tag"] ?? "").toLowerCase();
+    expect(tag, `x-robots-tag for ${id}`).toContain("noindex");
+    expect(tag, `x-robots-tag for ${id}`).toContain("nofollow");
+    expect(tag, `x-robots-tag for ${id}`).toContain("noarchive");
+  }
+});
+
+test("robots.txt opens /checkout/pay (so noindex is readable) but blocks /api, /checkout, /thank-you", async ({
+  request,
+}) => {
+  const txt = await (await request.get("/robots.txt")).text();
+  expect(txt).toContain("Allow: /checkout/pay/");
+  expect(txt).toContain("Disallow: /api/");
+  expect(txt).toContain("Disallow: /checkout\n");
+  expect(txt).toContain("Disallow: /thank-you");
+  // הנתיב הדינמי אינו חסום עוד לסריקה — אחרת ה-noindex לא היה נקרא.
+  expect(txt).not.toContain("Disallow: /checkout/pay/");
+});
