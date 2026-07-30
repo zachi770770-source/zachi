@@ -210,7 +210,7 @@ export const siteConfig = {
     { id: "secure-payment", label: "תשלום מאובטח", enabled: true, demoHidden: true },
     { id: "download", label: "גישה בהורדה ובמייל", enabled: true },
     { id: "devices", label: "קריאה בנייד, בטאבלט ובמחשב", enabled: true },
-    { id: "guest", label: "מהדורה דיגיטלית: גישה מיידית", enabled: true },
+    { id: "guest", label: "לאחר ההשקה: גישה מיידית", enabled: true },
   ],
 
   bonus: {
