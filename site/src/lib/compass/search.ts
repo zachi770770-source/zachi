@@ -3,11 +3,10 @@ import "server-only";
 import type { CompassMatch, CompassSearchResponse, SqlClient } from "@/lib/compass/types";
 
 /**
- * סף התאמה מינימלי (ציון מנורמל 0..1) — מתחתיו מסרבים להחזיר תוכן. הסירוב
- * העיקרי על שאלה ללא מקור מתרחש ממילא כי websearch_to_tsquery דורש שכל
- * מונחי השאילתה יימצאו (AND) — שאלה לא רלוונטית מחזירה 0 שורות. הסף הזה
- * הוא רצפה נוספת נגד התאמות זעירות. ערך זה כויל מול פיקסצ'ר קצר; יש לכייל
- * אותו מחדש מול התפלגות הציונים של כתב היד האמיתי.
+ * סף התאמה מינימלי (ציון מנורמל 0..1) — מתחתיו מסרבים להחזיר תוכן. מאחר
+ * שהשאילתה בנויה כ-OR בין מונחי התוכן (ראו buildTsQuery), שאלה לא רלוונטית
+ * פשוט לא תתאים לאף מונח ותחזיר 0 שורות; הסף הזה הוא רצפה נוספת נגד התאמות
+ * חלשות. יש לכייל אותו מול התפלגות הציונים של כתב היד האמיתי.
  */
 const DEFAULT_MIN_SCORE = 0.01;
 /** מקסימום קטעים בתשובה — לעולם לא מחזירים יותר. */
@@ -16,6 +15,43 @@ const MAX_RESULTS = 5;
 const MAX_PER_CHAPTER = 2;
 /** כמה שורות למשוך לפני סינון/הגבלה. */
 const FETCH_LIMIT = 12;
+
+/**
+ * מילות פונקציה/שאלה עבריות שאינן נחשבות מונחי תוכן — מוסרות לפני בניית
+ * השאילתה כדי שה-OR יתבסס על מונחים משמעותיים בלבד ולא על מילים נפוצות.
+ */
+const HEBREW_STOPWORDS = new Set([
+  "מה", "מהו", "מהי", "מהם", "איך", "כיצד", "האם", "למה", "מדוע", "מתי",
+  "איפה", "היכן", "מי", "של", "על", "אל", "את", "עם", "גם", "כי", "זה", "זו",
+  "זאת", "אלה", "אני", "אתה", "הוא", "היא", "אנחנו", "אתם", "אתן", "הם", "הן",
+  "אם", "או", "כמו", "יש", "אין", "לא", "כן", "אבל", "רק", "עד", "כל", "כדי",
+  "בין", "לבין", "אשר", "הזה", "הזו", "יותר", "פחות", "כך", "שם", "כאן", "הכי",
+  "עוד", "כבר", "איזה", "איזו", "כמה", "לי", "לך", "לו", "לה", "היה", "להיות",
+]);
+
+/**
+ * בונה tsquery מסוג OR ממונחי התוכן של שאלה עברית:
+ *   1. מפרק את השאלה לפי גבולות לא-אלפאנומריים (Unicode) — כל טוקן מכיל
+ *      אותיות/ספרות בלבד, ולכן בטוח ל-to_tsquery (אין תווים מיוחדים).
+ *   2. מסיר טוקנים קצרים (אות בודדת) ומילות פונקציה/שאלה.
+ *   3. מחבר את הנותרים ב-`|` (OR) — קטע רלוונטי אם הוא מכיל *מונח אחד או
+ *      יותר*, במקום לדרוש את כולם (AND). כך משתפר האחזור בעברית ('simple'
+ *      ללא גזירת שורש) בלי לפגוע בהגנות (הדירוג + הסף + התקרות ממילא מגבילים).
+ * מחזיר מחרוזת ריקה כשאין מונחי תוכן — אז החיפוש מחזיר `matched:false`.
+ */
+export function buildTsQuery(question: string): string {
+  const seen = new Set<string>();
+  const terms: string[] = [];
+  for (const raw of (question ?? "").normalize("NFC").split(/[^\p{L}\p{N}]+/u)) {
+    const term = raw.trim();
+    if (term.length < 2) continue;
+    if (HEBREW_STOPWORDS.has(term)) continue;
+    if (seen.has(term)) continue;
+    seen.add(term);
+    terms.push(term);
+  }
+  return terms.join(" | ");
+}
 
 type Row = {
   chapter_number: number;
@@ -59,16 +95,20 @@ export async function searchCompass(
     (versionRes.rows[0] as { version?: string } | undefined)?.version ?? null;
   if (!bookVersion) return { matched: false, bookVersion: null, results: [] };
 
+  // בונים tsquery מסוג OR ממונחי התוכן; ללא מונחים → אין התאמה.
+  const tsQuery = buildTsQuery(q);
+  if (!tsQuery) return { matched: false, bookVersion, results: [] };
+
   // דירוג ממושקל ומנורמל ל-0..1 (דגל 32 = rank/(rank+1)).
   const res = await db.query(
     `select chapter_number, chapter_name, section_name, content,
             ts_rank_cd(search_tsv, query, 32) as score
        from compass_book_sections,
-            websearch_to_tsquery('simple', $1) query
+            to_tsquery('simple', $1) query
       where book_version = $2 and is_active and search_tsv @@ query
       order by score desc
       limit $3`,
-    [q, bookVersion, FETCH_LIMIT]
+    [tsQuery, bookVersion, FETCH_LIMIT]
   );
 
   const perChapter = new Map<number, number>();
