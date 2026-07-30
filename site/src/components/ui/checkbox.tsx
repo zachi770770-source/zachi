@@ -13,7 +13,9 @@ const Checkbox = React.forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      "peer h-5 w-5 shrink-0 rounded border border-border-strong bg-surface transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-brand data-[state=checked]:border-brand aria-invalid:border-danger",
+      // גודל חזותי 20px, אך שטח לחיצה של 44×44 דרך pseudo-element שקוף
+      // (עומד ב-WCAG 2.5.5) — בלי לשנות את הפריסה (absolute, ללא CLS).
+      "peer relative h-5 w-5 shrink-0 rounded border border-border-strong bg-surface transition-colors before:absolute before:left-1/2 before:top-1/2 before:h-11 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 disabled:before:hidden data-[state=checked]:bg-brand data-[state=checked]:border-brand aria-invalid:border-danger",
       className
     )}
     {...props}

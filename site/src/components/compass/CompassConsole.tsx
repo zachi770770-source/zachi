@@ -258,7 +258,7 @@ export function CompassConsole({
           )}
         </Button>
 
-        <p className="mt-3 text-center text-[12.5px] text-foreground-muted/80">
+        <p className="mt-3 text-center text-[13px] text-foreground-muted">
           {compass.ui.hint}
         </p>
       </form>

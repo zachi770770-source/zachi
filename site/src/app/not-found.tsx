@@ -17,16 +17,19 @@ export default function NotFound() {
         נראה שהעמוד שחיפשתם לא קיים, או שהקישור השתנה. אפשר לחזור לעמוד
         הבית, לקרוא טעימה מהספר, או להצטרף לרשימת ההמתנה.
       </p>
-      <div className="mt-8 flex flex-wrap justify-center gap-3">
+      {/* היררכיה ברורה: פעולה ראשית אחת בולטת, ושתי פעולות משניות עדינות. */}
+      <div className="mt-8 flex flex-col items-center gap-4">
         <Button asChild size="lg">
           <Link href="/">חזרה לעמוד הבית</Link>
         </Button>
-        <Button asChild size="lg" variant="outline">
-          <Link href="/preview">לקריאת טעימה</Link>
-        </Button>
-        <Button asChild size="lg" variant="ghost">
-          <Link href="/waitlist">לרשימת ההמתנה</Link>
-        </Button>
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
+          <Button asChild variant="link" className="min-h-[44px]">
+            <Link href="/preview">לקריאת טעימה</Link>
+          </Button>
+          <Button asChild variant="link" className="min-h-[44px]">
+            <Link href="/waitlist">לרשימת ההמתנה</Link>
+          </Button>
+        </div>
       </div>
     </Container>
   );
