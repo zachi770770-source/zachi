@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Compass, Loader2, ArrowLeft, BookOpen } from "lucide-react";
+import { Compass, Loader2, ArrowLeft, BookOpen, TriangleAlert } from "lucide-react";
 
 import { compass } from "@/content/compass";
 import { trackEvent } from "@/lib/analytics";
@@ -18,6 +18,28 @@ type AnswerState =
   | { kind: "limit"; text: string }
   | { kind: "error"; text: string }
   | null;
+
+/** מעטפת כרטיס אחידה לכל מצבי התשובה — שומרת על שפת האתר (נייר, מסגרת, רדיוס). */
+const CARD_SHELL =
+  "stuck-answer mt-6 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8";
+
+/** קריאות לפעולה מתחת לתשובה — לספר/רשימת המתנה ולטעימה. */
+function AnswerActions({ ctaHref, ctaLabel }: { ctaHref: string; ctaLabel: string }) {
+  return (
+    <div className="mt-7 flex flex-col items-start gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
+      <Button asChild variant="outline">
+        <Link href={ctaHref}>{ctaLabel}</Link>
+      </Button>
+      <Link
+        href={compass.cta.sampleHref}
+        className="inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline"
+      >
+        {compass.cta.sampleLabel}
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+      </Link>
+    </div>
+  );
+}
 
 /**
  * ממשק „המצפן” — עמוד ספר עריכתי, לא dashboard. כל הקריאות עוברות בשרת
@@ -37,6 +59,7 @@ export function CompassConsole({
   const [company, setCompany] = React.useState(""); // honeypot
   const [answer, setAnswer] = React.useState<AnswerState>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  const formRef = React.useRef<HTMLFormElement>(null);
 
   // טעינת מצב זמינות + כמה שאלות נותרו (בלי לצרוך).
   React.useEffect(() => {
@@ -103,15 +126,28 @@ export function CompassConsole({
     [question, company, submitting, outOfQuestions]
   );
 
+  // שליחה במקלדת: Ctrl/Cmd+Enter (נגישות ונוחות ללא עכבר).
+  const onKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  }, []);
+
   const ctaHref = salesOpen ? compass.cta.openHref : compass.cta.closedHref;
   const ctaLabel = salesOpen ? compass.cta.openLabel : compass.cta.closedLabel;
 
   // מצב „בקרוב” — כשהעוזר עדיין אינו פעיל.
   if (availability === "soon") {
     return (
-      <div className="mx-auto max-w-2xl rounded-3xl border border-border bg-surface-muted px-6 py-10 text-center sm:px-10 sm:py-12">
-        <Compass className="mx-auto h-8 w-8 text-brand" aria-hidden="true" />
-        <h2 className="mt-4 font-serif text-2xl font-semibold text-foreground">
+      <div className="mx-auto max-w-xl rounded-2xl border border-border bg-surface-muted px-6 py-12 text-center shadow-sm sm:px-10">
+        <span
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-muted text-brand"
+          aria-hidden="true"
+        >
+          <Compass className="h-6 w-6" />
+        </span>
+        <h2 className="mt-5 font-serif text-2xl font-semibold text-foreground">
           {compass.soon.title}
         </h2>
         <p className="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-foreground-muted">
@@ -123,7 +159,7 @@ export function CompassConsole({
           </Button>
           <Link
             href={compass.cta.sampleHref}
-            className="inline-flex items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline"
+            className="inline-flex min-h-[44px] items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline"
           >
             {compass.cta.sampleLabel}
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -134,12 +170,21 @@ export function CompassConsole({
   }
 
   const charsLeft = maxQuestionChars - question.length;
+  const canSubmit = !submitting && !outOfQuestions && question.trim().length >= 2;
 
   return (
     <div className="mx-auto max-w-2xl">
-      <form onSubmit={onSubmit} className="rounded-3xl border border-border bg-surface p-5 sm:p-7">
+      {/* כרטיס השאלה — עריכתי, מזמין וקומפקטי */}
+      <form
+        ref={formRef}
+        onSubmit={onSubmit}
+        className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-7"
+      >
         {/* honeypot נסתר */}
-        <div className="pointer-events-none absolute -start-[9999px] top-0 h-0 w-0 overflow-hidden" aria-hidden="true">
+        <div
+          className="pointer-events-none absolute -start-[9999px] top-0 h-0 w-0 overflow-hidden"
+          aria-hidden="true"
+        >
           <label htmlFor="compass-company">אל תמלאו שדה זה</label>
           <input
             id="compass-company"
@@ -151,35 +196,53 @@ export function CompassConsole({
           />
         </div>
 
-        <label htmlFor="compass-question" className="block text-[15px] font-semibold text-foreground">
-          {compass.ui.inputLabel}
-        </label>
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand"
+            aria-hidden="true"
+          >
+            <Compass className="h-4 w-4" />
+          </span>
+          <label
+            htmlFor="compass-question"
+            className="text-[15px] font-semibold text-foreground"
+          >
+            {compass.ui.inputLabel}
+          </label>
+        </div>
+
         <textarea
           id="compass-question"
           value={question}
           onChange={(e) => setQuestion(e.target.value.slice(0, maxQuestionChars))}
+          onKeyDown={onKeyDown}
           maxLength={maxQuestionChars}
           rows={3}
           disabled={submitting || outOfQuestions}
           placeholder={compass.ui.placeholder}
-          className="mt-3 w-full resize-y rounded-2xl border border-border-strong bg-surface px-4 py-3 text-[17px] leading-relaxed text-foreground placeholder:text-foreground-muted/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60"
+          className="mt-4 w-full resize-y rounded-xl border border-border-strong bg-surface px-4 py-3 text-[17px] leading-relaxed text-foreground placeholder:text-foreground-muted/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60"
         />
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-[13px] text-foreground-muted" aria-live="polite">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <span
+            className="inline-flex items-center rounded-full bg-surface-muted px-3 py-1 text-[13px] font-medium text-foreground-muted"
+            aria-live="polite"
+          >
             {remaining === null
               ? " "
               : outOfQuestions
                 ? compass.ui.remainingNone
                 : compass.ui.remaining(remaining)}
           </span>
-          <span className="text-[13px] text-foreground-muted">{compass.ui.charsLeft(charsLeft)}</span>
+          <span className="text-[13px] tabular-nums text-foreground-muted">
+            {compass.ui.charsLeft(charsLeft)}
+          </span>
         </div>
 
         <Button
           type="submit"
           size="lg"
-          disabled={submitting || outOfQuestions || question.trim().length < 2}
+          disabled={!canSubmit}
           className="mt-4 h-[54px] w-full text-[17px]"
         >
           {submitting ? (
@@ -194,43 +257,63 @@ export function CompassConsole({
             </>
           )}
         </Button>
+
+        <p className="mt-3 text-center text-[12.5px] text-foreground-muted/80">
+          {compass.ui.hint}
+        </p>
       </form>
 
       {/* אזור התשובה — נקרא ע"י קורא מסך */}
-      <div aria-live="polite" className="mt-6">
-        {answer ? (
-          <article className="stuck-answer rounded-3xl border border-border bg-surface px-5 py-6 sm:px-8 sm:py-8">
-            {answer.kind === "answered" ? (
-              <>
-                <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
-                  {compass.ui.answerEyebrow}
-                </p>
-                <CompassAnswer
-                  text={answer.text}
-                  className="mt-3 text-[1.15rem] leading-[1.75] text-foreground"
-                />
-                {answer.citation ? (
-                  <p className="mt-5 flex items-center gap-2 border-t border-border pt-4 text-[14px] text-foreground-muted">
-                    <BookOpen className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-                    {formatCitation(answer.citation)}
-                  </p>
-                ) : null}
-                <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                  <Button asChild variant="outline">
-                    <Link href={ctaHref}>{ctaLabel}</Link>
-                  </Button>
-                  <Link
-                    href={compass.cta.sampleHref}
-                    className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline"
-                  >
-                    {compass.cta.sampleLabel}
-                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <p className="text-[1.05rem] leading-[1.7] text-foreground">{answer.text}</p>
-            )}
+      <div aria-live="polite">
+        {submitting ? (
+          <div className={CARD_SHELL} role="status">
+            <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {compass.ui.thinking}
+            </p>
+            <div className="mt-5 space-y-3" aria-hidden="true">
+              <div className="h-3.5 animate-pulse rounded bg-surface-muted" />
+              <div className="h-3.5 w-[92%] animate-pulse rounded bg-surface-muted" />
+              <div className="h-3.5 w-[80%] animate-pulse rounded bg-surface-muted" />
+              <div className="h-3.5 w-[64%] animate-pulse rounded bg-surface-muted" />
+            </div>
+          </div>
+        ) : answer?.kind === "answered" ? (
+          <article className={CARD_SHELL}>
+            <p className="kicker">{compass.ui.answerEyebrow}</p>
+            <CompassAnswer
+              text={answer.text}
+              className="mt-4 text-[1.2rem] leading-[1.85] text-foreground [text-wrap:pretty]"
+            />
+            {answer.citation ? (
+              <p className="mt-6 inline-flex items-center gap-2.5 rounded-xl bg-surface-muted px-4 py-3 text-[14px] font-medium text-foreground-muted">
+                <BookOpen className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+                {formatCitation(answer.citation)}
+              </p>
+            ) : null}
+            <AnswerActions ctaHref={ctaHref} ctaLabel={ctaLabel} />
+          </article>
+        ) : answer?.kind === "refused" ? (
+          <article className={CARD_SHELL}>
+            <p className="kicker">{compass.ui.refusedEyebrow}</p>
+            <div className="mt-4 flex gap-3">
+              <Compass className="mt-1 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />
+              <p className="text-[1.08rem] leading-[1.75] text-foreground">{answer.text}</p>
+            </div>
+          </article>
+        ) : answer?.kind === "limit" ? (
+          <article className={CARD_SHELL}>
+            <p className="kicker">{compass.ui.limitEyebrow}</p>
+            <p className="mt-4 text-[1.08rem] leading-[1.75] text-foreground">{answer.text}</p>
+            <AnswerActions ctaHref={ctaHref} ctaLabel={ctaLabel} />
+          </article>
+        ) : answer?.kind === "error" ? (
+          <article className={CARD_SHELL} role="alert">
+            <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-danger">
+              <TriangleAlert className="h-4 w-4" aria-hidden="true" />
+              {compass.ui.errorEyebrow}
+            </p>
+            <p className="mt-3 text-[1.05rem] leading-[1.7] text-foreground">{answer.text}</p>
           </article>
         ) : null}
       </div>

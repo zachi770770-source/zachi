@@ -27,7 +27,12 @@ export const compass = {
     placeholder: "לדוגמה: איך יודעים אם זו התאמה אמיתית או סתם פחד?",
     ask: "קבלו כיוון מהספר",
     asking: "המצפן חושב…",
+    hint: "טיפ: אפשר לשלוח גם עם Ctrl+Enter.",
+    thinking: "המצפן מחפש בין דפי הספר…",
     answerEyebrow: "כיוון מהספר",
+    refusedEyebrow: "מהמצפן",
+    limitEyebrow: "מכסת השאלות",
+    errorEyebrow: "תקלה זמנית",
     /** מונה שאלות שנותרו. */
     remaining: (n: number) => (n === 1 ? "נותרה שאלה אחת" : `נותרו ${n} שאלות`),
     remainingNone: "השתמשתם בכל השאלות",

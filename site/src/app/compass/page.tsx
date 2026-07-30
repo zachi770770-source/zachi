@@ -1,3 +1,5 @@
+import { Compass } from "lucide-react";
+
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { compass } from "@/content/compass";
@@ -25,7 +27,7 @@ export const metadata = {
  */
 export default function CompassPage() {
   return (
-    <Container className="py-12 sm:py-16 lg:py-20">
+    <Container className="py-9 sm:py-12 lg:py-14">
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
@@ -33,17 +35,23 @@ export default function CompassPage() {
         ]}
       />
 
-      <header className="mx-auto max-w-2xl text-center">
-        <span className="kicker justify-center">{compass.page.eyebrow}</span>
-        <h1 className="mt-4 font-serif text-[clamp(1.9rem,4vw,2.7rem)] font-semibold leading-[1.15] text-foreground">
+      <header className="mx-auto max-w-xl text-center">
+        <span
+          className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-muted text-brand"
+          aria-hidden="true"
+        >
+          <Compass className="h-5 w-5" />
+        </span>
+        <span className="kicker mt-5 justify-center">{compass.page.eyebrow}</span>
+        <h1 className="mt-3 font-serif text-[clamp(1.75rem,3.6vw,2.4rem)] font-semibold leading-[1.15] text-balance text-foreground">
           {compass.page.title}
         </h1>
-        <p className="mt-5 text-[clamp(1.05rem,1.6vw,1.25rem)] leading-relaxed text-foreground-muted">
+        <p className="mx-auto mt-4 max-w-lg text-[clamp(1.02rem,1.5vw,1.18rem)] leading-relaxed text-balance text-foreground-muted">
           {compass.page.lead}
         </p>
       </header>
 
-      <div className="mt-10 sm:mt-12">
+      <div className="mt-8 sm:mt-10">
         <CompassConsole
           salesOpen={siteConfig.salesOpen}
           maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
