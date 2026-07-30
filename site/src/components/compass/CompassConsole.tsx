@@ -21,7 +21,7 @@ type AnswerState =
 
 /** מעטפת כרטיס אחידה לכל מצבי התשובה — שומרת על שפת האתר (נייר, מסגרת, רדיוס). */
 const CARD_SHELL =
-  "stuck-answer mt-6 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8";
+  "stuck-answer mt-6 rounded-lg border border-border bg-surface p-6 sm:p-8";
 
 /** קריאות לפעולה מתחת לתשובה — לספר/רשימת המתנה ולטעימה. */
 function AnswerActions({ ctaHref, ctaLabel }: { ctaHref: string; ctaLabel: string }) {
@@ -140,7 +140,7 @@ export function CompassConsole({
   // מצב „בקרוב” — כשהעוזר עדיין אינו פעיל.
   if (availability === "soon") {
     return (
-      <div className="mx-auto max-w-xl rounded-2xl border border-border bg-surface-muted px-6 py-12 text-center shadow-sm sm:px-10">
+      <div className="mx-auto max-w-xl rounded-lg border border-border bg-surface-muted px-6 py-12 text-center sm:px-10">
         <span
           className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-muted text-brand"
           aria-hidden="true"
@@ -178,7 +178,7 @@ export function CompassConsole({
       <form
         ref={formRef}
         onSubmit={onSubmit}
-        className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-7"
+        className="rounded-lg border border-border bg-surface p-5 sm:p-7"
       >
         {/* honeypot נסתר */}
         <div

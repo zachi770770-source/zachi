@@ -24,13 +24,19 @@ export function Testimonials() {
           </h2>
         </Reveal>
 
-        <Reveal className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-3">
+        <Reveal className="mx-auto mt-14 grid max-w-5xl gap-x-12 gap-y-12 md:grid-cols-3">
           {items.map((t) => (
             <figure
               key={`${t.displayName}-${t.displayOrder}`}
-              className="flex flex-col rounded-2xl border border-border bg-surface p-7 text-start"
+              className="flex flex-col text-start"
             >
-              <blockquote className="flex-1 text-[17px] leading-relaxed text-foreground">
+              <span
+                aria-hidden="true"
+                className="font-serif text-[3.25rem] leading-[0.6] text-brand/40"
+              >
+                ״
+              </span>
+              <blockquote className="mt-3 flex-1 font-serif text-[1.3rem] leading-[1.6] text-foreground">
                 {t.quote}
               </blockquote>
               <figcaption className="mt-6 border-t border-border pt-4">

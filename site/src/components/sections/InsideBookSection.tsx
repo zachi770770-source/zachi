@@ -30,7 +30,7 @@ export function InsideBookSection() {
                   className="flex items-baseline gap-4 border-t border-border py-5 last:border-b"
                 >
                   <span
-                    className="type-quote w-9 shrink-0 text-xl text-brand/70 tabular-nums"
+                    className="type-quote w-9 shrink-0 text-xl text-foreground-muted tabular-nums"
                     aria-hidden="true"
                   >
                     {String(index + 1).padStart(2, "0")}
@@ -44,8 +44,8 @@ export function InsideBookSection() {
           </Reveal>
 
           <Reveal className="lg:pt-16">
-            <div className="rounded-2xl bg-surface-muted p-8 sm:p-10">
-              <h3 className="text-xl font-bold">כלים מעשיים בפנים</h3>
+            <div className="rounded-lg border-s-2 border-brand bg-surface-muted/70 py-8 pe-8 ps-6 sm:py-10 sm:pe-10 sm:ps-8">
+              <h3 className="font-serif text-xl font-semibold">כלים מעשיים בפנים</h3>
               <p className="mt-2 text-[16px] leading-relaxed text-foreground-muted">
                 הספר אינו רק רעיוני, אלה כמה מהכלים שתמצאו בתוכו.
               </p>

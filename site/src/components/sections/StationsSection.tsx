@@ -26,20 +26,26 @@ export function StationsSection() {
           <p className="type-lead mt-5 text-foreground-muted">{stations.intro}</p>
         </Reveal>
 
-        <Reveal className="mt-10 grid gap-6 md:grid-cols-3">
-          {stations.tracks.map((track) => (
+        <Reveal className="mt-12 grid gap-x-10 gap-y-11 md:grid-cols-3">
+          {stations.tracks.map((track, i) => (
             <Link
               key={track.id}
               href={track.href}
-              className="group flex flex-col rounded-2xl border border-border bg-surface p-7 transition-colors hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-8"
+              className="group flex flex-col text-start focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand md:border-s md:border-border md:ps-8 md:first:border-s-0 md:first:ps-0"
             >
-              <h3 className="font-serif text-2xl font-semibold text-foreground">
+              <span
+                aria-hidden="true"
+                className="font-serif text-[2.5rem] font-bold leading-none text-foreground-muted [font-variant-numeric:tabular-nums]"
+              >
+                {`0${i + 1}`}
+              </span>
+              <h3 className="mt-4 font-serif text-2xl font-semibold text-foreground transition-colors group-hover:text-brand-hover">
                 {track.title}
               </h3>
-              <p className="mt-4 flex-1 text-[17px] leading-relaxed text-foreground-muted">
+              <p className="mt-3 flex-1 text-[17px] leading-relaxed text-foreground-muted">
                 {track.description}
               </p>
-              <span className="mt-6 inline-flex items-center gap-2 text-[15px] font-semibold text-brand transition-colors group-hover:text-brand-hover">
+              <span className="mt-5 inline-flex items-center gap-2 text-[15px] font-semibold text-brand transition-colors group-hover:text-brand-hover">
                 {track.linkLabel}
                 <ArrowLeft
                   className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
