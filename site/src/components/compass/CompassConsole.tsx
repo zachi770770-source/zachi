@@ -6,7 +6,9 @@ import { Compass, Loader2, ArrowLeft, BookOpen } from "lucide-react";
 
 import { compass } from "@/content/compass";
 import { trackEvent } from "@/lib/analytics";
+import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
+import { CompassAnswer } from "@/components/compass/CompassAnswer";
 
 type Availability = "loading" | "ready" | "soon";
 
@@ -203,13 +205,14 @@ export function CompassConsole({
                 <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
                   {compass.ui.answerEyebrow}
                 </p>
-                <p className="mt-3 whitespace-pre-line text-[1.15rem] leading-[1.75] text-foreground">
-                  {answer.text}
-                </p>
+                <CompassAnswer
+                  text={answer.text}
+                  className="mt-3 text-[1.15rem] leading-[1.75] text-foreground"
+                />
                 {answer.citation ? (
                   <p className="mt-5 flex items-center gap-2 border-t border-border pt-4 text-[14px] text-foreground-muted">
                     <BookOpen className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-                    {answer.citation}
+                    {formatCitation(answer.citation)}
                   </p>
                 ) : null}
                 <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
