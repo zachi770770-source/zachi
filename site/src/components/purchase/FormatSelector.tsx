@@ -44,8 +44,8 @@ export function FormatSelector({
               className={cn(
                 "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
                 !selectable && "cursor-not-allowed border-border bg-surface-muted/60 opacity-70",
-                selectable && selected && "border-brand bg-brand-muted",
-                selectable && !selected && "border-border-strong hover:border-brand/50"
+                selectable && selected && "border-secondary bg-secondary-muted",
+                selectable && !selected && "border-border-strong hover:border-secondary/50"
               )}
             >
               <span className="flex items-start gap-3">
@@ -53,7 +53,7 @@ export function FormatSelector({
                   className={cn(
                     "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
                     selected
-                      ? "border-brand bg-brand text-surface"
+                      ? "border-secondary bg-secondary text-secondary-foreground"
                       : "border-border-strong"
                   )}
                   aria-hidden="true"

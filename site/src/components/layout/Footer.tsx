@@ -3,101 +3,79 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { footerLinks } from "@/config/nav";
 import { Container } from "@/components/shared/Container";
+import { BrandMark } from "@/components/shared/BrandMark";
 import { InstagramIcon, FacebookIcon } from "@/components/shared/SocialIcons";
 
+/**
+ * פוטר עריכתי: בלוק מותג עם הסמל בצד המתחיל, שני טורי קישורים בצד המסים,
+ * וקו שיער שמפריד את שורת הזכויות/הנגישות. משטח-עומק מרווה (secondary),
+ * טיפוגרפיה מדורגת וקצב אנכי נדיב — לא רשת קישורים גנרית.
+ */
 export function Footer() {
-  const hasSocial =
-    siteConfig.social.instagram || siteConfig.social.facebook;
+  const hasSocial = siteConfig.social.instagram || siteConfig.social.facebook;
+
+  const linkClass =
+    "inline-block py-1 text-[15px] text-secondary-foreground/80 transition-colors hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-muted";
 
   return (
-    <footer className="border-t border-border bg-secondary text-secondary-foreground">
-      <Container className="flex flex-col gap-10 py-12">
-        <div className="flex flex-col gap-8 sm:flex-row sm:justify-between">
-          <div className="flex max-w-sm flex-col gap-2">
-            <span className="font-serif text-lg font-semibold">
-              {siteConfig.bookTitle}
-            </span>
-            <p className="text-sm text-secondary-foreground/85">
+    <footer className="border-t border-secondary-foreground/15 bg-secondary text-secondary-foreground">
+      <Container className="flex flex-col gap-12 py-14 sm:py-16">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+          {/* בלוק המותג */}
+          <div className="flex max-w-sm flex-col gap-4">
+            <div className="flex items-center gap-2.5">
+              <BrandMark
+                withRing
+                className="h-9 w-9 shrink-0 text-secondary-foreground"
+              />
+              <span className="font-sans text-xl font-extrabold tracking-tight">
+                {siteConfig.bookTitle}
+              </span>
+            </div>
+            <p className="font-quote text-[1.05rem] italic leading-relaxed text-secondary-foreground/85">
               {siteConfig.tagline}
             </p>
+            {hasSocial ? (
+              <div className="mt-1 flex gap-3">
+                {siteConfig.social.instagram ? (
+                  <a
+                    href={siteConfig.social.instagram}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label="אינסטגרם"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-secondary-foreground/80 transition-colors hover:bg-secondary-foreground/10 hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-muted"
+                  >
+                    <InstagramIcon className="h-5 w-5" />
+                  </a>
+                ) : null}
+                {siteConfig.social.facebook ? (
+                  <a
+                    href={siteConfig.social.facebook}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label="פייסבוק"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-secondary-foreground/80 transition-colors hover:bg-secondary-foreground/10 hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-muted"
+                  >
+                    <FacebookIcon className="h-5 w-5" />
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:flex sm:gap-16">
-            <div className="flex flex-col gap-3">
-              <span className="text-[15px] font-semibold text-secondary-foreground">
-                מידע
-              </span>
-              <ul className="flex flex-col gap-2">
-                {footerLinks.main.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="inline-block py-1 text-[15px] text-secondary-foreground/85 transition-colors hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <span className="text-[15px] font-semibold text-secondary-foreground">
-                מדיניות
-              </span>
-              <ul className="flex flex-col gap-2">
-                {footerLinks.legal.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="inline-block py-1 text-[15px] text-secondary-foreground/85 transition-colors hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <FooterColumn title="מידע" links={footerLinks.main} linkClass={linkClass} />
+          <FooterColumn title="מדיניות" links={footerLinks.legal} linkClass={linkClass} />
         </div>
 
-        {hasSocial ? (
-          <div className="flex gap-4">
-            {siteConfig.social.instagram ? (
-              <a
-                href={siteConfig.social.instagram}
-                target="_blank"
-                rel="noreferrer noopener"
-                aria-label="אינסטגרם"
-                className="text-secondary-foreground/85 transition-colors hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              >
-                <InstagramIcon className="h-5 w-5" />
-              </a>
-            ) : null}
-            {siteConfig.social.facebook ? (
-              <a
-                href={siteConfig.social.facebook}
-                target="_blank"
-                rel="noreferrer noopener"
-                aria-label="פייסבוק"
-                className="text-secondary-foreground/85 transition-colors hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              >
-                <FacebookIcon className="h-5 w-5" />
-              </a>
-            ) : null}
-          </div>
-        ) : null}
-
-        <div className="flex flex-col gap-2 border-t border-secondary-foreground/20 pt-6 text-[13px] text-secondary-foreground/90 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-secondary-foreground/15 pt-6 text-[13px] text-secondary-foreground/85 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {siteConfig.copyrightYear} {siteConfig.bookTitle}. כל הזכויות
-            שמורות.
+            © {siteConfig.copyrightYear} {siteConfig.bookTitle}. כל הזכויות שמורות.
           </p>
           <p>
             אנו פועלים לשיפור הנגישות באופן מתמשך.{" "}
             <Link
               href="/accessibility"
-              className="underline underline-offset-2 hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="underline underline-offset-2 hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-muted"
             >
               הצהרת נגישות
             </Link>
@@ -105,5 +83,32 @@ export function Footer() {
         </div>
       </Container>
     </footer>
+  );
+}
+
+function FooterColumn({
+  title,
+  links,
+  linkClass,
+}: {
+  title: string;
+  links: ReadonlyArray<{ href: string; label: string }>;
+  linkClass: string;
+}) {
+  return (
+    <div className="flex flex-col gap-3.5">
+      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-secondary-foreground/90">
+        {title}
+      </span>
+      <ul className="flex flex-col gap-1.5">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link href={link.href} className={linkClass}>
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

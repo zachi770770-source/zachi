@@ -46,7 +46,7 @@ export function MethodSection() {
             {method.steps.map((step, index) => (
               <li key={step.number} className="relative ps-16 sm:ps-0">
                 <div className="flex items-center gap-4 sm:flex-col sm:items-start">
-                  <span className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full bg-brand text-[17px] font-bold text-brand-foreground sm:static">
+                  <span className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full bg-foreground text-[17px] font-bold text-surface sm:static">
                     {String(index + 1)}
                   </span>
                 </div>

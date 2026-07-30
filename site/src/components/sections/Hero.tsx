@@ -21,7 +21,7 @@ export function Hero() {
     <section className="relative overflow-hidden">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/50 to-background" />
-        <div className="absolute -top-40 start-[10%] h-[520px] w-[520px] rounded-full bg-brand/[0.06] blur-[120px]" />
+        <div className="absolute -top-40 start-[10%] h-[520px] w-[520px] rounded-full bg-secondary/[0.07] blur-[120px]" />
       </div>
 
       <Container className="flex min-h-[calc(74svh-76px)] items-start py-5 lg:items-center lg:py-8">

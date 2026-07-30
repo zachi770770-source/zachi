@@ -44,7 +44,7 @@ export default function AuthorPage() {
           <div className="relative">
             <div
               aria-hidden="true"
-              className="absolute -inset-3 -z-10 rounded-[1.75rem] bg-brand/[0.07]"
+              className="absolute -inset-3 -z-10 rounded-[1.75rem] bg-secondary/[0.08]"
             />
             <picture>
               <source

@@ -220,7 +220,7 @@ export function CompassConsole({
           rows={3}
           disabled={submitting || outOfQuestions}
           placeholder={compass.ui.placeholder}
-          className="mt-4 w-full resize-y rounded-xl border border-border-strong bg-surface px-4 py-3 text-[17px] leading-relaxed text-foreground placeholder:text-foreground-muted/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60"
+          className="mt-4 w-full resize-y rounded-lg border border-border-strong bg-surface px-4 py-3 text-[17px] leading-relaxed text-foreground placeholder:text-foreground-muted/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60"
         />
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -279,14 +279,14 @@ export function CompassConsole({
             </div>
           </div>
         ) : answer?.kind === "answered" ? (
-          <article className={CARD_SHELL}>
+          <article className={`${CARD_SHELL} border-s-2 border-s-brand`}>
             <p className="kicker">{compass.ui.answerEyebrow}</p>
             <CompassAnswer
               text={answer.text}
               className="mt-4 text-[1.2rem] leading-[1.85] text-foreground [text-wrap:pretty]"
             />
             {answer.citation ? (
-              <p className="mt-6 inline-flex items-center gap-2.5 rounded-xl bg-surface-muted px-4 py-3 text-[14px] font-medium text-foreground-muted">
+              <p className="mt-6 flex items-center gap-2.5 border-t border-border pt-5 text-[14px] font-medium text-foreground-muted">
                 <BookOpen className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
                 {formatCitation(answer.citation)}
               </p>

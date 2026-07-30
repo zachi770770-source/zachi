@@ -8,6 +8,8 @@ import { Container } from "@/components/shared/Container";
 import { CompassConsole } from "@/components/compass/CompassConsole";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
+const openingPoints = compass.signature.points;
+
 export const metadata = {
   ...pageMetadata({
     title: "המצפן של מדייטים לאהבה",
@@ -27,7 +29,7 @@ export const metadata = {
  */
 export default function CompassPage() {
   return (
-    <Container className="py-9 sm:py-12 lg:py-14">
+    <Container className="py-12 sm:py-16 lg:py-20">
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
@@ -35,23 +37,35 @@ export default function CompassPage() {
         ]}
       />
 
-      <header className="mx-auto max-w-xl text-center">
+      <header className="mx-auto max-w-2xl text-center">
         <span
-          className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-muted text-brand"
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-muted text-brand ring-1 ring-brand/15"
           aria-hidden="true"
         >
-          <Compass className="h-5 w-5" />
+          <Compass className="h-6 w-6" />
         </span>
-        <span className="kicker mt-5 justify-center">{compass.page.eyebrow}</span>
-        <h1 className="mt-3 font-serif text-[clamp(1.75rem,3.6vw,2.4rem)] font-semibold leading-[1.15] text-balance text-foreground">
+        <span className="kicker mt-6 justify-center">{compass.page.eyebrow}</span>
+        <h1 className="mt-4 font-serif text-[clamp(2rem,4.2vw,2.85rem)] font-semibold leading-[1.1] text-balance text-foreground">
           {compass.page.title}
         </h1>
-        <p className="mx-auto mt-4 max-w-lg text-[clamp(1.02rem,1.5vw,1.18rem)] leading-relaxed text-balance text-foreground-muted">
+        <p className="mx-auto mt-5 max-w-xl text-[clamp(1.05rem,1.5vw,1.2rem)] leading-relaxed text-balance text-foreground-muted">
           {compass.page.lead}
         </p>
+
+        <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+          {openingPoints.map((point) => (
+            <li
+              key={point}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-[13.5px] font-medium text-foreground-muted"
+            >
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-brand" />
+              {point}
+            </li>
+          ))}
+        </ul>
       </header>
 
-      <div className="mt-8 sm:mt-10">
+      <div className="mt-10 sm:mt-12">
         <CompassConsole
           salesOpen={siteConfig.salesOpen}
           maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}

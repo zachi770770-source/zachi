@@ -2,15 +2,23 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Compass } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { navLinks } from "@/config/nav";
 import { Button } from "@/components/ui/button";
 
+function isActivePath(pathname: string, href: string): boolean {
+  if (href.includes("#")) return false;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function MobileMenu() {
   const [open, setOpen] = React.useState(false);
+  const pathname = usePathname();
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
@@ -41,17 +49,33 @@ export function MobileMenu() {
             </DialogPrimitive.Close>
           </div>
 
-          <nav aria-label="ניווט ראשי" className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-3 text-base font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <nav aria-label="ניווט ראשי" className="-mx-1 flex flex-col">
+            {navLinks.map((link) => {
+              const active = isActivePath(pathname, link.href);
+              const isCompass = link.href === "/compass";
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-md border-s-2 px-3 py-3 text-[17px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+                    active
+                      ? "border-brand bg-surface-muted font-semibold text-foreground"
+                      : "border-transparent font-medium text-foreground-muted hover:bg-surface-muted hover:text-foreground"
+                  )}
+                >
+                  {isCompass ? (
+                    <Compass
+                      className={cn("h-[18px] w-[18px]", active ? "text-brand" : "text-brand-hover/80")}
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="mt-auto">

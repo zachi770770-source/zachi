@@ -24,7 +24,7 @@ export function ThesisSection() {
       aria-labelledby="thesis-heading"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -bottom-32 start-[-8%] h-[560px] w-[560px] rounded-full bg-brand/[0.10] blur-[130px]" />
+        <div className="absolute -bottom-32 start-[-8%] h-[560px] w-[560px] rounded-full bg-secondary/[0.10] blur-[130px]" />
       </div>
 
       <div className="py-24 sm:py-32">

@@ -156,8 +156,8 @@ export function StuckSelector({
                 <label
                   key={state.id}
                   className={
-                    "group relative min-h-[76px] cursor-pointer items-center gap-4 rounded-lg border bg-surface px-5 py-5 transition-colors hover:border-brand/40 hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-brand-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:px-6 sm:py-6 " +
-                    (checked ? "border-brand" : "border-border") +
+                    "group relative min-h-[76px] cursor-pointer items-center gap-4 rounded-lg border bg-surface px-5 py-5 transition-colors hover:border-secondary/40 hover:bg-surface-muted has-[:checked]:border-secondary has-[:checked]:bg-secondary-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:px-6 sm:py-6 " +
+                    (checked ? "border-secondary" : "border-border") +
                     " " +
                     (hiddenOnMobile ? "hidden sm:flex" : "flex")
                   }
@@ -172,9 +172,9 @@ export function StuckSelector({
                   />
                   <span
                     aria-hidden="true"
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-border-strong transition-colors group-has-[:checked]:border-brand"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-border-strong transition-colors group-has-[:checked]:border-secondary"
                   >
-                    <span className="h-3 w-3 scale-0 rounded-full bg-brand transition-transform group-has-[:checked]:scale-100" />
+                    <span className="h-3 w-3 scale-0 rounded-full bg-secondary transition-transform group-has-[:checked]:scale-100" />
                   </span>
                   <span className="text-start text-[18px] font-medium leading-snug text-foreground sm:text-[19px]">
                     {state.option}

@@ -36,7 +36,7 @@ export function LegalContent({
         ) : null}
 
         {legalDetailsPending ? (
-          <p className="mt-4 rounded-lg border border-brand/30 bg-brand-muted px-4 py-3 text-sm leading-relaxed text-foreground">
+          <p className="mt-4 rounded-lg border border-border border-s-2 border-s-brand bg-surface-muted px-4 py-3 text-sm leading-relaxed text-foreground">
             זוהי גרסת מסגרת של המסמך. פרטי העוסק/החברה, הכתובת הרשומה ואמצעי הקשר
             הרשמיים יתווספו ויאושרו לפני ההשקה. אין לראות במסמך זה ייעוץ משפטי או
             מסמך סופי.

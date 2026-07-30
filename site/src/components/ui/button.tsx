@@ -9,14 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // פעולה ראשית = דיו/פחם (לא חום). המותג נשאר accent בלבד.
         primary:
-          "bg-brand text-brand-foreground hover:bg-brand-hover shadow-sm",
+          "bg-foreground text-surface hover:bg-[#33373d] shadow-sm",
+        // אזור נבחר/מודגש = מרווה עמוק ומודרני.
         secondary:
           "bg-secondary text-secondary-foreground hover:opacity-90",
         outline:
           "border border-border-strong bg-surface text-foreground hover:bg-surface-muted",
         ghost: "bg-transparent text-foreground hover:bg-surface-muted",
-        link: "bg-transparent text-brand underline-offset-4 hover:underline p-0 h-auto",
+        // קישור-כפתור = accent חום מצומצם (טקסט בלבד).
+        link: "bg-transparent text-brand-hover underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {
         default: "h-12 px-6 text-[16px]",
