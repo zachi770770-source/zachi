@@ -12,25 +12,25 @@ import type { FaqItem } from "@/content/faq";
  */
 export function Faq({ items }: { items: FaqItem[] }) {
   return (
-    <div className="divide-y divide-border rounded-lg border border-border bg-surface">
+    <div className="divide-y divide-border border-y border-border">
       {items.map((item) => (
         <details
           key={item.id}
-          className="group px-5"
+          className="group"
           onToggle={(event) => {
             if (event.currentTarget.open) {
               trackEvent("faq_open", { question_id: item.id });
             }
           }}
         >
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-start text-[17px] font-semibold text-foreground [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-start text-[1.15rem] font-semibold text-foreground transition-colors [&::-webkit-details-marker]:hidden hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
             {item.question}
             <ChevronDown
               className="h-5 w-5 shrink-0 text-brand transition-transform group-open:rotate-180"
               aria-hidden="true"
             />
           </summary>
-          <p className="faq-answer pb-5 pe-8 text-base leading-relaxed text-foreground-muted">
+          <p className="faq-answer pb-6 pe-8 text-[1.05rem] leading-[1.75] text-foreground-muted">
             {item.answer}
           </p>
         </details>

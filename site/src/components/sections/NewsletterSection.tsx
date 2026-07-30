@@ -12,12 +12,12 @@ export function NewsletterSection() {
       aria-labelledby="newsletter-heading"
     >
       <Container>
-        <div className="mx-auto grid max-w-4xl items-center gap-8 rounded-3xl border border-border bg-surface px-8 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:px-12">
+        <div className="mx-auto grid max-w-4xl items-center gap-10 rounded-lg bg-secondary-muted px-7 py-11 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:px-12 sm:py-14">
           <div>
             <span className="kicker">רשימת המתנה</span>
             <h2
               id="newsletter-heading"
-              className="mt-3 text-[clamp(1.6rem,2.6vw,2.1rem)] font-bold leading-tight"
+              className="mt-3 font-serif text-[clamp(1.7rem,2.8vw,2.25rem)] font-semibold leading-[1.15] text-foreground"
             >
               קבלו עדכון כשהספר יוצא
             </h2>

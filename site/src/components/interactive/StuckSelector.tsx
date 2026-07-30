@@ -156,7 +156,7 @@ export function StuckSelector({
                 <label
                   key={state.id}
                   className={
-                    "group relative min-h-[76px] cursor-pointer items-center gap-4 rounded-2xl border bg-surface px-5 py-5 transition-colors hover:border-brand/40 hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-brand-muted has-[:checked]:shadow-[0_1px_0_rgba(169,79,61,0.12)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:px-6 sm:py-6 " +
+                    "group relative min-h-[76px] cursor-pointer items-center gap-4 rounded-lg border bg-surface px-5 py-5 transition-colors hover:border-brand/40 hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-brand-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:px-6 sm:py-6 " +
                     (checked ? "border-brand" : "border-border") +
                     " " +
                     (hiddenOnMobile ? "hidden sm:flex" : "flex")
@@ -202,7 +202,7 @@ export function StuckSelector({
             <article
               key={active.id}
               className={
-                "stuck-answer rounded-3xl border border-border bg-surface px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:py-10 sm:pb-10 " +
+                "stuck-answer rounded-lg border-s-2 border-brand bg-surface-muted/60 px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:py-10 sm:pb-10 " +
                 (compact ? "" : "sm:min-h-[24rem]")
               }
             >

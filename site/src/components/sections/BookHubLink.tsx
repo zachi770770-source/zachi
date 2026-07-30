@@ -13,8 +13,8 @@ export function BookHubLink() {
   return (
     <section className="py-6" aria-label="מעבר לעמוד הספר המלא">
       <Container>
-        <Reveal className="mx-auto flex max-w-3xl flex-col items-center gap-5 rounded-2xl border border-border bg-surface-muted px-8 py-10 text-center sm:flex-row sm:justify-between sm:text-start">
-          <div>
+        <Reveal className="mx-auto flex max-w-3xl flex-col items-start gap-6 border-y border-border py-9 text-start sm:flex-row sm:items-center sm:justify-between sm:gap-10">
+          <div className="border-s-2 border-brand ps-5">
             <h2 className="font-serif text-xl font-semibold text-foreground sm:text-2xl">
               רוצים להעמיק לפני שמחליטים?
             </h2>

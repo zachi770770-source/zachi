@@ -36,7 +36,7 @@ export function AudienceSection() {
                 className="flex items-baseline gap-5 border-t border-border py-6 last:border-b"
               >
                 <span
-                  className="type-quote shrink-0 text-2xl text-brand/70 tabular-nums"
+                  className="type-quote shrink-0 text-2xl text-foreground-muted tabular-nums"
                   aria-hidden="true"
                 >
                   {String(index + 1).padStart(2, "0")}

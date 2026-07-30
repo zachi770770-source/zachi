@@ -40,7 +40,7 @@ export function ThesisSection() {
               {NOISE.map((w, i) => (
                 <span
                   key={w}
-                  className="text-foreground/45"
+                  className="text-foreground-muted"
                   style={{
                     fontSize: `${15 + (i % 3) * 4}px`,
                     transform: `translateY(${(i % 2 === 0 ? -1 : 1) * (4 + (i % 3) * 3)}px)`,
