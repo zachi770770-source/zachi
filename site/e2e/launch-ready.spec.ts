@@ -233,23 +233,14 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator("#stuck article")).toBeVisible();
   });
 
-  test("hero: opening thoughts are decorative, the refrain remains, CTA stays active", async ({
+  test("hero: floating thoughts were removed, the refrain remains, CTA stays active", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
-    // שכבת המחשבות דקורטיבית בלבד — מסומנת aria-hidden ומחוץ לעץ הנגישות.
-    const thoughts = page.locator(".hero-thoughts");
-    await expect(thoughts).toHaveAttribute("aria-hidden", "true");
-    for (const thought of [
-      "אולי יש מישהו מתאים יותר",
-      "למה אני עדיין לא בטוח?",
-      "איך יודעים אם נכון להמשיך?",
-    ]) {
-      await expect(page.locator(".hero-thought", { hasText: thought })).toHaveCount(1);
-    }
-    // רק שלוש המחשבות החזקות — לא נותרה מחשבה רביעית.
-    await expect(page.locator(".hero-thought")).toHaveCount(3);
+    // פתקי „המחשבות” המרחפים הוסרו בכוונה (PHASE 13) — ה-Hero נקי מהם.
+    await expect(page.locator(".hero-thoughts")).toHaveCount(0);
+    await expect(page.locator(".hero-thought")).toHaveCount(0);
 
     // המסר שנשאר קיים וקריא.
     const refrain = page.locator(".hero-refrain");

@@ -9,6 +9,10 @@ import { stations } from "@/content/book";
  * "באיזו תחנה אתם נמצאים?" - שלוש נקודות פתיחה לאותו ספר ואותו מסע
  * (לפני קשר / מתחילים מחדש / בתוך קשר). מבהיר שמדובר בספר אחד עם רעיון
  * מאחד, וכל כרטיס מוביל לדף התחנה הייעודי שלו.
+ *
+ * PHASE 14: מסילת מסע אחת מחברת את שלוש התחנות למסלול יחיד — אופקית
+ * בדסקטופ (RTL: נמשכת מימין לשמאל) ואנכית במובייל. המסילה דקורטיבית
+ * (aria-hidden) ו-CSS-first; כל כרטיס נשאר קישור עצמאי ולחיץ.
  */
 export function StationsSection() {
   return (
@@ -26,12 +30,28 @@ export function StationsSection() {
           <p className="type-lead mt-5 text-foreground-muted">{stations.intro}</p>
         </Reveal>
 
-        <Reveal className="mt-12 grid gap-x-10 gap-y-11 md:grid-cols-3">
+        {/* מסילת המסע האופקית (דסקטופ) — שלוש תחנות על קו אחד */}
+        <div aria-hidden="true" className="mt-12 hidden items-center md:flex">
+          <span className="h-px flex-1" />
+          <span className="h-2 w-2 shrink-0 rounded-full bg-brand" />
+          <span className="route-line h-px flex-[2] bg-border-strong" />
+          <span className="h-2 w-2 shrink-0 rounded-full bg-brand" />
+          <span className="route-line h-px flex-[2] bg-border-strong" />
+          <span className="h-2 w-2 shrink-0 rounded-full bg-brand" />
+          <span className="h-px flex-1" />
+        </div>
+
+        <Reveal className="relative mt-7 grid gap-x-10 gap-y-11 md:mt-6 md:grid-cols-3">
+          {/* מסילת המסע האנכית (מובייל) — עמוד שדרה שמחבר את התחנות */}
+          <span
+            aria-hidden="true"
+            className="route-line--v absolute inset-y-2 start-[3px] w-px bg-border-strong md:hidden"
+          />
           {stations.tracks.map((track, i) => (
             <Link
               key={track.id}
               href={track.href}
-              className="group flex flex-col text-start focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand md:border-s md:border-border md:ps-8 md:first:border-s-0 md:first:ps-0"
+              className="group flex flex-col text-start ps-7 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand md:ps-0"
             >
               <span
                 aria-hidden="true"
@@ -47,10 +67,7 @@ export function StationsSection() {
               </p>
               <span className="mt-5 inline-flex items-center gap-2 text-[15px] font-semibold text-brand transition-colors group-hover:text-brand-hover">
                 {track.linkLabel}
-                <ArrowLeft
-                  className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
-                  aria-hidden="true"
-                />
+                <ArrowLeft className="edlink-arrow h-4 w-4" aria-hidden="true" />
               </span>
             </Link>
           ))}

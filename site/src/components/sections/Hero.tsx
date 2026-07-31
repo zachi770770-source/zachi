@@ -96,6 +96,18 @@ export function Hero() {
                 />
                 <BookCover priority className="w-full" />
               </div>
+              {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,
+                  מחבר את הכריכה לפזמון. דקורטיבי בלבד. */}
+              <span
+                aria-hidden="true"
+                className="flex items-center gap-1.5 opacity-80"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
+                <span className="route-line h-px w-8 bg-border-strong sm:w-12" />
+                <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                <span className="route-line h-px w-8 bg-border-strong sm:w-12" />
+                <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
+              </span>
               <figcaption className="hero-refrain">
                 <span className="hero-refrain__line">{hero.refrain[0]}</span>
                 <span className="hero-refrain__line hero-refrain__line--accent">
