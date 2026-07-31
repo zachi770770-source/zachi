@@ -120,14 +120,20 @@ test("sticky purchase bar is hidden during pre-launch", async ({ page }) => {
   await expect(bar).toBeHidden();
 });
 
-test("contact form submits successfully", async ({ page }) => {
+test("contact form fails safely (clear Hebrew error) when email delivery is not configured", async ({
+  page,
+}) => {
+  // בסביבת הבדיקה אין ספק מייל מוגדר. ההתנהגות הנכונה (P0): הטופס מציג כשל
+  // ברור בעברית, ולעולם לא „הצלחה” מזויפת. מסלול ההצלחה מכוסה בבדיקות היחידה
+  // של המתאם ושל ה-route.
   await page.goto("/contact", { waitUntil: "networkidle" });
   await page.getByLabel("שם").fill("בודק אוטומטי");
   await page.getByLabel("אימייל או טלפון").fill("tester@example.com");
   await page.getByLabel("נושא").fill("בדיקה");
   await page.getByLabel("הודעה").fill("זוהי הודעת בדיקה אוטומטית לצורך אימות הטופס.");
   await page.getByRole("button", { name: "שליחת הודעה" }).click();
-  await expect(page.getByText("ההודעה נשלחה בהצלחה")).toBeVisible();
+  await expect(page.getByText("שליחת ההודעה נכשלה")).toBeVisible();
+  await expect(page.getByText("ההודעה נשלחה בהצלחה")).toHaveCount(0);
 });
 
 test("waitlist form submits successfully", async ({ page }) => {
