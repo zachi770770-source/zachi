@@ -27,8 +27,9 @@ export function Hero() {
 
       <Container className="flex min-h-[calc(74svh-76px)] items-start py-5 lg:items-center lg:py-8">
         <div className="grid w-full items-center gap-y-5 lg:grid-cols-[52fr_48fr] lg:gap-x-16">
-          {/* תוכן — יחידה רציפה אחת (ימין בדסקטופ, שני במובייל) */}
-          <div className="order-2 flex flex-col items-start lg:order-1">
+          {/* תוכן — יחידה רציפה אחת. במובייל ראשון (הצעה + CTA לפני הכריכה);
+              בדסקטופ בעמודה הימנית (order-1). */}
+          <div className="order-1 flex flex-col items-start">
             <span className="kicker">{hero.eyebrow}</span>
 
             <h1 className="type-display mt-4 text-foreground">
@@ -78,7 +79,7 @@ export function Hero() {
           {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה
               מהרקע הבהיר (הפרדה טונאלית), ללא פתקים מרחפים, ללא מסגרת וללא
               רקע כהה. */}
-          <div className="hero-stage order-1 flex items-center justify-center lg:order-2 lg:self-stretch">
+          <div className="hero-stage order-2 flex items-center justify-center lg:self-stretch">
             {/* הילת Sage רכה — במה עדינה מאחורי הכריכה בלבד (גוון קיים) */}
             <div
               aria-hidden="true"
