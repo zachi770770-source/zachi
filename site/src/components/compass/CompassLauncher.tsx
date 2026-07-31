@@ -66,15 +66,16 @@ export function CompassLauncher({
           type="button"
           aria-label="שאלו את הספר"
           style={{ ["--bubble-bottom" as string]: mobileBottom }}
-          className="group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-3 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+          className="group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 flex translate-y-0 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
         >
-          {/* תווית — טאבלט ומעלה בלבד */}
-          <span className="hidden rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] font-semibold text-foreground shadow-sm md:inline-block">
-            שאלו את הספר
-          </span>
-          {/* גוף הבועה: Ink + טבעת דקה Terracotta + אייקון ספר לבן */}
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand transition-transform group-hover:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background motion-reduce:transition-none">
+          {/* גוף הבועה: Ink + טבעת דקה Terracotta + אייקון ספר לבן.
+              ללא אנימציה מתמשכת/pulse. */}
+          <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background">
             <BookOpen className="h-6 w-6" aria-hidden="true" />
+            {/* התווית נחשפת ב-hover/focus בלבד (דסקטופ/טאבלט), ללא הזזת הבועה */}
+            <span className="pointer-events-none absolute start-full top-1/2 ms-3 hidden -translate-y-1/2 whitespace-nowrap rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] font-semibold text-foreground opacity-0 shadow-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none md:block">
+              שאלו את הספר
+            </span>
           </span>
         </button>
       </DialogPrimitive.Trigger>

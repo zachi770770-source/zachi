@@ -6,20 +6,20 @@ import { compass } from "@/content/compass";
 import { Button } from "@/components/ui/button";
 
 /**
- * CTA „המצפן” בתוך ה-Hero — למובייל בלבד (md:hidden). בדסקטופ/טאבלט המשגר
- * הוא לשונית הצד הקבועה (CompassLauncher), ולכן כאן מסתתר. הלחיצה פותחת את
- * אותו drawer דרך אירוע חלון — בלי בועה תחתונה ובלי שכפול לוגיקה.
+ * CTA „שאלו את הספר” בתוך ה-Hero — למובייל בלבד (md:hidden). בדסקטופ/טאבלט
+ * המשגר הוא הבועה הצפה (CompassLauncher), ולכן כאן מסתתר. הלחיצה פותחת את
+ * אותו drawer דרך אירוע חלון — בלי שכפול לוגיקה.
  *
- * גוף הכפתור = Ink (variant primary הקיים), בדיוק כמו שאר הכפתורים הראשיים
- * באתר. אין צבע חדש ואין שינוי ברכיב Button.
+ * וריאנט משני (outline, טוקנים קיימים) כדי שיהיה נמוך במפורש מ-CTA הטעימה
+ * הראשי; אין צבע חדש ואין שינוי ברכיב Button.
  */
 export function CompassHeroCta() {
   return (
     <Button
       type="button"
-      variant="primary"
-      size="lg"
-      className="mt-4 w-full md:hidden"
+      variant="outline"
+      size="default"
+      className="md:hidden"
       onClick={() => window.dispatchEvent(new CustomEvent("open-compass"))}
     >
       <BookOpen className="h-4 w-4" aria-hidden="true" />

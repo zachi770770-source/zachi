@@ -45,46 +45,49 @@ export function Hero() {
               {hero.subhead}
             </p>
 
-            <p className="mt-6 text-[16px] font-semibold text-brand-hover">
-              {siteConfig.preLaunchPriceLabel}
-            </p>
+            {/* יחידת המרה אחת: סטטוס+מחיר, CTA ראשי ופעולה משנית — מקובצים
+                תחת קו שיער עדין, כך שהמחיר והסטטוס נראים חלק מהגוש ולא טקסט
+                אקראי. ה-CTA הראשי נשאר הפעולה הבולטת ביותר. */}
+            <div className="mt-7 flex w-full max-w-[46ch] flex-col items-start gap-4 border-t border-border pt-6">
+              <p className="text-[16px] font-semibold text-brand-hover">
+                {siteConfig.preLaunchPriceLabel}
+              </p>
 
-            {/* פעולה מרכזית אחת: לקרוא טעימה (או לרכוש כשהמכירה פתוחה).
-                פעולה משנית קלה: למצוא את המסלול המתאים. אין שני כפתורים שווי-משקל. */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Button asChild size="lg" className="h-14 px-7 text-[17px]">
-                <Link href={siteConfig.salesOpen ? "/book#purchase" : "/preview"}>
-                  {siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר"}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <Button asChild size="lg" className="h-14 px-7 text-[17px]">
+                  <Link href={siteConfig.salesOpen ? "/book#purchase" : "/preview"}>
+                    {siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר"}
+                  </Link>
+                </Button>
+                <Link
+                  href="/#stations"
+                  className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  למצוא את המסלול שלי
+                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
                 </Link>
-              </Button>
-              <Link
-                href="/#stations"
-                className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                למצוא את המסלול שלי
-                <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
-              </Link>
-            </div>
+              </div>
 
-            {/* המצפן — CTA בולט בתוך ה-Hero (מובייל בלבד). גוף הכפתור Ink, כמו
-                שאר הכפתורים הראשיים; אין צבע חדש. */}
-            <CompassHeroCta />
+              {/* „שאלו את הספר” — CTA משני במובייל בלבד, נמוך מ-CTA הטעימה */}
+              <CompassHeroCta />
+            </div>
 
             <TrustBar className="mt-7" />
           </div>
 
-          {/* ספר — „הבמה”: הרעש (מחשבות) מתפזר בגלילה והכריכה מקבלת נוכחות */}
+          {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה
+              מהרקע הבהיר (הפרדה טונאלית), ללא פתקים מרחפים, ללא מסגרת וללא
+              רקע כהה. */}
           <div className="hero-stage order-1 flex items-center justify-center lg:order-2 lg:self-stretch">
-            {/* שכבת המחשבות — דקורטיבית בלבד, מחוץ להיררכיית התוכן */}
-            <div className="hero-thoughts" aria-hidden="true">
-              {hero.openingThoughts.map((thought, i) => (
-                <span key={thought} className={`hero-thought hero-thought--${i + 1}`}>
-                  {thought}
-                </span>
-              ))}
+            {/* הילת Sage רכה — במה עדינה מאחורי הכריכה בלבד (גוון קיים) */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center"
+            >
+              <div className="aspect-square w-[66%] rounded-full bg-secondary/[0.14] blur-[62px]" />
             </div>
 
-            <figure className="hero-book flex flex-col items-center gap-3 lg:gap-4">
+            <figure className="hero-book relative flex flex-col items-center gap-3 lg:gap-4">
               <div className="relative w-[134px] sm:w-[226px] lg:w-[284px]">
                 <div
                   aria-hidden="true"
