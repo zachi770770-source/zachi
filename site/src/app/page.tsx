@@ -8,7 +8,9 @@ import { SampleSection } from "@/components/sections/SampleSection";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { CompassSignature } from "@/components/compass/CompassSignature";
+import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
+import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
@@ -43,6 +45,10 @@ export default function HomePage() {
       <AuthorTeaser />
       <Testimonials />
       <NewsletterSection />
+      <CompassLauncher
+        salesOpen={siteConfig.salesOpen}
+        maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
+      />
     </>
   );
 }
