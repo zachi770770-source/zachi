@@ -18,15 +18,19 @@ export const currency = "ILS" as const;
 const digitalPrice = 98;
 
 /**
- * כתובת הבסיס של האתר. יש להגדיר NEXT_PUBLIC_SITE_URL בסביבת הפרודקשן
- * (חובה - בלעדיה ה-canonical, ה-OG tags, ה-sitemap וכתובות ה-redirect
- * של הסליקה יצביעו לכתובת שגויה). כרשת ביטחון בלבד - אם המשתנה לא
- * הוגדר אך האתר רץ ב-Vercel, נשתמש בכתובת ה-deployment האוטומטית של
- * Vercel (VERCEL_URL) במקום ליפול חזרה ל-localhost בפרודקשן.
+ * כתובת הבסיס הקנונית של האתר. משמשת ל-canonical, ל-OG/Twitter, ל-sitemap,
+ * ל-JSON-LD ולכתובות ה-redirect של הסליקה. מקור אמת יחיד לדומיין.
+ *
+ * מדרג נפילה מכוון: NEXT_PUBLIC_SITE_URL (אם הוגדר) ← דומיין הפרודקשן הקבוע
+ * ← localhost (פיתוח בלבד). אנחנו לעולם *לא* נגזור canonical מ-VERCEL_URL:
+ * כתובת ה-deployment של Vercel משתנה בין preview ל-preview, וקנוניקל שמצביע
+ * אליה יפצל אותות אינדוקס. Preview deployments אמורים לקנן אל הפרודקשן.
  */
+const PRODUCTION_URL = "https://www.zachi.co.il";
+
 function resolveSiteUrl() {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NODE_ENV === "production") return PRODUCTION_URL;
   return "http://localhost:3000";
 }
 

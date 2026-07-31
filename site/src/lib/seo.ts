@@ -34,6 +34,18 @@ export function pageMetadata({
     ? title
     : `${title} | ${siteConfig.bookTitle}`;
 
+  // תמונת השיתוף (opengraph-image ברמת ה-root, 1200×630) נירשת לעמוד הבית
+  // דרך file-convention, אך אינה מוחלת אוטומטית על עמודים מקוננים שמגדירים
+  // אובייקט openGraph משלהם. לכן מוסיפים אותה במפורש לכל עמוד שאינו הבית,
+  // כדי שלכל קישור משותף (og:image + twitter:image) תהיה תצוגה מקדימה.
+  const isHome = path === "/";
+  const ogImage = {
+    url: "/opengraph-image",
+    width: 1200,
+    height: 630,
+    alt: `${siteConfig.bookTitle} — ${siteConfig.tagline}`,
+  };
+
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
@@ -45,11 +57,13 @@ export function pageMetadata({
       siteName: siteConfig.bookTitle,
       title: socialTitle,
       description,
+      ...(isHome ? {} : { images: [ogImage] }),
     },
     twitter: {
       card: "summary_large_image",
       title: socialTitle,
       description,
+      ...(isHome ? {} : { images: ["/opengraph-image"] }),
     },
   };
 }
