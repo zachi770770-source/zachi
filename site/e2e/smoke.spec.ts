@@ -189,7 +189,8 @@ test("/compass exists; while inert it shows a dignified coming-soon (no fixture)
   expect(res?.status()).toBe(200);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("יש לכם שאלה");
   // ללא ספק מודל/מסד בסביבת הבדיקה → מצב „בקרוב”, לא תיבת שאלה פעילה.
-  await expect(page.getByText("המצפן ייפתח בקרוב")).toBeVisible();
+  // השם הפונה למשתמש הוא כעת „שאלו את הספר” (עודכן ב-PHASE 12).
+  await expect(page.getByText("תיפתח בקרוב")).toBeVisible();
   await expect(page.locator("#compass-question")).toHaveCount(0);
 });
 

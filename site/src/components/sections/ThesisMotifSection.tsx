@@ -1,5 +1,6 @@
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
+import { StagedTextReveal } from "@/components/shared/StagedTextReveal";
 import { PathMotif } from "@/components/sections/PathMotif";
 import { bigIdea } from "@/content/book";
 
@@ -16,15 +17,26 @@ export function ThesisMotifSection() {
     <section className="py-14 sm:py-16" aria-labelledby="thesis-heading">
       <Container>
         <Reveal className="mx-auto grid max-w-4xl items-center gap-x-12 gap-y-8 md:grid-cols-[1fr_minmax(0,1.05fr)]">
-          <div className="text-start">
-            <h2
-              id="thesis-heading"
-              className="font-serif text-[1.9rem] font-semibold leading-tight text-foreground sm:text-4xl"
-            >
-              {bigIdea.title}
-            </h2>
-            <p className="type-lead mt-5 text-foreground-muted">{bigIdea.intro}</p>
-          </div>
+          {/* קריאה מבוקרת: הכותרת והפתיח נחשפים מילה-אחר-מילה, בציר זמן רציף
+              אחד, פעם אחת בכניסה לתצוגה. הטקסט המלא קיים ב-SSR וגלוי כברירת
+              מחדל (ללא JS / reduced-motion / ללא IO). */}
+          <StagedTextReveal
+            className="text-start"
+            groups={[
+              {
+                text: bigIdea.title,
+                as: "h2",
+                id: "thesis-heading",
+                className:
+                  "font-serif text-[1.9rem] font-semibold leading-tight text-foreground sm:text-4xl",
+              },
+              {
+                text: bigIdea.intro,
+                as: "p",
+                className: "type-lead mt-5 text-foreground-muted",
+              },
+            ]}
+          />
 
           <div className="relative">
             <span
