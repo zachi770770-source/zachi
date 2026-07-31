@@ -233,7 +233,7 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator("#stuck article")).toBeVisible();
   });
 
-  test("hero: floating thoughts were removed, the refrain remains, CTA stays active", async ({
+  test("hero: floating thoughts and the small refrain were removed; message lives in the Sage Thesis band; CTA stays active", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
@@ -242,10 +242,12 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator(".hero-thoughts")).toHaveCount(0);
     await expect(page.locator(".hero-thought")).toHaveCount(0);
 
-    // המסר שנשאר קיים וקריא.
-    const refrain = page.locator(".hero-refrain");
-    await expect(refrain).toContainText("דייטינג הוא חיפוש.");
-    await expect(refrain).toContainText("אהבה היא בנייה.");
+    // הפזמון הקטן שמתחת לכריכה הוסר — המסר „חיפוש→בנייה” נמסר פעם אחת,
+    // נחרצות, בבאנד המרווה (סקשן התזה).
+    await expect(page.locator(".hero-refrain")).toHaveCount(0);
+    const thesis = page.locator("#thesis-heading");
+    await expect(thesis).toContainText("דייטינג הוא חיפוש.");
+    await expect(thesis).toContainText("אהבה היא בנייה.");
 
     // ה-CTA הראשי (לקריאת טעימה) נשאר ברור ופעיל.
     await expect(
