@@ -51,6 +51,13 @@
   --radius-md: 0.625rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+
+  /* ===== מערכת מוֹשַן אחת (PHASE 14) — טוקנים לזמן ולהאטה ===== */
+  --ease-standard: cubic-bezier(0.33, 0, 0.2, 1); /* יציאה רכה, ללא באונס */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1); /* מודגש, פתיחת פאנל */
+  --motion-fast: 220ms; /* כפתורים ואינטראקציות קטנות (180–260) */
+  --motion-panel: 300ms; /* פאנלים ומעברים מקומיים (240–360) */
+  --motion-reveal: 600ms; /* הופעת סקשן (450–700) */
 }
 
 @theme inline {
@@ -96,6 +103,13 @@
   --animate-slide-up: slide-up 0.4s ease-out;
   /* כניסת מגירת התפריט במובייל (מהצד המתחיל ב-RTL) — תחושת אפליקציה. */
   --animate-drawer-in: drawer-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  /* „שאלו את הספר”: פתיחה/סגירה של הפאנל הצדדי (מהקצה end = שמאל ב-RTL).
+     תחת prefers-reduced-motion התנועה מבוטלת גלובלית והסגירה מיידית. */
+  --animate-fade-out: fade-out var(--motion-panel) ease-in forwards;
+  --animate-compass-in: compass-drawer-in var(--motion-panel)
+    var(--ease-emphasized);
+  --animate-compass-out: compass-drawer-out var(--motion-panel)
+    var(--ease-emphasized) forwards;
 
   @keyframes fade-in {
     from {
@@ -103,6 +117,34 @@
     }
     to {
       opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes compass-drawer-in {
+    from {
+      opacity: 0.4;
+      transform: translateX(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes compass-drawer-out {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0.4;
+      transform: translateX(-100%);
     }
   }
   @keyframes drawer-in {
@@ -379,6 +421,122 @@
         to {
           opacity: 1;
           transform: none;
+        }
+      }
+    }
+  }
+
+  /* ===================================================================
+   * מוטיב אמנותי אחד (PHASE 14): „מנקודות למבנה” — חיפוש → בנייה.
+   * הכל CSS-first, דקורטיבי (aria-hidden), ומצב ברירת המחדל הוא המבנה
+   * הבנוי (resolved) כדי שלא ייעלם תוכן ללא JS/הידרציה או תחת reduced-motion.
+   * =================================================================== */
+  .art-motif {
+    display: block;
+    overflow: visible;
+  }
+  /* ברירת מחדל = מבנה יציב ובנוי: הקו מצויר, המבנה גלוי, ה„חיפוש” נמוג */
+  .motif-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  .motif-structure {
+    opacity: 1;
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
+  .motif-scatter {
+    opacity: 0;
+  }
+
+  /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
+  .route-line {
+    transform-box: fill-box;
+    transform: scaleX(1);
+  }
+  .route-line--v {
+    transform: scaleY(1);
+  }
+
+  /* קישור עריכתי — תנועת חץ מרוסנת + קו תחתון עדין */
+  .edlink-arrow {
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .group:hover .edlink-arrow {
+    transform: translateX(-2px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .motif-scatter {
+        animation: motifScatterOut linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 34%;
+      }
+      .motif-structure {
+        animation: motifStructureIn linear both;
+        animation-timeline: view();
+        animation-range: entry 6% cover 48%;
+      }
+      .motif-line {
+        animation: motifDraw linear both;
+        animation-timeline: view();
+        animation-range: entry 16% cover 62%;
+      }
+      @keyframes motifScatterOut {
+        from {
+          opacity: 0.6;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+      @keyframes motifStructureIn {
+        from {
+          opacity: 0.3;
+          transform: scale(0.94);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes motifDraw {
+        from {
+          stroke-dashoffset: 1;
+        }
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      /* קו המסלול נמשך בכניסה לתצוגה (RTL: מהצד המתחיל—ימין) */
+      .route-line {
+        animation: routeDrawX linear both;
+        animation-timeline: view();
+        animation-range: entry 4% cover 46%;
+        transform-origin: right center;
+      }
+      .route-line--v {
+        animation: routeDrawY linear both;
+        animation-timeline: view();
+        animation-range: entry 2% cover 40%;
+        transform-origin: top center;
+      }
+      @keyframes routeDrawX {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+      @keyframes routeDrawY {
+        from {
+          transform: scaleY(0);
+        }
+        to {
+          transform: scaleY(1);
         }
       }
     }

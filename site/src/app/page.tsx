@@ -1,6 +1,7 @@
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
+import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
 import { StationsSection } from "@/components/sections/StationsSection";
 import { StuckSelector } from "@/components/interactive/StuckSelector";
 import { BookHubLink } from "@/components/sections/BookHubLink";
@@ -37,6 +38,7 @@ export default function HomePage() {
       <BookSchema />
       <ProductSchema />
       <Hero />
+      <ThesisMotifSection />
       <StationsSection />
       <StuckSelector variant="compact" />
       <BookHubLink />
