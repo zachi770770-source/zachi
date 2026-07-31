@@ -67,7 +67,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       <div
         role="status"
         aria-live="polite"
-        className="flex items-start gap-3 rounded-lg border border-secondary/40 bg-secondary-muted px-4 py-4 text-[15px] text-foreground"
+        className="form-status flex items-start gap-3 rounded-lg border border-secondary/40 bg-secondary-muted px-4 py-4 text-[15px] text-foreground"
       >
         <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden="true" />
         <span>נרשמת בהצלחה. נעדכן אותך כשהספר ייפתח לרכישה.</span>
@@ -122,7 +122,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
 
       <div aria-live="assertive" className="min-h-[1.25rem]">
         {status === "error" && error ? (
-          <p role="alert" className="flex items-center gap-2 text-sm text-danger">
+          <p role="alert" className="form-status flex items-center gap-2 text-sm text-danger">
             <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             {error}
           </p>

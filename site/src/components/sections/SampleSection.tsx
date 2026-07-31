@@ -14,7 +14,7 @@ export function SampleSection() {
   return (
     <section
       id="sample"
-      className="scroll-mt-20 bg-surface-muted py-14 sm:py-16"
+      className="scroll-mt-20 bg-surface-muted py-16 sm:py-24"
       aria-labelledby="sample-heading"
     >
       <Container>

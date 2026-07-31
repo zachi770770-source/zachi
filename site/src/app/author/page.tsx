@@ -41,7 +41,7 @@ export default function AuthorPage() {
       {/* Hero — תמונת המחבר לצד הכותרת */}
       <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">
         <div className="order-1 mx-auto w-full max-w-[300px] sm:max-w-[360px] lg:mx-0 lg:max-w-none">
-          <div className="relative">
+          <div className="portrait-reveal relative">
             <div
               aria-hidden="true"
               className="absolute -inset-3 -z-10 rounded-[1.75rem] bg-secondary/[0.08]"
@@ -70,7 +70,7 @@ export default function AuthorPage() {
           </div>
         </div>
 
-        <div className="order-2 flex flex-col items-start text-start">
+        <div className="enter-stagger order-2 flex flex-col items-start text-start">
           <span className="kicker">
             {siteConfig.author.name}, מחבר {siteConfig.bookTitle}
           </span>
@@ -80,11 +80,22 @@ export default function AuthorPage() {
           <p className="mt-5 font-serif text-[clamp(1.15rem,2vw,1.4rem)] italic text-brand-hover">
             {siteConfig.tagline}
           </p>
+          {/* קו מבנה זעיר — מחבר את סיפור המחבר לתזת הספר („חיפוש→בנייה”). */}
+          <span
+            aria-hidden="true"
+            className="mt-6 flex items-center gap-1.5 opacity-80"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
+            <span className="h-px w-8 bg-border-strong sm:w-12" />
+            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+            <span className="h-px w-8 bg-border-strong sm:w-12" />
+            <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
+          </span>
         </div>
       </div>
 
-      {/* גוף הטקסט — עמודה צרה וקריאה */}
-      <div className="mx-auto mt-12 flex max-w-[64ch] flex-col gap-6 sm:mt-16">
+      {/* גוף הטקסט — עמודה צרה וקריאה. חשיפה מקובצת אחת, לא פסקה-פסקה. */}
+      <div className="reveal mx-auto mt-12 flex max-w-[64ch] flex-col gap-6 sm:mt-16">
         {authorContent.fullBio.map((paragraph, index) => (
           <p
             key={index}

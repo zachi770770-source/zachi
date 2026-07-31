@@ -14,17 +14,20 @@ export function PurchaseSection() {
       aria-labelledby="purchase-heading"
     >
       <Container>
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="kicker">
-            הצעד הבא
-          </span>
-          <h2 id="purchase-heading" className="type-h2 mt-4">
-            {closing.title}
-          </h2>
-        </Reveal>
+        {/* חשיפה אחת — כותרת הסיכום וכרטיס הרכישה נכנסים יחד. */}
+        <Reveal>
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="kicker">
+              הצעד הבא
+            </span>
+            <h2 id="purchase-heading" className="type-h2 mt-4">
+              {closing.title}
+            </h2>
+          </div>
 
-        <Reveal className="mx-auto mt-14 max-w-3xl">
-          <PurchaseCard />
+          <div className="mx-auto mt-14 max-w-3xl">
+            <PurchaseCard />
+          </div>
         </Reveal>
       </Container>
     </section>

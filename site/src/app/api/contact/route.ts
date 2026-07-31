@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { contactSchema } from "@/lib/validation/contact";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { sendContactEmail } from "@/lib/email/contactEmail";
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request.headers);
@@ -36,13 +37,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  /**
-   * אין כרגע ספק שליחת מייל מחובר. הפנייה נרשמת ליומן השרת לצורך
-   * הדגמה בלבד. לפני עלייה לפרודקשן, יש לחבר כאן שירות שליחת מייל
-   * אמיתי (למשל Resend / Postmark / SMTP) כדי שהפנייה תגיע בפועל.
-   * אין רושמים שם, נושא או פרטי קשר - הם עלולים להכיל מידע מזהה.
-   */
-  console.log("[contact] פנייה חדשה (לא נשלחה בפועל - יש לחבר ספק מייל)");
+  // מדווחים הצלחה רק אם ספק המייל אישר מסירה. אין רישום ללוג של שם, הודעה,
+  // אימייל או טלפון — רק סטטוס לא-רגיש בתוך המתאם.
+  const result = await sendContactEmail({
+    name: parsed.data.name,
+    contact: parsed.data.contact,
+    subject: parsed.data.subject,
+    message: parsed.data.message,
+  });
 
-  return NextResponse.json({ success: true });
+  if (result.ok) {
+    return NextResponse.json({ success: true });
+  }
+
+  if (result.reason === "not_configured") {
+    return NextResponse.json(
+      {
+        error:
+          "שירות שליחת ההודעות אינו זמין כרגע. אנא נסו שוב מאוחר יותר, או פנו אלינו בדרך חלופית.",
+      },
+      { status: 503 }
+    );
+  }
+
+  return NextResponse.json(
+    { error: "אירעה תקלה בשליחת ההודעה. נסו שוב בעוד רגע." },
+    { status: 502 }
+  );
 }

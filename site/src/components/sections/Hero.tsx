@@ -6,7 +6,6 @@ import { siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
-import { TrustBar } from "@/components/sections/TrustBar";
 import { CompassHeroCta } from "@/components/compass/CompassHeroCta";
 
 /**
@@ -72,32 +71,33 @@ export function Hero() {
               {/* „שאלו את הספר” — CTA משני במובייל בלבד, נמוך מ-CTA הטעימה */}
               <CompassHeroCta />
             </div>
-
-            <TrustBar className="mt-7" />
           </div>
 
           {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה
               מהרקע הבהיר (הפרדה טונאלית), ללא פתקים מרחפים, ללא מסגרת וללא
               רקע כהה. */}
           <div className="hero-stage order-2 flex items-center justify-center lg:self-stretch">
-            {/* הילת Sage רכה — במה עדינה מאחורי הכריכה בלבד (גוון קיים) */}
+            {/* במת המוצר: הילת Sage רכה + נגיעת אור חמה עדינה מאחורי הכריכה,
+                להפרדה טונאלית ולנפח (גוונים קיימים בלבד) */}
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 flex items-center justify-center"
             >
-              <div className="aspect-square w-[66%] rounded-full bg-secondary/[0.14] blur-[62px]" />
+              <div className="aspect-square w-[78%] rounded-full bg-secondary/[0.18] blur-[70px]" />
+              <div className="absolute aspect-square w-[52%] translate-y-[8%] rounded-full bg-brand/[0.06] blur-[60px]" />
             </div>
 
-            <figure className="hero-book relative flex flex-col items-center gap-3 lg:gap-4">
-              <div className="relative w-[134px] sm:w-[226px] lg:w-[284px]">
+            <figure className="hero-book relative flex flex-col items-center gap-4 lg:gap-5">
+              <div className="relative w-[172px] sm:w-[264px] lg:w-[340px]">
                 <div
                   aria-hidden="true"
-                  className="absolute -bottom-4 start-1/2 h-7 w-[72%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/22 blur-2xl"
+                  className="absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
                 />
                 <BookCover priority className="w-full" />
               </div>
               {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,
-                  מחבר את הכריכה לפזמון. דקורטיבי בלבד. */}
+                  סימן-בסיס עדין מתחת לכריכה. דקורטיבי בלבד. המסר „חיפוש→בנייה”
+                  נמסר פעם אחת, נחרצות, בבאנד המרווה שבהמשך העמוד. */}
               <span
                 aria-hidden="true"
                 className="flex items-center gap-1.5 opacity-80"
@@ -108,12 +108,6 @@ export function Hero() {
                 <span className="route-line h-px w-8 bg-border-strong sm:w-12" />
                 <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
               </span>
-              <figcaption className="hero-refrain">
-                <span className="hero-refrain__line">{hero.refrain[0]}</span>
-                <span className="hero-refrain__line hero-refrain__line--accent">
-                  {hero.refrain[1]}
-                </span>
-              </figcaption>
             </figure>
           </div>
         </div>

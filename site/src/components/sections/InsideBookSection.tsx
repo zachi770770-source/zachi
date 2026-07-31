@@ -14,8 +14,9 @@ export function InsideBookSection() {
       aria-labelledby="inside-heading"
     >
       <Container>
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-20">
-          <Reveal>
+        {/* חשיפה מקובצת אחת לשתי העמודות. */}
+        <Reveal className="grid gap-14 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-20">
+          <div>
             <span className="kicker">
               מה יש בתוך הספר
             </span>
@@ -41,30 +42,33 @@ export function InsideBookSection() {
                 </li>
               ))}
             </ol>
-          </Reveal>
+          </div>
 
-          <Reveal className="lg:pt-16">
+          <div className="lg:pt-16">
             <div className="rounded-lg border-s-2 border-brand bg-surface-muted/70 py-8 pe-8 ps-6 sm:py-10 sm:pe-10 sm:ps-8">
               <h3 className="font-serif text-xl font-semibold">כלים מעשיים בפנים</h3>
               <p className="mt-2 text-[16px] leading-relaxed text-foreground-muted">
                 הספר אינו רק רעיוני, אלה כמה מהכלים שתמצאו בתוכו.
               </p>
               <ul className="mt-6 flex flex-col gap-3">
-                {tools.items.slice(0, 5).map((tool) => (
-                  <li key={tool.name} className="flex items-center gap-3">
+                {tools.items.map((tool) => (
+                  <li
+                    key={tool.name}
+                    className="tool-row flex items-center gap-3"
+                  >
                     <span
-                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
+                      className="tool-dot h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
                       aria-hidden="true"
                     />
-                    <span className="text-[17px] font-medium text-foreground">
+                    <span className="tool-name text-[17px] font-medium text-foreground">
                       {tool.name}
                     </span>
                   </li>
                 ))}
               </ul>
             </div>
-          </Reveal>
-        </div>
+          </div>
+        </Reveal>
       </Container>
     </section>
   );

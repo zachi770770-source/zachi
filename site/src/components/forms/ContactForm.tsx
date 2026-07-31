@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-1 text-sm text-danger">
+    <p role="alert" className="form-status mt-1 text-sm text-danger">
       {message}
     </p>
   );
@@ -53,7 +53,7 @@ export function ContactForm() {
       {status === "success" ? (
         <div
           role="status"
-          className="flex items-center gap-2 rounded-md border border-success/30 bg-success-foreground px-4 py-3 text-sm text-success"
+          className="form-status flex items-center gap-2 rounded-md border border-success/30 bg-success-foreground px-4 py-3 text-sm text-success"
         >
           <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
           ההודעה נשלחה בהצלחה. נחזור אליכם בהקדם.
@@ -62,7 +62,7 @@ export function ContactForm() {
       {status === "error" ? (
         <div
           role="alert"
-          className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger-foreground px-4 py-3 text-sm text-danger"
+          className="form-status flex items-center gap-2 rounded-md border border-danger/30 bg-danger-foreground px-4 py-3 text-sm text-danger"
         >
           <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
           שליחת ההודעה נכשלה. נסו שוב.

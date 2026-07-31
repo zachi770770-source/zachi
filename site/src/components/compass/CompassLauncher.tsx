@@ -28,7 +28,7 @@ export function CompassLauncher({
   maxQuestionChars: number;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [bannerHeight, setBannerHeight] = React.useState(0);
+  const [bannerOpen, setBannerOpen] = React.useState(false);
 
   // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון.
   React.useEffect(() => {
@@ -37,26 +37,26 @@ export function CompassLauncher({
     return () => window.removeEventListener("open-compass", handler);
   }, []);
 
-  // הרחקת הבועה מעל באנר העוגיות במובייל: הבאנר שומר לעצמו padding-bottom על
-  // ה-body לפי גובהו בפועל; קוראים אותו ומרימים את הבועה מעליו.
+  // מצב באנר העוגיות מגיע כאות-מצב מפורש מ-CookieConsent (data-attribute על
+  // ה-body + אירוע „cookie-banner-change”), ולא מהסקה של ריווח CSS. במובייל
+  // הבועה (בקרה לא-חיונית) מוסתרת כל עוד הבאנר פתוח, כדי שלא תכסה
+  // טקסט/CTA/טופס, ומשוחזרת אוטומטית עם סגירת ההסכמה. הפתרון אינו מבוסס z-index.
   React.useEffect(() => {
-    const read = () => {
-      const pb = parseInt(getComputedStyle(document.body).paddingBottom, 10);
-      setBannerHeight(Number.isFinite(pb) ? pb : 0);
+    const readAttr = () =>
+      document.body.getAttribute("data-cookie-banner") === "open";
+    const sync = (nextOpen: boolean) => setBannerOpen(nextOpen);
+    const onChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ open?: boolean }>).detail;
+      sync(typeof detail?.open === "boolean" ? detail.open : readAttr());
     };
-    read();
-    const mo = new MutationObserver(read);
-    mo.observe(document.body, { attributes: true, attributeFilter: ["style"] });
-    window.addEventListener("resize", read);
-    window.addEventListener("cookie-consent-changed", read);
-    return () => {
-      mo.disconnect();
-      window.removeEventListener("resize", read);
-      window.removeEventListener("cookie-consent-changed", read);
-    };
+    // מצב התחלתי מהאות המפורש (data-attribute), למקרה שהאירוע כבר נורה.
+    sync(readAttr());
+    window.addEventListener("cookie-banner-change", onChange);
+    return () => window.removeEventListener("cookie-banner-change", onChange);
   }, []);
 
-  const mobileBottom = bannerHeight > 0 ? `${bannerHeight + 16}px` : "1.25rem";
+  // כשאין באנר — הבועה מכבדת את env(safe-area-inset-bottom).
+  const mobileBottom = "max(1.25rem, env(safe-area-inset-bottom))";
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
@@ -66,7 +66,10 @@ export function CompassLauncher({
           type="button"
           aria-label="שאלו את הספר"
           style={{ ["--bubble-bottom" as string]: mobileBottom }}
-          className="group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-2.5 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+          className={
+            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-2.5 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2" +
+            (bannerOpen ? " max-md:hidden" : "")
+          }
         >
           {/* תווית קבועה, קטנה ועדינה — דסקטופ/טאבלט בלבד. לא לשונית ולא כפתור
               גדול; hover/focus רק מחזקים מעט את הניגודיות. */}

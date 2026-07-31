@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
@@ -8,7 +10,7 @@ export function NewsletterSection() {
   return (
     <section
       id="waitlist"
-      className="scroll-mt-24 py-6 sm:py-10"
+      className="scroll-mt-24 py-14 sm:py-20"
       aria-labelledby="newsletter-heading"
     >
       <Container>
@@ -30,7 +32,17 @@ export function NewsletterSection() {
               קבלו עדכון כשהספר יוצא
             </h2>
             <p className="mt-3 max-w-md text-[16px] leading-relaxed text-foreground-muted">
-              השאירו אימייל ונעדכן אתכם ברגע שהמהדורה הדיגיטלית תיפתח לרכישה. בלי ספאם, ואפשר להסיר את ההרשמה בכל עת.
+              השאירו אימייל ונעדכן אתכם כשהמהדורה הדיגיטלית תיפתח לרכישה. בלי ספאם, אפשר להסיר בכל עת.
+            </p>
+            <p className="mt-4 text-[15px] text-foreground-muted">
+              לא רוצים לחכות?{" "}
+              <Link
+                href="/preview"
+                className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                קראו עכשיו טעימה חינם מהספר
+              </Link>
+              .
             </p>
           </div>
           <div className="w-full text-start">

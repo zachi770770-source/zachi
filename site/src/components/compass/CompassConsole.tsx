@@ -220,7 +220,7 @@ export function CompassConsole({
           rows={3}
           disabled={submitting || outOfQuestions}
           placeholder={compass.ui.placeholder}
-          className="mt-4 w-full resize-y rounded-lg border border-border-strong bg-surface px-4 py-3 text-[17px] leading-relaxed text-foreground placeholder:text-foreground-muted/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60"
+          className="field-anim mt-4 w-full resize-y rounded-lg border border-border-strong bg-surface px-4 py-3 text-[17px] leading-relaxed text-foreground placeholder:text-foreground-muted/70 focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60"
         />
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -268,7 +268,8 @@ export function CompassConsole({
         {submitting ? (
           <div className={CARD_SHELL} role="status">
             <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {/* אינדיקציית טעינה יחידה ומרוסנת — אייקון המצפן מסתובב בעדינות */}
+              <Compass className="compass-loading h-4 w-4" aria-hidden="true" />
               {compass.ui.thinking}
             </p>
             <div className="mt-5 space-y-3" aria-hidden="true">
@@ -279,7 +280,10 @@ export function CompassConsole({
             </div>
           </div>
         ) : answer?.kind === "answered" ? (
-          <article className={`${CARD_SHELL} border-s-2 border-s-brand`}>
+          <article
+            key={answer.text}
+            className={`${CARD_SHELL} result-seq border-s-2 border-s-brand`}
+          >
             <p className="kicker">{compass.ui.answerEyebrow}</p>
             <CompassAnswer
               text={answer.text}

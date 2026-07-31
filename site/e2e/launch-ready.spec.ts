@@ -136,104 +136,7 @@ test.describe("Launch-readiness", () => {
     await expect(page.getByText(/תתווסף/)).toHaveCount(0);
   });
 
-  test("stuck selector: reveals one curated answer, is shareable, and changeable", async ({
-    page,
-  }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-    const section = page.locator("#stuck");
-    await expect(
-      section.getByRole("heading", { name: /איפה אתם נתקעים/ })
-    ).toBeVisible();
-
-    // אף תשובה אינה מוצגת לפני בחירה (לא כל התשובות יחד).
-    await expect(section.locator("article")).toHaveCount(0);
-
-    // בחירה → תשובה אחת עם עיקרון, שאלה, טעימה והבהרה. בגרסת הבית הקצרה
-    // (variant="compact") רשימת הפרקים אינה מוצגת — היא נשארת ב-/preview וב-/book.
-    await page.getByText("כשאין סערה, נדמה לי שאין משיכה.", { exact: true }).click();
-    const answer = section.locator("article");
-    await expect(answer).toBeVisible();
-    await expect(answer).toContainText("עיקרון מתוך הספר");
-    await expect(answer).not.toContainText("חלק שני: עוברים את השער");
-    await expect(answer).toContainText("זו נקודת מחשבה ראשונית, לא אבחון");
-    await expect(
-      answer.getByRole("link", { name: "לקריאת טעימה מהספר" })
-    ).toBeVisible();
-    // הבחירה משוקפת ב-URL לשיתוף.
-    await expect(page).toHaveURL(/[?&]stuck=calm/);
-
-    // אפשר להחליף בחירה — עדיין רק תשובה אחת.
-    await page.getByText("אני מחפש ודאות שלא מגיעה.", { exact: true }).click();
-    await expect(section.locator("article")).toHaveCount(1);
-    await expect(section.locator("article")).toContainText("ודאות");
-    await expect(page).toHaveURL(/[?&]stuck=certainty/);
-  });
-
-  test("stuck selector: a shared URL preselects the matching answer", async ({ page }) => {
-    await page.goto("/?stuck=in-relationship", { waitUntil: "networkidle" });
-    const answer = page.locator("#stuck article");
-    await expect(answer).toBeVisible();
-    await expect(answer).toContainText("אהבה אינה מסתיימת ברגע שמוצאים");
-    await expect(page.locator("#stuck input:checked")).toHaveValue("in-relationship");
-  });
-
-  test("stuck selector: remembers the last choice locally on a fresh visit (no URL param)", async ({
-    page,
-  }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-    await page.getByText("כשאין סערה, נדמה לי שאין משיכה.", { exact: true }).click();
-    await expect(page).toHaveURL(/[?&]stuck=calm/);
-
-    // ביקור חדש בלי פרמטר ב-URL → הבחירה משוחזרת מהמכשיר (localStorage).
-    await page.goto("/", { waitUntil: "networkidle" });
-    await expect(page).not.toHaveURL(/stuck=/);
-    await expect(page.locator("#stuck input:checked")).toHaveValue("calm");
-    await expect(page.locator("#stuck article")).toBeVisible();
-  });
-
-  test("stuck selector: mobile collapses to the chosen option with a change link", async ({
-    browser,
-  }) => {
-    const context = await browser.newContext({ viewport: MOBILE });
-    const page = await context.newPage();
-    await page.goto("/", { waitUntil: "networkidle" });
-    const options = page.locator("#stuck label");
-    await expect(options).toHaveCount(4);
-
-    await page.getByText("כשאין סערה, נדמה לי שאין משיכה.", { exact: true }).click();
-    // רק האפשרות שנבחרה נשארת גלויה במובייל.
-    await expect(options.filter({ visible: true })).toHaveCount(1);
-    const change = page.getByRole("button", { name: "שינוי הבחירה" });
-    await expect(change).toBeVisible();
-
-    // „שינוי הבחירה” מחזיר את כל ארבע האפשרויות.
-    await change.click();
-    await expect(options.filter({ visible: true })).toHaveCount(4);
-    await context.close();
-  });
-
-  test("stuck selector: reduced-motion still reveals the answer", async ({ browser }) => {
-    const context = await browser.newContext({ reducedMotion: "reduce" });
-    const page = await context.newPage();
-    await page.goto("/?stuck=calm", { waitUntil: "networkidle" });
-    await expect(page.locator("#stuck article")).toBeVisible();
-    await expect(page.locator("#stuck article")).toContainText("עיקרון מתוך הספר");
-    await context.close();
-  });
-
-  test("stuck selector: keyboard selection works (native radiogroup)", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-    const firstRadio = page.locator('#stuck input[type="radio"]').first();
-    await firstRadio.focus();
-    await page.keyboard.press("Space");
-    await expect(page.locator("#stuck article")).toBeVisible();
-    // חצי המקלדת מזיזים ובוחרים את האפשרות הבאה (התנהגות רדיו נטיבית).
-    await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#stuck input:checked")).toHaveCount(1);
-    await expect(page.locator("#stuck article")).toBeVisible();
-  });
-
-  test("hero: floating thoughts were removed, the refrain remains, CTA stays active", async ({
+  test("hero: floating thoughts and the small refrain were removed; message lives in the Sage Thesis band; CTA stays active", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
@@ -242,10 +145,12 @@ test.describe("Launch-readiness", () => {
     await expect(page.locator(".hero-thoughts")).toHaveCount(0);
     await expect(page.locator(".hero-thought")).toHaveCount(0);
 
-    // המסר שנשאר קיים וקריא.
-    const refrain = page.locator(".hero-refrain");
-    await expect(refrain).toContainText("דייטינג הוא חיפוש.");
-    await expect(refrain).toContainText("אהבה היא בנייה.");
+    // הפזמון הקטן שמתחת לכריכה הוסר — המסר „חיפוש→בנייה” נמסר פעם אחת,
+    // נחרצות, בבאנד המרווה (סקשן התזה).
+    await expect(page.locator(".hero-refrain")).toHaveCount(0);
+    const thesis = page.locator("#thesis-heading");
+    await expect(thesis).toContainText("דייטינג הוא חיפוש.");
+    await expect(thesis).toContainText("אהבה היא בנייה.");
 
     // ה-CTA הראשי (לקריאת טעימה) נשאר ברור ופעיל.
     await expect(

@@ -40,6 +40,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  // אינדוקס רק בפרודקשן. כל דיפלוי אחר (Preview/Development ב-Vercel) מקבל
+  // noindex,nofollow כדי שלא יתחרה בפרודקשן על אותות אינדוקס. נקבע לפי
+  // VERCEL_ENV (NODE_ENV אינו מבחין בין preview לפרודקשן ב-build).
+  robots:
+    process.env.VERCEL_ENV === "production"
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
   openGraph: {
     type: "website",
     locale: "he_IL",

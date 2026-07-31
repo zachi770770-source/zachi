@@ -61,15 +61,33 @@ export function CookieConsent() {
   const [marketing, setMarketing] = React.useState(false);
   const bannerRef = React.useRef<HTMLDivElement>(null);
 
-  // הבאנר הוא fixed בתחתית — שומרים לו מקום בתחתית העמוד לפי הגובה בפועל,
-  // כדי שלא יכסה את ה-CTA, הפוטר או תוכן אחר בשום רוחב או מצב טקסט.
+  // אות-מצב מפורש: כשהבאנר גלוי מסמנים data-cookie-banner="open" על ה-body
+  // ומשדרים „cookie-banner-change”, כדי שבקרות צפות (למשל הבועה „שאלו את הספר”)
+  // יגיבו למצב אמיתי ולא יסיקו אותו מריווח CSS. במקביל הבאנר, שהוא fixed
+  // בתחתית, שומר לעצמו padding-bottom לפי גובהו — זהו ריווח פריסה בלבד, לא
+  // אות-מצב — כדי שלא יכסה CTA/פוטר/תוכן בשום רוחב או מצב טקסט.
+  const setBannerState = React.useCallback((bannerOpen: boolean) => {
+    if (bannerOpen) {
+      document.body.setAttribute("data-cookie-banner", "open");
+    } else {
+      document.body.removeAttribute("data-cookie-banner");
+    }
+    window.dispatchEvent(
+      new CustomEvent("cookie-banner-change", { detail: { open: bannerOpen } })
+    );
+  }, []);
+
   React.useEffect(() => {
     if (!visible) {
       document.body.style.paddingBottom = "";
+      setBannerState(false);
       return;
     }
+    setBannerState(true);
     const el = bannerRef.current;
-    if (!el) return;
+    if (!el) {
+      return () => setBannerState(false);
+    }
     const apply = () => {
       document.body.style.paddingBottom = `${el.offsetHeight}px`;
     };
@@ -82,8 +100,9 @@ export function CookieConsent() {
       ro?.disconnect();
       window.removeEventListener("resize", apply);
       document.body.style.paddingBottom = "";
+      setBannerState(false);
     };
-  }, [visible]);
+  }, [visible, setBannerState]);
 
   function acceptAll() {
     writeConsent({ necessary: true, analytics: true, marketing: true });

@@ -18,7 +18,7 @@ export function StationsSection() {
   return (
     <section
       id="stations"
-      className="scroll-mt-20 py-14 sm:py-16"
+      className="scroll-mt-20 py-16 sm:py-24"
       aria-labelledby="stations-heading"
     >
       <Container>
