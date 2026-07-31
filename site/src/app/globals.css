@@ -257,6 +257,8 @@
         label:has(input[type="radio"])
       ):active {
       transform: none;
+      translate: none;
+      scale: none;
     }
   }
 
@@ -960,6 +962,10 @@ details[open] .faq-answer {
 }
 .lift-hover:focus-visible {
   transform: translateY(-2px);
+}
+/* לחיצה — הכרטיס „נלחץ” פנימה (חוזר מההרמה + כיווץ עדין). */
+.lift-hover:active {
+  transform: translateY(0) scale(0.994);
 }
 
 /* מעבר עדין של שדה טופס בפוקוס (מעבר על מסגרת/טבעת בלבד — ללא זזת פריסה). */
