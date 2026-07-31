@@ -34,7 +34,7 @@ export function Hero() {
             <h1 className="type-display mt-4 text-foreground">
               אהבה לא רק מוצאים.
               <br />
-              בונים אותה.
+              <span className="text-brand-hover">בונים אותה.</span>
             </h1>
 
             <p className="mt-4 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted">
@@ -66,14 +66,24 @@ export function Hero() {
               </Link>
             </div>
 
-            {/* המצפן — CTA בולט בתוך ה-Hero (מובייל בלבד) */}
+            {/* המצפן — CTA בולט בתוך ה-Hero (מובייל בלבד). גוף הכפתור Ink, כמו
+                שאר הכפתורים הראשיים; אין צבע חדש. */}
             <CompassHeroCta />
 
             <TrustBar className="mt-7" />
           </div>
 
-          {/* ספר — הכריכה מקבלת נוכחות מלאה, ללא פתקים דקורטיביים סביבה */}
+          {/* ספר — „הבמה”: הרעש (מחשבות) מתפזר בגלילה והכריכה מקבלת נוכחות */}
           <div className="hero-stage order-1 flex items-center justify-center lg:order-2 lg:self-stretch">
+            {/* שכבת המחשבות — דקורטיבית בלבד, מחוץ להיררכיית התוכן */}
+            <div className="hero-thoughts" aria-hidden="true">
+              {hero.openingThoughts.map((thought, i) => (
+                <span key={thought} className={`hero-thought hero-thought--${i + 1}`}>
+                  {thought}
+                </span>
+              ))}
+            </div>
+
             <figure className="hero-book flex flex-col items-center gap-3 lg:gap-4">
               <div className="relative w-[134px] sm:w-[226px] lg:w-[284px]">
                 <div

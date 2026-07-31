@@ -41,7 +41,7 @@ export function CompassLauncher({
         <button
           type="button"
           aria-label="פתיחת המצפן"
-          className="group fixed end-0 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-center gap-1.5 rounded-s-2xl bg-foreground py-4 ps-2.5 pe-2.5 text-surface shadow-[0_10px_30px_-12px_rgba(34,38,43,0.6)] ring-1 ring-black/5 transition-[padding,background-color] hover:bg-[#33373d] hover:pe-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:flex"
+          className="group fixed end-0 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-center gap-1.5 rounded-s-2xl border border-border-strong bg-foreground py-4 ps-2.5 pe-2.5 text-surface shadow-lg transition-[padding] hover:pe-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:flex"
         >
           <Compass className="h-5 w-5" aria-hidden="true" />
           <span className="text-[12px] font-semibold tracking-wide">המצפן</span>
