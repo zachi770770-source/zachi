@@ -480,14 +480,49 @@
     transition: transform var(--motion-fast) var(--ease-standard);
   }
   .tool-name {
+    position: relative;
     transition: color var(--motion-fast) var(--ease-standard);
+  }
+  /* קו תחתון שנמשך בעת hover/focus (מתחיל מהצד ההתחלתי ב-RTL = ימין). */
+  .tool-name::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -2px;
+    height: 1.5px;
+    background: var(--color-brand);
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .tool-row:hover .tool-name,
+  .tool-row:focus-within .tool-name {
+    color: var(--color-brand-hover);
+  }
+  .tool-row:hover .tool-name::after,
+  .tool-row:focus-within .tool-name::after {
+    transform: scaleX(1);
   }
   @media (hover: hover) {
     .tool-row:hover .tool-dot {
       transform: scale(1.55);
     }
-    .tool-row:hover .tool-name {
-      color: var(--color-brand-hover);
+  }
+
+  /* קו מבנה שנמשך פעם אחת בטעינה (מוטיב המחבר בעמוד המחבר). מבוסס זמן,
+     פועל בכל דפדפן. ברירת מחדל (reduced-motion/ללא תמיכה) — מצויר מלא. */
+  .line-draw {
+    transform-origin: right center;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .line-draw {
+      transform: scaleX(0);
+      animation: lineDrawX 700ms var(--ease-standard) 340ms both;
+    }
+  }
+  @keyframes lineDrawX {
+    to {
+      transform: scaleX(1);
     }
   }
 
@@ -665,6 +700,68 @@
 .hero-book {
   position: relative;
   z-index: 1;
+  perspective: 1600px;
+}
+
+/* עטיפת הכניסה של הספר — מצב סופי גלוי כברירת מחדל (ללא JS/תמיכה/
+ * reduced-motion). הכניסה עצמה מתווספת רק תחת prefers-reduced-motion:
+ * no-preference (למטה). transform-style משמר את מרחב ה-3D לשכבת ההטיה. */
+.hero-book-media {
+  transform-style: preserve-3d;
+}
+/* שכבת ההטיה האינטראקטיבית (JS מזין את המשתנים). במנוחה — זהות. */
+.hero-book-tilt {
+  transform: rotateX(var(--book-rx, 0deg)) rotateY(var(--book-ry, 0deg))
+    scale(var(--book-s, 1));
+  transform-style: preserve-3d;
+  transition: transform 320ms var(--ease-standard);
+}
+.hero-book-tilt.is-tilting {
+  will-change: transform;
+}
+/* מיקום הצל הרך מתחת לכריכה — מרכוז + היסט עדין לפי המצביע (JS). */
+.hero-book-shadow {
+  inset-inline-start: 50%;
+  translate: calc(-50% + var(--book-shadow-x, 0px)) 0;
+  transition: translate 320ms var(--ease-standard);
+}
+
+/* כניסת הספר של ה-Hero — הרגע החתום של המוצר. מבוססת זמן (פועלת בכל
+ * דפדפן, לא תלויה ב-scroll-timeline), מתחילה ~יחד עם ה-CTA ומסתיימת בתוך
+ * ~1 שנייה. תחת prefers-reduced-motion הכלל כולו נעדר → הספר מופיע מיד
+ * במצבו הסופי, ללא כניסה/השהיה/הטיה. אין CLS (opacity/transform בלבד). */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-book-media {
+    animation: bookEnter 760ms var(--ease-emphasized) both;
+    animation-delay: 220ms;
+  }
+  .hero-book-shadow {
+    animation: bookShadowIn 820ms var(--ease-standard) both;
+    animation-delay: 260ms;
+  }
+}
+@keyframes bookEnter {
+  from {
+    opacity: 0;
+    transform: translateY(34px) scale(0.91) rotateX(7deg) rotateY(-6deg);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg) rotateY(0deg);
+  }
+}
+@keyframes bookShadowIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
 .hero-thought {
   position: absolute;
@@ -786,7 +883,7 @@ details[open] .faq-answer {
 @keyframes portraitIn {
   from {
     opacity: 0;
-    transform: scale(1.05);
+    transform: scale(1.05) translateY(16px);
   }
   to {
     opacity: 1;
@@ -914,6 +1011,20 @@ details[open] .faq-answer {
     .method-steps > li:nth-child(3) {
       animation-range: entry 20% cover 36%;
     }
+    /* מסע שלוש התחנות (בית) — שלושת השלבים נחשפים ברצף. */
+    .stations-grid > a {
+      animation: enterUp linear both;
+      animation-timeline: view();
+    }
+    .stations-grid > a:nth-of-type(1) {
+      animation-range: entry 2% cover 22%;
+    }
+    .stations-grid > a:nth-of-type(2) {
+      animation-range: entry 8% cover 28%;
+    }
+    .stations-grid > a:nth-of-type(3) {
+      animation-range: entry 14% cover 34%;
+    }
   }
 }
 
@@ -958,6 +1069,25 @@ details[open] .faq-answer {
     }
     html.motion-js .method-steps.is-visible > li:nth-child(3) {
       transition-delay: 200ms;
+    }
+
+    /* מסע שלוש התחנות (בית) — רצף החשיפה של השלבים. */
+    html.motion-js .stations-grid > a {
+      opacity: 0;
+      transform: translateY(26px);
+      transition:
+        opacity 520ms var(--ease-standard),
+        transform 520ms var(--ease-standard);
+    }
+    html.motion-js .stations-grid.is-visible > a {
+      opacity: 1;
+      transform: none;
+    }
+    html.motion-js .stations-grid.is-visible > a:nth-of-type(2) {
+      transition-delay: 90ms;
+    }
+    html.motion-js .stations-grid.is-visible > a:nth-of-type(3) {
+      transition-delay: 180ms;
     }
 
     /* קו הציר של „השיטה” — נמשך כשהוא נכנס למסך (אופקי/אנכי). */
@@ -1012,23 +1142,6 @@ details[open] .faq-answer {
       opacity: 0;
       transform: translate(var(--dx, 0), var(--dy, -10px));
       filter: blur(3px);
-    }
-  }
-
-  .hero-book {
-    animation: heroBookRise linear both;
-    animation-timeline: scroll(root);
-    animation-range: 0 42vh;
-    transform-origin: center 60%;
-  }
-  @keyframes heroBookRise {
-    from {
-      transform: scale(0.975);
-      opacity: 0.94;
-    }
-    to {
-      transform: none;
-      opacity: 1;
     }
   }
 

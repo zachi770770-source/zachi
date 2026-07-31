@@ -5,7 +5,7 @@ import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
-import { BookCover } from "@/components/shared/BookCover";
+import { HeroBook } from "@/components/shared/HeroBook";
 import { CompassHeroCta } from "@/components/compass/CompassHeroCta";
 
 /**
@@ -28,7 +28,7 @@ export function Hero() {
         <div className="grid w-full items-center gap-y-5 lg:grid-cols-[52fr_48fr] lg:gap-x-16">
           {/* תוכן — יחידה רציפה אחת. במובייל ראשון (הצעה + CTA לפני הכריכה);
               בדסקטופ בעמודה הימנית (order-1). */}
-          <div className="order-1 flex flex-col items-start">
+          <div className="enter-stagger order-1 flex flex-col items-start">
             <span className="kicker">{hero.eyebrow}</span>
 
             <h1 className="type-display mt-4 text-foreground">
@@ -88,13 +88,7 @@ export function Hero() {
             </div>
 
             <figure className="hero-book relative flex flex-col items-center gap-4 lg:gap-5">
-              <div className="relative w-[172px] sm:w-[264px] lg:w-[340px]">
-                <div
-                  aria-hidden="true"
-                  className="absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
-                />
-                <BookCover priority className="w-full" />
-              </div>
+              <HeroBook />
               {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,
                   סימן-בסיס עדין מתחת לכריכה. דקורטיבי בלבד. המסר „חיפוש→בנייה”
                   נמסר פעם אחת, נחרצות, בבאנד המרווה שבהמשך העמוד. */}

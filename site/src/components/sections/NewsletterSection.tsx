@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
+import { Reveal } from "@/components/shared/Reveal";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 
 export function NewsletterSection() {
@@ -14,7 +15,7 @@ export function NewsletterSection() {
       aria-labelledby="newsletter-heading"
     >
       <Container>
-        <div className="mx-auto grid max-w-4xl items-center gap-10 rounded-lg bg-secondary-muted px-7 py-11 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:px-12 sm:py-14">
+        <Reveal className="mx-auto grid max-w-4xl items-center gap-10 rounded-lg bg-secondary-muted px-7 py-11 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:px-12 sm:py-14">
           <div>
             {/* הד סוגר למוטיב „מנקודות למבנה”: מבנה יציב ובנוי במלואו */}
             <span aria-hidden="true" className="mb-5 flex items-center gap-1.5">
@@ -48,7 +49,7 @@ export function NewsletterSection() {
           <div className="w-full text-start">
             <WaitlistForm source="homepage" />
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

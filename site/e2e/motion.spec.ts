@@ -80,3 +80,27 @@ test("waitlist form: submitting without consent surfaces a calm inline error", a
   const err = page.locator("p.form-status[role='alert']");
   await expect(err).toContainText("לאשר את קבלת העדכון");
 });
+
+test("hero book: entrance settles to full opacity and rest position", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  const media = page.locator(".hero-book-media");
+  await expect(media).toBeVisible();
+  // אחרי הכניסה — אטימות מלאה, וה-transform התיישב לזהות (המצב הסופי).
+  await expect(media).toHaveCSS("opacity", "1");
+  const transform = await media.evaluate((el) => getComputedStyle(el).transform);
+  expect(["none", "matrix(1, 0, 0, 1, 0, 0)"]).toContain(transform);
+});
+
+test("hero book: reduced-motion shows the final state immediately (no entrance)", async ({
+  browser,
+}) => {
+  const ctx = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await ctx.newPage();
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const media = page.locator(".hero-book-media");
+  // ללא המתנה לכניסה — תחת reduced-motion חייב להיות גלוי מיד במצב הסופי.
+  await expect(media).toHaveCSS("opacity", "1");
+  await ctx.close();
+});

@@ -15,7 +15,8 @@ import { usePathname } from "next/navigation";
  *    ה-fallback ב-CSS אינו מסתיר דבר — התוכן גלוי במצבו הסופי.
  *  - ללא הבהוב: אלמנטים שכבר במסך מסומנים כגלויים לפני הפעלת ה-CSS.
  */
-const SELECTOR = ".reveal, .method-steps, .route-line, .route-line--v";
+const SELECTOR =
+  ".reveal, .method-steps, .stations-grid, .route-line, .route-line--v";
 
 export function MotionFallback() {
   const pathname = usePathname();

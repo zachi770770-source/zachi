@@ -24,10 +24,10 @@ import { cn } from "@/lib/utils";
  * ה-observer מנותק אחרי ההפעלה הראשונה וב-cleanup (אין הפעלה חוזרת).
  */
 
-/** מרווח בין מילים (60–90ms) */
-const WORD_STEP_MS = 75;
-/** השהיה בין משפטים (180–260ms) */
-const SENTENCE_PAUSE_MS = 220;
+/** מרווח בין מילים — קצר וקריא, כדי שהמשפט לא „ממתין” (45ms). */
+const WORD_STEP_MS = 45;
+/** השהיה קצרה בין משפטים (130ms). */
+const SENTENCE_PAUSE_MS = 130;
 
 /** מפצל טקסט קיים למשפטים לפי נקודה — ללא שינוי/הרחבה של התוכן. */
 function splitSentences(text: string): string[] {

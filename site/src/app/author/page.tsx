@@ -86,9 +86,9 @@ export default function AuthorPage() {
             className="mt-6 flex items-center gap-1.5 opacity-80"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
-            <span className="h-px w-8 bg-border-strong sm:w-12" />
+            <span className="line-draw h-px w-8 bg-border-strong sm:w-12" />
             <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-            <span className="h-px w-8 bg-border-strong sm:w-12" />
+            <span className="line-draw h-px w-8 bg-border-strong sm:w-12" />
             <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
           </span>
         </div>

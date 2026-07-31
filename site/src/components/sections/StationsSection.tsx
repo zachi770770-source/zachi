@@ -41,7 +41,8 @@ export function StationsSection() {
           <span className="h-px flex-1" />
         </div>
 
-        <Reveal className="relative mt-7 grid gap-x-10 gap-y-11 md:mt-6 md:grid-cols-3">
+        {/* שלושת השלבים נחשפים ברצף (stations-grid) אחרי שהמסילה נמשכת. */}
+        <div className="stations-grid relative mt-7 grid gap-x-10 gap-y-11 md:mt-6 md:grid-cols-3">
           {/* מסילת המסע האנכית (מובייל) — עמוד שדרה שמחבר את התחנות */}
           <span
             aria-hidden="true"
@@ -51,7 +52,7 @@ export function StationsSection() {
             <Link
               key={track.id}
               href={track.href}
-              className="group flex flex-col text-start ps-7 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand md:ps-0"
+              className="lift-hover group flex flex-col rounded-2xl text-start ps-7 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand md:ps-0"
             >
               <span
                 aria-hidden="true"
@@ -71,7 +72,7 @@ export function StationsSection() {
               </span>
             </Link>
           ))}
-        </Reveal>
+        </div>
       </Container>
     </section>
   );

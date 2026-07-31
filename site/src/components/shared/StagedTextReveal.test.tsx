@@ -212,11 +212,11 @@ describe("StagedTextReveal", () => {
     const words = Array.from(
       container.querySelectorAll<HTMLElement>(".staged-word")
     );
-    // מילה ראשונה: 0ms; שנייה: 75ms; המילה הראשונה במשפט השני מקבלת גם
-    // השהיית-משפט (index*75 + sentenceIndex*220).
+    // מילה ראשונה: 0ms; שנייה: 45ms; המילה הראשונה במשפט השני מקבלת גם
+    // השהיית-משפט (index*45 + sentenceIndex*130).
     expect(words[0].style.getPropertyValue("--staged-delay")).toBe("0ms");
-    expect(words[1].style.getPropertyValue("--staged-delay")).toBe("75ms");
-    expect(words[3].style.getPropertyValue("--staged-delay")).toBe("445ms"); // 3*75 + 1*220
+    expect(words[1].style.getPropertyValue("--staged-delay")).toBe("45ms");
+    expect(words[3].style.getPropertyValue("--staged-delay")).toBe("265ms"); // 3*45 + 1*130
   });
 });
 
