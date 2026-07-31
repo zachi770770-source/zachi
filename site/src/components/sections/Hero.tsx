@@ -55,7 +55,7 @@ export function Hero() {
               </p>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Button asChild size="lg" className="h-14 px-7 text-[17px]">
+                <Button asChild size="lg" className="h-[60px] px-10 text-[18px] shadow-md">
                   <Link href={siteConfig.salesOpen ? "/book#purchase" : "/preview"}>
                     {siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר"}
                   </Link>
@@ -64,7 +64,7 @@ export function Hero() {
                   href="/#stations"
                   className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 >
-                  למצוא את המסלול שלי
+                  למציאת המסלול שלי
                   <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
                 </Link>
               </div>
@@ -73,7 +73,20 @@ export function Hero() {
               <CompassHeroCta />
             </div>
 
-            <TrustBar className="mt-7" />
+            {/* רצועת אמון עדינה — עובדות מאומתות בלבד מתוך תוכן האתר */}
+            <ul className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
+              {hero.trustFacts.map((fact) => (
+                <li
+                  key={fact}
+                  className="flex items-center gap-2 text-[14.5px] font-medium text-foreground-muted"
+                >
+                  <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+                  {fact}
+                </li>
+              ))}
+            </ul>
+
+            <TrustBar className="mt-6" />
           </div>
 
           {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה
@@ -89,7 +102,7 @@ export function Hero() {
             </div>
 
             <figure className="hero-book relative flex flex-col items-center gap-3 lg:gap-4">
-              <div className="relative w-[134px] sm:w-[226px] lg:w-[284px]">
+              <div className="relative w-[180px] sm:w-[320px] lg:w-[480px]">
                 <div
                   aria-hidden="true"
                   className="absolute -bottom-4 start-1/2 h-7 w-[72%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/22 blur-2xl"

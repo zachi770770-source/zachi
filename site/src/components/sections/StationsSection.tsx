@@ -14,7 +14,7 @@ export function StationsSection() {
   return (
     <section
       id="stations"
-      className="scroll-mt-20 py-14 sm:py-16"
+      className="scroll-mt-20 py-20 sm:py-24"
       aria-labelledby="stations-heading"
     >
       <Container>
@@ -42,10 +42,10 @@ export function StationsSection() {
               <h3 className="mt-4 font-serif text-2xl font-semibold text-foreground transition-colors group-hover:text-brand-hover">
                 {track.title}
               </h3>
-              <p className="mt-3 flex-1 text-[17px] leading-relaxed text-foreground-muted">
+              <p className="mt-3 flex-1 text-[18px] leading-relaxed text-foreground-muted">
                 {track.description}
               </p>
-              <span className="mt-5 inline-flex items-center gap-2 text-[15px] font-semibold text-brand transition-colors group-hover:text-brand-hover">
+              <span className="mt-5 inline-flex items-center gap-2 text-[16px] font-semibold text-brand transition-colors group-hover:text-brand-hover group-hover:underline underline-offset-4">
                 {track.linkLabel}
                 <ArrowLeft
                   className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"

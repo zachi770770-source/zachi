@@ -123,7 +123,7 @@ export function StuckSelector({
     <section
       ref={sectionRef}
       id="stuck"
-      className="scroll-mt-24 py-12 sm:py-16 lg:py-16"
+      className="scroll-mt-24 py-20 sm:py-24"
       aria-labelledby="stuck-heading"
     >
       <Container>
@@ -156,7 +156,7 @@ export function StuckSelector({
                 <label
                   key={state.id}
                   className={
-                    "group relative min-h-[76px] cursor-pointer items-center gap-4 rounded-lg border bg-surface px-5 py-5 transition-colors hover:border-secondary/40 hover:bg-surface-muted has-[:checked]:border-secondary has-[:checked]:bg-secondary-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:px-6 sm:py-6 " +
+                    "group relative min-h-[76px] cursor-pointer items-center gap-4 rounded-lg border bg-surface px-5 py-5 transition-[color,background-color,border-color,box-shadow] duration-200 ease-out hover:border-secondary/50 hover:bg-surface-muted hover:shadow-sm has-[:checked]:border-secondary has-[:checked]:bg-secondary-muted has-[:checked]:shadow-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:px-6 sm:py-6 " +
                     (checked ? "border-secondary" : "border-border") +
                     " " +
                     (hiddenOnMobile ? "hidden sm:flex" : "flex")

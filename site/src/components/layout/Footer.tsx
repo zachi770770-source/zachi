@@ -19,7 +19,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-secondary-foreground/15 bg-secondary text-secondary-foreground">
-      <Container className="flex flex-col gap-12 py-14 sm:py-16">
+      <Container className="flex flex-col gap-12 py-14 pb-24 sm:py-16">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
           {/* בלוק המותג */}
           <div className="flex max-w-sm flex-col gap-4">

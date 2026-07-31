@@ -73,9 +73,10 @@ export function CompassLauncher({
           <span className="hidden whitespace-nowrap rounded-full bg-surface px-3 py-1.5 text-[12.5px] font-medium text-foreground-muted shadow-sm ring-1 ring-border transition-colors group-hover:text-foreground group-focus-visible:text-foreground md:inline-block">
             שאלו את הספר
           </span>
-          {/* בועה: גוף Ink + טבעת דקה Terracotta + אייקון ספר לבן; ללא pulse */}
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background">
-            <BookOpen className="h-6 w-6" aria-hidden="true" />
+          {/* בועה: גוף Ink + טבעת דקה Terracotta + אייקון ספר לבן; ללא pulse.
+              במובייל 56px (טביעת רגל קטנה יותר שלא מכסה תוכן), 64px במחשב. */}
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background md:h-16 md:w-16">
+            <BookOpen className="h-[22px] w-[22px] md:h-6 md:w-6" aria-hidden="true" />
           </span>
         </button>
       </DialogPrimitive.Trigger>

@@ -136,7 +136,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
             שולח...
           </>
         ) : (
-          "עדכנו אותי כשהספר יוצא"
+          "שלחו לי עדכון כשהספר יוצא"
         )}
       </Button>
     </form>

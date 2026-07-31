@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
  */
 export function BookHubLink() {
   return (
-    <section className="py-6" aria-label="מעבר לעמוד הספר המלא">
+    <section className="py-10 sm:py-14" aria-label="מעבר לעמוד הספר המלא">
       <Container>
         <Reveal className="mx-auto flex max-w-3xl flex-col items-start gap-6 border-y border-border py-9 text-start sm:flex-row sm:items-center sm:justify-between sm:gap-10">
           <div className="border-s-2 border-brand ps-5">
