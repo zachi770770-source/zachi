@@ -2,21 +2,23 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Compass, X } from "lucide-react";
+import { BookOpen, X } from "lucide-react";
 
 import { compass } from "@/content/compass";
 import { CompassConsole } from "@/components/compass/CompassConsole";
 
 /**
- * משגר „המצפן” בעמוד הבית — הבידול המרכזי, נגיש תמיד וללא ניווט החוצה.
+ * משגר „שאלו את הספר” בעמוד הבית — הבידול המרכזי, נגיש תמיד וללא ניווט החוצה.
+ * (שם פנימי בקוד נשמר; זהו שם תצוגה בלבד.)
  *
- * - Desktop/Tablet (md ומעלה): לשונית צד קבועה באמצע גובה המסך (לא בתחתית).
- * - Mobile: מופעל דרך ה-CTA שבתוך ה-Hero (CompassHeroCta), ששולח את
- *   האירוע `open-compass`. אין כאן בועת צ׳אט תחתונה.
+ * - Desktop/Tablet (md ומעלה): בועה עגולה קבועה בצד המתחיל-לוגית של הקצה
+ *   (שמאל ב-RTL), באמצע גובה המסך (לא בתחתית), עם תווית קטנה „שאלו את הספר”.
+ * - Mobile: בועה עגולה צפה באותו צד, במרווח בטוח מעל באנר העוגיות (מחושב
+ *   דינמית מה-padding שהבאנר שומר), כדי שלא תסתיר אותו. בנוסף קיים CTA בתוך
+ *   ה-Hero (CompassHeroCta). אין בועה תחתונה בסגנון צ׳אט שירות.
  *
  * הפתיחה מרנדרת את CompassConsole הקיים כמות שהוא — אותה קריאה ל-/api/compass,
- * אותה מכסה ואותו טיפול במצבים (ready/loading/answer/no-match/quota/error/soon).
- * אין כאן שכפול של API, לוגיקה, prompt או חיפוש; רק מעטפת תצוגה (drawer).
+ * אותה מכסה ואותו טיפול במצבים. אין שכפול של API, לוגיקה, prompt או חיפוש.
  */
 export function CompassLauncher({
   salesOpen,
@@ -26,6 +28,7 @@ export function CompassLauncher({
   maxQuestionChars: number;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [bannerHeight, setBannerHeight] = React.useState(0);
 
   // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון.
   React.useEffect(() => {
@@ -34,17 +37,45 @@ export function CompassLauncher({
     return () => window.removeEventListener("open-compass", handler);
   }, []);
 
+  // הרחקת הבועה מעל באנר העוגיות במובייל: הבאנר שומר לעצמו padding-bottom על
+  // ה-body לפי גובהו בפועל; קוראים אותו ומרימים את הבועה מעליו.
+  React.useEffect(() => {
+    const read = () => {
+      const pb = parseInt(getComputedStyle(document.body).paddingBottom, 10);
+      setBannerHeight(Number.isFinite(pb) ? pb : 0);
+    };
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+    window.addEventListener("resize", read);
+    window.addEventListener("cookie-consent-changed", read);
+    return () => {
+      mo.disconnect();
+      window.removeEventListener("resize", read);
+      window.removeEventListener("cookie-consent-changed", read);
+    };
+  }, []);
+
+  const mobileBottom = bannerHeight > 0 ? `${bannerHeight + 16}px` : "1.25rem";
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-      {/* לשונית צד קבועה — טאבלט ומעלה בלבד, מעוגנת לאמצע הגובה */}
+      {/* בועה צפה — כל הרוחב מהצד המתחיל של הקצה (שמאל ב-RTL) */}
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label="פתיחת המצפן"
-          className="group fixed end-0 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-center gap-1.5 rounded-s-2xl border border-border-strong bg-foreground py-4 ps-2.5 pe-2.5 text-surface shadow-lg transition-[padding] hover:pe-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:flex"
+          aria-label="שאלו את הספר"
+          style={{ ["--bubble-bottom" as string]: mobileBottom }}
+          className="group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-3 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
         >
-          <Compass className="h-5 w-5" aria-hidden="true" />
-          <span className="text-[12px] font-semibold tracking-wide">המצפן</span>
+          {/* תווית — טאבלט ומעלה בלבד */}
+          <span className="hidden rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] font-semibold text-foreground shadow-sm md:inline-block">
+            שאלו את הספר
+          </span>
+          {/* גוף הבועה: Ink + טבעת דקה Terracotta + אייקון ספר לבן */}
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand transition-transform group-hover:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background motion-reduce:transition-none">
+            <BookOpen className="h-6 w-6" aria-hidden="true" />
+          </span>
         </button>
       </DialogPrimitive.Trigger>
 
@@ -60,15 +91,15 @@ export function CompassLauncher({
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-muted text-brand"
                 aria-hidden="true"
               >
-                <Compass className="h-4 w-4" />
+                <BookOpen className="h-4 w-4" />
               </span>
               <DialogPrimitive.Title className="font-serif text-lg font-semibold text-foreground">
                 {compass.card.eyebrow}
               </DialogPrimitive.Title>
             </div>
             <DialogPrimitive.Close
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              aria-label="סגירת המצפן"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              aria-label="סגירה"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </DialogPrimitive.Close>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 import { compass } from "@/content/compass";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ export function CompassHeroCta() {
       className="mt-4 w-full md:hidden"
       onClick={() => window.dispatchEvent(new CustomEvent("open-compass"))}
     >
-      <Compass className="h-4 w-4" aria-hidden="true" />
+      <BookOpen className="h-4 w-4" aria-hidden="true" />
       {compass.signature.cta}
     </Button>
   );

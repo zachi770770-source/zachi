@@ -1,14 +1,14 @@
 export const navLinks = [
   { href: "/#thesis", label: "הרעיון" },
   { href: "/book", label: "הספר" },
-  { href: "/compass", label: "המצפן" },
+  { href: "/compass", label: "שאלו את הספר" },
   { href: "/#sample", label: "טעימה" },
   { href: "/faq", label: "שאלות נפוצות" },
 ] as const;
 
 export const footerLinks = {
   main: [
-    { href: "/compass", label: "המצפן" },
+    { href: "/compass", label: "שאלו את הספר" },
     { href: "/preview", label: "הצצה לספר" },
     { href: "/author", label: "מאחורי הספר" },
     { href: "/faq", label: "שאלות נפוצות" },

@@ -30,7 +30,7 @@ export const dynamic = "force-dynamic";
 
 const MAX_BODY_BYTES = 2_000;
 const LIMIT_MESSAGE =
-  "הגעתם למכסת השאלות. המצפן נועד לטעימה ממוקדת בלבד, לא לשיחה ארוכה. לקריאה מלאה אפשר לפנות אל הספר עצמו.";
+  "הגעתם למכסת השאלות. זו טעימה ממוקדת בלבד, לא שיחה ארוכה. לקריאה מלאה אפשר לפנות אל הספר עצמו.";
 
 /** בדיקה שה-Origin (אם קיים) תואם ל-Host — הגנה בסיסית מפני CSRF. */
 function isTrustedOrigin(request: Request): boolean {

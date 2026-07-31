@@ -1,4 +1,4 @@
-import { Compass } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
@@ -12,7 +12,7 @@ const openingPoints = compass.signature.points;
 
 export const metadata = {
   ...pageMetadata({
-    title: "המצפן של מדייטים לאהבה",
+    title: "שאלו את הספר",
     description:
       "שאלו מספר שאלות ממוקדות וקבלו כיוון קצר המבוסס על עקרונות הספר מדייטים לאהבה. טעימה מהגישה, לא תחליף לקריאת הספר.",
     path: "/compass",
@@ -33,7 +33,7 @@ export default function CompassPage() {
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
-          { name: "המצפן", path: "/compass" },
+          { name: "שאלו את הספר", path: "/compass" },
         ]}
       />
 
@@ -42,7 +42,7 @@ export default function CompassPage() {
           className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-muted text-brand ring-1 ring-brand/15"
           aria-hidden="true"
         >
-          <Compass className="h-6 w-6" />
+          <BookOpen className="h-6 w-6" />
         </span>
         <span className="kicker mt-6 justify-center">{compass.page.eyebrow}</span>
         <h1 className="mt-4 font-serif text-[clamp(2rem,4.2vw,2.85rem)] font-semibold leading-[1.1] text-balance text-foreground">
