@@ -5,21 +5,32 @@ import { PathMotif } from "@/components/sections/PathMotif";
 import { bigIdea } from "@/content/book";
 
 /**
- * סקשן התזה כמרכז החזותי של הנרטיב (PHASE 14): הרעיון „חיפוש → בנייה”
- * מקבל ביטוי חזותי דרך מוטיב אחד (PathMotif) — נקודות מפוזרות שמתלכדות
- * למבנה יציב ומשותף. הטקסט הוא bigIdea הקיים בלבד; המוטיב דקורטיבי.
+ * סקשן התזה כמרכז החזותי של הנרטיב: הרעיון „חיפוש → בנייה” כבאנד מרווה
+ * מלא-רוחב — הרגע הצבעוני-נועז היחיד בעמוד, שובר את רצף הבז' ומעגן את
+ * הרעיון. מוטיב אחד (PathMotif) בקנה מידה גדול: נקודות מפוזרות שמתלכדות
+ * למבנה יציב. הטקסט הוא bigIdea הקיים בלבד; המוטיב דקורטיבי (aria-hidden).
  *
  * פריסה: RTL — טקסט בצד המתחיל (ימין), המוטיב בצד השני (שמאל). במובייל
- * הטקסט למעלה והמוטיב מתחתיו. הכל CSS-first ו-reduced-motion-safe.
+ * הטקסט למעלה והמוטיב מתחתיו. קריאה מבוקרת מילה-אחר-מילה (StagedTextReveal),
+ * CSS-first ו-reduced-motion-safe: הטקסט המלא ב-SSR וגלוי כברירת מחדל.
  */
 export function ThesisMotifSection() {
   return (
-    <section className="py-14 sm:py-16" aria-labelledby="thesis-heading">
-      <Container>
-        <Reveal className="mx-auto grid max-w-4xl items-center gap-x-12 gap-y-8 md:grid-cols-[1fr_minmax(0,1.05fr)]">
-          {/* קריאה מבוקרת: הכותרת והפתיח נחשפים מילה-אחר-מילה, בציר זמן רציף
-              אחד, פעם אחת בכניסה לתצוגה. הטקסט המלא קיים ב-SSR וגלוי כברירת
-              מחדל (ללא JS / reduced-motion / ללא IO). */}
+    <section
+      className="relative overflow-hidden bg-secondary py-20 text-secondary-foreground sm:py-28"
+      aria-labelledby="thesis-heading"
+    >
+      {/* עומק עדין: הילה כהה רכה שמוסיפה תלת-ממד לבאנד, ללא צבע חדש */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-0"
+      >
+        <div className="absolute -top-24 start-[-10%] h-[560px] w-[560px] rounded-full bg-[color:var(--color-ink)]/25 blur-[130px]" />
+        <div className="absolute -bottom-32 end-[-6%] h-[520px] w-[520px] rounded-full bg-brand/[0.10] blur-[120px]" />
+      </div>
+
+      <Container className="relative">
+        <Reveal className="mx-auto grid max-w-5xl items-center gap-x-16 gap-y-12 md:grid-cols-2">
           <StagedTextReveal
             className="text-start"
             groups={[
@@ -28,12 +39,13 @@ export function ThesisMotifSection() {
                 as: "h2",
                 id: "thesis-heading",
                 className:
-                  "font-serif text-[1.9rem] font-semibold leading-tight text-foreground sm:text-4xl",
+                  "font-serif text-[2.4rem] font-semibold leading-[1.05] text-secondary-foreground sm:text-5xl lg:text-[3.4rem]",
               },
               {
                 text: bigIdea.intro,
                 as: "p",
-                className: "type-lead mt-5 text-foreground-muted",
+                className:
+                  "mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 sm:text-xl",
               },
             ]}
           />
@@ -41,9 +53,9 @@ export function ThesisMotifSection() {
           <div className="relative">
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 mx-auto my-auto h-24 w-3/4 rounded-full bg-secondary/[0.12] blur-[46px]"
+              className="pointer-events-none absolute inset-0 -z-10 mx-auto my-auto h-40 w-[85%] rounded-full bg-secondary-foreground/[0.06] blur-[54px]"
             />
-            <PathMotif className="mx-auto max-w-[420px]" />
+            <PathMotif tone="light" className="mx-auto max-w-[520px]" />
           </div>
         </Reveal>
       </Container>

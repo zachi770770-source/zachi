@@ -13,7 +13,7 @@ export function AuthorTeaser() {
   return (
     <section
       id="author-teaser"
-      className="scroll-mt-20 py-12 sm:py-14"
+      className="scroll-mt-20 py-16 sm:py-24"
       aria-labelledby="author-teaser-heading"
     >
       <Container>

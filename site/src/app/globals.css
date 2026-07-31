@@ -582,11 +582,13 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 4px 9px 9px 4px;
+  border-radius: 4px 10px 10px 4px;
   position: relative;
   z-index: 2;
-  box-shadow: -30px 34px 58px -26px rgba(34, 38, 43, 0.5),
-    -6px 10px 22px -14px rgba(34, 38, 43, 0.32);
+  /* תאורת מוצר: צל עומק מדורג + נגיעת אור עדינה בשדרה (inset) לנפח */
+  box-shadow: -34px 40px 70px -28px rgba(34, 38, 43, 0.52),
+    -10px 16px 30px -16px rgba(34, 38, 43, 0.34),
+    inset 2px 0 0 0 rgba(255, 255, 255, 0.16);
 }
 .book-cover__pages {
   position: absolute;

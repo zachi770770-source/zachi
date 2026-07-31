@@ -123,7 +123,7 @@ export function StuckSelector({
     <section
       ref={sectionRef}
       id="stuck"
-      className="scroll-mt-24 py-12 sm:py-16 lg:py-16"
+      className="scroll-mt-24 bg-surface-muted py-16 sm:py-24"
       aria-labelledby="stuck-heading"
     >
       <Container>

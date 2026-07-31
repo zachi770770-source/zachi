@@ -80,19 +80,21 @@ export function Hero() {
               מהרקע הבהיר (הפרדה טונאלית), ללא פתקים מרחפים, ללא מסגרת וללא
               רקע כהה. */}
           <div className="hero-stage order-2 flex items-center justify-center lg:self-stretch">
-            {/* הילת Sage רכה — במה עדינה מאחורי הכריכה בלבד (גוון קיים) */}
+            {/* במת המוצר: הילת Sage רכה + נגיעת אור חמה עדינה מאחורי הכריכה,
+                להפרדה טונאלית ולנפח (גוונים קיימים בלבד) */}
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 flex items-center justify-center"
             >
-              <div className="aspect-square w-[66%] rounded-full bg-secondary/[0.14] blur-[62px]" />
+              <div className="aspect-square w-[78%] rounded-full bg-secondary/[0.18] blur-[70px]" />
+              <div className="absolute aspect-square w-[52%] translate-y-[8%] rounded-full bg-brand/[0.06] blur-[60px]" />
             </div>
 
-            <figure className="hero-book relative flex flex-col items-center gap-3 lg:gap-4">
-              <div className="relative w-[134px] sm:w-[226px] lg:w-[284px]">
+            <figure className="hero-book relative flex flex-col items-center gap-4 lg:gap-5">
+              <div className="relative w-[172px] sm:w-[264px] lg:w-[340px]">
                 <div
                   aria-hidden="true"
-                  className="absolute -bottom-4 start-1/2 h-7 w-[72%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/22 blur-2xl"
+                  className="absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
                 />
                 <BookCover priority className="w-full" />
               </div>

@@ -9,11 +9,30 @@ import { cn } from "@/lib/utils";
  * הכל CSS-first (ראו globals.css): ברירת המחדל היא המבנה הבנוי והגלוי, כדי
  * שלא ייעלם דבר ללא JS/הידרציה או תחת prefers-reduced-motion. הרכיב הוא שרת
  * טהור, ללא JS צד־לקוח, ומסומן aria-hidden כי הוא דקורטיבי בלבד.
+ *
+ * tone="ink" (ברירת מחדל) — על רקע בהיר. tone="light" — על באנד כהה (מרווה),
+ * קו ונקודות פיזור בהירים, צמתים בטרקוטה שבולטים על הירוק.
  */
-export function PathMotif({ className }: { className?: string }) {
+export function PathMotif({
+  className,
+  tone = "ink",
+}: {
+  className?: string;
+  tone?: "ink" | "light";
+}) {
+  const light = tone === "light";
+  const scatterColor = light
+    ? "var(--color-secondary-foreground)"
+    : "var(--color-border-strong)";
+  const lineColor = light
+    ? "var(--color-secondary-foreground)"
+    : "var(--color-foreground-muted)";
+  const nodeColor = light ? "var(--color-brand-muted)" : "var(--color-brand)";
+  const nodeCore = "var(--color-brand)";
+
   return (
     <svg
-      viewBox="0 0 320 104"
+      viewBox="0 0 320 118"
       role="presentation"
       aria-hidden="true"
       focusable="false"
@@ -22,22 +41,23 @@ export function PathMotif({ className }: { className?: string }) {
       {/* חיפוש: נקודות מפוזרות וקווים מתפצלים — נמוגים בכניסה לתצוגה */}
       <g
         className="motif-scatter"
-        stroke="var(--color-border-strong)"
+        stroke={scatterColor}
         strokeWidth="1.25"
         strokeLinecap="round"
+        style={{ opacity: light ? 0.55 : 1 }}
       >
-        <path d="M40 30 L74 22" strokeDasharray="3 5" />
-        <path d="M40 30 L70 46" strokeDasharray="3 5" />
-        <path d="M212 78 L246 70" strokeDasharray="3 5" />
-        <path d="M212 78 L244 90" strokeDasharray="3 5" />
-        <g fill="var(--color-border-strong)" stroke="none">
-          <circle cx="40" cy="30" r="2.4" />
-          <circle cx="86" cy="16" r="2.4" />
-          <circle cx="132" cy="34" r="2.4" />
-          <circle cx="98" cy="82" r="2.4" />
-          <circle cx="162" cy="90" r="2.4" />
-          <circle cx="212" cy="78" r="2.4" />
-          <circle cx="266" cy="26" r="2.4" />
+        <path d="M40 34 L78 24" strokeDasharray="3 6" />
+        <path d="M40 34 L72 52" strokeDasharray="3 6" />
+        <path d="M214 86 L252 76" strokeDasharray="3 6" />
+        <path d="M214 86 L248 100" strokeDasharray="3 6" />
+        <g fill={scatterColor} stroke="none">
+          <circle cx="40" cy="34" r="2.6" />
+          <circle cx="88" cy="16" r="2.6" />
+          <circle cx="138" cy="36" r="2.6" />
+          <circle cx="100" cy="90" r="2.6" />
+          <circle cx="168" cy="100" r="2.6" />
+          <circle cx="214" cy="86" r="2.6" />
+          <circle cx="272" cy="26" r="2.6" />
         </g>
       </g>
 
@@ -45,21 +65,30 @@ export function PathMotif({ className }: { className?: string }) {
       <g className="motif-structure">
         <path
           className="motif-line"
-          d="M300 66 L242 50 L184 60 L126 42 L68 54 L20 40"
+          d="M300 74 L240 54 L182 66 L124 44 L66 58 L20 42"
           pathLength={1}
           fill="none"
-          stroke="var(--color-foreground-muted)"
-          strokeWidth="1.75"
+          stroke={lineColor}
+          strokeOpacity={light ? 0.9 : 1}
+          strokeWidth="2.25"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <g fill="var(--color-brand)">
-          <circle cx="300" cy="66" r="3.4" />
-          <circle cx="242" cy="50" r="3.4" />
-          <circle cx="184" cy="60" r="3.4" />
-          <circle cx="126" cy="42" r="3.4" />
-          <circle cx="68" cy="54" r="3.4" />
-          <circle cx="20" cy="40" r="3.4" />
+        <g>
+          {[
+            [300, 74],
+            [240, 54],
+            [182, 66],
+            [124, 44],
+            [66, 58],
+            [20, 42],
+          ].map(([cx, cy], i) => (
+            <g key={i}>
+              {/* טבעת רכה סביב הצומת — נפח ומיקוד */}
+              <circle cx={cx} cy={cy} r="7.5" fill={nodeColor} opacity={light ? 0.28 : 0.16} />
+              <circle cx={cx} cy={cy} r="4.2" fill={nodeCore} />
+            </g>
+          ))}
         </g>
       </g>
     </svg>
