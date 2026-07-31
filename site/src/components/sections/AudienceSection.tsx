@@ -16,8 +16,9 @@ export function AudienceSection() {
       aria-labelledby="audience-heading"
     >
       <Container>
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
-          <Reveal className="lg:sticky lg:top-28 lg:self-start">
+        {/* חשיפה מקובצת אחת לשתי העמודות. */}
+        <Reveal className="grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
+          <div className="lg:sticky lg:top-28 lg:self-start">
             <span className="kicker">
               למי הספר הזה
             </span>
@@ -27,9 +28,9 @@ export function AudienceSection() {
             <p className="type-lead mt-6 max-w-[48ch] text-foreground-muted">
               {problem.closing}
             </p>
-          </Reveal>
+          </div>
 
-          <Reveal className="flex flex-col">
+          <div className="flex flex-col">
             {situations.map((situation, index) => (
               <div
                 key={situation}
@@ -46,8 +47,8 @@ export function AudienceSection() {
                 </p>
               </div>
             ))}
-          </Reveal>
-        </div>
+          </div>
+        </Reveal>
       </Container>
     </section>
   );

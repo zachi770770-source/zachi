@@ -42,7 +42,7 @@ export function FormatSelector({
               disabled={!selectable}
               onClick={() => selectable && onChange(id)}
               className={cn(
-                "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+                "field-anim flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
                 !selectable && "cursor-not-allowed border-border bg-surface-muted/60 opacity-70",
                 selectable && selected && "border-secondary bg-secondary-muted",
                 selectable && !selected && "border-border-strong hover:border-secondary/50"
@@ -51,14 +51,22 @@ export function FormatSelector({
               <span className="flex items-start gap-3">
                 <span
                   className={cn(
-                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                    "field-anim mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
                     selected
                       ? "border-secondary bg-secondary text-secondary-foreground"
                       : "border-border-strong"
                   )}
                   aria-hidden="true"
                 >
-                  {selected ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
+                  {/* מסומן תמיד מרונדר — נכנס בעמעום/שינוי-קנה-מידה עדין
+                      במקום הופעה חדה, ללא הזזת פריסה. */}
+                  <Check
+                    className={cn(
+                      "h-3.5 w-3.5 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+                      selected ? "scale-100 opacity-100" : "scale-50 opacity-0"
+                    )}
+                    strokeWidth={3}
+                  />
                 </span>
                 <span className="flex flex-col">
                   <span className="font-semibold text-foreground">

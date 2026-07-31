@@ -3,11 +3,8 @@ import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { TrustStrip } from "@/components/sections/TrustStrip";
 import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
-import { BookPullQuote } from "@/components/sections/BookPullQuote";
 import { StationsSection } from "@/components/sections/StationsSection";
-import { StuckSelector } from "@/components/interactive/StuckSelector";
 import { BookHubLink } from "@/components/sections/BookHubLink";
-import { SampleSection } from "@/components/sections/SampleSection";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { CompassSignature } from "@/components/compass/CompassSignature";
@@ -26,12 +23,12 @@ export const metadata = pageMetadata({
 });
 
 /**
- * עמוד הבית כשער ניווט קצר וניתן לסריקה מהירה. הוא מחזיק רק את מה שמכוון
- * את הקורא הלאה: Hero, שלוש התחנות, „איפה אתם נתקעים?”, טיזר קצר לספר,
- * טיזר קצר לטעימה, טיזר מחבר קצר מאוד (2 עד 3 שורות) ו-CTA לרשימת ההמתנה.
- * רכיב ההמלצות מרונדר רק כשיש שלוש המלצות מאושרות (אחרת null). כל הפירוט
- * המלא חי בדפים הייעודיים ולא משוכפל כאן: השיטה, מבנה הספר, הכלים, התוצאות
- * והמהדורות ב-/book; הטעימה המלאה ב-/preview; סיפור המחבר ב-/author.
+ * עמוד הבית כשער השכנוע הראשי: כל סקשן = תפקיד יחיד במסע ההמרה, בלי כפילות.
+ * Hero (מה/למי/הבטחה/פעולה) → פס עובדות → התזה (עוגן) → תחנת הקשר (זיהוי
+ * + ניתוב) → מה נותן הספר (ערך מעשי מזוקק) → טעימת שיטה (המצפן) → מחבר קצר
+ * → החלטת המרה סוגרת (טעימה חינם או רשימת המתנה). כל העומק חי בדפים
+ * הייעודיים ולא משוכפל כאן: /book, /preview, /compass, /author, /faq
+ * ודפי התחנות. רכיב ההמלצות מרונדר רק כשיש שלוש המלצות מאושרות (אחרת null).
  */
 export default function HomePage() {
   return (
@@ -42,12 +39,9 @@ export default function HomePage() {
       <Hero />
       <TrustStrip />
       <ThesisMotifSection />
-      <BookPullQuote />
       <StationsSection />
-      <StuckSelector variant="compact" />
       <BookHubLink />
       <CompassSignature />
-      <SampleSection />
       <AuthorTeaser />
       <Testimonials />
       <NewsletterSection />

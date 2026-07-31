@@ -30,6 +30,8 @@ export function StationPage({ station }: { station: Station }) {
     .filter((id) => id !== station.id)
     .map((id) => stations[id]);
 
+  const currentIndex = stationOrder.indexOf(station.id);
+
   return (
     <Container className="py-10 sm:py-14 lg:py-16">
       <BreadcrumbSchema
@@ -57,8 +59,8 @@ export function StationPage({ station }: { station: Station }) {
         </ol>
       </nav>
 
-      {/* כותרת */}
-      <header className="mx-auto mt-8 max-w-[54ch]">
+      {/* כותרת — כניסה מתואמת (kicker → כותרת → תיאור → מחוון מסע). */}
+      <header className="enter-stagger mx-auto mt-8 max-w-[54ch]">
         <span className="kicker">{stationsUi.eyebrow}</span>
         <h1 className="mt-4 font-serif text-[clamp(1.9rem,4vw,2.9rem)] font-semibold leading-[1.15] text-foreground">
           {station.h1}
@@ -66,11 +68,37 @@ export function StationPage({ station }: { station: Station }) {
         <p className="mt-5 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted">
           {station.lead}
         </p>
+        {/* מחוון מסע מרוסן — התחנה הנוכחית מתוך שלוש. דקורטיבי. */}
+        <div
+          aria-hidden="true"
+          className="mt-7 flex items-center gap-2.5"
+        >
+          {stationOrder.map((id, i) => (
+            <span key={id} className="flex items-center gap-2.5">
+              {i > 0 ? (
+                <span
+                  className={`h-px w-7 sm:w-12 ${
+                    i <= currentIndex ? "bg-brand/45" : "bg-border-strong"
+                  }`}
+                />
+              ) : null}
+              <span
+                className={
+                  i === currentIndex
+                    ? "h-2.5 w-2.5 rounded-full bg-brand ring-4 ring-brand/15"
+                    : i < currentIndex
+                      ? "h-2 w-2 rounded-full bg-brand/55"
+                      : "h-2 w-2 rounded-full bg-border-strong"
+                }
+              />
+            </span>
+          ))}
+        </div>
       </header>
 
       <div className="mx-auto mt-12 flex max-w-[64ch] flex-col gap-12 sm:mt-14">
         {/* תיאור הקושי */}
-        <section aria-labelledby="difficulty-heading">
+        <section aria-labelledby="difficulty-heading" className="reveal">
           <h2
             id="difficulty-heading"
             className="font-serif text-2xl font-semibold text-foreground"
@@ -90,7 +118,7 @@ export function StationPage({ station }: { station: Station }) {
         </section>
 
         {/* מה הספר מציע */}
-        <section aria-labelledby="offer-heading">
+        <section aria-labelledby="offer-heading" className="reveal">
           <h2
             id="offer-heading"
             className="font-serif text-2xl font-semibold text-foreground"
@@ -115,7 +143,7 @@ export function StationPage({ station }: { station: Station }) {
         </section>
 
         {/* הפרקים הרלוונטיים */}
-        <section aria-labelledby="chapters-heading">
+        <section aria-labelledby="chapters-heading" className="reveal">
           <h2
             id="chapters-heading"
             className="font-serif text-2xl font-semibold text-foreground"
@@ -140,7 +168,7 @@ export function StationPage({ station }: { station: Station }) {
         </section>
 
         {/* קטע מהספר */}
-        <section aria-labelledby="excerpt-heading">
+        <section aria-labelledby="excerpt-heading" className="reveal">
           <h2 id="excerpt-heading" className="kicker">
             {stationsUi.excerptTitle}
           </h2>
@@ -152,7 +180,7 @@ export function StationPage({ station }: { station: Station }) {
         {/* שאלה למחשבה */}
         <section
           aria-labelledby="question-heading"
-          className="rounded-2xl bg-surface-muted p-6 sm:p-8"
+          className="reveal rounded-2xl bg-surface-muted p-6 sm:p-8"
         >
           <h2 id="question-heading" className="kicker">
             {stationsUi.questionTitle}
@@ -165,7 +193,7 @@ export function StationPage({ station }: { station: Station }) {
         {/* קריאה לפעולה */}
         <section
           aria-labelledby="cta-heading"
-          className="flex flex-col items-start gap-x-8 gap-y-4 border-t border-border pt-8 sm:flex-row sm:items-center"
+          className="reveal flex flex-col items-start gap-x-8 gap-y-4 border-t border-border pt-8 sm:flex-row sm:items-center"
         >
           <h2 id="cta-heading" className="sr-only">
             להמשך
@@ -192,7 +220,7 @@ export function StationPage({ station }: { station: Station }) {
       {/* מעבר לשתי התחנות האחרות */}
       <section
         aria-labelledby="other-stations-heading"
-        className="mx-auto mt-16 max-w-[64ch] border-t border-border pt-10"
+        className="reveal mx-auto mt-16 max-w-[64ch] border-t border-border pt-10"
       >
         <h2
           id="other-stations-heading"
@@ -205,7 +233,7 @@ export function StationPage({ station }: { station: Station }) {
             <Link
               key={other.id}
               href={`/${other.id}`}
-              className="group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               <div>
                 <span className="font-serif text-lg font-semibold text-foreground">

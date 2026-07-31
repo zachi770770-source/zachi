@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { authorContent } from "@/content/author";
@@ -18,6 +20,15 @@ export function AuthorTeaser() {
     >
       <Container>
         <Reveal className="mx-auto max-w-2xl text-center">
+          {/* תמונת מחבר אמיתית — אנושיות ואמון, קומפקטית. הסיפור המלא ב-/author. */}
+          <Image
+            src={siteConfig.author.photo}
+            alt={siteConfig.author.photoAlt}
+            width={96}
+            height={96}
+            sizes="96px"
+            className="mx-auto mb-6 h-24 w-24 rounded-full object-cover shadow-sm ring-1 ring-border"
+          />
           <span className="kicker justify-center">על המחבר</span>
           <h2
             id="author-teaser-heading"

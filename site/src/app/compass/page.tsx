@@ -37,7 +37,7 @@ export default function CompassPage() {
         ]}
       />
 
-      <header className="mx-auto max-w-2xl text-center">
+      <header className="enter-stagger mx-auto max-w-2xl text-center">
         <span
           className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-muted text-brand ring-1 ring-brand/15"
           aria-hidden="true"
@@ -65,7 +65,8 @@ export default function CompassPage() {
         </ul>
       </header>
 
-      <div className="mt-10 sm:mt-12">
+      {/* כניסה מתואמת רק בעמוד /compass (לא בתוך המגירה בבית — מונע כפל תנועה) */}
+      <div className="enter mt-10 sm:mt-12" style={{ animationDelay: "160ms" }}>
         <CompassConsole
           salesOpen={siteConfig.salesOpen}
           maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}

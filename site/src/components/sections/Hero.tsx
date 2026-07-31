@@ -6,7 +6,6 @@ import { siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
-import { TrustBar } from "@/components/sections/TrustBar";
 import { CompassHeroCta } from "@/components/compass/CompassHeroCta";
 
 /**
@@ -72,8 +71,6 @@ export function Hero() {
               {/* „שאלו את הספר” — CTA משני במובייל בלבד, נמוך מ-CTA הטעימה */}
               <CompassHeroCta />
             </div>
-
-            <TrustBar className="mt-7" />
           </div>
 
           {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה

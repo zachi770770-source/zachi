@@ -468,6 +468,23 @@
     transform: translateX(-2px);
   }
 
+  /* כלים מעשיים (/book) — משוב hover מרוסן: הנקודה גדֵלה מעט והשם
+     מתחלף לגוון המותג. ללא הזזת פריסה. מנוטרל תחת reduced-motion. */
+  .tool-dot {
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .tool-name {
+    transition: color var(--motion-fast) var(--ease-standard);
+  }
+  @media (hover: hover) {
+    .tool-row:hover .tool-dot {
+      transform: scale(1.55);
+    }
+    .tool-row:hover .tool-name {
+      color: var(--color-brand-hover);
+    }
+  }
+
   /* ===================================================================
    * חשיפת טקסט מדורגת (StagedTextReveal) — „קריאה מבוקרת” מילה-אחר-מילה.
    * ברירת מחדל: כל המילים גלויות (SSR / ללא JS / ללא IO / reduced-motion).
@@ -741,6 +758,157 @@
 }
 details[open] .faq-answer {
   animation: faqAnswerIn 220ms ease-out both;
+}
+
+/* ===================================================================
+ * שפת מיקרו-תנועה משותפת (premium, calm, editorial). כל התנועות מבוססות
+ * opacity/transform בלבד, ומופעלות רק תחת prefers-reduced-motion: no-preference.
+ * ברירת המחדל (ללא JS / ללא תמיכה / reduced-motion) היא המצב הסופי הגלוי —
+ * הבלוק הגלובלי של reduced-motion מכווץ כל משך אנימציה. אין תנועה דקורטיבית
+ * מתמשכת (למעט אינדיקציית טעינה, שהיא פונקציונלית ומוגבלת למשך הבקשה).
+ * =================================================================== */
+@keyframes enterUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes portraitIn {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes compassSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* כניסה מתואמת בטעינה (מעל הקיפול): ראש/כותרת/פאנל בהדרגה. */
+@media (prefers-reduced-motion: no-preference) {
+  .enter {
+    animation: enterUp var(--motion-reveal) var(--ease-standard) both;
+  }
+  /* stagger לילדים ישירים: 320–480ms משך, 55ms דילוג (40–70) */
+  .enter-stagger > * {
+    animation: enterUp 420ms var(--ease-standard) both;
+  }
+  .enter-stagger > *:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  .enter-stagger > *:nth-child(2) {
+    animation-delay: 55ms;
+  }
+  .enter-stagger > *:nth-child(3) {
+    animation-delay: 110ms;
+  }
+  .enter-stagger > *:nth-child(4) {
+    animation-delay: 165ms;
+  }
+  .enter-stagger > *:nth-child(5) {
+    animation-delay: 220ms;
+  }
+
+  /* רצף תוצאה (המצפן): מכל → תשובה → מקור → פעולות. */
+  .result-seq > * {
+    animation: enterUp var(--motion-panel) var(--ease-standard) both;
+  }
+  .result-seq > *:nth-child(2) {
+    animation-delay: 70ms;
+  }
+  .result-seq > *:nth-child(3) {
+    animation-delay: 140ms;
+  }
+  .result-seq > *:nth-child(4) {
+    animation-delay: 210ms;
+  }
+
+  /* חשיפת דיוקן (עמוד המחבר): opacity + scale 1.02 → 1. */
+  .portrait-reveal {
+    animation: portraitIn 460ms var(--ease-standard) both;
+  }
+
+  /* אינדיקציית טעינה יחידה ומרוסנת של אייקון המצפן (רק בזמן הבקשה). */
+  .compass-loading {
+    animation: compassSpin 1.6s linear infinite;
+  }
+}
+
+/* הרמה מרוסנת (≤2px) בריחוף/פוקוס — קישורי „תחנה קשורה”, כרטיסי כלים. */
+.lift-hover {
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+@media (hover: hover) {
+  .lift-hover:hover {
+    transform: translateY(-2px);
+  }
+}
+.lift-hover:focus-visible {
+  transform: translateY(-2px);
+}
+
+/* מעבר עדין של שדה טופס בפוקוס (מעבר על מסגרת/טבעת בלבד — ללא זזת פריסה). */
+.field-anim {
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+/* החלפת תוכן חלקה (crossfade) — בורר המהדורות בעמוד הספר, ללא זזת פריסה. */
+@media (prefers-reduced-motion: no-preference) {
+  .crossfade {
+    animation: fadeInSoft var(--motion-panel) var(--ease-standard) both;
+  }
+}
+
+/* משוב מצב בטפסים (waitlist/contact) — הודעות הצלחה/שגיאה ושגיאות שדה
+ * נכנסות ברגיעה אחידה (עמעום + עלייה עדינה) במקום הופעה חדה. מצב סופי
+ * מיידי תחת prefers-reduced-motion. שינוי-מצב: ~240ms. */
+@media (prefers-reduced-motion: no-preference) {
+  .form-status {
+    animation: enterUp 240ms var(--ease-standard) both;
+  }
+}
+@keyframes fadeInSoft {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* רגע התנועה של „השיטה” (/book): הקו נמשך פעם אחת ושלושת השלבים מופיעים
+ * ברצף בזמן הגלילה לתוך הסקשן. scroll-driven; מצב ברירת המחדל גלוי. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .method-steps > li {
+      animation: enterUp linear both;
+      animation-timeline: view();
+    }
+    .method-steps > li:nth-child(1) {
+      animation-range: entry 4% cover 20%;
+    }
+    .method-steps > li:nth-child(2) {
+      animation-range: entry 12% cover 28%;
+    }
+    .method-steps > li:nth-child(3) {
+      animation-range: entry 20% cover 36%;
+    }
+  }
 }
 
 /* שדרוג: אנימציות מונָעות-גלילה (נתמך ב-Chromium; שאר הדפדפנים מקבלים

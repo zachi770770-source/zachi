@@ -26,28 +26,24 @@ test("author teaser is written in the first person", async ({ page }) => {
   await expect(author).not.toContainText("צחי חן זיהה");
 });
 
-test("book pull-quote sits between the thesis band and the stations journey", async ({
+test("conversion journey: thesis anchor precedes the stage section on the homepage", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  const quote = page.getByRole("region", { name: "רעיון מתוך הספר" });
-  await expect(quote.locator("blockquote")).toBeVisible();
-  await expect(quote).toContainText("מתוך הספר");
+  await expect(page.locator("#thesis-heading")).toBeVisible();
+  await expect(page.locator("#stations")).toBeVisible();
 
-  // סדר ה-DOM: תזה → ציטוט → תחנות
-  const order = await page.evaluate(() => {
+  // סדר ה-DOM: התזה (עוגן) לפני תחנת הקשר (זיהוי + ניתוב).
+  const thesisBeforeStations = await page.evaluate(() => {
     const thesis = document.querySelector("#thesis-heading");
-    const quoteEl = document.querySelector('[aria-label="רעיון מתוך הספר"]');
     const stations = document.querySelector("#stations");
-    const pos = (a: Element | null, b: Element | null) =>
-      a && b ? a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING : 0;
-    return {
-      thesisBeforeQuote: !!pos(thesis, quoteEl),
-      quoteBeforeStations: !!pos(quoteEl, stations),
-    };
+    if (!thesis || !stations) return false;
+    return !!(
+      thesis.compareDocumentPosition(stations) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
-  expect(order.thesisBeforeQuote).toBe(true);
-  expect(order.quoteBeforeStations).toBe(true);
+  expect(thesisBeforeStations).toBe(true);
 });
 
 test("mobile 390: assistant bubble is hidden while the cookie banner is open, and restored after consent", async ({
@@ -125,7 +121,7 @@ for (const w of [320, 360, 390]) {
   });
 }
 
-test("reduced-motion: trust strip and pull-quote text are fully visible", async ({
+test("reduced-motion: trust strip and thesis text are fully visible", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
@@ -137,8 +133,8 @@ test("reduced-motion: trust strip and pull-quote text are fully visible", async 
   await expect(
     page.getByRole("region", { name: "עובדות על הספר" })
   ).toContainText("6 כלים מעשיים");
-  const quote = page.getByRole("region", { name: "רעיון מתוך הספר" });
-  await quote.scrollIntoViewIfNeeded();
-  await expect(quote.locator("blockquote")).toBeVisible();
+  const thesis = page.locator("#thesis-heading");
+  await thesis.scrollIntoViewIfNeeded();
+  await expect(thesis).toContainText("אהבה היא בנייה.");
   await ctx.close();
 });

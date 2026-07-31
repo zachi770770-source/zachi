@@ -31,18 +31,20 @@ export function MethodSection() {
           </p>
         </Reveal>
 
-        <Reveal className="relative mt-16">
-          {/* קו ציר: אופקי בדסקטופ, אנכי במובייל */}
+        {/* רגע התנועה המרכזי של הדף: הקו נמשך פעם אחת ושלושת השלבים
+            נחשפים ברצף. חשיפה מונָעת-גלילה, בטוחה ל-prefers-reduced-motion. */}
+        <div className="relative mt-16">
+          {/* קו ציר: אופקי בדסקטופ, אנכי במובייל — נמשך עם הגלילה */}
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 top-[22px] hidden h-px bg-border sm:block"
+            className="route-line absolute inset-x-0 top-[22px] hidden h-px bg-border-strong sm:block"
           />
           <div
             aria-hidden="true"
-            className="absolute bottom-2 top-2 right-[22px] w-px bg-border sm:hidden"
+            className="route-line--v absolute bottom-2 top-2 right-[22px] w-px bg-border-strong sm:hidden"
           />
 
-          <ol className="grid gap-12 sm:grid-cols-3 sm:gap-10">
+          <ol className="method-steps grid gap-12 sm:grid-cols-3 sm:gap-10">
             {method.steps.map((step, index) => (
               <li key={step.number} className="relative ps-16 sm:ps-0">
                 <div className="flex items-center gap-4 sm:flex-col sm:items-start">
@@ -60,17 +62,17 @@ export function MethodSection() {
               </li>
             ))}
           </ol>
-        </Reveal>
+        </div>
 
-        <Reveal className="mt-14">
+        <div className="mt-14">
           <Link
             href="#inside"
-            className="inline-flex items-center gap-2 text-[17px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            className="group inline-flex items-center gap-2 text-[17px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             {method.linkLabel}
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeft className="edlink-arrow h-4 w-4" aria-hidden="true" />
           </Link>
-        </Reveal>
+        </div>
       </Container>
     </section>
   );

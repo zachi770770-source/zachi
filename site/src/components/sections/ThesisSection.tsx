@@ -29,14 +29,14 @@ export function ThesisSection() {
 
       <div className="py-24 sm:py-32">
         <Container>
-          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-            <Reveal>
-              <BrandMark className="mx-auto h-9 w-9 text-foreground/80" />
-              <span className="kicker mt-5 justify-center">הרעיון המרכזי</span>
-            </Reveal>
+          {/* חשיפה אחת לכל הסצנה המרכזית — רעש החיפוש, העצירה והתובנה,
+              וההבטחה — במקום ארבע חשיפות נפרדות. */}
+          <Reveal className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <BrandMark className="mx-auto h-9 w-9 text-foreground/80" />
+            <span className="kicker mt-5 justify-center">הרעיון המרכזי</span>
 
-            {/* שלב 1 — רעש החיפוש: מילים מפוזרות ומעומעמות */}
-            <Reveal className="mt-10 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3">
+            {/* רעש החיפוש: מילים מפוזרות ומעומעמות */}
+            <div className="mt-10 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3">
               {NOISE.map((w, i) => (
                 <span
                   key={w}
@@ -49,47 +49,39 @@ export function ThesisSection() {
                   {w}
                 </span>
               ))}
-            </Reveal>
+            </div>
 
-            {/* שלב 2 — העצירה והתובנה */}
-            <Reveal className="mt-12">
-              <p className="type-quote text-[clamp(1.75rem,3vw,2.5rem)] font-medium text-foreground/70">
-                דייטינג הוא חיפוש.
-              </p>
-              {/* קו הבנייה — אנכי, מחבר בין החיפוש לבנייה */}
-              <span
-                aria-hidden="true"
-                className="mx-auto my-6 block h-14 w-px bg-gradient-to-b from-foreground/20 to-brand"
-              />
-              <h2
-                id="thesis-heading"
-                className="type-h2 text-brand-hover"
-              >
-                אהבה היא בנייה.
-              </h2>
-            </Reveal>
+            {/* העצירה והתובנה */}
+            <p className="type-quote mt-12 text-[clamp(1.75rem,3vw,2.5rem)] font-medium text-foreground/70">
+              דייטינג הוא חיפוש.
+            </p>
+            {/* קו הבנייה — אנכי, מחבר בין החיפוש לבנייה */}
+            <span
+              aria-hidden="true"
+              className="mx-auto my-6 block h-14 w-px bg-gradient-to-b from-foreground/20 to-brand"
+            />
+            <h2 id="thesis-heading" className="type-h2 text-brand-hover">
+              אהבה היא בנייה.
+            </h2>
 
-            <Reveal className="mt-8 max-w-[54ch]">
-              <p className="text-[clamp(1.05rem,1.4vw,1.28rem)] leading-relaxed text-foreground-muted">
-                {bigIdea.promise}
-              </p>
-            </Reveal>
-          </div>
-
-          {/* שלב 3 — שלושה עקרונות בנייה, מסודרים (לא תיבות) */}
-          <Reveal className="mx-auto mt-16 grid max-w-4xl gap-x-12 gap-y-8 border-t border-foreground/15 pt-12 sm:grid-cols-3">
-            {principles.map((item, i) => (
-              <div key={item} className="flex flex-col gap-3">
-                <span className="type-quote text-3xl font-bold text-brand tabular-nums">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <p className="text-[18px] leading-relaxed text-foreground">{item}</p>
-              </div>
-            ))}
+            <p className="mt-8 max-w-[54ch] text-[clamp(1.05rem,1.4vw,1.28rem)] leading-relaxed text-foreground-muted">
+              {bigIdea.promise}
+            </p>
           </Reveal>
 
-          <Reveal className="mx-auto mt-12 max-w-2xl text-center">
-            <p className="text-[15px] leading-relaxed text-foreground-muted">
+          {/* שלושה עקרונות בנייה + הסתייגות — חשיפה מקובצת אחת */}
+          <Reveal className="mx-auto mt-16 max-w-4xl border-t border-foreground/15 pt-12">
+            <div className="grid gap-x-12 gap-y-8 sm:grid-cols-3">
+              {principles.map((item, i) => (
+                <div key={item} className="flex flex-col gap-3">
+                  <span className="type-quote text-3xl font-bold text-brand tabular-nums">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p className="text-[18px] leading-relaxed text-foreground">{item}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mx-auto mt-12 max-w-2xl text-center text-[15px] leading-relaxed text-foreground-muted">
               {bigIdea.caveat}
             </p>
           </Reveal>

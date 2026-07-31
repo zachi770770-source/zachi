@@ -41,21 +41,6 @@ export function CompassSignature() {
                 {signature.text}
               </p>
 
-              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-                {signature.points.map((point) => (
-                  <li
-                    key={point}
-                    className="flex items-center gap-2 text-[14.5px] font-medium text-foreground-muted"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
-                    />
-                    {point}
-                  </li>
-                ))}
-              </ul>
-
               <div className="mt-8">
                 <Button asChild size="lg">
                   <Link href="/compass">
@@ -94,10 +79,6 @@ export function CompassSignature() {
             </figure>
           </div>
         </Reveal>
-
-        <p className="mt-4 text-center text-[13.5px] leading-relaxed text-foreground-muted">
-          {signature.note}
-        </p>
       </Container>
     </section>
   );
