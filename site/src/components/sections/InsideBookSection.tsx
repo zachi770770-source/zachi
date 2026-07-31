@@ -50,7 +50,7 @@ export function InsideBookSection() {
                 הספר אינו רק רעיוני, אלה כמה מהכלים שתמצאו בתוכו.
               </p>
               <ul className="mt-6 flex flex-col gap-3">
-                {tools.items.slice(0, 5).map((tool) => (
+                {tools.items.map((tool) => (
                   <li key={tool.name} className="flex items-center gap-3">
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
