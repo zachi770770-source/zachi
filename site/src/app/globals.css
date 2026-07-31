@@ -14,7 +14,9 @@
   --color-surface-muted: #e7ece6;
   /* פחם ניטרלי לטקסט — לא אספרסו חום. */
   --color-foreground: #24272c;
-  --color-foreground-muted: #575c63;
+  /* טקסט משני — הוכהה מעט (#575c63 → #4d525a) כדי לעבור AA בנוחות (~7.2:1
+     על נייר) בלי לשטח את ההיררכיה מול foreground הכהה. */
+  --color-foreground-muted: #4d525a;
   /* פחם ניטרלי לצל אובייקט העטיפה בלבד. */
   --color-ink: #262a2f;
 
