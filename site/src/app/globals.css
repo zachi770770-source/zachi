@@ -415,10 +415,16 @@
         animation-range: entry 2% cover 18%;
         will-change: opacity, transform;
       }
+      /* האטימות מגיעה ל-1 מוקדם (עד ~55% מהטווח) כדי שטקסט בגוון המותג
+       * לא ייתפס במצב חצי-שקוף (נגישות/ניגודיות); התנועה (translate) נמשכת
+       * לכל הטווח כדי לשמור על חשיפה מובחנת. */
       @keyframes revealRise {
         from {
           opacity: 0;
-          transform: translateY(14px);
+          transform: translateY(30px);
+        }
+        55% {
+          opacity: 1;
         }
         to {
           opacity: 1;
@@ -770,7 +776,7 @@ details[open] .faq-answer {
 @keyframes enterUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(22px);
   }
   to {
     opacity: 1;
@@ -780,7 +786,7 @@ details[open] .faq-answer {
 @keyframes portraitIn {
   from {
     opacity: 0;
-    transform: scale(1.02);
+    transform: scale(1.05);
   }
   to {
     opacity: 1;
@@ -798,9 +804,9 @@ details[open] .faq-answer {
   .enter {
     animation: enterUp var(--motion-reveal) var(--ease-standard) both;
   }
-  /* stagger לילדים ישירים: 320–480ms משך, 55ms דילוג (40–70) */
+  /* stagger לילדים ישירים: משך מובחן יותר, 60ms דילוג */
   .enter-stagger > * {
-    animation: enterUp 420ms var(--ease-standard) both;
+    animation: enterUp 520ms var(--ease-standard) both;
   }
   .enter-stagger > *:nth-child(1) {
     animation-delay: 0ms;
@@ -907,6 +913,69 @@ details[open] .faq-answer {
     }
     .method-steps > li:nth-child(3) {
       animation-range: entry 20% cover 36%;
+    }
+  }
+}
+
+/* ===================================================================
+ * Fallback לחשיפה בגלילה בדפדפנים ללא Scroll-Driven Animations
+ * (Safari, Firefox): חשיפה מבוססת IntersectionObserver. הבלוק מופעל אך
+ * ורק כאשר סקריפט הלקוח (MotionFallback) מאמת שלושה תנאים ומוסיף
+ * html.motion-js: (1) אין תמיכה מקורית ב-animation-timeline: view();
+ * (2) המשתמש לא ביקש הפחתת תנועה; (3) IntersectionObserver זמין.
+ * ללא JS או ללא התנאים — התוכן נשאר במצבו הסופי הגלוי (אין הסתרה),
+ * ו-prefers-reduced-motion מכובד גם ב-CSS וגם ב-JS (אין עקיפה).
+ * =================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  @supports not (animation-timeline: view()) {
+    html.motion-js .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition:
+        opacity var(--motion-reveal) var(--ease-standard),
+        transform var(--motion-reveal) var(--ease-standard);
+      will-change: opacity, transform;
+    }
+    html.motion-js .reveal.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* שלבי „השיטה” (/book) — חשיפה מדורגת כשה-<ol> נכנס למסך. */
+    html.motion-js .method-steps > li {
+      opacity: 0;
+      transform: translateY(26px);
+      transition:
+        opacity 520ms var(--ease-standard),
+        transform 520ms var(--ease-standard);
+    }
+    html.motion-js .method-steps.is-visible > li {
+      opacity: 1;
+      transform: none;
+    }
+    html.motion-js .method-steps.is-visible > li:nth-child(2) {
+      transition-delay: 100ms;
+    }
+    html.motion-js .method-steps.is-visible > li:nth-child(3) {
+      transition-delay: 200ms;
+    }
+
+    /* קו הציר של „השיטה” — נמשך כשהוא נכנס למסך (אופקי/אנכי). */
+    html.motion-js .route-line {
+      transform: scaleX(0);
+      transform-origin: right center;
+      transition: transform var(--motion-reveal) var(--ease-standard);
+    }
+    html.motion-js .route-line.is-visible {
+      transform: scaleX(1);
+    }
+    html.motion-js .route-line--v {
+      transform: scaleY(0);
+      transform-origin: top center;
+      transition: transform var(--motion-reveal) var(--ease-standard);
+    }
+    html.motion-js .route-line--v.is-visible {
+      transform: scaleY(1);
     }
   }
 }

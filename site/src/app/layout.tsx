@@ -8,6 +8,7 @@ import { StickyPurchaseBar } from "@/components/layout/StickyPurchaseBar";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
+import { MotionFallback } from "@/components/shared/MotionFallback";
 
 /**
  * Heebo משמש לממשק, לגוף ולכותרות המרכזיות.
@@ -88,6 +89,7 @@ export default function RootLayout({
         <StickyPurchaseBar />
         <CookieConsent />
         <AnalyticsScripts />
+        <MotionFallback />
       </body>
     </html>
   );
