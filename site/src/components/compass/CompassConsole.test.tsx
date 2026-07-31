@@ -15,7 +15,7 @@ import { CompassConsole } from "@/components/compass/CompassConsole";
  * חלק ממעבר המיקרו-אנימציה. הרשת מדומה כדי לשלוט בכל מצב.
  */
 
-type FetchImpl = (url: string, init?: RequestInit) => Promise<unknown>;
+type FetchImpl = (url: string, init?: RequestInit) => unknown;
 
 function mockFetch(impl: FetchImpl) {
   const fn = vi.fn((url: string, init?: RequestInit) => {

@@ -40,8 +40,6 @@ test("stage pages share a journey motif that marks the current station", async (
   page,
 }) => {
   await page.goto("/starting-again", { waitUntil: "networkidle" });
-  // המחוון דקורטיבי (aria-hidden) ומכיל שלוש נקודות תחנה.
-  const motif = page.locator('header [aria-hidden="true"] >> nth=0');
   await expect(page.locator("h1")).toBeVisible();
   // שלוש התחנות קיימות כנקודות בתוך ה-header.
   const dots = page.locator("header span.rounded-full");
