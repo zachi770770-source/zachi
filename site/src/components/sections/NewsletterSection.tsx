@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
+import { TrustBar } from "@/components/sections/TrustBar";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 
 export function NewsletterSection() {
@@ -32,6 +33,8 @@ export function NewsletterSection() {
             <p className="mt-3 max-w-md text-[16px] leading-relaxed text-foreground-muted">
               השאירו אימייל ונעדכן אתכם ברגע שהמהדורה הדיגיטלית תיפתח לרכישה. בלי ספאם, ואפשר להסיר את ההרשמה בכל עת.
             </p>
+            {/* תוכן אמון סמוך לנקודת ההחלטה — עובדות קיימות בלבד (siteConfig.trustBar). */}
+            <TrustBar className="mt-6" />
           </div>
           <div className="w-full text-start">
             <WaitlistForm source="homepage" />

@@ -3,9 +3,11 @@ import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
 import { StationsSection } from "@/components/sections/StationsSection";
+import { StationJourney } from "@/components/interactive/StationJourney";
 import { StuckSelector } from "@/components/interactive/StuckSelector";
 import { BookHubLink } from "@/components/sections/BookHubLink";
-import { SampleSection } from "@/components/sections/SampleSection";
+import { PeekInside } from "@/components/interactive/PeekInside";
+import { StickyCta } from "@/components/interactive/StickyCta";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { CompassSignature } from "@/components/compass/CompassSignature";
@@ -40,10 +42,11 @@ export default function HomePage() {
       <Hero />
       <ThesisMotifSection />
       <StationsSection />
+      <StationJourney />
       <StuckSelector variant="compact" />
       <BookHubLink />
       <CompassSignature />
-      <SampleSection />
+      <PeekInside />
       <AuthorTeaser />
       <Testimonials />
       <NewsletterSection />
@@ -51,6 +54,7 @@ export default function HomePage() {
         salesOpen={siteConfig.salesOpen}
         maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
       />
+      <StickyCta />
     </>
   );
 }
