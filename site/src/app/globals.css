@@ -659,6 +659,172 @@
   z-index: 1;
 }
 
+/* ====================================================================
+ * PHASE MOTION 2 — כניסת Hero קולנועית (on-load, CSS בלבד, חד-פעמית ~1.2s).
+ * הרצף: (1) קו טרקוטה נמשך → (2) הכותרת נחשפת שורה-אחר-שורה דרך מסכה →
+ * (3) „בונים אותה” מתיישבת → (4) הכריכה נכנסת (תזוזה/scale/סיבוב 3D/צל) →
+ * (5) עובדות/משנֶה נכנסים ברצף מבוקר. ה-CTA הראשי גלוי ולחיץ מיידית
+ * (transform בלבד, opacity נשארת 1, ללא pointer-events:none).
+ *
+ * הכול opacity/transform בלבד ⇒ אין CLS. ה-opacity של האלמנטים הגדולים
+ * (כריכה/כותרת) עולה מהר ⇒ אין פגיעה מהותית ב-LCP. ללא JS — האנימציה עדיין
+ * רצה (CSS טהור). תחת prefers-reduced-motion — הכלל הגלובלי מכווץ משך והשהיה,
+ * והמצב הסופי מוצג מיד (ראו הבלוק למטה: animation-delay:0).
+ * ==================================================================== */
+/* מבנה קבוע (חל בכל מצב, גם reduced-motion / ללא JS) — כדי שהאלמנטים קיימים
+ * וגלויים במצבם הסופי גם כשאין תנועה. רק ה-transform ההתחלתי והאנימציה
+ * מגודרים תחת no-preference. */
+.hero-rule {
+  display: block;
+  inline-size: clamp(2.5rem, 6vw, 4rem);
+  block-size: 2px;
+  border-radius: 2px;
+  background: var(--color-brand);
+  transform-origin: right center;
+}
+.hero-line {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.1em;
+  margin-block: -0.1em;
+}
+.hero-line__in {
+  display: block;
+}
+.hero-build {
+  display: inline-block;
+  transform-origin: right bottom;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* (1) קו המסלול הפותח — נמשך מימין לשמאל (RTL). */
+  .hero-rule {
+    transform: scaleX(0);
+    animation: heroRuleDraw 480ms var(--ease-settle) both;
+  }
+  @keyframes heroRuleDraw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* (2) חשיפת כותרת שורה-אחר-שורה דרך מסכה (overflow) — וילון אמיתי.
+   * תזמון מזוקק: שורה 1 מתחילה כמעט מיד (70ms); הכותרת המלאה קריאה עד ~720ms. */
+  .hero-line__in {
+    transform: translateY(115%);
+    animation: heroLineIn 450ms var(--ease-settle) both;
+  }
+  .hero-line--1 .hero-line__in {
+    animation-delay: 40ms;
+  }
+  .hero-line--2 .hero-line__in {
+    animation-delay: 200ms;
+  }
+  @keyframes heroLineIn {
+    to {
+      transform: translateY(0);
+    }
+  }
+  /* (3) „בונים אותה” — התיישבות/בנייה עדינה שרצה יחד עם החשיפה וממשיכה עד
+   * ~1.0s. scale בלבד על טקסט שכבר קריא ⇒ אינו מעכב קריאוּת. */
+  .hero-build {
+    animation: heroBuildSettle 780ms var(--ease-settle) 240ms both;
+  }
+  @keyframes heroBuildSettle {
+    0% {
+      transform: scale(0.97) translateY(1px);
+    }
+    62% {
+      transform: scale(1.006) translateY(0);
+    }
+    100% {
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* (5) עובדות/משנֶה — fade+rise עדין (טקסט לא-אינטראקטיבי). */
+  .hero-fade {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: heroFadeUp 460ms var(--ease-settle) both;
+  }
+  @keyframes heroFadeUp {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  /* ה-CTA וגוש הפעולה — transform בלבד (opacity נשארת 1) ⇒ גלוי ולחיץ מיידית. */
+  .hero-rise-soft {
+    transform: translateY(12px);
+    animation: heroRiseSoft 460ms var(--ease-settle) both;
+  }
+  @keyframes heroRiseSoft {
+    to {
+      transform: none;
+    }
+  }
+
+  /* (4) כניסת הכריכה — 40–60px, scale 0.88→1, סיבוב 3D מרוסן, opacity מוקדם ל-LCP. */
+  .hero-book {
+    transform-origin: center 62%;
+    animation: heroBookEnter 900ms var(--ease-settle) 220ms both;
+  }
+  @keyframes heroBookEnter {
+    0% {
+      opacity: 0;
+      transform: perspective(1100px) translateY(52px) scale(0.88) rotateY(8deg)
+        rotateX(2.5deg);
+    }
+    32% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(1100px) translateY(0) scale(1) rotateY(0deg)
+        rotateX(0deg);
+    }
+  }
+  /* צל הכריכה מתיישב יחד עם הנחיתה. המרכוז (-translate-x-1/2) מגיע מ-Tailwind
+   * דרך תכונת ה-translate; כאן מנפישים רק transform (scaleX) ו-opacity כדי
+   * לא לשכפל את היסט המרכוז. */
+  .hero-book__shadow {
+    transform-origin: center;
+    animation: heroShadowSettle 640ms var(--ease-settle) 480ms both;
+  }
+  @keyframes heroShadowSettle {
+    from {
+      opacity: 0;
+      transform: scaleX(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
+  /* (9) מובייל — גרסה מפושטת: ללא סיבוב 3D (מונע גלישה), מרחק קטן, מהיר יותר. */
+  @media (max-width: 767px) {
+    .hero-book {
+      animation-duration: 720ms;
+      animation-delay: 160ms;
+    }
+    @keyframes heroBookEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(26px) scale(0.94);
+      }
+      40% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  }
+}
+
 /* מעבר קצר ועדין לכרטיס תשובת „איפה אתם נתקעים?” — opacity + translateY
  * מינימלי, משך קצר, ללא קפיצת גובה. מכובד אוטומטית תחת prefers-reduced-motion
  * (הכלל הגלובלי מכווץ את משך האנימציה למצב הסופי). */
@@ -842,40 +1008,37 @@ details[open] .faq-answer {
   }
 }
 
-/* שדרוג: אנימציות מונָעות-גלילה (נתמך ב-Chromium; שאר הדפדפנים מקבלים
- * את המצב הבסיסי הסטטי לעיל). הטווח קצר — רק ~42vh הראשונים — כדי שלא
- * תהיה תנועה בזמן קריאת תוכן ארוך בהמשך העמוד. */
-@supports (animation-timeline: scroll()) {
-  .hero-book {
-    animation: heroBookRise linear both;
-    animation-timeline: scroll(root);
-    animation-range: 0 42vh;
-    transform-origin: center 60%;
-  }
-  @keyframes heroBookRise {
-    from {
-      transform: scale(0.975);
-      opacity: 0.94;
-    }
-    to {
-      transform: none;
-      opacity: 1;
-    }
-  }
-}
+/* (heroBookRise הישן — כניסה חלשה מונעת-גלילה — הוסר ב-PHASE MOTION 2 לטובת
+ * כניסת ה-on-load הקולנועית שלמעלה, כדי שלא יתנגשו על אותו .hero-book.) */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0s !important; /* אין השהיית כניסה — המצב הסופי מיידי */
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
   .reveal {
     opacity: 1 !important;
     transform: none !important;
+  }
+  /* כניסת ה-Hero (PHASE MOTION 2) — מצב סופי מיידי, ללא תנועה. */
+  .hero-line__in,
+  .hero-fade,
+  .hero-rise-soft,
+  .hero-build,
+  .hero-rule,
+  .hero-book__shadow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .hero-rule {
+    transform: scaleX(1) !important;
   }
   .book-cover:hover .book-cover__inner {
     transform: rotateY(9deg) rotateX(1.2deg);
