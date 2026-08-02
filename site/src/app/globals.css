@@ -465,12 +465,13 @@
     transform: scaleY(1);
   }
 
-  /* קישור עריכתי — תנועת חץ מרוסנת + קו תחתון עדין */
+  /* קישור עריכתי — תנועת חץ מרוסנת + קו תחתון עדין (PHASE MOTION 4: ~6px) */
   .edlink-arrow {
     transition: transform var(--motion-fast) var(--ease-standard);
   }
-  .group:hover .edlink-arrow {
-    transform: translateX(-2px);
+  .group:hover .edlink-arrow,
+  .group:focus-visible .edlink-arrow {
+    transform: translateX(-6px);
   }
 
   /* כלים מעשיים (/book) — משוב hover מרוסן: הנקודה גדֵלה מעט והשם
@@ -636,6 +637,164 @@
   .book-cover:hover .book-cover__inner {
     transform: rotateY(6deg) rotateX(0.8deg) translateY(-5px);
   }
+}
+
+/* PHASE MOTION 4 (C) — הטיה מונעת-סמן על הכריכה (±4° סביב זווית הבסיס).
+ * ה-vars נקבעים ב-BookTilt (דסקטופ + תנועה בלבד); כאן רק הטרנספורם.
+ * בתוך .book-tilt ההטיה מחליפה את יישור ה-hover הכללי (בלי „קפיצת” lift). */
+.book-tilt {
+  display: block;
+  width: 100%;
+}
+.book-tilt .book-cover__inner,
+.book-tilt .book-cover:hover .book-cover__inner {
+  transform: rotateY(calc(9deg + var(--tilt-y, 0deg)))
+    rotateX(calc(1.2deg + var(--tilt-x, 0deg)));
+  transition: transform 160ms var(--ease-standard);
+}
+
+/* PHASE MOTION 4 (B) — „מעבר דף” מרוסן ב-PeekInside. הדף היוצא מסתובב הצידה
+ * ונמוג מעל הדף הנכנס (כריכה מימין, RTL). 6–10° בלבד, ללא סימולטור עמודים.
+ * reduced-motion: השכבה היוצאת אינה מרונדרת (החלפה מיידית) + אין אנימציה. */
+.peek-stage {
+  position: relative;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .peek-page--enter {
+    animation: peekEnter 420ms var(--ease-settle) both;
+    transform-origin: right center;
+  }
+  .peek-page--leave {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: peekLeave 420ms var(--ease-settle) both;
+    transform-origin: right center;
+  }
+  @keyframes peekEnter {
+    from {
+      opacity: 0;
+      transform: perspective(1400px) rotateY(-7deg) translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes peekLeave {
+    from {
+      opacity: 1;
+      transform: perspective(1400px) rotateY(0deg) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: perspective(1400px) rotateY(9deg) translateY(-4px);
+    }
+  }
+}
+
+/* PHASE MOTION 4 (A) — מסלול התחנות: קו טרקוטה דרך 01/02/03 + סמן שנע.
+ * הבסיס (fallback/reduced) = מסלול מצויר וגלוי; תחת motion-js הוא נמשך בכניסה
+ * לתצוגה (is-inview) והתחנות מופעלות ברצף. הבחירה מזיזה את הסמן (--mx נמדד). */
+.station-route {
+  position: relative;
+  padding-block: 10px;
+}
+.station-route__line {
+  position: absolute;
+  inset-inline: 9%;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: var(--color-brand);
+  opacity: 0.55;
+  transform-origin: right center; /* RTL: נמשך מימין לשמאל */
+}
+.station-route__nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 9%;
+}
+.station-route__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.station-route__node::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-brand);
+  opacity: 0.55;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard);
+}
+.station-route__node[data-active="true"]::before {
+  background: var(--color-brand-muted);
+  opacity: 1;
+}
+.station-route__num {
+  font-family: var(--font-quote);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-foreground-muted);
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+.station-route__node[data-active="true"] .station-route__num {
+  color: var(--color-brand-hover);
+}
+.station-route__marker {
+  position: absolute;
+  top: 50%;
+  left: 0; /* עוגן פיזי; ההזזה ב--mx נמדדת מהשמאל הפיזי (בטוח ל-RTL) */
+  width: 13px;
+  height: 13px;
+  margin-top: -6.5px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-brand) 16%, transparent);
+  opacity: 0;
+  transform: translateX(calc(var(--mx, 0px) - 50%));
+  transition:
+    transform var(--motion-panel) var(--ease-settle),
+    opacity var(--motion-fast) var(--ease-standard);
+}
+.station-route.has-selection .station-route__marker {
+  opacity: 1;
+}
+/* משיכת המסלול בכניסה לתצוגה (motion-js בלבד; הבסיס נשאר מצויר). */
+.motion-js .station-route:not(.is-inview) .station-route__line {
+  transform: scaleX(0);
+}
+.motion-js .station-route.is-inview .station-route__line {
+  transform: scaleX(1);
+  transition: transform 680ms var(--ease-settle);
+}
+.motion-js .station-route:not(.is-inview) .station-route__node::before,
+.motion-js .station-route:not(.is-inview) .station-route__num {
+  opacity: 0;
+}
+.motion-js .station-route:not(.is-inview) .station-route__node::before {
+  transform: scale(0.5);
+}
+.motion-js .station-route.is-inview .station-route__node::before {
+  transition:
+    opacity 300ms var(--ease-settle),
+    transform 300ms var(--ease-settle),
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+  transition-delay: calc(var(--i) * 120ms); /* הפעלה כשהמסלול „מגיע” לתחנה */
+}
+.motion-js .station-route.is-inview .station-route__num {
+  transition: opacity 300ms var(--ease-settle);
+  transition-delay: calc(var(--i) * 120ms);
 }
 
 /* ===================================================================

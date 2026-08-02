@@ -30,7 +30,10 @@ const VALID = new Set(stationOrder);
  */
 export function StationJourney() {
   const [selected, setSelected] = React.useState<Station["id"] | null>(null);
+  const [inview, setInview] = React.useState(false);
   const sectionRef = React.useRef<HTMLElement>(null);
+  const routeRef = React.useRef<HTMLDivElement>(null);
+  const markerRef = React.useRef<HTMLSpanElement>(null);
 
   // בחירה משותפת מה-URL (קישור לשיתוף), פעם אחת אחרי mount.
   React.useEffect(() => {
@@ -55,6 +58,45 @@ export function StationJourney() {
   const active = selected ? stations[selected] : null;
   const currentIndex = selected ? stationOrder.indexOf(selected) : -1;
 
+  // כניסה לתצוגה — הפעלת „משיכת המסלול” (רק כשתנועה מתקדמת מותרת).
+  React.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (!document.documentElement.classList.contains("motion-js")) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setInview(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // הזזת סמן המסלול אל מרכז התחנה הנבחרת (נמדד — בטוח ל-RTL). מגיב לשינוי
+  // בחירה ולשינוי גודל. ה-transition מוגדר ב-CSS ומכובד תחת reduced-motion.
+  React.useEffect(() => {
+    const route = routeRef.current;
+    const marker = markerRef.current;
+    if (!route || !marker) return;
+    const place = () => {
+      if (currentIndex < 0) return;
+      const nodes = route.querySelectorAll<HTMLElement>(".station-route__node");
+      const node = nodes[currentIndex];
+      if (!node) return;
+      const rr = route.getBoundingClientRect();
+      const nr = node.getBoundingClientRect();
+      marker.style.setProperty("--mx", `${nr.left + nr.width / 2 - rr.left}px`);
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [currentIndex]);
+
   return (
     <section
       ref={sectionRef}
@@ -77,31 +119,31 @@ export function StationJourney() {
           </p>
         </div>
 
-        {/* מחוון מסע (דקורטיבי) — שלוש תחנות על ציר, RTL. */}
+        {/* מסלול המסע — קו טרקוטה דרך שלוש התחנות (ממשיך את קו הסצנה שמעל),
+            נמשך בכניסה לתצוגה, וסמן שנע לתחנה הנבחרת. דקורטיבי (aria-hidden);
+            הבחירה הנגישה היא ב-radiogroup שמתחת. */}
         <div
+          ref={routeRef}
           aria-hidden="true"
-          className="mx-auto mt-9 flex max-w-3xl items-center justify-center gap-2 sm:gap-3"
+          className={`station-route mx-auto mt-9 max-w-2xl${inview ? " is-inview" : ""}${
+            currentIndex >= 0 ? " has-selection" : ""
+          }`}
         >
-          {stationOrder.map((id, i) => (
-            <React.Fragment key={id}>
-              {i > 0 ? (
-                <span
-                  className={`h-px w-8 sm:w-16 ${
-                    currentIndex >= 0 && i <= currentIndex
-                      ? "bg-brand/50"
-                      : "bg-border-strong"
-                  }`}
-                />
-              ) : null}
+          <span className="station-route__line" />
+          <span ref={markerRef} className="station-route__marker" />
+          <div className="station-route__nodes">
+            {stationOrder.map((id, i) => (
               <span
-                className={
-                  id === selected
-                    ? "h-2.5 w-2.5 rounded-full bg-brand ring-4 ring-brand/15"
-                    : "h-2 w-2 rounded-full bg-border-strong"
-                }
-              />
-            </React.Fragment>
-          ))}
+                key={id}
+                className="station-route__node"
+                data-active={currentIndex >= 0 && i <= currentIndex ? "true" : "false"}
+                data-current={i === currentIndex ? "true" : "false"}
+                style={{ "--i": i } as React.CSSProperties}
+              >
+                <span className="station-route__num">{`0${i + 1}`}</span>
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* בורר התחנות — radiogroup נגיש, מקטע בדסקטופ / ערימה במובייל */}
@@ -182,7 +224,7 @@ export function StationJourney() {
                 >
                   לתחנה המלאה: {active.navLabel}
                   <ArrowLeft
-                    className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+                    className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                     aria-hidden="true"
                   />
                 </Link>

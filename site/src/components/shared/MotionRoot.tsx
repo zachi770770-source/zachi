@@ -10,7 +10,7 @@ const useIsomorphicLayoutEffect =
  *
  * מוסיף `motion-js` ל-<html> אך ורק כאשר: JS חי, IntersectionObserver נתמך,
  * והמשתמש אינו מבקש `prefers-reduced-motion: reduce`. כל שכבות התנועה מבוססות-JS
- * (חשיפות Reveal, ובהמשך tilt/parallax/route-draw) מגודרות מאחורי המחלקה הזו,
+ * (חשיפות Reveal, ובהמשך tilt/route-draw) מגודרות מאחורי המחלקה הזו,
  * כך שנפילה בטוחה מובנית: ללא JS / הידרציה נכשלת / reduced-motion ⇒ המחלקה לא
  * מתווספת והתוכן נשאר במצבו הסופי הגלוי (ללא הסתרה).
  *

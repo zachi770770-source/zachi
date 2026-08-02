@@ -80,7 +80,7 @@ export function PreviewClosing() {
             >
               {previewClosing.bookLinkLabel}
               <ArrowLeft
-                className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+                className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
               />
             </Link>
