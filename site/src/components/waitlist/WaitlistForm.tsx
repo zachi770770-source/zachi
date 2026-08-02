@@ -142,10 +142,10 @@ export function WaitlistForm({
           />
           <div>
             <p className="text-[16px] font-semibold text-foreground">
-              נרשמת בהצלחה.
+              נרשמת בהצלחה. הטעימה מחכה לכם.
             </p>
             <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">
-              נעדכן אתכם ברגע שהספר ייצא. בינתיים אפשר לקרוא את הטעימה.
+              נעדכן אתכם ברגע שהספר ייצא — בינתיים אפשר לקרוא את הטעימה עכשיו.
             </p>
           </div>
         </div>

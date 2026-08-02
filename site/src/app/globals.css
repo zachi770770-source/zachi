@@ -432,6 +432,18 @@
     opacity: 1;
     transform: none;
   }
+  /* גיבוי-על בלתי-תלוי-JS: אם משום-מה החשיפה לא סומנה (בקר נכשל, race נדיר),
+     אף .reveal לא יישאר נסתר. ה-animation מתחיל רק אחרי 4s (forwards) ולכן אינו
+     מפריע לחשיפה הרגילה שקורית הרבה קודם. */
+  .motion-js .reveal {
+    animation: reveal-failsafe 0.001s linear 4s forwards;
+  }
+  @keyframes reveal-failsafe {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
@@ -1026,6 +1038,24 @@ details[open] .faq-answer {
   /* אינדיקציית טעינה יחידה ומרוסנת של אייקון המצפן (רק בזמן הבקשה). */
   .compass-loading {
     animation: compassSpin 1.6s linear infinite;
+  }
+
+  /* פעימת-דגש אחת ומרוסנת לכפתור ההרשמה בשער — אחרי שכניסת ה-Hero מתייצבת.
+     מחזור אחד בלבד (אף פעם לא אינסופי), ללא fill-mode כדי לא „לתקוע” טרנספורם
+     ולשמור על אפקט הלחיצה/hover. אינה מעכבת שימושיות: הכפתור לחיץ מיד. */
+  .hero-cta-pulse button[type="submit"] {
+    animation: heroCtaBeat 900ms var(--ease-standard) 1600ms 1;
+  }
+  @keyframes heroCtaBeat {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 0%, transparent);
+    }
+    45% {
+      box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-brand) 16%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 0%, transparent);
+    }
   }
 }
 

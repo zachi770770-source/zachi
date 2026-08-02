@@ -39,9 +39,11 @@ export function ToolsBento() {
             return (
               <div
                 key={tool.name}
-                className={`group flex flex-col rounded-2xl border p-5 transition-colors sm:p-6 ${
-                  wide ? "sm:col-span-2 border-secondary/40 bg-secondary-muted/60" : "border-border bg-surface"
-                } ${wide ? "" : "hover:border-brand/40 hover:bg-surface-muted"}`}
+                className={`group flex flex-col rounded-2xl border p-5 transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-20px_rgba(43,36,31,0.45)] sm:p-6 ${
+                  wide
+                    ? "sm:col-span-2 border-secondary/40 bg-secondary-muted/60 hover:border-secondary/60"
+                    : "border-border bg-surface hover:border-brand/40 hover:bg-surface-muted"
+                }`}
               >
                 <span
                   aria-hidden="true"

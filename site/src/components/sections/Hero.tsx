@@ -92,9 +92,15 @@ export function Hero() {
                     <Link href="/book#purchase">לרכישת הספר</Link>
                   </Button>
                 ) : (
-                  // טרום-השקה: טופס הרשמה קומפקטי ישיר. כפתור „עדכנו אותי…”
-                  // הוא הפעולה הדומיננטית היחידה בשער. אין צורך באימייל לטעימה.
-                  <WaitlistCta source="hero" inline />
+                  // טרום-השקה: פעולה דומיננטית אחת — הצטרפות לעדכון ההשקה
+                  // שמעניקה גם גישה לטעימה. טופס הרשמה קומפקטי ישיר; אין צורך
+                  // באימייל כדי לקרוא את הטעימה (קישור משני נפרד).
+                  <div className="hero-cta-pulse flex w-full flex-col items-start gap-2.5">
+                    <p className="text-[15px] font-semibold text-foreground">
+                      הצטרפו לעדכון ההשקה וקבלו גישה לטעימה
+                    </p>
+                    <WaitlistCta source="hero" inline />
+                  </div>
                 )}
 
                 {/* פעולת משנה קלה: קריאת טעימה חינם (מפעילה את מעבר „כניסה
