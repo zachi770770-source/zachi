@@ -4,8 +4,14 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * עוטף תוכן בהופעה עדינה (fade + translate) כשהוא נכנס למסך.
- * מכבד prefers-reduced-motion דרך ה-CSS ב-globals.css.
+ * עוטף תוכן ב-class `reveal` בלבד. החשיפה עצמה (הוספת `is-visible`) מנוהלת
+ * גלובלית ב-MotionRoot עבור *כל* אלמנט `.reveal` בעמוד — גם רכיבי <Reveal>
+ * וגם שימושים גולמיים ב-class. כך אין תלות ב-IntersectionObserver פר-רכיב,
+ * תוכן מעל נקודת-הגלילה/deep-link נחשף מיד, ויש fail-safe שלא משאיר תוכן נסתר.
+ *
+ * הרכיב אינו מחזיק state ואינו כותב `is-visible` בעצמו — כך רינדור מחדש של
+ * React לא „מוחק” את החשיפה שה-controller הוסיף ל-DOM. מצב הבסיס (ללא JS /
+ * reduced-motion) הוא התוכן הגלוי במלואו.
  */
 export function Reveal({
   children,
@@ -18,32 +24,10 @@ export function Reveal({
   as?: React.ElementType;
   delay?: number;
 }) {
-  const ref = React.useRef<HTMLElement | null>(null);
-  const [visible, setVisible] = React.useState(false);
-
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.disconnect();
-          }
-        }
-      },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <Tag
-      ref={ref}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-      className={cn("reveal", visible && "is-visible", className)}
+      className={cn("reveal", className)}
     >
       {children}
     </Tag>

@@ -5,12 +5,11 @@ import { Reveal } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookLink } from "@/components/shared/BookLink";
-import { tools } from "@/content/book";
 
 /**
  * „מה נותן הספר” — הגרסה המזוקקת של הערך המעשי: שיטה בת שלושה שלבים וכלים
- * לשימוש חוזר, עם שלושה שמות כלים מאומתים כהוכחה שזה ספר מעשי ולא רק רעיון.
- * הפירוט המלא (השיטה, מבנה הספר, כל הכלים והתוצאות) חי ב-/book — לא משוכפל כאן.
+ * לשימוש חוזר. ששת הכלים המלאים מוצגים בבנטו הסמוך (ToolsBento) ולכן אינם
+ * משוכפלים כאן; הפירוט המלא חי ב-/book.
  */
 export function BookHubLink() {
   return (
@@ -27,19 +26,6 @@ export function BookHubLink() {
             <p className="mt-2 max-w-md text-[16px] leading-relaxed text-foreground-muted">
               שיטה מעשית בת שלושה שלבים וכלים לשימוש חוזר בכל תחנה בקשר — לא רק רעיון.
             </p>
-            <ul
-              className="mt-4 flex flex-wrap gap-2"
-              aria-label="דוגמאות לכלים מעשיים מהספר"
-            >
-              {tools.items.slice(0, 3).map((tool) => (
-                <li
-                  key={tool.name}
-                  className="rounded-full border border-border-strong bg-surface px-3 py-1 text-[13.5px] font-medium text-foreground-muted"
-                >
-                  {tool.name}
-                </li>
-              ))}
-            </ul>
           </div>
           {/* עטיפה קטנה + כפתור: נקודת המקור של „כניסה לספר”. בלחיצה, העטיפה
               נמשכת ומשתנה גודל אל עטיפת עמוד הספר. */}

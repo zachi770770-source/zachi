@@ -3,7 +3,9 @@ import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { TrustStrip } from "@/components/sections/TrustStrip";
 import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
+import { HomeRelevance } from "@/components/sections/HomeRelevance";
 import { BookHubLink } from "@/components/sections/BookHubLink";
+import { ToolsBento } from "@/components/sections/ToolsBento";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { CompassSignature } from "@/components/compass/CompassSignature";
@@ -42,7 +44,9 @@ export default function HomePage() {
       <TrustStrip />
       <ThesisMotifSection />
       <StationJourney />
+      <HomeRelevance />
       <BookHubLink />
+      <ToolsBento />
       <PeekInside />
       <CompassSignature />
       <AuthorTeaser />

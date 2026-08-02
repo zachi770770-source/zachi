@@ -2,7 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ArrowLeft,
+  Share2,
+  Check,
+} from "lucide-react";
 
 import type { WaitlistSource } from "@/lib/validation/waitlist";
 import { trackEvent } from "@/lib/analytics";
@@ -12,6 +19,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 type Status = "idle" | "loading" | "success" | "error";
+
+/** דגל מקומי (ללא שרת) שמסמן שהמשתמש כבר נרשם לעדכון — כדי לא לבקש אימייל שוב
+    (למשל אחרי תשובת „שאלו את הספר”). לא נשמר תוכן ולא נשלח מזהה אישי. */
+export const WAITLIST_JOINED_KEY = "mdl_waitlist_joined";
 
 /**
  * טופס רשימת המתנה נגיש: שדה אימייל יחיד, הסכמה חובה (לא מסומנת מראש),
@@ -42,11 +53,37 @@ export function WaitlistForm({
   const [company, setCompany] = React.useState(""); // honeypot
   const [status, setStatus] = React.useState<Status>("idle");
   const [error, setError] = React.useState<string | null>(null);
+  const [copied, setCopied] = React.useState(false);
 
   // מיקוד שדה האימייל כשהטופס נחשף (ניהול מיקוד נגיש). פעם אחת בהרכבה.
   React.useEffect(() => {
     if (autoFocus) emailRef.current?.focus();
   }, [autoFocus]);
+
+  // שיתוף/העתקת קישור רגיל: Web Share כשנתמך (מובייל), אחרת העתקה ללוח.
+  const shareSite = React.useCallback(async () => {
+    const url = `${window.location.origin}/`;
+    const data = {
+      title: "מדייטים לאהבה",
+      text: "ספר מעשי לדייטינג ולזוגיות מאת צחי חן",
+      url,
+    };
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share(data);
+        return;
+      } catch {
+        return; // המשתמש ביטל — לא נופלים להעתקה
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      /* אין הרשאת לוח — מתעלמים בשקט */
+    }
+  }, []);
 
   const onSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -76,8 +113,12 @@ export function WaitlistForm({
         trackEvent("waitlist_submit_success", { source }); // אירוע הצלחה אחיד (PHASE 16)
         // ייחוס מסלול הטעימה: הרשמה שהגיעה מסוף עמוד ההצצה.
         if (source === "preview") trackEvent("waitlist_from_preview");
+        try {
+          localStorage.setItem(WAITLIST_JOINED_KEY, "1");
+        } catch {
+          /* אחסון חסום — לא קריטי */
+        }
         setStatus("success");
-        // נתיב ההמרה של PHASE 16: פתיחת /preview רק אחרי הצלחה אמיתית.
         onSuccess?.();
       } catch {
         setStatus("error");
@@ -92,10 +133,47 @@ export function WaitlistForm({
       <div
         role="status"
         aria-live="polite"
-        className="form-status flex items-start gap-3 rounded-lg border border-secondary/40 bg-secondary-muted px-4 py-4 text-[15px] text-foreground"
+        className="form-status rounded-lg border border-secondary/40 bg-secondary-muted px-5 py-5 text-start"
       >
-        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden="true" />
-        <span>נרשמת בהצלחה. נעדכן אותך כשהספר ייפתח לרכישה.</span>
+        <div className="flex items-start gap-3">
+          <CheckCircle2
+            className="mt-0.5 h-5 w-5 shrink-0 text-secondary"
+            aria-hidden="true"
+          />
+          <div>
+            <p className="text-[16px] font-semibold text-foreground">
+              נרשמת בהצלחה. הטעימה מחכה לכם.
+            </p>
+            <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">
+              נעדכן אתכם ברגע שהספר ייצא — בינתיים אפשר לקרוא את הטעימה עכשיו.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button asChild size="lg">
+            <Link href="/preview">
+              לקריאת הטעימה
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
+          <button
+            type="button"
+            onClick={shareSite}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-md px-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {copied ? (
+              <>
+                <Check className="h-4 w-4" aria-hidden="true" />
+                הקישור הועתק
+              </>
+            ) : (
+              <>
+                <Share2 className="h-4 w-4" aria-hidden="true" />
+                שיתוף האתר
+              </>
+            )}
+          </button>
+        </div>
       </div>
     );
   }

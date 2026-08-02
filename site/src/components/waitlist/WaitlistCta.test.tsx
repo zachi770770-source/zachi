@@ -1,11 +1,11 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
-import { render, cleanup, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, cleanup, screen, fireEvent } from "@testing-library/react";
 
 import { WaitlistCta, CONVERSION_CTA_LABEL } from "@/components/waitlist/WaitlistCta";
 
 /**
- * פעולת ההמרה האחידה (PHASE 16): כפתור יחיד → טופס inline; הרשמה מוצלחת אמיתית
- * פותחת את /preview (router.push) ומדווחת אנליטיקה; כשל אימות/שרת אינו מנווט.
+ * פעולת ההמרה האחידה: כפתור יחיד → טופס inline; הרשמה מוצלחת מציגה מצב-הצלחה
+ * עם „לקריאת הטעימה” ושיתוף (ללא ניווט אוטומטי); כשל אימות/שרת אינו מנווט.
  */
 
 const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
@@ -55,7 +55,7 @@ describe("WaitlistCta", () => {
     expect(window.gtag).toHaveBeenCalledWith("event", "hero_waitlist_open", expect.anything());
   });
 
-  it("navigates to /preview after a genuinely successful registration", async () => {
+  it("shows the success state (read-sample + share) after a genuine registration, without navigating", async () => {
     mockFetchOk({ success: true });
     render(<WaitlistCta source="hero" />);
     openForm();
@@ -66,9 +66,11 @@ describe("WaitlistCta", () => {
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }));
 
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/preview"));
+    await screen.findByText(/נרשמת בהצלחה/);
+    expect(screen.getByRole("link", { name: /לקריאת הטעימה/ })).toBeInTheDocument();
     expect(window.gtag).toHaveBeenCalledWith("event", "waitlist_submit_success", expect.anything());
-    expect(window.gtag).toHaveBeenCalledWith("event", "preview_open_after_signup", expect.anything());
+    // אין ניווט אוטומטי אחרי הרשמה — הטעימה נגישה דרך הכפתור.
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it("does NOT navigate when consent is missing (client validation failure)", async () => {

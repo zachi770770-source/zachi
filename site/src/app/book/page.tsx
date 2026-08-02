@@ -42,12 +42,17 @@ export default function BookPage() {
       <header className="border-b border-border bg-surface-muted">
         <Container className="py-16 sm:py-20 lg:py-24">
           <Reveal className="mx-auto max-w-3xl text-center">
-            {/* עוגן המעבר „כניסה לספר”: העטיפה נמשכת לכאן מנקודת המקור בבית. */}
-            <div
-              data-vt-book-dest
-              className="mx-auto mb-7 w-[104px] sm:w-[116px]"
-            >
-              <BookCover />
+            {/* עוגן המעבר „כניסה לספר” + מוקד עריכתי: העטיפה גדולה ומכובדת,
+                עם הילת Sage רכה מאחוריה להפרדה טונאלית. העטיפה נמשכת לכאן
+                מנקודת המקור בבית. */}
+            <div className="relative mx-auto mb-9 w-[172px] sm:w-[204px] lg:w-[232px]">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-secondary/[0.16] blur-2xl"
+              />
+              <div data-vt-book-dest className="w-full">
+                <BookCover priority />
+              </div>
             </div>
             <span className="kicker justify-center">הספר לעומק</span>
             <h1 className="type-h1 mt-4">מה יש בספר, ואיך הוא עובד</h1>

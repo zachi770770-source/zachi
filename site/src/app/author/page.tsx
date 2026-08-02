@@ -6,6 +6,8 @@ import { pageMetadata } from "@/lib/seo";
 import { authorContent } from "@/content/author";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
+import { BookCover } from "@/components/shared/BookCover";
+import { BookLink } from "@/components/shared/BookLink";
 import { AuthorAudio } from "@/components/author/AuthorAudio";
 import { AuthorPageView } from "@/components/author/AuthorPageView";
 import { PersonSchema } from "@/components/schema/PersonSchema";
@@ -109,24 +111,41 @@ export default function AuthorPage() {
       {/* „למה כתבתי את הספר הזה” — שמע בקולו של המחבר (או placeholder + תמלול) */}
       <AuthorAudio />
 
-      {/* קריאה לפעולה */}
-      <div className="mx-auto mt-12 flex max-w-[64ch] flex-col items-start gap-x-8 gap-y-4 border-t border-border pt-8 sm:flex-row sm:items-center">
-        <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">
-          <Link href={primaryHref}>{primaryLabel}</Link>
-        </Button>
-        {/* לאחר פתיחת המכירה, הטעימה נשארת פעולה משנית לצד הרכישה. */}
-        {siteConfig.salesOpen ? (
-          <Link
-            href="/preview"
-            className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
-            לקריאת טעימה מהספר
-            <ArrowLeft
-              className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-              aria-hidden="true"
-            />
-          </Link>
+      {/* קריאה לפעולה — עטיפה אמיתית לצד הפעולה, שהיא גם מקור המעבר המשותף
+          אל עמוד ההצצה. אין כאן מכירה: הפעולה מובילה לטעימה החינמית. */}
+      <div className="mx-auto mt-14 flex max-w-[64ch] flex-col items-start gap-x-8 gap-y-6 border-t border-border pt-10 sm:flex-row sm:items-center">
+        {!siteConfig.salesOpen ? (
+          <div data-vt-book-source className="w-[100px] shrink-0 sm:w-[116px]">
+            <BookCover />
+          </div>
         ) : null}
+        <div className="flex flex-col items-start gap-3">
+          {siteConfig.salesOpen ? (
+            <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">
+              <Link href={primaryHref}>{primaryLabel}</Link>
+            </Button>
+          ) : (
+            <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">
+              <BookLink href="/preview" morphCover>
+                {primaryLabel}
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </BookLink>
+            </Button>
+          )}
+          {/* לאחר פתיחת המכירה, הטעימה נשארת פעולה משנית לצד הרכישה. */}
+          {siteConfig.salesOpen ? (
+            <Link
+              href="/preview"
+              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              לקריאת טעימה מהספר
+              <ArrowLeft
+                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                aria-hidden="true"
+              />
+            </Link>
+          ) : null}
+        </div>
       </div>
     </Container>
   );
