@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Pre-launch: המכירה סגורה", () => {
   test("אין כפתור רכישה פעיל, /checkout חסום, ו-API יוצר-הזמנה מחזיר 403", async ({
@@ -10,12 +10,11 @@ test.describe("Pre-launch: המכירה סגורה", () => {
       "בונים אותה"
     );
 
-    // מצב טרום-השקה: הפעולה המרכזית מזמינה לקרוא טעימה — לא כפתור רכישה חסום ולא תשלום.
-    const sampleCta = page
-      .getByRole("link", { name: "לקריאת טעימה מהספר" })
-      .first();
-    await expect(sampleCta).toBeVisible();
-    await expect(sampleCta).toHaveAttribute("href", "/preview");
+    // מצב טרום-השקה: הפעולה המרכזית היא ההרשמה (כפתור הטופס „עדכנו אותי…”) —
+    // לא כפתור רכישה חסום ולא תשלום.
+    await expect(
+      page.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).first()
+    ).toBeVisible();
     // אין קישור רכישה פעיל אל התשלום כל עוד המכירה סגורה.
     await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
 

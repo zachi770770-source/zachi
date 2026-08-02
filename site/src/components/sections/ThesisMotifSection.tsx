@@ -1,18 +1,13 @@
-import { Container } from "@/components/shared/Container";
-import { Reveal } from "@/components/shared/Reveal";
-import { StagedTextReveal } from "@/components/shared/StagedTextReveal";
-import { PathMotif } from "@/components/sections/PathMotif";
-import { bigIdea } from "@/content/book";
+import { SearchToBuildScene } from "@/components/motion/SearchToBuildScene";
 
 /**
  * סקשן התזה כמרכז החזותי של הנרטיב: הרעיון „חיפוש → בנייה” כבאנד מרווה
- * מלא-רוחב — הרגע הצבעוני-נועז היחיד בעמוד, שובר את רצף הבז' ומעגן את
- * הרעיון. מוטיב אחד (PathMotif) בקנה מידה גדול: נקודות מפוזרות שמתלכדות
- * למבנה יציב. הטקסט הוא bigIdea הקיים בלבד; המוטיב דקורטיבי (aria-hidden).
+ * מלא-רוחב — הרגע החתימתי של העמוד. מ-PHASE MOTION 3 זהו סצנת scrollytelling
+ * (SearchToBuildScene): שברים מפוזרים מתלכדים למבנה, „דייטינג הוא חיפוש” נמוג,
+ * „אהבה היא בנייה” נבנית, וקו הטרקוטה ממשיך אל התחנות.
  *
- * פריסה: RTL — טקסט בצד המתחיל (ימין), המוטיב בצד השני (שמאל). במובייל
- * הטקסט למעלה והמוטיב מתחתיו. קריאה מבוקרת מילה-אחר-מילה (StagedTextReveal),
- * CSS-first ו-reduced-motion-safe: הטקסט המלא ב-SSR וגלוי כברירת מחדל.
+ * הטקסט הוא bigIdea הקיים בלבד; המוטיב דקורטיבי (aria-hidden). בטוח-נפילה:
+ * ללא JS/GSAP/תמיכה או תחת prefers-reduced-motion — מוצג ההרכב הסופי הקריא.
  */
 export function ThesisMotifSection() {
   return (
@@ -29,36 +24,7 @@ export function ThesisMotifSection() {
         <div className="absolute -bottom-32 end-[-6%] h-[520px] w-[520px] rounded-full bg-brand/[0.10] blur-[120px]" />
       </div>
 
-      <Container className="relative">
-        <Reveal className="mx-auto grid max-w-5xl items-center gap-x-16 gap-y-12 md:grid-cols-2">
-          <StagedTextReveal
-            className="text-start"
-            groups={[
-              {
-                text: bigIdea.title,
-                as: "h2",
-                id: "thesis-heading",
-                className:
-                  "font-serif text-[2.4rem] font-semibold leading-[1.05] text-secondary-foreground sm:text-5xl lg:text-[3.4rem]",
-              },
-              {
-                text: bigIdea.intro,
-                as: "p",
-                className:
-                  "mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 sm:text-xl",
-              },
-            ]}
-          />
-
-          <div className="relative">
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 mx-auto my-auto h-40 w-[85%] rounded-full bg-secondary-foreground/[0.06] blur-[54px]"
-            />
-            <PathMotif tone="light" className="mx-auto max-w-[520px]" />
-          </div>
-        </Reveal>
-      </Container>
+      <SearchToBuildScene />
     </section>
   );
 }

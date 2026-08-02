@@ -8,6 +8,7 @@ import { siteConfig } from "@/config/site";
 import { sampleReader } from "@/content/sample";
 import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
+import { BookCover } from "@/components/shared/BookCover";
 
 const PREFS_KEY = "sample-reader-prefs";
 const MIN_SCALE = 0.9;
@@ -46,10 +47,22 @@ export function SampleReader() {
   const [scale, setScale] = React.useState(1);
   const [theme, setTheme] = React.useState<Theme>("light");
   const [progress, setProgress] = React.useState(0);
+  // „דיו חי” (PHASE 4B): כשקטע הטעימה נכנס לתצוגה, סמן קריאה בטרקוטה נמשך
+  // לצד השורות ומשפט-המפתח מודגש בדיו. חד-פעמי (IO), לא נגרר-גלילה — נוח במובייל.
+  const [reading, setReading] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const articleRef = React.useRef<HTMLElement>(null);
+  const livingRef = React.useRef<HTMLDivElement>(null);
   const completedRef = React.useRef(false);
   const minutes = React.useMemo(() => estimateMinutes(), []);
+
+  const principleParts = React.useMemo(() => {
+    const { text, emphasis } = sampleReader.principle;
+    if (emphasis && text.startsWith(emphasis)) {
+      return { key: emphasis, rest: text.slice(emphasis.length) };
+    }
+    return { key: "", rest: text };
+  }, []);
 
   // טעינת העדפות מקומיות לפני ה-paint — ללא הבזק בהיר.
   useIsomorphicLayoutEffect(() => {
@@ -116,6 +129,25 @@ export function SampleReader() {
       window.removeEventListener("resize", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
+  }, []);
+
+  // „דיו חי” — הפעלה חד-פעמית כשקטע הטעימה נכנס לתצוגה (רק כשתנועה מותרת).
+  React.useEffect(() => {
+    const el = livingRef.current;
+    if (!el) return;
+    if (!document.documentElement.classList.contains("motion-js")) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setReading(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.28 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   const adjust = (delta: number) =>
@@ -209,22 +241,43 @@ export function SampleReader() {
       </div>
 
       <article ref={articleRef} className="reader-content">
+        {/* עמוד-שער זעיר לטעימה: העטיפה האמיתית של הספר, שהיא גם יעד המעבר
+            „כניסה לטעימה” — הכריכה מהשער נמשכת ומשתנה גודל אל כאן. מרוסן,
+            ואינו דוחק את חוויית הקריאה. */}
+        <div data-vt-book-dest className="reader-cover">
+          <BookCover />
+        </div>
         <span className="kicker">{sampleReader.eyebrow}</span>
         <h1 className="reader-title">{sampleReader.title}</h1>
         <p className="reader-intro">{sampleReader.intro}</p>
 
-        <p className="reader-lead">{sampleReader.opening}</p>
+        {/* קטע הטעימה עם „דיו חי”: סמן קריאה בטרקוטה נמשך לצד השורות ומשפט-
+            המפתח מודגש בדיו. הטקסט נשאר בחירה/נגיש; ה-marker דקורטיבי בלבד. */}
+        <div ref={livingRef} className={`living-ink${reading ? " is-reading" : ""}`}>
+          <span className="living-ink__marker" aria-hidden="true" />
 
-        {sampleReader.passage.map((para, i) => (
-          <p key={i} className="reader-p">
-            {para}
-          </p>
-        ))}
+          <p className="reader-lead">{sampleReader.opening}</p>
 
-        <aside className="reader-principle" aria-label={sampleReader.principle.label}>
-          <span className="reader-principle__label">{sampleReader.principle.label}</span>
-          <p className="reader-principle__text">{sampleReader.principle.text}</p>
-        </aside>
+          {sampleReader.passage.map((para, i) => (
+            <p key={i} className="reader-p">
+              {para}
+            </p>
+          ))}
+
+          <aside className="reader-principle" aria-label={sampleReader.principle.label}>
+            <span className="reader-principle__label">{sampleReader.principle.label}</span>
+            <p className="reader-principle__text">
+              {principleParts.key ? (
+                <>
+                  <span className="ink-key">{principleParts.key}</span>
+                  {principleParts.rest}
+                </>
+              ) : (
+                sampleReader.principle.text
+              )}
+            </p>
+          </aside>
+        </div>
 
         <p className="reader-question">{sampleReader.readerQuestion}</p>
 
@@ -235,7 +288,7 @@ export function SampleReader() {
           <p className="reader-closing__note">{sampleReader.closingNote}</p>
         </div>
 
-        <div className="reader-cta">
+        <div className={`reader-cta${reading ? " is-ready" : ""}`}>
           <Button asChild size="lg" className="h-[56px] w-full px-8 text-[17px] sm:w-auto">
             <Link href={primaryHref}>
               {primaryLabel}

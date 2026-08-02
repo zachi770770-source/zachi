@@ -209,7 +209,7 @@ export function StationPage({ station }: { station: Station }) {
             >
               {stationsUi.sampleCta}
               <ArrowLeft
-                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5"
+                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
               />
             </Link>
@@ -244,7 +244,7 @@ export function StationPage({ station }: { station: Station }) {
                 </p>
               </div>
               <ArrowUpLeft
-                className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
+                className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5 group-hover:-translate-y-1.5 group-focus-visible:-translate-y-1.5"
                 aria-hidden="true"
               />
             </Link>

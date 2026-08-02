@@ -3,12 +3,17 @@ import { render, cleanup, screen, fireEvent } from "@testing-library/react";
 
 import { CompassConsole } from "@/components/compass/CompassConsole";
 import { stations, stationOrder } from "@/content/stations";
+import { CONVERSION_CTA_LABEL } from "@/components/waitlist/WaitlistCta";
 
 /**
- * בדיקות לשאלות הפתיחה (PHASE 15): שלוש שאלות ההתלבטות האמיתיות של התחנות
- * מציעות התחלה למי שלא בטוח מה לשאול, מפעילות בדיוק את אותה זרימת שאילתה,
- * וה-CTA לטעימה מופיע רק אחרי תשובה מוצלחת — לא לפני. הרשת מדומה במלואה.
+ * שאלות פתיחה (PHASE 15) + פעולת ההמרה האחידה (PHASE 16): שלוש שאלות ההתלבטות
+ * האמיתיות מפעילות את אותה זרימת שאילתה, ופעולת ההמרה „קבלו טעימה ועדכון…”
+ * מופיעה רק אחרי תשובה מוצלחת אמיתית — לא לפני, ולא בשגיאה. הרשת מדומה במלואה.
  */
+
+// WaitlistCta משתמש ב-useRouter של next/navigation — ממקים אותו בסביבת הבדיקה.
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: pushMock }) }));
 
 type FetchImpl = (url: string, init?: RequestInit) => unknown;
 
@@ -25,11 +30,11 @@ function mockFetch(impl: FetchImpl) {
 }
 
 const STARTERS = stationOrder.map((id) => stations[id].question);
-const SAMPLE_LABEL = "לקריאת טעימה מהספר";
 
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  pushMock.mockReset();
 });
 
 beforeEach(() => {
@@ -47,7 +52,12 @@ async function renderReadyConsole() {
   await screen.findByLabelText("השאלה שלכם");
 }
 
-describe("CompassConsole — starter questions", () => {
+/** פעולת ההמרה (הכפתור שנפתח לטופס). לפני פתיחתו אין שדה אימייל. */
+function conversionCta() {
+  return screen.queryByRole("button", { name: CONVERSION_CTA_LABEL });
+}
+
+describe("CompassConsole — starters + unified conversion CTA", () => {
   it("renders the three real station questions as starters before any answer", async () => {
     await renderReadyConsole();
     for (const q of STARTERS) {
@@ -55,12 +65,12 @@ describe("CompassConsole — starter questions", () => {
     }
   });
 
-  it("does not show the sample CTA before an answer exists", async () => {
+  it("does not show the conversion CTA before an answer exists", async () => {
     await renderReadyConsole();
-    expect(screen.queryByRole("link", { name: SAMPLE_LABEL })).toBeNull();
+    expect(conversionCta()).toBeNull();
   });
 
-  it("runs the full query flow when a starter is clicked and reveals the sample CTA only after success", async () => {
+  it("runs the full query flow on a starter click and reveals the conversion CTA only after success", async () => {
     const fn = await (async () => {
       const f = mockFetch((_url, init) => {
         if (!init || init.method === "GET") {
@@ -83,8 +93,8 @@ describe("CompassConsole — starter questions", () => {
     const body = JSON.parse(String(postCalls[0][1]?.body ?? "{}"));
     expect(body.question).toBe(STARTERS[0]);
 
-    // ה-CTA לטעימה מופיע רק עכשיו (אחרי תשובה מוצלחת).
-    expect(screen.getByRole("link", { name: SAMPLE_LABEL })).toBeInTheDocument();
+    // פעולת ההמרה מופיעה רק עכשיו (אחרי תשובה מוצלחת).
+    expect(conversionCta()).toBeInTheDocument();
   });
 
   it("hides the starters once an answer is shown", async () => {
@@ -96,7 +106,7 @@ describe("CompassConsole — starter questions", () => {
     }
   });
 
-  it("shows no sample CTA when the starter-triggered request fails", async () => {
+  it("shows no conversion CTA when the starter-triggered request fails", async () => {
     const fn = vi.fn((url: string, init?: RequestInit) => {
       if (!init || init.method === "GET") {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ available: true, remaining: 3 }) });
@@ -112,6 +122,6 @@ describe("CompassConsole — starter questions", () => {
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("אירעה תקלה זמנית. נסו שוב בעוד רגע.");
-    expect(screen.queryByRole("link", { name: SAMPLE_LABEL })).toBeNull();
+    expect(conversionCta()).toBeNull();
   });
 });

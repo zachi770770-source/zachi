@@ -3,7 +3,6 @@ import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { TrustStrip } from "@/components/sections/TrustStrip";
 import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
-import { StationsSection } from "@/components/sections/StationsSection";
 import { BookHubLink } from "@/components/sections/BookHubLink";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
@@ -42,7 +41,6 @@ export default function HomePage() {
       <Hero />
       <TrustStrip />
       <ThesisMotifSection />
-      <StationsSection />
       <StationJourney />
       <BookHubLink />
       <PeekInside />

@@ -31,10 +31,16 @@ export type AnalyticsEventName =
   | "stuck_select"
   | "stuck_to_sample"
   | "compass_ask"
+  | "compass_answer_success"
   | "preview_opened"
   | "preview_reached_end"
   | "waitlist_from_preview"
-  | "author_page_opened";
+  | "author_page_opened"
+  // PHASE 16 — נתיב ההמרה האחיד (טופס ה-Hero, הרשמה מוצלחת, פתיחת הטעימה
+  // אחרי הרשמה). ללא מידע אישי; עוברים דרך אותה שכבת consent קיימת.
+  | "hero_waitlist_open"
+  | "waitlist_submit_success"
+  | "preview_open_after_signup";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
 

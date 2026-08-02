@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
+import { BookCover } from "@/components/shared/BookCover";
+import { BookLink } from "@/components/shared/BookLink";
 import { tools } from "@/content/book";
 
 /**
@@ -40,12 +41,19 @@ export function BookHubLink() {
               ))}
             </ul>
           </div>
-          <Button asChild size="lg" variant="outline" className="shrink-0">
-            <Link href="/book">
-              לעמוד הספר המלא
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </Button>
+          {/* עטיפה קטנה + כפתור: נקודת המקור של „כניסה לספר”. בלחיצה, העטיפה
+              נמשכת ומשתנה גודל אל עטיפת עמוד הספר. */}
+          <div className="flex shrink-0 flex-col items-center gap-4">
+            <div data-vt-book-source className="w-[76px]">
+              <BookCover />
+            </div>
+            <Button asChild size="lg" variant="outline">
+              <BookLink href="/book" morphCover>
+                לעמוד הספר המלא
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </BookLink>
+            </Button>
+          </div>
         </Reveal>
       </Container>
     </section>

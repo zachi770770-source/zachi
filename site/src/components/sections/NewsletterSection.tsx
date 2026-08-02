@@ -1,7 +1,6 @@
-import Link from "next/link";
-
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
+import { BookLink } from "@/components/shared/BookLink";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { TrustBar } from "@/components/sections/TrustBar";
 
@@ -37,12 +36,12 @@ export function NewsletterSection() {
             </p>
             <p className="mt-4 text-[15px] text-foreground-muted">
               לא רוצים לחכות?{" "}
-              <Link
+              <BookLink
                 href="/preview"
                 className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
                 קראו עכשיו טעימה חינם מהספר
-              </Link>
+              </BookLink>
               .
             </p>
             {/* עובדות אמון בנקודת ההחלטה — מה מקבלים בפועל. */}

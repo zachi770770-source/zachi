@@ -17,14 +17,36 @@ type Status = "idle" | "loading" | "success" | "error";
  * טופס רשימת המתנה נגיש: שדה אימייל יחיד, הסכמה חובה (לא מסומנת מראש),
  * honeypot נסתר, מצבי loading/success/error אמיתיים עם aria-live, ו-RTL מלא.
  * אינו שומר דבר בצד הלקוח.
+ *
+ * `autoFocus` ממקד את שדה האימייל בעת הרכבה (לגילוי inline מתוך WaitlistCta).
+ * `onSuccess` נקרא רק אחרי הרשמה מוצלחת אמיתית (אחרי הכרזת ההצלחה) — משמש את
+ * נתיב ההמרה של PHASE 16 כדי לפתוח את /preview. בכשל אימות/שרת הוא לא נקרא.
  */
-export function WaitlistForm({ source }: { source: WaitlistSource }) {
+export function WaitlistForm({
+  source,
+  autoFocus = false,
+  onSuccess,
+  compact = false,
+}: {
+  source: WaitlistSource;
+  autoFocus?: boolean;
+  onSuccess?: () => void;
+  /** פריסה קומפקטית (Hero): אימייל + כפתור בשורה, הסכמה קטנה מתחת. אותה
+      לוגיקה, אותו API, אותה ולידציה — רק צפיפות ויזואלית. */
+  compact?: boolean;
+}) {
   const id = React.useId();
+  const emailRef = React.useRef<HTMLInputElement>(null);
   const [email, setEmail] = React.useState("");
   const [consent, setConsent] = React.useState(false);
   const [company, setCompany] = React.useState(""); // honeypot
   const [status, setStatus] = React.useState<Status>("idle");
   const [error, setError] = React.useState<string | null>(null);
+
+  // מיקוד שדה האימייל כשהטופס נחשף (ניהול מיקוד נגיש). פעם אחת בהרכבה.
+  React.useEffect(() => {
+    if (autoFocus) emailRef.current?.focus();
+  }, [autoFocus]);
 
   const onSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -51,15 +73,18 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           return;
         }
         trackEvent("waitlist_signup", { source }); // ללא כתובת אימייל
+        trackEvent("waitlist_submit_success", { source }); // אירוע הצלחה אחיד (PHASE 16)
         // ייחוס מסלול הטעימה: הרשמה שהגיעה מסוף עמוד ההצצה.
         if (source === "preview") trackEvent("waitlist_from_preview");
         setStatus("success");
+        // נתיב ההמרה של PHASE 16: פתיחת /preview רק אחרי הצלחה אמיתית.
+        onSuccess?.();
       } catch {
         setStatus("error");
         setError("בעיית תקשורת. בדקו את החיבור ונסו שוב.");
       }
     },
-    [email, consent, company, source]
+    [email, consent, company, source, onSuccess]
   );
 
   if (status === "success") {
@@ -75,24 +100,114 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
     );
   }
 
+  const submitButton = (
+    <Button
+      type="submit"
+      size="lg"
+      disabled={status === "loading"}
+      className={compact ? "w-full shrink-0 sm:w-auto" : "w-full"}
+    >
+      {status === "loading" ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          שולח...
+        </>
+      ) : (
+        "עדכנו אותי כשהספר יוצא"
+      )}
+    </Button>
+  );
+
+  const honeypot = (
+    <div className="pointer-events-none absolute -start-[9999px] top-0 h-0 w-0 overflow-hidden">
+      <label htmlFor={`${id}-company`}>אל תמלאו שדה זה</label>
+      <input
+        id={`${id}-company`}
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        value={company}
+        onChange={(e) => setCompany(e.target.value)}
+      />
+    </div>
+  );
+
+  const consent_ = (
+    <div className="flex items-start gap-3">
+      <Checkbox
+        id={`${id}-consent`}
+        checked={consent}
+        onCheckedChange={(v) => setConsent(v === true)}
+      />
+      <Label
+        htmlFor={`${id}-consent`}
+        className={
+          compact
+            ? "text-[13px] font-normal leading-relaxed text-foreground-muted"
+            : "font-normal leading-relaxed"
+        }
+      >
+        אני מסכים/ה לקבל עדכון חד-פעמי כשהספר ייפתח לרכישה, בהתאם ל
+        <Link href="/privacy" className="text-brand-hover underline underline-offset-2">
+          מדיניות הפרטיות
+        </Link>
+        .
+      </Label>
+    </div>
+  );
+
+  const errorArea = (
+    <div aria-live="assertive" className={compact ? "min-h-[1rem]" : "min-h-[1.25rem]"}>
+      {status === "error" && error ? (
+        <p role="alert" className="form-status flex items-center gap-2 text-sm text-danger">
+          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+
+  if (compact) {
+    // פריסת Hero: שדה + כפתור בשורה אחת (בדסקטופ), הסכמה קטנה מתחת. תווית
+    // האימייל נגישה (sr-only) — placeholder אינו תחליף לתווית.
+    return (
+      <form onSubmit={onSubmit} noValidate className="flex w-full flex-col gap-2.5">
+        {honeypot}
+        <div className="flex flex-col gap-2.5 sm:flex-row">
+          <div className="sm:flex-1">
+            <Label htmlFor={`${id}-email`} className="sr-only">
+              כתובת אימייל
+            </Label>
+            <Input
+              ref={emailRef}
+              id={`${id}-email`}
+              type="email"
+              required
+              inputMode="email"
+              autoComplete="email"
+              aria-invalid={status === "error" && !!error}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@example.com"
+              className="h-12"
+            />
+          </div>
+          {submitButton}
+        </div>
+        {errorArea}
+        {consent_}
+      </form>
+    );
+  }
+
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-      {/* honeypot — נסתר מחוץ למסך (ללא aria-hidden על שדה שאפשר למקד) */}
-      <div className="pointer-events-none absolute -start-[9999px] top-0 h-0 w-0 overflow-hidden">
-        <label htmlFor={`${id}-company`}>אל תמלאו שדה זה</label>
-        <input
-          id={`${id}-company`}
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-        />
-      </div>
+      {honeypot}
 
       <div>
         <Label htmlFor={`${id}-email`}>כתובת אימייל</Label>
         <Input
+          ref={emailRef}
           id={`${id}-email`}
           type="email"
           required
@@ -105,40 +220,9 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
         />
       </div>
 
-      <div className="flex items-start gap-3">
-        <Checkbox
-          id={`${id}-consent`}
-          checked={consent}
-          onCheckedChange={(v) => setConsent(v === true)}
-        />
-        <Label htmlFor={`${id}-consent`} className="font-normal leading-relaxed">
-          אני מסכים/ה לקבל עדכון חד-פעמי כשהספר ייפתח לרכישה, בהתאם ל
-          <Link href="/privacy" className="text-brand-hover underline underline-offset-2">
-            מדיניות הפרטיות
-          </Link>
-          .
-        </Label>
-      </div>
-
-      <div aria-live="assertive" className="min-h-[1.25rem]">
-        {status === "error" && error ? (
-          <p role="alert" className="form-status flex items-center gap-2 text-sm text-danger">
-            <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-            {error}
-          </p>
-        ) : null}
-      </div>
-
-      <Button type="submit" size="lg" disabled={status === "loading"} className="w-full">
-        {status === "loading" ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            שולח...
-          </>
-        ) : (
-          "עדכנו אותי כשהספר יוצא"
-        )}
-      </Button>
+      {consent_}
+      {errorArea}
+      {submitButton}
     </form>
   );
 }

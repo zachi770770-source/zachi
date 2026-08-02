@@ -14,8 +14,9 @@ import { CompassConsole } from "@/components/compass/CompassConsole";
  * - Desktop/Tablet (md ומעלה): בועה עגולה קבועה בצד המתחיל-לוגית של הקצה
  *   (שמאל ב-RTL), באמצע גובה המסך (לא בתחתית), עם תווית קטנה „שאלו את הספר”.
  * - Mobile: בועה עגולה צפה באותו צד, במרווח בטוח מעל באנר העוגיות (מחושב
- *   דינמית מה-padding שהבאנר שומר), כדי שלא תסתיר אותו. בנוסף קיים CTA בתוך
- *   ה-Hero (CompassHeroCta). אין בועה תחתונה בסגנון צ׳אט שירות.
+ *   דינמית מה-padding שהבאנר שומר), כדי שלא תסתיר אותו. אין בועה תחתונה
+ *   בסגנון צ׳אט שירות.
+ * - הבועה נחשפת רק אחרי גלילה קלה, כדי שלא תתחרה בטופס ההרשמה שבשער בטעינה.
  *
  * הפתיחה מרנדרת את CompassConsole הקיים כמות שהוא — אותה קריאה ל-/api/compass,
  * אותה מכסה ואותו טיפול במצבים. אין שכפול של API, לוגיקה, prompt או חיפוש.
@@ -29,12 +30,28 @@ export function CompassLauncher({
 }) {
   const [open, setOpen] = React.useState(false);
   const [bannerOpen, setBannerOpen] = React.useState(false);
+  // הבועה הצפה אינה מופיעה בטעינה הראשונית כדי שלא תתחרה בטופס ההרשמה שבשער;
+  // היא נחשפת בעדינות אחרי גלילה קלה (או מיד אם המשתמש כבר גלל / פתח את החלונית).
+  const [revealed, setRevealed] = React.useState(false);
 
   // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון.
   React.useEffect(() => {
     const handler = () => setOpen(true);
     window.addEventListener("open-compass", handler);
     return () => window.removeEventListener("open-compass", handler);
+  }, []);
+
+  // חשיפה אחרי גלילה מעבר לכ-60% מגובה החלון (מעבר לאזור השער).
+  React.useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > window.innerHeight * 0.6) {
+        setRevealed(true);
+        window.removeEventListener("scroll", onScroll);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   // מצב באנר העוגיות מגיע כאות-מצב מפורש מ-CookieConsent (data-attribute על
@@ -67,8 +84,9 @@ export function CompassLauncher({
           aria-label="שאלו את הספר"
           style={{ ["--bubble-bottom" as string]: mobileBottom }}
           className={
-            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-2.5 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2" +
-            (bannerOpen ? " max-md:hidden" : "")
+            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-2.5 transition-opacity duration-500 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2" +
+            (bannerOpen ? " max-md:hidden" : "") +
+            (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
           }
         >
           {/* תווית קבועה, קטנה ועדינה — דסקטופ/טאבלט בלבד. לא לשונית ולא כפתור

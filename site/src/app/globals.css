@@ -60,6 +60,14 @@
   --motion-fast: 220ms; /* כפתורים ואינטראקציות קטנות (180–260) */
   --motion-panel: 300ms; /* פאנלים ומעברים מקומיים (240–360) */
   --motion-reveal: 600ms; /* הופעת סקשן (450–700) */
+  /* PHASE MOTION 1 — הרחבת שפת התנועה: התיישבות רכה, מרחקים וסטגר משותפים.
+     כל התנועה מבוססת opacity/transform בלבד (ללא CLS). */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1); /* התיישבות/בנייה, ללא באונס */
+  --motion-slow: 900ms; /* פתיחי-על (Hero cinematic) */
+  --motion-dist-sm: 8px; /* מיקרו-תנועה (חיצים, hover) */
+  --motion-dist-md: 16px; /* הופעת סקשן */
+  --motion-dist-lg: 28px; /* כניסה מודגשת (כריכה/כותרת) */
+  --motion-stagger: 90ms; /* מרווח בין פריטים ברצף */
 }
 
 @theme inline {
@@ -407,48 +415,22 @@
    * animations התוכן עולה בעדינות כשהוא נכנס למסך, ותוכן שכבר במסך מוצג מיד.
    * בדפדפנים אחרים — פשוט גלוי, ללא אנימציה (תוכן קודם לכול).
    */
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .reveal {
-        animation: revealRise linear both;
-        animation-timeline: view();
-        animation-range: entry 2% cover 18%;
-        will-change: opacity, transform;
-      }
-      @keyframes revealRise {
-        from {
-          opacity: 0;
-          transform: translateY(14px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-    }
-  }
-
-  /* ===================================================================
-   * מוטיב אמנותי אחד (PHASE 14): „מנקודות למבנה” — חיפוש → בנייה.
-   * הכל CSS-first, דקורטיבי (aria-hidden), ומצב ברירת המחדל הוא המבנה
-   * הבנוי (resolved) כדי שלא ייעלם תוכן ללא JS/הידרציה או תחת reduced-motion.
-   * =================================================================== */
-  .art-motif {
-    display: block;
-    overflow: visible;
-  }
-  /* ברירת מחדל = מבנה יציב ובנוי: הקו מצויר, המבנה גלוי, ה„חיפוש” נמוג */
-  .motif-line {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 0;
-  }
-  .motif-structure {
-    opacity: 1;
-    transform-box: fill-box;
-    transform-origin: 50% 50%;
-  }
-  .motif-scatter {
+  /* חשיפה חוצת-דפדפנים (PHASE MOTION 1): התוכן גלוי כברירת מחדל. רק כאשר
+   * html.motion-js פעיל (JS חי, IntersectionObserver נתמך, ואין reduced-motion —
+   * נקבע ב-MotionRoot) הוא מוסתר-זמנית ונחשף ב-.is-visible כשה-Reveal נכנס
+   * למסך (IntersectionObserver ב-Reveal.tsx — עובד בכל מנוע, לא רק Chromium).
+   * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
+  .motion-js .reveal {
     opacity: 0;
+    transform: translateY(var(--motion-dist-md));
+    transition:
+      opacity var(--motion-reveal) var(--ease-settle),
+      transform var(--motion-reveal) var(--ease-settle);
+    will-change: opacity, transform;
+  }
+  .motion-js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
   }
 
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
@@ -460,12 +442,13 @@
     transform: scaleY(1);
   }
 
-  /* קישור עריכתי — תנועת חץ מרוסנת + קו תחתון עדין */
+  /* קישור עריכתי — תנועת חץ מרוסנת + קו תחתון עדין (PHASE MOTION 4: ~6px) */
   .edlink-arrow {
     transition: transform var(--motion-fast) var(--ease-standard);
   }
-  .group:hover .edlink-arrow {
-    transform: translateX(-2px);
+  .group:hover .edlink-arrow,
+  .group:focus-visible .edlink-arrow {
+    transform: translateX(-6px);
   }
 
   /* כלים מעשיים (/book) — משוב hover מרוסן: הנקודה גדֵלה מעט והשם
@@ -485,74 +468,8 @@
     }
   }
 
-  /* ===================================================================
-   * חשיפת טקסט מדורגת (StagedTextReveal) — „קריאה מבוקרת” מילה-אחר-מילה.
-   * ברירת מחדל: כל המילים גלויות (SSR / ללא JS / ללא IO / reduced-motion).
-   * רק כש-JS מחמש (is-armed) מסתירים, וכש-is-revealing נוסף — כל מילה
-   * נכנסת עם opacity + עלייה עדינה (6px), בהשהיה מדורגת (transition-delay).
-   * ה-transform שומר מקום ⇒ אין CLS. אין לולאה ואין cursor.
-   * =================================================================== */
-  .staged-word {
-    display: inline-block;
-  }
-  .staged-reveal.is-armed .staged-word {
-    opacity: 0;
-    transform: translateY(6px);
-    will-change: opacity, transform;
-  }
-  .staged-reveal.is-armed.is-revealing .staged-word {
-    opacity: 1;
-    transform: none;
-    transition:
-      opacity 300ms var(--ease-standard),
-      transform 300ms var(--ease-standard);
-    transition-delay: var(--staged-delay, 0ms);
-  }
-
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .motif-scatter {
-        animation: motifScatterOut linear both;
-        animation-timeline: view();
-        animation-range: entry 0% cover 34%;
-      }
-      .motif-structure {
-        animation: motifStructureIn linear both;
-        animation-timeline: view();
-        animation-range: entry 6% cover 48%;
-      }
-      .motif-line {
-        animation: motifDraw linear both;
-        animation-timeline: view();
-        animation-range: entry 16% cover 62%;
-      }
-      @keyframes motifScatterOut {
-        from {
-          opacity: 0.6;
-        }
-        to {
-          opacity: 0;
-        }
-      }
-      @keyframes motifStructureIn {
-        from {
-          opacity: 0.3;
-          transform: scale(0.94);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      @keyframes motifDraw {
-        from {
-          stroke-dashoffset: 1;
-        }
-        to {
-          stroke-dashoffset: 0;
-        }
-      }
-
       /* קו המסלול נמשך בכניסה לתצוגה (RTL: מהצד המתחיל—ימין) */
       .route-line {
         animation: routeDrawX linear both;
@@ -633,6 +550,164 @@
   }
 }
 
+/* PHASE MOTION 4 (C) — הטיה מונעת-סמן על הכריכה (±4° סביב זווית הבסיס).
+ * ה-vars נקבעים ב-BookTilt (דסקטופ + תנועה בלבד); כאן רק הטרנספורם.
+ * בתוך .book-tilt ההטיה מחליפה את יישור ה-hover הכללי (בלי „קפיצת” lift). */
+.book-tilt {
+  display: block;
+  width: 100%;
+}
+.book-tilt .book-cover__inner,
+.book-tilt .book-cover:hover .book-cover__inner {
+  transform: rotateY(calc(9deg + var(--tilt-y, 0deg)))
+    rotateX(calc(1.2deg + var(--tilt-x, 0deg)));
+  transition: transform 160ms var(--ease-standard);
+}
+
+/* PHASE MOTION 4 (B) — „מעבר דף” מרוסן ב-PeekInside. הדף היוצא מסתובב הצידה
+ * ונמוג מעל הדף הנכנס (כריכה מימין, RTL). 6–10° בלבד, ללא סימולטור עמודים.
+ * reduced-motion: השכבה היוצאת אינה מרונדרת (החלפה מיידית) + אין אנימציה. */
+.peek-stage {
+  position: relative;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .peek-page--enter {
+    animation: peekEnter 420ms var(--ease-settle) both;
+    transform-origin: right center;
+  }
+  .peek-page--leave {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: peekLeave 420ms var(--ease-settle) both;
+    transform-origin: right center;
+  }
+  @keyframes peekEnter {
+    from {
+      opacity: 0;
+      transform: perspective(1400px) rotateY(-7deg) translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes peekLeave {
+    from {
+      opacity: 1;
+      transform: perspective(1400px) rotateY(0deg) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: perspective(1400px) rotateY(9deg) translateY(-4px);
+    }
+  }
+}
+
+/* PHASE MOTION 4 (A) — מסלול התחנות: קו טרקוטה דרך 01/02/03 + סמן שנע.
+ * הבסיס (fallback/reduced) = מסלול מצויר וגלוי; תחת motion-js הוא נמשך בכניסה
+ * לתצוגה (is-inview) והתחנות מופעלות ברצף. הבחירה מזיזה את הסמן (--mx נמדד). */
+.station-route {
+  position: relative;
+  padding-block: 10px;
+}
+.station-route__line {
+  position: absolute;
+  inset-inline: 9%;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: var(--color-brand);
+  opacity: 0.55;
+  transform-origin: right center; /* RTL: נמשך מימין לשמאל */
+}
+.station-route__nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 9%;
+}
+.station-route__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.station-route__node::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-brand);
+  opacity: 0.55;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard);
+}
+.station-route__node[data-active="true"]::before {
+  background: var(--color-brand-muted);
+  opacity: 1;
+}
+.station-route__num {
+  font-family: var(--font-quote);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-foreground-muted);
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+.station-route__node[data-active="true"] .station-route__num {
+  color: var(--color-brand-hover);
+}
+.station-route__marker {
+  position: absolute;
+  top: 50%;
+  left: 0; /* עוגן פיזי; ההזזה ב--mx נמדדת מהשמאל הפיזי (בטוח ל-RTL) */
+  width: 13px;
+  height: 13px;
+  margin-top: -6.5px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-brand) 16%, transparent);
+  opacity: 0;
+  transform: translateX(calc(var(--mx, 0px) - 50%));
+  transition:
+    transform var(--motion-panel) var(--ease-settle),
+    opacity var(--motion-fast) var(--ease-standard);
+}
+.station-route.has-selection .station-route__marker {
+  opacity: 1;
+}
+/* משיכת המסלול בכניסה לתצוגה (motion-js בלבד; הבסיס נשאר מצויר). */
+.motion-js .station-route:not(.is-inview) .station-route__line {
+  transform: scaleX(0);
+}
+.motion-js .station-route.is-inview .station-route__line {
+  transform: scaleX(1);
+  transition: transform 680ms var(--ease-settle);
+}
+.motion-js .station-route:not(.is-inview) .station-route__node::before,
+.motion-js .station-route:not(.is-inview) .station-route__num {
+  opacity: 0;
+}
+.motion-js .station-route:not(.is-inview) .station-route__node::before {
+  transform: scale(0.5);
+}
+.motion-js .station-route.is-inview .station-route__node::before {
+  transition:
+    opacity 300ms var(--ease-settle),
+    transform 300ms var(--ease-settle),
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+  transition-delay: calc(var(--i) * 120ms); /* הפעלה כשהמסלול „מגיע” לתחנה */
+}
+.motion-js .station-route.is-inview .station-route__num {
+  transition: opacity 300ms var(--ease-settle);
+  transition-delay: calc(var(--i) * 120ms);
+}
+
 /* ===================================================================
  * פתיחת ה-Hero: „הרעש” של הדייטינג מתפזר והכריכה + המסר מקבלים נוכחות.
  *
@@ -649,82 +724,193 @@
   position: relative;
   container-type: inline-size;
 }
-.hero-thoughts {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  animation: heroThoughtsIn 1200ms ease-out both;
-}
 .hero-book {
   position: relative;
   z-index: 1;
 }
-.hero-thought {
-  position: absolute;
-  max-inline-size: 14ch;
-  margin: 0;
-  font-family: var(--font-quote);
-  font-style: italic;
-  font-size: clamp(0.82rem, 1.05vw, 0.98rem);
-  line-height: 1.3;
-  color: var(--color-foreground-muted);
-  opacity: 0.66;
-  text-wrap: balance;
+
+/* ====================================================================
+ * PHASE MOTION 2 — כניסת Hero קולנועית (on-load, CSS בלבד, חד-פעמית ~1.2s).
+ * הרצף: (1) קו טרקוטה נמשך → (2) הכותרת נחשפת שורה-אחר-שורה דרך מסכה →
+ * (3) „בונים אותה” מתיישבת → (4) הכריכה נכנסת (תזוזה/scale/סיבוב 3D/צל) →
+ * (5) עובדות/משנֶה נכנסים ברצף מבוקר. ה-CTA הראשי גלוי ולחיץ מיידית
+ * (transform בלבד, opacity נשארת 1, ללא pointer-events:none).
+ *
+ * הכול opacity/transform בלבד ⇒ אין CLS. ה-opacity של האלמנטים הגדולים
+ * (כריכה/כותרת) עולה מהר ⇒ אין פגיעה מהותית ב-LCP. ללא JS — האנימציה עדיין
+ * רצה (CSS טהור). תחת prefers-reduced-motion — הכלל הגלובלי מכווץ משך והשהיה,
+ * והמצב הסופי מוצג מיד (ראו הבלוק למטה: animation-delay:0).
+ * ==================================================================== */
+/* ====================================================================
+ * PHASE MOTION 3 — סצנת „חיפוש → בנייה” (SearchToBuildScene).
+ * מצב-הבסיס = ההרכב הסופי הבנוי והקריא (קו מצויר, טקסט מלא, קו-המשך) כדי
+ * שללא JS/GSAP/תמיכה או תחת reduced-motion הכל גלוי. GSAP קובע מצב-התחלה
+ * ומריץ את הכוריאוגרפיה. הפיזור מוסתר כברירת מחדל (inline opacity:0).
+ * ==================================================================== */
+.s2b__line {
+  stroke-dasharray: 1; /* עם pathLength=1: dashoffset 1=מוסתר, 0=מצויר (בסיס) */
 }
-.hero-thought--1 {
-  inset-block-start: 6%;
-  inset-inline-start: 1%;
-}
-.hero-thought--2 {
-  inset-block-start: 22%;
-  inset-inline-end: 1%;
-  text-align: end;
-}
-.hero-thought--3 {
-  inset-block-end: 8%;
-  inset-inline-start: 4%;
-}
-/* מסך צר: שתי מחשבות בלבד, בשוליים משני צדי הכריכה הקטנה */
-@container (max-width: 30rem) {
-  .hero-thought--3 {
-    display: none;
-  }
-  .hero-thought--1 {
-    inset-block-start: 9%;
-    inset-inline-start: 0;
-  }
-  .hero-thought--2 {
-    inset-block-end: 9%;
-    inset-block-start: auto;
-    inset-inline-end: 0;
+/* בדסקטופ עם תנועה — הבמה ממלאת מסך לרצף ה-pinned. תחת reduced-motion הבאנד
+ * בגובה תוכן רגיל (בלי 100vh ריק). */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .s2b__stage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
   }
 }
 
-.hero-refrain {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  text-align: center;
-  font-family: var(--font-quote);
-  line-height: 1.2;
+/* מבנה קבוע (חל בכל מצב, גם reduced-motion / ללא JS) — כדי שהאלמנטים קיימים
+ * וגלויים במצבם הסופי גם כשאין תנועה. רק ה-transform ההתחלתי והאנימציה
+ * מגודרים תחת no-preference. */
+.hero-rule {
+  display: block;
+  inline-size: clamp(2.5rem, 6vw, 4rem);
+  block-size: 2px;
+  border-radius: 2px;
+  background: var(--color-brand);
+  transform-origin: right center;
 }
-.hero-refrain__line {
-  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
-  font-weight: 600;
-  color: var(--color-foreground-muted);
+.hero-line {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.1em;
+  margin-block: -0.1em;
 }
-.hero-refrain__line--accent {
-  color: var(--color-brand-hover);
+.hero-line__in {
+  display: block;
+}
+.hero-build {
+  display: inline-block;
+  transform-origin: right bottom;
 }
 
-@keyframes heroThoughtsIn {
-  from {
+@media (prefers-reduced-motion: no-preference) {
+  /* (1) קו המסלול הפותח — נמשך מימין לשמאל (RTL). */
+  .hero-rule {
+    transform: scaleX(0);
+    animation: heroRuleDraw 480ms var(--ease-settle) both;
+  }
+  @keyframes heroRuleDraw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* (2) חשיפת כותרת שורה-אחר-שורה דרך מסכה (overflow) — וילון אמיתי.
+   * תזמון מזוקק: שורה 1 מתחילה כמעט מיד (70ms); הכותרת המלאה קריאה עד ~720ms. */
+  .hero-line__in {
+    transform: translateY(115%);
+    animation: heroLineIn 450ms var(--ease-settle) both;
+  }
+  .hero-line--1 .hero-line__in {
+    animation-delay: 40ms;
+  }
+  .hero-line--2 .hero-line__in {
+    animation-delay: 200ms;
+  }
+  @keyframes heroLineIn {
+    to {
+      transform: translateY(0);
+    }
+  }
+  /* (3) „בונים אותה” — התיישבות/בנייה עדינה שרצה יחד עם החשיפה וממשיכה עד
+   * ~1.0s. scale בלבד על טקסט שכבר קריא ⇒ אינו מעכב קריאוּת. */
+  .hero-build {
+    animation: heroBuildSettle 780ms var(--ease-settle) 240ms both;
+  }
+  @keyframes heroBuildSettle {
+    0% {
+      transform: scale(0.97) translateY(1px);
+    }
+    62% {
+      transform: scale(1.006) translateY(0);
+    }
+    100% {
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* (5) עובדות/משנֶה — fade+rise עדין (טקסט לא-אינטראקטיבי). */
+  .hero-fade {
     opacity: 0;
+    transform: translateY(14px);
+    animation: heroFadeUp 460ms var(--ease-settle) both;
   }
-  to {
-    opacity: 1;
+  @keyframes heroFadeUp {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  /* ה-CTA וגוש הפעולה — transform בלבד (opacity נשארת 1) ⇒ גלוי ולחיץ מיידית. */
+  .hero-rise-soft {
+    transform: translateY(12px);
+    animation: heroRiseSoft 460ms var(--ease-settle) both;
+  }
+  @keyframes heroRiseSoft {
+    to {
+      transform: none;
+    }
+  }
+
+  /* (4) כניסת הכריכה — 40–60px, scale 0.88→1, סיבוב 3D מרוסן, opacity מוקדם ל-LCP. */
+  .hero-book {
+    transform-origin: center 62%;
+    animation: heroBookEnter 900ms var(--ease-settle) 220ms both;
+  }
+  @keyframes heroBookEnter {
+    0% {
+      opacity: 0;
+      transform: perspective(1100px) translateY(52px) scale(0.88) rotateY(8deg)
+        rotateX(2.5deg);
+    }
+    32% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(1100px) translateY(0) scale(1) rotateY(0deg)
+        rotateX(0deg);
+    }
+  }
+  /* צל הכריכה מתיישב יחד עם הנחיתה. המרכוז (-translate-x-1/2) מגיע מ-Tailwind
+   * דרך תכונת ה-translate; כאן מנפישים רק transform (scaleX) ו-opacity כדי
+   * לא לשכפל את היסט המרכוז. */
+  .hero-book__shadow {
+    transform-origin: center;
+    animation: heroShadowSettle 640ms var(--ease-settle) 480ms both;
+  }
+  @keyframes heroShadowSettle {
+    from {
+      opacity: 0;
+      transform: scaleX(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
+  /* (9) מובייל — גרסה מפושטת: ללא סיבוב 3D (מונע גלישה), מרחק קטן, מהיר יותר. */
+  @media (max-width: 767px) {
+    .hero-book {
+      animation-duration: 720ms;
+      animation-delay: 160ms;
+    }
+    @keyframes heroBookEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(26px) scale(0.94);
+      }
+      40% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
   }
 }
 
@@ -911,111 +1097,46 @@ details[open] .faq-answer {
   }
 }
 
-/* שדרוג: אנימציות מונָעות-גלילה (נתמך ב-Chromium; שאר הדפדפנים מקבלים
- * את המצב הבסיסי הסטטי לעיל). הטווח קצר — רק ~42vh הראשונים — כדי שלא
- * תהיה תנועה בזמן קריאת תוכן ארוך בהמשך העמוד. */
-@supports (animation-timeline: scroll()) {
-  .hero-thought {
-    animation: heroThoughtOut linear both;
-    animation-timeline: scroll(root);
-    animation-range: 0 42vh;
-  }
-  .hero-thought--1 {
-    --dx: -14px;
-    --dy: -12px;
-  }
-  .hero-thought--2 {
-    --dx: 15px;
-    --dy: -8px;
-  }
-  .hero-thought--3 {
-    --dx: -12px;
-    --dy: 14px;
-  }
-  @keyframes heroThoughtOut {
-    0%,
-    14% {
-      opacity: 0.66;
-      transform: none;
-      filter: blur(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translate(var(--dx, 0), var(--dy, -10px));
-      filter: blur(3px);
-    }
-  }
-
-  .hero-book {
-    animation: heroBookRise linear both;
-    animation-timeline: scroll(root);
-    animation-range: 0 42vh;
-    transform-origin: center 60%;
-  }
-  @keyframes heroBookRise {
-    from {
-      transform: scale(0.975);
-      opacity: 0.94;
-    }
-    to {
-      transform: none;
-      opacity: 1;
-    }
-  }
-
-  .hero-refrain {
-    animation: heroRefrainIn linear both;
-    animation-timeline: scroll(root);
-    animation-range: 6vh 42vh;
-  }
-  @keyframes heroRefrainIn {
-    from {
-      opacity: 0.45;
-      transform: translateY(5px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-}
+/* (heroBookRise הישן — כניסה חלשה מונעת-גלילה — הוסר ב-PHASE MOTION 2 לטובת
+ * כניסת ה-on-load הקולנועית שלמעלה, כדי שלא יתנגשו על אותו .hero-book.) */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0s !important; /* אין השהיית כניסה — המצב הסופי מיידי */
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
   .reveal {
     opacity: 1 !important;
     transform: none !important;
   }
+  /* כניסת ה-Hero (PHASE MOTION 2) — מצב סופי מיידי, ללא תנועה. */
+  .hero-line__in,
+  .hero-fade,
+  .hero-rise-soft,
+  .hero-build,
+  .hero-rule,
+  .hero-book__shadow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .hero-rule {
+    transform: scaleX(1) !important;
+  }
   .book-cover:hover .book-cover__inner {
     transform: rotateY(9deg) rotateX(1.2deg);
   }
   /* Hero: ללא תנועה — מצב סופי קריא, כל התוכן וההיררכיה נשמרים */
-  .hero-thoughts {
-    animation: none !important;
-    opacity: 1;
-  }
-  .hero-thought {
-    animation: none !important;
-    opacity: 0.66;
-    transform: none;
-    filter: none;
-  }
   .hero-book {
     animation: none !important;
     transform: none;
     opacity: 1;
-  }
-  .hero-refrain {
-    animation: none !important;
-    opacity: 1;
-    transform: none;
   }
 }
 
@@ -1172,6 +1293,17 @@ details[open] .faq-answer {
     padding: 2.5rem 3rem 3.5rem;
   }
 }
+/* עמוד-שער זעיר: העטיפה בפתח הקורא, מיושרת ל-inline-start כמו הכותרת (עוגן
+   יעד למעבר „כניסה לטעימה”). מרוסן — אינו דוחק את הקריאה. */
+.reader-cover {
+  width: 88px;
+  margin-block-end: 1.35rem;
+}
+@media (min-width: 640px) {
+  .reader-cover {
+    width: 100px;
+  }
+}
 .reader-title {
   font-family: var(--font-quote);
   font-weight: 700;
@@ -1247,6 +1379,76 @@ details[open] .faq-answer {
 }
 .reader-cta {
   margin-top: 1.8em;
+}
+
+/* ===== „דיו חי” — סמן קריאה בטרקוטה + הדגשת משפט-מפתח (PHASE 4B) =====
+   מצב הבסיס (ללא JS / reduced-motion) הוא הסופי והקריא: הסמן מלא, משפט-המפתח
+   מודגש. עם .motion-js נקבע מצב-פתיחה (סמן לא-משוך, הדגשה כבויה) שנחשף כאשר
+   הקטע נכנס לתצוגה (.is-reading). הטקסט תמיד ניתן לבחירה ולהקראה. */
+.living-ink {
+  position: relative;
+  padding-inline-start: 1.15rem;
+}
+.living-ink__marker {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.4em;
+  bottom: 0.4em;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--reader-accent);
+  transform-origin: top;
+}
+.ink-key {
+  color: var(--reader-fg);
+  font-weight: 600;
+  box-shadow: inset 0 -0.4em 0 color-mix(in srgb, var(--reader-accent) 18%, transparent);
+}
+
+/* מצב-פתיחה (עד כניסה לתצוגה): הסמן לא-משוך וההדגשה כבויה. */
+.motion-js .living-ink:not(.is-reading) .living-ink__marker {
+  transform: scaleY(0);
+}
+.motion-js .living-ink:not(.is-reading) .ink-key {
+  color: var(--reader-fg-muted);
+  box-shadow: inset 0 -0.4em 0 transparent;
+}
+/* כניסה לתצוגה — משתמשים ב-animation (ולא transition) כדי שהמשיכה תיראה גם
+   כשהקטע כבר בתצוגה בטעינה: animation תמיד מתנגן מ-0% עם החלת ה-class. */
+.motion-js .living-ink.is-reading .living-ink__marker {
+  animation: ink-draw var(--motion-slow) var(--ease-settle) both;
+}
+.motion-js .living-ink.is-reading .ink-key {
+  animation: ink-emphasize var(--motion-reveal) var(--ease-standard) 340ms both;
+}
+@keyframes ink-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes ink-emphasize {
+  from {
+    color: var(--reader-fg-muted);
+    box-shadow: inset 0 -0.4em 0 transparent;
+  }
+  to {
+    color: var(--reader-fg);
+    box-shadow: inset 0 -0.4em 0 color-mix(in srgb, var(--reader-accent) 18%, transparent);
+  }
+}
+
+/* חיזוק עדין ל-CTA אחרי שהקטע נקרא — „הגעה” רכה, בלי להסתיר את הכפתור. */
+.motion-js .reader-cta a {
+  transition:
+    transform var(--motion-panel) var(--ease-settle),
+    opacity var(--motion-panel) var(--ease-standard);
+}
+.motion-js .reader-cta:not(.is-ready) a {
+  transform: translateY(6px);
+  opacity: 0.92;
 }
 
 /* ===== מפת הספר החיה ===== */
@@ -1331,6 +1533,53 @@ details[open] .faq-answer {
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ===== מעבר „כניסה לספר” (PHASE 4B) =====
+   שם-המעבר המשותף (book-cover): המקור ([data-vt-book-source]) מסומן בזמן ריצה
+   כשהוא נראה בתצוגה; היעד ([data-vt-book-dest]) מסומן דרך CSS אך ורק בניווט-
+   morph (html.vt-book-morph), כך שאין „יציאה” מקרית כשליעד אין עטיפה, והצילום
+   של עמוד היעד נתפס נכון בלי תלות בתזמון JS. */
+html.vt-book-morph [data-vt-book-dest] {
+  view-transition-name: book-cover;
+}
+
+/* מסכת-דף Ivory מרוסנת: העמוד הנכנס נחשף מלמעלה עם קצה רך, מעל גוון Ivory.
+   מתוחם ל-html.vt-book-nav בלבד כדי לא להשפיע על מעברי View Transitions אחרים
+   (למשל החלפת מצב-קריאה בהיר/כהה בעמוד ההצצה). */
+html.vt-book-nav::view-transition-old(root) {
+  animation: vt-book-out 260ms var(--ease-standard) both;
+}
+html.vt-book-nav::view-transition-new(root) {
+  animation: vt-book-in var(--motion-reveal) var(--ease-settle) both;
+}
+html.vt-book-nav::view-transition-group(book-cover) {
+  animation-duration: var(--motion-reveal);
+  animation-timing-function: var(--ease-settle);
+}
+
+@keyframes vt-book-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.55;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+@keyframes vt-book-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.vt-book-nav::view-transition-old(root),
+  html.vt-book-nav::view-transition-new(root),
+  html.vt-book-nav::view-transition-group(book-cover) {
     animation: none !important;
   }
 }
