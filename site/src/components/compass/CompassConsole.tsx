@@ -11,6 +11,7 @@ import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
 import { CompassAnswer } from "@/components/compass/CompassAnswer";
 import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
+import { WAITLIST_JOINED_KEY } from "@/components/waitlist/WaitlistForm";
 
 /** שאלות פתיחה אמיתיות — שאלת ההתלבטות של כל אחת משלוש התחנות הקיימות. */
 const STARTER_QUESTIONS = stationOrder.map((id) => stations[id].question);
@@ -46,7 +47,18 @@ export function CompassConsole({
   const [company, setCompany] = React.useState(""); // honeypot
   const [answer, setAnswer] = React.useState<AnswerState>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  const [joined, setJoined] = React.useState(false);
   const formRef = React.useRef<HTMLFormElement>(null);
+
+  // האם המשתמש כבר נרשם לעדכון (דגל מקומי) — כדי לא לבקש אימייל שוב אחרי תשובה.
+  React.useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- קריאה חד-פעמית מ-localStorage אחרי mount
+      setJoined(localStorage.getItem(WAITLIST_JOINED_KEY) === "1");
+    } catch {
+      /* אחסון חסום — נשארים במצב „לא נרשם” */
+    }
+  }, []);
 
   // טעינת מצב זמינות + כמה שאלות נותרו (בלי לצרוך).
   React.useEffect(() => {
@@ -320,21 +332,36 @@ export function CompassConsole({
                 {formatCitation(answer.citation)}
               </p>
             ) : null}
-            {/* המרה אחרי תשובה מוצלחת אמיתית: פעולה ראשית — הצטרפות לרשימת
-                ההמתנה (הרשמה מוצלחת פותחת את /preview); פעולה משנית קלה —
-                קריאת טעימה חינם, בלי אימייל. הטעימה ממצבת את המצפן כהצצה לספר. */}
+            {/* מסגור אחרי תשובה: „זו רק הצצה…” ואז קריאה לפרק הטעימה. אם כבר
+                נרשמו — לא מבקשים אימייל שוב; מציגים את קריאת הטעימה כפעולה ראשית. */}
             <div className="mt-7 border-t border-border pt-6">
-              <WaitlistCta source="compass" align="start" />
-              <Link
-                href={compass.cta.sampleHref}
-                className="group mt-4 inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                {compass.cta.sampleLabel}
-                <ArrowLeft
-                  className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                  aria-hidden="true"
-                />
-              </Link>
+              <p className="text-[15px] leading-relaxed text-foreground-muted">
+                {compass.afterAnswer}
+              </p>
+              {joined ? (
+                <div className="mt-4">
+                  <Button asChild size="lg">
+                    <Link href={compass.cta.sampleHref}>
+                      {compass.cta.readSampleLabel}
+                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <WaitlistCta source="compass" align="start" />
+                  <Link
+                    href={compass.cta.sampleHref}
+                    className="group mt-4 inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    {compass.cta.readSampleLabel}
+                    <ArrowLeft
+                      className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </div>
+              )}
             </div>
           </article>
         ) : answer?.kind === "refused" ? (

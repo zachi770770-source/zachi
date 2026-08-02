@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import type { WaitlistSource } from "@/lib/validation/waitlist";
@@ -18,8 +17,8 @@ export const CONVERSION_CTA_LABEL = "קבלו טעימה ועדכון כשהספ
  * בלחיצה נחשף טופס inline קומפקטי (אימייל + הסכמה + שליחה) המשתמש ב-WaitlistForm
  * הקיים, ב-API, בוולידציה ובטיפול השגיאות הקיימים — ללא מערכת הרשמה מקבילה.
  *
- * אחרי הרשמה מוצלחת אמיתית בלבד: פותחים את /preview (נתיב מועדף, לא שער חסום —
- * „טעימה” בתפריט נשארת פתוחה לכולם). בכשל אימות/שרת אין ניווט.
+ * אחרי הרשמה מוצלחת אמיתית: WaitlistForm מציג מצב-הצלחה עם „לקריאת הטעימה”
+ * ושיתוף (ללא ניווט אוטומטי). בכשל אימות/שרת אין ניווט.
  *
  * נגישות: מיקוד עובר לשדה האימייל בעת החשיפה (autoFocus), והכרזות ההצלחה/שגיאה
  * החיות מגיעות מ-WaitlistForm (aria-live).
@@ -36,22 +35,15 @@ export function WaitlistCta({
   openEvent?: AnalyticsEventName;
   align?: "start" | "center";
   className?: string;
-  /** מצב inline (Hero): מציג את טופס ההרשמה הקומפקטי ישירות, ללא כפתור-חושף.
-      אותה לוגיקה, אותו API, ואותו נתיב הצלחה (פתיחת /preview). */
+  /** מצב inline (Hero): מציג את טופס ההרשמה הקומפקטי ישירות, ללא כפתור-חושף. */
   inline?: boolean;
 }) {
-  const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
   const handleOpen = React.useCallback(() => {
     setOpen(true);
     if (openEvent) trackEvent(openEvent);
   }, [openEvent]);
-
-  const handleSuccess = React.useCallback(() => {
-    trackEvent("preview_open_after_signup", { source });
-    router.push("/preview");
-  }, [router, source]);
 
   const alignClass =
     align === "center" ? "items-center text-center" : "items-start text-start";
@@ -60,7 +52,7 @@ export function WaitlistCta({
   if (inline) {
     return (
       <div className={`w-full${className ? ` ${className}` : ""}`}>
-        <WaitlistForm source={source} compact onSuccess={handleSuccess} />
+        <WaitlistForm source={source} compact />
       </div>
     );
   }
@@ -79,10 +71,10 @@ export function WaitlistCta({
             {CONVERSION_CTA_LABEL}
           </p>
           <p className="mt-1 text-[14px] leading-relaxed text-foreground-muted">
-            השאירו אימייל — נפתח לכם עכשיו את הטעימה, ונעדכן כשהספר ייצא לרכישה.
+            השאירו אימייל — נעדכן אתכם כשהספר ייצא, ותוכלו לקרוא את הטעימה מיד.
           </p>
           <div className="mt-4">
-            <WaitlistForm source={source} autoFocus onSuccess={handleSuccess} />
+            <WaitlistForm source={source} autoFocus />
           </div>
         </div>
       ) : (

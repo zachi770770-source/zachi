@@ -1,9 +1,9 @@
 import { test, expect, type Page } from "./fixtures";
 
 /**
- * PHASE 16 — נתיב ההמרה. פעולת המרה דומיננטית אחת ואחידה („קבלו טעימה ועדכון…”)
- * שנפתחת לטופס inline; הרשמה מוצלחת אמיתית פותחת את /preview; כשל אימות/שרת
- * אינו מנווט; /preview נשארת נגישה ישירות לכולם; ורק חוויית תחנות אחת קיימת.
+ * נתיב ההמרה. פעולת המרה דומיננטית אחת; הרשמה מוצלחת מציגה מצב-הצלחה עם
+ * „לקריאת הטעימה” ושיתוף (ללא ניווט אוטומטי); כשל אימות/שרת אינו מנווט;
+ * /preview נשארת נגישה ישירות לכולם; ורק חוויית תחנות אחת קיימת.
  */
 
 const CTA = "קבלו טעימה ועדכון כשהספר יוצא";
@@ -24,13 +24,16 @@ async function fillHeroInlineForm(page: Page, { consent }: { consent: boolean })
   await hero.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
 }
 
-test("Hero: successful registration opens /preview", async ({ page }) => {
+test("Hero: successful registration shows success + read-sample (no auto-redirect)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
   await fillHeroInlineForm(page, { consent: true });
 
-  await expect(page).toHaveURL(/\/preview$/);
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  const hero = page.locator("main section").first();
+  await expect(hero.getByText(/נרשמת בהצלחה/)).toBeVisible();
+  await expect(hero.getByRole("link", { name: "לקריאת הטעימה" })).toBeVisible();
+  // נשארים בבית — אין ניווט אוטומטי; הטעימה נגישה דרך הכפתור.
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test("Hero: validation failure (no consent) does not navigate", async ({ page }) => {
@@ -72,7 +75,7 @@ test("only one station experience remains (no duplicate static station section)"
   await expect(page.locator("#stations")).toHaveCount(0);
 });
 
-test("PeekInside conversion CTA uses the same waitlist → /preview flow", async ({ page }) => {
+test("PeekInside conversion CTA shows the same success + read-sample state", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
   const peek = page.locator("#sample");
@@ -80,7 +83,8 @@ test("PeekInside conversion CTA uses the same waitlist → /preview flow", async
   await peek.getByRole("button", { name: CTA }).click();
   await fillConversionForm(page, { consent: true });
 
-  await expect(page).toHaveURL(/\/preview$/);
+  await expect(peek.getByText(/נרשמת בהצלחה/)).toBeVisible();
+  await expect(peek.getByRole("link", { name: "לקריאת הטעימה" })).toBeVisible();
 });
 
 test("Compass (pre-launch): no conversion CTA before an answer", async ({ page }) => {
