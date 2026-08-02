@@ -2,7 +2,7 @@ export const navLinks = [
   { href: "/#thesis", label: "הרעיון" },
   { href: "/book", label: "הספר" },
   { href: "/compass", label: "שאלו את הספר" },
-  { href: "/#sample", label: "טעימה" },
+  { href: "/preview", label: "טעימה" },
   { href: "/faq", label: "שאלות נפוצות" },
 ] as const;
 

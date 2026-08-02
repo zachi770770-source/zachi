@@ -17,7 +17,8 @@ import { bigIdea } from "@/content/book";
 export function ThesisMotifSection() {
   return (
     <section
-      className="relative overflow-hidden bg-secondary py-20 text-secondary-foreground sm:py-28"
+      id="thesis"
+      className="relative scroll-mt-24 overflow-hidden bg-secondary py-20 text-secondary-foreground sm:py-28"
       aria-labelledby="thesis-heading"
     >
       {/* עומק עדין: הילה כהה רכה שמוסיפה תלת-ממד לבאנד, ללא צבע חדש */}

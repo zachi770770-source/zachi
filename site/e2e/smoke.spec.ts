@@ -233,3 +233,13 @@ test("sitemap, robots and manifest are served correctly", async ({ request }) =>
   const manifestJson = await manifest.json();
   expect(manifestJson.dir).toBe("rtl");
 });
+
+test("homepage nav anchors are not dead (thesis target exists; no stale /#sample)", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  // „הרעיון” → /#thesis must have a real target on the shortened homepage.
+  expect(await page.locator("#thesis").count()).toBeGreaterThan(0);
+  // „טעימה” must not point at the removed #sample section anywhere.
+  expect(await page.locator("a[href='/#sample']").count()).toBe(0);
+});
