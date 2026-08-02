@@ -28,6 +28,7 @@ test("desktop top nav: every item is a real page and none uses a hash fragment",
   const map = await readNavMap(page);
   expect(Object.keys(map).length).toBeGreaterThanOrEqual(4);
 
+  const hrefs = Object.values(map);
   for (const [label, href] of Object.entries(map)) {
     // (2) אין fragment באף יעד גלוי בתפריט.
     expect(href, `menu item "${label}" must not contain '#'`).not.toContain("#");
@@ -36,13 +37,17 @@ test("desktop top nav: every item is a real page and none uses a hash fragment",
     expect(resp.status(), `menu item "${label}" → ${href}`).toBeLessThan(400);
   }
 
+  // (3) כל היעדים ייחודיים — אין שני פריטים לאותו עמוד.
+  expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(", ")}`).toBe(
+    hrefs.length
+  );
+
   // מיפוי היעדים הנדרש (לפי התוויות הקיימות).
+  expect(map["על המחבר"]).toBe("/author");
+  expect(map["הספר"]).toBe("/book");
+  expect(map["שאלו את הספר"]).toBe("/compass");
   expect(map["טעימה"]).toBe("/preview");
   expect(map["שאלות נפוצות"]).toBe("/faq");
-  // „הרעיון” ו/או „הספר” → /book.
-  for (const label of ["הרעיון", "הספר"]) {
-    if (map[label] !== undefined) expect(map[label]).toBe("/book");
-  }
 });
 
 test("mobile drawer uses the exact same routes as the desktop nav (no fragments)", async ({
