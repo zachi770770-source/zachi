@@ -3,20 +3,26 @@ import { test, expect } from "@playwright/test";
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
-  test("home: one primary CTA (sample) + a light secondary (find my path)", async ({ page }) => {
+  test("home Hero: one dominant conversion action + a light secondary (find my path)", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
-    // פעולה מרכזית אחת: לקריאת טעימה. הבקשה להירשם מרוכזת בסוף הטעימה.
-    const primary = page.getByRole("link", { name: "לקריאת טעימה מהספר" }).first();
-    await expect(primary).toBeVisible();
-    await expect(primary).toHaveAttribute("href", "/preview");
+    const heroSection = page.locator("main section").first();
 
-    // פעולה משנית קלה: למצוא את המסלול המתאים (התחנות), לא כפתור שווה-משקל.
-    const secondary = page.getByRole("link", { name: "למצוא את המסלול שלי" });
-    await expect(secondary).toHaveAttribute("href", "/#stations");
+    // פעולת המרה דומיננטית אחת בתוך ה-Hero: „קבלו טעימה ועדכון…”.
+    const dominant = heroSection.getByRole("button", {
+      name: "קבלו טעימה ועדכון כשהספר יוצא",
+    });
+    await expect(dominant).toBeVisible();
 
-    // אין כפתור רכישה פעיל במצב טרום-השקה.
+    // אין פעולה ראשית מתחרה: לא כפתור רכישה, ולא קישור „טעימה” ישיר ב-Hero.
     await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
+    await expect(
+      heroSection.getByRole("link", { name: "לקריאת טעימה מהספר" })
+    ).toHaveCount(0);
+
+    // פעולה משנית קלה: למצוא את המסלול המתאים (חוויית התחנות #where).
+    const secondary = page.getByRole("link", { name: "למצוא את המסלול שלי" });
+    await expect(secondary).toHaveAttribute("href", "/#where");
   });
 
   test("home newsletter section: the waitlist form still submits successfully", async ({ page }) => {
@@ -152,21 +158,25 @@ test.describe("Launch-readiness", () => {
     await expect(thesis).toContainText("דייטינג הוא חיפוש.");
     await expect(thesis).toContainText("אהבה היא בנייה.");
 
-    // ה-CTA הראשי (לקריאת טעימה) נשאר ברור ופעיל.
+    // פעולת ההמרה הראשית („קבלו טעימה ועדכון…”) נשארת ברורה ופעילה ב-Hero.
     await expect(
-      page.getByRole("link", { name: "לקריאת טעימה מהספר" }).first()
+      page.locator("main section").first().getByRole("button", {
+        name: "קבלו טעימה ועדכון כשהספר יוצא",
+      })
     ).toBeVisible();
   });
 
-  test("stations: home cards link to dedicated pages, which cross-link and CTA to the sample", async ({
+  test("stations: home experience links to dedicated pages, which cross-link and CTA to the sample", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
-    // כרטיס „לפני קשר” בעמוד הבית מוביל לדף הייעודי (ולא לעוגן פנימי).
-    await page
-      .getByRole("link", { name: /לפני קשר/ })
-      .first()
+    // חוויית התחנות היחידה (#where): בחירת „לפני קשר” חושפת קישור לדף הייעודי.
+    const where = page.locator("#where");
+    await where.scrollIntoViewIfNeeded();
+    await where.getByText("לפני קשר", { exact: true }).click();
+    await where
+      .getByRole("link", { name: /לתחנה המלאה: לפני קשר/ })
       .click();
     await expect(page).toHaveURL(/\/before-relationship$/);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("לפני קשר");

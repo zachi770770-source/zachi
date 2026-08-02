@@ -10,6 +10,7 @@ import { trackEvent } from "@/lib/analytics";
 import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
 import { CompassAnswer } from "@/components/compass/CompassAnswer";
+import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
 /** שאלות פתיחה אמיתיות — שאלת ההתלבטות של כל אחת משלוש התחנות הקיימות. */
 const STARTER_QUESTIONS = stationOrder.map((id) => stations[id].question);
@@ -26,24 +27,6 @@ type AnswerState =
 /** מעטפת כרטיס אחידה לכל מצבי התשובה — שומרת על שפת האתר (נייר, מסגרת, רדיוס). */
 const CARD_SHELL =
   "stuck-answer mt-6 rounded-lg border border-border bg-surface p-6 sm:p-8";
-
-/** קריאות לפעולה מתחת לתשובה — לספר/רשימת המתנה ולטעימה. */
-function AnswerActions({ ctaHref, ctaLabel }: { ctaHref: string; ctaLabel: string }) {
-  return (
-    <div className="mt-7 flex flex-col items-start gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
-      <Button asChild variant="outline">
-        <Link href={ctaHref}>{ctaLabel}</Link>
-      </Button>
-      <Link
-        href={compass.cta.sampleHref}
-        className="inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline"
-      >
-        {compass.cta.sampleLabel}
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-      </Link>
-    </div>
-  );
-}
 
 /**
  * ממשק „המצפן” — עמוד ספר עריכתי, לא dashboard. כל הקריאות עוברות בשרת
@@ -116,6 +99,7 @@ export function CompassConsole({
         } else if (data.status === "answered") {
           setAnswer({ kind: "answered", text: data.answer, citation: data.citation });
           setQuestion("");
+          trackEvent("compass_answer_success"); // רק על תשובה מוצלחת אמיתית
         } else if (data.status === "refused") {
           setAnswer({ kind: "refused", text: data.answer });
         } else if (data.status === "limit") {
@@ -336,7 +320,11 @@ export function CompassConsole({
                 {formatCitation(answer.citation)}
               </p>
             ) : null}
-            <AnswerActions ctaHref={ctaHref} ctaLabel={ctaLabel} />
+            {/* פעולת ההמרה האחידה — רק אחרי תשובה מוצלחת אמיתית (PHASE 16).
+                הרשמה מוצלחת פותחת את /preview. */}
+            <div className="mt-7 border-t border-border pt-6">
+              <WaitlistCta source="compass" align="start" />
+            </div>
           </article>
         ) : answer?.kind === "refused" ? (
           <article className={CARD_SHELL}>
@@ -350,7 +338,6 @@ export function CompassConsole({
           <article className={CARD_SHELL}>
             <p className="kicker">{compass.ui.limitEyebrow}</p>
             <p className="mt-4 text-[1.08rem] leading-[1.75] text-foreground">{answer.text}</p>
-            <AnswerActions ctaHref={ctaHref} ctaLabel={ctaLabel} />
           </article>
         ) : answer?.kind === "error" ? (
           <article className={CARD_SHELL} role="alert">

@@ -9,6 +9,9 @@ import {
   stationOrder,
   type Station,
 } from "@/content/stations";
+// המסגור המאחד של התחנות (הועבר לכאן כשה-StationsSection הכפול הוסר ב-PHASE 16;
+// טקסט קיים בלבד): „ספר אחד, מסע אחד” + „אהבה נבנית, לא רק נמצאת”.
+import { stations as stationsCopy } from "@/content/book";
 import { Container } from "@/components/shared/Container";
 
 const URL_PARAM = "station";
@@ -69,8 +72,8 @@ export function StationJourney() {
             איפה אתם נמצאים עכשיו?
           </h2>
           <p className="type-lead mt-4 text-foreground-muted">
-            שלוש נקודות פתיחה לאותו מסע. בחרו את זו שמדברת אליכם, ונראה מה הספר
-            מציע בדיוק שם.
+            {stationsCopy.intro} בחרו את התחנה שמדברת אליכם, ונראה מה הספר מציע
+            בדיוק שם.
           </p>
         </div>
 

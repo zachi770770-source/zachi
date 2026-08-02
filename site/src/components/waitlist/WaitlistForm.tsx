@@ -17,14 +17,32 @@ type Status = "idle" | "loading" | "success" | "error";
  * טופס רשימת המתנה נגיש: שדה אימייל יחיד, הסכמה חובה (לא מסומנת מראש),
  * honeypot נסתר, מצבי loading/success/error אמיתיים עם aria-live, ו-RTL מלא.
  * אינו שומר דבר בצד הלקוח.
+ *
+ * `autoFocus` ממקד את שדה האימייל בעת הרכבה (לגילוי inline מתוך WaitlistCta).
+ * `onSuccess` נקרא רק אחרי הרשמה מוצלחת אמיתית (אחרי הכרזת ההצלחה) — משמש את
+ * נתיב ההמרה של PHASE 16 כדי לפתוח את /preview. בכשל אימות/שרת הוא לא נקרא.
  */
-export function WaitlistForm({ source }: { source: WaitlistSource }) {
+export function WaitlistForm({
+  source,
+  autoFocus = false,
+  onSuccess,
+}: {
+  source: WaitlistSource;
+  autoFocus?: boolean;
+  onSuccess?: () => void;
+}) {
   const id = React.useId();
+  const emailRef = React.useRef<HTMLInputElement>(null);
   const [email, setEmail] = React.useState("");
   const [consent, setConsent] = React.useState(false);
   const [company, setCompany] = React.useState(""); // honeypot
   const [status, setStatus] = React.useState<Status>("idle");
   const [error, setError] = React.useState<string | null>(null);
+
+  // מיקוד שדה האימייל כשהטופס נחשף (ניהול מיקוד נגיש). פעם אחת בהרכבה.
+  React.useEffect(() => {
+    if (autoFocus) emailRef.current?.focus();
+  }, [autoFocus]);
 
   const onSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -51,15 +69,18 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
           return;
         }
         trackEvent("waitlist_signup", { source }); // ללא כתובת אימייל
+        trackEvent("waitlist_submit_success", { source }); // אירוע הצלחה אחיד (PHASE 16)
         // ייחוס מסלול הטעימה: הרשמה שהגיעה מסוף עמוד ההצצה.
         if (source === "preview") trackEvent("waitlist_from_preview");
         setStatus("success");
+        // נתיב ההמרה של PHASE 16: פתיחת /preview רק אחרי הצלחה אמיתית.
+        onSuccess?.();
       } catch {
         setStatus("error");
         setError("בעיית תקשורת. בדקו את החיבור ונסו שוב.");
       }
     },
-    [email, consent, company, source]
+    [email, consent, company, source, onSuccess]
   );
 
   if (status === "success") {
@@ -93,6 +114,7 @@ export function WaitlistForm({ source }: { source: WaitlistSource }) {
       <div>
         <Label htmlFor={`${id}-email`}>כתובת אימייל</Label>
         <Input
+          ref={emailRef}
           id={`${id}-email`}
           type="email"
           required

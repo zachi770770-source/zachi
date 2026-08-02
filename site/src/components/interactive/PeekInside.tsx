@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { ChevronRight, ChevronLeft, ArrowLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { preview, tools } from "@/content/book";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
-import { Button } from "@/components/ui/button";
+import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
 /** כלי-שער אמיתי מתוך הספר (src/content/book.ts) — לא ממציאים תוכן. */
 const SIGNATURE_TOOL =
@@ -224,13 +223,10 @@ export function PeekInside() {
           </div>
         </div>
 
-        <div className="mt-8 text-center">
-          <Button asChild size="lg" variant="outline">
-            <Link href="/preview">
-              {preview.ctaLabel}
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </Button>
+        {/* פעולת ההמרה האחידה — מיד אחרי ההצצה (PHASE 16). הרשמה מוצלחת
+            פותחת את /preview; „טעימה” בתפריט נשארת נגישה לכולם ישירות. */}
+        <div className="mt-8 flex justify-center">
+          <WaitlistCta source="sample" align="center" />
         </div>
       </Container>
     </section>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { CompassHeroCta } from "@/components/compass/CompassHeroCta";
+import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
 /**
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
@@ -53,15 +54,21 @@ export function Hero() {
                 {siteConfig.preLaunchPriceLabel}
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Button asChild size="lg" className="h-14 px-7 text-[17px]">
-                  <Link href={siteConfig.salesOpen ? "/book#purchase" : "/preview"}>
-                    {siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר"}
-                  </Link>
-                </Button>
+              {/* פעולת המרה דומיננטית אחת. טרום-השקה: „קבלו טעימה ועדכון…”
+                  שנפתחת לטופס inline ומובילה ל-/preview אחרי הרשמה מוצלחת.
+                  אחרי פתיחת המכירה: אותו מקום הופך לכפתור הרכישה. הפעולה
+                  המשנית („למצוא את המסלול שלי”) קלה ולא שוות-משקל. */}
+              <div className="flex w-full flex-col items-start gap-3">
+                {siteConfig.salesOpen ? (
+                  <Button asChild size="lg" className="h-14 px-7 text-[17px]">
+                    <Link href="/book#purchase">לרכישת הספר</Link>
+                  </Button>
+                ) : (
+                  <WaitlistCta source="hero" openEvent="hero_waitlist_open" />
+                )}
                 <Link
-                  href="/#stations"
-                  className="group inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  href="/#where"
+                  className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground-muted underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 >
                   למצוא את המסלול שלי
                   <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />

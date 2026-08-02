@@ -10,6 +10,7 @@ export const WAITLIST_SOURCES = [
   "homepage",
   "waitlist",
   "preview",
+  "compass",
 ] as const;
 
 export type WaitlistSource = (typeof WAITLIST_SOURCES)[number];

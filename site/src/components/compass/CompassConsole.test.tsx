@@ -15,6 +15,9 @@ import { CompassConsole } from "@/components/compass/CompassConsole";
  * חלק ממעבר המיקרו-אנימציה. הרשת מדומה כדי לשלוט בכל מצב.
  */
 
+// מצב התשובה המוצלחת מרנדר את WaitlistCta (useRouter) — ממקים את next/navigation.
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 type FetchImpl = (url: string, init?: RequestInit) => unknown;
 
 function mockFetch(impl: FetchImpl) {

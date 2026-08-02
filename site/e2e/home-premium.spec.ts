@@ -31,12 +31,13 @@ test("conversion journey: thesis anchor precedes the stage section on the homepa
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   await expect(page.locator("#thesis-heading")).toBeVisible();
-  await expect(page.locator("#stations")).toBeVisible();
+  // חוויית התחנות היחידה (PHASE 16): הבורר האינטראקטיבי #where.
+  await expect(page.locator("#where")).toBeVisible();
 
   // סדר ה-DOM: התזה (עוגן) לפני תחנת הקשר (זיהוי + ניתוב).
   const thesisBeforeStations = await page.evaluate(() => {
     const thesis = document.querySelector("#thesis-heading");
-    const stations = document.querySelector("#stations");
+    const stations = document.querySelector("#where");
     if (!thesis || !stations) return false;
     return !!(
       thesis.compareDocumentPosition(stations) &
