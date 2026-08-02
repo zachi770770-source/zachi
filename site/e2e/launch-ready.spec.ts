@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 const MOBILE = { width: 390, height: 844 };
 
@@ -8,9 +8,9 @@ test.describe("Launch-readiness", () => {
 
     const heroSection = page.locator("main section").first();
 
-    // פעולת המרה דומיננטית אחת (כפתור) בתוך ה-Hero: „קבלו טעימה ועדכון…”.
+    // פעולת המרה דומיננטית אחת (כפתור הרשמה של הטופס הקומפקטי): „עדכנו אותי…”.
     const dominant = heroSection.getByRole("button", {
-      name: "קבלו טעימה ועדכון כשהספר יוצא",
+      name: "עדכנו אותי כשהספר יוצא",
     });
     await expect(dominant).toBeVisible();
 
@@ -159,10 +159,10 @@ test.describe("Launch-readiness", () => {
     await expect(thesis).toContainText("דייטינג הוא חיפוש.");
     await expect(thesis).toContainText("אהבה היא בנייה.");
 
-    // פעולת ההמרה הראשית („קבלו טעימה ועדכון…”) נשארת ברורה ופעילה ב-Hero.
+    // פעולת ההמרה הראשית (טופס ההרשמה הקומפקטי, „עדכנו אותי…”) נשארת פעילה ב-Hero.
     await expect(
       page.locator("main section").first().getByRole("button", {
-        name: "קבלו טעימה ועדכון כשהספר יוצא",
+        name: "עדכנו אותי כשהספר יוצא",
       })
     ).toBeVisible();
   });

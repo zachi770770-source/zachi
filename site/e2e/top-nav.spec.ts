@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Locator } from "@playwright/test";
+import { test, expect, type Page, type Locator } from "./fixtures";
 
 /**
  * ניווט עליון (PHASE 15 correction) — פריטי התפריט הגלויים חייבים לנווט בין

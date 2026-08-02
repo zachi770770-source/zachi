@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 /**
  * שיפורים ממוקדים לעמוד הבית (מעל הרדיזיין המאושר): פס עובדות, טיזר מחבר
@@ -87,14 +87,20 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
     () => !document.body.hasAttribute("data-cookie-banner")
   );
 
-  // לאחר סגירת ההסכמה — הבועה חוזרת
+  // מיד אחרי ההסכמה, עדיין בראש העמוד: הבועה מוסתרת בכוונה כדי לא להתחרות
+  // בטופס ההרשמה שבשער בטעינה הראשונית.
+  expect(await fixedBubbleVisible()).toBe(false);
+
+  // גלילה מעבר לאזור השער חושפת את הבועה בעדינות.
+  await page.evaluate(() => window.scrollTo(0, window.innerHeight));
   await page.waitForFunction(() => {
     const btns = Array.from(
       document.querySelectorAll('button[aria-label="שאלו את הספר"]')
     );
     const fixed = btns.find((b) => getComputedStyle(b).position === "fixed");
     if (!fixed) return false;
-    return getComputedStyle(fixed).display !== "none";
+    const cs = getComputedStyle(fixed);
+    return cs.display !== "none" && parseFloat(cs.opacity || "1") > 0;
   });
   expect(await fixedBubbleVisible()).toBe(true);
 

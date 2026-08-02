@@ -8,7 +8,6 @@ import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
-import { CompassHeroCta } from "@/components/compass/CompassHeroCta";
 import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
 /**
@@ -85,7 +84,7 @@ export function Hero() {
                   המשנית („למצוא את המסלול שלי”) קלה ולא שוות-משקל.
                   hero-rise-soft: תזוזה בלבד (opacity=1) ⇒ ה-CTA גלוי ולחיץ מיידית. */}
               <div
-                className="hero-rise-soft flex w-full flex-col items-start gap-3"
+                className="hero-rise-soft flex w-full flex-col items-start gap-3.5"
                 style={{ animationDelay: "360ms" }}
               >
                 {siteConfig.salesOpen ? (
@@ -93,31 +92,31 @@ export function Hero() {
                     <Link href="/book#purchase">לרכישת הספר</Link>
                   </Button>
                 ) : (
-                  <WaitlistCta source="hero" openEvent="hero_waitlist_open" />
+                  // טרום-השקה: טופס הרשמה קומפקטי ישיר. כפתור „עדכנו אותי…”
+                  // הוא הפעולה הדומיננטית היחידה בשער. אין צורך באימייל לטעימה.
+                  <WaitlistCta source="hero" inline />
                 )}
-                {/* פעולות משנה שקטות. „לקריאת טעימה מהספר” מנתב ל-/preview דרך
-                    BookLink — ובלחיצה רגילה הכריכה בשער נמשכת אל עמוד ההצצה. */}
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                  <BookLink
-                    href="/preview"
-                    morphCover
-                    className="group inline-flex items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                  >
-                    לקריאת טעימה מהספר
-                    <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                  </BookLink>
-                  <Link
-                    href="/#where"
-                    className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground-muted underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                  >
-                    למצוא את המסלול שלי
-                    <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                  </Link>
-                </div>
-              </div>
 
-              {/* „שאלו את הספר” — CTA משני במובייל בלבד, נמוך מ-CTA הטעימה */}
-              <CompassHeroCta />
+                {/* פעולת משנה קלה: קריאת טעימה חינם (מפעילה את מעבר „כניסה
+                    לטעימה” — הכריכה בשער נמשכת אל עמוד ההצצה). אינה דורשת אימייל. */}
+                <BookLink
+                  href="/preview"
+                  morphCover
+                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  לקריאת טעימה מהספר
+                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
+                </BookLink>
+
+                {/* פעולה שלישונית, שקטה עוד יותר. */}
+                <Link
+                  href="/#where"
+                  className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  למצוא את המסלול שלי
+                  <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1" aria-hidden="true" />
+                </Link>
+              </div>
             </div>
           </div>
 

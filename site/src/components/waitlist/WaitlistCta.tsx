@@ -29,12 +29,16 @@ export function WaitlistCta({
   openEvent,
   align = "start",
   className,
+  inline = false,
 }: {
   source: WaitlistSource;
   /** אירוע אנליטיקה שנורה כשהטופס נחשף (למשל hero_waitlist_open ב-Hero). */
   openEvent?: AnalyticsEventName;
   align?: "start" | "center";
   className?: string;
+  /** מצב inline (Hero): מציג את טופס ההרשמה הקומפקטי ישירות, ללא כפתור-חושף.
+      אותה לוגיקה, אותו API, ואותו נתיב הצלחה (פתיחת /preview). */
+  inline?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -51,6 +55,15 @@ export function WaitlistCta({
 
   const alignClass =
     align === "center" ? "items-center text-center" : "items-start text-start";
+
+  // Hero: טופס קומפקטי ישיר — הכפתור „עדכנו אותי…” הוא הפעולה הדומיננטית.
+  if (inline) {
+    return (
+      <div className={`w-full${className ? ` ${className}` : ""}`}>
+        <WaitlistForm source={source} compact onSuccess={handleSuccess} />
+      </div>
+    );
+  }
 
   return (
     <div

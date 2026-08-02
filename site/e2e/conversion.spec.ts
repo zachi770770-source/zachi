@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "./fixtures";
 
 /**
  * PHASE 16 — נתיב ההמרה. פעולת המרה דומיננטית אחת ואחידה („קבלו טעימה ועדכון…”)
@@ -8,7 +8,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 const CTA = "קבלו טעימה ועדכון כשהספר יוצא";
 
-/** ממלא ושולח את טופס ההמרה שכבר נפתח בתוך קבוצת ה-role=group שלו. */
+/** ממלא ושולח את טופס ההמרה שכבר נפתח בתוך קבוצת ה-role=group שלו (Peek). */
 async function fillConversionForm(page: Page, { consent }: { consent: boolean }) {
   const group = page.getByRole("group", { name: CTA });
   await group.getByLabel("כתובת אימייל").fill("reader@example.com");
@@ -16,12 +16,18 @@ async function fillConversionForm(page: Page, { consent }: { consent: boolean })
   await group.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
 }
 
+/** טופס ההרשמה הקומפקטי שבשער מוצג ישירות (ללא כפתור-חושף). */
+async function fillHeroInlineForm(page: Page, { consent }: { consent: boolean }) {
+  const hero = page.locator("main section").first();
+  await hero.getByLabel("כתובת אימייל").fill("reader@example.com");
+  if (consent) await hero.getByRole("checkbox").click();
+  await hero.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+}
+
 test("Hero: successful registration opens /preview", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
-  const hero = page.locator("main section").first();
-  await hero.getByRole("button", { name: CTA }).click();
-  await fillConversionForm(page, { consent: true });
+  await fillHeroInlineForm(page, { consent: true });
 
   await expect(page).toHaveURL(/\/preview$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -30,10 +36,9 @@ test("Hero: successful registration opens /preview", async ({ page }) => {
 test("Hero: validation failure (no consent) does not navigate", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await page.locator("main section").first().getByRole("button", { name: CTA }).click();
-  await fillConversionForm(page, { consent: false });
+  await fillHeroInlineForm(page, { consent: false });
 
-  await expect(page.getByRole("group", { name: CTA }).getByRole("alert")).toBeVisible();
+  await expect(page.locator("main section").first().getByRole("alert")).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
 });
 
@@ -47,10 +52,9 @@ test("Hero: API failure does not navigate", async ({ page }) => {
   );
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await page.locator("main section").first().getByRole("button", { name: CTA }).click();
-  await fillConversionForm(page, { consent: true });
+  await fillHeroInlineForm(page, { consent: true });
 
-  await expect(page.getByRole("group", { name: CTA }).getByRole("alert")).toBeVisible();
+  await expect(page.locator("main section").first().getByRole("alert")).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
 });
 

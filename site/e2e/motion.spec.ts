@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 /**
  * מעבר המיקרו-אנימציה — כיסוי ממוקד. כל התנועה מבוססת-CSS ומצב ברירת המחדל

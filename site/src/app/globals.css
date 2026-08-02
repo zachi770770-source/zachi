@@ -433,29 +433,6 @@
     transform: none;
   }
 
-  /* ===================================================================
-   * מוטיב אמנותי אחד (PHASE 14): „מנקודות למבנה” — חיפוש → בנייה.
-   * הכל CSS-first, דקורטיבי (aria-hidden), ומצב ברירת המחדל הוא המבנה
-   * הבנוי (resolved) כדי שלא ייעלם תוכן ללא JS/הידרציה או תחת reduced-motion.
-   * =================================================================== */
-  .art-motif {
-    display: block;
-    overflow: visible;
-  }
-  /* ברירת מחדל = מבנה יציב ובנוי: הקו מצויר, המבנה גלוי, ה„חיפוש” נמוג */
-  .motif-line {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 0;
-  }
-  .motif-structure {
-    opacity: 1;
-    transform-box: fill-box;
-    transform-origin: 50% 50%;
-  }
-  .motif-scatter {
-    opacity: 0;
-  }
-
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
     transform-box: fill-box;
@@ -491,74 +468,8 @@
     }
   }
 
-  /* ===================================================================
-   * חשיפת טקסט מדורגת (StagedTextReveal) — „קריאה מבוקרת” מילה-אחר-מילה.
-   * ברירת מחדל: כל המילים גלויות (SSR / ללא JS / ללא IO / reduced-motion).
-   * רק כש-JS מחמש (is-armed) מסתירים, וכש-is-revealing נוסף — כל מילה
-   * נכנסת עם opacity + עלייה עדינה (6px), בהשהיה מדורגת (transition-delay).
-   * ה-transform שומר מקום ⇒ אין CLS. אין לולאה ואין cursor.
-   * =================================================================== */
-  .staged-word {
-    display: inline-block;
-  }
-  .staged-reveal.is-armed .staged-word {
-    opacity: 0;
-    transform: translateY(6px);
-    will-change: opacity, transform;
-  }
-  .staged-reveal.is-armed.is-revealing .staged-word {
-    opacity: 1;
-    transform: none;
-    transition:
-      opacity 300ms var(--ease-standard),
-      transform 300ms var(--ease-standard);
-    transition-delay: var(--staged-delay, 0ms);
-  }
-
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .motif-scatter {
-        animation: motifScatterOut linear both;
-        animation-timeline: view();
-        animation-range: entry 0% cover 34%;
-      }
-      .motif-structure {
-        animation: motifStructureIn linear both;
-        animation-timeline: view();
-        animation-range: entry 6% cover 48%;
-      }
-      .motif-line {
-        animation: motifDraw linear both;
-        animation-timeline: view();
-        animation-range: entry 16% cover 62%;
-      }
-      @keyframes motifScatterOut {
-        from {
-          opacity: 0.6;
-        }
-        to {
-          opacity: 0;
-        }
-      }
-      @keyframes motifStructureIn {
-        from {
-          opacity: 0.3;
-          transform: scale(0.94);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      @keyframes motifDraw {
-        from {
-          stroke-dashoffset: 1;
-        }
-        to {
-          stroke-dashoffset: 0;
-        }
-      }
-
       /* קו המסלול נמשך בכניסה לתצוגה (RTL: מהצד המתחיל—ימין) */
       .route-line {
         animation: routeDrawX linear both;

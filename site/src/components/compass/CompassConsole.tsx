@@ -320,10 +320,21 @@ export function CompassConsole({
                 {formatCitation(answer.citation)}
               </p>
             ) : null}
-            {/* פעולת ההמרה האחידה — רק אחרי תשובה מוצלחת אמיתית (PHASE 16).
-                הרשמה מוצלחת פותחת את /preview. */}
+            {/* המרה אחרי תשובה מוצלחת אמיתית: פעולה ראשית — הצטרפות לרשימת
+                ההמתנה (הרשמה מוצלחת פותחת את /preview); פעולה משנית קלה —
+                קריאת טעימה חינם, בלי אימייל. הטעימה ממצבת את המצפן כהצצה לספר. */}
             <div className="mt-7 border-t border-border pt-6">
               <WaitlistCta source="compass" align="start" />
+              <Link
+                href={compass.cta.sampleHref}
+                className="group mt-4 inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                {compass.cta.sampleLabel}
+                <ArrowLeft
+                  className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                  aria-hidden="true"
+                />
+              </Link>
             </div>
           </article>
         ) : answer?.kind === "refused" ? (
