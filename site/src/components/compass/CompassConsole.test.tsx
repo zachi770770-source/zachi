@@ -83,9 +83,8 @@ describe("CompassConsole — PHASE 15 starter questions", () => {
     // הופעל POST אחד עם השאלה של התחנה.
     const postCalls = fn.mock.calls.filter(([, init]) => init?.method === "POST");
     expect(postCalls).toHaveLength(1);
-    expect(JSON.parse(postCalls[0][1].body).question).toContain(
-      stations[first].question.slice(0, 12)
-    );
+    const body = JSON.parse(String(postCalls[0][1]?.body ?? "{}"));
+    expect(body.question).toContain(stations[first].question.slice(0, 12));
   });
 
   it("on a failed request shows an error and NO sample CTA", async () => {

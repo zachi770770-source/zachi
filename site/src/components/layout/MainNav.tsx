@@ -34,7 +34,7 @@ export function MainNav() {
           const isCompass = link.href === "/compass";
           return (
             <Link
-              key={link.href}
+              key={link.label}
               href={link.href}
               aria-current={active ? "page" : undefined}
               className={cn(

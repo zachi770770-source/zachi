@@ -1,8 +1,12 @@
+// ניווט עליון — פריטים גלויים חייבים לנווט בין עמודים אמיתיים בלבד (ללא
+// עוגני #). „הרעיון” ו„הספר” מובילים לעמוד הספר (/book, שם חיה גם התזה);
+// „טעימה” מובילה לעמוד ההצצה (/preview). קישור הדילוג #main-content מוחרג
+// ואינו חלק מכאן.
 export const navLinks = [
-  { href: "/#thesis", label: "הרעיון" },
+  { href: "/book", label: "הרעיון" },
   { href: "/book", label: "הספר" },
   { href: "/compass", label: "שאלו את הספר" },
-  { href: "/#sample", label: "טעימה" },
+  { href: "/preview", label: "טעימה" },
   { href: "/faq", label: "שאלות נפוצות" },
 ] as const;
 

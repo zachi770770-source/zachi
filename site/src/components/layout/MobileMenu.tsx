@@ -55,7 +55,7 @@ export function MobileMenu() {
               const isCompass = link.href === "/compass";
               return (
                 <Link
-                  key={link.href}
+                  key={link.label}
                   href={link.href}
                   onClick={() => setOpen(false)}
                   aria-current={active ? "page" : undefined}
