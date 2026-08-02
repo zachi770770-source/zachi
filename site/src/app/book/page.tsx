@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
@@ -6,6 +5,8 @@ import { bigIdea } from "@/content/book";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
+import { BookCover } from "@/components/shared/BookCover";
+import { BookLink } from "@/components/shared/BookLink";
 import { BehindSection } from "@/components/sections/BehindSection";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
@@ -41,6 +42,13 @@ export default function BookPage() {
       <header className="border-b border-border bg-surface-muted">
         <Container className="py-16 sm:py-20 lg:py-24">
           <Reveal className="mx-auto max-w-3xl text-center">
+            {/* עוגן המעבר „כניסה לספר”: העטיפה נמשכת לכאן מנקודת המקור בבית. */}
+            <div
+              data-vt-book-dest
+              className="mx-auto mb-7 w-[104px] sm:w-[116px]"
+            >
+              <BookCover />
+            </div>
             <span className="kicker justify-center">הספר לעומק</span>
             <h1 className="type-h1 mt-4">מה יש בספר, ואיך הוא עובד</h1>
             <p className="type-lead mt-6 text-foreground-muted">
@@ -50,7 +58,7 @@ export default function BookPage() {
             <p className="mx-auto mt-6 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted/90">
               {bigIdea.clarification}
             </p>
-            <Link
+            <BookLink
               href="/preview"
               className="group mt-7 inline-flex items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
@@ -59,7 +67,7 @@ export default function BookPage() {
                 className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
               />
-            </Link>
+            </BookLink>
           </Reveal>
         </Container>
       </header>

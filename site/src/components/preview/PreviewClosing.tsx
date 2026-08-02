@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
@@ -6,6 +5,7 @@ import { previewClosing } from "@/content/sample";
 import { waitlistPage } from "@/content/stations";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
+import { BookLink } from "@/components/shared/BookLink";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 
 /**
@@ -36,10 +36,10 @@ export function PreviewClosing() {
           {salesOpen ? (
             <div className="mt-8 flex justify-center">
               <Button asChild size="lg" className="w-full sm:w-auto">
-                <Link href="/book#purchase">
+                <BookLink href="/book#purchase">
                   לרכישת הספר
                   <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                </Link>
+                </BookLink>
               </Button>
             </div>
           ) : (
@@ -74,7 +74,7 @@ export function PreviewClosing() {
           )}
 
           <div className="mt-8 border-t border-border pt-6 text-center">
-            <Link
+            <BookLink
               href="/book"
               className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
@@ -83,7 +83,7 @@ export function PreviewClosing() {
                 className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
               />
-            </Link>
+            </BookLink>
           </div>
         </div>
       </Container>

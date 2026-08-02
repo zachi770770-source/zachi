@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
+import { BookLink } from "@/components/shared/BookLink";
 import { CompassHeroCta } from "@/components/compass/CompassHeroCta";
 import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
@@ -94,13 +95,25 @@ export function Hero() {
                 ) : (
                   <WaitlistCta source="hero" openEvent="hero_waitlist_open" />
                 )}
-                <Link
-                  href="/#where"
-                  className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground-muted underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                >
-                  למצוא את המסלול שלי
-                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                </Link>
+                {/* פעולות משנה שקטות. „לקריאת טעימה מהספר” מנתב ל-/preview דרך
+                    BookLink — ובלחיצה רגילה הכריכה בשער נמשכת אל עמוד ההצצה. */}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <BookLink
+                    href="/preview"
+                    morphCover
+                    className="group inline-flex items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    לקריאת טעימה מהספר
+                    <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
+                  </BookLink>
+                  <Link
+                    href="/#where"
+                    className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground-muted underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    למצוא את המסלול שלי
+                    <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
+                  </Link>
+                </div>
               </div>
 
               {/* „שאלו את הספר” — CTA משני במובייל בלבד, נמוך מ-CTA הטעימה */}
@@ -129,7 +142,12 @@ export function Hero() {
                   className="hero-book__shadow absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
                 />
                 <BookTilt className="w-full">
-                  <BookCover priority className="w-full" />
+                  {/* מקור המעבר „כניסה לטעימה”: הכריכה הגלויה בשער נמשכת אל
+                      עטיפת עמוד ההצצה. עוטף צמוד — כדי שהצילום יתפוס את הכריכה
+                      בלבד (ללא הצל שמאחוריה). */}
+                  <div data-vt-book-source className="w-full">
+                    <BookCover priority className="w-full" />
+                  </div>
                 </BookTilt>
               </div>
               {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,

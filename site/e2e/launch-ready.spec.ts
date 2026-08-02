@@ -3,24 +3,25 @@ import { test, expect } from "@playwright/test";
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
-  test("home Hero: one dominant conversion action + a light secondary (find my path)", async ({ page }) => {
+  test("home Hero: one dominant conversion action + light secondaries (sample, find my path)", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     const heroSection = page.locator("main section").first();
 
-    // פעולת המרה דומיננטית אחת בתוך ה-Hero: „קבלו טעימה ועדכון…”.
+    // פעולת המרה דומיננטית אחת (כפתור) בתוך ה-Hero: „קבלו טעימה ועדכון…”.
     const dominant = heroSection.getByRole("button", {
       name: "קבלו טעימה ועדכון כשהספר יוצא",
     });
     await expect(dominant).toBeVisible();
 
-    // אין פעולה ראשית מתחרה: לא כפתור רכישה, ולא קישור „טעימה” ישיר ב-Hero.
+    // אין כפתור רכישה דומיננטי מתחרה ב-Hero.
     await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
-    await expect(
-      heroSection.getByRole("link", { name: "לקריאת טעימה מהספר" })
-    ).toHaveCount(0);
 
-    // פעולה משנית קלה: למצוא את המסלול המתאים (חוויית התחנות #where).
+    // פעולות משנה קלות (קישורי טקסט, לא כפתורים): „לקריאת טעימה מהספר” → /preview
+    // (טריגר המעבר „כניסה לטעימה”, שמושך את כריכת השער אל עמוד ההצצה),
+    // ו„למצוא את המסלול שלי” → /#where.
+    const sample = heroSection.getByRole("link", { name: "לקריאת טעימה מהספר" });
+    await expect(sample).toHaveAttribute("href", "/preview");
     const secondary = page.getByRole("link", { name: "למצוא את המסלול שלי" });
     await expect(secondary).toHaveAttribute("href", "/#where");
   });
