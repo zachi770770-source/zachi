@@ -60,6 +60,14 @@
   --motion-fast: 220ms; /* כפתורים ואינטראקציות קטנות (180–260) */
   --motion-panel: 300ms; /* פאנלים ומעברים מקומיים (240–360) */
   --motion-reveal: 600ms; /* הופעת סקשן (450–700) */
+  /* PHASE MOTION 1 — הרחבת שפת התנועה: התיישבות רכה, מרחקים וסטגר משותפים.
+     כל התנועה מבוססת opacity/transform בלבד (ללא CLS). */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1); /* התיישבות/בנייה, ללא באונס */
+  --motion-slow: 900ms; /* פתיחי-על (Hero cinematic) */
+  --motion-dist-sm: 8px; /* מיקרו-תנועה (חיצים, hover) */
+  --motion-dist-md: 16px; /* הופעת סקשן */
+  --motion-dist-lg: 28px; /* כניסה מודגשת (כריכה/כותרת) */
+  --motion-stagger: 90ms; /* מרווח בין פריטים ברצף */
 }
 
 @theme inline {
@@ -407,25 +415,22 @@
    * animations התוכן עולה בעדינות כשהוא נכנס למסך, ותוכן שכבר במסך מוצג מיד.
    * בדפדפנים אחרים — פשוט גלוי, ללא אנימציה (תוכן קודם לכול).
    */
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .reveal {
-        animation: revealRise linear both;
-        animation-timeline: view();
-        animation-range: entry 2% cover 18%;
-        will-change: opacity, transform;
-      }
-      @keyframes revealRise {
-        from {
-          opacity: 0;
-          transform: translateY(14px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-    }
+  /* חשיפה חוצת-דפדפנים (PHASE MOTION 1): התוכן גלוי כברירת מחדל. רק כאשר
+   * html.motion-js פעיל (JS חי, IntersectionObserver נתמך, ואין reduced-motion —
+   * נקבע ב-MotionRoot) הוא מוסתר-זמנית ונחשף ב-.is-visible כשה-Reveal נכנס
+   * למסך (IntersectionObserver ב-Reveal.tsx — עובד בכל מנוע, לא רק Chromium).
+   * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
+  .motion-js .reveal {
+    opacity: 0;
+    transform: translateY(var(--motion-dist-md));
+    transition:
+      opacity var(--motion-reveal) var(--ease-settle),
+      transform var(--motion-reveal) var(--ease-settle);
+    will-change: opacity, transform;
+  }
+  .motion-js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
   }
 
   /* ===================================================================
@@ -649,83 +654,9 @@
   position: relative;
   container-type: inline-size;
 }
-.hero-thoughts {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  animation: heroThoughtsIn 1200ms ease-out both;
-}
 .hero-book {
   position: relative;
   z-index: 1;
-}
-.hero-thought {
-  position: absolute;
-  max-inline-size: 14ch;
-  margin: 0;
-  font-family: var(--font-quote);
-  font-style: italic;
-  font-size: clamp(0.82rem, 1.05vw, 0.98rem);
-  line-height: 1.3;
-  color: var(--color-foreground-muted);
-  opacity: 0.66;
-  text-wrap: balance;
-}
-.hero-thought--1 {
-  inset-block-start: 6%;
-  inset-inline-start: 1%;
-}
-.hero-thought--2 {
-  inset-block-start: 22%;
-  inset-inline-end: 1%;
-  text-align: end;
-}
-.hero-thought--3 {
-  inset-block-end: 8%;
-  inset-inline-start: 4%;
-}
-/* מסך צר: שתי מחשבות בלבד, בשוליים משני צדי הכריכה הקטנה */
-@container (max-width: 30rem) {
-  .hero-thought--3 {
-    display: none;
-  }
-  .hero-thought--1 {
-    inset-block-start: 9%;
-    inset-inline-start: 0;
-  }
-  .hero-thought--2 {
-    inset-block-end: 9%;
-    inset-block-start: auto;
-    inset-inline-end: 0;
-  }
-}
-
-.hero-refrain {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  text-align: center;
-  font-family: var(--font-quote);
-  line-height: 1.2;
-}
-.hero-refrain__line {
-  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
-  font-weight: 600;
-  color: var(--color-foreground-muted);
-}
-.hero-refrain__line--accent {
-  color: var(--color-brand-hover);
-}
-
-@keyframes heroThoughtsIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 /* מעבר קצר ועדין לכרטיס תשובת „איפה אתם נתקעים?” — opacity + translateY
@@ -915,37 +846,6 @@ details[open] .faq-answer {
  * את המצב הבסיסי הסטטי לעיל). הטווח קצר — רק ~42vh הראשונים — כדי שלא
  * תהיה תנועה בזמן קריאת תוכן ארוך בהמשך העמוד. */
 @supports (animation-timeline: scroll()) {
-  .hero-thought {
-    animation: heroThoughtOut linear both;
-    animation-timeline: scroll(root);
-    animation-range: 0 42vh;
-  }
-  .hero-thought--1 {
-    --dx: -14px;
-    --dy: -12px;
-  }
-  .hero-thought--2 {
-    --dx: 15px;
-    --dy: -8px;
-  }
-  .hero-thought--3 {
-    --dx: -12px;
-    --dy: 14px;
-  }
-  @keyframes heroThoughtOut {
-    0%,
-    14% {
-      opacity: 0.66;
-      transform: none;
-      filter: blur(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translate(var(--dx, 0), var(--dy, -10px));
-      filter: blur(3px);
-    }
-  }
-
   .hero-book {
     animation: heroBookRise linear both;
     animation-timeline: scroll(root);
@@ -960,22 +860,6 @@ details[open] .faq-answer {
     to {
       transform: none;
       opacity: 1;
-    }
-  }
-
-  .hero-refrain {
-    animation: heroRefrainIn linear both;
-    animation-timeline: scroll(root);
-    animation-range: 6vh 42vh;
-  }
-  @keyframes heroRefrainIn {
-    from {
-      opacity: 0.45;
-      transform: translateY(5px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
     }
   }
 }
@@ -997,25 +881,10 @@ details[open] .faq-answer {
     transform: rotateY(9deg) rotateX(1.2deg);
   }
   /* Hero: ללא תנועה — מצב סופי קריא, כל התוכן וההיררכיה נשמרים */
-  .hero-thoughts {
-    animation: none !important;
-    opacity: 1;
-  }
-  .hero-thought {
-    animation: none !important;
-    opacity: 0.66;
-    transform: none;
-    filter: none;
-  }
   .hero-book {
     animation: none !important;
     transform: none;
     opacity: 1;
-  }
-  .hero-refrain {
-    animation: none !important;
-    opacity: 1;
-    transform: none;
   }
 }
 
