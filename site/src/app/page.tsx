@@ -10,6 +10,9 @@ import { Testimonials } from "@/components/sections/Testimonials";
 import { CompassSignature } from "@/components/compass/CompassSignature";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
+import { StationJourney } from "@/components/interactive/StationJourney";
+import { PeekInside } from "@/components/interactive/PeekInside";
+import { StickyCta } from "@/components/interactive/StickyCta";
 import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
@@ -40,7 +43,9 @@ export default function HomePage() {
       <TrustStrip />
       <ThesisMotifSection />
       <StationsSection />
+      <StationJourney />
       <BookHubLink />
+      <PeekInside />
       <CompassSignature />
       <AuthorTeaser />
       <Testimonials />
@@ -49,6 +54,7 @@ export default function HomePage() {
         salesOpen={siteConfig.salesOpen}
         maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
       />
+      <StickyCta />
     </>
   );
 }

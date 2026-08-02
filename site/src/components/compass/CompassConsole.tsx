@@ -5,10 +5,14 @@ import Link from "next/link";
 import { Compass, Loader2, ArrowLeft, BookOpen, TriangleAlert } from "lucide-react";
 
 import { compass } from "@/content/compass";
+import { stations, stationOrder } from "@/content/stations";
 import { trackEvent } from "@/lib/analytics";
 import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
 import { CompassAnswer } from "@/components/compass/CompassAnswer";
+
+/** שאלות פתיחה אמיתיות — שאלת ההתלבטות של כל אחת משלוש התחנות הקיימות. */
+const STARTER_QUESTIONS = stationOrder.map((id) => stations[id].question);
 
 type Availability = "loading" | "ready" | "soon";
 
@@ -85,12 +89,14 @@ export function CompassConsole({
 
   const outOfQuestions = remaining !== null && remaining <= 0;
 
-  const onSubmit = React.useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const q = question.trim();
+  // זרימת השאילתה המשותפת — משמשת גם את שליחת הטופס וגם את שאלות הפתיחה.
+  // זהה בכל השאר (מכסה, סירוב, מגבלה, שגיאה); התוכן והלוגיקה בשרת ללא שינוי.
+  const runQuery = React.useCallback(
+    async (raw: string) => {
+      const q = raw.trim();
       if (q.length < 2 || submitting || outOfQuestions) return;
 
+      setQuestion(q);
       setSubmitting(true);
       setAnswer(null);
       trackEvent("compass_ask"); // אנונימי, ללא תוכן
@@ -123,7 +129,15 @@ export function CompassConsole({
         setSubmitting(false);
       }
     },
-    [question, company, submitting, outOfQuestions]
+    [company, submitting, outOfQuestions]
+  );
+
+  const onSubmit = React.useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      void runQuery(question);
+    },
+    [runQuery, question]
   );
 
   // שליחה במקלדת: Ctrl/Cmd+Enter (נגישות ונוחות ללא עכבר).
@@ -262,6 +276,33 @@ export function CompassConsole({
           {compass.ui.hint}
         </p>
       </form>
+
+      {/* שאלות פתיחה — עוזרות למי שלא בטוח מה לשאול. מפעילות את אותה זרימה
+          בדיוק (runQuery). מוצגות רק לפני תשובה, כשעדיין נותרו שאלות. */}
+      {!answer && !submitting && !outOfQuestions ? (
+        <div className="mt-5">
+          <p className="text-[14px] font-medium text-foreground-muted">
+            לא בטוחים מה לשאול? התחילו מאחת מאלה:
+          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {STARTER_QUESTIONS.map((q) => (
+              <li key={q}>
+                <button
+                  type="button"
+                  onClick={() => void runQuery(q)}
+                  className="group flex w-full items-start gap-2.5 rounded-lg border border-border-strong bg-surface px-4 py-3 text-start text-[15px] leading-relaxed text-foreground transition-colors hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  <Compass
+                    className="mt-0.5 h-4 w-4 shrink-0 text-brand"
+                    aria-hidden="true"
+                  />
+                  <span>{q}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {/* אזור התשובה — נקרא ע"י קורא מסך */}
       <div aria-live="polite">

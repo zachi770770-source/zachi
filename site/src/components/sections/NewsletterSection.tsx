@@ -3,6 +3,7 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
+import { TrustBar } from "@/components/sections/TrustBar";
 
 export function NewsletterSection() {
   if (!siteConfig.features.newsletter) return null;
@@ -44,6 +45,8 @@ export function NewsletterSection() {
               </Link>
               .
             </p>
+            {/* עובדות אמון בנקודת ההחלטה — מה מקבלים בפועל. */}
+            <TrustBar className="mt-6" />
           </div>
           <div className="w-full text-start">
             <WaitlistForm source="homepage" />
