@@ -8,14 +8,6 @@ import { test, expect, type Page } from "./fixtures";
 
 const CTA = "קבלו טעימה ועדכון כשהספר יוצא";
 
-/** ממלא ושולח את טופס ההמרה שכבר נפתח בתוך קבוצת ה-role=group שלו (Peek). */
-async function fillConversionForm(page: Page, { consent }: { consent: boolean }) {
-  const group = page.getByRole("group", { name: CTA });
-  await group.getByLabel("כתובת אימייל").fill("reader@example.com");
-  if (consent) await group.getByRole("checkbox").click();
-  await group.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
-}
-
 /** טופס ההרשמה הקומפקטי שבשער מוצג ישירות (ללא כפתור-חושף). */
 async function fillHeroInlineForm(page: Page, { consent }: { consent: boolean }) {
   const hero = page.locator("main section").first();
@@ -75,16 +67,27 @@ test("only one station experience remains (no duplicate static station section)"
   await expect(page.locator("#stations")).toHaveCount(0);
 });
 
-test("PeekInside conversion CTA shows the same success + read-sample state", async ({ page }) => {
+test("home sample teaser is a slim presence that links to /preview (peek moved off home)", async ({
+  page,
+}) => {
   await page.goto("/", { waitUntil: "networkidle" });
+  // ההצצה האינטראקטיבית (#sample) עברה ל-/preview; בבית נשארת נוכחות מצומצמת.
+  await expect(page.locator("#sample")).toHaveCount(0);
+  const teaser = page.locator("#sample-teaser");
+  await expect(teaser.getByRole("link", { name: "לקריאת הטעימה" })).toHaveAttribute(
+    "href",
+    "/preview"
+  );
+});
 
-  const peek = page.locator("#sample");
-  await peek.scrollIntoViewIfNeeded();
-  await peek.getByRole("button", { name: CTA }).click();
-  await fillConversionForm(page, { consent: true });
-
-  await expect(peek.getByText(/נרשמת בהצלחה/)).toBeVisible();
-  await expect(peek.getByRole("link", { name: "לקריאת הטעימה" })).toBeVisible();
+test("the interactive peek now lives on /preview, without a duplicate conversion form", async ({
+  page,
+}) => {
+  await page.goto("/preview", { waitUntil: "networkidle" });
+  // ההצצה קיימת ב-/preview (עוגן #sample), אך ללא טופס המרה כפול —
+  // PreviewClosing מחזיק את ההרשמה בסוף העמוד.
+  await expect(page.locator("#sample")).toHaveCount(1);
+  await expect(page.locator("#sample").getByRole("button", { name: CTA })).toHaveCount(0);
 });
 
 test("Compass (pre-launch): no conversion CTA before an answer", async ({ page }) => {

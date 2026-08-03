@@ -13,7 +13,7 @@ import { BookLink } from "@/components/shared/BookLink";
  * הספר. חשיפת Reveal עדינה בלבד (fade-up), ללא אנימציה חדשה. שפת Ink/Ivory/
  * Sage/Terracotta הקיימת.
  */
-export function ToolsBento() {
+export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
   const items = tools.items.slice(0, 6);
   // אינדקסים של התאים ה„מובילים” (רחבים + גוון Sage) — הראשון והאחרון.
   const feature = new Set([0, items.length - 1]);
@@ -66,14 +66,18 @@ export function ToolsBento() {
           })}
         </Reveal>
 
-        <Reveal className="mt-9 flex justify-center">
-          <Button asChild size="lg" variant="outline">
-            <BookLink href="/book">
-              לשיטה ולכלים המלאים בספר
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </BookLink>
-          </Button>
-        </Reveal>
+        {/* ה-CTA לעמוד הספר נחוץ רק בהקשר הבית (טעימה → קישור לעמוד המלא).
+            כשהבנטו מוצג בתוך /book עצמו זהו קישור-עצמי מיותר, ולכן מוסתר. */}
+        {!hideCta && (
+          <Reveal className="mt-9 flex justify-center">
+            <Button asChild size="lg" variant="outline">
+              <BookLink href="/book">
+                לשיטה ולכלים המלאים בספר
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </BookLink>
+            </Button>
+          </Reveal>
+        )}
       </Container>
     </section>
   );

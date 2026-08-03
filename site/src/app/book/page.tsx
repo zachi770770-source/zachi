@@ -11,6 +11,7 @@ import { BehindSection } from "@/components/sections/BehindSection";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
 import { MethodSection } from "@/components/sections/MethodSection";
+import { ToolsBento } from "@/components/sections/ToolsBento";
 import { InsideBookSection } from "@/components/sections/InsideBookSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
@@ -81,6 +82,9 @@ export default function BookPage() {
       <ThesisSection />
       <AudienceSection />
       <MethodSection />
+      {/* ששת הכלים המעשיים — הועברו לכאן מעמוד הבית. עוגן #tools משמש את
+          הטעימה בבית ואת ה-CTA של השיטה. ה-CTA לעמוד הספר מוסתר (קישור-עצמי). */}
+      <ToolsBento hideCta />
       <InsideBookSection />
       <OutcomesSection />
       <PurchaseSection />

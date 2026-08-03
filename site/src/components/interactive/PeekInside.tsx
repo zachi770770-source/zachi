@@ -30,7 +30,7 @@ const PANELS: { id: PanelId; label: string }[] = [
  * (חיצים RTL, Home/End), כפתורי הקודם/הבא גלויים, וב-מובייל גם החלקה (swipe).
  * מכבד prefers-reduced-motion (החלפת הפאנל היא opacity בלבד, מנוטרלת גלובלית).
  */
-export function PeekInside() {
+export function PeekInside({ showCta = true }: { showCta?: boolean } = {}) {
   const [index, setIndex] = React.useState(0);
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const touchX = React.useRef<number | null>(null);
@@ -273,10 +273,14 @@ export function PeekInside() {
         </div>
 
         {/* פעולת ההמרה האחידה — מיד אחרי ההצצה (PHASE 16). הרשמה מוצלחת
-            פותחת את /preview; „טעימה” בתפריט נשארת נגישה לכולם ישירות. */}
-        <div className="mt-8 flex justify-center">
-          <WaitlistCta source="sample" align="center" />
-        </div>
+            פותחת את /preview; „טעימה” בתפריט נשארת נגישה לכולם ישירות.
+            ב-/preview מוסתרת: PreviewClosing כבר מחזיק את טופס ההרשמה, ואין
+            צורך בשני טפסים באותו עמוד. */}
+        {showCta && (
+          <div className="mt-8 flex justify-center">
+            <WaitlistCta source="sample" align="center" />
+          </div>
+        )}
       </Container>
     </section>
   );
