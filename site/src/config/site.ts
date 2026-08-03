@@ -75,7 +75,7 @@ export const siteConfig = {
   },
 
   contact: {
-    email: "PLACEHOLDER-contact@example.com",
+    email: "zachi@zachi.co.il",
     phone: "",
   },
 
