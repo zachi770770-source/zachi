@@ -154,14 +154,19 @@ export function Hero() {
                   aria-hidden="true"
                   className="hero-book__shadow absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
                 />
-                <BookTilt className="w-full">
-                  {/* מקור המעבר „כניסה לטעימה”: הכריכה הגלויה בשער נמשכת אל
-                      עטיפת עמוד ההצצה. עוטף צמוד — כדי שהצילום יתפוס את הכריכה
-                      בלבד (ללא הצל שמאחוריה). */}
-                  <div data-vt-book-source className="w-full">
-                    <BookCover priority className="w-full" />
-                  </div>
-                </BookTilt>
+                {/* ריחוף/נשימה מתמשכים — הכריכה „חיה” גם ללא סמן (מובייל כלול).
+                    שכבה ייעודית לתנועה בלבד, כדי לא להתנגש בפרלקסה (הורה),
+                    בכניסה (figure) או בטילט (צאצא). מכבד reduced-motion. */}
+                <div className="hero-float w-full">
+                  <BookTilt className="w-full">
+                    {/* מקור המעבר „כניסה לטעימה”: הכריכה הגלויה בשער נמשכת אל
+                        עטיפת עמוד ההצצה. עוטף צמוד — כדי שהצילום יתפוס את הכריכה
+                        בלבד (ללא הצל שמאחוריה). */}
+                    <div data-vt-book-source className="w-full">
+                      <BookCover priority className="w-full" />
+                    </div>
+                  </BookTilt>
+                </div>
               </div>
               {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,
                   סימן-בסיס עדין מתחת לכריכה. דקורטיבי בלבד. המסר „חיפוש→בנייה”

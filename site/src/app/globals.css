@@ -425,15 +425,46 @@
    * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
   .motion-js .reveal {
     opacity: 0;
-    transform: translateY(var(--motion-dist-md));
+    transform: translateY(46px) scale(0.965);
     transition:
-      opacity var(--motion-reveal) var(--ease-settle),
-      transform var(--motion-reveal) var(--ease-settle);
+      opacity 640ms var(--ease-settle),
+      transform 760ms var(--ease-settle);
     will-change: opacity, transform;
   }
   .motion-js .reveal.is-visible {
     opacity: 1;
     transform: none;
+  }
+  /* וריאנטים מובחנים לכניסות סקשן — שכל מקטע נכנס אחרת (קצב/ריתמוס, לא
+     fade-up אחיד). מוחלפים דרך אותו .is-visible; ברירת מחדל גלוי ללא JS. */
+  .motion-js .reveal--zoom {
+    transform: scale(0.86);
+  }
+  .motion-js .reveal--start {
+    transform: translateX(64px) scale(0.98);
+  }
+  .motion-js .reveal--end {
+    transform: translateX(-64px) scale(0.98);
+  }
+  .motion-js .reveal--zoom.is-visible,
+  .motion-js .reveal--start.is-visible,
+  .motion-js .reveal--end.is-visible {
+    transform: none;
+  }
+  /* חשיפת-מסכה: הכותרת „נמשכת” מלמטה למעלה מאחורי מסכה (clip-path). גלויה
+     תמיד ללא JS; opacity נשארת 1 ⇒ אין הבהוב ניגודיות. */
+  .motion-js .reveal--mask {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 900ms var(--ease-settle);
+  }
+  .motion-js .reveal--mask.is-visible {
+    clip-path: inset(0 0 0 0);
+  }
+  /* מדרג ילדים: ילדי מקטע נכנסים בזה-אחר-זה (--i נקבע ב-JSX / מונה). */
+  .motion-js .reveal[data-stagger] {
+    transition-delay: calc(var(--i, 0) * 90ms);
   }
   /* גיבוי-על בלתי-תלוי-JS: אם משום-מה החשיפה לא סומנה (בקר נכשל, race נדיר),
      אף .reveal לא יישאר נסתר. ה-animation מתחיל רק אחרי 4s (forwards) ולכן אינו
@@ -480,6 +511,52 @@
     will-change: transform;
   }
 
+  /* הכריכה מרחפת ונושמת ברצף (עומק חי) — נראה תמיד, גם ללא סמן ובמובייל.
+     שכבה ייעודית: לא מתנגשת בפרלקסה/כניסה/טילט. transform בלבד ⇒ 60fps.
+     מתחיל אחרי כניסת הכריכה (delay) כדי לא להילחם באנימציית הנחיתה. */
+  .motion-js .hero-float {
+    animation: heroFloat 5.5s ease-in-out 1.15s infinite;
+    transform-origin: center 60%;
+  }
+  @keyframes heroFloat {
+    0% {
+      transform: translateY(0) rotate(0deg) perspective(900px) rotateY(0deg);
+    }
+    30% {
+      transform: translateY(-13px) rotate(-0.9deg) perspective(900px) rotateY(3deg);
+    }
+    65% {
+      transform: translateY(-20px) rotate(0.5deg) perspective(900px) rotateY(-2.5deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg) perspective(900px) rotateY(0deg);
+    }
+  }
+  /* ההילה „נושמת” בקצב איטי ומנוגד — נפח שמתרחב ומתכווץ מאחורי הכריכה. */
+  .motion-js .hero-depth-halo > div {
+    animation: heroHaloBreathe 7s ease-in-out infinite;
+  }
+  .motion-js .hero-depth-halo > div:last-child {
+    animation-delay: -3.5s;
+  }
+  @keyframes heroHaloBreathe {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.85;
+    }
+    50% {
+      transform: scale(1.12);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .motion-js .hero-float,
+    .motion-js .hero-depth-halo > div {
+      animation: none;
+    }
+  }
+
   /* ===================================================================
    * #6 „בניית משפט” — הדגשה למשפטים החזקים ביותר. בכניסה לתצוגה הטקסט „נבנה”
    * לפוקוס: ניגודיות עולה (opacity) + חשיפת מסכה (clip-path) מימין לשמאל (סדר
@@ -516,21 +593,41 @@
     inset-block: 0;
     inset-inline-end: 0;
     z-index: 30;
-    width: 2px;
+    width: 4px;
     pointer-events: none;
   }
   .build-spine__track {
     position: absolute;
     inset: 0;
-    background: color-mix(in oklab, var(--color-brand) 14%, transparent);
+    background: color-mix(in oklab, var(--color-brand) 16%, transparent);
   }
   .build-spine__fill {
     position: absolute;
     inset: 0;
-    background: var(--color-brand);
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-brand) 55%, transparent),
+      var(--color-brand)
+    );
     transform-origin: top center;
     transform: scaleY(var(--build-progress, 0));
     will-change: transform;
+    box-shadow: 0 0 10px color-mix(in oklab, var(--color-brand) 45%, transparent);
+  }
+  /* „ראש הבנייה” — נקודת אור טרקוטה שנעה לאורך הקצה עם התקדמות הקריאה,
+     והופכת את הפס לאלמנט נרטיבי מובחן ולא לקישוט כמעט-בלתי-נראה. */
+  .build-spine__head {
+    position: absolute;
+    inset-inline: -3px;
+    top: calc(var(--build-progress, 0) * 100%);
+    height: 10px;
+    border-radius: 9999px;
+    background: var(--color-brand);
+    box-shadow:
+      0 0 12px 2px color-mix(in oklab, var(--color-brand) 70%, transparent),
+      0 0 24px 4px color-mix(in oklab, var(--color-brand) 35%, transparent);
+    transform: translateY(-50%);
+    will-change: top;
   }
 
   /* #5 כרטיסי כלים פרימיום: אור נקודתי עוקב-סמן (רדיאלי, דרך --mx/--my
@@ -719,9 +816,12 @@
 @media (prefers-reduced-motion: no-preference) {
   /* #1 היפוך-דף בגרירה: הדף הנוכחי מסתובב בעקבות --drag (-1..1 מ-JS); ב-release
      snap חזרה ל-0 (או מעבר לדף הבא דרך peekEnter/peekLeave). */
+  /* גרירה = דף שנפתח: הדף נהפך סביב הכריכה (ימין ב-RTL) עד ~38° בעקבות הסמן,
+     עם perspective עמוקה ⇒ תחושת דף פיזי שמתרומם, לא לוח שמסתובב מעט. */
   .peek-stage {
-    transform: perspective(1400px) rotateY(calc(var(--drag, 0) * 15deg));
-    transition: transform 300ms var(--ease-settle);
+    transform-style: preserve-3d;
+    transform: perspective(1200px) rotateY(calc(var(--drag, 0) * 38deg));
+    transition: transform 360ms var(--ease-settle);
   }
   .peek-stage.peek-dragging {
     transition: none;
@@ -729,20 +829,30 @@
     user-select: none;
   }
   .peek-page--enter {
-    animation: peekEnter 420ms var(--ease-settle) both;
+    animation: peekEnter 560ms var(--ease-settle) both;
     transform-origin: right center;
+    transform-style: preserve-3d;
   }
   .peek-page--leave {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    animation: peekLeave 420ms var(--ease-settle) both;
+    z-index: 4;
+    animation: peekLeave 620ms var(--ease-settle) both;
     transform-origin: right center;
+    transform-style: preserve-3d;
+    /* הצללת „גב הדף” שמתחזקת ככל שהדף נהפך — קורא כדף אמיתי מתרומם */
+    background: var(--color-surface);
+    box-shadow: -14px 0 30px -12px rgba(34, 38, 43, 0.45);
   }
+  /* הדף הנכנס מגיע מאחור; הדף היוצא נהפך כמעט 100° סביב הכריכה — היפוך ספר */
   @keyframes peekEnter {
     from {
       opacity: 0;
-      transform: perspective(1400px) rotateY(-7deg) translateY(6px);
+      transform: perspective(1200px) rotateY(-22deg) translateY(10px) scale(0.985);
+    }
+    45% {
+      opacity: 1;
     }
     to {
       opacity: 1;
@@ -752,11 +862,13 @@
   @keyframes peekLeave {
     from {
       opacity: 1;
-      transform: perspective(1400px) rotateY(0deg) translateY(0);
+      transform: perspective(1200px) rotateY(0deg);
+      filter: brightness(1);
     }
     to {
       opacity: 0;
-      transform: perspective(1400px) rotateY(9deg) translateY(-4px);
+      transform: perspective(1200px) rotateY(96deg);
+      filter: brightness(0.82);
     }
   }
 }
@@ -822,20 +934,39 @@
   position: absolute;
   top: 50%;
   left: 0; /* עוגן פיזי; ההזזה ב--mx נמדדת מהשמאל הפיזי (בטוח ל-RTL) */
-  width: 13px;
-  height: 13px;
-  margin-top: -6.5px;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
   border-radius: 50%;
   background: var(--color-brand);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-brand) 16%, transparent);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--color-brand) 18%, transparent),
+    0 0 16px 3px color-mix(in srgb, var(--color-brand) 55%, transparent);
   opacity: 0;
   transform: translateX(calc(var(--mx, 0px) - 50%));
   transition:
-    transform var(--motion-panel) var(--ease-settle),
+    transform 620ms var(--ease-settle),
     opacity var(--motion-fast) var(--ease-standard);
 }
 .station-route.has-selection .station-route__marker {
   opacity: 1;
+}
+/* התחנה הנבחרת „פועמת” — מוקד ברור שהמסלול הגיע אליה */
+@media (prefers-reduced-motion: no-preference) {
+  .station-route__node[data-current="true"]::before {
+    animation: stationPulse 1.8s var(--ease-standard) infinite;
+  }
+  @keyframes stationPulse {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 40%, transparent);
+    }
+    50% {
+      transform: scale(1.25);
+      box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-brand) 0%, transparent);
+    }
+  }
 }
 /* משיכת המסלול בכניסה לתצוגה (motion-js בלבד; הבסיס נשאר מצויר). */
 .motion-js .station-route:not(.is-inview) .station-route__line {
@@ -877,6 +1008,27 @@
  *  - prefers-reduced-motion: כל התנועה מבוטלת; מוצג המצב הסופי הקריא.
  * כל האנימציות על opacity/transform/filter בלבד — אין CLS.
  * =================================================================== */
+/* שדה-צבע חי בבאנד ה-Sage — ההילות נסחפות ונושמות לאט (עומק רקע). */
+@media (prefers-reduced-motion: no-preference) {
+  .thesis-halos > div {
+    animation: thesisHaloDrift 16s ease-in-out infinite;
+    will-change: transform;
+  }
+  .thesis-halos > div:last-child {
+    animation-duration: 20s;
+    animation-delay: -6s;
+  }
+  @keyframes thesisHaloDrift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(4%, -3%, 0) scale(1.16);
+    }
+  }
+}
+
 .hero-stage {
   position: relative;
   container-type: inline-size;
@@ -1080,8 +1232,11 @@
 @keyframes stuckAnswerIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
-    clip-path: inset(0 0 0 22%);
+    transform: translateY(34px) scale(0.97);
+    clip-path: inset(0 0 0 42%);
+  }
+  60% {
+    opacity: 1;
   }
   to {
     opacity: 1;
@@ -1090,7 +1245,32 @@
   }
 }
 .stuck-answer {
-  animation: stuckAnswerIn 460ms var(--ease-settle) both;
+  animation: stuckAnswerIn 620ms var(--ease-settle) both;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* התוכן הפנימי „נבנה” בזה-אחר-זה כשמתחלפת תחנה — קריא כמסלול שנבנה מחדש */
+  .stuck-answer > * {
+    animation: stuckChildIn 520ms var(--ease-settle) both;
+  }
+  .stuck-answer > *:nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .stuck-answer > *:nth-child(3) {
+    animation-delay: 170ms;
+  }
+  .stuck-answer > *:nth-child(4) {
+    animation-delay: 250ms;
+  }
+  @keyframes stuckChildIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 /* #3 קו-המשך הנרטיב — מגשר בין סצנת „חיפוש→בנייה” למסלול התחנות. בסיס: גלוי
@@ -1138,6 +1318,50 @@
   stroke-width: 1;
   stroke-opacity: 0.16;
 }
+/* טבעת מקווקוות מסתובבת — תנועה מתמדת ועדינה שמסמנת „חי” */
+.living-compass__ring-sweep {
+  fill: none;
+  stroke: var(--color-brand);
+  stroke-width: 1.2;
+  stroke-opacity: 0.4;
+  stroke-dasharray: 6 10;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.living-compass__sweep {
+  stroke: var(--color-brand);
+  stroke-width: 1.4;
+  stroke-opacity: 0.5;
+  stroke-linecap: round;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .living-compass__ring-sweep {
+    animation: compassRingSpin 14s linear infinite;
+  }
+  .living-compass__sweep {
+    animation: compassSweep 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+}
+@keyframes compassRingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes compassSweep {
+  0% {
+    transform: rotate(0deg);
+    stroke-opacity: 0.5;
+  }
+  70% {
+    stroke-opacity: 0.5;
+  }
+  100% {
+    transform: rotate(360deg);
+    stroke-opacity: 0.5;
+  }
+}
 .living-compass__tick {
   stroke: var(--color-brand);
   stroke-width: 1.6;
@@ -1146,11 +1370,15 @@
 }
 .living-compass__needle {
   transform-origin: 50% 50%;
-  transition: transform 900ms cubic-bezier(0.34, 1.55, 0.5, 1); /* back-out = spring */
+  transition: transform 1000ms cubic-bezier(0.34, 1.7, 0.4, 1); /* spring מודגש */
 }
 @media (prefers-reduced-motion: reduce) {
   .living-compass__needle {
     transition: none;
+  }
+  .living-compass__ring-sweep,
+  .living-compass__sweep {
+    animation: none;
   }
 }
 .living-compass__north {

@@ -13,11 +13,11 @@ import * as React from "react";
  * no-JS ⇒ נסתר לגמרי, ללא השפעה על הפריסה.
  */
 export function BuildSpine() {
-  const fillRef = React.useRef<HTMLSpanElement>(null);
+  const rootRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    const fill = fillRef.current;
-    if (!fill) return;
+    const root = rootRef.current;
+    if (!root) return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     let raf = 0;
@@ -26,7 +26,8 @@ export function BuildSpine() {
       const doc = document.documentElement;
       const max = doc.scrollHeight - (window.innerHeight || doc.clientHeight);
       const p = max > 0 ? Math.min(1, Math.max(0, (window.scrollY || 0) / max)) : 0;
-      fill.style.setProperty("--build-progress", p.toFixed(4));
+      // מתפרסם על השורש כדי שגם המילוי וגם ה„ראש” הזוהר יקראו את אותו ערך.
+      root.style.setProperty("--build-progress", p.toFixed(4));
     };
     const onScroll = () => {
       if (!raf) raf = window.requestAnimationFrame(update);
@@ -42,9 +43,10 @@ export function BuildSpine() {
   }, []);
 
   return (
-    <div aria-hidden="true" className="build-spine">
+    <div ref={rootRef} aria-hidden="true" className="build-spine">
       <span className="build-spine__track" />
-      <span ref={fillRef} className="build-spine__fill" />
+      <span className="build-spine__fill" />
+      <span className="build-spine__head" />
     </div>
   );
 }

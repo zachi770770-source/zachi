@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
  * לכיוון „הצפון” של הספר (‎-38°, לעבר ה-CTA). דקורטיבי (aria-hidden). מכבד
  * prefers-reduced-motion (מחט סטטית בכיוון היעד, ללא spring). transform בלבד.
  */
-const REST = 34; // „מחפש”
-const FOUND = -38; // „מצא כיוון” (לעבר הפעולה)
-const HOVER = -52;
+const REST = 42; // „מחפש” (זווית מפוזרת, גדולה יותר ⇒ תנועת „מציאה” מורגשת)
+const FOUND = -44; // „מצא כיוון” (לעבר הפעולה)
+const HOVER = -60;
 
 export function LivingCompass({
   className,
@@ -65,9 +65,18 @@ export function LivingCompass({
       onPointerEnter={() => !reduce && setAngle(HOVER)}
       onPointerLeave={() => !reduce && setAngle(FOUND)}
     >
-      {/* טבעות */}
+      {/* טבעות — החיצונית מקווקוות ומסתובבת לאט (תנועה מתמדת, „מצפן חי”) */}
       <circle cx="50" cy="50" r="46" className="living-compass__ring-outer" />
+      <circle cx="50" cy="50" r="40" className="living-compass__ring-sweep" />
       <circle cx="50" cy="50" r="34" className="living-compass__ring-inner" />
+      {/* מטאטא „ראדאר” — קו שמסתובב ברציפות סביב המרכז, קורא מיד כתנועה */}
+      <line
+        x1="50"
+        y1="50"
+        x2="50"
+        y2="10"
+        className="living-compass__sweep"
+      />
       {/* שנתות ראשיות (N/E/S/W) */}
       {[0, 90, 180, 270].map((d) => (
         <line

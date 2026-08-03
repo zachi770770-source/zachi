@@ -20,7 +20,7 @@ export function CompassSignature() {
   return (
     <section className="py-16 sm:py-20 lg:py-24" aria-labelledby="compass-signature-heading">
       <Container>
-        <Reveal className="group relative overflow-hidden rounded-lg border border-border-strong bg-surface">
+        <Reveal className="reveal--zoom group relative overflow-hidden rounded-lg border border-border-strong bg-surface">
           {/* סימן מים: טבעת המצפן — הזהות החזותית (סטטי, טקסטורה עדינה). */}
           <Compass
             aria-hidden="true"
@@ -32,7 +32,7 @@ export function CompassSignature() {
             {/* המסר + CTA */}
             <div>
               {/* #4 המצפן החי — סימן מותג שמחפש ומתייצב לכיוון (spring). */}
-              <LivingCompass className="mb-5 h-14 w-14 text-brand" />
+              <LivingCompass className="mb-5 h-20 w-20 text-brand sm:h-24 sm:w-24" />
               <span className="kicker">{signature.eyebrow}</span>
               <h2
                 id="compass-signature-heading"
