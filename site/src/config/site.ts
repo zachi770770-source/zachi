@@ -29,7 +29,18 @@ const digitalPrice = 98;
 const PRODUCTION_URL = "https://www.zachi.co.il";
 
 function resolveSiteUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) {
+    try {
+      // הגנת אינדוקס: לעולם לא לקנן אל דומיין preview של Vercel (…​.vercel.app).
+      // כתובת ה-deployment משתנה בין preview ל-preview, וקנוניקל שמצביע אליה
+      // מפצל אותות אינדוקס. אם NEXT_PUBLIC_SITE_URL הוגדר בטעות לכתובת preview
+      // (או לכל כתובת לא-תקינה) — מתעלמים ממנו ונופלים לדומיין הפרודקשן הקבוע.
+      if (!new URL(explicit).host.endsWith(".vercel.app")) return explicit;
+    } catch {
+      // כתובת לא תקינה — מתעלמים ונופלים לברירת המחדל.
+    }
+  }
   if (process.env.NODE_ENV === "production") return PRODUCTION_URL;
   return "http://localhost:3000";
 }
