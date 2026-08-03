@@ -211,7 +211,10 @@
   html,
   body {
     max-width: 100vw;
-    overflow-x: hidden;
+    /* clip (ולא hidden) מונע גלישה אופקית *בלי* להפוך את body/html ל-scroll
+       container — כך scroll math ותזמוני-גלילה נטיביים (view()/scroll()) עובדים
+       נכון. נתמך בכל הדפדפנים היעד. */
+    overflow-x: clip;
   }
 
   /* ===================================================================
@@ -475,6 +478,95 @@
   .hero-depth-book,
   .hero-depth-halo {
     will-change: transform;
+  }
+
+  /* ===================================================================
+   * #6 „בניית משפט” — הדגשה למשפטים החזקים ביותר. בכניסה לתצוגה הטקסט „נבנה”
+   * לפוקוס: ניגודיות עולה (opacity) + חשיפת מסכה (clip-path) מימין לשמאל (סדר
+   * קריאה עברי) — „חיפוש הופך לבנייה”, לא fade-up גנרי. מונע-JS דרך BuildText
+   * (IntersectionObserver) ולא native scroll-timeline: ה-body כאן הוא scroll
+   * container (overflow-x:hidden), מה שמשבש view()/scroll(); IO אמין בכל מצב.
+   * transform/opacity/clip-path בלבד (מרוכב). ברירת מחדל: גלוי לגמרי (ללא JS /
+   * reduced-motion / deep-link) — לעולם לא מסתיר תוכן לצמיתות. ================ */
+  .build-text {
+    color: var(--color-foreground);
+  }
+  .build-text.is-armed {
+    opacity: 0.32;
+    clip-path: inset(0 0 0 100%);
+    will-change: opacity, clip-path;
+  }
+  .build-text.is-armed.is-focused {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transition:
+      opacity 640ms var(--ease-settle),
+      clip-path 760ms var(--ease-settle);
+  }
+
+  /* #1 קו-הבנייה של העמוד — פס טרקוטה דק בקצה-ההתחלה (ימין ב-RTL) שמתמלא לפי
+   * התקדמות הקריאה. הד ל„מסלול/בנייה”, תחושת מסע רציף. הגובה מונע מ-JS
+   * (BuildSpine) דרך --build-progress (0..1); מרוכב (scaleY), rAF-מקובץ.
+   * מוצג רק כשמותרת תנועה (.motion-js); reduced-motion / no-JS ⇒ נסתר.
+   * דקורטיבי (aria-hidden). */
+  .build-spine {
+    display: none;
+  }
+  .motion-js .build-spine {
+    display: block;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: 30;
+    width: 2px;
+    pointer-events: none;
+  }
+  .build-spine__track {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklab, var(--color-brand) 14%, transparent);
+  }
+  .build-spine__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--color-brand);
+    transform-origin: top center;
+    transform: scaleY(var(--build-progress, 0));
+    will-change: transform;
+  }
+
+  /* #5 כרטיסי כלים פרימיום: אור נקודתי עוקב-סמן (רדיאלי, דרך --mx/--my
+   * שנקבעים ב-ToolCard), עומק שכבתי בריחוף ולחיצת „קפיץ” עדינה. transform/
+   * opacity בלבד. reduced-motion: ללא לחיצה/הרמה. */
+  .tool-card {
+    position: relative;
+    isolation: isolate;
+  }
+  .tool-card__light {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 220ms var(--ease-standard);
+    background: radial-gradient(
+      16rem 16rem at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--color-brand) 12%, transparent),
+      transparent 60%
+    );
+  }
+  @media (hover: hover) {
+    .tool-card:hover .tool-card__light {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* לחיצת „קפיץ” עדינה — ה-transition על transform מגיע ממחלקת הכרטיס
+       (transition-[...] של Tailwind); כאן רק מצב הלחיצה ומשכה הקצר. */
+    .tool-card:active {
+      transform: scale(0.985);
+      transition-duration: 90ms;
+    }
   }
 
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */

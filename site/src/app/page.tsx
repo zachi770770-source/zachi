@@ -14,6 +14,7 @@ import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StationJourney } from "@/components/interactive/StationJourney";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
+import { BuildSpine } from "@/components/shared/BuildSpine";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
@@ -39,6 +40,7 @@ export default function HomePage() {
       <WebSiteSchema />
       <BookSchema />
       <ProductSchema />
+      <BuildSpine />
       <Hero />
       <TrustStrip />
       <ThesisMotifSection />

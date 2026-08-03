@@ -47,7 +47,7 @@ export function HomeRelevance() {
         <Reveal className="mx-auto mt-14 max-w-4xl border-t border-border pt-12 sm:mt-16 sm:pt-14">
           <div className="mx-auto max-w-2xl text-center">
             <span className="kicker justify-center">הגישה</span>
-            <h3 className="mt-4 font-serif text-[clamp(1.5rem,2.8vw,2.05rem)] font-semibold leading-[1.15] text-balance text-foreground">
+            <h3 className="build-text mt-4 font-serif text-[clamp(1.5rem,2.8vw,2.05rem)] font-semibold leading-[1.15] text-balance text-foreground">
               {approach.title}
             </h3>
             <p className="mx-auto mt-4 max-w-[58ch] text-[16.5px] leading-relaxed text-foreground-muted">

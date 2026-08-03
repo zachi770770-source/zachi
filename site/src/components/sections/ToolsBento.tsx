@@ -5,6 +5,7 @@ import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
+import { ToolCard } from "@/components/sections/ToolCard";
 
 /**
  * „הכלים המעשיים” — בנטו עריכתי של ששת הכלים האמיתיים מהספר (src/content/book.ts).
@@ -37,9 +38,9 @@ export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
           {items.map((tool, i) => {
             const wide = feature.has(i);
             return (
-              <div
+              <ToolCard
                 key={tool.name}
-                className={`group flex flex-col rounded-2xl border p-5 transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-20px_rgba(43,36,31,0.45)] sm:p-6 ${
+                className={`flex flex-col rounded-2xl border p-5 transition-[transform,translate,box-shadow,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-20px_rgba(43,36,31,0.45)] sm:p-6 ${
                   wide
                     ? "sm:col-span-2 border-secondary/40 bg-secondary-muted/60 hover:border-secondary/60"
                     : "border-border bg-surface hover:border-brand/40 hover:bg-surface-muted"
@@ -61,7 +62,7 @@ export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
                 <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
                   {tool.description}
                 </p>
-              </div>
+              </ToolCard>
             );
           })}
         </Reveal>
