@@ -445,6 +445,38 @@
     }
   }
 
+  /* ===================================================================
+   * חשיפת טקסט מדורגת (StagedTextReveal) — „קריאה מבוקרת” מילה-אחר-מילה.
+   * ברירת מחדל: כל המילים גלויות (SSR / ללא JS / ללא IO / reduced-motion).
+   * רק כש-JS מחמש (is-armed) מסתירים, וכש-is-revealing נוסף — כל מילה
+   * נכנסת עם opacity + עלייה עדינה (6px), בהשהיה מדורגת (transition-delay).
+   * ה-transform שומר מקום ⇒ אין CLS. אין לולאה ואין cursor.
+   * =================================================================== */
+  .staged-word {
+    display: inline-block;
+  }
+  .staged-reveal.is-armed .staged-word {
+    opacity: 0;
+    transform: translateY(6px);
+    will-change: opacity, transform;
+  }
+  .staged-reveal.is-armed.is-revealing .staged-word {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 300ms var(--ease-standard),
+      transform 300ms var(--ease-standard);
+    transition-delay: var(--staged-delay, 0ms);
+  }
+
+  /* עומק/פרלקסה מרוסנת לכריכת השער (ההזזה מונעת מ-JS ב-ParallaxScroll דרך
+     המשתנה --hero-parallax; ברירת מחדל 0 ⇒ אין הזזה עד שיש גלילה, אין קפיצה
+     ב-first-paint). transform בלבד ⇒ מרוכב ב-compositor. */
+  .hero-depth-book,
+  .hero-depth-halo {
+    will-change: transform;
+  }
+
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
     transform-box: fill-box;

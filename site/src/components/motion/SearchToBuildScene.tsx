@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { Container } from "@/components/shared/Container";
+import { StagedTextReveal } from "@/components/shared/StagedTextReveal";
 import { bigIdea } from "@/content/book";
 
 /**
@@ -71,7 +72,6 @@ export function SearchToBuildScene() {
             gsap.set(q(".s2b__line"), { strokeDashoffset: 1 });
             gsap.set(q(".s2b__node"), { autoAlpha: 0, scale: 0.35, transformOrigin: "center" });
             gsap.set(q(".s2b__build-word"), { autoAlpha: 0, yPercent: 45 });
-            gsap.set(q(".s2b__intro"), { autoAlpha: 0, y: 16 });
             gsap.set(q(".s2b__route"), { scaleY: 0, transformOrigin: "top center" });
             gsap.set(q(".s2b__search"), { autoAlpha: 1, y: 0 });
 
@@ -97,7 +97,6 @@ export function SearchToBuildScene() {
               .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.045, duration: 0.22 }, 0.52)
               // (5) „אהבה היא בנייה” נבנית מילה-אחר-מילה
               .to(q(".s2b__build-word"), { autoAlpha: 1, yPercent: 0, stagger: 0.09, duration: 0.14 }, 0.72)
-              .to(q(".s2b__intro"), { autoAlpha: 1, y: 0, duration: 0.16 }, 0.84)
               // (6) קו הטרקוטה ממשיך אל התחנות
               .to(q(".s2b__route"), { scaleY: 1, duration: 0.16 }, 0.86);
 
@@ -111,7 +110,6 @@ export function SearchToBuildScene() {
             gsap.set(q(".s2b__line"), { strokeDashoffset: 1 });
             gsap.set(q(".s2b__node"), { autoAlpha: 0, scale: 0.35, transformOrigin: "center" });
             gsap.set(q(".s2b__build-word"), { autoAlpha: 0, yPercent: 40 });
-            gsap.set(q(".s2b__intro"), { autoAlpha: 0, y: 14 });
             gsap.set(q(".s2b__route"), { scaleY: 0, transformOrigin: "top center" });
 
             // שלב 1 — הפיזור (חיפוש/רעש) מופיע
@@ -127,7 +125,6 @@ export function SearchToBuildScene() {
             // שלב 3 — „אהבה היא בנייה” נבנית מילה-אחר-מילה + קו ההמשך
             gsap.timeline({ scrollTrigger: { trigger: q(".s2b__build"), start: "top 80%", once: true } })
               .to(q(".s2b__build-word"), { autoAlpha: 1, yPercent: 0, stagger: 0.1, duration: 0.42, ease: "power2.out" })
-              .to(q(".s2b__intro"), { autoAlpha: 1, y: 0, duration: 0.4 }, 0.2)
               .to(q(".s2b__route"), { scaleY: 1, duration: 0.4, ease: "power2.out" }, 0.25);
           });
         }, rootRef);
@@ -165,9 +162,19 @@ export function SearchToBuildScene() {
                   ))}
                 </span>
               </h2>
-              <p className="s2b__intro mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 sm:text-xl">
-                {bigIdea.intro}
-              </p>
+              {/* התזה בפרוזה — „קריאה מבוקרת” מילה-אחר-מילה (StagedTextReveal).
+                  חשיפה עצמאית ב-IntersectionObserver; GSAP אינו נוגע ב-s2b__intro
+                  כדי שלא תהיה שליטה כפולה. בטוח-נפילה: הטקסט המלא מרונדר ב-SSR. */}
+              <StagedTextReveal
+                groups={[
+                  {
+                    text: bigIdea.intro,
+                    as: "p",
+                    className:
+                      "s2b__intro mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 sm:text-xl",
+                  },
+                ]}
+              />
             </div>
 
             {/* עמודת המוטיב — דקורטיבי (aria-hidden) */}
