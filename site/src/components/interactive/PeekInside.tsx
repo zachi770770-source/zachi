@@ -33,7 +33,8 @@ const PANELS: { id: PanelId; label: string }[] = [
 export function PeekInside({ showCta = true }: { showCta?: boolean } = {}) {
   const [index, setIndex] = React.useState(0);
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
-  const touchX = React.useRef<number | null>(null);
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  const dragRef = React.useRef<{ x: number; active: boolean }>({ x: 0, active: false });
 
   // מעבר „דף ספר” מרוסן (PHASE MOTION 4-B): בעת מעבר לשונית, הדף היוצא מסתובב
   // הצידה ונמוג מעל הדף הנכנס. תחת reduced-motion אין שכבה יוצאת — החלפה מיידית.
@@ -80,15 +81,33 @@ export function PeekInside({ showCta = true }: { showCta?: boolean } = {}) {
     }
   };
 
-  // החלקה במובייל: RTL — החלקה שמאלה (dx<0) = הבא, ימינה = הקודם.
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchX.current = e.touches[0]?.clientX ?? null;
+  // גרירת „דף” (Pointer: עכבר/מגע/עט): הדף הנוכחי מסתובב בעקבות הגרירה עם צל
+  // סלסול (curl), וב-release מעל סף — „נהפך” לדף הבא/הקודם עם snap; אחרת חוזר.
+  // RTL: גרירה שמאלה (dx<0) = הבא, ימינה = הקודם. עובד לצד לחיצה/מקלדת/tab.
+  const onPointerDown = (e: React.PointerEvent) => {
+    // מתעלמים מגרירה שמתחילה על פקד (כפתור/לשונית) — הם מטפלים בלחיצה עצמם.
+    if ((e.target as HTMLElement).closest("button")) return;
+    dragRef.current = { x: e.clientX, active: true };
+    stageRef.current?.classList.add("peek-dragging");
   };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchX.current === null) return;
-    const dx = (e.changedTouches[0]?.clientX ?? 0) - touchX.current;
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current.active) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    const w = stage.offsetWidth || 1;
+    const d = Math.max(-1, Math.min(1, (e.clientX - dragRef.current.x) / (w * 0.6)));
+    stage.style.setProperty("--drag", d.toFixed(3));
+    stage.style.setProperty("--curl", Math.abs(d).toFixed(3));
+  };
+  const endDrag = (e: React.PointerEvent) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.x;
+    dragRef.current.active = false;
+    const stage = stageRef.current;
+    stage?.classList.remove("peek-dragging");
+    stage?.style.setProperty("--drag", "0");
+    stage?.style.setProperty("--curl", "0");
     if (Math.abs(dx) > 45) go(dx < 0 ? index + 1 : index - 1);
-    touchX.current = null;
   };
 
   const active = PANELS[index].id;
@@ -219,17 +238,22 @@ export function PeekInside({ showCta = true }: { showCta?: boolean } = {}) {
             })}
           </div>
 
-          {/* פאנל תוכן — משתנה לפי הלשונית. swipe במובייל. */}
+          {/* פאנל תוכן — משתנה לפי הלשונית. גרירה (עכבר/מגע) הופכת דף. */}
           <div
             role="tabpanel"
             id={`peek-panel-${active}`}
             aria-labelledby={`peek-tab-${active}`}
             tabIndex={0}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onPointerLeave={endDrag}
+            style={{ touchAction: "pan-y" }}
             className="mt-5 min-h-[220px] rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            <div className="peek-stage">
+            <div ref={stageRef} className="peek-stage">
+              <span aria-hidden="true" className="peek-stage__curl" />
               <div key={active} className="peek-page peek-page--enter">
                 {renderPanel(active)}
               </div>

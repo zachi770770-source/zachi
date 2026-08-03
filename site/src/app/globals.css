@@ -491,17 +491,15 @@
   .build-text {
     color: var(--color-foreground);
   }
+  /* מסכה בלבד (clip-path), ללא הורדת opacity — כדי לא ליצור מצב ניגודיות-נמוכה
+     קבוע לטקסט מוסתר. הצבע המלא נשמר; החשיפה היא „בנייה” מכיוון הקריאה. */
   .build-text.is-armed {
-    opacity: 0.32;
     clip-path: inset(0 0 0 100%);
-    will-change: opacity, clip-path;
+    will-change: clip-path;
   }
   .build-text.is-armed.is-focused {
-    opacity: 1;
     clip-path: inset(0 0 0 0);
-    transition:
-      opacity 640ms var(--ease-settle),
-      clip-path 760ms var(--ease-settle);
+    transition: clip-path 780ms var(--ease-settle);
   }
 
   /* #1 קו-הבנייה של העמוד — פס טרקוטה דק בקצה-ההתחלה (ימין ב-RTL) שמתמלא לפי
@@ -696,8 +694,9 @@
 .book-tilt .book-cover__inner,
 .book-tilt .book-cover:hover .book-cover__inner {
   transform: rotateY(calc(9deg + var(--tilt-y, 0deg)))
-    rotateX(calc(1.2deg + var(--tilt-x, 0deg)));
-  transition: transform 160ms var(--ease-standard);
+    rotateX(calc(1.2deg + var(--tilt-x, 0deg))) scale(var(--tilt-lift, 1));
+  transition:
+    transform 220ms var(--ease-settle);
 }
 
 /* PHASE MOTION 4 (B) — „מעבר דף” מרוסן ב-PeekInside. הדף היוצא מסתובב הצידה
@@ -705,8 +704,30 @@
  * reduced-motion: השכבה היוצאת אינה מרונדרת (החלפה מיידית) + אין אנימציה. */
 .peek-stage {
   position: relative;
+  transform-origin: right center;
+}
+/* צל „סלסול הדף” — מתחזק עם הגרירה (--curl 0..1 מ-JS). */
+.peek-stage__curl {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: 0.75rem;
+  opacity: var(--curl, 0);
+  background: radial-gradient(140% 90% at 100% 50%, transparent 52%, rgba(43, 36, 31, 0.16));
 }
 @media (prefers-reduced-motion: no-preference) {
+  /* #1 היפוך-דף בגרירה: הדף הנוכחי מסתובב בעקבות --drag (-1..1 מ-JS); ב-release
+     snap חזרה ל-0 (או מעבר לדף הבא דרך peekEnter/peekLeave). */
+  .peek-stage {
+    transform: perspective(1400px) rotateY(calc(var(--drag, 0) * 15deg));
+    transition: transform 300ms var(--ease-settle);
+  }
+  .peek-stage.peek-dragging {
+    transition: none;
+    cursor: grabbing;
+    user-select: none;
+  }
   .peek-page--enter {
     animation: peekEnter 420ms var(--ease-settle) both;
     transform-origin: right center;
@@ -1053,18 +1074,48 @@
 /* מעבר קצר ועדין לכרטיס תשובת „איפה אתם נתקעים?” — opacity + translateY
  * מינימלי, משך קצר, ללא קפיצת גובה. מכובד אוטומטית תחת prefers-reduced-motion
  * (הכלל הגלובלי מכווץ את משך האנימציה למצב הסופי). */
+/* #2 מעבר „מבנה נבנה” בין בחירות: הפאנל אינו מתחלף בקפיצה — הוא נבנה בחשיפת
+ * מסכה מכיוון הקריאה (RTL: מימין) יחד עם עלייה עדינה, בזמן שהסמן נע על המסלול
+ * והתחנות נדלקות ברצף. תנועה אחת מתמשכת. */
 @keyframes stuckAnswerIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(10px);
+    clip-path: inset(0 0 0 22%);
   }
   to {
     opacity: 1;
     transform: none;
+    clip-path: inset(0 0 0 0);
   }
 }
 .stuck-answer {
-  animation: stuckAnswerIn 240ms ease-out both;
+  animation: stuckAnswerIn 460ms var(--ease-settle) both;
+}
+
+/* #3 קו-המשך הנרטיב — מגשר בין סצנת „חיפוש→בנייה” למסלול התחנות. בסיס: גלוי
+ * (fallback/no-JS/reduced). תחת motion-js נמשך בכניסה לתצוגה (scaleY). */
+.journey-connector {
+  display: block;
+  width: 2px;
+  height: 2.75rem;
+  margin: -0.5rem auto 1.25rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-brand) 20%, transparent),
+    var(--color-brand)
+  );
+  transform-origin: top center;
+}
+.motion-js .journey-connector {
+  transform: scaleY(0);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .motion-js .journey-connector.is-inview {
+    transform: scaleY(1);
+    transition: transform 720ms var(--ease-settle) 120ms;
+  }
 }
 
 /* חשיפה עדינה של תשובת ה-FAQ בפתיחה (details נטיבי). ללא קפיצה, קצר. */

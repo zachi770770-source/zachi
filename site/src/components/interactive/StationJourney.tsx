@@ -105,6 +105,12 @@ export function StationJourney() {
       aria-labelledby="where-heading"
     >
       <Container>
+        {/* #3 המשכיות נרטיב — קו המשך שנמשך מסצנת „חיפוש→בנייה” שמעל אל מסלול
+            התחנות, כך שהסיפור אינו מתאפס אחרי הסצנה הנעוצה. דקורטיבי. */}
+        <span
+          aria-hidden="true"
+          className={`journey-connector${inview ? " is-inview" : ""}`}
+        />
         <div className="mx-auto max-w-2xl text-center">
           <span className="kicker justify-center">
             <MapPin className="h-4 w-4" aria-hidden="true" />
