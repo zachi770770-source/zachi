@@ -51,7 +51,9 @@ export default function BookPage() {
                 aria-hidden="true"
                 className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-secondary/[0.16] blur-2xl"
               />
-              <div data-vt-book-dest className="w-full">
+              {/* #6 המשכיות אובייקט: הכריכה גם יעד (בהגעה מהבית) וגם מקור (ביציאה
+                  אל /preview) — אותו ספר „ממשיך” הלאה, ללא כריכה כפולה. */}
+              <div data-vt-book-dest data-vt-book-source className="w-full">
                 <BookCover priority />
               </div>
             </div>
@@ -66,6 +68,7 @@ export default function BookPage() {
             </p>
             <BookLink
               href="/preview"
+              morphCover
               className="group mt-7 inline-flex items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
               קראו טעימה מהספר

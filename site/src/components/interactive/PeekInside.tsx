@@ -99,15 +99,24 @@ export function PeekInside({ showCta = true }: { showCta?: boolean } = {}) {
     stage.style.setProperty("--drag", d.toFixed(3));
     stage.style.setProperty("--curl", Math.abs(d).toFixed(3));
   };
-  const endDrag = (e: React.PointerEvent) => {
-    if (!dragRef.current.active) return;
-    const dx = e.clientX - dragRef.current.x;
+  const settleStage = () => {
     dragRef.current.active = false;
     const stage = stageRef.current;
     stage?.classList.remove("peek-dragging");
     stage?.style.setProperty("--drag", "0");
     stage?.style.setProperty("--curl", "0");
+  };
+  // שחרור: מעל סף → הופך דף; אחרת snap חזרה.
+  const endDrag = (e: React.PointerEvent) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.x;
+    settleStage();
     if (Math.abs(dx) > 45) go(dx < 0 ? index + 1 : index - 1);
+  };
+  // ביטול (עזיבת הרכיב / pointercancel): תמיד snap חזרה, בלי היפוך.
+  const cancelDrag = () => {
+    if (!dragRef.current.active) return;
+    settleStage();
   };
 
   const active = PANELS[index].id;
@@ -247,8 +256,8 @@ export function PeekInside({ showCta = true }: { showCta?: boolean } = {}) {
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            onPointerLeave={endDrag}
+            onPointerCancel={cancelDrag}
+            onPointerLeave={cancelDrag}
             style={{ touchAction: "pan-y" }}
             className="mt-5 min-h-[220px] rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >

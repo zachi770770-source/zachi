@@ -2,6 +2,7 @@ import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { SampleReader } from "@/components/preview/SampleReader";
+import { MarkSampleSeen } from "@/components/preview/MarkSampleSeen";
 import { PeekInside } from "@/components/interactive/PeekInside";
 import { BookMap } from "@/components/preview/BookMap";
 import { PreviewClosing } from "@/components/preview/PreviewClosing";
@@ -23,6 +24,8 @@ export default function PreviewPage() {
           { name: "הצצה לספר", path: "/preview" },
         ]}
       />
+
+      <MarkSampleSeen />
 
       <Container className="py-10 sm:py-14">
         <SampleReader />

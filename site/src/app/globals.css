@@ -1098,12 +1098,14 @@
 .journey-connector {
   display: block;
   width: 2px;
-  height: 2.75rem;
-  margin: -0.5rem auto 1.25rem;
+  height: 3.5rem;
+  /* נמשך כלפי מעלה אל גבול הבאנד שמעל, כדי שייקרא כהמשך של קו „חיפוש→בנייה”
+     ולא כקו נפרד. */
+  margin: -2rem auto 1.25rem;
   border-radius: 9999px;
   background: linear-gradient(
     to bottom,
-    color-mix(in oklab, var(--color-brand) 20%, transparent),
+    color-mix(in oklab, var(--color-brand) 12%, transparent),
     var(--color-brand)
   );
   transform-origin: top center;
@@ -1115,6 +1117,69 @@
   .motion-js .journey-connector.is-inview {
     transform: scaleY(1);
     transition: transform 720ms var(--ease-settle) 120ms;
+  }
+}
+
+/* #4 מצפן חי — טבעות סטטיות + מחט שמתייצבת לכיוון עם spring. */
+.living-compass {
+  display: block;
+  overflow: visible;
+}
+.living-compass__ring-outer,
+.living-compass__ring-inner {
+  fill: none;
+  stroke: var(--color-brand);
+}
+.living-compass__ring-outer {
+  stroke-width: 1.4;
+  stroke-opacity: 0.28;
+}
+.living-compass__ring-inner {
+  stroke-width: 1;
+  stroke-opacity: 0.16;
+}
+.living-compass__tick {
+  stroke: var(--color-brand);
+  stroke-width: 1.6;
+  stroke-opacity: 0.45;
+  stroke-linecap: round;
+}
+.living-compass__needle {
+  transform-origin: 50% 50%;
+  transition: transform 900ms cubic-bezier(0.34, 1.55, 0.5, 1); /* back-out = spring */
+}
+@media (prefers-reduced-motion: reduce) {
+  .living-compass__needle {
+    transition: none;
+  }
+}
+.living-compass__north {
+  fill: var(--color-brand);
+}
+.living-compass__south {
+  fill: var(--color-foreground);
+  opacity: 0.32;
+}
+.living-compass__hub {
+  fill: var(--color-foreground);
+}
+
+/* #5 מעבר עדין של תווית ה-CTA כשמשתנה שלב המסע (בין טעינות עמוד; לעולם לא בזמן
+   ריחוף/פוקוס — היעד יציב מ-mount). */
+@media (prefers-reduced-motion: no-preference) {
+  .cta-morph {
+    display: inline-block;
+    animation: ctaMorph 360ms var(--ease-standard) both;
+  }
+  @keyframes ctaMorph {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 

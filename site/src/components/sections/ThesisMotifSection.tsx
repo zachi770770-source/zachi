@@ -12,7 +12,7 @@ import { SearchToBuildScene } from "@/components/motion/SearchToBuildScene";
 export function ThesisMotifSection() {
   return (
     <section
-      className="relative overflow-hidden bg-secondary py-20 text-secondary-foreground sm:py-28"
+      className="relative overflow-hidden bg-secondary pb-0 pt-20 text-secondary-foreground sm:pt-28"
       aria-labelledby="thesis-heading"
     >
       {/* עומק עדין: הילה כהה רכה שמוסיפה תלת-ממד לבאנד, ללא צבע חדש */}

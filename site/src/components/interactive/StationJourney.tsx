@@ -101,7 +101,7 @@ export function StationJourney() {
     <section
       ref={sectionRef}
       id="where"
-      className="scroll-mt-20 py-14 sm:py-16"
+      className="scroll-mt-20 pb-14 pt-4 sm:pb-16 sm:pt-6"
       aria-labelledby="where-heading"
     >
       <Container>

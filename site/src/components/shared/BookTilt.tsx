@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
  * מוגבל ל-±4° סביב זווית-הבסיס של הכריכה. פעיל אך ורק במצביע מדויק עם hover
  * (דסקטופ) וכשאין prefers-reduced-motion — כלומר מנוטרל לחלוטין במגע.
  * ה-JS קובע רק CSS-vars (--tilt-x/--tilt-y/--tilt-lift); הטרנספורם עצמו
- * ב-globals.css. ההטיה מורגשת (±8°) ומלווה ב„הרמה” עדינה (scale) לתחושת עומק.
+ * ב-globals.css. ההטיה מורגשת אך מרוסנת (±4°) ומלווה ב„הרמה” עדינה (scale)
+ * לתחושת עומק — נוכחת אך לא מוגזמת.
  */
-const MAX_DEG = 8;
+const MAX_DEG = 4;
 
 export function BookTilt({
   children,
@@ -37,7 +38,7 @@ export function BookTilt({
       raf = requestAnimationFrame(() => {
         el.style.setProperty("--tilt-y", `${(px * MAX_DEG * 2).toFixed(2)}deg`);
         el.style.setProperty("--tilt-x", `${(-py * MAX_DEG * 2).toFixed(2)}deg`);
-        el.style.setProperty("--tilt-lift", "1.035"); // הרמה קלה כלפי הצופה
+        el.style.setProperty("--tilt-lift", "1.025"); // הרמה קלה כלפי הצופה
       });
     };
     const reset = () => {
