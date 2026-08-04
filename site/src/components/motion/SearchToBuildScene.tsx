@@ -139,14 +139,12 @@ export function SearchToBuildScene() {
         introEl?.classList.add("is-in");
       }, 300);
     };
-    // Backstop יחיד ל-import שנתקע (לא נפתר ולא נדחה): פועל רק אם GSAP לא התחמש.
-    // מבוטל מיד עם התחמשות GSAP וב-cleanup, כך שאינו מתחרה באנימציה החיה.
-    const backstopTimer = window.setTimeout(runRescue, 6000);
-
     let killed = false;
     let ctx: { revert: () => void } | undefined;
+    let backstopTimer = 0;
+    let started = false;
 
-    (async () => {
+    const runGsap = async () => {
       try {
         const [{ gsap }, { ScrollTrigger }] = await Promise.all([
           import("gsap"),
@@ -234,10 +232,39 @@ export function SearchToBuildScene() {
         clearTimeout(backstopTimer);
         runRescue();
       }
-    })();
+    };
+
+    // ביצועים: GSAP+ScrollTrigger נטענים *רק כשהסצנה מתקרבת לאזור הצפייה* (היא
+    // מתחת-לקיפול) — כלומר אחרי ה-LCP, ורק בדף הבית. כך ~1.3ש של bootup וחישובי
+    // layout יורדים מהנתיב הקריטי של הטעינה הראשונית. הרצף/הסדר/ההצלה זהים
+    // לחלוטין — רק תזמון הטעינה השתנה. ה-Backstop מזוין רק כשמתחילים לטעון GSAP.
+    const start = () => {
+      if (started || killed) return;
+      started = true;
+      backstopTimer = window.setTimeout(runRescue, 6000);
+      void runGsap();
+    };
+    let io: IntersectionObserver | undefined;
+    if (rootRef.current && typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io?.disconnect();
+            start();
+          }
+        },
+        // rootMargin נדיב ⇒ מתחילים לטעון מעט לפני שהסצנה נכנסת, כדי שהאנימציה
+        // תהיה מוכנה בזמן; deep-link/כבר-בתצוגה ⇒ נורה מיד; ללא IO ⇒ טוען מיד.
+        { rootMargin: "900px 0px 900px 0px" }
+      );
+      io.observe(rootRef.current);
+    } else {
+      start();
+    }
 
     return () => {
       killed = true;
+      io?.disconnect();
       clearTimeout(backstopTimer);
       if (rescueStep2) clearTimeout(rescueStep2);
       if (introTimer) clearTimeout(introTimer);
