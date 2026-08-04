@@ -1,14 +1,10 @@
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
-import { TrustStrip } from "@/components/sections/TrustStrip";
 import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
-import { HomeRelevance } from "@/components/sections/HomeRelevance";
-import { BookHubLink } from "@/components/sections/BookHubLink";
 import { HubTeaser } from "@/components/sections/HubTeaser";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
-import { CompassSignature } from "@/components/compass/CompassSignature";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StationJourney } from "@/components/interactive/StationJourney";
@@ -27,12 +23,21 @@ export const metadata = pageMetadata({
 });
 
 /**
- * עמוד הבית כשער השכנוע הראשי: כל סקשן = תפקיד יחיד במסע ההמרה, בלי כפילות.
- * Hero (מה/למי/הבטחה/פעולה) → פס עובדות → התזה (עוגן) → תחנת הקשר (זיהוי
- * + ניתוב) → מה נותן הספר (ערך מעשי מזוקק) → טעימת שיטה (המצפן) → מחבר קצר
- * → החלטת המרה סוגרת (טעימה חינם או רשימת המתנה). כל העומק חי בדפים
- * הייעודיים ולא משוכפל כאן: /book, /preview, /compass, /author, /faq
- * ודפי התחנות. רכיב ההמלצות מרונדר רק כשיש שלוש המלצות מאושרות (אחרת null).
+ * עמוד הבית = מסלול עריכתי קצר וממוקד (לא הדף המלא). כל סקשן ממלא תפקיד יחיד
+ * ומוביל הלאה, בלי לחזור על אותו מסר/‏CTA וללא כפילות מול הדפים הייעודיים:
+ *
+ *   1. Hero — מה/למי/הבטחה/פעולה ראשית (הרשמה לעדכון ההשקה).
+ *   2. Search→Build — סצנת החתימה (התזה, אות-אחר-אות).
+ *   3. Path Finder — 3 תחנות + ניתוב אישי (#where) — נקודת האינטראקציה.
+ *   4. הצצה לספר/כלים → /book.
+ *   5. הצצה לטעימה → /preview.
+ *   6. מילת המחבר הקצרה → /author.
+ *   7. הרשמה לעדכון ההשקה.
+ *
+ * כל העומק חי בדפים הייעודיים ולא משוכפל כאן: השיטה המלאה וששת הכלים ב-/book,
+ * הקורא וההצצה המלאה ב-/preview, הסיפור האישי המלא ב-/author, ממשק המצפן המלא
+ * ב-/compass (בבית — רק המשגר הצף כהזמנה קצרה), ושאלות ותשובות ב-/faq.
+ * ההמלצות מרונדרות רק כשיש שלוש מאושרות (אחרת null — נשאר מוסתר עד לנכסים אמיתיים).
  */
 export default function HomePage() {
   return (
@@ -42,21 +47,18 @@ export default function HomePage() {
       <ProductSchema />
       <BuildSpine />
       <Hero />
-      <TrustStrip />
       <ThesisMotifSection />
       <StationJourney />
-      <HomeRelevance />
-      <BookHubLink />
-      {/* הכלים המלאים חיים ב-/book; כאן נוכחות מצומצמת + קישור. */}
+      {/* הצצה לספר + כלים — השיטה המלאה וששת הכלים (ToolsBento) חיים ב-/book. */}
       <HubTeaser
-        id="tools-teaser"
+        id="book-teaser"
         kicker="כלים, לא רק רעיון"
-        heading="כלים מעשיים מתוך הספר"
-        text="השיטה של הספר באה עם כלים מעשיים ליישום בכל שלב — כולם מרוכזים בעמוד הספר."
-        href="/book#tools"
-        linkLabel="לכל הכלים בעמוד הספר"
+        heading="שיטה מעשית וכלים לכל תחנה בקשר"
+        text="שיטה בת שלושה שלבים וכלים לשימוש חוזר — לא רק רעיון. כולם מרוכזים בעמוד הספר."
+        href="/book"
+        linkLabel="לעמוד הספר המלא"
       />
-      {/* ההצצה האינטראקטיבית חיה ב-/preview; כאן נוכחות מצומצמת + קישור. */}
+      {/* הצצה לטעימה — ההצצה האינטראקטיבית והקורא המלא חיים ב-/preview. */}
       <HubTeaser
         id="sample-teaser"
         kicker="הצצה לספר"
@@ -65,7 +67,6 @@ export default function HomePage() {
         href="/preview"
         linkLabel="לקריאת הטעימה"
       />
-      <CompassSignature />
       <AuthorTeaser />
       <Testimonials />
       <NewsletterSection />
