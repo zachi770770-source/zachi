@@ -1107,10 +1107,26 @@
 .s2b__char {
   display: inline-block;
   will-change: opacity, transform;
+  transform-origin: center;
 }
+/* המילים אטומיות — לעולם לא נשברת אות באמצע מילה. השורות שומרות מבנה קבוע:
+ * inline בבסיס (דסקטופ ⇒ שורה אחת), block בטאבלט/מובייל (שתי שורות קבועות). */
+.s2b__build-vis {
+  display: block;
+}
+.s2b__build-word {
+  display: inline-block;
+}
+.s2b__build-line {
+  display: inline;
+}
+/* חשיפת האותיות: opacity + scale-במקום בלבד (transform-origin מרכז). האות
+ * לעולם אינה מופיעה נמוך/בצד/בשורה אחרת ואז „קופצת” — היא מתמלאת בדיוק
+ * במיקומה הסופי. הרוחב והמבנה שמורים מראש (inline-block, opacity:0) ⇒ אין
+ * reflow ואין קפיצת-שורה בזמן האנימציה. */
 .motion-js .s2b__build .s2b__char {
   opacity: 0;
-  transform: translateY(24px) scale(0.97);
+  transform: scale(0.8);
 }
 .motion-js .s2b__build.is-building .s2b__char {
   opacity: 1;
@@ -1135,13 +1151,74 @@
     opacity 400ms var(--ease-settle),
     transform 400ms var(--ease-settle);
 }
-/* בדסקטופ עם תנועה — הבמה ממלאת מסך לרצף ה-pinned. תחת reduced-motion הבאנד
- * בגובה תוכן רגיל (בלי 100vh ריק). */
-@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+/* עם תנועה — הבמה ממלאת מסך לרצף ה-pinned, בכל הרוחבים (כולל מובייל) כדי
+ * שהמשפט יתמרכז אנכית וייעצר. תחת reduced-motion הבאנד בגובה תוכן רגיל
+ * (בלי מסך ריק). 100svh = גובה-מסך יציב במובייל (ללא קפיצות סרגל-הכתובת). */
+@media (prefers-reduced-motion: no-preference) {
   .s2b__stage {
     min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     align-items: center;
+  }
+}
+/* דסקטופ (≥1024): „אהבה היא בנייה.” בשורה אחת, ללא wrap אוטומטי; והקו מעט
+ * חזק יותר (stroke-opacity מלא) לאיזון מול הכותרת. */
+@media (min-width: 1024px) {
+  .s2b__build-vis {
+    white-space: nowrap;
+  }
+  .s2b__line {
+    stroke-opacity: 1;
+  }
+}
+/* טאבלט + מובייל (≤1023): שתי שורות קבועות מראש — „אהבה היא” / „בנייה.” —
+ * ‎.s2b__build-line‎ הופך ל-block. אין wrap אוטומטי שמשתנה תוך כדי האנימציה. */
+@media (max-width: 1023px) {
+  .s2b__build-line {
+    display: block;
+  }
+}
+/* טאבלט (600–1023): גודל מכוון, max-width לכותרת ומרווח בטוח מצד-ההתחלה
+ * (ימין ב-RTL), ומרווח 24–32px אל הטקסט המשני (‎mt-6‎ = 24px, מוגדל כאן). */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .s2b__build {
+    font-size: clamp(40px, 6.4vw, 56px);
+    line-height: 1.1;
+  }
+  .s2b__text {
+    max-width: 34rem;
+    padding-inline-start: 32px;
+  }
+  .s2b__intro {
+    margin-top: 32px;
+  }
+}
+/* מובייל (≤599): „אהבה היא בנייה” בגודל בולט clamp(38,12vw,52), ≥24px מכל צד
+ * (ריפוד ה-Container ‎+‎ ריפוד נוסף), ושבירה רק בגבול-מילה. */
+@media (max-width: 599px) {
+  .s2b__build {
+    font-size: clamp(38px, 12vw, 52px);
+    line-height: 1.08;
+  }
+  .s2b__text {
+    padding-inline: 12px;
+  }
+}
+/* מובייל + תנועה: בזמן הרצף הנעוץ, המוטיב (קו+נקודות) יוצא מהזרימה וממוקם
+ * באזור התחתון כדקורציה, כדי שגוש-הכותרת יתמרכז אנכית וה„אהבה היא בנייה”
+ * יישב במרכז אזור הצפייה (לא נדחף מעלה ע"י המוטיב/ההסבר). תחת reduced-motion
+ * הכל נשאר בזרימה רגילה (הבמה בגובה-תוכן). */
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  .s2b__grid {
+    position: relative;
+  }
+  .s2b__motif {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 4%;
+    margin-inline: auto;
+    width: min(56vw, 220px);
   }
 }
 
