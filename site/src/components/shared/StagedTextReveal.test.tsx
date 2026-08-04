@@ -96,6 +96,19 @@ beforeEach(() => {
   setMatchMedia(false);
   (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver =
     MockIntersectionObserver;
+  // ברירת מחדל: הקטע מתחת-לקיפול ⇒ נבחר מסלול ה-IntersectionObserver (ולא
+  // החשיפה-המיידית של „כבר בתצוגה”). בדיקה ייעודית לחשיפה-המיידית דורסת זאת.
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+    top: 10000,
+    bottom: 10100,
+    left: 0,
+    right: 100,
+    width: 100,
+    height: 100,
+    x: 0,
+    y: 10000,
+    toJSON: () => ({}),
+  } as DOMRect);
 });
 
 afterEach(() => {
@@ -184,6 +197,26 @@ describe("StagedTextReveal", () => {
     expect(io.disconnect).not.toHaveBeenCalled();
     unmount();
     expect(io.disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it("8b. already in view: reveals immediately without needing the observer (no stuck words)", () => {
+    // הקטע כבר בתצוגה (top קטן מגובה החלון) ⇒ חשיפה מיידית, בלי IO.
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      top: 10,
+      bottom: 210,
+      left: 0,
+      right: 100,
+      width: 100,
+      height: 200,
+      x: 0,
+      y: 10,
+      toJSON: () => ({}),
+    } as DOMRect);
+    const { container } = render(<StagedTextReveal groups={GROUPS} />);
+    const root = container.querySelector(".staged-reveal")!;
+    // נחשף מיד — לא מחכה ל-IntersectionObserver.
+    expect(root.classList.contains("is-revealing")).toBe(true);
+    expect(MockIntersectionObserver.instances.length).toBe(0);
   });
 
   it("9. hydrates server markup without hydration warnings", () => {
