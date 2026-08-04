@@ -140,6 +140,15 @@ for (const route of ["/", "/author", "/book"]) {
       return bad;
     });
     expect(stuck, `stuck-hidden elements on ${route}`).toEqual([]);
+    // חשיפה מדורגת (StagedTextReveal): גם המילים הבודדות חייבות להתגלות
+    // (הבאג ב„אנימציית האותיות” — מילים תקועות ב-opacity 0 כשה-IO לא נורה).
+    const stuckWords = await page.evaluate(
+      () =>
+        [...document.querySelectorAll(".staged-word")].filter(
+          (e) => parseFloat(getComputedStyle(e).opacity) < 0.99
+        ).length
+    );
+    expect(stuckWords, `stuck staged words on ${route}`).toBe(0);
     // הבאג הספציפי: is-visible קיים אך opacity עדיין 0
     const visibleButZero = await page.evaluate(
       () =>

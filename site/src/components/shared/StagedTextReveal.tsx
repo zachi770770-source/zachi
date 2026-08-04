@@ -99,6 +99,14 @@ export function StagedTextReveal({
 
     setArmed(true);
 
+    // אם הקטע כבר בתוך/מעל אזור התצוגה (deep-link, reload בגלילה, מעל-הקיפול,
+    // או סצנה נעוצה שבה ה-IO עלול לא לחצות סף) — חושפים מיד, בלי להמתין ל-IO.
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (el.getBoundingClientRect().top < vh * 0.92) {
+      setRevealing(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries, obs) => {
         for (const entry of entries) {
@@ -111,7 +119,14 @@ export function StagedTextReveal({
       { threshold: 0.35, rootMargin: "0px 0px -8% 0px" }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+
+    // גיבוי קשיח: אם ה-IO לא נורה מסיבה כלשהי (סצנה נעוצה, race, מנוע דפדפן) —
+    // חושפים בכל מקרה כדי שהמילים לעולם לא יישארו נסתרות. „חי” > „מושלם”.
+    const failsafe = window.setTimeout(() => setRevealing(true), 3000);
+    return () => {
+      observer.disconnect();
+      clearTimeout(failsafe);
+    };
   }, []);
 
   const model = buildStagedModel(groups);
