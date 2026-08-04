@@ -1279,10 +1279,10 @@
     animation: heroLineIn 720ms var(--ease-settle) both;
   }
   .hero-line--1 .hero-line__in {
-    animation-delay: 300ms;
+    animation-delay: 90ms;
   }
   .hero-line--2 .hero-line__in {
-    animation-delay: 520ms;
+    animation-delay: 240ms;
   }
   @keyframes heroLineIn {
     to {
@@ -1292,7 +1292,7 @@
   /* (3) „בונים אותה” — פעימת התיישבות ברורה (overshoot נראה) אחרי שהשורה
    * נחשפה, כרגע-חתימה של הכותרת (~0.76s→~1.5s). */
   .hero-build {
-    animation: heroBuildSettle 760ms var(--ease-settle) 780ms both;
+    animation: heroBuildSettle 760ms var(--ease-settle) 420ms both;
   }
   @keyframes heroBuildSettle {
     0% {
@@ -1332,20 +1332,18 @@
     }
   }
 
-  /* (4) כניסת הכריכה — נחיתה מוצרית מלאה: 76px מלמטה, scale 0.82, סיבוב 3D
-   * (rotateY 11°, rotateX 3.5°), מתיישבת לאורך ~1.35s. opacity עולה מוקדם ל-LCP. */
+  /* (4) כניסת הכריכה — נחיתה מוצרית (76px מלמטה, scale 0.82, סיבוב 3D) מתיישבת
+   * לאורך ~1.35s. ל-LCP: הכריכה גלויה (opacity 1) מיד — הנחיתה היא transform
+   * בלבד, כך שה-LCP נמדד בזמן ציור התמונה (מוקדם) ולא בסוף האנימציה. */
   .hero-book {
     transform-origin: center 62%;
-    animation: heroBookEnter 1350ms var(--ease-settle) 340ms both;
+    animation: heroBookEnter 1350ms var(--ease-settle) 60ms both;
   }
   @keyframes heroBookEnter {
     0% {
-      opacity: 0;
+      opacity: 1;
       transform: perspective(1100px) translateY(76px) scale(0.82) rotateY(11deg)
         rotateX(3.5deg);
-    }
-    28% {
-      opacity: 1;
     }
     100% {
       opacity: 1;

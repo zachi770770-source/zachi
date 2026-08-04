@@ -3,7 +3,11 @@ import { BookOpen } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { compass } from "@/content/compass";
-import { COMPASS_LIMITS, isCompassFeatureEnabled } from "@/lib/compass/assistant/config";
+import {
+  COMPASS_LIMITS,
+  isCompassFeatureEnabled,
+  hasProviderKey,
+} from "@/lib/compass/assistant/config";
 import { Container } from "@/components/shared/Container";
 import { CompassConsole } from "@/components/compass/CompassConsole";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -18,8 +22,12 @@ export const metadata = {
     path: "/compass",
     ogType: "article",
   }),
-  // כל עוד המצפן אינו פעיל — noindex,nofollow, כדי שלא ייכנס לאינדוקס בטרם עת.
-  ...(isCompassFeatureEnabled() ? {} : { robots: { index: false, follow: false } }),
+  // כלל יחיד ועקבי: אינדוקס רק כשהמצפן *פעיל ושימושי* — הדגל התפעולי דלוק *וגם*
+  // קיים מפתח ספק (שרת). אם אחד מהם חסר (כבוי/מוגבל) — noindex,nofollow, כדי
+  // שלא ייכנס לאינדוקס עמוד „בקרוב”/לא-פעיל. תואם למצב הפיצ'ר בפועל.
+  ...(isCompassFeatureEnabled() && hasProviderKey()
+    ? {}
+    : { robots: { index: false, follow: false } }),
 };
 
 /**

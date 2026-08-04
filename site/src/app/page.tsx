@@ -47,8 +47,11 @@ export default function HomePage() {
       <ProductSchema />
       <BuildSpine />
       <Hero />
-      <ThesisMotifSection />
+      {/* Path Finder לפני סצנת החתימה: המשתמש מגיע לשאלון מיד אחרי ה-Hero
+          (וקישור „למצוא את המסלול שלי” ‏/#where מגיע אליו ≤800ms, בלי לחצות את
+          טווח ה-pin של Search→Build). בגלילה טבעית הסצנה והאנימציה נשארות מלאות. */}
       <StationJourney />
+      <ThesisMotifSection />
       {/* הצצה לספר + כלים — השיטה המלאה וששת הכלים (ToolsBento) חיים ב-/book. */}
       <HubTeaser
         id="book-teaser"

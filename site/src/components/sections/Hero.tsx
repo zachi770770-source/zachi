@@ -37,7 +37,7 @@ export function Hero() {
 
             <span
               className="kicker hero-fade"
-              style={{ animationDelay: "320ms" }}
+              style={{ animationDelay: "180ms" }}
             >
               {hero.eyebrow}
             </span>
@@ -56,14 +56,14 @@ export function Hero() {
 
             <p
               className="hero-fade mt-4 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted"
-              style={{ animationDelay: "1000ms" }}
+              style={{ animationDelay: "460ms" }}
             >
               מאת צחי חן
             </p>
 
             <p
               className="hero-fade mt-4 max-w-[46ch] text-[21px] leading-[1.6] text-foreground/80"
-              style={{ animationDelay: "1140ms" }}
+              style={{ animationDelay: "540ms" }}
             >
               {hero.subhead}
             </p>
@@ -74,7 +74,7 @@ export function Hero() {
             <div className="mt-7 flex w-full max-w-[46ch] flex-col items-start gap-4 border-t border-border pt-6">
               <p
                 className="hero-fade text-[16px] font-semibold text-brand-hover"
-                style={{ animationDelay: "1300ms" }}
+                style={{ animationDelay: "700ms" }}
               >
                 {siteConfig.preLaunchPriceLabel}
               </p>
