@@ -1029,6 +1029,46 @@
   }
 }
 
+/* כניסת הכריכה בעמוד /book — נחיתה מוצרית ברורה (למעלה מהקיפול, on-load).
+   בסיס גלוי; רק תחת motion-js מריצים כניסה. reduced-motion / no-JS ⇒ סטטי גלוי. */
+.motion-js .book-hero-enter {
+  animation: bookHeroEnter 1200ms var(--ease-settle) 120ms both;
+  transform-origin: center 62%;
+}
+.motion-js .book-hero-enter__shadow {
+  transform-origin: center;
+  animation: bookHeroShadow 900ms var(--ease-settle) 300ms both;
+}
+@keyframes bookHeroEnter {
+  0% {
+    opacity: 0;
+    transform: perspective(1200px) translateY(64px) scale(0.84) rotateX(4deg);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1200px) translateY(0) scale(1) rotateX(0deg);
+  }
+}
+@keyframes bookHeroShadow {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-js .book-hero-enter,
+  .motion-js .book-hero-enter__shadow {
+    animation: none;
+  }
+}
+
 .hero-stage {
   position: relative;
   container-type: inline-size;
@@ -1095,10 +1135,10 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* (1) קו המסלול הפותח — נמשך מימין לשמאל (RTL). */
+  /* (1) קו המסלול הפותח — נמשך מימין לשמאל (RTL) לאורך 0.7s. פותח את הרצף. */
   .hero-rule {
     transform: scaleX(0);
-    animation: heroRuleDraw 480ms var(--ease-settle) both;
+    animation: heroRuleDraw 700ms var(--ease-settle) 60ms both;
   }
   @keyframes heroRuleDraw {
     to {
@@ -1106,34 +1146,37 @@
     }
   }
 
-  /* (2) חשיפת כותרת שורה-אחר-שורה דרך מסכה (overflow) — וילון אמיתי.
-   * תזמון מזוקק: שורה 1 מתחילה כמעט מיד (70ms); הכותרת המלאה קריאה עד ~720ms. */
+  /* (2) חשיפת כותרת שורה-אחר-שורה דרך מסכה (overflow) — וילון אמיתי, איטי דיו
+   * כדי שהעין תקלוט אותו. סטגר 220ms בין השורות. */
   .hero-line__in {
     transform: translateY(115%);
-    animation: heroLineIn 450ms var(--ease-settle) both;
+    animation: heroLineIn 720ms var(--ease-settle) both;
   }
   .hero-line--1 .hero-line__in {
-    animation-delay: 40ms;
+    animation-delay: 300ms;
   }
   .hero-line--2 .hero-line__in {
-    animation-delay: 200ms;
+    animation-delay: 520ms;
   }
   @keyframes heroLineIn {
     to {
       transform: translateY(0);
     }
   }
-  /* (3) „בונים אותה” — התיישבות/בנייה עדינה שרצה יחד עם החשיפה וממשיכה עד
-   * ~1.0s. scale בלבד על טקסט שכבר קריא ⇒ אינו מעכב קריאוּת. */
+  /* (3) „בונים אותה” — פעימת התיישבות ברורה (overshoot נראה) אחרי שהשורה
+   * נחשפה, כרגע-חתימה של הכותרת (~0.76s→~1.5s). */
   .hero-build {
-    animation: heroBuildSettle 780ms var(--ease-settle) 240ms both;
+    animation: heroBuildSettle 760ms var(--ease-settle) 780ms both;
   }
   @keyframes heroBuildSettle {
     0% {
-      transform: scale(0.97) translateY(1px);
+      transform: scale(0.94) translateY(2px);
     }
-    62% {
-      transform: scale(1.006) translateY(0);
+    55% {
+      transform: scale(1.035) translateY(0);
+    }
+    78% {
+      transform: scale(0.992);
     }
     100% {
       transform: scale(1) translateY(0);
@@ -1154,8 +1197,8 @@
   }
   /* ה-CTA וגוש הפעולה — transform בלבד (opacity נשארת 1) ⇒ גלוי ולחיץ מיידית. */
   .hero-rise-soft {
-    transform: translateY(12px);
-    animation: heroRiseSoft 460ms var(--ease-settle) both;
+    transform: translateY(8px);
+    animation: heroRiseSoft 360ms var(--ease-settle) both;
   }
   @keyframes heroRiseSoft {
     to {
@@ -1163,18 +1206,19 @@
     }
   }
 
-  /* (4) כניסת הכריכה — 40–60px, scale 0.88→1, סיבוב 3D מרוסן, opacity מוקדם ל-LCP. */
+  /* (4) כניסת הכריכה — נחיתה מוצרית מלאה: 76px מלמטה, scale 0.82, סיבוב 3D
+   * (rotateY 11°, rotateX 3.5°), מתיישבת לאורך ~1.35s. opacity עולה מוקדם ל-LCP. */
   .hero-book {
     transform-origin: center 62%;
-    animation: heroBookEnter 900ms var(--ease-settle) 220ms both;
+    animation: heroBookEnter 1350ms var(--ease-settle) 340ms both;
   }
   @keyframes heroBookEnter {
     0% {
       opacity: 0;
-      transform: perspective(1100px) translateY(52px) scale(0.88) rotateY(8deg)
-        rotateX(2.5deg);
+      transform: perspective(1100px) translateY(76px) scale(0.82) rotateY(11deg)
+        rotateX(3.5deg);
     }
-    32% {
+    28% {
       opacity: 1;
     }
     100% {
@@ -1183,17 +1227,15 @@
         rotateX(0deg);
     }
   }
-  /* צל הכריכה מתיישב יחד עם הנחיתה. המרכוז (-translate-x-1/2) מגיע מ-Tailwind
-   * דרך תכונת ה-translate; כאן מנפישים רק transform (scaleX) ו-opacity כדי
-   * לא לשכפל את היסט המרכוז. */
+  /* צל הכריכה מתרחב ומתיישב יחד עם הנחיתה. */
   .hero-book__shadow {
     transform-origin: center;
-    animation: heroShadowSettle 640ms var(--ease-settle) 480ms both;
+    animation: heroShadowSettle 820ms var(--ease-settle) 560ms both;
   }
   @keyframes heroShadowSettle {
     from {
       opacity: 0;
-      transform: scaleX(0.6);
+      transform: scaleX(0.5);
     }
     to {
       opacity: 1;
@@ -1512,14 +1554,14 @@ details[open] .faq-answer {
      מחזור אחד בלבד (אף פעם לא אינסופי), ללא fill-mode כדי לא „לתקוע” טרנספורם
      ולשמור על אפקט הלחיצה/hover. אינה מעכבת שימושיות: הכפתור לחיץ מיד. */
   .hero-cta-pulse button[type="submit"] {
-    animation: heroCtaBeat 900ms var(--ease-standard) 1600ms 1;
+    animation: heroCtaBeat 1000ms var(--ease-standard) 2050ms 1;
   }
   @keyframes heroCtaBeat {
     0% {
       box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 0%, transparent);
     }
     45% {
-      box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-brand) 16%, transparent);
+      box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-brand) 20%, transparent);
     }
     100% {
       box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 0%, transparent);
@@ -1536,11 +1578,14 @@ details[open] .faq-answer {
 }
 @media (hover: hover) {
   .lift-hover:hover {
-    transform: translateY(-2px);
+    transform: translateY(-5px);
+    border-color: color-mix(in oklab, var(--color-brand) 45%, var(--color-border-strong));
+    box-shadow: 0 16px 30px -18px rgba(43, 36, 31, 0.5);
   }
 }
 .lift-hover:focus-visible {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 30px -18px rgba(43, 36, 31, 0.5);
 }
 
 /* מעבר עדין של שדה טופס בפוקוס (מעבר על מסגרת/טבעת בלבד — ללא זזת פריסה). */

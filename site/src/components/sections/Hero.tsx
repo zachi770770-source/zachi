@@ -37,7 +37,7 @@ export function Hero() {
 
             <span
               className="kicker hero-fade"
-              style={{ animationDelay: "150ms" }}
+              style={{ animationDelay: "320ms" }}
             >
               {hero.eyebrow}
             </span>
@@ -56,14 +56,14 @@ export function Hero() {
 
             <p
               className="hero-fade mt-4 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted"
-              style={{ animationDelay: "560ms" }}
+              style={{ animationDelay: "1000ms" }}
             >
               מאת צחי חן
             </p>
 
             <p
               className="hero-fade mt-4 max-w-[46ch] text-[21px] leading-[1.6] text-foreground/80"
-              style={{ animationDelay: "640ms" }}
+              style={{ animationDelay: "1140ms" }}
             >
               {hero.subhead}
             </p>
@@ -74,7 +74,7 @@ export function Hero() {
             <div className="mt-7 flex w-full max-w-[46ch] flex-col items-start gap-4 border-t border-border pt-6">
               <p
                 className="hero-fade text-[16px] font-semibold text-brand-hover"
-                style={{ animationDelay: "720ms" }}
+                style={{ animationDelay: "1300ms" }}
               >
                 {siteConfig.preLaunchPriceLabel}
               </p>
@@ -86,7 +86,7 @@ export function Hero() {
                   hero-rise-soft: תזוזה בלבד (opacity=1) ⇒ ה-CTA גלוי ולחיץ מיידית. */}
               <div
                 className="hero-rise-soft flex w-full flex-col items-start gap-3.5"
-                style={{ animationDelay: "360ms" }}
+                style={{ animationDelay: "160ms" }}
               >
                 {siteConfig.salesOpen ? (
                   <Button asChild size="lg" className="h-14 px-7 text-[17px]">

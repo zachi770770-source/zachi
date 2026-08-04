@@ -46,10 +46,15 @@ export default function BookPage() {
             {/* עוגן המעבר „כניסה לספר” + מוקד עריכתי: העטיפה גדולה ומכובדת,
                 עם הילת Sage רכה מאחוריה להפרדה טונאלית. העטיפה נמשכת לכאן
                 מנקודת המקור בבית. */}
-            <div className="relative mx-auto mb-9 w-[172px] sm:w-[204px] lg:w-[232px]">
+            <div className="book-hero-enter relative mx-auto mb-10 w-[248px] sm:w-[304px] lg:w-[360px]">
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-secondary/[0.16] blur-2xl"
+                className="pointer-events-none absolute -inset-8 -z-10 rounded-full bg-secondary/[0.18] blur-3xl"
+              />
+              {/* צל נחיתה שמתרחב ומתיישב יחד עם כניסת הכריכה (עומק מוצר) */}
+              <div
+                aria-hidden="true"
+                className="book-hero-enter__shadow pointer-events-none absolute -bottom-6 start-1/2 h-12 w-[78%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
               />
               {/* #6 המשכיות אובייקט: הכריכה גם יעד (בהגעה מהבית) וגם מקור (ביציאה
                   אל /preview) — אותו ספר „ממשיך” הלאה, ללא כריכה כפולה. */}

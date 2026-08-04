@@ -111,3 +111,54 @@ test("/author primary CTA is visible and links to the free sample (no checkout)"
   await expect(cta).toBeVisible();
   await expect(cta).toHaveAttribute("href", "/preview");
 });
+
+// שומר-סף מחמיר: אחרי גלילה מלאה + התייצבות, שום אלמנט חשיפה (reveal / build-text /
+// staged-reveal) אינו נשאר מתחת ל-opacity 0.99, ובפרט אין `.is-visible` עם opacity 0
+// (הבאג המדווח בפרודקשן). מכסה /, /author, /book.
+for (const route of ["/", "/author", "/book"]) {
+  test(`reveal safety (settled, full scroll): ${route} hides nothing`, async ({ page }) => {
+    await page.goto(route, { waitUntil: "networkidle" });
+    await page.evaluate(async () => {
+      const h = document.body.scrollHeight;
+      for (let y = 0; y <= h; y += 500) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 70));
+      }
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(3600); // מעבר לכל ה-fail-safes (3s) + מעברים
+    const stuck = await page.evaluate(() => {
+      const sel = ".reveal, .build-text, .staged-reveal";
+      const bad: string[] = [];
+      document.querySelectorAll(sel).forEach((el) => {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        if (parseFloat(cs.opacity) < 0.99 && r.width > 40 && r.height > 10) {
+          bad.push(`${el.className.toString().slice(0, 50)} op=${cs.opacity}`);
+        }
+      });
+      return bad;
+    });
+    expect(stuck, `stuck-hidden elements on ${route}`).toEqual([]);
+    // הבאג הספציפי: is-visible קיים אך opacity עדיין 0
+    const visibleButZero = await page.evaluate(
+      () =>
+        [...document.querySelectorAll(".reveal.is-visible")].filter(
+          (e) => parseFloat(getComputedStyle(e).opacity) < 0.99
+        ).length
+    );
+    expect(visibleButZero, `is-visible but opacity<0.99 on ${route}`).toBe(0);
+  });
+}
+
+// כשל-JS מדומה (ללא motion-js): כל התוכן גלוי מיד, אין הסתרה שתלויה בתנועה.
+test("no-JS style safety: without motion-js nothing is hidden", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  const hiddenWhenNoMotion = await page.evaluate(() => {
+    document.documentElement.classList.remove("motion-js");
+    return [...document.querySelectorAll(".reveal, .build-text")].filter(
+      (e) => parseFloat(getComputedStyle(e).opacity) < 0.99
+    ).length;
+  });
+  expect(hiddenWhenNoMotion).toBe(0);
+});
