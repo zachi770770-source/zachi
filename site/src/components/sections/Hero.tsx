@@ -27,13 +27,13 @@ export function Hero() {
         <div className="absolute -top-40 start-[10%] h-[520px] w-[520px] rounded-full bg-secondary/[0.07] blur-[120px]" />
       </div>
 
-      <Container className="flex min-h-[calc(74svh-76px)] items-start py-5 lg:items-center lg:py-8">
-        <div className="grid w-full items-center gap-y-5 lg:grid-cols-[52fr_48fr] lg:gap-x-16">
+      <Container className="flex min-h-[calc(74svh-76px)] items-start py-3 lg:items-center lg:py-8">
+        <div className="grid w-full items-center gap-y-2.5 lg:grid-cols-[52fr_48fr] lg:gap-y-0 lg:gap-x-16">
           {/* תוכן — יחידה רציפה אחת. במובייל ראשון (הצעה + CTA לפני הכריכה);
               בדסקטופ בעמודה הימנית (order-1). */}
           <div className="order-1 flex flex-col items-start">
             {/* (1) קו המסלול הפותח — טרקוטה דק שנמשך ראשון */}
-            <span className="hero-rule mb-5" aria-hidden="true" />
+            <span className="hero-rule mb-3.5 lg:mb-5" aria-hidden="true" />
 
             <span
               className="kicker hero-fade"
@@ -43,7 +43,7 @@ export function Hero() {
             </span>
 
             {/* (2)+(3) חשיפת כותרת שורה-אחר-שורה דרך מסכה; „בונים אותה” מתיישבת */}
-            <h1 className="type-display mt-4 text-foreground">
+            <h1 className="type-display mt-3 text-foreground lg:mt-4">
               <span className="hero-line hero-line--1">
                 <span className="hero-line__in">אהבה לא רק מוצאים.</span>
               </span>
@@ -55,14 +55,14 @@ export function Hero() {
             </h1>
 
             <p
-              className="hero-fade mt-4 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted"
+              className="hero-fade mt-3 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted lg:mt-4"
               style={{ animationDelay: "460ms" }}
             >
               מאת צחי חן
             </p>
 
             <p
-              className="hero-fade mt-4 max-w-[46ch] text-[21px] leading-[1.6] text-foreground/80"
+              className="hero-fade mt-3.5 max-w-[46ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:text-[21px] lg:leading-[1.6]"
               style={{ animationDelay: "540ms" }}
             >
               {hero.subhead}
@@ -71,7 +71,7 @@ export function Hero() {
             {/* יחידת המרה אחת: סטטוס+מחיר, CTA ראשי ופעולה משנית — מקובצים
                 תחת קו שיער עדין, כך שהמחיר והסטטוס נראים חלק מהגוש ולא טקסט
                 אקראי. ה-CTA הראשי נשאר הפעולה הבולטת ביותר. */}
-            <div className="mt-7 flex w-full max-w-[46ch] flex-col items-start gap-4 border-t border-border pt-6">
+            <div className="mt-4 flex w-full max-w-[46ch] flex-col items-start gap-3 border-t border-border pt-4 lg:mt-7 lg:gap-4 lg:pt-6">
               <p
                 className="hero-fade text-[16px] font-semibold text-brand-hover"
                 style={{ animationDelay: "700ms" }}
@@ -85,7 +85,7 @@ export function Hero() {
                   המשנית („למצוא את המסלול שלי”) קלה ולא שוות-משקל.
                   hero-rise-soft: תזוזה בלבד (opacity=1) ⇒ ה-CTA גלוי ולחיץ מיידית. */}
               <div
-                className="hero-rise-soft flex w-full flex-col items-start gap-3.5"
+                className="hero-rise-soft flex w-full flex-col items-start gap-2.5 lg:gap-3.5"
                 style={{ animationDelay: "160ms" }}
               >
                 {siteConfig.salesOpen ? (
@@ -96,7 +96,7 @@ export function Hero() {
                   // טרום-השקה: פעולה דומיננטית אחת — הצטרפות לעדכון ההשקה
                   // שמעניקה גם גישה לטעימה. טופס הרשמה קומפקטי ישיר; אין צורך
                   // באימייל כדי לקרוא את הטעימה (קישור משני נפרד).
-                  <div className="hero-cta-pulse flex w-full flex-col items-start gap-2.5">
+                  <div className="hero-cta-pulse flex w-full flex-col items-start gap-2 lg:gap-2.5">
                     <p className="text-[15px] font-semibold text-foreground">
                       הצטרפו לעדכון ההשקה וקבלו גישה מיידית לטעימה
                     </p>
@@ -147,7 +147,7 @@ export function Hero() {
               {/* הכריכה נסחפת מעט כלפי מעלה בגלילה (פרלקסה מרוסנת) — עומק בלי
                   להפריע לטילט/למעבר-הכריכה (שיושבים על אלמנטים פנימיים). */}
               <div
-                className="hero-depth-book relative w-[172px] sm:w-[264px] lg:w-[340px]"
+                className="hero-depth-book relative w-[168px] sm:w-[224px] lg:w-[340px]"
                 style={{ transform: "translateY(calc(var(--hero-parallax, 0) * -50px))" }}
               >
                 <div
