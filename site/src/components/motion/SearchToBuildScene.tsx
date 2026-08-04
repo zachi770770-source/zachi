@@ -105,42 +105,43 @@ export function SearchToBuildScene() {
     const buildEl = rootRef.current?.querySelector(".s2b__build");
     const introEl = rootRef.current?.querySelector(".s2b__intro");
 
-    // חשיפת הכותרת אות-אחר-אות; ורק לאחר שהמשפט הושלם — fade-up של טקסט ההסבר
-    // המשני. מוגן מפני קריאות חוזרות (scrub הלוך-ושוב) כדי לא לערום טיימרים.
+    // חשיפת הכותרת אות-אחר-אות — זהו רצף האנימציה של GSAP (מסונכרן-גלילה).
+    // מוגן מפני קריאות חוזרות. אחרי סיום המשפט + זמן ההחזקה — fade-up של הטקסט
+    // המשני. GSAP הוא המפעיל *היחיד* של הרצף הזה כשהוא נטען ופועל.
     let built = false;
     let introTimer = 0;
     const revealBuild = () => {
-      if (built) return;
+      if (built || rescued) return;
       built = true;
       buildEl?.classList.add("is-building");
-      // המשפט המלא מוחזק ≥1.5ש לפני שהטקסט המשני מופיע (fade-up): החשיפה מתוזמנת
-      // ל„סיום האותיות + זמן ההחזקה”.
       introTimer = window.setTimeout(
         () => introEl?.classList.add("is-in"),
         LETTERS_TOTAL_MS + HOLD_BEFORE_INTRO_MS
       );
     };
 
-    // גיבוי קשיח: אם ה-GSAP/scrub לא הפעיל את חשיפת-האותיות — הן ייחשפו בכל מקרה
-    // כשהסצנה בתצוגה, כך שלעולם אינן נשארות ב-opacity 0 (כמו שאר מנגנוני הבטיחות).
-    let failsafeTimer = 0;
-    let failsafeIO: IntersectionObserver | undefined;
-    if (buildEl && typeof IntersectionObserver !== "undefined") {
-      failsafeIO = new IntersectionObserver(
-        (entries) => {
-          if (entries.some((e) => e.isIntersecting)) {
-            // גיבוי בלבד (GSAP הוא המפעיל הראשי, בנקודה שבה „דייטינג הוא חיפוש”
-            // כבר דעך והמסלול נבנה). מספיק קצר כדי שהאותיות לעולם לא יישארו נסתרות.
-            failsafeTimer = window.setTimeout(revealBuild, 2600);
-            failsafeIO?.disconnect();
-          }
-        },
-        // rootMargin נדיב + threshold 0 ⇒ נתפס גם בגלילה מהירה/קופצנית שאחרת
-        // עלולה „לדלג” על מסגרת ההצטלבות (בטיחות מוחלטת: האותיות תמיד נחשפות).
-        { rootMargin: "500px 0px 500px 0px", threshold: 0 }
-      );
-      failsafeIO.observe(buildEl);
-    }
+    // הצלת-תוכן בלבד — נכנסת *אך ורק* אם GSAP/ScrollTrigger לא נטען/נכשל
+    // באתחול/לא יצר timeline תקין. אינה טיימר מקביל לאנימציה: כל עוד GSAP חמוש
+    // (gsapArmed) ההצלה לעולם אינה מפעילה דבר. במצב הצלה היא מעבירה את הסצנה
+    // למצב סופי *באופן מסודר* — קודם מעלימה לגמרי את „דייטינג הוא חיפוש”, ורק
+    // אז מציגה את „אהבה היא בנייה.” (ללא אנימציית-אותיות מתוזמנת המתחרה ב-GSAP).
+    let gsapArmed = false;
+    let rescued = false;
+    let rescueStep2 = 0;
+    const runRescue = () => {
+      if (rescued || gsapArmed || built) return;
+      rescued = true;
+      const searchEl = rootRef.current?.querySelector(".s2b__search");
+      searchEl?.classList.add("s2b__search--gone"); // (א) החיפוש נעלם לחלוטין
+      rescueStep2 = window.setTimeout(() => {
+        if (gsapArmed || built) return; // GSAP התעורר בינתיים — לא מתחרים
+        buildEl?.classList.add("s2b__build--shown"); // (ב) המשפט הסופי מוצג
+        introEl?.classList.add("is-in");
+      }, 300);
+    };
+    // Backstop יחיד ל-import שנתקע (לא נפתר ולא נדחה): פועל רק אם GSAP לא התחמש.
+    // מבוטל מיד עם התחמשות GSAP וב-cleanup, כך שאינו מתחרה באנימציה החיה.
+    const backstopTimer = window.setTimeout(runRescue, 6000);
 
     let killed = false;
     let ctx: { revert: () => void } | undefined;
@@ -190,6 +191,10 @@ export function SearchToBuildScene() {
                 pin: stageRef.current,
                 pinSpacing: true,
                 anticipatePin: 1,
+                // בטיחות-תוכן נטיבית של GSAP (לא טיימר): אם גללו *מעבר* לסוף הסצנה
+                // בלי שה-scrub הפעיל את חשיפת-האותיות (גלילה מהירה מאוד) — הן
+                // נחשפות כאן. לעולם אינו יורה בזמן צפייה/עצירה בתוך הסצנה.
+                onLeave: revealBuild,
               },
             });
             // סדר קפדני (מסונכרן-גלילה): (1) פיזור נמוג → (2) „דייטינג הוא חיפוש”
@@ -199,8 +204,9 @@ export function SearchToBuildScene() {
             tl
               // (1→2) הפיזור מתכווץ, מסתובב ונמוג אל המרכז = „חיפוש שמתלכד”
               .to(q(".s2b__scatter"), { scale: 0.45, rotate: -14, autoAlpha: 0, duration: 0.3 }, 0.04)
-              // (3) „דייטינג הוא חיפוש” נסוג, מחליק ומתעמעם — מסתיים ~0.5
-              .to(q(".s2b__search"), { autoAlpha: 0.18, y: -34, scale: 0.92, duration: 0.24 }, 0.26)
+              // (3) „דייטינג הוא חיפוש” נסוג, מחליק ונעלם *לחלוטין* (opacity 0)
+              // עד ~0.5 — כך שהוא לעולם נעלם לפני שהאות הראשונה מופיעה.
+              .to(q(".s2b__search"), { autoAlpha: 0, y: -34, scale: 0.92, duration: 0.24 }, 0.26)
               // (4) הקו נמשך בהדגשה (יסוד המבנה לפני הצמתים)
               .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.3 }, 0.4)
               // הצמתים מתמצקים — עלייה חלקה ויציבה (ללא פעימת-טבעת מהבהבת)
@@ -211,18 +217,29 @@ export function SearchToBuildScene() {
               // (6) קו הטרקוטה ממשיך אל התחנות — אחרי שהמשפט הורכב והוחזק
               .to(q(".s2b__route"), { scaleY: 1, duration: 0.16 }, 0.98);
 
+            // ה-timeline נוצר בהצלחה עם ScrollTrigger תקין ⇒ GSAP „חמוש”.
+            gsapArmed = true;
             return () => tl.scrollTrigger?.kill();
           });
         }, rootRef);
+        // GSAP התחמש → מבטלים את ה-backstop (אין הצלה כשהאנימציה חיה). אם ה-context
+        // רץ אך ה-timeline לא נוצר (מדיה לא תאמה) — מריצים הצלה מסודרת עכשיו.
+        if (gsapArmed) clearTimeout(backstopTimer);
+        else {
+          clearTimeout(backstopTimer);
+          runRescue();
+        }
       } catch {
-        /* GSAP נכשל בטעינה — ההרכב הסופי כבר גלוי (בטוח). */
+        // GSAP נכשל בטעינה/אתחול ⇒ הצלה מסודרת למצב הסופי (חיפוש נעלם → משפט מוצג).
+        clearTimeout(backstopTimer);
+        runRescue();
       }
     })();
 
     return () => {
       killed = true;
-      failsafeIO?.disconnect();
-      if (failsafeTimer) clearTimeout(failsafeTimer);
+      clearTimeout(backstopTimer);
+      if (rescueStep2) clearTimeout(rescueStep2);
       if (introTimer) clearTimeout(introTimer);
       ctx?.revert();
     };

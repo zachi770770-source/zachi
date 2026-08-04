@@ -126,7 +126,20 @@ for (const route of ["/", "/author", "/book"]) {
       }
       window.scrollTo(0, 0);
     });
-    await page.waitForTimeout(5200); // מעבר לכל ה-fail-safes (3.2s s2b) + זמן ההרכבה
+    // סצנת „חיפוש → בנייה” נעוצה: האותיות נחשפות ע"י GSAP בגלילה דרך הסצנה (לא
+    // ע"י טיימר מקביל). ה-pin מוסיף spacer שמגדיל את גובה הגלילה — לכן קוראים
+    // מחדש את מיקום הסצנה ועוברים דרכה עד *מעבר* לסוף ה-pin (חושף גם ב-scrub וגם
+    // ב-onLeave). ללא סצנה (‎/author, /book‎) — no-op.
+    await page.evaluate(async () => {
+      const el = document.querySelector(".s2b");
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      for (let i = 0; i <= 28; i++) {
+        window.scrollTo(0, top + i * window.innerHeight * 0.1);
+        await new Promise((r) => setTimeout(r, 80));
+      }
+    });
+    await page.waitForTimeout(5200); // זמן הרכבת האותיות (stagger) + התייצבות
     const stuck = await page.evaluate(() => {
       const sel = ".reveal, .build-text, .staged-reveal";
       const bad: string[] = [];

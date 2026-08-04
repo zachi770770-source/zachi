@@ -1136,6 +1136,19 @@
     transform 440ms var(--ease-settle);
   transition-delay: var(--char-delay, 0ms);
 }
+/* הצלת-תוכן (rescue) — פועל *רק* כש-GSAP נכשל/לא נטען. הצגה מסודרת של המצב
+ * הסופי: (א) „דייטינג הוא חיפוש” נעלם לחלוטין; (ב) „אהבה היא בנייה” מוצג *ללא*
+ * stagger מתוזמן (transition-delay:0) — לא אנימציית-אותיות שמתחרה ב-GSAP. */
+.motion-js .s2b__search.s2b__search--gone {
+  opacity: 0;
+  transition: opacity 240ms var(--ease-settle);
+}
+.motion-js .s2b__build.s2b__build--shown .s2b__char {
+  opacity: 1;
+  transform: none;
+  transition: opacity 320ms var(--ease-settle);
+  transition-delay: 0ms;
+}
 /* טקסט ההסבר המשני — מוסתר תחת motion-js, ומופיע ב-fade-up קצר רק אחרי
  * שהכותרת הושלמה (המחלקה .is-in נוספת מ-JS). בסיס (no-JS / reduced-motion /
  * ללא motion-js) = גלוי לחלוטין ובמקום, ללא CLS (opacity + transform בלבד). */
