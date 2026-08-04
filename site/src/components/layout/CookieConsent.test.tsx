@@ -10,12 +10,16 @@ import { CookieConsent } from "@/components/layout/CookieConsent";
 describe("CookieConsent", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    // הבאנר „מזוין” מיד במסך גבוה (≥900px). הבדיקות בודקות את לוגיקת ההסכמה,
+    // לכן מעמידים גובה-חלון גבוה כדי שהבאנר יוצג (כמו דסקטופ). ה„זימון” קורה
+    // ב-requestAnimationFrame ⇒ שימוש ב-findBy* (אסינכרוני) במקום getBy*.
+    window.innerHeight = 1000;
   });
 
-  it("shows the banner on first visit", () => {
+  it("shows the banner on first visit", async () => {
     render(<CookieConsent />);
     expect(
-      screen.getByRole("region", { name: "הסכמה לשימוש בעוגיות" })
+      await screen.findByRole("region", { name: "הסכמה לשימוש בעוגיות" })
     ).toBeInTheDocument();
   });
 
@@ -23,7 +27,7 @@ describe("CookieConsent", () => {
     const user = userEvent.setup();
     render(<CookieConsent />);
 
-    await user.click(screen.getByRole("button", { name: "אישור הכל" }));
+    await user.click(await screen.findByRole("button", { name: "אישור הכל" }));
 
     expect(
       screen.queryByRole("region", { name: "הסכמה לשימוש בעוגיות" })
@@ -37,7 +41,7 @@ describe("CookieConsent", () => {
     render(<CookieConsent />);
 
     await user.click(
-      screen.getByRole("button", { name: "רק הכרחי - דחיית עוגיות לא הכרחיות" })
+      await screen.findByRole("button", { name: "רק הכרחי - דחיית עוגיות לא הכרחיות" })
     );
 
     expect(

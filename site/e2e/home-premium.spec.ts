@@ -6,17 +6,8 @@ import { test, expect } from "./fixtures";
  * אופקית ב-320/360/390. התנועה המאושרת אינה משתנה כאן.
  */
 
-test("trust strip: three facts below the hero, as an accessible list", async ({
-  page,
-}) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  const strip = page.getByRole("region", { name: "עובדות על הספר" });
-  await expect(strip).toBeVisible();
-  await expect(strip.getByRole("listitem")).toHaveCount(3);
-  await expect(strip).toContainText("3 תחנות במסע הזוגי");
-  await expect(strip).toContainText("6 כלים מעשיים");
-  await expect(strip).toContainText("טעימה חופשית מהספר");
-});
+// (פס-העובדות „TrustStrip” הוסר מעמוד הבית בקיצור העריכתי — הבדיקה שלו הוסרה
+//  בהתאם; אין להמציא/להחזיר תוכן שלא מוצג.)
 
 test("author teaser is written in the first person", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
@@ -26,25 +17,26 @@ test("author teaser is written in the first person", async ({ page }) => {
   await expect(author).not.toContainText("צחי חן זיהה");
 });
 
-test("conversion journey: thesis anchor precedes the stage section on the homepage", async ({
+test("conversion journey: the Path Finder (#where) precedes the Search→Build thesis scene", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  await expect(page.locator("#thesis-heading")).toBeVisible();
-  // חוויית התחנות היחידה (PHASE 16): הבורר האינטראקטיבי #where.
   await expect(page.locator("#where")).toBeVisible();
+  await expect(page.locator("#thesis-heading")).toBeVisible();
 
-  // סדר ה-DOM: התזה (עוגן) לפני תחנת הקשר (זיהוי + ניתוב).
-  const thesisBeforeStations = await page.evaluate(() => {
-    const thesis = document.querySelector("#thesis-heading");
+  // סדר ה-DOM אחרי הקיצור/הארגון-מחדש: מגלה-המסלול (#where) *לפני* סצנת
+  // Search→Build (#thesis-heading) — כדי שלחיצה על „למצוא את המסלול שלי” תגיע
+  // לשאלון בלי לחצות את טווח ה-pin של הסצנה.
+  const stationsBeforeThesis = await page.evaluate(() => {
     const stations = document.querySelector("#where");
+    const thesis = document.querySelector("#thesis-heading");
     if (!thesis || !stations) return false;
     return !!(
-      thesis.compareDocumentPosition(stations) &
+      stations.compareDocumentPosition(thesis) &
       Node.DOCUMENT_POSITION_FOLLOWING
     );
   });
-  expect(thesisBeforeStations).toBe(true);
+  expect(stationsBeforeThesis).toBe(true);
 });
 
 test("mobile 390: assistant bubble is hidden while the cookie banner is open, and restored after consent", async ({
@@ -54,6 +46,10 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "networkidle" });
 
+  // במסכים נמוכים (מובייל) באנר העוגיות מזוין רק אחרי שה-CTA הראשי גלל אל מעל
+  // פס-הבאנר (כדי שלא יכסה אותו). גוללים מעט כדי שהבאנר יופיע — עדיין הרבה לפני
+  // סף חשיפת הבועה (≈0.6 מסך), כך שהבועה נשארת מוסתרת.
+  await page.evaluate(() => window.scrollTo(0, 220));
   const banner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
   await expect(banner).toBeVisible();
 
@@ -87,12 +83,16 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
     () => !document.body.hasAttribute("data-cookie-banner")
   );
 
-  // מיד אחרי ההסכמה, עדיין בראש העמוד: הבועה מוסתרת בכוונה כדי לא להתחרות
-  // בטופס ההרשמה שבשער בטעינה הראשונית.
+  // מיד אחרי ההסכמה, עדיין לפני אזור חשיפת-הבועה: הבועה מוסתרת בכוונה כדי לא
+  // להתחרות בטופס ההרשמה שבשער.
   expect(await fixedBubbleVisible()).toBe(false);
 
-  // גלילה מעבר לאזור השער חושפת את הבועה בעדינות.
-  await page.evaluate(() => window.scrollTo(0, window.innerHeight));
+  // גלילה מעבר לאזור השער חושפת את הבועה בעדינות (גלילה מיידית — דטרמיניסטית,
+  // ללא smooth שעלול להיקטע מ-reflow סגירת-הבאנר).
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+    window.scrollTo(0, window.innerHeight);
+  });
   await page.waitForFunction(() => {
     const btns = Array.from(
       document.querySelectorAll('button[aria-label="שאלו את הספר"]')
@@ -128,18 +128,14 @@ for (const w of [320, 360, 390]) {
   });
 }
 
-test("reduced-motion: trust strip and thesis text are fully visible", async ({
-  browser,
-}) => {
+test("reduced-motion: thesis text is fully visible", async ({ browser }) => {
   const ctx = await browser.newContext({
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
   });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "networkidle" });
-  await expect(
-    page.getByRole("region", { name: "עובדות על הספר" })
-  ).toContainText("6 כלים מעשיים");
+  // תחת reduced-motion אין הסתרה (motion-js לא מתווסף) — התוכן קריא במלואו.
   const thesis = page.locator("#thesis-heading");
   await thesis.scrollIntoViewIfNeeded();
   await expect(thesis).toContainText("אהבה היא בנייה.");

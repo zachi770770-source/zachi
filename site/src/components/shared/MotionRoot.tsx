@@ -67,6 +67,25 @@ export function MotionRoot() {
       if (buildIo) setupBuildText();
     };
 
+    // גיבוי מגודר-מיקום: חושף אך ורק רכיבים ש*מצטלבים כרגע* עם אזור-הצפייה
+    // (חלק כלשהו גלוי) ונשארו מוסתרים — race נדיר של IO. רכיב מתחת-לקיפול
+    // (top ≥ גובה-החלון) לעולם אינו נחשף כאן: הוא ממתין לגלילה (IO/scan).
+    const revealStuckInView = () => {
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      document
+        .querySelectorAll<HTMLElement>(".reveal:not(.is-visible)")
+        .forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.top < vh && r.bottom > 0) reveal(el);
+        });
+      document
+        .querySelectorAll<HTMLElement>(".build-text.is-armed:not(.is-focused)")
+        .forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.top < vh && r.bottom > 0) focusBuild(el);
+        });
+    };
+
     const scheduleScan = () => {
       if (rafScan) return;
       rafScan = window.requestAnimationFrame(() => {
@@ -107,15 +126,12 @@ export function MotionRoot() {
       // לתצוגה — מבטיח „הגיע לתצוגה ⇒ נראה” גם בקצוות שה-IO עלול לפספס.
       window.addEventListener("scroll", scheduleScan, { passive: true });
       window.addEventListener("resize", scheduleScan);
-      // fail-safe: לא משאירים תוכן משמעותי נסתר בשום תרחיש.
-      failsafe = window.setTimeout(() => {
-        document
-          .querySelectorAll<HTMLElement>(".reveal:not(.is-visible)")
-          .forEach(reveal);
-        document
-          .querySelectorAll<HTMLElement>(".build-text.is-armed:not(.is-focused)")
-          .forEach(focusBuild);
-      }, 3000);
+      // fail-safe *כשל-אמיתי בלבד* — לא טיימר גלובלי לפי-זמן. אחרי השהיה קצרה
+      // חושפים אך ורק רכיבים שכבר נמצאים בתוך/קרוב לאזור-הצפייה אך נשארו
+      // מוסתרים (race נדיר שבו callback ה-IO לא נורה על אלמנט שכבר בתצוגה
+      // בטעינה/הידרציה). רכיב רחוק מתחת-לקיפול לעולם אינו נחשף לפי זמן — הוא
+      // ממתין ל-IntersectionObserver/scan כשגוללים אליו (גם אחרי 10–20ש בשער).
+      failsafe = window.setTimeout(revealStuckInView, 1200);
     };
 
     const stopController = () => {
@@ -139,9 +155,20 @@ export function MotionRoot() {
 
     const apply = () => {
       const allowed = supportsIO && !(mq?.matches ?? false);
-      root.classList.toggle("motion-js", allowed);
-      if (allowed) startController();
-      else stopController(); // בסיס: כל .reveal גלוי ממילא (אין הסתרה)
+      if (allowed) {
+        try {
+          root.classList.add("motion-js");
+          startController();
+        } catch {
+          // כשל-אמיתי באתחול הבקר (חריגת JS) → משחזרים למצב גלוי-מלא: מסירים
+          // motion-js כך שה-CSS אינו מסתיר עוד אף .reveal (item 3).
+          stopController();
+          root.classList.remove("motion-js");
+        }
+      } else {
+        root.classList.remove("motion-js"); // בסיס: כל .reveal גלוי ממילא
+        stopController();
+      }
     };
 
     apply();
