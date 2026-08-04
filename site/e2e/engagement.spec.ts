@@ -88,10 +88,10 @@ test("path finder: three questions map deterministically to a station + tool + d
   await page.goto("/", { waitUntil: "networkidle" });
   const where = page.locator("#where");
   await where.scrollIntoViewIfNeeded();
-  await expect(where.getByRole("heading", { name: "איפה אתם נתקעים בדרך לקשר?" })).toBeVisible();
+  await expect(where.getByRole("heading", { name: "איפה אתם נמצאים במסע הזוגי שלכם?" })).toBeVisible();
 
-  // Q1 "לפני קשר" → deterministically the before-relationship station.
-  await where.getByRole("radio", { name: "לפני קשר" }).click();
+  // Q1 "אני מחפש/ת קשר" → deterministically the before-relationship station.
+  await where.getByRole("radio", { name: "אני מחפש/ת קשר" }).click();
   await where.getByRole("radio", { name: /נועל.*מסקנה/ }).click(); // Q2 → "שלוש שאלות השער"
   await where.getByRole("radio", { name: /קטע קצר מהספר/ }).click(); // Q3 → sample emphasis
 
@@ -123,6 +123,6 @@ test("path finder does not transmit answer content to analytics", async ({ page 
   await where.getByRole("radio").first().click();
   await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
   // No request body may contain the answer/question text.
-  const leaked = posts.filter((p) => /בתוך קשר|נועל|קטע קצר|נתקעים/.test(p));
+  const leaked = posts.filter((p) => /בתוך קשר|נועל|קטע קצר/.test(p));
   expect(leaked, "answer text must never be transmitted").toEqual([]);
 });

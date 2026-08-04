@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, RotateCcw } from "lucide-react";
 
 import { stations, stationOrder, type Station } from "@/content/stations";
-import { stations as stationsCopy, tools } from "@/content/book";
+import { tools } from "@/content/book";
 import { Container } from "@/components/shared/Container";
 import { trackEvent } from "@/lib/analytics";
 
@@ -24,14 +24,17 @@ import { trackEvent } from "@/lib/analytics";
 type StationId = Station["id"];
 
 // ——— מיפויים דטרמיניסטיים (תוכן קיים ומאומת בלבד) ———
+// שלושת קהלי היעד של הספר — ניסוח שמתאים לכל אחד (חיפוש קשר / התחלה מחדש /
+// זוגיות קיימת). המיפוי לתחנות לא משתנה.
 const Q1: { label: string; station: StationId }[] = [
-  { label: "לפני קשר", station: "before-relationship" },
-  { label: "מתחילים מחדש", station: "starting-again" },
-  { label: "בתוך קשר", station: "inside-relationship" },
+  { label: "אני מחפש/ת קשר", station: "before-relationship" },
+  { label: "אני מתחיל/ה מחדש", station: "starting-again" },
+  { label: "אני בתוך קשר ורוצה לבנות אותו טוב יותר", station: "inside-relationship" },
 ];
-// מה חוזר שוב ושוב → כלי מעשי אמיתי מהספר.
+// מה חוזר שוב ושוב → כלי מעשי אמיתי מהספר. ניסוח ניטרלי שמתאים גם למי שמחפש/ת
+// קשר, גם למי שמתחיל/ה מחדש וגם למי שכבר בזוגיות (לא מניח דייטינג).
 const Q2: { label: string; tool: string }[] = [
-  { label: "אני נועל/ת מסקנה מהר — פוסל/ת או מכתיר/ה", tool: "שלוש שאלות השער" },
+  { label: "אני נועל/ת מסקנה מהר על אדם או על מצב", tool: "שלוש שאלות השער" },
   { label: "קשה לי לדעת אם מה שאני מרגיש/ה זה סימן אמיתי", tool: "בדיקת השקט" },
   { label: "אני מגיב/ה לרגע, ומתחרט/ת אחר כך", tool: "כלל 72 השעות" },
 ];
@@ -44,10 +47,18 @@ const Q3: { label: string; emphasis: Emphasis }[] = [
 ];
 
 const QUESTIONS = [
-  { key: "q1", title: "באיזה שלב אתם בדרך לקשר?", options: Q1.map((o) => o.label) },
+  { key: "q1", title: "מה מתאר הכי טוב את המקום שלכם עכשיו?", options: Q1.map((o) => o.label) },
   { key: "q2", title: "מה חוזר אצלכם שוב ושוב?", options: Q2.map((o) => o.label) },
   { key: "q3", title: "מה הכי יעזור לכם עכשיו?", options: Q3.map((o) => o.label) },
 ] as const;
+
+// תוויות דילוג קצרות לשלוש התחנות — מתאימות לשלושת קהלי היעד. מקומיות לשאלון
+// (לא משנות את navLabel הגלובלי שמשמש בניווט/בתוצאה/ב-CTA).
+const SKIP_LABELS: Record<StationId, string> = {
+  "before-relationship": "מחפשים קשר",
+  "starting-again": "מתחילים מחדש",
+  "inside-relationship": "בתוך קשר",
+};
 
 export function StationJourney() {
   // answers[0..2] = index הבחירה בכל שאלה; null = טרם נבחר.
@@ -155,11 +166,11 @@ export function StationJourney() {
             שלוש שאלות קצרות
           </span>
           <h2 id="where-heading" className="type-h2 mt-4">
-            איפה אתם נתקעים בדרך לקשר?
+            איפה אתם נמצאים במסע הזוגי שלכם?
           </h2>
           <p className="type-lead mt-4 text-foreground-muted">
-            {stationsCopy.intro} בחרו את התשובות שהכי קרובות למה שאתם חווים עכשיו,
-            וקבלו נקודת פתיחה לקריאה.
+            בין אם אתם מחפשים קשר, מתחילים מחדש או כבר נמצאים בזוגיות — שלוש שאלות
+            קצרות יעזרו לכם למצוא את נקודת הפתיחה שמתאימה לחיים שלכם עכשיו.
           </p>
         </div>
 
@@ -321,7 +332,7 @@ export function StationJourney() {
                 href={`/${id}`}
                 className="text-[14px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                {stations[id].navLabel}
+                {SKIP_LABELS[id]}
               </Link>
             ))}
           </div>
