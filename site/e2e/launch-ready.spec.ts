@@ -174,11 +174,11 @@ test.describe("Launch-readiness", () => {
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
-    // מגלה-המסלול (#where): שלוש שאלות → בחירת „לפני קשר” + השלמת השאלות
+    // מגלה-המסלול (#where): שלוש שאלות → בחירת „אני מחפש/ת קשר” + השלמת השאלות
     // חושפת נקודת-פתיחה עם קישור לדף התחנה הייעודי.
     const where = page.locator("#where");
     await where.scrollIntoViewIfNeeded();
-    await where.getByRole("radio", { name: "לפני קשר" }).click(); // שאלה 1
+    await where.getByRole("radio", { name: "אני מחפש/ת קשר" }).click(); // שאלה 1
     await where.getByRole("radio").first().click(); // שאלה 2
     await where.getByRole("radio").first().click(); // שאלה 3
     await where
