@@ -21,11 +21,16 @@ const bodyFont = Heebo({
   display: "swap",
 });
 
+// גופן הכותרות/ציטוט (serif). preload:false בכוונה: כל צרכניו הם או מתחת-לקיפול
+// (סצנת התזה, מחבר) או כותרת-הירו שנחשפת דרך אנימציית-מסכה (display:swap מציג
+// serif חלופי בינתיים) — כך שאינו על הנתיב הקריטי של ה-LCP (תווית ה-Heebo הגלויה
+// בירו). ביטול ה-preload שלו משחרר רוחב-פס לקבצי ה-Heebo הקריטיים ל-LCP.
 const quoteFont = Frank_Ruhl_Libre({
   variable: "--font-quote",
   subsets: ["hebrew", "latin"],
   weight: ["500", "700", "800", "900"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {

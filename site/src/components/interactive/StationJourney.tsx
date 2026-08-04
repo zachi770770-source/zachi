@@ -55,6 +55,53 @@ export function StationJourney() {
   const [step, setStep] = React.useState(0); // 0..2 שאלה נוכחית; 3 = תוצאה
   const startedRef = React.useRef(false);
 
+  // כניסה דרך hash אל השאלון (#where) — deep-link ל-/#where או לחיצה על „למצוא
+  // את המסלול שלי”. נוחתים *מיד* על השאלון (scroll-behavior:auto נקודתי) במקום
+  // גלילה חלקה ארוכה: לגלילה החלקה הנטיבית למרחק הזה לוקח ~850ms, מעל יעד
+  // ה-≤800ms (בעיקר במובייל). ההחלפה נקודתית בלבד — התנהגות-הגלילה החלקה של
+  // שאר עוגני-הדף נשמרת (משוחזרת מיד אחרי הנחיתה).
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const landOnWhere = () => {
+      if (window.location.hash !== "#where") return;
+      const el = document.getElementById("where");
+      if (!el) return;
+      const html = document.documentElement;
+      const prev = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
+      el.scrollIntoView({ block: "start" });
+      requestAnimationFrame(() => {
+        html.style.scrollBehavior = prev;
+      });
+    };
+    landOnWhere();
+    window.addEventListener("hashchange", landOnWhere);
+
+    // לחיצה על קישור ל-/#where דרך <Link> של Next: הראוטר מעדכן היסטוריה בלי
+    // לירות „hashchange”, וגולל בעצמו *חלק* (~800ms+). כדי לנחות ≤800ms מכבים
+    // נקודתית את הגלילה החלקה (scroll-behavior:auto) בשלב ה-capture — כך שגלילת
+    // ה-Next שמיד אחריה מיידית — בלי preventDefault ובלי להילחם בניווט. משוחזר
+    // מיד אחרי, כדי לא לפגוע בגלילה החלקה של שאר עוגני-הדף.
+    const onClickCapture = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.(
+        'a[href="/#where"], a[href="#where"]'
+      );
+      if (!a) return;
+      const html = document.documentElement;
+      html.style.scrollBehavior = "auto";
+      window.setTimeout(() => {
+        html.style.scrollBehavior = "";
+      }, 150);
+    };
+    document.addEventListener("click", onClickCapture, true);
+
+    return () => {
+      window.removeEventListener("hashchange", landOnWhere);
+      document.removeEventListener("click", onClickCapture, true);
+    };
+  }, []);
+
   const choose = React.useCallback(
     (qIndex: number, optIndex: number) => {
       if (!startedRef.current) {

@@ -184,7 +184,10 @@ export function SearchToBuildScene() {
               scrollTrigger: {
                 trigger: rootRef.current,
                 start: "top top",
-                end: "+=180%",
+                // אורך ה-pin מקוצר (130vh) ⇒ הסצנה תופסת פחות גובה בעמוד וכל מה
+                // שאחריה מגיע מהר יותר; הכוריאוגרפיה זהה (אותו timeline על פחות
+                // גלילה, עם scrub חלק). האותיות נבנות ב-CSS מבוסס-זמן ומוחזקות.
+                end: "+=130%",
                 scrub: 0.6,
                 pin: stageRef.current,
                 pinSpacing: true,
@@ -233,6 +236,21 @@ export function SearchToBuildScene() {
         runRescue();
       }
     };
+
+    // ניווט דרך hash (deep-link ל-/#where, או לחיצה על „למצוא את המסלול שלי”):
+    // מדלגים לחלוטין על יצירת ה-pin ומעבירים את הסצנה *מיד* למצב הסופי הקריא.
+    // הסיבה: pinSpacing מוסיף spacer בזמן טעינת ה-GSAP הנדחית, וה-reflow הזה עוצר
+    // את גלילת-ה-hash הנטיבית/החלקה באמצע (scrollY נתקע לפני #where). בלי pin →
+    // אין reflow → הגלילה אל #where מסתיימת ≤800ms. גלילה טבעית (ללא hash)
+    // ממשיכה לקבל את האנימציה הנעוצה המלאה — הדילוג חל רק כשקיים hash.
+    if (window.location.hash) {
+      runRescue();
+      return () => {
+        killed = true;
+        if (rescueStep2) clearTimeout(rescueStep2);
+        if (introTimer) clearTimeout(introTimer);
+      };
+    }
 
     // ביצועים: GSAP+ScrollTrigger נטענים *רק כשהסצנה מתקרבת לאזור הצפייה* (היא
     // מתחת-לקיפול) — כלומר אחרי ה-LCP, ורק בדף הבית. כך ~1.3ש של bootup וחישובי

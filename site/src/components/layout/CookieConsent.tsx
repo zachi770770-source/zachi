@@ -139,8 +139,10 @@ export function CookieConsent() {
             מדיניות פרטיות
           </a>
         </p>
+        {/* יעדי-מגע ≥44px (min-h-11) בשלושת הכפתורים — מעל מינימום WCAG, נוח
+            במובייל — תוך שמירה על מראה קומפקטי (px מרוסן). */}
         <div className="flex flex-wrap gap-2 sm:shrink-0">
-          <Button size="sm" onClick={acceptAll}>
+          <Button size="sm" onClick={acceptAll} className="min-h-11">
             אישור הכל
           </Button>
           <Button
@@ -148,6 +150,7 @@ export function CookieConsent() {
             size="sm"
             onClick={rejectNonEssential}
             aria-label="רק הכרחי - דחיית עוגיות לא הכרחיות"
+            className="min-h-11"
           >
             רק הכרחי
           </Button>
@@ -156,6 +159,7 @@ export function CookieConsent() {
             size="sm"
             onClick={() => setManageOpen(true)}
             aria-label="ניהול העדפות עוגיות"
+            className="min-h-11"
           >
             ניהול
           </Button>
