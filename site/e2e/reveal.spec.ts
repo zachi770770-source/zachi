@@ -126,7 +126,7 @@ for (const route of ["/", "/author", "/book"]) {
       }
       window.scrollTo(0, 0);
     });
-    await page.waitForTimeout(3600); // מעבר לכל ה-fail-safes (3s) + מעברים
+    await page.waitForTimeout(5200); // מעבר לכל ה-fail-safes (3.2s s2b) + זמן ההרכבה
     const stuck = await page.evaluate(() => {
       const sel = ".reveal, .build-text, .staged-reveal";
       const bad: string[] = [];
@@ -149,6 +149,14 @@ for (const route of ["/", "/author", "/book"]) {
         ).length
     );
     expect(stuckWords, `stuck staged words on ${route}`).toBe(0);
+    // חשיפת-האותיות של „אהבה היא בנייה” (s2b__char) — אף גרפמה לא תישאר נסתרת.
+    const stuckChars = await page.evaluate(
+      () =>
+        [...document.querySelectorAll(".s2b__char")].filter(
+          (e) => parseFloat(getComputedStyle(e).opacity) < 0.99
+        ).length
+    );
+    expect(stuckChars, `stuck s2b letters on ${route}`).toBe(0);
     // הבאג הספציפי: is-visible קיים אך opacity עדיין 0
     const visibleButZero = await page.evaluate(
       () =>

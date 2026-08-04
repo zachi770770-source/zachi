@@ -26,6 +26,34 @@ const SEARCH_TEXT = bigIdea.title.split(".")[0] + "."; // „דייטינג הו
 const BUILD_TEXT = bigIdea.title.split(".").slice(1).join(".").trim(); // „אהבה היא בנייה.”
 const BUILD_WORDS = BUILD_TEXT.split(/\s+/).filter(Boolean);
 
+// חלוקה לגרפמות (grapheme clusters) עברית — Intl.Segmenter עם נפילה בטוחה.
+// דטרמיניסטי (טקסט קבוע) ⇒ זהה ב-SSR ובלקוח, בלי אי-התאמת הידרציה.
+function toGraphemes(word: string): string[] {
+  try {
+    const seg = new Intl.Segmenter("he", { granularity: "grapheme" });
+    return Array.from(seg.segment(word), (s) => s.segment);
+  } catch {
+    return Array.from(word); // נפילה: נקודות-קוד (בטוח לעברית ללא ניקוד)
+  }
+}
+/** תזמון חשיפת-האותיות: stagger בין אותיות + מרווח נוסף בין מילים. */
+const CHAR_STAGGER_MS = 55; // 45–65ms בין גרפמות
+const WORD_GAP_MS = 100; // 80–120ms הפרדה נוספת בין מילים
+/**
+ * מודל „אות-אחר-אות” בסדר קריאה RTL לוגי: לכל מילה רשימת גרפמות עם ההשהיה
+ * המצטברת. „אהבה” נבנית ראשונה, „היא”, ואז „בנייה.” משלימה — לא בבת אחת.
+ */
+const BUILD_CHARS: { ch: string; delay: number }[][] = (() => {
+  let ci = 0;
+  return BUILD_WORDS.map((word, wi) =>
+    toGraphemes(word).map((ch) => {
+      const delay = ci * CHAR_STAGGER_MS + wi * WORD_GAP_MS;
+      ci += 1;
+      return { ch, delay };
+    })
+  );
+})();
+
 /** מיקומי חמשת צמתי המבנה (עולים = „בנייה”). */
 const NODES: Array<[number, number]> = [
   [56, 168],
@@ -50,6 +78,28 @@ export function SearchToBuildScene() {
     // reduced-motion / אין matchMedia ⇒ אין תנועה; נשאר ההרכב הסופי הקריא.
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
+    const buildEl = rootRef.current?.querySelector(".s2b__build");
+    const revealBuild = () => buildEl?.classList.add("is-building");
+
+    // גיבוי קשיח: אם ה-GSAP/scrub לא הפעיל את חשיפת-האותיות — הן ייחשפו בכל מקרה
+    // כשהסצנה בתצוגה, כך שלעולם אינן נשארות ב-opacity 0 (כמו שאר מנגנוני הבטיחות).
+    let failsafeTimer = 0;
+    let failsafeIO: IntersectionObserver | undefined;
+    if (buildEl && typeof IntersectionObserver !== "undefined") {
+      failsafeIO = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            failsafeTimer = window.setTimeout(revealBuild, 2600);
+            failsafeIO?.disconnect();
+          }
+        },
+        // rootMargin נדיב + threshold 0 ⇒ נתפס גם בגלילה מהירה/קופצנית שאחרת
+        // עלולה „לדלג” על מסגרת ההצטלבות (בטיחות מוחלטת: האותיות תמיד נחשפות).
+        { rootMargin: "500px 0px 500px 0px", threshold: 0 }
+      );
+      failsafeIO.observe(buildEl);
+    }
+
     let killed = false;
     let ctx: { revert: () => void } | undefined;
 
@@ -73,7 +123,8 @@ export function SearchToBuildScene() {
             gsap.set(q(".s2b__scatter-dot"), { transformOrigin: "center" });
             gsap.set(q(".s2b__line"), { strokeDashoffset: 1 });
             gsap.set(q(".s2b__node"), { autoAlpha: 0, scale: 0.2, transformOrigin: "center" });
-            gsap.set(q(".s2b__build-word"), { autoAlpha: 0, yPercent: 60 });
+            // „אהבה היא בנייה” נחשפת אות-אחר-אות (CSS מבוסס-זמן) בטריגר בהמשך —
+            // GSAP אינו נוגע ב-.s2b__char כדי שלא תהיה שליטה כפולה.
             gsap.set(q(".s2b__route"), { scaleY: 0, transformOrigin: "top center" });
             gsap.set(q(".s2b__search"), { autoAlpha: 1, y: 0, scale: 1, transformOrigin: "right center" });
 
@@ -105,10 +156,11 @@ export function SearchToBuildScene() {
               .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.34 }, 0.42)
               .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.06, duration: 0.26, ease: "back.out(2.2)" }, 0.5)
               .fromTo(q(".s2b__node-ring"), { scale: 0.4, autoAlpha: 0.6, transformOrigin: "center" }, { scale: 1.9, autoAlpha: 0, stagger: 0.06, duration: 0.34 }, 0.56)
-              // (5) „אהבה היא בנייה” נבנית מילה-אחר-מילה, עלייה מודגשת
-              .to(q(".s2b__build-word"), { autoAlpha: 1, yPercent: 0, stagger: 0.11, duration: 0.16, ease: "back.out(1.7)" }, 0.72)
-              // (6) קו הטרקוטה ממשיך אל התחנות
-              .to(q(".s2b__route"), { scaleY: 1, duration: 0.16 }, 0.9);
+              // (5) „אהבה היא בנייה” נבנית אות-אחר-אות — הטריגר מפעיל חשיפת-CSS
+              // מבוססת-זמן (stagger בין גרפמות), והמשפט המורכב מוחזק לקריאה.
+              .call(revealBuild, undefined, 0.72)
+              // (6) קו הטרקוטה ממשיך אל התחנות — אחרי שהמשפט הורכב והוחזק
+              .to(q(".s2b__route"), { scaleY: 1, duration: 0.16 }, 0.98);
 
             return () => tl.scrollTrigger?.kill();
           });
@@ -119,7 +171,6 @@ export function SearchToBuildScene() {
             gsap.set(q(".s2b__scatter"), { autoAlpha: 0, scale: 1, transformOrigin: "50% 55%" });
             gsap.set(q(".s2b__line"), { strokeDashoffset: 1 });
             gsap.set(q(".s2b__node"), { autoAlpha: 0, scale: 0.35, transformOrigin: "center" });
-            gsap.set(q(".s2b__build-word"), { autoAlpha: 0, yPercent: 40 });
             gsap.set(q(".s2b__route"), { scaleY: 0, transformOrigin: "top center" });
 
             // שלב 1 — הפיזור (חיפוש/רעש) מופיע ומרחף
@@ -138,10 +189,10 @@ export function SearchToBuildScene() {
               .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.75, ease: "power1.inOut" }, 0.2)
               .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.09, duration: 0.44, ease: "back.out(2.2)" }, 0.5)
               .fromTo(q(".s2b__node-ring"), { scale: 0.4, autoAlpha: 0.6, transformOrigin: "center" }, { scale: 1.9, autoAlpha: 0, stagger: 0.09, duration: 0.5 }, 0.6);
-            // שלב 3 — „אהבה היא בנייה” נבנית מילה-אחר-מילה + קו ההמשך
-            gsap.timeline({ scrollTrigger: { trigger: q(".s2b__build"), start: "top 80%", once: true } })
-              .to(q(".s2b__build-word"), { autoAlpha: 1, yPercent: 0, stagger: 0.1, duration: 0.42, ease: "power2.out" })
-              .to(q(".s2b__route"), { scaleY: 1, duration: 0.4, ease: "power2.out" }, 0.25);
+            // שלב 3 — „אהבה היא בנייה” נבנית אות-אחר-אות (טריגר → חשיפת-CSS) + קו ההמשך
+            gsap.timeline({ scrollTrigger: { trigger: q(".s2b__build"), start: "top 82%", once: true } })
+              .call(revealBuild)
+              .to(q(".s2b__route"), { scaleY: 1, duration: 0.4, ease: "power2.out" }, 0.9);
           });
         }, rootRef);
       } catch {
@@ -151,6 +202,8 @@ export function SearchToBuildScene() {
 
     return () => {
       killed = true;
+      failsafeIO?.disconnect();
+      if (failsafeTimer) clearTimeout(failsafeTimer);
       ctx?.revert();
     };
   }, []);
@@ -169,13 +222,32 @@ export function SearchToBuildScene() {
                 <span className="s2b__search block text-secondary-foreground/90">
                   {SEARCH_TEXT}
                 </span>
+                {/* „אהבה היא בנייה.” נבנית אות-אחר-אות (grapheme). העטיפות
+                    החזותיות aria-hidden; קוראי-מסך מקבלים את המשפט השלם פעם אחת
+                    (sr-only). סדר DOM = סדר קריאה לוגי RTL; ה-bidi של הדפדפן
+                    מסדר את הגרפמות מימין-לשמאל — המשפט לעולם אינו מתהפך. */}
                 <span className="s2b__build mt-2 block text-brand-muted">
-                  {BUILD_WORDS.map((w, i) => (
-                    <span key={i} className="s2b__build-word inline-block">
-                      {w}
-                      {i < BUILD_WORDS.length - 1 ? " " : ""}
-                    </span>
-                  ))}
+                  <span aria-hidden="true">
+                    {BUILD_CHARS.map((chars, wi) => (
+                      <React.Fragment key={wi}>
+                        <span className="s2b__build-word inline-block">
+                          {chars.map(({ ch, delay }, ci) => (
+                            <span
+                              key={ci}
+                              className="s2b__char"
+                              style={
+                                { "--char-delay": `${delay}ms` } as React.CSSProperties
+                              }
+                            >
+                              {ch}
+                            </span>
+                          ))}
+                        </span>
+                        {wi < BUILD_CHARS.length - 1 ? " " : null}
+                      </React.Fragment>
+                    ))}
+                  </span>
+                  <span className="sr-only">{BUILD_TEXT}</span>
                 </span>
               </h2>
               {/* התזה בפרוזה — „קריאה מבוקרת” מילה-אחר-מילה (StagedTextReveal).

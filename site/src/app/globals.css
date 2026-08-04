@@ -1099,6 +1099,27 @@
 .s2b__line {
   stroke-dasharray: 1; /* עם pathLength=1: dashoffset 1=מוסתר, 0=מצויר (בסיס) */
 }
+/* „אהבה היא בנייה” — חשיפת גרפמות אות-אחר-אות, מבוססת-זמן. בסיס גלוי לחלוטין
+ * (SSR / no-JS / reduced-motion). תחת motion-js האותיות מזוינות (opacity 0,
+ * עלייה קלה), ומתגלות כש-.is-building נוסף (טריגר GSAP בנקודת „הבנייה” או
+ * גיבוי), עם transition-delay פר-אות (‎--char-delay). transform/opacity בלבד ⇒
+ * אין CLS, מרוכב ב-compositor. אין blur. */
+.s2b__char {
+  display: inline-block;
+  will-change: opacity, transform;
+}
+.motion-js .s2b__build .s2b__char {
+  opacity: 0;
+  transform: translateY(24px) scale(0.97);
+}
+.motion-js .s2b__build.is-building .s2b__char {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 420ms var(--ease-settle),
+    transform 420ms var(--ease-settle);
+  transition-delay: var(--char-delay, 0ms);
+}
 /* בדסקטופ עם תנועה — הבמה ממלאת מסך לרצף ה-pinned. תחת reduced-motion הבאנד
  * בגובה תוכן רגיל (בלי 100vh ריק). */
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
