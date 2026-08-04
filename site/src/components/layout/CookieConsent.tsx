@@ -68,19 +68,23 @@ export function CookieConsent() {
   const [armed, setArmed] = React.useState(false);
   React.useEffect(() => {
     if (!wantsBanner) return;
-    if (window.innerHeight >= 900) {
-      setArmed(true);
-      return;
-    }
+    let raf = 0;
     const arm = () => {
-      if (window.scrollY > 140) {
+      // מסך גבוה/דסקטופ (≥900px): ה-CTA הראשי לעולם אינו בפס-הבאנר → מזיינים
+      // מיד. מסך נמוך: מזיינים רק אחרי שה-CTA גלל אל מעל פס-הבאנר (scrollY>140),
+      // כך שהבאנר לעולם לא מכסה ולו פיקסל מה-CTA (כולל 375×667 / 360×800).
+      if (window.innerHeight >= 900 || window.scrollY > 140) {
         setArmed(true);
         window.removeEventListener("scroll", arm);
       }
     };
     window.addEventListener("scroll", arm, { passive: true });
-    arm();
-    return () => window.removeEventListener("scroll", arm);
+    // בדיקה ראשונית מחוץ לגוף ה-effect (rAF) — לא setState סינכרוני באפקט.
+    raf = window.requestAnimationFrame(arm);
+    return () => {
+      window.removeEventListener("scroll", arm);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [wantsBanner]);
 
   const visible = wantsBanner && armed;

@@ -38,7 +38,15 @@ test("smart sticky sample bar: appears after hero, links to /preview, dismissal 
   await expect(bar).toBeHidden();
 
   // אחרי גלילה מעבר ל-Hero — מופיע, מפנה לטעימה החינמית, ללא ניסוח רכישה.
-  await page.evaluate(() => window.scrollTo(0, Math.round(document.body.scrollHeight * 0.5)));
+  // גוללים אל מיד-אחרי ה-Hero (הבר מופיע כשה-Hero יוצא מהתצוגה), עדיין הרבה
+  // לפני סצנת ה-s2b שמסתירה את הבר. גלילה מיידית ומגודרת-מיקום (לא אחוז שרירותי,
+  // שהשתנה עם הארגון-מחדש של הבית).
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+    const hero = document.querySelector("main section");
+    const y = (hero ? hero.getBoundingClientRect().bottom : 0) + window.scrollY + 40;
+    window.scrollTo(0, y);
+  });
   await expect(bar).toBeVisible();
   const cta = bar.getByRole("link", { name: /קראו 2 דקות עכשיו/ });
   await expect(cta).toHaveAttribute("href", "/preview");
@@ -48,7 +56,15 @@ test("smart sticky sample bar: appears after hero, links to /preview, dismissal 
   await bar.getByRole("button", { name: "סגירת בר הטעימה" }).click();
   await expect(bar).toBeHidden();
   await page.reload({ waitUntil: "networkidle" });
-  await page.evaluate(() => window.scrollTo(0, Math.round(document.body.scrollHeight * 0.5)));
+  // גוללים אל מיד-אחרי ה-Hero (הבר מופיע כשה-Hero יוצא מהתצוגה), עדיין הרבה
+  // לפני סצנת ה-s2b שמסתירה את הבר. גלילה מיידית ומגודרת-מיקום (לא אחוז שרירותי,
+  // שהשתנה עם הארגון-מחדש של הבית).
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+    const hero = document.querySelector("main section");
+    const y = (hero ? hero.getBoundingClientRect().bottom : 0) + window.scrollY + 40;
+    window.scrollTo(0, y);
+  });
   await expect(page.getByRole("complementary", { name: "בר הטעימה" })).toBeHidden();
   await ctx.close();
 });

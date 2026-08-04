@@ -78,6 +78,8 @@ test.describe("Launch-readiness", () => {
 
   test("cookie banner reserves space and does not cover the footer", async ({ page }) => {
     await page.goto("/author", { waitUntil: "networkidle" });
+    // הבאנר מזוין רק אחרי גלילה קלה במסכים נמוכים (כדי לא לכסות את ה-CTA).
+    await page.evaluate(() => window.scrollTo(0, 200));
     const banner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
     await expect(banner).toBeVisible();
     // הגוף שומר מקום בתחתית בגובה הבאנר בפועל, כך שהבאנר לא מכסה תוכן/פוטר.

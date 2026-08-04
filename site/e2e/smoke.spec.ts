@@ -87,6 +87,8 @@ test("cookie consent: accept all hides the banner without crashing the app", asy
   const errors = trackErrors(page);
   await page.goto("/", { waitUntil: "networkidle" });
 
+  // הבאנר מזוין רק אחרי גלילה קלה במסכים נמוכים (כדי לא לכסות את ה-CTA הראשי).
+  await page.evaluate(() => window.scrollTo(0, 200));
   const consentBanner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
   await expect(consentBanner).toBeVisible();
   await page.getByRole("button", { name: "אישור הכל" }).click();
@@ -110,6 +112,8 @@ test("cookie consent: accept all hides the banner without crashing the app", asy
 test("sticky purchase bar is hidden during pre-launch", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "networkidle" });
+  // הבאנר מזוין בגלילה במובייל; גוללים מעט ואז מאשרים כדי לסגור אותו.
+  await page.evaluate(() => window.scrollTo(0, 200));
   await page.getByRole("button", { name: "אישור הכל" }).click();
 
   const bar = page.getByRole("region", { name: "רכישה מהירה" });
