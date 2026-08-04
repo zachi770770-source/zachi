@@ -820,7 +820,7 @@
      עם perspective עמוקה ⇒ תחושת דף פיזי שמתרומם, לא לוח שמסתובב מעט. */
   .peek-stage {
     transform-style: preserve-3d;
-    transform: perspective(1200px) rotateY(calc(var(--drag, 0) * 38deg));
+    transform: perspective(1400px) rotateY(calc(var(--drag, 0) * 12deg));
     transition: transform 360ms var(--ease-settle);
   }
   .peek-stage.peek-dragging {
@@ -845,13 +845,14 @@
     background: var(--color-surface);
     box-shadow: -14px 0 30px -12px rgba(34, 38, 43, 0.45);
   }
-  /* הדף הנכנס מגיע מאחור; הדף היוצא נהפך כמעט 100° סביב הכריכה — היפוך ספר */
+  /* מעבר דף מרוסן (9–11°): שכבה נכנסת + שכבה יוצאת אמיתיות סביב הכריכה (RTL),
+     עם צל נע — בלי „היפוך” מוגזם. */
   @keyframes peekEnter {
     from {
       opacity: 0;
-      transform: perspective(1200px) rotateY(-22deg) translateY(10px) scale(0.985);
+      transform: perspective(1400px) rotateY(-10deg) translateX(8px);
     }
-    45% {
+    55% {
       opacity: 1;
     }
     to {
@@ -862,13 +863,12 @@
   @keyframes peekLeave {
     from {
       opacity: 1;
-      transform: perspective(1200px) rotateY(0deg);
-      filter: brightness(1);
+      transform: perspective(1400px) rotateY(0deg);
     }
     to {
       opacity: 0;
-      transform: perspective(1200px) rotateY(96deg);
-      filter: brightness(0.82);
+      transform: perspective(1400px) rotateY(11deg) translateX(-6px);
+      filter: brightness(0.94);
     }
   }
 }

@@ -98,7 +98,7 @@ export function Hero() {
                   // באימייל כדי לקרוא את הטעימה (קישור משני נפרד).
                   <div className="hero-cta-pulse flex w-full flex-col items-start gap-2.5">
                     <p className="text-[15px] font-semibold text-foreground">
-                      הצטרפו לעדכון ההשקה וקבלו גישה לטעימה
+                      הצטרפו לעדכון ההשקה וקבלו גישה מיידית לטעימה
                     </p>
                     <WaitlistCta source="hero" inline />
                   </div>
