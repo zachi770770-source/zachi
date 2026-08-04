@@ -2,47 +2,37 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, X } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
+import { trackEvent } from "@/lib/analytics";
 
 /**
- * CTA דביק מודע-כוונה: מופיע רק אחרי שה-Hero יוצא מהתצוגה (הקורא כבר גלל
- * לתוך התוכן), ומפנה לפעולה הנכונה למצב הנוכחי — בטרום-השקה לטעימה החינמית,
- * ואחרי פתיחת המכירה לרכישה. שני היעדים והתוויות קיימים כבר באתר.
- *
- * מיקום: צמוד לתחתית בצד המסיים (שמאל ב-RTL — ההפוך מבועת „שאלו את הספר”
- * שנמצאת בצד המתחיל), ומורם מעל באנר העוגיות (קורא את ה-padding שהבאנר שומר
- * ל-body), כך שאינו מכסה עוגיות, את משגר העוזר או תוכן. ניתן לסגירה, נגיש
- * במקלדת, ומכבד prefers-reduced-motion (הכניסה מגודרת ב-motion-safe).
+ * בר-הטעימה החכם — פעולה דביקה אחת ומאוחדת. בטרום-השקה זו תמיד הטעימה החינמית
+ * (ללא חיכוך, ללא הרשמה): „קראו טעימה חינם” → /preview. אחרי פתיחת המכירה הופך
+ * לרכישה. מופיע רק אחרי שה-Hero יוצא מהתצוגה; מורם מעל באנר העוגיות (קורא את
+ * ה-padding שהבאנר שומר ל-body) כדי לא לכסות עוגיות/משגר/תוכן; ניתן לסגירה,
+ * והסגירה נזכרת לאורך ה-session (sessionStorage). נגיש במקלדת (יעד 44px),
+ * ומכבד prefers-reduced-motion (הכניסה מגודרת ב-motion-safe). כולל תמונת כריכה
+ * זעירה אמיתית וטקסט עובדתי קצר — ללא ניסוח רכישה, ללא דירוג/מונה מזויפים.
  */
-/**
- * #5 שלב המסע של המבקר — נקבע *פעם אחת* ב-mount מ-localStorage ולא משתנה אחר כך
- * (אין מאזין storage), ולכן היעד יציב לחלוטין כל עוד ה-CTA חי — לעולם לא משתנה
- * בזמן שהמצביע/פוקוס עליו. explore → sample (קרא טעימה) → joined (נרשם).
- */
-type Stage = "explore" | "sample" | "joined";
-const STAGE_CTA: Record<Stage, { href: string; label: string }> = {
-  explore: { href: "/preview", label: "לקריאת טעימה מהספר" },
-  sample: { href: "/waitlist", label: "להצטרפות לרשימת ההמתנה" },
-  joined: { href: "/preview", label: "חזרה לטעימה מהספר" },
-};
+const DISMISS_KEY = "mdl_sticky_dismissed";
 
 export function StickyCta() {
   const [visible, setVisible] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
   const [bannerHeight, setBannerHeight] = React.useState(0);
-  const [stage, setStage] = React.useState<Stage>("explore");
 
-  // שלב המסע — קריאה חד-פעמית ב-mount. יציב לכל אורך חיי ה-CTA (focus-safe).
+  // סגירה נזכרת ל-session — לא מציקים שוב אחרי שהמבקר סגר.
   React.useEffect(() => {
     try {
-      const joined = localStorage.getItem("mdl_waitlist_joined") === "1";
-      const seen = localStorage.getItem("mdl_sample_seen") === "1";
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- קריאה חד-פעמית מ-localStorage ב-mount
-      setStage(joined ? "joined" : seen ? "sample" : "explore");
+      if (sessionStorage.getItem(DISMISS_KEY) === "1") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- קריאה חד-פעמית ב-mount
+        setDismissed(true);
+      }
     } catch {
-      /* ברירת מחדל: explore */
+      /* אין sessionStorage — הבר פשוט יופיע */
     }
   }, []);
 
@@ -74,35 +64,62 @@ export function StickyCta() {
     };
   }, []);
 
+  const close = React.useCallback(() => {
+    setDismissed(true);
+    try {
+      sessionStorage.setItem(DISMISS_KEY, "1");
+    } catch {
+      /* לא קריטי */
+    }
+  }, []);
+
   if (dismissed || !visible) return null;
 
-  // אחרי פתיחת המכירה — רכישה. טרום-השקה — לפי שלב המסע (יציב מ-mount).
-  const { href, label } = siteConfig.salesOpen
-    ? { href: "/book#purchase", label: "לרכישת הספר" }
-    : STAGE_CTA[stage];
+  // טרום-השקה: תמיד הטעימה החינמית ללא הרשמה. אחרי פתיחת המכירה — רכישה.
+  const preLaunch = !siteConfig.salesOpen;
+  const href = preLaunch ? "/preview" : "/book#purchase";
+  const label = preLaunch ? "קראו טעימה חינם" : "לרכישת הספר";
 
   return (
     <aside
-      aria-label="קיצור דרך לפעולה"
-      className="motion-safe:animate-slide-up fixed start-4 z-30 flex max-w-[calc(100vw-2rem)] items-center gap-1.5 rounded-full border border-border-strong bg-surface/95 p-1.5 ps-4 shadow-lg backdrop-blur"
-      style={{ bottom: `calc(${bannerHeight}px + 1rem)` }}
+      aria-label="בר הטעימה"
+      className="motion-safe:animate-slide-up fixed bottom-0 start-3 end-[90px] z-30 flex items-center gap-2 rounded-2xl border border-border-strong bg-surface/95 p-2 ps-3 shadow-lg backdrop-blur sm:end-auto sm:start-4 sm:max-w-none sm:rounded-full"
+      style={{
+        bottom: `calc(${bannerHeight}px + max(0.75rem, env(safe-area-inset-bottom)))`,
+      }}
     >
+      {/* כריכה זעירה אמיתית — נוכחות הספר, ללא הזזת פריסה (רוחב קבוע) */}
+      <Image
+        src={siteConfig.images.cover}
+        alt=""
+        aria-hidden="true"
+        width={30}
+        height={45}
+        unoptimized
+        className="hidden h-10 w-[27px] shrink-0 rounded-sm shadow-sm sm:block"
+      />
       <Link
         href={href}
-        className="inline-flex min-h-[40px] items-center gap-2 rounded-full text-[15px] font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        onClick={() => preLaunch && trackEvent("sticky_sample_click")}
+        className="inline-flex min-h-[44px] flex-1 items-center justify-between gap-2 rounded-full ps-1 text-[15px] font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:flex-none sm:justify-start"
       >
-        <span key={stage} className="cta-morph">
-          {label}
+        <span className="flex flex-col items-start leading-tight">
+          <span>{label}</span>
+          {preLaunch ? (
+            <span className="text-[12px] font-medium text-foreground-muted">
+              קטע אמיתי מהספר · בלי הרשמה
+            </span>
+          ) : null}
         </span>
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-surface">
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground text-surface">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </span>
       </Link>
       <button
         type="button"
-        onClick={() => setDismissed(true)}
-        aria-label="סגירת קיצור הדרך"
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-foreground-muted transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        onClick={close}
+        aria-label="סגירת בר הטעימה"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-foreground-muted transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>
