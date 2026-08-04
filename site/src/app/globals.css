@@ -1289,6 +1289,22 @@
 .stuck-answer {
   animation: stuckAnswerIn 620ms var(--ease-settle) both;
 }
+/* מגלה-המסלול — כל שאלה נכנסת עם החלקה עדינה מכיוון הקריאה (RTL). */
+@media (prefers-reduced-motion: no-preference) {
+  .pathfinder__q {
+    animation: pathfinderQ 380ms var(--ease-settle) both;
+  }
+  @keyframes pathfinderQ {
+    from {
+      opacity: 0;
+      transform: translateX(28px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   /* התוכן הפנימי „נבנה” בזה-אחר-זה כשמתחלפת תחנה — קריא כמסלול שנבנה מחדש */
   .stuck-answer > * {
