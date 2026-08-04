@@ -425,10 +425,12 @@
    * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
   .motion-js .reveal {
     opacity: 0;
-    transform: translateY(46px) scale(0.965);
+    /* fade-up מורגש: translateY 32px → 0, opacity 0 → 1, ~0.7s,
+       cubic-bezier(0.22,1,0.36,1) (=var(--ease-settle)). */
+    transform: translateY(32px);
     transition:
-      opacity 640ms var(--ease-settle),
-      transform 760ms var(--ease-settle);
+      opacity 700ms var(--ease-settle),
+      transform 700ms var(--ease-settle);
     will-change: opacity, transform;
   }
   .motion-js .reveal.is-visible {
@@ -462,22 +464,15 @@
   .motion-js .reveal--mask.is-visible {
     clip-path: inset(0 0 0 0);
   }
-  /* מדרג ילדים: ילדי מקטע נכנסים בזה-אחר-זה (--i נקבע ב-JSX / מונה). */
+  /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה (--i נקבע ב-JSX / מונה). */
   .motion-js .reveal[data-stagger] {
-    transition-delay: calc(var(--i, 0) * 90ms);
+    transition-delay: calc(var(--i, 0) * 120ms);
   }
-  /* גיבוי-על בלתי-תלוי-JS: אם משום-מה החשיפה לא סומנה (בקר נכשל, race נדיר),
-     אף .reveal לא יישאר נסתר. ה-animation מתחיל רק אחרי 4s (forwards) ולכן אינו
-     מפריע לחשיפה הרגילה שקורית הרבה קודם. */
-  .motion-js .reveal {
-    animation: reveal-failsafe 0.001s linear 4s forwards;
-  }
-  @keyframes reveal-failsafe {
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
+  /* אין כאן „גיבוי-על” מבוסס-זמן: אנימציית reveal-failsafe שחשפה כל .reveal
+     אחרי 4s מהטעינה הוסרה בכוונה — היא גרמה לסקשנים מתחת-לקיפול להגיע למצב
+     הסופי לפני שהמשתמש גלל אליהם (ואז ללא fade-up). החשיפה מונעת אך ורק דרך
+     IntersectionObserver פר-רכיב (MotionRoot), עם גיבוי מגודר-מיקום (חושף רק
+     מה שכבר בתוך/קרוב לאזור-הצפייה) — לעולם לא לפי זמן-מהטעינה. */
 
   /* ===================================================================
    * חשיפת טקסט מדורגת (StagedTextReveal) — „קריאה מבוקרת” מילה-אחר-מילה.

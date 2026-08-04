@@ -18,20 +18,32 @@ async function noHiddenReveal(page: import("@playwright/test").Page) {
   );
 }
 
-test("/author: body copy is visible (not stuck at opacity 0)", async ({ page }) => {
+test("/author: body copy reveals (fade-up) once scrolled into view, not stuck at 0", async ({ page }) => {
   await page.goto("/author", { waitUntil: "networkidle" });
-  // ה-motion-js אמור להיות פעיל (JS + IO + לא reduced), והתוכן חשוף.
+  // ה-motion-js אמור להיות פעיל (JS + IO + לא reduced).
   await expect
     .poll(() => page.evaluate(() => document.documentElement.classList.contains("motion-js")))
     .toBe(true);
   const body = page.locator(".reveal").first();
-  await expect.poll(() => opacityOf(body)).toBeGreaterThan(0.99);
+  // התנהגות תקינה: כשה-.reveal מתחת-לקיפול בטעינה הוא מוסתר (מחכה לגלילה),
+  // ולא נחשף מראש לפי טיימר. גוללים אליו ⇒ הוא עולה ל-opacity מלא.
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+    const el = document.querySelector(".reveal") as HTMLElement | null;
+    el?.scrollIntoView({ block: "center" });
+  });
+  await expect.poll(() => opacityOf(body)).toBeGreaterThan(0.95);
   await expect(page.getByText(/זיהיתי קושי משותף/)).toBeVisible();
   await expect.poll(() => noHiddenReveal(page)).toBe(0);
 });
 
 test("/book: every reveal section is visible after scrolling through", async ({ page }) => {
   await page.goto("/book", { waitUntil: "networkidle" });
+  // גלילה דטרמיניסטית (ללא smooth) כדי שהעמוד באמת יעבור דרך כל מיקום ⇒ כל
+  // reveal ייכנס לתצוגה וייחשף. (הבדיקה הישנה הסתמכה על failsafe-זמן שהוסר.)
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+  });
   for (let y = 0; y <= 8000; y += 600) {
     await page.evaluate((v) => window.scrollTo(0, v), y);
     await page.waitForTimeout(120);
@@ -54,6 +66,9 @@ test("/book: deep-link leaves no section at/above the fold hidden", async ({ pag
 
 test("station deep page: raw .reveal sections are all visible", async ({ page }) => {
   await page.goto("/before-relationship", { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+  });
   for (let y = 0; y <= 6000; y += 600) {
     await page.evaluate((v) => window.scrollTo(0, v), y);
     await page.waitForTimeout(100);
@@ -119,6 +134,7 @@ for (const route of ["/", "/author", "/book"]) {
   test(`reveal safety (settled, full scroll): ${route} hides nothing`, async ({ page }) => {
     await page.goto(route, { waitUntil: "networkidle" });
     await page.evaluate(async () => {
+      document.documentElement.style.scrollBehavior = "auto";
       const h = document.body.scrollHeight;
       for (let y = 0; y <= h; y += 500) {
         window.scrollTo(0, y);
@@ -180,6 +196,84 @@ for (const route of ["/", "/author", "/book"]) {
     expect(visibleButZero, `is-visible but opacity<0.99 on ${route}`).toBe(0);
   });
 }
+
+// ── רגרסיה לתקלת-הפרודקשן הספציפית (Scroll Reveal מבוסס-זמן) ──────────────────
+// הבאג: כל `.reveal` קיבל מצב-סופי ב-scrollY=0 דרך failsafe מבוסס-זמן — טיימר
+// גלובלי של 3ש ב-MotionRoot + אנימציית CSS `reveal-failsafe` אחרי 4ש — ולכן
+// כשגללו אל הסקשנים הם כבר היו במצב הסופי (ללא fade-up). שני ה-failsafes האלה
+// הוסרו; החשיפה מונעת אך ורק דרך IntersectionObserver פר-רכיב, עם גיבוי
+// מגודר-מיקום בלבד. הבדיקה הבאה הייתה *נכשלת* על הקוד הישן.
+test("home: 10s at scrollY=0 does NOT pre-reveal a far below-fold reveal, and scrolling to it triggers a real fade-up", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.classList.contains("motion-js")))
+    .toBe(true);
+
+  // רכיב .reveal שנמצא הרחק מתחת-לקיפול בטעינה (top > 1.5 מסך).
+  const farIdx = await page.evaluate(() => {
+    const vh = window.innerHeight;
+    const els = [...document.querySelectorAll(".reveal")];
+    for (let i = els.length - 1; i >= 0; i--) {
+      if (els[i].getBoundingClientRect().top > vh * 1.5) return i;
+    }
+    return -1;
+  });
+  expect(farIdx, "expected a .reveal far below the fold on home").toBeGreaterThanOrEqual(0);
+
+  // המתנה ארוכה בראש העמוד — אסור שהרכיב הרחוק ייחשף לפי זמן.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(10_000);
+  const atTop = await page.evaluate((i) => {
+    const el = document.querySelectorAll(".reveal")[i];
+    return {
+      op: parseFloat(getComputedStyle(el).opacity),
+      isVis: el.classList.contains("is-visible"),
+      top: Math.round(el.getBoundingClientRect().top),
+      vh: window.innerHeight,
+    };
+  }, farIdx);
+  expect(atTop.top, "sanity: element is still below the fold").toBeGreaterThan(atTop.vh);
+  expect(atTop.isVis, "far below-fold reveal must NOT be pre-revealed after 10s at top").toBe(false);
+  expect(atTop.op, "far below-fold reveal must stay hidden (opacity ~0) after 10s at top").toBeLessThan(0.1);
+
+  // גלילה אל הרכיב (מיידית, ללא smooth) — חייב שינוי אמיתי hidden → final.
+  await page.evaluate((i) => {
+    document.documentElement.style.scrollBehavior = "auto";
+    const el = document.querySelectorAll(".reveal")[i] as HTMLElement;
+    const y = window.scrollY + el.getBoundingClientRect().top - window.innerHeight * 0.45;
+    window.scrollTo(0, Math.max(0, y));
+  }, farIdx);
+  await page.waitForTimeout(1000); // > משך ה-fade-up (700ms)
+  const settled = await page.evaluate((i) => {
+    const el = document.querySelectorAll(".reveal")[i];
+    const cs = getComputedStyle(el);
+    let ty = 0;
+    const m = cs.transform;
+    if (m && m.startsWith("matrix")) {
+      const n = m.match(/matrix\(([^)]+)\)/);
+      if (n) ty = parseFloat(n[1].split(",")[5]) || 0;
+    }
+    return { op: parseFloat(cs.opacity), ty, isVis: el.classList.contains("is-visible") };
+  }, farIdx);
+  expect(settled.isVis, "reveal becomes visible after scrolling to it").toBe(true);
+  expect(settled.op, "reveal reaches full opacity after entering the viewport").toBeGreaterThan(0.95);
+  expect(Math.abs(settled.ty), "reveal settles to translateY 0").toBeLessThan(3);
+});
+
+test("home: reduced-motion shows every reveal immediately (no motion-js, nothing hidden)", async ({
+  browser,
+}) => {
+  const ctx = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await ctx.newPage();
+  await page.goto("/", { waitUntil: "networkidle" });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.classList.contains("motion-js")))
+    .toBe(false);
+  await expect.poll(() => noHiddenReveal(page)).toBe(0);
+  await ctx.close();
+});
 
 // כשל-JS מדומה (ללא motion-js): כל התוכן גלוי מיד, אין הסתרה שתלויה בתנועה.
 test("no-JS style safety: without motion-js nothing is hidden", async ({ page }) => {
