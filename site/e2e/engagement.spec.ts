@@ -60,3 +60,48 @@ test("no fabricated social proof rendered in pre-launch (no stars, no reader cou
   // אין דירוג כוכבים ואין מונה קוראים מזויף.
   await expect(page.getByText(/מעל \d+ קוראים|★|⭐/)).toHaveCount(0);
 });
+
+test("path finder: three questions map deterministically to a station + tool + disclaimer", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  const where = page.locator("#where");
+  await where.scrollIntoViewIfNeeded();
+  await expect(where.getByRole("heading", { name: "איפה אתם נתקעים בדרך לקשר?" })).toBeVisible();
+
+  // Q1 "לפני קשר" → deterministically the before-relationship station.
+  await where.getByRole("radio", { name: "לפני קשר" }).click();
+  await where.getByRole("radio", { name: /נועל.*מסקנה/ }).click(); // Q2 → "שלוש שאלות השער"
+  await where.getByRole("radio", { name: /קטע קצר מהספר/ }).click(); // Q3 → sample emphasis
+
+  // Result: the mapped station, the mapped real tool, the required disclaimer.
+  await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
+  await expect(where.getByText("שלוש שאלות השער")).toBeVisible();
+  await expect(where.getByText("זו נקודת פתיחה לקריאה, לא אבחון או ייעוץ.")).toBeVisible();
+  await expect(where.getByRole("link", { name: /לתחנה המלאה: לפני קשר/ })).toHaveAttribute(
+    "href",
+    "/before-relationship"
+  );
+  await expect(where.getByRole("link", { name: "לקריאת הטעימה" })).toHaveAttribute("href", "/preview");
+
+  // Restart returns to question 1.
+  await where.getByRole("button", { name: "להתחיל מחדש" }).click();
+  await expect(where.getByText("שאלה 1/3")).toBeVisible();
+});
+
+test("path finder does not transmit answer content to analytics", async ({ page }) => {
+  const posts: string[] = [];
+  page.on("request", (r) => {
+    if (r.method() === "POST") posts.push((r.postData() || "") + " " + r.url());
+  });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const where = page.locator("#where");
+  await where.scrollIntoViewIfNeeded();
+  await where.getByRole("radio", { name: "בתוך קשר" }).click();
+  await where.getByRole("radio").first().click();
+  await where.getByRole("radio").first().click();
+  await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
+  // No request body may contain the answer/question text.
+  const leaked = posts.filter((p) => /בתוך קשר|נועל|קטע קצר|נתקעים/.test(p));
+  expect(leaked, "answer text must never be transmitted").toEqual([]);
+});
