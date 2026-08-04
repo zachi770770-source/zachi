@@ -425,12 +425,12 @@
    * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
   .motion-js .reveal {
     opacity: 0;
-    /* fade-up מורגש: translateY 32px → 0, opacity 0 → 1, ~0.7s,
+    /* fade-up מורגש: translateY 34px → 0, opacity 0 → 1, 0.72s,
        cubic-bezier(0.22,1,0.36,1) (=var(--ease-settle)). */
-    transform: translateY(32px);
+    transform: translateY(34px);
     transition:
-      opacity 700ms var(--ease-settle),
-      transform 700ms var(--ease-settle);
+      opacity 720ms var(--ease-settle),
+      transform 720ms var(--ease-settle);
     will-change: opacity, transform;
   }
   .motion-js .reveal.is-visible {
@@ -466,7 +466,7 @@
   }
   /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה (--i נקבע ב-JSX / מונה). */
   .motion-js .reveal[data-stagger] {
-    transition-delay: calc(var(--i, 0) * 120ms);
+    transition-delay: calc(var(--i, 0) * 115ms);
   }
   /* אין כאן „גיבוי-על” מבוסס-זמן: אנימציית reveal-failsafe שחשפה כל .reveal
      אחרי 4s מהטעינה הוסרה בכוונה — היא גרמה לסקשנים מתחת-לקיפול להגיע למצב
@@ -1371,9 +1371,9 @@
     @keyframes heroBookEnter {
       0% {
         opacity: 0;
-        transform: translateY(26px) scale(0.94);
+        transform: translateY(48px) scale(0.92);
       }
-      40% {
+      42% {
         opacity: 1;
       }
       100% {

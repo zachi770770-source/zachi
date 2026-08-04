@@ -23,6 +23,7 @@ export function StickyCta() {
   const [visible, setVisible] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
   const [bannerHeight, setBannerHeight] = React.useState(0);
+  const [bannerOpen, setBannerOpen] = React.useState(false);
 
   // סגירה נזכרת ל-session — לא מציקים שוב אחרי שהמבקר סגר.
   React.useEffect(() => {
@@ -104,6 +105,23 @@ export function StickyCta() {
     };
   }, []);
 
+  // כשבאנר העוגיות פתוח — הבר אינו מרונדר (הרכיבים הצפים לא מתחרים על אותו
+  // שטח בתחתית). חוזר מיד עם סגירת ההסכמה. אות-מצב מפורש מ-CookieConsent
+  // (data-attribute + אירוע), לא הסקה מריווח CSS. setState עובר דרך פונקציה
+  // (לא בגוף ה-effect ישירות) — כדי לא להפעיל את כלל set-state-in-effect.
+  React.useEffect(() => {
+    const readAttr = () =>
+      document.body.getAttribute("data-cookie-banner") === "open";
+    const sync = (nextOpen: boolean) => setBannerOpen(nextOpen);
+    const onChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ open?: boolean }>).detail;
+      sync(typeof detail?.open === "boolean" ? detail.open : readAttr());
+    };
+    sync(readAttr());
+    window.addEventListener("cookie-banner-change", onChange);
+    return () => window.removeEventListener("cookie-banner-change", onChange);
+  }, []);
+
   const close = React.useCallback(() => {
     setDismissed(true);
     try {
@@ -115,7 +133,8 @@ export function StickyCta() {
 
   // בזמן שסצנת „חיפוש → בנייה” בתחום הצפייה — הבר אינו מרונדר כלל (לא רק
   // מוסתר), כדי שלעולם לא יכסה את רגע-השיא. חוזר מיד עם היציאה מהסצנה.
-  if (dismissed || !visible || formInView || sceneInView) return null;
+  // כשבאנר העוגיות פתוח — מוסתר אף הוא (אין תחרות על שטח התחתית).
+  if (dismissed || !visible || formInView || sceneInView || bannerOpen) return null;
 
   // טרום-השקה: תמיד הטעימה החינמית ללא הרשמה. אחרי פתיחת המכירה — רכישה.
   const preLaunch = !siteConfig.salesOpen;
@@ -125,7 +144,9 @@ export function StickyCta() {
   return (
     <aside
       aria-label="בר הטעימה"
-      className="motion-safe:animate-slide-up fixed bottom-0 start-3 end-[90px] z-30 flex items-center gap-2 rounded-2xl border border-border-strong bg-surface/95 p-2 ps-3 shadow-lg backdrop-blur sm:end-auto sm:start-4 sm:max-w-none sm:rounded-full"
+      /* חזרה עדינה-מדורגת אחרי סגירת ההסכמה: השהיית-כניסה קלה כך שהבר נכנס מעט
+         אחרי בועת „שאלו את הספר” (לא בבת-אחת). מגודר motion-safe. */
+      className="motion-safe:animate-slide-up motion-safe:[animation-delay:140ms] fixed bottom-0 start-3 end-[90px] z-30 flex items-center gap-2 rounded-2xl border border-border-strong bg-surface/95 p-2 ps-3 shadow-lg backdrop-blur sm:end-auto sm:start-4 sm:max-w-none sm:rounded-full"
       style={{
         bottom: `calc(${bannerHeight}px + max(0.75rem, env(safe-area-inset-bottom)))`,
       }}

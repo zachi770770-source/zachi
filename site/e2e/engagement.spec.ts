@@ -37,10 +37,15 @@ test("smart sticky sample bar: appears after hero, links to /preview, dismissal 
   // לא מופיע כל עוד ה-Hero בתצוגה.
   await expect(bar).toBeHidden();
 
+  // הרכיבים הצפים לא מתחרים על שטח התחתית: בזמן שבאנר-העוגיות פתוח בר-הטעימה
+  // מוסתר. מאשרים עוגיות תחילה (גלילה מזיינת את הבאנר) כדי לסגור אותו, ואז
+  // בר-הטעימה יכול להופיע אחרי ה-Hero.
+  await page.evaluate(() => window.scrollTo(0, 220));
+  await page.getByRole("button", { name: "אישור הכל" }).click();
+
   // אחרי גלילה מעבר ל-Hero — מופיע, מפנה לטעימה החינמית, ללא ניסוח רכישה.
   // גוללים אל מיד-אחרי ה-Hero (הבר מופיע כשה-Hero יוצא מהתצוגה), עדיין הרבה
-  // לפני סצנת ה-s2b שמסתירה את הבר. גלילה מיידית ומגודרת-מיקום (לא אחוז שרירותי,
-  // שהשתנה עם הארגון-מחדש של הבית).
+  // לפני סצנת ה-s2b שמסתירה את הבר. גלילה מיידית ומגודרת-מיקום.
   await page.evaluate(() => {
     document.documentElement.style.scrollBehavior = "auto";
     const hero = document.querySelector("main section");
