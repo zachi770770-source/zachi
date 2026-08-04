@@ -20,7 +20,7 @@ test.describe("Launch-readiness", () => {
     // פעולות משנה קלות (קישורי טקסט, לא כפתורים): „לקריאת טעימה מהספר” → /preview
     // (טריגר המעבר „כניסה לטעימה”, שמושך את כריכת השער אל עמוד ההצצה),
     // ו„למצוא את המסלול שלי” → /#where.
-    const sample = heroSection.getByRole("link", { name: "לקריאת טעימה מהספר" });
+    const sample = heroSection.getByRole("link", { name: "לקריאת טעימה ללא הרשמה" });
     await expect(sample).toHaveAttribute("href", "/preview");
     const secondary = page.getByRole("link", { name: "למצוא את המסלול שלי" });
     await expect(secondary).toHaveAttribute("href", "/#where");

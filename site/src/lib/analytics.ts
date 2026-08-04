@@ -40,7 +40,13 @@ export type AnalyticsEventName =
   // אחרי הרשמה). ללא מידע אישי; עוברים דרך אותה שכבת consent קיימת.
   | "hero_waitlist_open"
   | "waitlist_submit_success"
-  | "preview_open_after_signup";
+  | "preview_open_after_signup"
+  // בר-הטעימה החכם + עוגני-מדיה עתידיים (ללא מידע אישי; no-op עד להגדרת ספק).
+  | "sticky_sample_click"
+  | "path_finder_start"
+  | "path_finder_complete"
+  | "audio_play"
+  | "video_play";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
 
