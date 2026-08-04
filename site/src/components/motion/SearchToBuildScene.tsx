@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import { Container } from "@/components/shared/Container";
-import { StagedTextReveal } from "@/components/shared/StagedTextReveal";
 import { bigIdea } from "@/content/book";
 
 /**
@@ -37,22 +36,34 @@ function toGraphemes(word: string): string[] {
   }
 }
 /** תזמון חשיפת-האותיות: stagger בין אותיות + מרווח נוסף בין מילים. */
-const CHAR_STAGGER_MS = 55; // 45–65ms בין גרפמות
-const WORD_GAP_MS = 100; // 80–120ms הפרדה נוספת בין מילים
+const CHAR_STAGGER_MS = 100; // מרווח בין גרפמה לגרפמה (קצב קריא, אות-אחר-אות)
+const WORD_GAP_MS = 210; // השהיית „נשימה” בגבול-מילה (במקום ה-100 הרגיל)
+const CHAR_ENTRANCE_MS = 440; // משך כניסת כל אות
 /**
  * מודל „אות-אחר-אות” בסדר קריאה RTL לוגי: לכל מילה רשימת גרפמות עם ההשהיה
  * המצטברת. „אהבה” נבנית ראשונה, „היא”, ואז „בנייה.” משלימה — לא בבת אחת.
+ * ההשהיה מצטברת ברצף: בין אותיות באותה מילה +CHAR_STAGGER, ובגבול-מילה
+ * +WORD_GAP (כך שהפער בין מילים הוא בדיוק WORD_GAP, לא stagger+gap).
  */
 const BUILD_CHARS: { ch: string; delay: number }[][] = (() => {
-  let ci = 0;
-  return BUILD_WORDS.map((word, wi) =>
-    toGraphemes(word).map((ch) => {
-      const delay = ci * CHAR_STAGGER_MS + wi * WORD_GAP_MS;
-      ci += 1;
-      return { ch, delay };
+  let acc = 0;
+  let first = true;
+  return BUILD_WORDS.map((word) =>
+    toGraphemes(word).map((ch, gi) => {
+      if (first) {
+        first = false;
+      } else if (gi === 0) {
+        acc += WORD_GAP_MS; // גבול-מילה: נשימה ארוכה יותר
+      } else {
+        acc += CHAR_STAGGER_MS; // אות-אחר-אות בתוך המילה
+      }
+      return { ch, delay: acc };
     })
   );
 })();
+/** משך הרכבת המשפט המלא (האות האחרונה + משך כניסתה) — נקודת „הכותרת הושלמה”. */
+const LETTERS_TOTAL_MS =
+  Math.max(0, ...BUILD_CHARS.flat().map((c) => c.delay)) + CHAR_ENTRANCE_MS;
 
 /** מיקומי חמשת צמתי המבנה (עולים = „בנייה”). */
 const NODES: Array<[number, number]> = [
@@ -79,7 +90,21 @@ export function SearchToBuildScene() {
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     const buildEl = rootRef.current?.querySelector(".s2b__build");
-    const revealBuild = () => buildEl?.classList.add("is-building");
+    const introEl = rootRef.current?.querySelector(".s2b__intro");
+
+    // חשיפת הכותרת אות-אחר-אות; ורק לאחר שהמשפט הושלם — fade-up של טקסט ההסבר
+    // המשני. מוגן מפני קריאות חוזרות (scrub הלוך-ושוב) כדי לא לערום טיימרים.
+    let built = false;
+    let introTimer = 0;
+    const revealBuild = () => {
+      if (built) return;
+      built = true;
+      buildEl?.classList.add("is-building");
+      introTimer = window.setTimeout(
+        () => introEl?.classList.add("is-in"),
+        LETTERS_TOTAL_MS
+      );
+    };
 
     // גיבוי קשיח: אם ה-GSAP/scrub לא הפעיל את חשיפת-האותיות — הן ייחשפו בכל מקרה
     // כשהסצנה בתצוגה, כך שלעולם אינן נשארות ב-opacity 0 (כמו שאר מנגנוני הבטיחות).
@@ -152,13 +177,14 @@ export function SearchToBuildScene() {
               .to(q(".s2b__scatter"), { scale: 0.45, rotate: -14, autoAlpha: 0, duration: 0.34 }, 0.04)
               // (3) „דייטינג הוא חיפוש” נסוג, מחליק ומתעמעם
               .to(q(".s2b__search"), { autoAlpha: 0.22, y: -40, scale: 0.92, duration: 0.22 }, 0.3)
-              // (4) המבנה נבנה — הקו נמשך בהדגשה, הצמתים „קופצים” לתוקף (overshoot)
+              // (4) המבנה נבנה — הקו נמשך בהדגשה (יסוד המבנה לפני הצמתים)
               .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.34 }, 0.42)
-              .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.06, duration: 0.26, ease: "back.out(2.2)" }, 0.5)
-              .fromTo(q(".s2b__node-ring"), { scale: 0.4, autoAlpha: 0.6, transformOrigin: "center" }, { scale: 1.9, autoAlpha: 0, stagger: 0.06, duration: 0.34 }, 0.56)
               // (5) „אהבה היא בנייה” נבנית אות-אחר-אות — הטריגר מפעיל חשיפת-CSS
               // מבוססת-זמן (stagger בין גרפמות), והמשפט המורכב מוחזק לקריאה.
               .call(revealBuild, undefined, 0.72)
+              // הצמתים מתמצקים בסנכרון עם הרכבת המשפט — עלייה חלקה ויציבה (ללא
+              // פעימת-טבעת מהבהבת). כל צומת „ננעל” לתוקפו ונשאר; אין הבהוב.
+              .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.05, duration: 0.2, ease: "power2.out" }, 0.72)
               // (6) קו הטרקוטה ממשיך אל התחנות — אחרי שהמשפט הורכב והוחזק
               .to(q(".s2b__route"), { scaleY: 1, duration: 0.16 }, 0.98);
 
@@ -187,8 +213,8 @@ export function SearchToBuildScene() {
             gsap.timeline({ scrollTrigger: { trigger: q(".s2b__motif"), start: "top 62%", once: true } })
               .to(q(".s2b__scatter"), { scale: 0.55, rotate: -12, autoAlpha: 0, duration: 0.55, ease: "power1.in" })
               .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.75, ease: "power1.inOut" }, 0.2)
-              .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.09, duration: 0.44, ease: "back.out(2.2)" }, 0.5)
-              .fromTo(q(".s2b__node-ring"), { scale: 0.4, autoAlpha: 0.6, transformOrigin: "center" }, { scale: 1.9, autoAlpha: 0, stagger: 0.09, duration: 0.5 }, 0.6);
+              // צמתים מתמצקים בעלייה חלקה ויציבה — ללא פעימת-טבעת מהבהבת.
+              .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.09, duration: 0.44, ease: "power2.out" }, 0.5);
             // שלב 3 — „אהבה היא בנייה” נבנית אות-אחר-אות (טריגר → חשיפת-CSS) + קו ההמשך
             gsap.timeline({ scrollTrigger: { trigger: q(".s2b__build"), start: "top 82%", once: true } })
               .call(revealBuild)
@@ -204,6 +230,7 @@ export function SearchToBuildScene() {
       killed = true;
       failsafeIO?.disconnect();
       if (failsafeTimer) clearTimeout(failsafeTimer);
+      if (introTimer) clearTimeout(introTimer);
       ctx?.revert();
     };
   }, []);
@@ -250,19 +277,13 @@ export function SearchToBuildScene() {
                   <span className="sr-only">{BUILD_TEXT}</span>
                 </span>
               </h2>
-              {/* התזה בפרוזה — „קריאה מבוקרת” מילה-אחר-מילה (StagedTextReveal).
-                  חשיפה עצמאית ב-IntersectionObserver; GSAP אינו נוגע ב-s2b__intro
-                  כדי שלא תהיה שליטה כפולה. בטוח-נפילה: הטקסט המלא מרונדר ב-SSR. */}
-              <StagedTextReveal
-                groups={[
-                  {
-                    text: bigIdea.intro,
-                    as: "p",
-                    className:
-                      "s2b__intro mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 sm:text-xl",
-                  },
-                ]}
-              />
+              {/* טקסט ההסבר המשני — מופיע ב-fade-up קצר *רק אחרי* שהכותרת
+                  הושלמה אות-אחר-אות (המחלקה .is-in נוספת ב-revealBuild אחרי
+                  LETTERS_TOTAL_MS). בטוח-נפילה: הטקסט המלא מרונדר ב-SSR וגלוי
+                  כברירת מחדל (ההסתרה מגודרת ב-.motion-js בלבד). */}
+              <p className="s2b__intro mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 sm:text-xl">
+                {bigIdea.intro}
+              </p>
             </div>
 
             {/* עמודת המוטיב — דקורטיבי (aria-hidden) */}
@@ -305,8 +326,8 @@ export function SearchToBuildScene() {
                 <g>
                   {NODES.map(([cx, cy], i) => (
                     <g key={i} className="s2b__node">
-                      {/* טבעת „פעימת בנייה” שמתפשטת כשהצומת מתמצק */}
-                      <circle className="s2b__node-ring" cx={cx} cy={cy} r="9" fill="none" stroke="var(--color-brand)" strokeWidth="1.6" />
+                      {/* צומת „בנייה” — הילה רכה + ליבה מלאה. ללא טבעת-פעימה
+                          (מקור הבהוב); הצומת מתמצק חלק ונשאר יציב. */}
                       <circle cx={cx} cy={cy} r="9.5" fill="var(--color-brand-muted)" opacity="0.32" />
                       <circle cx={cx} cy={cy} r="5.4" fill="var(--color-brand)" />
                     </g>

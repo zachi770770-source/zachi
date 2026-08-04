@@ -1116,9 +1116,24 @@
   opacity: 1;
   transform: none;
   transition:
-    opacity 420ms var(--ease-settle),
-    transform 420ms var(--ease-settle);
+    opacity 440ms var(--ease-settle),
+    transform 440ms var(--ease-settle);
   transition-delay: var(--char-delay, 0ms);
+}
+/* טקסט ההסבר המשני — מוסתר תחת motion-js, ומופיע ב-fade-up קצר רק אחרי
+ * שהכותרת הושלמה (המחלקה .is-in נוספת מ-JS). בסיס (no-JS / reduced-motion /
+ * ללא motion-js) = גלוי לחלוטין ובמקום, ללא CLS (opacity + transform בלבד). */
+.motion-js .s2b__intro {
+  opacity: 0;
+  transform: translateY(16px);
+  will-change: opacity, transform;
+}
+.motion-js .s2b__intro.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 400ms var(--ease-settle),
+    transform 400ms var(--ease-settle);
 }
 /* בדסקטופ עם תנועה — הבמה ממלאת מסך לרצף ה-pinned. תחת reduced-motion הבאנד
  * בגובה תוכן רגיל (בלי 100vh ריק). */

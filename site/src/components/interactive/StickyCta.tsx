@@ -7,6 +7,7 @@ import { ArrowLeft, X } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
 /**
  * בר-הטעימה החכם — פעולה דביקה אחת ומאוחדת. בטרום-השקה זו תמיד הטעימה החינמית
@@ -72,6 +73,22 @@ export function StickyCta() {
     return () => io.disconnect();
   }, []);
 
+  // בזמן שסצנת „חיפוש → בנייה” (.s2b) בתחום הצפייה — מסתירים בעדינות את הבר כדי
+  // שלא יכסה את הרגע החתימתי; משוחזר כשהסצנה יוצאת. נמדד ב-IO (לא אחוז-גלילה).
+  // אינו נוגע בבאנר העוגיות/ההסכמה — רק בבר-הטעימה עצמו.
+  const [sceneInView, setSceneInView] = React.useState(false);
+  React.useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const scene = document.querySelector(".s2b");
+    if (!scene) return; // הסצנה קיימת רק בעמוד הבית
+    const io = new IntersectionObserver(
+      ([entry]) => setSceneInView(entry.isIntersecting),
+      { threshold: 0, rootMargin: "0px 0px -20% 0px" }
+    );
+    io.observe(scene);
+    return () => io.disconnect();
+  }, []);
+
   // הרמה מעל באנר העוגיות: הבאנר שומר padding-bottom על ה-body לפי גובהו.
   React.useEffect(() => {
     const read = () => {
@@ -107,7 +124,13 @@ export function StickyCta() {
   return (
     <aside
       aria-label="בר הטעימה"
-      className="motion-safe:animate-slide-up fixed bottom-0 start-3 end-[90px] z-30 flex items-center gap-2 rounded-2xl border border-border-strong bg-surface/95 p-2 ps-3 shadow-lg backdrop-blur sm:end-auto sm:start-4 sm:max-w-none sm:rounded-full"
+      aria-hidden={sceneInView || undefined}
+      inert={sceneInView || undefined}
+      className={cn(
+        "motion-safe:animate-slide-up fixed bottom-0 start-3 end-[90px] z-30 flex items-center gap-2 rounded-2xl border border-border-strong bg-surface/95 p-2 ps-3 shadow-lg backdrop-blur transition-[opacity,transform] duration-300 ease-out sm:end-auto sm:start-4 sm:max-w-none sm:rounded-full",
+        // הסתרה עדינה בזמן סצנת „חיפוש → בנייה” (נשאר mounted → מעבר רך, לא ניתוק)
+        sceneInView && "pointer-events-none translate-y-4 opacity-0"
+      )}
       style={{
         bottom: `calc(${bannerHeight}px + max(0.75rem, env(safe-area-inset-bottom)))`,
       }}
