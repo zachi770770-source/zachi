@@ -54,7 +54,36 @@ export function CookieConsent() {
     getConsentRawSnapshot,
     getServerConsentRawSnapshot
   );
-  const visible = siteConfig.features.cookieConsent && !consentRaw;
+  const wantsBanner = siteConfig.features.cookieConsent && !consentRaw;
+
+  // „חימוש” הבאנר — מתי מותר להציגו. הבאנר נעוץ-תחתית, ובמסכים נמוכים ה-CTA
+  // הראשי של ה-Hero יושב בקצה-התחתון של אזור-הצפייה בטעינה; באנר תחתון *אינו
+  // יכול* שלא לכסות אותו שם (אין מקום על-המסך מתחתיו). לכן:
+  //  • מסכים גבוהים/דסקטופ (≥900px) — ה-CTA לעולם אינו בפס-הבאנר → מציגים מיד.
+  //  • מסכים נמוכים (מובייל/טאבלט) — מציגים *רק* אחרי שה-CTA הראשי גלל אל מעל
+  //    פס-הבאנר (scrollY > 140), כך שהבאנר לעולם אינו מכסה ולו פיקסל מה-CTA
+  //    (כולל 375×667 ו-360×800). עוגיות לא-הכרחיות ממילא מגודרות-הסכמה, כך
+  //    שדבר אינו נמדד/נשמר לפני הבחירה. אין SSR לבאנר (armed=false בשרת
+  //    ובריצה הראשונה בלקוח — ללא אי-התאמת הידרציה).
+  const [armed, setArmed] = React.useState(false);
+  React.useEffect(() => {
+    if (!wantsBanner) return;
+    if (window.innerHeight >= 900) {
+      setArmed(true);
+      return;
+    }
+    const arm = () => {
+      if (window.scrollY > 140) {
+        setArmed(true);
+        window.removeEventListener("scroll", arm);
+      }
+    };
+    window.addEventListener("scroll", arm, { passive: true });
+    arm();
+    return () => window.removeEventListener("scroll", arm);
+  }, [wantsBanner]);
+
+  const visible = wantsBanner && armed;
 
   const [manageOpen, setManageOpen] = React.useState(false);
   const [analytics, setAnalytics] = React.useState(false);
