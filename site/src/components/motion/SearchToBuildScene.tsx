@@ -61,9 +61,22 @@ const BUILD_CHARS: { ch: string; delay: number }[][] = (() => {
     })
   );
 })();
+/**
+ * שורות מוגדרות-מראש (deterministic) לשליטה בשבירה לפי רוחב — ללא wrap אוטומטי
+ * שמשתנה תוך כדי האנימציה. שתי מילים ראשונות בשורה אחת („אהבה היא”) והשלישית
+ * בשורה שנייה („בנייה.”). בדסקטופ השורות inline ⇒ שורה אחת; בטאבלט/מובייל block
+ * ⇒ שתי שורות קבועות. סדר וזמני ההשהיה נשמרים רציפים (RTL) בין השורות.
+ */
+const LINE_WORD_INDICES: number[][] =
+  BUILD_WORDS.length >= 3 ? [[0, 1], [2]] : BUILD_WORDS.map((_, i) => [i]);
+const BUILD_LINES = LINE_WORD_INDICES.map((idxs) =>
+  idxs.map((i) => BUILD_CHARS[i])
+);
 /** משך הרכבת המשפט המלא (האות האחרונה + משך כניסתה) — נקודת „הכותרת הושלמה”. */
 const LETTERS_TOTAL_MS =
   Math.max(0, ...BUILD_CHARS.flat().map((c) => c.delay)) + CHAR_ENTRANCE_MS;
+/** החזקת המשפט המלא לפני הופעת הטקסט המשני (≥1.5ש קריאה). */
+const HOLD_BEFORE_INTRO_MS = 1500;
 
 /** מיקומי חמשת צמתי המבנה (עולים = „בנייה”). */
 const NODES: Array<[number, number]> = [
@@ -100,9 +113,11 @@ export function SearchToBuildScene() {
       if (built) return;
       built = true;
       buildEl?.classList.add("is-building");
+      // המשפט המלא מוחזק ≥1.5ש לפני שהטקסט המשני מופיע (fade-up): החשיפה מתוזמנת
+      // ל„סיום האותיות + זמן ההחזקה”.
       introTimer = window.setTimeout(
         () => introEl?.classList.add("is-in"),
-        LETTERS_TOTAL_MS
+        LETTERS_TOTAL_MS + HOLD_BEFORE_INTRO_MS
       );
     };
 
@@ -114,6 +129,8 @@ export function SearchToBuildScene() {
       failsafeIO = new IntersectionObserver(
         (entries) => {
           if (entries.some((e) => e.isIntersecting)) {
+            // גיבוי בלבד (GSAP הוא המפעיל הראשי, בנקודה שבה „דייטינג הוא חיפוש”
+            // כבר דעך והמסלול נבנה). מספיק קצר כדי שהאותיות לעולם לא יישארו נסתרות.
             failsafeTimer = window.setTimeout(revealBuild, 2600);
             failsafeIO?.disconnect();
           }
@@ -141,8 +158,11 @@ export function SearchToBuildScene() {
           const q = gsap.utils.selector(rootRef);
           const mm = gsap.matchMedia();
 
-          // ===== דסקטופ/טאבלט — רצף pinned עם scrub =====
-          mm.add("(min-width: 768px)", () => {
+          // ===== רצף pinned עם scrub — לכל הרוחבים (דסקטופ ומובייל) =====
+          // מובייל מקבל את אותה כוריאוגרפיה נעוצה: הבמה ננעצת וממורכזת, כך
+          // שהמשפט „אהבה היא בנייה” נבנה במרכז המסך, מוחזק, והסקשן הבא אינו
+          // נכנס עד שהגלילה עברה את אזור ה-pin (הרצף הושלם ונקרא).
+          mm.add("(min-width: 1px)", () => {
             // מצב-התחלה: הפיזור גדול ומפוזר (רעש/חיפוש), הצמתים זעירים ונסתרים.
             gsap.set(q(".s2b__scatter"), { autoAlpha: 1, scale: 1.18, rotate: 6, transformOrigin: "50% 55%" });
             gsap.set(q(".s2b__scatter-dot"), { transformOrigin: "center" });
@@ -172,53 +192,26 @@ export function SearchToBuildScene() {
                 anticipatePin: 1,
               },
             });
+            // סדר קפדני (מסונכרן-גלילה): (1) פיזור נמוג → (2) „דייטינג הוא חיפוש”
+            // דועך ומסתיים → (3) הקו נמשך → (4) הצמתים מתמצקים → ורק אז (5) „אהבה
+            // היא בנייה” נבנית אות-אחר-אות. הטריגר של האותיות (0.58) בא *אחרי*
+            // שהחיפוש דעך (מסתיים ~0.5) והמסלול נבנה — כך שהסדר לעולם לא מתערבב.
             tl
               // (1→2) הפיזור מתכווץ, מסתובב ונמוג אל המרכז = „חיפוש שמתלכד”
-              .to(q(".s2b__scatter"), { scale: 0.45, rotate: -14, autoAlpha: 0, duration: 0.34 }, 0.04)
-              // (3) „דייטינג הוא חיפוש” נסוג, מחליק ומתעמעם
-              .to(q(".s2b__search"), { autoAlpha: 0.22, y: -40, scale: 0.92, duration: 0.22 }, 0.3)
-              // (4) המבנה נבנה — הקו נמשך בהדגשה (יסוד המבנה לפני הצמתים)
-              .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.34 }, 0.42)
+              .to(q(".s2b__scatter"), { scale: 0.45, rotate: -14, autoAlpha: 0, duration: 0.3 }, 0.04)
+              // (3) „דייטינג הוא חיפוש” נסוג, מחליק ומתעמעם — מסתיים ~0.5
+              .to(q(".s2b__search"), { autoAlpha: 0.18, y: -34, scale: 0.92, duration: 0.24 }, 0.26)
+              // (4) הקו נמשך בהדגשה (יסוד המבנה לפני הצמתים)
+              .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.3 }, 0.4)
+              // הצמתים מתמצקים — עלייה חלקה ויציבה (ללא פעימת-טבעת מהבהבת)
+              .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.05, duration: 0.18, ease: "power2.out" }, 0.48)
               // (5) „אהבה היא בנייה” נבנית אות-אחר-אות — הטריגר מפעיל חשיפת-CSS
               // מבוססת-זמן (stagger בין גרפמות), והמשפט המורכב מוחזק לקריאה.
-              .call(revealBuild, undefined, 0.72)
-              // הצמתים מתמצקים בסנכרון עם הרכבת המשפט — עלייה חלקה ויציבה (ללא
-              // פעימת-טבעת מהבהבת). כל צומת „ננעל” לתוקפו ונשאר; אין הבהוב.
-              .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.05, duration: 0.2, ease: "power2.out" }, 0.72)
+              .call(revealBuild, undefined, 0.58)
               // (6) קו הטרקוטה ממשיך אל התחנות — אחרי שהמשפט הורכב והוחזק
               .to(q(".s2b__route"), { scaleY: 1, duration: 0.16 }, 0.98);
 
             return () => tl.scrollTrigger?.kill();
-          });
-
-          // ===== מובייל — שלושה שלבים מטריגרים, ללא pin =====
-          mm.add("(max-width: 767px)", () => {
-            // מצב-התחלה (כמו בדסקטופ) — נקבע פעם אחת; הבסיס הקריא נשאר לנפילה.
-            gsap.set(q(".s2b__scatter"), { autoAlpha: 0, scale: 1, transformOrigin: "50% 55%" });
-            gsap.set(q(".s2b__line"), { strokeDashoffset: 1 });
-            gsap.set(q(".s2b__node"), { autoAlpha: 0, scale: 0.35, transformOrigin: "center" });
-            gsap.set(q(".s2b__route"), { scaleY: 0, transformOrigin: "top center" });
-
-            // שלב 1 — הפיזור (חיפוש/רעש) מופיע ומרחף
-            gsap.to(q(".s2b__scatter"), {
-              scrollTrigger: { trigger: rootRef.current, start: "top 80%", once: true },
-              autoAlpha: 1, duration: 0.5, ease: "power2.out",
-            });
-            gsap.to(q(".s2b__scatter-dot"), {
-              x: "random(-8,8)", y: "random(-6,6)",
-              duration: 1.4, ease: "sine.inOut", repeat: -1, yoyo: true,
-              stagger: { each: 0.12, from: "random" },
-            });
-            // שלב 2 — הפיזור מתלכד ונמוג, והמבנה נבנה (קו + צמתים + פעימה)
-            gsap.timeline({ scrollTrigger: { trigger: q(".s2b__motif"), start: "top 62%", once: true } })
-              .to(q(".s2b__scatter"), { scale: 0.55, rotate: -12, autoAlpha: 0, duration: 0.55, ease: "power1.in" })
-              .to(q(".s2b__line"), { strokeDashoffset: 0, duration: 0.75, ease: "power1.inOut" }, 0.2)
-              // צמתים מתמצקים בעלייה חלקה ויציבה — ללא פעימת-טבעת מהבהבת.
-              .to(q(".s2b__node"), { autoAlpha: 1, scale: 1, stagger: 0.09, duration: 0.44, ease: "power2.out" }, 0.5);
-            // שלב 3 — „אהבה היא בנייה” נבנית אות-אחר-אות (טריגר → חשיפת-CSS) + קו ההמשך
-            gsap.timeline({ scrollTrigger: { trigger: q(".s2b__build"), start: "top 82%", once: true } })
-              .call(revealBuild)
-              .to(q(".s2b__route"), { scaleY: 1, duration: 0.4, ease: "power2.out" }, 0.9);
           });
         }, rootRef);
       } catch {
@@ -239,9 +232,10 @@ export function SearchToBuildScene() {
     <div ref={rootRef} className="s2b">
       <div ref={stageRef} className="s2b__stage">
         <Container className="relative">
-          <div className="s2b__grid mx-auto grid max-w-5xl items-center gap-x-16 gap-y-10 md:grid-cols-2">
-            {/* עמודת הטקסט — טקסט אמיתי קריא (התזה המלאה) */}
-            <div className="s2b__text text-start">
+          <div className="s2b__grid mx-auto grid max-w-5xl items-center gap-x-16 gap-y-8 md:grid-cols-2 md:gap-y-10">
+            {/* עמודת הטקסט — טקסט אמיתי קריא (התזה המלאה). במובייל ממורכז כדי
+                שהמשפט „אהבה היא בנייה” יישב במרכז אזור הצפייה הנעוץ. */}
+            <div className="s2b__text text-center md:text-start">
               <h2
                 id="thesis-heading"
                 className="font-serif text-[2.4rem] font-semibold leading-[1.08] text-secondary-foreground sm:text-5xl lg:text-[3.4rem]"
@@ -254,23 +248,36 @@ export function SearchToBuildScene() {
                     (sr-only). סדר DOM = סדר קריאה לוגי RTL; ה-bidi של הדפדפן
                     מסדר את הגרפמות מימין-לשמאל — המשפט לעולם אינו מתהפך. */}
                 <span className="s2b__build mt-2 block text-brand-muted">
-                  <span aria-hidden="true">
-                    {BUILD_CHARS.map((chars, wi) => (
-                      <React.Fragment key={wi}>
-                        <span className="s2b__build-word inline-block">
-                          {chars.map(({ ch, delay }, ci) => (
-                            <span
-                              key={ci}
-                              className="s2b__char"
-                              style={
-                                { "--char-delay": `${delay}ms` } as React.CSSProperties
-                              }
-                            >
-                              {ch}
-                            </span>
+                  {/* מבנה השורות והרוחב שמור מראש; כל אות מונפשת ב-opacity/scale
+                      בלבד (ללא הזזת layout, ללא קפיצת-שורה). השורות inline בדסקטופ
+                      (שורה אחת) ו-block בטאבלט/מובייל (שתי שורות קבועות). */}
+                  <span aria-hidden="true" className="s2b__build-vis">
+                    {BUILD_LINES.map((lineWords, li) => (
+                      <React.Fragment key={li}>
+                        <span className="s2b__build-line">
+                          {lineWords.map((chars, wi) => (
+                            <React.Fragment key={wi}>
+                              <span className="s2b__build-word">
+                                {chars.map(({ ch, delay }, ci) => (
+                                  <span
+                                    key={ci}
+                                    className="s2b__char"
+                                    style={
+                                      {
+                                        "--char-delay": `${delay}ms`,
+                                      } as React.CSSProperties
+                                    }
+                                  >
+                                    {ch}
+                                  </span>
+                                ))}
+                              </span>
+                              {wi < lineWords.length - 1 ? " " : null}
+                            </React.Fragment>
                           ))}
                         </span>
-                        {wi < BUILD_CHARS.length - 1 ? " " : null}
+                        {/* רווח בין השורות — משמעותי רק כשהשורות inline (דסקטופ) */}
+                        {li < BUILD_LINES.length - 1 ? " " : null}
                       </React.Fragment>
                     ))}
                   </span>
@@ -281,13 +288,14 @@ export function SearchToBuildScene() {
                   הושלמה אות-אחר-אות (המחלקה .is-in נוספת ב-revealBuild אחרי
                   LETTERS_TOTAL_MS). בטוח-נפילה: הטקסט המלא מרונדר ב-SSR וגלוי
                   כברירת מחדל (ההסתרה מגודרת ב-.motion-js בלבד). */}
-              <p className="s2b__intro mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 sm:text-xl">
+              <p className="s2b__intro mx-auto mt-6 max-w-[42ch] text-lg leading-relaxed text-secondary-foreground/85 md:mx-0 sm:text-xl">
                 {bigIdea.intro}
               </p>
             </div>
 
-            {/* עמודת המוטיב — דקורטיבי (aria-hidden) */}
-            <div className="s2b__motif relative">
+            {/* עמודת המוטיב — דקורטיבי (aria-hidden). במובייל מצומצם וממורכז
+                כדי שהרצף כולו יישאר בתוך הבמה הנעוצה בגובה מסך אחד. */}
+            <div className="s2b__motif relative mx-auto w-full max-w-[260px] md:max-w-none">
               <span
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 -z-10 mx-auto my-auto h-40 w-[85%] rounded-full bg-secondary-foreground/[0.06] blur-[54px]"
