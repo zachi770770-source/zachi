@@ -211,7 +211,10 @@
   html,
   body {
     max-width: 100vw;
-    overflow-x: hidden;
+    /* clip (ולא hidden) מונע גלישה אופקית *בלי* להפוך את body/html ל-scroll
+       container — כך scroll math ותזמוני-גלילה נטיביים (view()/scroll()) עובדים
+       נכון. נתמך בכל הדפדפנים היעד. */
+    overflow-x: clip;
   }
 
   /* ===================================================================
@@ -422,15 +425,46 @@
    * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
   .motion-js .reveal {
     opacity: 0;
-    transform: translateY(var(--motion-dist-md));
+    transform: translateY(46px) scale(0.965);
     transition:
-      opacity var(--motion-reveal) var(--ease-settle),
-      transform var(--motion-reveal) var(--ease-settle);
+      opacity 640ms var(--ease-settle),
+      transform 760ms var(--ease-settle);
     will-change: opacity, transform;
   }
   .motion-js .reveal.is-visible {
     opacity: 1;
     transform: none;
+  }
+  /* וריאנטים מובחנים לכניסות סקשן — שכל מקטע נכנס אחרת (קצב/ריתמוס, לא
+     fade-up אחיד). מוחלפים דרך אותו .is-visible; ברירת מחדל גלוי ללא JS. */
+  .motion-js .reveal--zoom {
+    transform: scale(0.86);
+  }
+  .motion-js .reveal--start {
+    transform: translateX(64px) scale(0.98);
+  }
+  .motion-js .reveal--end {
+    transform: translateX(-64px) scale(0.98);
+  }
+  .motion-js .reveal--zoom.is-visible,
+  .motion-js .reveal--start.is-visible,
+  .motion-js .reveal--end.is-visible {
+    transform: none;
+  }
+  /* חשיפת-מסכה: הכותרת „נמשכת” מלמטה למעלה מאחורי מסכה (clip-path). גלויה
+     תמיד ללא JS; opacity נשארת 1 ⇒ אין הבהוב ניגודיות. */
+  .motion-js .reveal--mask {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 900ms var(--ease-settle);
+  }
+  .motion-js .reveal--mask.is-visible {
+    clip-path: inset(0 0 0 0);
+  }
+  /* מדרג ילדים: ילדי מקטע נכנסים בזה-אחר-זה (--i נקבע ב-JSX / מונה). */
+  .motion-js .reveal[data-stagger] {
+    transition-delay: calc(var(--i, 0) * 90ms);
   }
   /* גיבוי-על בלתי-תלוי-JS: אם משום-מה החשיפה לא סומנה (בקר נכשל, race נדיר),
      אף .reveal לא יישאר נסתר. ה-animation מתחיל רק אחרי 4s (forwards) ולכן אינו
@@ -442,6 +476,191 @@
     to {
       opacity: 1;
       transform: none;
+    }
+  }
+
+  /* ===================================================================
+   * חשיפת טקסט מדורגת (StagedTextReveal) — „קריאה מבוקרת” מילה-אחר-מילה.
+   * ברירת מחדל: כל המילים גלויות (SSR / ללא JS / ללא IO / reduced-motion).
+   * רק כש-JS מחמש (is-armed) מסתירים, וכש-is-revealing נוסף — כל מילה
+   * נכנסת עם opacity + עלייה עדינה (6px), בהשהיה מדורגת (transition-delay).
+   * ה-transform שומר מקום ⇒ אין CLS. אין לולאה ואין cursor.
+   * =================================================================== */
+  .staged-word {
+    display: inline-block;
+  }
+  .staged-reveal.is-armed .staged-word {
+    opacity: 0;
+    transform: translateY(6px);
+    will-change: opacity, transform;
+  }
+  .staged-reveal.is-armed.is-revealing .staged-word {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 300ms var(--ease-standard),
+      transform 300ms var(--ease-standard);
+    transition-delay: var(--staged-delay, 0ms);
+  }
+
+  /* עומק/פרלקסה מרוסנת לכריכת השער (ההזזה מונעת מ-JS ב-ParallaxScroll דרך
+     המשתנה --hero-parallax; ברירת מחדל 0 ⇒ אין הזזה עד שיש גלילה, אין קפיצה
+     ב-first-paint). transform בלבד ⇒ מרוכב ב-compositor. */
+  .hero-depth-book,
+  .hero-depth-halo {
+    will-change: transform;
+  }
+
+  /* הכריכה מרחפת ונושמת ברצף (עומק חי) — נראה תמיד, גם ללא סמן ובמובייל.
+     שכבה ייעודית: לא מתנגשת בפרלקסה/כניסה/טילט. transform בלבד ⇒ 60fps.
+     מתחיל אחרי כניסת הכריכה (delay) כדי לא להילחם באנימציית הנחיתה. */
+  .motion-js .hero-float {
+    animation: heroFloat 5.5s ease-in-out 1.15s infinite;
+    transform-origin: center 60%;
+  }
+  @keyframes heroFloat {
+    0% {
+      transform: translateY(0) rotate(0deg) perspective(900px) rotateY(0deg);
+    }
+    30% {
+      transform: translateY(-13px) rotate(-0.9deg) perspective(900px) rotateY(3deg);
+    }
+    65% {
+      transform: translateY(-20px) rotate(0.5deg) perspective(900px) rotateY(-2.5deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg) perspective(900px) rotateY(0deg);
+    }
+  }
+  /* ההילה „נושמת” בקצב איטי ומנוגד — נפח שמתרחב ומתכווץ מאחורי הכריכה. */
+  .motion-js .hero-depth-halo > div {
+    animation: heroHaloBreathe 7s ease-in-out infinite;
+  }
+  .motion-js .hero-depth-halo > div:last-child {
+    animation-delay: -3.5s;
+  }
+  @keyframes heroHaloBreathe {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.85;
+    }
+    50% {
+      transform: scale(1.12);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .motion-js .hero-float,
+    .motion-js .hero-depth-halo > div {
+      animation: none;
+    }
+  }
+
+  /* ===================================================================
+   * #6 „בניית משפט” — הדגשה למשפטים החזקים ביותר. בכניסה לתצוגה הטקסט „נבנה”
+   * לפוקוס: ניגודיות עולה (opacity) + חשיפת מסכה (clip-path) מימין לשמאל (סדר
+   * קריאה עברי) — „חיפוש הופך לבנייה”, לא fade-up גנרי. מונע-JS דרך BuildText
+   * (IntersectionObserver) ולא native scroll-timeline: ה-body כאן הוא scroll
+   * container (overflow-x:hidden), מה שמשבש view()/scroll(); IO אמין בכל מצב.
+   * transform/opacity/clip-path בלבד (מרוכב). ברירת מחדל: גלוי לגמרי (ללא JS /
+   * reduced-motion / deep-link) — לעולם לא מסתיר תוכן לצמיתות. ================ */
+  .build-text {
+    color: var(--color-foreground);
+  }
+  /* מסכה בלבד (clip-path), ללא הורדת opacity — כדי לא ליצור מצב ניגודיות-נמוכה
+     קבוע לטקסט מוסתר. הצבע המלא נשמר; החשיפה היא „בנייה” מכיוון הקריאה. */
+  .build-text.is-armed {
+    clip-path: inset(0 0 0 100%);
+    will-change: clip-path;
+  }
+  .build-text.is-armed.is-focused {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 780ms var(--ease-settle);
+  }
+
+  /* #1 קו-הבנייה של העמוד — פס טרקוטה דק בקצה-ההתחלה (ימין ב-RTL) שמתמלא לפי
+   * התקדמות הקריאה. הד ל„מסלול/בנייה”, תחושת מסע רציף. הגובה מונע מ-JS
+   * (BuildSpine) דרך --build-progress (0..1); מרוכב (scaleY), rAF-מקובץ.
+   * מוצג רק כשמותרת תנועה (.motion-js); reduced-motion / no-JS ⇒ נסתר.
+   * דקורטיבי (aria-hidden). */
+  .build-spine {
+    display: none;
+  }
+  .motion-js .build-spine {
+    display: block;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: 30;
+    width: 4px;
+    pointer-events: none;
+  }
+  .build-spine__track {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklab, var(--color-brand) 16%, transparent);
+  }
+  .build-spine__fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-brand) 55%, transparent),
+      var(--color-brand)
+    );
+    transform-origin: top center;
+    transform: scaleY(var(--build-progress, 0));
+    will-change: transform;
+    box-shadow: 0 0 10px color-mix(in oklab, var(--color-brand) 45%, transparent);
+  }
+  /* „ראש הבנייה” — נקודת אור טרקוטה שנעה לאורך הקצה עם התקדמות הקריאה,
+     והופכת את הפס לאלמנט נרטיבי מובחן ולא לקישוט כמעט-בלתי-נראה. */
+  .build-spine__head {
+    position: absolute;
+    inset-inline: -3px;
+    top: calc(var(--build-progress, 0) * 100%);
+    height: 10px;
+    border-radius: 9999px;
+    background: var(--color-brand);
+    box-shadow:
+      0 0 12px 2px color-mix(in oklab, var(--color-brand) 70%, transparent),
+      0 0 24px 4px color-mix(in oklab, var(--color-brand) 35%, transparent);
+    transform: translateY(-50%);
+    will-change: top;
+  }
+
+  /* #5 כרטיסי כלים פרימיום: אור נקודתי עוקב-סמן (רדיאלי, דרך --mx/--my
+   * שנקבעים ב-ToolCard), עומק שכבתי בריחוף ולחיצת „קפיץ” עדינה. transform/
+   * opacity בלבד. reduced-motion: ללא לחיצה/הרמה. */
+  .tool-card {
+    position: relative;
+    isolation: isolate;
+  }
+  .tool-card__light {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 220ms var(--ease-standard);
+    background: radial-gradient(
+      16rem 16rem at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--color-brand) 12%, transparent),
+      transparent 60%
+    );
+  }
+  @media (hover: hover) {
+    .tool-card:hover .tool-card__light {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* לחיצת „קפיץ” עדינה — ה-transition על transform מגיע ממחלקת הכרטיס
+       (transition-[...] של Tailwind); כאן רק מצב הלחיצה ומשכה הקצר. */
+    .tool-card:active {
+      transform: scale(0.985);
+      transition-duration: 90ms;
     }
   }
 
@@ -572,8 +791,9 @@
 .book-tilt .book-cover__inner,
 .book-tilt .book-cover:hover .book-cover__inner {
   transform: rotateY(calc(9deg + var(--tilt-y, 0deg)))
-    rotateX(calc(1.2deg + var(--tilt-x, 0deg)));
-  transition: transform 160ms var(--ease-standard);
+    rotateX(calc(1.2deg + var(--tilt-x, 0deg))) scale(var(--tilt-lift, 1));
+  transition:
+    transform 220ms var(--ease-settle);
 }
 
 /* PHASE MOTION 4 (B) — „מעבר דף” מרוסן ב-PeekInside. הדף היוצא מסתובב הצידה
@@ -581,23 +801,59 @@
  * reduced-motion: השכבה היוצאת אינה מרונדרת (החלפה מיידית) + אין אנימציה. */
 .peek-stage {
   position: relative;
+  transform-origin: right center;
+}
+/* צל „סלסול הדף” — מתחזק עם הגרירה (--curl 0..1 מ-JS). */
+.peek-stage__curl {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: 0.75rem;
+  opacity: var(--curl, 0);
+  background: radial-gradient(140% 90% at 100% 50%, transparent 52%, rgba(43, 36, 31, 0.16));
 }
 @media (prefers-reduced-motion: no-preference) {
+  /* #1 היפוך-דף בגרירה: הדף הנוכחי מסתובב בעקבות --drag (-1..1 מ-JS); ב-release
+     snap חזרה ל-0 (או מעבר לדף הבא דרך peekEnter/peekLeave). */
+  /* גרירה = דף שנפתח: הדף נהפך סביב הכריכה (ימין ב-RTL) עד ~38° בעקבות הסמן,
+     עם perspective עמוקה ⇒ תחושת דף פיזי שמתרומם, לא לוח שמסתובב מעט. */
+  .peek-stage {
+    transform-style: preserve-3d;
+    transform: perspective(1400px) rotateY(calc(var(--drag, 0) * 12deg));
+    transition: transform 360ms var(--ease-settle);
+  }
+  .peek-stage.peek-dragging {
+    transition: none;
+    cursor: grabbing;
+    user-select: none;
+  }
   .peek-page--enter {
-    animation: peekEnter 420ms var(--ease-settle) both;
+    animation: peekEnter 560ms var(--ease-settle) both;
     transform-origin: right center;
+    transform-style: preserve-3d;
   }
   .peek-page--leave {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    animation: peekLeave 420ms var(--ease-settle) both;
+    z-index: 4;
+    animation: peekLeave 620ms var(--ease-settle) both;
     transform-origin: right center;
+    transform-style: preserve-3d;
+    /* הצללת „גב הדף” שמתחזקת ככל שהדף נהפך — קורא כדף אמיתי מתרומם */
+    background: var(--color-surface);
+    box-shadow: -14px 0 30px -12px rgba(34, 38, 43, 0.45);
   }
+  /* מעבר דף מרוסן (9–11°): שכבה נכנסת + שכבה יוצאת אמיתיות סביב הכריכה (RTL),
+     עם צל נע — בלי „היפוך” מוגזם. */
   @keyframes peekEnter {
     from {
       opacity: 0;
-      transform: perspective(1400px) rotateY(-7deg) translateY(6px);
+      transform: perspective(1400px) rotateY(-10deg) translateX(8px);
+    }
+    55% {
+      opacity: 1;
     }
     to {
       opacity: 1;
@@ -607,11 +863,12 @@
   @keyframes peekLeave {
     from {
       opacity: 1;
-      transform: perspective(1400px) rotateY(0deg) translateY(0);
+      transform: perspective(1400px) rotateY(0deg);
     }
     to {
       opacity: 0;
-      transform: perspective(1400px) rotateY(9deg) translateY(-4px);
+      transform: perspective(1400px) rotateY(11deg) translateX(-6px);
+      filter: brightness(0.94);
     }
   }
 }
@@ -677,20 +934,39 @@
   position: absolute;
   top: 50%;
   left: 0; /* עוגן פיזי; ההזזה ב--mx נמדדת מהשמאל הפיזי (בטוח ל-RTL) */
-  width: 13px;
-  height: 13px;
-  margin-top: -6.5px;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
   border-radius: 50%;
   background: var(--color-brand);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-brand) 16%, transparent);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--color-brand) 18%, transparent),
+    0 0 16px 3px color-mix(in srgb, var(--color-brand) 55%, transparent);
   opacity: 0;
   transform: translateX(calc(var(--mx, 0px) - 50%));
   transition:
-    transform var(--motion-panel) var(--ease-settle),
+    transform 620ms var(--ease-settle),
     opacity var(--motion-fast) var(--ease-standard);
 }
 .station-route.has-selection .station-route__marker {
   opacity: 1;
+}
+/* התחנה הנבחרת „פועמת” — מוקד ברור שהמסלול הגיע אליה */
+@media (prefers-reduced-motion: no-preference) {
+  .station-route__node[data-current="true"]::before {
+    animation: stationPulse 1.8s var(--ease-standard) infinite;
+  }
+  @keyframes stationPulse {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 40%, transparent);
+    }
+    50% {
+      transform: scale(1.25);
+      box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-brand) 0%, transparent);
+    }
+  }
 }
 /* משיכת המסלול בכניסה לתצוגה (motion-js בלבד; הבסיס נשאר מצויר). */
 .motion-js .station-route:not(.is-inview) .station-route__line {
@@ -732,6 +1008,67 @@
  *  - prefers-reduced-motion: כל התנועה מבוטלת; מוצג המצב הסופי הקריא.
  * כל האנימציות על opacity/transform/filter בלבד — אין CLS.
  * =================================================================== */
+/* שדה-צבע חי בבאנד ה-Sage — ההילות נסחפות ונושמות לאט (עומק רקע). */
+@media (prefers-reduced-motion: no-preference) {
+  .thesis-halos > div {
+    animation: thesisHaloDrift 16s ease-in-out infinite;
+    will-change: transform;
+  }
+  .thesis-halos > div:last-child {
+    animation-duration: 20s;
+    animation-delay: -6s;
+  }
+  @keyframes thesisHaloDrift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(4%, -3%, 0) scale(1.16);
+    }
+  }
+}
+
+/* כניסת הכריכה בעמוד /book — נחיתה מוצרית ברורה (למעלה מהקיפול, on-load).
+   בסיס גלוי; רק תחת motion-js מריצים כניסה. reduced-motion / no-JS ⇒ סטטי גלוי. */
+.motion-js .book-hero-enter {
+  animation: bookHeroEnter 1200ms var(--ease-settle) 120ms both;
+  transform-origin: center 62%;
+}
+.motion-js .book-hero-enter__shadow {
+  transform-origin: center;
+  animation: bookHeroShadow 900ms var(--ease-settle) 300ms both;
+}
+@keyframes bookHeroEnter {
+  0% {
+    opacity: 0;
+    transform: perspective(1200px) translateY(64px) scale(0.84) rotateX(4deg);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1200px) translateY(0) scale(1) rotateX(0deg);
+  }
+}
+@keyframes bookHeroShadow {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-js .book-hero-enter,
+  .motion-js .book-hero-enter__shadow {
+    animation: none;
+  }
+}
+
 .hero-stage {
   position: relative;
   container-type: inline-size;
@@ -798,10 +1135,10 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* (1) קו המסלול הפותח — נמשך מימין לשמאל (RTL). */
+  /* (1) קו המסלול הפותח — נמשך מימין לשמאל (RTL) לאורך 0.7s. פותח את הרצף. */
   .hero-rule {
     transform: scaleX(0);
-    animation: heroRuleDraw 480ms var(--ease-settle) both;
+    animation: heroRuleDraw 700ms var(--ease-settle) 60ms both;
   }
   @keyframes heroRuleDraw {
     to {
@@ -809,34 +1146,37 @@
     }
   }
 
-  /* (2) חשיפת כותרת שורה-אחר-שורה דרך מסכה (overflow) — וילון אמיתי.
-   * תזמון מזוקק: שורה 1 מתחילה כמעט מיד (70ms); הכותרת המלאה קריאה עד ~720ms. */
+  /* (2) חשיפת כותרת שורה-אחר-שורה דרך מסכה (overflow) — וילון אמיתי, איטי דיו
+   * כדי שהעין תקלוט אותו. סטגר 220ms בין השורות. */
   .hero-line__in {
     transform: translateY(115%);
-    animation: heroLineIn 450ms var(--ease-settle) both;
+    animation: heroLineIn 720ms var(--ease-settle) both;
   }
   .hero-line--1 .hero-line__in {
-    animation-delay: 40ms;
+    animation-delay: 300ms;
   }
   .hero-line--2 .hero-line__in {
-    animation-delay: 200ms;
+    animation-delay: 520ms;
   }
   @keyframes heroLineIn {
     to {
       transform: translateY(0);
     }
   }
-  /* (3) „בונים אותה” — התיישבות/בנייה עדינה שרצה יחד עם החשיפה וממשיכה עד
-   * ~1.0s. scale בלבד על טקסט שכבר קריא ⇒ אינו מעכב קריאוּת. */
+  /* (3) „בונים אותה” — פעימת התיישבות ברורה (overshoot נראה) אחרי שהשורה
+   * נחשפה, כרגע-חתימה של הכותרת (~0.76s→~1.5s). */
   .hero-build {
-    animation: heroBuildSettle 780ms var(--ease-settle) 240ms both;
+    animation: heroBuildSettle 760ms var(--ease-settle) 780ms both;
   }
   @keyframes heroBuildSettle {
     0% {
-      transform: scale(0.97) translateY(1px);
+      transform: scale(0.94) translateY(2px);
     }
-    62% {
-      transform: scale(1.006) translateY(0);
+    55% {
+      transform: scale(1.035) translateY(0);
+    }
+    78% {
+      transform: scale(0.992);
     }
     100% {
       transform: scale(1) translateY(0);
@@ -857,8 +1197,8 @@
   }
   /* ה-CTA וגוש הפעולה — transform בלבד (opacity נשארת 1) ⇒ גלוי ולחיץ מיידית. */
   .hero-rise-soft {
-    transform: translateY(12px);
-    animation: heroRiseSoft 460ms var(--ease-settle) both;
+    transform: translateY(8px);
+    animation: heroRiseSoft 360ms var(--ease-settle) both;
   }
   @keyframes heroRiseSoft {
     to {
@@ -866,18 +1206,19 @@
     }
   }
 
-  /* (4) כניסת הכריכה — 40–60px, scale 0.88→1, סיבוב 3D מרוסן, opacity מוקדם ל-LCP. */
+  /* (4) כניסת הכריכה — נחיתה מוצרית מלאה: 76px מלמטה, scale 0.82, סיבוב 3D
+   * (rotateY 11°, rotateX 3.5°), מתיישבת לאורך ~1.35s. opacity עולה מוקדם ל-LCP. */
   .hero-book {
     transform-origin: center 62%;
-    animation: heroBookEnter 900ms var(--ease-settle) 220ms both;
+    animation: heroBookEnter 1350ms var(--ease-settle) 340ms both;
   }
   @keyframes heroBookEnter {
     0% {
       opacity: 0;
-      transform: perspective(1100px) translateY(52px) scale(0.88) rotateY(8deg)
-        rotateX(2.5deg);
+      transform: perspective(1100px) translateY(76px) scale(0.82) rotateY(11deg)
+        rotateX(3.5deg);
     }
-    32% {
+    28% {
       opacity: 1;
     }
     100% {
@@ -886,17 +1227,15 @@
         rotateX(0deg);
     }
   }
-  /* צל הכריכה מתיישב יחד עם הנחיתה. המרכוז (-translate-x-1/2) מגיע מ-Tailwind
-   * דרך תכונת ה-translate; כאן מנפישים רק transform (scaleX) ו-opacity כדי
-   * לא לשכפל את היסט המרכוז. */
+  /* צל הכריכה מתרחב ומתיישב יחד עם הנחיתה. */
   .hero-book__shadow {
     transform-origin: center;
-    animation: heroShadowSettle 640ms var(--ease-settle) 480ms both;
+    animation: heroShadowSettle 820ms var(--ease-settle) 560ms both;
   }
   @keyframes heroShadowSettle {
     from {
       opacity: 0;
-      transform: scaleX(0.6);
+      transform: scaleX(0.5);
     }
     to {
       opacity: 1;
@@ -929,18 +1268,189 @@
 /* מעבר קצר ועדין לכרטיס תשובת „איפה אתם נתקעים?” — opacity + translateY
  * מינימלי, משך קצר, ללא קפיצת גובה. מכובד אוטומטית תחת prefers-reduced-motion
  * (הכלל הגלובלי מכווץ את משך האנימציה למצב הסופי). */
+/* #2 מעבר „מבנה נבנה” בין בחירות: הפאנל אינו מתחלף בקפיצה — הוא נבנה בחשיפת
+ * מסכה מכיוון הקריאה (RTL: מימין) יחד עם עלייה עדינה, בזמן שהסמן נע על המסלול
+ * והתחנות נדלקות ברצף. תנועה אחת מתמשכת. */
 @keyframes stuckAnswerIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(34px) scale(0.97);
+    clip-path: inset(0 0 0 42%);
+  }
+  60% {
+    opacity: 1;
   }
   to {
     opacity: 1;
     transform: none;
+    clip-path: inset(0 0 0 0);
   }
 }
 .stuck-answer {
-  animation: stuckAnswerIn 240ms ease-out both;
+  animation: stuckAnswerIn 620ms var(--ease-settle) both;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* התוכן הפנימי „נבנה” בזה-אחר-זה כשמתחלפת תחנה — קריא כמסלול שנבנה מחדש */
+  .stuck-answer > * {
+    animation: stuckChildIn 520ms var(--ease-settle) both;
+  }
+  .stuck-answer > *:nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .stuck-answer > *:nth-child(3) {
+    animation-delay: 170ms;
+  }
+  .stuck-answer > *:nth-child(4) {
+    animation-delay: 250ms;
+  }
+  @keyframes stuckChildIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* #3 קו-המשך הנרטיב — מגשר בין סצנת „חיפוש→בנייה” למסלול התחנות. בסיס: גלוי
+ * (fallback/no-JS/reduced). תחת motion-js נמשך בכניסה לתצוגה (scaleY). */
+.journey-connector {
+  display: block;
+  width: 2px;
+  height: 3.5rem;
+  /* נמשך כלפי מעלה אל גבול הבאנד שמעל, כדי שייקרא כהמשך של קו „חיפוש→בנייה”
+     ולא כקו נפרד. */
+  margin: -2rem auto 1.25rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-brand) 12%, transparent),
+    var(--color-brand)
+  );
+  transform-origin: top center;
+}
+.motion-js .journey-connector {
+  transform: scaleY(0);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .motion-js .journey-connector.is-inview {
+    transform: scaleY(1);
+    transition: transform 720ms var(--ease-settle) 120ms;
+  }
+}
+
+/* #4 מצפן חי — טבעות סטטיות + מחט שמתייצבת לכיוון עם spring. */
+.living-compass {
+  display: block;
+  overflow: visible;
+}
+.living-compass__ring-outer,
+.living-compass__ring-inner {
+  fill: none;
+  stroke: var(--color-brand);
+}
+.living-compass__ring-outer {
+  stroke-width: 1.4;
+  stroke-opacity: 0.28;
+}
+.living-compass__ring-inner {
+  stroke-width: 1;
+  stroke-opacity: 0.16;
+}
+/* טבעת מקווקוות מסתובבת — תנועה מתמדת ועדינה שמסמנת „חי” */
+.living-compass__ring-sweep {
+  fill: none;
+  stroke: var(--color-brand);
+  stroke-width: 1.2;
+  stroke-opacity: 0.4;
+  stroke-dasharray: 6 10;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.living-compass__sweep {
+  stroke: var(--color-brand);
+  stroke-width: 1.4;
+  stroke-opacity: 0.5;
+  stroke-linecap: round;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .living-compass__ring-sweep {
+    animation: compassRingSpin 14s linear infinite;
+  }
+  .living-compass__sweep {
+    animation: compassSweep 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+}
+@keyframes compassRingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes compassSweep {
+  0% {
+    transform: rotate(0deg);
+    stroke-opacity: 0.5;
+  }
+  70% {
+    stroke-opacity: 0.5;
+  }
+  100% {
+    transform: rotate(360deg);
+    stroke-opacity: 0.5;
+  }
+}
+.living-compass__tick {
+  stroke: var(--color-brand);
+  stroke-width: 1.6;
+  stroke-opacity: 0.45;
+  stroke-linecap: round;
+}
+.living-compass__needle {
+  transform-origin: 50% 50%;
+  transition: transform 1000ms cubic-bezier(0.34, 1.7, 0.4, 1); /* spring מודגש */
+}
+@media (prefers-reduced-motion: reduce) {
+  .living-compass__needle {
+    transition: none;
+  }
+  .living-compass__ring-sweep,
+  .living-compass__sweep {
+    animation: none;
+  }
+}
+.living-compass__north {
+  fill: var(--color-brand);
+}
+.living-compass__south {
+  fill: var(--color-foreground);
+  opacity: 0.32;
+}
+.living-compass__hub {
+  fill: var(--color-foreground);
+}
+
+/* #5 מעבר עדין של תווית ה-CTA כשמשתנה שלב המסע (בין טעינות עמוד; לעולם לא בזמן
+   ריחוף/פוקוס — היעד יציב מ-mount). */
+@media (prefers-reduced-motion: no-preference) {
+  .cta-morph {
+    display: inline-block;
+    animation: ctaMorph 360ms var(--ease-standard) both;
+  }
+  @keyframes ctaMorph {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 /* חשיפה עדינה של תשובת ה-FAQ בפתיחה (details נטיבי). ללא קפיצה, קצר. */
@@ -1044,14 +1554,14 @@ details[open] .faq-answer {
      מחזור אחד בלבד (אף פעם לא אינסופי), ללא fill-mode כדי לא „לתקוע” טרנספורם
      ולשמור על אפקט הלחיצה/hover. אינה מעכבת שימושיות: הכפתור לחיץ מיד. */
   .hero-cta-pulse button[type="submit"] {
-    animation: heroCtaBeat 900ms var(--ease-standard) 1600ms 1;
+    animation: heroCtaBeat 1000ms var(--ease-standard) 2050ms 1;
   }
   @keyframes heroCtaBeat {
     0% {
       box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 0%, transparent);
     }
     45% {
-      box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-brand) 16%, transparent);
+      box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-brand) 20%, transparent);
     }
     100% {
       box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 0%, transparent);
@@ -1068,11 +1578,14 @@ details[open] .faq-answer {
 }
 @media (hover: hover) {
   .lift-hover:hover {
-    transform: translateY(-2px);
+    transform: translateY(-5px);
+    border-color: color-mix(in oklab, var(--color-brand) 45%, var(--color-border-strong));
+    box-shadow: 0 16px 30px -18px rgba(43, 36, 31, 0.5);
   }
 }
 .lift-hover:focus-visible {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 30px -18px rgba(43, 36, 31, 0.5);
 }
 
 /* מעבר עדין של שדה טופס בפוקוס (מעבר על מסגרת/טבעת בלבד — ללא זזת פריסה). */

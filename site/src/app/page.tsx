@@ -5,16 +5,16 @@ import { TrustStrip } from "@/components/sections/TrustStrip";
 import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
 import { HomeRelevance } from "@/components/sections/HomeRelevance";
 import { BookHubLink } from "@/components/sections/BookHubLink";
-import { ToolsBento } from "@/components/sections/ToolsBento";
+import { HubTeaser } from "@/components/sections/HubTeaser";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { CompassSignature } from "@/components/compass/CompassSignature";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StationJourney } from "@/components/interactive/StationJourney";
-import { PeekInside } from "@/components/interactive/PeekInside";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
+import { BuildSpine } from "@/components/shared/BuildSpine";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
@@ -40,14 +40,31 @@ export default function HomePage() {
       <WebSiteSchema />
       <BookSchema />
       <ProductSchema />
+      <BuildSpine />
       <Hero />
       <TrustStrip />
       <ThesisMotifSection />
       <StationJourney />
       <HomeRelevance />
       <BookHubLink />
-      <ToolsBento />
-      <PeekInside />
+      {/* הכלים המלאים חיים ב-/book; כאן נוכחות מצומצמת + קישור. */}
+      <HubTeaser
+        id="tools-teaser"
+        kicker="כלים, לא רק רעיון"
+        heading="כלים מעשיים מתוך הספר"
+        text="השיטה של הספר באה עם כלים מעשיים ליישום בכל שלב — כולם מרוכזים בעמוד הספר."
+        href="/book#tools"
+        linkLabel="לכל הכלים בעמוד הספר"
+      />
+      {/* ההצצה האינטראקטיבית חיה ב-/preview; כאן נוכחות מצומצמת + קישור. */}
+      <HubTeaser
+        id="sample-teaser"
+        kicker="הצצה לספר"
+        heading="כמה שורות, כדי שתדעו לאן אתם נכנסים"
+        text="עטיפה, מבנה, קטע לקריאה וכלי מעשי אחד — ההצצה המלאה מחכה בעמוד הטעימה."
+        href="/preview"
+        linkLabel="לקריאת הטעימה"
+      />
       <CompassSignature />
       <AuthorTeaser />
       <Testimonials />

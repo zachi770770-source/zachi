@@ -101,10 +101,16 @@ export function StationJourney() {
     <section
       ref={sectionRef}
       id="where"
-      className="scroll-mt-20 py-14 sm:py-16"
+      className="scroll-mt-20 pb-14 pt-4 sm:pb-16 sm:pt-6"
       aria-labelledby="where-heading"
     >
       <Container>
+        {/* #3 המשכיות נרטיב — קו המשך שנמשך מסצנת „חיפוש→בנייה” שמעל אל מסלול
+            התחנות, כך שהסיפור אינו מתאפס אחרי הסצנה הנעוצה. דקורטיבי. */}
+        <span
+          aria-hidden="true"
+          className={`journey-connector${inview ? " is-inview" : ""}`}
+        />
         <div className="mx-auto max-w-2xl text-center">
           <span className="kicker justify-center">
             <MapPin className="h-4 w-4" aria-hidden="true" />

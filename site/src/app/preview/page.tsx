@@ -2,6 +2,8 @@ import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { SampleReader } from "@/components/preview/SampleReader";
+import { MarkSampleSeen } from "@/components/preview/MarkSampleSeen";
+import { PeekInside } from "@/components/interactive/PeekInside";
 import { BookMap } from "@/components/preview/BookMap";
 import { PreviewClosing } from "@/components/preview/PreviewClosing";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -23,9 +25,15 @@ export default function PreviewPage() {
         ]}
       />
 
+      <MarkSampleSeen />
+
       <Container className="py-10 sm:py-14">
         <SampleReader />
       </Container>
+
+      {/* ההצצה האינטראקטיבית (עטיפה / מבנה / קטע / כלי) הועברה לכאן מעמוד הבית.
+          ה-CTA הפנימי מוסתר — PreviewClosing מחזיק את טופס ההרשמה בסוף העמוד. */}
+      <PeekInside showCta={false} />
 
       <BookMap />
       <PreviewClosing />

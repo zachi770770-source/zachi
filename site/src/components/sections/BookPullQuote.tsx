@@ -14,7 +14,7 @@ export function BookPullQuote() {
       <Container>
         <Reveal className="mx-auto max-w-3xl text-center">
           <figure>
-            <blockquote className="font-serif text-[1.55rem] font-medium leading-[1.5] text-foreground sm:text-[2rem]">
+            <blockquote className="build-text font-serif text-[1.55rem] font-medium leading-[1.5] text-foreground sm:text-[2rem]">
               {closing.title}
             </blockquote>
             <figcaption className="mt-5 text-[12.5px] font-semibold uppercase tracking-[0.16em] text-brand-hover">

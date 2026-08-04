@@ -5,6 +5,7 @@ import { compass } from "@/content/compass";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
+import { LivingCompass } from "@/components/compass/LivingCompass";
 
 /**
  * סקשן ה-Signature של „המצפן” בעמוד הבית — הבידול המרכזי של האתר, ולכן
@@ -19,17 +20,19 @@ export function CompassSignature() {
   return (
     <section className="py-16 sm:py-20 lg:py-24" aria-labelledby="compass-signature-heading">
       <Container>
-        <Reveal className="group relative overflow-hidden rounded-lg border border-border-strong bg-surface">
-          {/* סימן מים: סמל המצפן — הזהות החזותית. מיקרו-אינטראקציה עדינה בריחוף. */}
+        <Reveal className="reveal--zoom group relative overflow-hidden rounded-lg border border-border-strong bg-surface">
+          {/* סימן מים: טבעת המצפן — הזהות החזותית (סטטי, טקסטורה עדינה). */}
           <Compass
             aria-hidden="true"
-            className="pointer-events-none absolute -start-20 -top-16 h-72 w-72 text-brand/[0.05] transition-transform duration-700 ease-out group-hover:rotate-[18deg] motion-reduce:transition-none"
+            className="pointer-events-none absolute -start-20 -top-16 h-72 w-72 text-brand/[0.05]"
             strokeWidth={1}
           />
 
           <div className="relative grid gap-10 p-7 sm:p-11 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16 lg:p-14">
             {/* המסר + CTA */}
             <div>
+              {/* #4 המצפן החי — סימן מותג שמחפש ומתייצב לכיוון (spring). */}
+              <LivingCompass className="mb-5 h-20 w-20 text-brand sm:h-24 sm:w-24" />
               <span className="kicker">{signature.eyebrow}</span>
               <h2
                 id="compass-signature-heading"

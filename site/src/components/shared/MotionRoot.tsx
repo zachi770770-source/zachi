@@ -30,11 +30,26 @@ export function MotionRoot() {
     const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
     let io: IntersectionObserver | null = null;
+    let buildIo: IntersectionObserver | null = null;
     let mo: MutationObserver | null = null;
     let failsafe = 0;
     let rafScan = 0;
 
     const reveal = (el: Element) => el.classList.add("is-visible");
+
+    // #6 „בניית משפט” — הדגשת המשפטים החזקים: חימוש (מסכה) + פוקוס בכניסה
+    // לתצוגה. אמין ב-body עם overflow-x:hidden (שם native scroll-timeline נכשל).
+    const focusBuild = (el: Element) => el.classList.add("is-focused");
+    const setupBuildText = () => {
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      document.querySelectorAll<HTMLElement>(".build-text:not(.is-focused)").forEach((el) => {
+        if (!el.classList.contains("is-armed")) el.classList.add("is-armed");
+        // הגיע לאזור קריאה נוח (כולל מעל-הקיפול/deep-link) ⇒ פוקוס. נקרא גם
+        // בכל גלילה (גיבוי ל-IO) ⇒ „הגיע לתצוגה ⇒ נבנה”, לעולם לא תקוע מוסתר.
+        if (el.getBoundingClientRect().top < vh * 0.78) focusBuild(el);
+        else buildIo?.observe(el);
+      });
+    };
 
     const inOrAboveView = (el: Element) => {
       const vh = window.innerHeight || document.documentElement.clientHeight;
@@ -47,8 +62,10 @@ export function MotionRoot() {
       else io?.observe(el);
     };
 
-    const scan = () =>
+    const scan = () => {
       document.querySelectorAll<HTMLElement>(".reveal:not(.is-visible)").forEach(process);
+      if (buildIo) setupBuildText();
+    };
 
     const scheduleScan = () => {
       if (rafScan) return;
@@ -71,7 +88,19 @@ export function MotionRoot() {
         },
         { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
       );
+      buildIo = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              focusBuild(e.target);
+              buildIo?.unobserve(e.target);
+            }
+          }
+        },
+        { rootMargin: "0px 0px -10% 0px", threshold: 0.55 }
+      );
       scan();
+      setupBuildText();
       mo = new MutationObserver(scheduleScan);
       mo.observe(document.body, { childList: true, subtree: true });
       // גיבוי ל-IO: בכל גלילה/שינוי-גודל סורקים שוב וחושפים כל .reveal שהגיע
@@ -83,12 +112,17 @@ export function MotionRoot() {
         document
           .querySelectorAll<HTMLElement>(".reveal:not(.is-visible)")
           .forEach(reveal);
+        document
+          .querySelectorAll<HTMLElement>(".build-text.is-armed:not(.is-focused)")
+          .forEach(focusBuild);
       }, 3000);
     };
 
     const stopController = () => {
       io?.disconnect();
       io = null;
+      buildIo?.disconnect();
+      buildIo = null;
       mo?.disconnect();
       mo = null;
       window.removeEventListener("scroll", scheduleScan);

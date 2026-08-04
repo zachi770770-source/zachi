@@ -5,6 +5,7 @@ import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
+import { ToolCard } from "@/components/sections/ToolCard";
 
 /**
  * „הכלים המעשיים” — בנטו עריכתי של ששת הכלים האמיתיים מהספר (src/content/book.ts).
@@ -13,7 +14,7 @@ import { BookLink } from "@/components/shared/BookLink";
  * הספר. חשיפת Reveal עדינה בלבד (fade-up), ללא אנימציה חדשה. שפת Ink/Ivory/
  * Sage/Terracotta הקיימת.
  */
-export function ToolsBento() {
+export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
   const items = tools.items.slice(0, 6);
   // אינדקסים של התאים ה„מובילים” (רחבים + גוון Sage) — הראשון והאחרון.
   const feature = new Set([0, items.length - 1]);
@@ -37,9 +38,9 @@ export function ToolsBento() {
           {items.map((tool, i) => {
             const wide = feature.has(i);
             return (
-              <div
+              <ToolCard
                 key={tool.name}
-                className={`group flex flex-col rounded-2xl border p-5 transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-20px_rgba(43,36,31,0.45)] sm:p-6 ${
+                className={`flex flex-col rounded-2xl border p-5 transition-[transform,translate,box-shadow,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-20px_rgba(43,36,31,0.45)] sm:p-6 ${
                   wide
                     ? "sm:col-span-2 border-secondary/40 bg-secondary-muted/60 hover:border-secondary/60"
                     : "border-border bg-surface hover:border-brand/40 hover:bg-surface-muted"
@@ -61,19 +62,23 @@ export function ToolsBento() {
                 <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
                   {tool.description}
                 </p>
-              </div>
+              </ToolCard>
             );
           })}
         </Reveal>
 
-        <Reveal className="mt-9 flex justify-center">
-          <Button asChild size="lg" variant="outline">
-            <BookLink href="/book">
-              לשיטה ולכלים המלאים בספר
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </BookLink>
-          </Button>
-        </Reveal>
+        {/* ה-CTA לעמוד הספר נחוץ רק בהקשר הבית (טעימה → קישור לעמוד המלא).
+            כשהבנטו מוצג בתוך /book עצמו זהו קישור-עצמי מיותר, ולכן מוסתר. */}
+        {!hideCta && (
+          <Reveal className="mt-9 flex justify-center">
+            <Button asChild size="lg" variant="outline">
+              <BookLink href="/book">
+                לשיטה ולכלים המלאים בספר
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </BookLink>
+            </Button>
+          </Reveal>
+        )}
       </Container>
     </section>
   );

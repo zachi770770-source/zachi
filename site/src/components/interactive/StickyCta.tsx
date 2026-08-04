@@ -16,10 +16,35 @@ import { siteConfig } from "@/config/site";
  * ל-body), כך שאינו מכסה עוגיות, את משגר העוזר או תוכן. ניתן לסגירה, נגיש
  * במקלדת, ומכבד prefers-reduced-motion (הכניסה מגודרת ב-motion-safe).
  */
+/**
+ * #5 שלב המסע של המבקר — נקבע *פעם אחת* ב-mount מ-localStorage ולא משתנה אחר כך
+ * (אין מאזין storage), ולכן היעד יציב לחלוטין כל עוד ה-CTA חי — לעולם לא משתנה
+ * בזמן שהמצביע/פוקוס עליו. explore → sample (קרא טעימה) → joined (נרשם).
+ */
+type Stage = "explore" | "sample" | "joined";
+const STAGE_CTA: Record<Stage, { href: string; label: string }> = {
+  explore: { href: "/preview", label: "לקריאת טעימה מהספר" },
+  sample: { href: "/waitlist", label: "להצטרפות לרשימת ההמתנה" },
+  joined: { href: "/preview", label: "חזרה לטעימה מהספר" },
+};
+
 export function StickyCta() {
   const [visible, setVisible] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
   const [bannerHeight, setBannerHeight] = React.useState(0);
+  const [stage, setStage] = React.useState<Stage>("explore");
+
+  // שלב המסע — קריאה חד-פעמית ב-mount. יציב לכל אורך חיי ה-CTA (focus-safe).
+  React.useEffect(() => {
+    try {
+      const joined = localStorage.getItem("mdl_waitlist_joined") === "1";
+      const seen = localStorage.getItem("mdl_sample_seen") === "1";
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- קריאה חד-פעמית מ-localStorage ב-mount
+      setStage(joined ? "joined" : seen ? "sample" : "explore");
+    } catch {
+      /* ברירת מחדל: explore */
+    }
+  }, []);
 
   // מופיע כשה-Hero (הסקשן הראשון ב-main) יצא מהתצוגה. לא נוגעים ב-Hero.
   React.useEffect(() => {
@@ -51,8 +76,10 @@ export function StickyCta() {
 
   if (dismissed || !visible) return null;
 
-  const href = siteConfig.salesOpen ? "/book#purchase" : "/preview";
-  const label = siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר";
+  // אחרי פתיחת המכירה — רכישה. טרום-השקה — לפי שלב המסע (יציב מ-mount).
+  const { href, label } = siteConfig.salesOpen
+    ? { href: "/book#purchase", label: "לרכישת הספר" }
+    : STAGE_CTA[stage];
 
   return (
     <aside
@@ -64,7 +91,9 @@ export function StickyCta() {
         href={href}
         className="inline-flex min-h-[40px] items-center gap-2 rounded-full text-[15px] font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
-        {label}
+        <span key={stage} className="cta-morph">
+          {label}
+        </span>
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-surface">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </span>

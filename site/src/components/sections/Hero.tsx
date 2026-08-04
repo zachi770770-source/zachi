@@ -8,6 +8,7 @@ import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
+import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
 /**
@@ -36,7 +37,7 @@ export function Hero() {
 
             <span
               className="kicker hero-fade"
-              style={{ animationDelay: "150ms" }}
+              style={{ animationDelay: "320ms" }}
             >
               {hero.eyebrow}
             </span>
@@ -55,14 +56,14 @@ export function Hero() {
 
             <p
               className="hero-fade mt-4 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted"
-              style={{ animationDelay: "560ms" }}
+              style={{ animationDelay: "1000ms" }}
             >
               מאת צחי חן
             </p>
 
             <p
               className="hero-fade mt-4 max-w-[46ch] text-[21px] leading-[1.6] text-foreground/80"
-              style={{ animationDelay: "640ms" }}
+              style={{ animationDelay: "1140ms" }}
             >
               {hero.subhead}
             </p>
@@ -73,7 +74,7 @@ export function Hero() {
             <div className="mt-7 flex w-full max-w-[46ch] flex-col items-start gap-4 border-t border-border pt-6">
               <p
                 className="hero-fade text-[16px] font-semibold text-brand-hover"
-                style={{ animationDelay: "720ms" }}
+                style={{ animationDelay: "1300ms" }}
               >
                 {siteConfig.preLaunchPriceLabel}
               </p>
@@ -85,7 +86,7 @@ export function Hero() {
                   hero-rise-soft: תזוזה בלבד (opacity=1) ⇒ ה-CTA גלוי ולחיץ מיידית. */}
               <div
                 className="hero-rise-soft flex w-full flex-col items-start gap-3.5"
-                style={{ animationDelay: "360ms" }}
+                style={{ animationDelay: "160ms" }}
               >
                 {siteConfig.salesOpen ? (
                   <Button asChild size="lg" className="h-14 px-7 text-[17px]">
@@ -97,7 +98,7 @@ export function Hero() {
                   // באימייל כדי לקרוא את הטעימה (קישור משני נפרד).
                   <div className="hero-cta-pulse flex w-full flex-col items-start gap-2.5">
                     <p className="text-[15px] font-semibold text-foreground">
-                      הצטרפו לעדכון ההשקה וקבלו גישה לטעימה
+                      הצטרפו לעדכון ההשקה וקבלו גישה מיידית לטעימה
                     </p>
                     <WaitlistCta source="hero" inline />
                   </div>
@@ -129,31 +130,43 @@ export function Hero() {
           {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה
               מהרקע הבהיר (הפרדה טונאלית), ללא פתקים מרחפים, ללא מסגרת וללא
               רקע כהה. */}
-          <div className="hero-stage order-2 flex items-center justify-center lg:self-stretch">
+          <ParallaxScroll className="hero-stage order-2 flex items-center justify-center lg:self-stretch">
             {/* במת המוצר: הילת Sage רכה + נגיעת אור חמה עדינה מאחורי הכריכה,
-                להפרדה טונאלית ולנפח (גוונים קיימים בלבד) */}
+                להפרדה טונאלית ולנפח (גוונים קיימים בלבד). ההילה נעה מעט עם
+                הגלילה (עומק) בקצב הפוך לכריכה. */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 flex items-center justify-center"
+              className="hero-depth-halo pointer-events-none absolute inset-0 flex items-center justify-center"
+              style={{ transform: "translateY(calc(var(--hero-parallax, 0) * 30px))" }}
             >
               <div className="aspect-square w-[78%] rounded-full bg-secondary/[0.18] blur-[70px]" />
               <div className="absolute aspect-square w-[52%] translate-y-[8%] rounded-full bg-brand/[0.06] blur-[60px]" />
             </div>
 
             <figure className="hero-book relative flex flex-col items-center gap-4 lg:gap-5">
-              <div className="relative w-[172px] sm:w-[264px] lg:w-[340px]">
+              {/* הכריכה נסחפת מעט כלפי מעלה בגלילה (פרלקסה מרוסנת) — עומק בלי
+                  להפריע לטילט/למעבר-הכריכה (שיושבים על אלמנטים פנימיים). */}
+              <div
+                className="hero-depth-book relative w-[172px] sm:w-[264px] lg:w-[340px]"
+                style={{ transform: "translateY(calc(var(--hero-parallax, 0) * -50px))" }}
+              >
                 <div
                   aria-hidden="true"
                   className="hero-book__shadow absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
                 />
-                <BookTilt className="w-full">
-                  {/* מקור המעבר „כניסה לטעימה”: הכריכה הגלויה בשער נמשכת אל
-                      עטיפת עמוד ההצצה. עוטף צמוד — כדי שהצילום יתפוס את הכריכה
-                      בלבד (ללא הצל שמאחוריה). */}
-                  <div data-vt-book-source className="w-full">
-                    <BookCover priority className="w-full" />
-                  </div>
-                </BookTilt>
+                {/* ריחוף/נשימה מתמשכים — הכריכה „חיה” גם ללא סמן (מובייל כלול).
+                    שכבה ייעודית לתנועה בלבד, כדי לא להתנגש בפרלקסה (הורה),
+                    בכניסה (figure) או בטילט (צאצא). מכבד reduced-motion. */}
+                <div className="hero-float w-full">
+                  <BookTilt className="w-full">
+                    {/* מקור המעבר „כניסה לטעימה”: הכריכה הגלויה בשער נמשכת אל
+                        עטיפת עמוד ההצצה. עוטף צמוד — כדי שהצילום יתפוס את הכריכה
+                        בלבד (ללא הצל שמאחוריה). */}
+                    <div data-vt-book-source className="w-full">
+                      <BookCover priority className="w-full" />
+                    </div>
+                  </BookTilt>
+                </div>
               </div>
               {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,
                   סימן-בסיס עדין מתחת לכריכה. דקורטיבי בלבד. המסר „חיפוש→בנייה”
@@ -169,7 +182,7 @@ export function Hero() {
                 <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
               </span>
             </figure>
-          </div>
+          </ParallaxScroll>
         </div>
       </Container>
     </section>
