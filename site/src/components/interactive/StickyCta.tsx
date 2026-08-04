@@ -36,7 +36,10 @@ export function StickyCta() {
     }
   }, []);
 
-  // מופיע כשה-Hero (הסקשן הראשון ב-main) יצא מהתצוגה. לא נוגעים ב-Hero.
+  const [formInView, setFormInView] = React.useState(false);
+
+  // מופיע כשה-Hero (הסקשן הראשון ב-main) יצא מהתצוגה — נמדד ישירות ב-IO
+  // (לא לפי אחוז-גלילה שרירותי). לא נוגעים ב-Hero.
   React.useEffect(() => {
     const hero = document.querySelector("main section");
     if (!hero || typeof IntersectionObserver === "undefined") return;
@@ -45,6 +48,27 @@ export function StickyCta() {
       { threshold: 0, rootMargin: "0px 0px -10% 0px" }
     );
     io.observe(hero);
+    return () => io.disconnect();
+  }, []);
+
+  // מתחבא ליד טופסי הרשמה אחרים (למשל אזור העדכון בתחתית): כשכל שדה-אימייל
+  // בעמוד נכנס לתצוגה — הבר נעלם, כדי לא להתחרות/לכפול פעולת הרשמה.
+  React.useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const fields = Array.from(document.querySelectorAll('input[type="email"]'));
+    if (!fields.length) return;
+    const seen = new Set<Element>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) seen.add(e.target);
+          else seen.delete(e.target);
+        }
+        setFormInView(seen.size > 0);
+      },
+      { threshold: 0.2 }
+    );
+    fields.forEach((f) => io.observe(f));
     return () => io.disconnect();
   }, []);
 
@@ -73,12 +97,12 @@ export function StickyCta() {
     }
   }, []);
 
-  if (dismissed || !visible) return null;
+  if (dismissed || !visible || formInView) return null;
 
   // טרום-השקה: תמיד הטעימה החינמית ללא הרשמה. אחרי פתיחת המכירה — רכישה.
   const preLaunch = !siteConfig.salesOpen;
   const href = preLaunch ? "/preview" : "/book#purchase";
-  const label = preLaunch ? "קראו טעימה חינם" : "לרכישת הספר";
+  const label = preLaunch ? "קראו 2 דקות עכשיו" : "לרכישת הספר";
 
   return (
     <aside

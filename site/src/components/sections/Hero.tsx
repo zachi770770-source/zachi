@@ -111,7 +111,7 @@ export function Hero() {
                   morphCover
                   className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 >
-                  לקריאת טעימה ללא הרשמה
+                  קראו 2 דקות עכשיו · בלי הרשמה
                   <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                 </BookLink>
 

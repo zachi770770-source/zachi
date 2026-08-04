@@ -9,7 +9,7 @@ import { test, expect } from "./fixtures";
 test("zero-friction: hero sample link opens /preview with no registration", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   const hero = page.locator("main section").first();
-  const link = hero.getByRole("link", { name: "לקריאת טעימה ללא הרשמה" });
+  const link = hero.getByRole("link", { name: "קראו 2 דקות עכשיו · בלי הרשמה" });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute("href", "/preview");
   // ניווט ישיר — בלי אימייל, בלי מודאל.
@@ -40,7 +40,7 @@ test("smart sticky sample bar: appears after hero, links to /preview, dismissal 
   // אחרי גלילה מעבר ל-Hero — מופיע, מפנה לטעימה החינמית, ללא ניסוח רכישה.
   await page.evaluate(() => window.scrollTo(0, Math.round(document.body.scrollHeight * 0.5)));
   await expect(bar).toBeVisible();
-  const cta = bar.getByRole("link", { name: /קראו טעימה חינם/ });
+  const cta = bar.getByRole("link", { name: /קראו 2 דקות עכשיו/ });
   await expect(cta).toHaveAttribute("href", "/preview");
   await expect(bar.getByText(/לרכישה|buy|קנ/i)).toHaveCount(0);
 
