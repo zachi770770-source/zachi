@@ -1,23 +1,52 @@
-import { ArrowLeft } from "lucide-react";
+"use client";
+
+import * as React from "react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 
 import { tools } from "@/content/book";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
-import { ToolCard } from "@/components/sections/ToolCard";
 
 /**
- * „הכלים המעשיים” — בנטו עריכתי של ששת הכלים האמיתיים מהספר (src/content/book.ts).
- * מבנה מגוון ונקי: שני כלים „מובילים” רחבים (Sage) וארבעה תאים רגילים, בלי תאים
- * ריקים בשום רזולוציה. תצוגה בלבד; הפעולה הנגישה (מקלדת/מגע) היא קישור אחד לעמוד
- * הספר. חשיפת Reveal עדינה בלבד (fade-up), ללא אנימציה חדשה. שפת Ink/Ivory/
- * Sage/Terracotta הקיימת.
+ * „הכלים המעשיים” — בנטו אינטראקטיבי של ששת הכלים האמיתיים מהספר
+ * (src/content/book.ts). כל כלי הוא `<details>` נטיבי: נפתח/נסגר בלחיצה ובמקלדת
+ * (Enter/Space), נגיש כברירת מחדל, ועובד גם ללא JS ותחת reduced-motion (הפתיחה
+ * מיידית, ללא Flip Cards וללא קרוסלה). לכל כרטיס עוגן יציב `#tool-<id>` כדי
+ * שתוצאת ה-Path Finder תוכל להגיע אליו ישירות, לפתוח אותו ולהעביר אליו focus.
+ * מבנה בנטו: שני כלים „מובילים” רחבים (הראשון והאחרון) וארבעה רגילים; טור יחיד
+ * במובייל, שתיים/ארבע עמודות בדסקטופ. תוכן: שם + הסבר קצר מהספר בלבד (אין תוכן
+ * מומצא). שפת Ink/Ivory/Sage/Terracotta הקיימת.
  */
 export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
   const items = tools.items.slice(0, 6);
-  // אינדקסים של התאים ה„מובילים” (רחבים + גוון Sage) — הראשון והאחרון.
   const feature = new Set([0, items.length - 1]);
+
+  // deep-link: ‏#tool-<id> פותח את הכרטיס, גולל אליו (מיידית, בלי לשבור smooth
+  // גלובלי) ומעביר focus ל-summary — נגיש. רץ בטעינה ובכל שינוי hash.
+  React.useEffect(() => {
+    const openFromHash = () => {
+      const hash = window.location.hash;
+      if (!hash.startsWith("#tool-")) return;
+      const el = document.getElementById(hash.slice(1));
+      if (!(el instanceof HTMLDetailsElement)) return;
+      el.open = true;
+      // focus קודם (בלי לגלול) כדי שהוא לא ידרוס את מיקום ה-scroll-mt; אחר-כך
+      // גלילה מיידית שמכבדת את scroll-mt-24 (הכרטיס יושב מתחת ל-header הדביק).
+      el.querySelector<HTMLElement>("summary")?.focus({ preventScroll: true });
+      const html = document.documentElement;
+      const prev = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
+      el.scrollIntoView({ block: "start" });
+      requestAnimationFrame(() => {
+        html.style.scrollBehavior = prev;
+      });
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    return () => window.removeEventListener("hashchange", openFromHash);
+  }, []);
 
   return (
     <section
@@ -32,43 +61,55 @@ export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
             {tools.title}
           </h2>
           <p className="type-lead mt-4 text-foreground-muted">{tools.description}</p>
+          <p className="mt-2 text-[14px] text-foreground-muted">
+            לחצו על כל כלי כדי לפתוח אותו.
+          </p>
         </Reveal>
 
         <Reveal className="mx-auto mt-10 grid max-w-5xl gap-3.5 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((tool, i) => {
             const wide = feature.has(i);
             return (
-              <ToolCard
-                key={tool.name}
-                className={`flex flex-col rounded-2xl border p-5 transition-[transform,translate,box-shadow,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-20px_rgba(43,36,31,0.45)] sm:p-6 ${
+              <details
+                key={tool.id}
+                id={`tool-${tool.id}`}
+                className={`tool-acc group scroll-mt-24 rounded-2xl border transition-colors duration-200 ${
                   wide
-                    ? "sm:col-span-2 border-secondary/40 bg-secondary-muted/60 hover:border-secondary/60"
-                    : "border-border bg-surface hover:border-brand/40 hover:bg-surface-muted"
+                    ? "border-secondary/40 bg-secondary-muted/60 open:border-secondary/60 sm:col-span-2"
+                    : "border-border bg-surface open:border-brand/40"
                 }`}
               >
-                <span
-                  aria-hidden="true"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-muted font-quote text-[14px] font-bold text-brand-hover tabular-nums transition-transform group-hover:scale-110"
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3
-                  className={`mt-4 font-serif font-semibold leading-snug text-foreground ${
-                    wide ? "text-[1.3rem]" : "text-[1.12rem]"
-                  }`}
-                >
-                  {tool.name}
-                </h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-                  {tool.description}
-                </p>
-              </ToolCard>
+                <summary className="tool-acc__summary flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6">
+                  <span className="flex items-center gap-3">
+                    <span
+                      aria-hidden="true"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-muted font-quote text-[14px] font-bold tabular-nums text-brand-hover"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className={`font-serif font-semibold leading-snug text-foreground ${
+                        wide ? "text-[1.3rem]" : "text-[1.12rem]"
+                      }`}
+                    >
+                      {tool.name}
+                    </span>
+                  </span>
+                  <ChevronDown
+                    className="tool-acc__chev h-5 w-5 shrink-0 text-foreground-muted transition-transform duration-200"
+                    aria-hidden="true"
+                  />
+                </summary>
+                <div className="tool-acc__body px-5 pb-5 sm:px-6 sm:pb-6">
+                  <p className="text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                    {tool.description}
+                  </p>
+                </div>
+              </details>
             );
           })}
         </Reveal>
 
-        {/* ה-CTA לעמוד הספר נחוץ רק בהקשר הבית (טעימה → קישור לעמוד המלא).
-            כשהבנטו מוצג בתוך /book עצמו זהו קישור-עצמי מיותר, ולכן מוסתר. */}
         {!hideCta && (
           <Reveal className="mt-9 flex justify-center">
             <Button asChild size="lg" variant="outline">

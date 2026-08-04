@@ -659,6 +659,39 @@
     }
   }
 
+  /* בנטו הכלים האינטראקטיבי — `<details>` נטיבי (נגיש, מקלדת, ללא-JS). הסרת
+     סמן ברירת-המחדל, סיבוב השברון בפתיחה, וחשיפת-גוף עדינה (מגודרת motion-safe,
+     ללא תלות ב-JS ולא שוברת reduced-motion). */
+  .tool-acc > summary {
+    list-style: none;
+  }
+  .tool-acc > summary::-webkit-details-marker {
+    display: none;
+  }
+  @media (hover: hover) {
+    .tool-acc > summary:hover .tool-acc__chev {
+      color: var(--color-foreground);
+    }
+  }
+  .tool-acc[open] .tool-acc__chev {
+    transform: rotate(180deg);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .tool-acc[open] .tool-acc__body {
+      animation: toolAccBody 260ms var(--ease-settle) both;
+    }
+    @keyframes toolAccBody {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
     transform-box: fill-box;

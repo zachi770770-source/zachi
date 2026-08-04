@@ -141,12 +141,16 @@ export function StationJourney() {
 
   const done = step === 3 && answers.every((a) => a !== null);
   const station = done ? stations[Q1[answers[0]!].station] : null;
+  // הקושי שנבחר (שאלה 2) והכלי המתאים — המיפוי הקיים. הכלי תמיד קיים ברשימה.
+  const difficulty = done ? Q2[answers[1]!].label : null;
   const tool = done
     ? tools.items.find((t) => t.name === Q2[answers[1]!].tool) ?? tools.items[0]
     : null;
   const emphasis: Emphasis | null = done ? Q3[answers[2]!].emphasis : null;
 
-  // סדר הפעולות בתוצאה לפי מה שהמבקר ביקש (כולן זמינות תמיד).
+  // פעולה ראשית: קישור ישיר לכרטיס הכלי ב-/book (העוגן פותח אותו ומעביר focus).
+  const toolCta = tool ? { href: `/book#tool-${tool.id}`, label: "לכלי המלא בעמוד הספר" } : null;
+  // סדר הפעולות המשניות לפי תשובת שאלה 3 (כולן זמינות תמיד).
   const sampleCta = { href: "/preview", label: "לקריאת הטעימה" };
   const compassCta = { href: "/compass", label: "שאלו את הספר" };
   const stationCta = station
@@ -264,6 +268,12 @@ export function StationJourney() {
                 {station!.lead}
               </p>
 
+              {/* הקושי המרכזי שנבחר (שאלה 2) — הד קצר, לא אבחוני. */}
+              <p className="mt-4 text-[15px] leading-relaxed text-foreground-muted">
+                מה שאתם מזהים:{" "}
+                <span className="font-semibold text-foreground">„{difficulty}”</span>.
+              </p>
+
               <div className="mt-5 rounded-xl border-s-2 border-brand bg-surface-muted/60 p-4">
                 <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
                   כלי מהספר שיכול לעזור כאן
@@ -276,14 +286,22 @@ export function StationJourney() {
                 </p>
               </div>
 
-              {/* פעולות — הראשית לפי בקשת המבקר, כולן זמינות */}
-              <div className="mt-6 flex flex-col gap-3">
-                {(emphasis === "compass"
-                  ? [compassCta, sampleCta, stationCta]
-                  : emphasis === "station"
-                    ? [stationCta, sampleCta, compassCta]
-                    : [sampleCta, stationCta, compassCta]
-                )
+              {/* פעולה אחת עכשיו — ניווט לכרטיס הכלי (לא הבטחה ולא תוכן מומצא). */}
+              <p className="mt-5 text-[15px] leading-relaxed text-foreground">
+                פעולה אחת עכשיו: פתחו את כרטיס הכלי בעמוד הספר וראו איך הוא עובד.
+              </p>
+
+              {/* פעולות — הראשית: הכלי המלא ב-/book (deep-link לכרטיס שנפתח וממוקד).
+                  המשניות מסודרות לפי תשובת שאלה 3. כולן זמינות תמיד. */}
+              <div className="mt-4 flex flex-col gap-3">
+                {[
+                  toolCta,
+                  ...(emphasis === "compass"
+                    ? [compassCta, sampleCta, stationCta]
+                    : emphasis === "station"
+                      ? [stationCta, sampleCta, compassCta]
+                      : [sampleCta, stationCta, compassCta]),
+                ]
                   .filter((c): c is { href: string; label: string } => Boolean(c))
                   .map((c, i) => (
                     <Link
