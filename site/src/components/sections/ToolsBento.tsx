@@ -39,7 +39,12 @@ export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
       const prev = html.style.scrollBehavior;
       html.style.scrollBehavior = "auto";
       el.scrollIntoView({ block: "start" });
+      // תיקון-מסגרת: פתיחת כרטיס גבוה משנה גובה-שורה בגריד, ובמכשירים איטיים
+      // (או כשהפריסה עדיין מתייצבת) הגלילה הראשונה עלולה לנחות על מיקום ישן.
+      // גלילה חוזרת ב-rAF, אחרי שהפריסה סופית, מבטיחה שהכרטיס יושב בראש — ורק
+      // אז משחזרים את התנהגות-הגלילה החלקה.
       requestAnimationFrame(() => {
+        el.scrollIntoView({ block: "start" });
         html.style.scrollBehavior = prev;
       });
     };
@@ -101,9 +106,67 @@ export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
                   />
                 </summary>
                 <div className="tool-acc__body px-5 pb-5 sm:px-6 sm:pb-6">
-                  <p className="text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                  <p className="tool-acc__desc text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
                     {tool.description}
                   </p>
+
+                  {/* העשרה מכתב-היד — ציטוט ישיר בלבד (ראו book.ts). מופיעה רק
+                      בפתיחת הכרטיס (Progressive Disclosure), ורק לכלים שיש להם
+                      מקור מאומת בספר; לכלי בלי מקור לא מוצג דבר. */}
+                  {(tool.whenToUse ||
+                    tool.howItWorks ||
+                    tool.example ||
+                    tool.exercise ||
+                    tool.quote) && (
+                    <dl className="mt-4 space-y-3 border-t border-border pt-4">
+                      {tool.whenToUse && (
+                        <div>
+                          <dt className="text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
+                            מתי זה מתאים
+                          </dt>
+                          <dd className="mt-1 text-[14px] leading-relaxed text-foreground [text-wrap:pretty]">
+                            {tool.whenToUse}
+                          </dd>
+                        </div>
+                      )}
+                      {tool.howItWorks && (
+                        <div>
+                          <dt className="text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
+                            איך זה עובד
+                          </dt>
+                          <dd className="mt-1 text-[14px] leading-relaxed text-foreground [text-wrap:pretty]">
+                            {tool.howItWorks}
+                          </dd>
+                        </div>
+                      )}
+                      {tool.example && (
+                        <div>
+                          <dt className="text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
+                            דוגמה מהספר
+                          </dt>
+                          <dd className="mt-1 text-[14px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                            {tool.example}
+                          </dd>
+                        </div>
+                      )}
+                      {tool.exercise && (
+                        <div>
+                          <dt className="text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
+                            תרגיל קצר
+                          </dt>
+                          <dd className="mt-1 text-[14px] leading-relaxed text-foreground [text-wrap:pretty]">
+                            {tool.exercise}
+                          </dd>
+                        </div>
+                      )}
+                      {tool.quote && (
+                        <blockquote className="border-s-2 border-secondary ps-3 font-serif text-[15px] italic leading-relaxed text-foreground [text-wrap:pretty]">
+                          {tool.quote}
+                        </blockquote>
+                      )}
+                    </dl>
+                  )}
+
                   {/* נגן שמע אופציונלי — מוצג אך ורק כשקיימים גם קובץ מאושר וגם
                       תמלול. אין אוטו-פליי; preload="none" מבטיח שהקובץ נטען רק
                       כשהמשתמש מנגן (הכרטיס ממילא סגור עד לפתיחה). כרגע אין הקלטות

@@ -24,8 +24,8 @@ export type ToolId =
   | "gate-questions"
   | "quiet-check"
   | "twenty-maintenance"
-  | "rule-72h"
-  | "process-30-days";
+  | "boundary-ladder"
+  | "emergency-kit";
 
 /** שלושת שלבי-החיים (Q1), בסדר התצוגה בשאלון. */
 export const STAGES: StationId[] = [
@@ -44,33 +44,38 @@ export const PREFERENCE_COUNT = 3;
  * העמודות (Q2): 0 = „נועל/ת מסקנה מהר”, 1 = „קשה לדעת אם זה סימן אמיתי”,
  * 2 = „מגיב/ה לרגע ומתחרט/ת”.
  *
+ * כל ששת הכלים קיימים בכתב-היד ומאומתים (ראו book.ts). הקושי „מגיב/ה לרגע
+ * ומתחרט/ת” (עמודה 2) מפנה תמיד ל„ערכת חירום כשהדפוס מקדים אותך” — כלי הרגע-החם
+ * של הספר — בכל שלושת השלבים, כי זו בדיוק הבעיה שהוא פותר.
+ *
  * הרציונל התוכני לכל תא:
  * • before-relationship
  *   0 → gate-questions   — פוסלים או מכתירים מהר; „שלוש שאלות השער” בודקות קשר
  *                          מתחיל בלי למהר להכריע.
  *   1 → fact-story-action— „סימן אמיתי או פרשנות?” — „עובדה, סיפור, פעולה” מפריד
  *                          את מה שקרה מהסיפור שנתנו לו.
- *   2 → rule-72h         — תגובה רגעית מול מסקנה; „כלל 72 השעות” נותן זמן להבחין.
+ *   2 → emergency-kit    — תגובה רגעית ואצבע על הכפתור; „ערכת החירום” קונה שניות
+ *                          לפני שהדפוס שולח את ההודעה.
  * • starting-again
  *   0 → gate-questions   — אחרי פרידה נועלים מסקנה מהר מתוך העבר; שער הבדיקה עוצר
  *                          את הפסילה האוטומטית.
- *   1 → process-30-days  — קשה לקרוא סימנים כשחוזרים; „תהליך 30 הימים” נותן מסגרת
- *                          זמן שמאפשרת לקשר חדש להתברר.
- *   2 → rule-72h         — אותה תגובתיות רגעית — כלל 72 השעות.
+ *   1 → boundary-ladder  — כשמשהו מפריע ולא ברור אם זה רצון, צורך או קו אדום;
+ *                          „מדרג הגבולות” עוזר לקרוא את הסימן במקום לבלוע אותו.
+ *   2 → emergency-kit    — אותה תגובתיות רגעית — ערכת החירום.
  * • inside-relationship
  *   0 → quiet-check      — בתוך קשר „נועלים מסקנה” על שקט/ריחוק; „בדיקת השקט”
  *                          מבדילה שקט בריא מחוסר עניין.
- *   1 → quiet-check      — „סימן אמיתי?” בתוך קשר הוא בדיוק שאלת השקט.
- *   2 → twenty-maintenance— תגובה רגעית בתוך קשר; „תחזוקת ה-20” מחליפה תגובתיות
- *                          בתשומת-לב יומיומית קטנה וקבועה.
+ *   1 → twenty-maintenance— „סימן אמיתי?” בתוך קשר — „תחזוקת ה-20” מחזירה מגע
+ *                          וקריאה אמיתית של מי שבן/בת הזוג נעשה/תה היום.
+ *   2 → emergency-kit    — תגובה רגעית בתוך קשר — ערכת החירום.
  *
- * כיסוי: gate-questions ✔, fact-story-action ✔, rule-72h ✔, process-30-days ✔,
+ * כיסוי: gate-questions ✔, fact-story-action ✔, emergency-kit ✔, boundary-ladder ✔,
  * quiet-check ✔, twenty-maintenance ✔ — כל ששת הכלים נגישים.
  */
 export const TOOL_BY_STAGE_DIFFICULTY: Record<StationId, ToolId[]> = {
-  "before-relationship": ["gate-questions", "fact-story-action", "rule-72h"],
-  "starting-again": ["gate-questions", "process-30-days", "rule-72h"],
-  "inside-relationship": ["quiet-check", "quiet-check", "twenty-maintenance"],
+  "before-relationship": ["gate-questions", "fact-story-action", "emergency-kit"],
+  "starting-again": ["gate-questions", "boundary-ladder", "emergency-kit"],
+  "inside-relationship": ["quiet-check", "twenty-maintenance", "emergency-kit"],
 };
 
 /**
