@@ -62,12 +62,20 @@ test("/book deep-link (#tool-…) opens the matching tool card and moves focus t
 });
 
 test("path finder result links directly to a real tool card in /book", async ({ page }) => {
+  // reduced-motion: התוצאה/הכרטיסים מיד במצב סופי (בלי „element is not stable”).
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const where = page.locator("#where");
   await where.scrollIntoViewIfNeeded();
-  // בוחרים תשובה אחת בכל אחת משלוש השאלות (ראשונה בכל שאלה).
+  // סוגרים את באנר-העוגיות פעם אחת כדי שלא ישנה padding-bottom עם כל גלילה.
+  await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
+  // בוחרים תשובה אחת בכל אחת משלוש השאלות (ראשונה בכל שאלה). מעגנים כל רדיו
+  // למרכז לפני הקליק — ה-header הדביק מכסה את ראש התצוגה ו-Playwright מגלגל
+  // יעד לראש כברירת מחדל.
   for (let i = 0; i < 3; i++) {
-    await where.locator('[role="radio"]').first().click();
+    const radio = where.locator('[role="radio"]').first();
+    await radio.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await radio.click();
   }
   const article = where.locator("article");
   await expect(article.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
@@ -78,6 +86,7 @@ test("path finder result links directly to a real tool card in /book", async ({ 
   expect(TOOL_IDS).toContain(href!.replace("/book#", ""));
 
   // הקישור באמת פותח את הכלי המתאים ב-/book.
+  await primary.evaluate((el) => el.scrollIntoView({ block: "center" }));
   await primary.click();
   await expect(page).toHaveURL(new RegExp(`/book#${href!.split("#")[1]}$`));
   await expect(page.locator(`#${href!.split("#")[1]}`)).toHaveJSProperty("open", true);
