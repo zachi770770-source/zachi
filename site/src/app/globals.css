@@ -1060,20 +1060,19 @@
 /* כניסת הכריכה בעמוד /book — נחיתה מוצרית ברורה (למעלה מהקיפול, on-load).
    בסיס גלוי; רק תחת motion-js מריצים כניסה. reduced-motion / no-JS ⇒ סטטי גלוי. */
 .motion-js .book-hero-enter {
-  animation: bookHeroEnter 1200ms var(--ease-settle) 120ms both;
+  animation: bookHeroEnter 700ms var(--ease-settle) 40ms both;
   transform-origin: center 62%;
 }
 .motion-js .book-hero-enter__shadow {
   transform-origin: center;
-  animation: bookHeroShadow 900ms var(--ease-settle) 300ms both;
+  animation: bookHeroShadow 640ms var(--ease-settle) 160ms both;
 }
+/* תנועה תומכת מרוסנת — הכריכה מופיעה כמעט מיד (התחלה ב-opacity גבוה) כדי
+   שהפתיח לעולם לא ייראה ריק; הכותרת/המיצוב/ה-CTA גלויים ממילא מיד (ללא Reveal). */
 @keyframes bookHeroEnter {
   0% {
-    opacity: 0;
-    transform: perspective(1200px) translateY(64px) scale(0.84) rotateX(4deg);
-  }
-  40% {
-    opacity: 1;
+    opacity: 0.35;
+    transform: perspective(1200px) translateY(30px) scale(0.93) rotateX(2deg);
   }
   100% {
     opacity: 1;
@@ -1632,58 +1631,31 @@
 /* #2 מעבר „מבנה נבנה” בין בחירות: הפאנל אינו מתחלף בקפיצה — הוא נבנה בחשיפת
  * מסכה מכיוון הקריאה (RTL: מימין) יחד עם עלייה עדינה, בזמן שהסמן נע על המסלול
  * והתחנות נדלקות ברצף. תנועה אחת מתמשכת. */
+/* כרטיס התוצאה נכנס כיחידה אחת, מהר וללא „שטח ריק”: הופעה עדינה (opacity +
+   עלייה קטנה) שמסתיימת ב-~340ms. אין clip-path ואין הרכבה איטית פר-ילד, שגרמו
+   לתחושת מסך ריק לפני שהתוצאה מופיעה. */
 @keyframes stuckAnswerIn {
   from {
     opacity: 0;
-    transform: translateY(34px) scale(0.97);
-    clip-path: inset(0 0 0 42%);
-  }
-  60% {
-    opacity: 1;
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: none;
-    clip-path: inset(0 0 0 0);
   }
 }
 .stuck-answer {
-  animation: stuckAnswerIn 620ms var(--ease-settle) both;
+  animation: stuckAnswerIn 340ms var(--ease-settle) both;
 }
 /* מגלה-המסלול — כל שאלה נכנסת עם החלקה עדינה מכיוון הקריאה (RTL). */
 @media (prefers-reduced-motion: no-preference) {
   .pathfinder__q {
-    animation: pathfinderQ 380ms var(--ease-settle) both;
+    animation: pathfinderQ 300ms var(--ease-settle) both;
   }
   @keyframes pathfinderQ {
     from {
       opacity: 0;
-      transform: translateX(28px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  /* התוכן הפנימי „נבנה” בזה-אחר-זה כשמתחלפת תחנה — קריא כמסלול שנבנה מחדש */
-  .stuck-answer > * {
-    animation: stuckChildIn 520ms var(--ease-settle) both;
-  }
-  .stuck-answer > *:nth-child(2) {
-    animation-delay: 90ms;
-  }
-  .stuck-answer > *:nth-child(3) {
-    animation-delay: 170ms;
-  }
-  .stuck-answer > *:nth-child(4) {
-    animation-delay: 250ms;
-  }
-  @keyframes stuckChildIn {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
+      transform: translateX(22px);
     }
     to {
       opacity: 1;

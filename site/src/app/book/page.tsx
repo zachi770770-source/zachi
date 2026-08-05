@@ -4,7 +4,6 @@ import { siteConfig } from "@/config/site";
 import { bigIdea } from "@/content/book";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
-import { Reveal } from "@/components/shared/Reveal";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookLink } from "@/components/shared/BookLink";
 import { BehindSection } from "@/components/sections/BehindSection";
@@ -41,12 +40,15 @@ export default function BookPage() {
       />
 
       <header className="border-b border-border bg-surface-muted">
-        <Container className="py-16 sm:py-20 lg:py-24">
-          <Reveal className="mx-auto max-w-3xl text-center">
-            {/* עוגן המעבר „כניסה לספר” + מוקד עריכתי: העטיפה גדולה ומכובדת,
-                עם הילת Sage רכה מאחוריה להפרדה טונאלית. העטיפה נמשכת לכאן
-                מנקודת המקור בבית. */}
-            <div className="book-hero-enter relative mx-auto mb-10 w-[248px] sm:w-[304px] lg:w-[360px]">
+        <Container className="py-9 sm:py-11 lg:py-12">
+          {/* לא Reveal: תוכן ה-Hero המרכזי (כותרת/מיצוב/CTA) נקרא מיד — בלי
+              „שער” גלילה שמשאיר את הפתיח כמעט ריק. תנועת-הכניסה של הכריכה
+              (book-hero-enter) ממשיכה כתנועה תומכת בלבד. */}
+          <div className="mx-auto max-w-3xl text-center">
+            {/* עוגן המעבר „כניסה לספר” + מוקד עריכתי: הכריכה מכובדת אך מרוסנת —
+                גובה ה-Hero מצומצם כדי שהכותרת, המיצוב וה-CTA יהיו מעל הקיפול.
+                העטיפה נמשכת לכאן מנקודת המקור בבית. */}
+            <div className="book-hero-enter relative mx-auto mb-6 w-[168px] sm:w-[200px] lg:w-[224px]">
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute -inset-8 -z-10 rounded-full bg-secondary/[0.18] blur-3xl"
@@ -66,20 +68,15 @@ export default function BookPage() {
             <h1 className="type-h1 mt-4">מה יש בספר, ואיך הוא עובד</h1>
             {/* מיצוב: לא ספר חד-פעמי אלא מלווה לאורך כל המסע הזוגי (ללא טענה
                 השוואתית — לא „היחיד” / „הראשון מסוגו”). */}
-            <p className="mt-5 font-serif text-[19px] font-semibold leading-snug text-brand-hover">
+            <p className="mt-4 font-serif text-[19px] font-semibold leading-snug text-brand-hover">
               לא ספר שקוראים פעם אחת — ספר שחוזרים אליו לאורך המסע הזוגי.
             </p>
-            <p className="type-lead mt-5 text-foreground-muted">
-              {siteConfig.description}
-            </p>
-            {/* נקודת האיזון של הגישה, הועברה לכאן מהשער כדי לשמור על עמוד בית חיובי. */}
-            <p className="mx-auto mt-6 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted/90">
-              {bigIdea.clarification}
-            </p>
+            {/* ה-CTA הראשי מיד אחרי המיצוב — כדי שיהיה מעל הקיפול בדסקטופ. הפסקאות
+                התיאוריות (תיאור + נקודת האיזון) מגיעות אחריו כפירוט תומך. */}
             <BookLink
               href="/preview"
               morphCover
-              className="group mt-7 inline-flex items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              className="group mt-5 inline-flex items-center gap-2 text-[16px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
               קראו טעימה מהספר
               <ArrowLeft
@@ -87,7 +84,14 @@ export default function BookPage() {
                 aria-hidden="true"
               />
             </BookLink>
-          </Reveal>
+            <p className="type-lead mt-6 text-foreground-muted">
+              {siteConfig.description}
+            </p>
+            {/* נקודת האיזון של הגישה, הועברה לכאן מהשער כדי לשמור על עמוד בית חיובי. */}
+            <p className="mx-auto mt-5 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted/90">
+              {bigIdea.clarification}
+            </p>
+          </div>
         </Container>
       </header>
 

@@ -51,13 +51,17 @@ export type ToolSample = {
  */
 export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
   // תוכן הקריאה הפעיל: מותאם-כלי (אם הגענו מ-Path Finder) או הטעימה הכללית.
+  // מיפוי מותאם-כלי: תרחיש→פתיחה, יישום→גוף, תובנה→משפט-מפתח מודגש, שאלה→שאלת
+  // הרהור סוגרת. השאלה של הכלי אינה מוצגת באמצע (readerQuestion=null) אלא בסוף.
   const contextLine = toolSample?.contextLine;
   const opening = toolSample ? toolSample.opening : sampleReader.opening;
   const passage = toolSample ? toolSample.passage : sampleReader.passage;
   const principle = toolSample
     ? { label: "תובנת מפתח מהספר", text: toolSample.insight, emphasis: toolSample.insight }
     : sampleReader.principle;
-  const readerQuestion = toolSample ? toolSample.question : sampleReader.readerQuestion;
+  const readerQuestion = toolSample ? null : sampleReader.readerQuestion;
+  const ending = toolSample ? null : sampleReader.ending;
+  const closingPrompt = toolSample ? toolSample.question : sampleReader.closingPrompt;
   const [scale, setScale] = React.useState(1);
   const [theme, setTheme] = React.useState<Theme>("light");
   const [progress, setProgress] = React.useState(0);
@@ -318,12 +322,14 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
           </aside>
         </div>
 
-        <p className="reader-question reader-leaf">{readerQuestion}</p>
+        {readerQuestion ? (
+          <p className="reader-question reader-leaf">{readerQuestion}</p>
+        ) : null}
 
-        <p className="reader-p reader-ending reader-leaf">{sampleReader.ending}</p>
+        {ending ? <p className="reader-p reader-ending reader-leaf">{ending}</p> : null}
 
         <div className="reader-closing reader-leaf">
-          <p className="reader-closing__prompt">{sampleReader.closingPrompt}</p>
+          <p className="reader-closing__prompt">{closingPrompt}</p>
           <p className="reader-closing__note">{sampleReader.closingNote}</p>
         </div>
 

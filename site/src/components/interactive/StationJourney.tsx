@@ -94,6 +94,9 @@ export function StationJourney() {
   // התחנה הפעילה: מה שהותאם בשאלון כאן (אם הושלם) גובר על מה ש„המצפן” שמר.
   const [savedStationId, setSavedStationId] = React.useState<StationId | null>(null);
   const [resolvedStationId, setResolvedStationId] = React.useState<StationId | null>(null);
+  // האם השאלון פעיל (המשתמש כבר בחר תשובה ועדיין לא סיים) — כדי להסתיר מיד את
+  // באנר „התוצאה הקודמת” ברגע שנבחרה תשובה לשאלה 1.
+  const [quizActive, setQuizActive] = React.useState(false);
   React.useEffect(() => {
     // נקרא רק בצד-הלקוח (rAF) — בלי אי-התאמת הידרציה.
     const raf = requestAnimationFrame(() => {
@@ -102,7 +105,10 @@ export function StationJourney() {
     });
     return () => cancelAnimationFrame(raf);
   }, []);
-  const activeStationId: StationId | null = resolvedStationId ?? savedStationId;
+  // הדגשת התחנה במסלול: התוצאה החדשה (אם הושלמה) גוברת; בזמן מענה פעיל אין
+  // הדגשה של „התחנה הקודמת”; רק במצב פריסטין מדגישים את מה שהמצפן שמר.
+  const activeStationId: StationId | null =
+    resolvedStationId ?? (quizActive ? null : savedStationId);
 
   return (
     <section
@@ -127,11 +133,15 @@ export function StationJourney() {
         </div>
 
         <div className="mt-9">
-          <PathFinder onResolveStation={setResolvedStationId} />
+          <PathFinder
+            onResolveStation={setResolvedStationId}
+            onActiveChange={setQuizActive}
+          />
         </div>
 
-        {/* המשך מהמצפן: אם הושלם „המצפן” (/compass) ועדיין לא ענו על השאלון כאן. */}
-        {savedStationId && !resolvedStationId ? (
+        {/* המשך מהמצפן: מוצג רק לפני שהתחילו לענות כאן (savedStationId, לא פעיל,
+            ולא הושלם) — ברגע שנבחרת תשובה לשאלה 1 הבאנר נעלם מיד. */}
+        {savedStationId && !resolvedStationId && !quizActive ? (
           <div className="mx-auto mt-8 max-w-2xl rounded-xl border-s-2 border-brand bg-surface-muted/60 p-4 text-start">
             <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
               השלמתם את המצפן

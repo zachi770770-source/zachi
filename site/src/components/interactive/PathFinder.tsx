@@ -52,17 +52,23 @@ const QUESTIONS = [
 
 export function PathFinder({
   onResolveStation,
+  onActiveChange,
 }: {
   onResolveStation?: (stationId: StationId | null) => void;
+  /** מדווח כשהמשתמש התחיל לענות (true) ועד איפוס (false) — כדי שההורה יסתיר מיד
+      כל „תוצאה קודמת” (למשל באנר „השלמתם את המצפן”) ברגע שנבחרה תשובה לשאלה 1. */
+  onActiveChange?: (active: boolean) => void;
 } = {}) {
   // answers[0..2] = index הבחירה בכל שאלה; null = טרם נבחר.
   const [answers, setAnswers] = React.useState<(number | null)[]>([null, null, null]);
   const [step, setStep] = React.useState(0); // 0..2 שאלה נוכחית; 3 = תוצאה
   const startedRef = React.useRef(false);
+  const resultHeadingRef = React.useRef<HTMLHeadingElement>(null);
 
   const choose = (qIndex: number, optIndex: number) => {
     if (!startedRef.current) {
       startedRef.current = true;
+      onActiveChange?.(true); // מסתיר מיד תוצאה קודמת בהורה
       trackEvent("path_finder_start"); // ללא תוכן התשובה
     }
     setAnswers((prev) => {
@@ -79,6 +85,8 @@ export function PathFinder({
   };
 
   const restart = () => {
+    startedRef.current = false;
+    onActiveChange?.(false);
     setAnswers([null, null, null]);
     setStep(0);
   };
@@ -104,6 +112,20 @@ export function PathFinder({
       onResolveStation?.(null);
     }
   }, [done, station, onResolveStation]);
+
+  // עם השלמת השאלון — הנחתה + מיקוד על כותרת התוצאה (מיד, בלי „שטח ריק”). ה-
+  // scroll-mt מרחיק את הכותרת מתחת ל-header הדביק. תנועה מנוטרלת גלובלית תחת
+  // reduced-motion, ולכן התוצאה גלויה מיידית.
+  React.useEffect(() => {
+    if (!done) return;
+    const el = resultHeadingRef.current;
+    if (!el) return;
+    const raf = requestAnimationFrame(() => {
+      el.scrollIntoView({ block: "start" });
+      el.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [done]);
 
   // שלוש פעולות אמיתיות. תשובת שאלה 3 קובעת מי מהן ה-CTA הראשי; האחרות יורדות
   // לפעולות-משנה שקטות. כל יעד הוא עמוד אמיתי עם תוכן מאושר.
@@ -217,7 +239,11 @@ export function PathFinder({
           aria-live="polite"
         >
           <p className="kicker">התאמה אישית</p>
-          <h3 className="mt-3 font-serif text-[1.4rem] font-semibold leading-snug text-foreground">
+          <h3
+            ref={resultHeadingRef}
+            tabIndex={-1}
+            className="mt-3 scroll-mt-24 font-serif text-[1.4rem] font-semibold leading-snug text-foreground focus:outline-none"
+          >
             נקודת הפתיחה שלכם: {station!.navLabel}
           </h3>
           <p className="mt-3 text-[1.05rem] leading-[1.75] text-foreground">{station!.lead}</p>
