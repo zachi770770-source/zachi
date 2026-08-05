@@ -192,8 +192,8 @@ test("/compass is an active deterministic 3-question compass (closed choices, no
   const res = await page.goto("/compass", { waitUntil: "networkidle" });
   expect(res?.status()).toBe(200);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("נקודת הפתיחה");
-  // שאלה 1 מתוך 3, בחירות סגורות (radiogroup), ללא טקסט חופשי.
-  await expect(page.getByText("שאלה 1 מתוך 3")).toBeVisible();
+  // שאלה 1/3, בחירות סגורות (radiogroup), ללא טקסט חופשי.
+  await expect(page.getByText("שאלה 1/3")).toBeVisible();
   await expect(page.getByRole("radiogroup")).toHaveCount(1);
   await expect(page.getByRole("textbox")).toHaveCount(0);
 });

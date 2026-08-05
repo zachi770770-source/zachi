@@ -5,12 +5,12 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
 
 import { compassQuiz } from "@/content/compass";
-import { CompassQuiz } from "@/components/compass/CompassQuiz";
+import { PathFinder } from "@/components/interactive/PathFinder";
 
 /**
  * משגר „המצפן” בעמוד הבית — חוויית שלוש-השאלות הדטרמיניסטית, נגישה תמיד וללא
- * ניווט החוצה. אינו צ׳אטבוט ואינו AI: הבועה פותחת את אותו רכיב CompassQuiz
- * שבעמוד /compass — בחירות סגורות בלבד, בלי קריאה ל-API חיצוני.
+ * ניווט החוצה. אינו צ׳אטבוט ואינו AI: הבועה פותחת את אותו מנוע שאלון (PathFinder)
+ * שבעמוד /compass ובבית — שלוש שאלות סגורות → תחנה + כלי + פעולה, בלי API חיצוני.
  *
  * - Desktop/Tablet (md ומעלה): בועה עגולה קבועה בצד המתחיל-לוגית של הקצה
  *   (שמאל ב-RTL), באמצע גובה המסך, עם תווית קטנה „המצפן”.
@@ -119,7 +119,7 @@ export function CompassLauncher() {
           </div>
 
           <div className="grow overflow-y-auto px-5 py-6 sm:px-6">
-            <CompassQuiz />
+            <PathFinder />
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

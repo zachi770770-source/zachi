@@ -23,15 +23,41 @@ const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
 
 /**
+ * קטע קריאה מותאם-כלי — נגזר *כולו* מהתוכן המאושר של אותו כלי (src/content/book.ts):
+ * התרחיש, היישום, תובנת המפתח והשאלה. שונה בפועל לכל כלי (לא רק שורת-הקשר), בלי
+ * טקסט חדש שהומצא. נבנה בשרת (preview/page.tsx) ומועבר כ-prop.
+ */
+export type ToolSample = {
+  toolName: string;
+  contextLine: string;
+  /** פתיחת הקטע — התרחיש מהחיים של הכלי. */
+  opening: string;
+  /** גוף הקטע — היישום בפועל (פסקה אחת או יותר). */
+  passage: string[];
+  /** תובנת המפתח — מודגשת „בדיו”. */
+  insight: string;
+  /** שאלה לקורא — שאלת-המסגור של הכלי. */
+  question: string;
+};
+
+/**
  * מצב קריאה נגיש לטעימה: תוכן HTML (לא תמונות), רוחב שורה נוח, טיפוגרפיה
  * עברית, מד התקדמות עדין, הגדלה/הקטנה של הכתב, ומצב בהיר/כהה — הכל בתוך אזור
  * הקריאה בלבד, עם שמירת העדפה מקומית. אין דפדוף מלאכותי המדמה ספר פיזי.
  *
- * `contextToolName` (אופציונלי) מגיע מ-Path Finder עם כלי+תחנה תקפים
- * (`/preview?tool=&station=`): מוצגת שורת-הקשר אישית קצרה, אך התוכן עצמו נשאר
- * הטעימה המאושרת בלבד — אין אבחון ואין תוכן שהומצא.
+ * `toolSample` (אופציונלי) מגיע מ-Path Finder עם כלי+תחנה תקפים
+ * (`/preview?tool=&station=`): מציג קטע קריאה שונה *בפועל* לאותו כלי, שנבנה כולו
+ * מהתוכן המאושר של הכלי — אין אבחון ואין תוכן שהומצא. בלי כלי תקף → הטעימה הכללית.
  */
-export function SampleReader({ contextToolName }: { contextToolName?: string } = {}) {
+export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
+  // תוכן הקריאה הפעיל: מותאם-כלי (אם הגענו מ-Path Finder) או הטעימה הכללית.
+  const contextLine = toolSample?.contextLine;
+  const opening = toolSample ? toolSample.opening : sampleReader.opening;
+  const passage = toolSample ? toolSample.passage : sampleReader.passage;
+  const principle = toolSample
+    ? { label: "תובנת מפתח מהספר", text: toolSample.insight, emphasis: toolSample.insight }
+    : sampleReader.principle;
+  const readerQuestion = toolSample ? toolSample.question : sampleReader.readerQuestion;
   const [scale, setScale] = React.useState(1);
   const [theme, setTheme] = React.useState<Theme>("light");
   const [progress, setProgress] = React.useState(0);
@@ -43,13 +69,15 @@ export function SampleReader({ contextToolName }: { contextToolName?: string } =
   const livingRef = React.useRef<HTMLDivElement>(null);
   const completedRef = React.useRef(false);
 
-  const principleParts = React.useMemo(() => {
-    const { text, emphasis } = sampleReader.principle;
+  // חישוב זול (ללא hook) — פיצול משפט-המפתח שמודגש „בדיו”. React Compiler ממילא
+  // ממזכר; אין תלות ב-useMemo שמשתנה בכל render.
+  const principleParts = (() => {
+    const { text, emphasis } = principle;
     if (emphasis && text.startsWith(emphasis)) {
       return { key: emphasis, rest: text.slice(emphasis.length) };
     }
     return { key: "", rest: text };
-  }, []);
+  })();
 
   // טעינת העדפות מקומיות לפני ה-paint — ללא הבזק בהיר.
   useIsomorphicLayoutEffect(() => {
@@ -258,27 +286,25 @@ export function SampleReader({ contextToolName }: { contextToolName?: string } =
         <h1 className="reader-title">{sampleReader.title}</h1>
         <p className="reader-intro">{sampleReader.intro}</p>
 
-        {/* שורת-הקשר אישית — רק כשהגענו מ-Path Finder עם כלי+תחנה תקפים. התוכן
-            שמתחת נשאר הטעימה המאושרת בלבד (אין אבחון, אין תוכן שהומצא). */}
-        {contextToolName ? (
-          <p className="reader-context">{sampleReader.contextLine(contextToolName)}</p>
-        ) : null}
+        {/* שורת-הקשר אישית — רק כשהגענו מ-Path Finder עם כלי+תחנה תקפים. הקטע
+            שמתחת נגזר כולו מהתוכן המאושר של אותו כלי (אין אבחון, אין תוכן שהומצא). */}
+        {contextLine ? <p className="reader-context">{contextLine}</p> : null}
 
         {/* קטע הטעימה עם „דיו חי”: סמן קריאה בטרקוטה נמשך לצד השורות ומשפט-
             המפתח מודגש בדיו. הטקסט נשאר בחירה/נגיש; ה-marker דקורטיבי בלבד. */}
         <div ref={livingRef} className={`living-ink reader-leaf${reading ? " is-reading" : ""}`}>
           <span className="living-ink__marker" aria-hidden="true" />
 
-          <p className="reader-lead">{sampleReader.opening}</p>
+          <p className="reader-lead">{opening}</p>
 
-          {sampleReader.passage.map((para, i) => (
+          {passage.map((para, i) => (
             <p key={i} className="reader-p">
               {para}
             </p>
           ))}
 
-          <aside className="reader-principle" aria-label={sampleReader.principle.label}>
-            <span className="reader-principle__label">{sampleReader.principle.label}</span>
+          <aside className="reader-principle" aria-label={principle.label}>
+            <span className="reader-principle__label">{principle.label}</span>
             <p className="reader-principle__text">
               {principleParts.key ? (
                 <>
@@ -286,13 +312,13 @@ export function SampleReader({ contextToolName }: { contextToolName?: string } =
                   {principleParts.rest}
                 </>
               ) : (
-                sampleReader.principle.text
+                principle.text
               )}
             </p>
           </aside>
         </div>
 
-        <p className="reader-question reader-leaf">{sampleReader.readerQuestion}</p>
+        <p className="reader-question reader-leaf">{readerQuestion}</p>
 
         <p className="reader-p reader-ending reader-leaf">{sampleReader.ending}</p>
 

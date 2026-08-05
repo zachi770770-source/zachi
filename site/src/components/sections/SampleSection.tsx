@@ -21,7 +21,7 @@ export function SampleSection() {
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="kicker justify-center">טעימה מהספר</span>
           <h2 id="sample-heading" className="type-h2 mt-4">
-            כמה שורות, כדי שתדעו לאן אתם נכנסים
+            טעימה קצרה, כדי שתדעו לאן אתם נכנסים
           </h2>
           <p className="type-quote mx-auto mt-6 max-w-[44ch] text-[19px] leading-[1.7] text-foreground/85">
             {preview.homeTeaser}

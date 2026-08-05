@@ -64,10 +64,10 @@ export default function HomePage() {
       <HubTeaser
         id="sample-teaser"
         kicker="טעימה מהספר"
-        heading="כמה שורות, כדי שתדעו לאן אתם נכנסים"
-        text="קטע אמיתי מהספר לקריאה של כשתי דקות, ללא הרשמה — מחכה בעמוד הטעימה."
+        heading="טעימה קצרה, כדי שתדעו לאן אתם נכנסים"
+        text="טעימה מהספר לקריאה של כ-2 דקות, ללא הרשמה — מחכה בעמוד הטעימה."
         href="/preview"
-        linkLabel="לקריאת הטעימה"
+        linkLabel="לקריאת טעימה מהספר"
       />
       <AuthorTeaser />
       <Testimonials />

@@ -3,7 +3,7 @@ import { Compass } from "lucide-react";
 import { pageMetadata } from "@/lib/seo";
 import { compassQuiz } from "@/content/compass";
 import { Container } from "@/components/shared/Container";
-import { CompassQuiz } from "@/components/compass/CompassQuiz";
+import { PathFinder } from "@/components/interactive/PathFinder";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
@@ -57,7 +57,7 @@ export default function CompassPage() {
       </header>
 
       <div className="enter mt-10 sm:mt-12" style={{ animationDelay: "160ms" }}>
-        <CompassQuiz />
+        <PathFinder />
       </div>
     </Container>
   );

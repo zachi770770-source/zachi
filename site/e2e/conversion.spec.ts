@@ -84,7 +84,7 @@ test("home sample teaser is a slim presence that links to /preview (peek moved o
   // ההצצה האינטראקטיבית (#sample) הוסרה לגמרי; בבית נשארת נוכחות מצומצמת.
   await expect(page.locator("#sample")).toHaveCount(0);
   const teaser = page.locator("#sample-teaser");
-  await expect(teaser.getByRole("link", { name: "לקריאת הטעימה" })).toHaveAttribute(
+  await expect(teaser.getByRole("link", { name: "לקריאת טעימה מהספר" })).toHaveAttribute(
     "href",
     "/preview"
   );
