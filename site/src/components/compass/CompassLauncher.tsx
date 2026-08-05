@@ -21,8 +21,9 @@ import { PathFinder } from "@/components/interactive/PathFinder";
 export function CompassLauncher() {
   const [open, setOpen] = React.useState(false);
   const [bannerOpen, setBannerOpen] = React.useState(false);
-  // הבועה הצפה אינה מופיעה בטעינה הראשונית כדי שלא תתחרה בטופס ההרשמה שבשער;
-  // היא נחשפת בעדינות אחרי גלילה קלה (או מיד אם המשתמש כבר גלל / פתח את החלונית).
+  // הבועה הצפה אינה מופיעה בפריים הראשון ממש (כדי לא לקפוץ מעל השער), אך נחשפת
+  // מהר וברור בשני המכשירים: אחרי גלילה קטנה, או אחרי השהיה קצרה גם בלי גלילה —
+  // כך מי שלא גולל עדיין רואה אותה, ולא רק אחרי חצי מסך.
   const [revealed, setRevealed] = React.useState(false);
 
   // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון.
@@ -32,17 +33,25 @@ export function CompassLauncher() {
     return () => window.removeEventListener("open-compass", handler);
   }, []);
 
-  // חשיפה אחרי גלילה מעבר לכ-60% מגובה החלון (מעבר לאזור השער).
+  // חשיפה מהירה: גלילה קלה (מעל 120px) *או* טיימר-גיבוי קצר, מה שקורה קודם.
   React.useEffect(() => {
+    let timer = 0;
+    const reveal = () => {
+      setRevealed(true);
+      cleanup();
+    };
     const onScroll = () => {
-      if (window.scrollY > window.innerHeight * 0.6) {
-        setRevealed(true);
-        window.removeEventListener("scroll", onScroll);
-      }
+      if (window.scrollY > 120) reveal();
+    };
+    const cleanup = () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timer) window.clearTimeout(timer);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    // גיבוי: גם בלי גלילה כלל — הבועה נוכחת אחרי השהיה קצרה.
+    timer = window.setTimeout(reveal, 1200);
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    return cleanup;
   }, []);
 
   // מצב באנר העוגיות מגיע כאות-מצב מפורש מ-CookieConsent (data-attribute על
@@ -80,8 +89,9 @@ export function CompassLauncher() {
             (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
           }
         >
-          {/* תווית קבועה, קטנה ועדינה — דסקטופ/טאבלט בלבד. לא לשונית ולא כפתור
-              גדול; hover/focus רק מחזקים מעט את הניגודיות. */}
+          {/* תווית קבועה, קטנה ועדינה — דסקטופ/טאבלט בלבד (במובייל היא הייתה
+              מתנגשת עם בר-הטעימה הדביק בפינה; שם הבועה העגולה מזוהה מספיק לבדה).
+              לא לשונית ולא כפתור גדול; hover/focus רק מחזקים מעט את הניגודיות. */}
           <span className="hidden whitespace-nowrap rounded-full bg-surface px-3 py-1.5 text-[12.5px] font-medium text-foreground-muted shadow-sm ring-1 ring-border transition-colors group-hover:text-foreground group-focus-visible:text-foreground md:inline-block">
             המצפן
           </span>
