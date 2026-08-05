@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin, RotateCcw } from "lucide-react";
 import { stations, stationOrder, type Station } from "@/content/stations";
 import { tools } from "@/content/book";
 import { resolveToolId } from "@/lib/pathfinder/toolMapping";
+import { loadCompass } from "@/lib/compass/quizStorage";
 import { Container } from "@/components/shared/Container";
 import { trackEvent } from "@/lib/analytics";
 
@@ -41,12 +42,14 @@ const Q2: { label: string }[] = [
   { label: "קשה לי לדעת אם מה שאני מרגיש/ה זה סימן אמיתי" },
   { label: "אני מגיב/ה לרגע, ומתחרט/ת אחר כך" },
 ];
-// מה הכי יעזור עכשיו → איזו פעולה ראשית להדגיש (כל הפעולות נשארות זמינות).
-type Emphasis = "sample" | "compass" | "station";
+// מה הכי יעזור עכשיו → קובע את הפעולה הראשית *ואת יעדה האמיתי*. שלוש הפעולות
+// אמיתיות: קריאת קטע מותאם (‏/preview עם הקשר), הכלי המעשי (‏/book#tool-…), או
+// הבנת התחנה (עמוד התחנה). הבחירה כאן היא שקובעת מי ה-CTA הראשי — אין שאלון נוסף.
+type Emphasis = "sample" | "tool" | "station";
 const Q3: { label: string; emphasis: Emphasis }[] = [
-  { label: "לקרוא קטע קצר מהספר על זה", emphasis: "sample" },
-  { label: "לשאול את הספר שאלה משלי", emphasis: "compass" },
-  { label: "לראות מה הספר מציע בתחנה שלי", emphasis: "station" },
+  { label: "לקרוא קטע שמתאים לי", emphasis: "sample" },
+  { label: "לראות כלי מעשי שמתאים לי", emphasis: "tool" },
+  { label: "להבין את התחנה שלי", emphasis: "station" },
 ];
 
 const QUESTIONS = [
@@ -142,6 +145,32 @@ export function StationJourney() {
     setStep(0);
   }, []);
 
+  // מסלול התחנות — כניסה מונפשת מקומית (IntersectionObserver ייעודי), בלתי-תלויה
+  // בבקר החשיפה הגלובלי. מצב הבסיס גלוי במלואו (ללא JS / reduced-motion); רק
+  // תחת no-preference ה-JS „חומש” את הכניסה (journey-armed → מוסתר) ואז „מעיר”
+  // אותה (is-awake → הקו נמשך והצמתים קופצים) כשהמסלול נכנס לתצוגה.
+  const journeyRef = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    const el = journeyRef.current;
+    if (!el) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    el.classList.add("journey-armed");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            el.classList.add("is-awake");
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const done = step === 3 && answers.every((a) => a !== null);
   const station = done ? stations[Q1[answers[0]!].station] : null;
   // הקושי שנבחר (שאלה 2) והכלי המתאים — נגזר מצירוף התחנה (Q1) והקושי (Q2) דרך
@@ -154,14 +183,62 @@ export function StationJourney() {
     : null;
   const emphasis: Emphasis | null = done ? Q3[answers[2]!].emphasis : null;
 
-  // פעולה ראשית: קישור ישיר לכרטיס הכלי ב-/book (העוגן פותח אותו ומעביר focus).
-  const toolCta = tool ? { href: `/book#tool-${tool.id}`, label: "לכלי המלא בעמוד הספר" } : null;
-  // סדר הפעולות המשניות לפי תשובת שאלה 3 (כולן זמינות תמיד).
-  const sampleCta = { href: "/preview", label: "לקריאת הטעימה" };
-  const compassCta = { href: "/compass", label: "שאלו את הספר" };
-  const stationCta = station
-    ? { href: `/${station.id}`, label: `לתחנה המלאה: ${station.navLabel}` }
+  // התחנה ששמורה מ„המצפן” (/compass) — נקראת בבטחה מ-localStorage (null אם
+  // ריק/חסום/פגום). מדגישה את התחנה המתאימה בבית ומאפשרת CTA „המשך”.
+  const [savedStationId, setSavedStationId] = React.useState<StationId | null>(null);
+  React.useEffect(() => {
+    // ה-setState נדחה ל-rAF (מחוץ לגוף האפקט) — צד-לקוח בלבד, בלי אי-התאמת
+    // הידרציה ובלי „cascading renders”.
+    const raf = requestAnimationFrame(() => {
+      const saved = loadCompass();
+      if (saved) setSavedStationId(saved.stationId);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // התחנה הפעילה במסלול: קודם מה שהותאם בשאלון בבית (אם הושלם), אחרת מה
+  // שהמצפן שמר. מקבלת נוכחות ברורה במסלול התחנות.
+  const activeStationId: StationId | null = done
+    ? Q1[answers[0]!].station
+    : savedStationId;
+
+  // שלוש פעולות אמיתיות שנגזרות מהתוצאה. תשובת שאלה 3 קובעת מי מהן היא ה-CTA
+  // הראשי (הבולט), ושתי האחרות יורדות לפעולות-משנה שקטות. אין „לשאול את הספר”:
+  // כל יעד הוא עמוד אמיתי עם תוכן מאושר.
+  //  • sample  → קטע מותאם ב-/preview (הקשר לפי כלי+תחנה, בלי אבחון).
+  //  • tool    → כרטיס הכלי ב-/book (העוגן פותח אותו ומעביר focus).
+  //  • station → עמוד התחנה המלא.
+  const sampleCta =
+    tool && station
+      ? {
+          key: "sample" as const,
+          href: `/preview?tool=${tool.id}&station=${station.id}`,
+          label: "לקרוא את הקטע שמתאים לי",
+        }
+      : null;
+  const toolCta = tool
+    ? { key: "tool" as const, href: `/book#tool-${tool.id}`, label: "לכלי המעשי בעמוד הספר" }
     : null;
+  const stationCta = station
+    ? { key: "station" as const, href: `/${station.id}`, label: `לתחנה המלאה: ${station.navLabel}` }
+    : null;
+
+  // סדר לפי תשובת שאלה 3: הפעולה שנבחרה ראשונה (ראשית/בולטת), אחריה השתיים
+  // האחרות (משניות שקטות). לכל היותר שלוש — פעולה ראשית + עד שתי משניות.
+  const byKey: Record<Emphasis, { key: Emphasis; href: string; label: string } | null> = {
+    sample: sampleCta,
+    tool: toolCta,
+    station: stationCta,
+  };
+  const emphasisOrder: Emphasis[] =
+    emphasis === "tool"
+      ? ["tool", "sample", "station"]
+      : emphasis === "station"
+        ? ["station", "sample", "tool"]
+        : ["sample", "tool", "station"];
+  const resultActions = emphasisOrder
+    .map((k) => byKey[k])
+    .filter((c): c is { key: Emphasis; href: string; label: string } => Boolean(c));
 
   return (
     <section
@@ -176,11 +253,12 @@ export function StationJourney() {
             שלוש שאלות קצרות
           </span>
           <h2 id="where-heading" className="type-h2 mt-4">
-            איפה אתם נמצאים במסע הזוגי שלכם?
+            איפה הספר פוגש אתכם עכשיו?
           </h2>
           <p className="type-lead mt-4 text-foreground-muted">
-            בין אם אתם מחפשים קשר, מתחילים מחדש או כבר נמצאים בזוגיות — שלוש שאלות
-            קצרות יעזרו לכם למצוא את נקודת הפתיחה שמתאימה לחיים שלכם עכשיו.
+            שלוש תחנות, ספר אחד. לפני קשר, מתחילים מחדש או בתוך זוגיות — שלוש
+            נקודות כניסה לאותו ספר. שלוש שאלות קצרות, ותדעו מאיזו תחנה מתאים
+            לכם להיכנס עכשיו.
           </p>
         </div>
 
@@ -266,9 +344,9 @@ export function StationJourney() {
               className="stuck-answer rounded-2xl border border-border bg-surface p-6 text-start sm:p-8"
               aria-live="polite"
             >
-              <p className="kicker">נקודת הפתיחה שלכם</p>
+              <p className="kicker">התאמה אישית</p>
               <h3 className="mt-3 font-serif text-[1.4rem] font-semibold leading-snug text-foreground">
-                {station!.navLabel} — {station!.h1.split(":")[0]}
+                נקודת הפתיחה שלכם: {station!.navLabel}
               </h3>
               <p className="mt-3 text-[1.05rem] leading-[1.75] text-foreground">
                 {station!.lead}
@@ -292,44 +370,40 @@ export function StationJourney() {
                 </p>
               </div>
 
-              {/* פעולה אחת עכשיו — ניווט לכרטיס הכלי (לא הבטחה ולא תוכן מומצא). */}
+              {/* פעולה אחת ברורה — הניסוח נגזר מתשובת שאלה 3 (לא הבטחה, לא תוכן
+                  מומצא). ה-CTA הראשי מתחתיה מוביל בדיוק לאותו יעד. */}
               <p className="mt-5 text-[15px] leading-relaxed text-foreground">
-                פעולה אחת עכשיו: פתחו את כרטיס הכלי בעמוד הספר וראו איך הוא עובד.
+                {emphasis === "tool"
+                  ? "פעולה אחת עכשיו: פתחו את כרטיס הכלי בעמוד הספר וראו איך הוא עובד."
+                  : emphasis === "station"
+                    ? "פעולה אחת עכשיו: עברו לעמוד התחנה שלכם והבינו מה הספר מציע בה."
+                    : "פעולה אחת עכשיו: קראו קטע קצר שמתכתב עם מה שאתם מזהים — בלי הרשמה."}
               </p>
 
-              {/* פעולות — הראשית: הכלי המלא ב-/book (deep-link לכרטיס שנפתח וממוקד).
-                  המשניות מסודרות לפי תשובת שאלה 3. כולן זמינות תמיד. */}
+              {/* פעולות — הראשית (בולטת) נקבעת בתשובת שאלה 3; אחריה עד שתי פעולות
+                  משנה שקטות. כל יעד הוא עמוד אמיתי עם תוכן מאושר. */}
               <div className="mt-4 flex flex-col gap-3">
-                {[
-                  toolCta,
-                  ...(emphasis === "compass"
-                    ? [compassCta, sampleCta, stationCta]
-                    : emphasis === "station"
-                      ? [stationCta, sampleCta, compassCta]
-                      : [sampleCta, stationCta, compassCta]),
-                ]
-                  .filter((c): c is { href: string; label: string } => Boolean(c))
-                  .map((c, i) => (
-                    <Link
-                      key={c.href}
-                      href={c.href}
+                {resultActions.map((c, i) => (
+                  <Link
+                    key={c.key}
+                    href={c.href}
+                    className={
+                      i === 0
+                        ? "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-foreground px-6 text-[16px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        : "group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                    }
+                  >
+                    {c.label}
+                    <ArrowLeft
                       className={
                         i === 0
-                          ? "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-foreground px-6 text-[16px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                          : "group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                          ? "h-4 w-4"
+                          : "h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                       }
-                    >
-                      {c.label}
-                      <ArrowLeft
-                        className={
-                          i === 0
-                            ? "h-4 w-4"
-                            : "h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                        }
-                        aria-hidden="true"
-                      />
-                    </Link>
-                  ))}
+                      aria-hidden="true"
+                    />
+                  </Link>
+                ))}
               </div>
 
               <p className="mt-6 border-t border-border pt-4 text-[13px] leading-relaxed text-foreground-muted">
@@ -347,19 +421,73 @@ export function StationJourney() {
             </article>
           )}
 
-          {/* דילוג ישיר לכל תחנה — עובד תמיד (גם ללא JS / בלי להשלים שאלות) */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
-            <span className="text-[13px] text-foreground-muted">או דלגו ישר לתחנה:</span>
-            {stationOrder.map((id) => (
-              <Link
-                key={id}
-                href={`/${id}`}
-                className="text-[14px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                {SKIP_LABELS[id]}
-              </Link>
-            ))}
-          </div>
+          {/* מסלול התחנות — שלוש התחנות כקו-מסע מחובר. הקו והצמתים „מתעוררים”
+              בגלילה (‎.reveal → .is-visible), כל צומת מוביל לעמוד הייעודי שלו,
+              והתחנה שהותאמה בשאלון (אם הושלם) מקבלת נוכחות ברורה. עובד תמיד —
+              גם ללא JS ובלי להשלים שאלות — וכל התוכן במצבו הסופי תחת
+              reduced-motion. */}
+          {/* המשך מהמצפן: אם הושלם „המצפן” (/compass) ועדיין לא ענו על השאלון
+              כאן — מציגים באנר „המשך” עם קישור ישיר לתחנה המתאימה. */}
+          {savedStationId && !done ? (
+            <div className="mx-auto mt-8 max-w-2xl rounded-xl border-s-2 border-brand bg-surface-muted/60 p-4 text-start">
+              <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
+                השלמתם את המצפן
+              </p>
+              <p className="mt-1 text-[15px] leading-relaxed text-foreground">
+                התחנה שמתאימה לכם:{" "}
+                <span className="font-semibold">{stations[savedStationId].navLabel}</span>.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <Link
+                  href={`/${savedStationId}`}
+                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  להמשיך לתחנה שלי
+                  <ArrowLeft
+                    className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                    aria-hidden="true"
+                  />
+                </Link>
+                <Link
+                  href="/compass"
+                  className="text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  למצפן
+                </Link>
+              </div>
+            </div>
+          ) : null}
+
+          <nav
+            ref={journeyRef}
+            aria-label="דילוג לתחנות המסע"
+            className="station-journey mt-8"
+          >
+            <p className="mb-5 text-center text-[13px] text-foreground-muted">
+              או דלגו ישר לתחנה שמתאימה לכם:
+            </p>
+            <ol className="station-journey__track grid grid-cols-3 gap-1.5 sm:gap-3">
+              {stationOrder.map((id, i) => (
+                <li
+                  key={id}
+                  className="station-journey__item"
+                  style={{ "--i": i } as React.CSSProperties}
+                >
+                  <Link
+                    href={`/${id}`}
+                    aria-current={activeStationId === id ? "true" : undefined}
+                    data-active={activeStationId === id ? "" : undefined}
+                    className="station-node group focus-visible:outline-none"
+                  >
+                    <span className="station-node__dot" aria-hidden="true">
+                      <span className="station-node__pulse" aria-hidden="true" />
+                    </span>
+                    <span className="station-node__label">{SKIP_LABELS[id]}</span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </nav>
         </div>
       </Container>
     </section>

@@ -9,7 +9,6 @@ import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StationJourney } from "@/components/interactive/StationJourney";
 import { StickyCta } from "@/components/interactive/StickyCta";
-import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 import { BuildSpine } from "@/components/shared/BuildSpine";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
@@ -64,19 +63,16 @@ export default function HomePage() {
       {/* הצצה לטעימה — ההצצה האינטראקטיבית והקורא המלא חיים ב-/preview. */}
       <HubTeaser
         id="sample-teaser"
-        kicker="הצצה לספר"
+        kicker="טעימה מהספר"
         heading="כמה שורות, כדי שתדעו לאן אתם נכנסים"
-        text="עטיפה, מבנה, קטע לקריאה וכלי מעשי אחד — ההצצה המלאה מחכה בעמוד הטעימה."
+        text="קטע אמיתי מהספר לקריאה של כשתי דקות, ללא הרשמה — מחכה בעמוד הטעימה."
         href="/preview"
         linkLabel="לקריאת הטעימה"
       />
       <AuthorTeaser />
       <Testimonials />
       <NewsletterSection />
-      <CompassLauncher
-        salesOpen={siteConfig.salesOpen}
-        maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
-      />
+      <CompassLauncher />
       <StickyCta />
     </>
   );

@@ -139,7 +139,7 @@ export function StickyCta() {
   // טרום-השקה: תמיד הטעימה החינמית ללא הרשמה. אחרי פתיחת המכירה — רכישה.
   const preLaunch = !siteConfig.salesOpen;
   const href = preLaunch ? "/preview" : "/book#purchase";
-  const label = preLaunch ? "קראו 2 דקות עכשיו" : "לרכישת הספר";
+  const label = preLaunch ? "קראו טעימה מהספר · 2 דקות" : "לרכישת הספר";
 
   return (
     <aside

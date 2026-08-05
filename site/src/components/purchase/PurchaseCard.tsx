@@ -3,22 +3,26 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FileText, Download, Smartphone, Package } from "lucide-react";
+import { FileText, Download, Smartphone, Package, ArrowLeft } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import type { ProductFormat } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
+import { BookLink } from "@/components/shared/BookLink";
 import { FormatSelector } from "@/components/purchase/FormatSelector";
 
 /**
  * מצב Pre-launch: האתר ציבורי אך המכירה סגורה. אין מעבר ל-checkout ואין
- * תשלום. המחיר מוצג כ"בקרוב" וה-CTA אינו מטעה. כאשר salesOpen יופעל, יש
- * להחזיר את זרימת הרכישה הפעילה.
+ * תשלום. כל עוד המכירה סגורה *אין בורר מהדורות ואין כרטיסי „מודפס”/„דיגיטלי+
+ * מודפס”* — רק המהדורה הדיגיטלית מוצגת עובדתית, עם מחיר-השקה, עובדות מאומתות,
+ * פעולה אחת („קבלו עדכון כשהספר יוצא”) ופעולה משנית לטעימה. כאשר salesOpen
+ * יופעל, חוזר בורר המהדורות וזרימת הרכישה הפעילה.
  */
 export function PurchaseCard() {
   const [format, setFormat] = React.useState<ProductFormat>(
     siteConfig.products.defaultFormat
   );
+  const salesOpen = siteConfig.salesOpen;
 
   return (
     <div
@@ -32,11 +36,12 @@ export function PurchaseCard() {
               {siteConfig.bookTitle}
             </h3>
             <p className="mt-1 text-[15px] text-foreground-muted">
-              מאת צחי חן · המכירה תיפתח בקרוב
+              מאת צחי חן · {salesOpen ? "המהדורה הדיגיטלית" : "המכירה תיפתח בקרוב"}
             </p>
           </div>
 
-          <FormatSelector value={format} onChange={setFormat} />
+          {/* בורר מהדורות מוצג רק כשהמכירה פתוחה — בטרום-השקה אין בחירת מהדורה. */}
+          {salesOpen ? <FormatSelector value={format} onChange={setFormat} /> : null}
 
           <div className="border-t border-foreground/12 pt-5">
             <p className="type-quote text-[26px] font-bold text-brand-hover">
@@ -66,10 +71,25 @@ export function PurchaseCard() {
           </ul>
 
           <Button asChild size="lg" className="h-14 w-full text-[17px]">
-            <Link href={siteConfig.salesOpen ? "/checkout" : "/#waitlist"}>
-              {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}
+            <Link href={salesOpen ? "/checkout" : "/#waitlist"}>
+              {salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}
             </Link>
           </Button>
+
+          {/* פעולה משנית שקטה בטרום-השקה: טעימה חינם (אותו מונח אחיד לכל האתר). */}
+          {!salesOpen ? (
+            <BookLink
+              href="/preview"
+              morphCover
+              className="group inline-flex items-center gap-2 self-start text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              קראו טעימה מהספר · 2 דקות
+              <ArrowLeft
+                className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                aria-hidden="true"
+              />
+            </BookLink>
+          ) : null}
 
           <p className="text-[13px] leading-relaxed text-foreground-muted">
             האתר בשלב טרום-השקה. עם פתיחת המכירה תתאפשר רכישה מאובטחת של

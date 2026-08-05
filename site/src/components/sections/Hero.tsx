@@ -9,7 +9,6 @@ import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
 import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
-import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
 /**
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
@@ -22,13 +21,19 @@ import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/50 to-background" />
-        <div className="absolute -top-40 start-[10%] h-[520px] w-[520px] rounded-full bg-secondary/[0.07] blur-[120px]" />
+      {/* רקע קולנועי — שכבה ראשונה בכניסה המדורגת (hero-bg-enter): הגראדיינט
+          וההילות עולים ומתרחבים ראשונים, לפני הקו/הכותרת/הספר. דקורטיבי בלבד. */}
+      <div
+        aria-hidden="true"
+        className="hero-bg-enter pointer-events-none absolute inset-0 -z-10"
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/60 via-background to-background" />
+        <div className="absolute -top-40 start-[8%] h-[560px] w-[560px] rounded-full bg-secondary/[0.09] blur-[130px]" />
+        <div className="absolute top-[22%] end-[4%] h-[360px] w-[360px] rounded-full bg-brand/[0.05] blur-[120px]" />
       </div>
 
-      <Container className="flex min-h-[calc(74svh-76px)] items-start py-3 lg:items-center lg:py-8">
-        <div className="grid w-full items-center gap-y-2.5 lg:grid-cols-[52fr_48fr] lg:gap-y-0 lg:gap-x-16">
+      <Container className="flex min-h-[calc(78svh-76px)] items-start py-3 lg:items-center lg:py-8">
+        <div className="grid w-full items-center gap-y-3 lg:grid-cols-[1fr_1fr] lg:gap-y-0 lg:gap-x-14">
           {/* תוכן — יחידה רציפה אחת. במובייל ראשון (הצעה + CTA לפני הכריכה);
               בדסקטופ בעמודה הימנית (order-1). */}
           <div className="order-1 flex flex-col items-start">
@@ -53,6 +58,15 @@ export function Hero() {
                 </span>
               </span>
             </h1>
+
+            {/* משפט המיצוב: „ספר לכל המסע הזוגי” — בולט, מיד אחרי הכותרת, כדי
+                שגולש חדש יבין שהספר אינו רק לדייטים. אנימציית hero-fade בלבד. */}
+            <p
+              className="hero-fade mt-3.5 font-serif text-[18px] font-semibold leading-snug text-brand-hover lg:mt-4 lg:text-[22px]"
+              style={{ animationDelay: "380ms" }}
+            >
+              {hero.positioning}
+            </p>
 
             <p
               className="hero-fade mt-3 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted lg:mt-4"
@@ -79,50 +93,52 @@ export function Hero() {
                 {siteConfig.preLaunchPriceLabel}
               </p>
 
-              {/* פעולת המרה דומיננטית אחת. טרום-השקה: „קבלו טעימה ועדכון…”
-                  שנפתחת לטופס inline ומובילה ל-/preview אחרי הרשמה מוצלחת.
-                  אחרי פתיחת המכירה: אותו מקום הופך לכפתור הרכישה. הפעולה
-                  המשנית („למצוא את המסלול שלי”) קלה ולא שוות-משקל.
+              {/* היררכיית פעולה אחת וברורה. טרום-השקה: פעולה דומיננטית *יחידה* —
+                  „קראו טעימה מהספר · 2 דקות” אל /preview (עם מעבר-הכריכה
+                  morphCover). אין טופס אימייל בשער: הטעימה נפתחת מיד וללא הרשמה.
+                  אחרי פתיחת המכירה: אותו מקום הופך לכפתור הרכישה.
                   hero-rise-soft: תזוזה בלבד (opacity=1) ⇒ ה-CTA גלוי ולחיץ מיידית. */}
               <div
-                className="hero-rise-soft flex w-full flex-col items-start gap-2.5 lg:gap-3.5"
+                className="hero-rise-soft flex w-full flex-col items-start gap-3 lg:gap-4"
                 style={{ animationDelay: "160ms" }}
               >
                 {siteConfig.salesOpen ? (
-                  <Button asChild size="lg" className="h-14 px-7 text-[17px]">
+                  <Button asChild size="lg" className="h-14 w-full px-7 text-[17px] sm:w-auto">
                     <Link href="/book#purchase">לרכישת הספר</Link>
                   </Button>
                 ) : (
-                  // טרום-השקה: פעולה דומיננטית אחת — הצטרפות לעדכון ההשקה
-                  // שמעניקה גם גישה לטעימה. טופס הרשמה קומפקטי ישיר; אין צורך
-                  // באימייל כדי לקרוא את הטעימה (קישור משני נפרד).
-                  <div className="hero-cta-pulse flex w-full flex-col items-start gap-2 lg:gap-2.5">
-                    <p className="text-[15px] font-semibold text-foreground">
-                      הצטרפו לעדכון ההשקה וקבלו גישה מיידית לטעימה
-                    </p>
-                    <WaitlistCta source="hero" inline />
-                  </div>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="hero-cta-pulse h-14 w-full px-7 text-[17px] sm:w-auto"
+                  >
+                    <BookLink href="/preview" morphCover>
+                      קראו טעימה מהספר · 2 דקות
+                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    </BookLink>
+                  </Button>
                 )}
 
-                {/* פעולת משנה קלה: קריאת טעימה חינם (מפעילה את מעבר „כניסה
-                    לטעימה” — הכריכה בשער נמשכת אל עמוד ההצצה). אינה דורשת אימייל. */}
-                <BookLink
-                  href="/preview"
-                  morphCover
-                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                >
-                  קראו 2 דקות עכשיו · בלי הרשמה
-                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                </BookLink>
-
-                {/* פעולה שלישונית, שקטה עוד יותר. */}
+                {/* פעולה משנית שקטה: מציאת נקודת הפתיחה (Path Finder). קישור-טקסט,
+                    לא כפתור — לא שווה-משקל לפעולה הדומיננטית. */}
                 <Link
                   href="/#where"
-                  className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 >
-                  למצוא את המסלול שלי
-                  <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1" aria-hidden="true" />
+                  מצאו את נקודת הפתיחה שלכם
+                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                 </Link>
+
+                {/* פעולה שלישונית, שקטה עוד יותר — למי שרק רוצה עדכון בהשקה. */}
+                <p className="text-[13.5px] leading-relaxed text-foreground-muted">
+                  רוצים רק לדעת כשהספר יוצא?{" "}
+                  <Link
+                    href="/#waitlist"
+                    className="font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    הצטרפו לעדכון ההשקה
+                  </Link>
+                </p>
               </div>
             </div>
           </div>
@@ -147,24 +163,38 @@ export function Hero() {
               {/* הכריכה נסחפת מעט כלפי מעלה בגלילה (פרלקסה מרוסנת) — עומק בלי
                   להפריע לטילט/למעבר-הכריכה (שיושבים על אלמנטים פנימיים). */}
               <div
-                className="hero-depth-book relative w-[168px] sm:w-[224px] lg:w-[340px]"
+                className="hero-depth-book relative w-[196px] sm:w-[264px] lg:w-[392px]"
                 style={{ transform: "translateY(calc(var(--hero-parallax, 0) * -50px))" }}
               >
+                {/* צל משתנה: מעמיק ונפרש עם הגלילה (פרלקסה) — עומק „חי” בזמן
+                    שהכריכה נסחפת. transform/opacity בלבד (מרוכב, ללא reflow). */}
                 <div
                   aria-hidden="true"
                   className="hero-book__shadow absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
+                  style={{
+                    transform:
+                      "translateX(-50%) translateY(calc(var(--hero-parallax, 0) * 10px)) scaleX(calc(1 + var(--hero-parallax, 0) * 0.22)) scaleY(calc(1 + var(--hero-parallax, 0) * 0.35))",
+                    opacity: "calc(1 + var(--hero-parallax, 0) * 0.5)",
+                  }}
                 />
                 {/* ריחוף/נשימה מתמשכים — הכריכה „חיה” גם ללא סמן (מובייל כלול).
                     שכבה ייעודית לתנועה בלבד, כדי לא להתנגש בפרלקסה (הורה),
                     בכניסה (figure) או בטילט (צאצא). מכבד reduced-motion. */}
                 <div className="hero-float w-full">
                   <BookTilt className="w-full">
-                    {/* מקור המעבר „כניסה לטעימה”: הכריכה הגלויה בשער נמשכת אל
-                        עטיפת עמוד ההצצה. עוטף צמוד — כדי שהצילום יתפוס את הכריכה
-                        בלבד (ללא הצל שמאחוריה). */}
-                    <div data-vt-book-source className="w-full">
-                      <BookCover priority className="w-full" />
-                    </div>
+                    {/* הכריכה עצמה לחיצה ומובילה ל-/preview (כמו „קראו טעימה”),
+                        עם אותו מעבר-כריכה רציף (morphCover). מקור המעבר
+                        ([data-vt-book-source]) עוטף צמוד את הכריכה בלבד. */}
+                    <BookLink
+                      href="/preview"
+                      morphCover
+                      aria-label="הציצו בספר — לקריאת טעימה"
+                      className="hero-book__link block w-full rounded-[6px] focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-brand"
+                    >
+                      <div data-vt-book-source className="w-full">
+                        <BookCover priority className="w-full" />
+                      </div>
+                    </BookLink>
                   </BookTilt>
                 </div>
               </div>

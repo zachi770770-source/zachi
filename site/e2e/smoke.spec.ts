@@ -176,40 +176,35 @@ test("legacy URLs 301-redirect to the most relevant page", async ({ request }) =
   }
 });
 
-test("/api/compass sets a secure anonymous cookie (HttpOnly, SameSite=Lax, Path=/, Max-Age)", async ({
+test("/api/compass no longer exists — the AI endpoint was removed (no direct AI calls)", async ({
   request,
 }) => {
-  const res = await request.get("/api/compass");
-  expect(res.status()).toBe(200);
-  const setCookies = res
-    .headersArray()
-    .filter((h) => h.name.toLowerCase() === "set-cookie")
-    .map((h) => h.value)
-    .filter((v) => v.startsWith("compass_uid="));
-  expect(setCookies.length).toBeGreaterThan(0);
-  const cookie = setCookies[0];
-  expect(cookie).toMatch(/HttpOnly/i);
-  expect(cookie).toMatch(/SameSite=Lax/i);
-  expect(cookie).toMatch(/Path=\//i);
-  expect(cookie).toMatch(/Max-Age=\d+/i);
+  // המצפן הדטרמיניסטי אינו קורא ל-API; נתיב ה-AI הישן הוסר לגמרי.
+  const get = await request.get("/api/compass");
+  expect(get.status()).toBe(404);
+  const post = await request.post("/api/compass", { data: { question: "x" } });
+  expect(post.status()).toBe(404);
 });
 
-test("/compass exists; while inert it shows a dignified coming-soon (no fixture)", async ({ page }) => {
+test("/compass is an active deterministic 3-question compass (closed choices, no free text)", async ({
+  page,
+}) => {
   const res = await page.goto("/compass", { waitUntil: "networkidle" });
   expect(res?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("יש לכם שאלה");
-  // ללא ספק מודל/מסד בסביבת הבדיקה → מצב „בקרוב”, לא תיבת שאלה פעילה.
-  // השם הפונה למשתמש הוא כעת „שאלו את הספר” (עודכן ב-PHASE 12).
-  await expect(page.getByText("תיפתח בקרוב")).toBeVisible();
-  await expect(page.locator("#compass-question")).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("נקודת הפתיחה");
+  // שאלה 1 מתוך 3, בחירות סגורות (radiogroup), ללא טקסט חופשי.
+  await expect(page.getByText("שאלה 1 מתוך 3")).toBeVisible();
+  await expect(page.getByRole("radiogroup")).toHaveCount(1);
+  await expect(page.getByRole("textbox")).toHaveCount(0);
 });
 
 test("/book is a real page (not a redirect) with the deep-dive content", async ({ page }) => {
   const res = await page.goto("/book", { waitUntil: "domcontentloaded" });
   expect(res?.status()).toBe(200);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("מה יש בספר, ואיך הוא עובד");
-  // התוכן שהועבר מהבית מופיע כאן (כלים + מהדורות), ולא נשאר בבית.
-  await expect(page.getByText("כלים מעשיים בפנים")).toBeVisible();
+  // ששת הכלים המעשיים מופיעים כאן (פעם אחת, בבנטו האינטראקטיבי), ולא נשארו בבית.
+  await expect(page.getByRole("heading", { name: "כלים מעשיים מתוך הספר" })).toBeVisible();
+  await expect(page.locator("#tools button.tool-lux-card")).toHaveCount(6);
 });
 
 test("home page has the canonical title and unique social metadata", async ({ page }) => {

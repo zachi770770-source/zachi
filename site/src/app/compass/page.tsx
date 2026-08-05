@@ -1,39 +1,22 @@
-import { BookOpen } from "lucide-react";
+import { Compass } from "lucide-react";
 
-import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
-import { compass } from "@/content/compass";
-import {
-  COMPASS_LIMITS,
-  isCompassFeatureEnabled,
-  hasProviderKey,
-} from "@/lib/compass/assistant/config";
+import { compassQuiz } from "@/content/compass";
 import { Container } from "@/components/shared/Container";
-import { CompassConsole } from "@/components/compass/CompassConsole";
+import { CompassQuiz } from "@/components/compass/CompassQuiz";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-const openingPoints = compass.signature.points;
-
-export const metadata = {
-  ...pageMetadata({
-    title: "שאלו את הספר",
-    description:
-      "שאלו מספר שאלות ממוקדות וקבלו כיוון קצר המבוסס על עקרונות הספר מדייטים לאהבה. טעימה מהגישה, לא תחליף לקריאת הספר.",
-    path: "/compass",
-    ogType: "article",
-  }),
-  // כלל יחיד ועקבי: אינדוקס רק כשהמצפן *פעיל ושימושי* — הדגל התפעולי דלוק *וגם*
-  // קיים מפתח ספק (שרת). אם אחד מהם חסר (כבוי/מוגבל) — noindex,nofollow, כדי
-  // שלא ייכנס לאינדוקס עמוד „בקרוב”/לא-פעיל. תואם למצב הפיצ'ר בפועל.
-  ...(isCompassFeatureEnabled() && hasProviderKey()
-    ? {}
-    : { robots: { index: false, follow: false } }),
-};
+export const metadata = pageMetadata({
+  title: compassQuiz.metaTitle,
+  description: compassQuiz.metaDescription,
+  path: "/compass",
+  ogType: "article",
+});
 
 /**
- * עמוד „המצפן”. העמוד קיים תמיד; הזמינות בפועל (ספק מודל + גרסת ספר פעילה)
- * נקבעת בזמן ריצה ומוצגת ע"י הרכיב — כשאינו פעיל מוצג „בקרוב” מכובד, בלי
- * שום תוכן פיקצ׳ר.
+ * עמוד „המצפן” — חוויית שלוש-שאלות דטרמיניסטית שמכוונת את הקורא/ת לתחנה
+ * המתאימה בספר. אינו צ׳אטבוט ואינו AI: כל האפשרויות סגורות, המיפוי דטרמיניסטי
+ * בצד-הלקוח, ואין קריאה ל-API חיצוני. העמוד תמיד פעיל וניתן לאינדוקס.
  */
 export default function CompassPage() {
   return (
@@ -41,7 +24,7 @@ export default function CompassPage() {
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
-          { name: "שאלו את הספר", path: "/compass" },
+          { name: compassQuiz.eyebrow, path: "/compass" },
         ]}
       />
 
@@ -50,18 +33,18 @@ export default function CompassPage() {
           className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-muted text-brand ring-1 ring-brand/15"
           aria-hidden="true"
         >
-          <BookOpen className="h-6 w-6" />
+          <Compass className="h-6 w-6" />
         </span>
-        <span className="kicker mt-6 justify-center">{compass.page.eyebrow}</span>
+        <span className="kicker mt-6 justify-center">{compassQuiz.eyebrow}</span>
         <h1 className="mt-4 font-serif text-[clamp(2rem,4.2vw,2.85rem)] font-semibold leading-[1.1] text-balance text-foreground">
-          {compass.page.title}
+          {compassQuiz.title}
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-[clamp(1.05rem,1.5vw,1.2rem)] leading-relaxed text-balance text-foreground-muted">
-          {compass.page.lead}
+          {compassQuiz.lead}
         </p>
 
         <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-          {openingPoints.map((point) => (
+          {compassQuiz.points.map((point) => (
             <li
               key={point}
               className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-[13.5px] font-medium text-foreground-muted"
@@ -73,12 +56,8 @@ export default function CompassPage() {
         </ul>
       </header>
 
-      {/* כניסה מתואמת רק בעמוד /compass (לא בתוך המגירה בבית — מונע כפל תנועה) */}
       <div className="enter mt-10 sm:mt-12" style={{ animationDelay: "160ms" }}>
-        <CompassConsole
-          salesOpen={siteConfig.salesOpen}
-          maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
-        />
+        <CompassQuiz />
       </div>
     </Container>
   );

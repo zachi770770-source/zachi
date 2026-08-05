@@ -3,27 +3,28 @@ import { test, expect } from "./fixtures";
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
-  test("home Hero: one dominant conversion action + light secondaries (sample, find my path)", async ({ page }) => {
+  test("home Hero: one dominant sample action + quiet secondaries (find my path, launch update)", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     const heroSection = page.locator("main section").first();
 
-    // פעולת המרה דומיננטית אחת (כפתור הרשמה של הטופס הקומפקטי): „עדכנו אותי…”.
-    const dominant = heroSection.getByRole("button", {
-      name: "עדכנו אותי כשהספר יוצא",
+    // פעולה דומיננטית *יחידה*: „קראו טעימה מהספר · 2 דקות” → /preview.
+    const dominant = heroSection.getByRole("link", {
+      name: "קראו טעימה מהספר · 2 דקות",
     });
     await expect(dominant).toBeVisible();
+    await expect(dominant).toHaveAttribute("href", "/preview");
 
-    // אין כפתור רכישה דומיננטי מתחרה ב-Hero.
+    // אין שדה אימייל בשער, ואין כפתור רכישה מתחרה.
+    await expect(heroSection.getByLabel("כתובת אימייל")).toHaveCount(0);
     await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
 
-    // פעולות משנה קלות (קישורי טקסט, לא כפתורים): „לקריאת טעימה מהספר” → /preview
-    // (טריגר המעבר „כניסה לטעימה”, שמושך את כריכת השער אל עמוד ההצצה),
-    // ו„למצוא את המסלול שלי” → /#where.
-    const sample = heroSection.getByRole("link", { name: "קראו 2 דקות עכשיו · בלי הרשמה" });
-    await expect(sample).toHaveAttribute("href", "/preview");
-    const secondary = page.getByRole("link", { name: "למצוא את המסלול שלי" });
-    await expect(secondary).toHaveAttribute("href", "/#where");
+    // פעולות משנה שקטות (קישורי טקסט): „מצאו את נקודת הפתיחה שלכם” → /#where,
+    // ו„הצטרפו לעדכון ההשקה” → /#waitlist.
+    const findPath = heroSection.getByRole("link", { name: "מצאו את נקודת הפתיחה שלכם" });
+    await expect(findPath).toHaveAttribute("href", "/#where");
+    const launchUpdate = heroSection.getByRole("link", { name: "הצטרפו לעדכון ההשקה" });
+    await expect(launchUpdate).toHaveAttribute("href", "/#waitlist");
   });
 
   test("home newsletter section: the waitlist form still submits successfully", async ({ page }) => {
@@ -99,10 +100,9 @@ test.describe("Launch-readiness", () => {
     await expect(reader).toBeVisible();
 
     // תוכן HTML נגיש (לא תמונות): כותרת, קטע וסיום קיימים כטקסט.
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("כמה עמודים");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("טעימה מהספר");
     await expect(reader).toContainText("בזמן שקראתם, על איזה קשר או דייט חשבתם?");
     await expect(page.getByRole("progressbar")).toBeVisible();
-    await expect(page.getByText(/דק׳ קריאה/)).toBeVisible();
 
     // הגדלת כתב → שינוי המשתנה --reader-fs.
     const scale0 = await reader.evaluate((el) => getComputedStyle(el).getPropertyValue("--reader-fs"));
@@ -118,18 +118,6 @@ test.describe("Launch-readiness", () => {
 
     // כפתור חזרה ברור.
     await expect(reader.getByRole("link", { name: /חזרה לעמוד הבית/ })).toBeVisible();
-  });
-
-  test("book map: three parts, each with a chapter, an examining question and a line", async ({
-    page,
-  }) => {
-    await page.goto("/preview", { waitUntil: "networkidle" });
-    const stations = page.locator(".book-map__station");
-    await expect(stations).toHaveCount(3);
-    await expect(stations.nth(0)).toContainText("מזהים את הרעש");
-    await expect(stations.nth(1)).toContainText("עוברים את השער");
-    await expect(stations.nth(2)).toContainText("מתחילים לבנות");
-    await expect(page.locator(".book-map__examines").first()).toBeVisible();
   });
 
   test("author page: single author story, no audio block or duplication while file is missing", async ({
@@ -161,10 +149,10 @@ test.describe("Launch-readiness", () => {
     await expect(thesis).toContainText("דייטינג הוא חיפוש.");
     await expect(thesis).toContainText("אהבה היא בנייה.");
 
-    // פעולת ההמרה הראשית (טופס ההרשמה הקומפקטי, „עדכנו אותי…”) נשארת פעילה ב-Hero.
+    // פעולת ההמרה הראשית בשער — „קראו טעימה מהספר · 2 דקות” → /preview — פעילה.
     await expect(
-      page.locator("main section").first().getByRole("button", {
-        name: "עדכנו אותי כשהספר יוצא",
+      page.locator("main section").first().getByRole("link", {
+        name: "קראו טעימה מהספר · 2 דקות",
       })
     ).toBeVisible();
   });

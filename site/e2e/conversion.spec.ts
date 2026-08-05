@@ -1,43 +1,53 @@
 import { test, expect, type Page } from "./fixtures";
 
 /**
- * נתיב ההמרה. פעולת המרה דומיננטית אחת; הרשמה מוצלחת מציגה מצב-הצלחה עם
- * „לקריאת הטעימה” ושיתוף (ללא ניווט אוטומטי); כשל אימות/שרת אינו מנווט;
- * /preview נשארת נגישה ישירות לכולם; ורק חוויית תחנות אחת קיימת.
+ * נתיב ההמרה (עודכן ל-PASS). ה-Hero כבר אינו ממיר בטופס אימייל: הפעולה
+ * הדומיננטית בו היא „קראו טעימה מהספר · 2 דקות” → /preview (ללא הרשמה). הרשמה
+ * לרשימת ההמתנה מרוכזת באזור הייעודי (#waitlist) ובסוף עמוד הטעימה. הרשמה
+ * מוצלחת מציגה מצב-הצלחה עם „לקריאת הטעימה”; כשל אימות/שרת אינו מנווט;
+ * /preview נשארת נגישה ישירות לכולם; וההצצה האינטראקטיבית הכפולה הוסרה.
  */
 
-const CTA = "קבלו טעימה ועדכון כשהספר יוצא";
-
-/** טופס ההרשמה הקומפקטי שבשער מוצג ישירות (ללא כפתור-חושף). */
-async function fillHeroInlineForm(page: Page, { consent }: { consent: boolean }) {
-  const hero = page.locator("main section").first();
-  await hero.getByLabel("כתובת אימייל").fill("reader@example.com");
-  if (consent) await hero.getByRole("checkbox").click();
-  await hero.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+/** טופס ההרשמה באזור רשימת ההמתנה (#waitlist) בעמוד הבית. */
+async function fillWaitlistForm(page: Page, { consent }: { consent: boolean }) {
+  const waitlist = page.locator("#waitlist");
+  await waitlist.scrollIntoViewIfNeeded();
+  await waitlist.getByLabel("כתובת אימייל").fill("reader@example.com");
+  if (consent) await waitlist.getByRole("checkbox").click();
+  await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
 }
 
-test("Hero: successful registration shows success + read-sample (no auto-redirect)", async ({ page }) => {
+test("Hero: the single dominant action is the free sample, not an email form", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  const hero = page.locator("main section").first();
+  // אין שדה אימייל בשער — הטעימה נפתחת מיד וללא הרשמה.
+  await expect(hero.getByLabel("כתובת אימייל")).toHaveCount(0);
+  const dominant = hero.getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" });
+  await expect(dominant).toHaveAttribute("href", "/preview");
+});
+
+test("Waitlist: successful registration shows success + read-sample (no auto-redirect)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await fillHeroInlineForm(page, { consent: true });
+  await fillWaitlistForm(page, { consent: true });
 
-  const hero = page.locator("main section").first();
-  await expect(hero.getByText(/נרשמת בהצלחה/)).toBeVisible();
-  await expect(hero.getByRole("link", { name: "לקריאת הטעימה" })).toBeVisible();
+  const waitlist = page.locator("#waitlist");
+  await expect(waitlist.getByText(/נרשמת בהצלחה/)).toBeVisible();
+  await expect(waitlist.getByRole("link", { name: "לקריאת הטעימה" })).toBeVisible();
   // נשארים בבית — אין ניווט אוטומטי; הטעימה נגישה דרך הכפתור.
   await expect(page).toHaveURL(/\/$/);
 });
 
-test("Hero: validation failure (no consent) does not navigate", async ({ page }) => {
+test("Waitlist: validation failure (no consent) does not navigate", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await fillHeroInlineForm(page, { consent: false });
+  await fillWaitlistForm(page, { consent: false });
 
-  await expect(page.locator("main section").first().getByRole("alert")).toBeVisible();
+  await expect(page.locator("#waitlist").getByRole("alert")).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
 });
 
-test("Hero: API failure does not navigate", async ({ page }) => {
+test("Waitlist: API failure does not navigate", async ({ page }) => {
   await page.route("**/api/waitlist", (route) =>
     route.fulfill({
       status: 500,
@@ -47,9 +57,9 @@ test("Hero: API failure does not navigate", async ({ page }) => {
   );
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await fillHeroInlineForm(page, { consent: true });
+  await fillWaitlistForm(page, { consent: true });
 
-  await expect(page.locator("main section").first().getByRole("alert")).toBeVisible();
+  await expect(page.locator("#waitlist").getByRole("alert")).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
 });
 
@@ -71,7 +81,7 @@ test("home sample teaser is a slim presence that links to /preview (peek moved o
   page,
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // ההצצה האינטראקטיבית (#sample) עברה ל-/preview; בבית נשארת נוכחות מצומצמת.
+  // ההצצה האינטראקטיבית (#sample) הוסרה לגמרי; בבית נשארת נוכחות מצומצמת.
   await expect(page.locator("#sample")).toHaveCount(0);
   const teaser = page.locator("#sample-teaser");
   await expect(teaser.getByRole("link", { name: "לקריאת הטעימה" })).toHaveAttribute(
@@ -80,18 +90,18 @@ test("home sample teaser is a slim presence that links to /preview (peek moved o
   );
 });
 
-test("the interactive peek now lives on /preview, without a duplicate conversion form", async ({
+test("/preview is a single reading experience — the duplicate peek (carousel) was removed", async ({
   page,
 }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });
-  // ההצצה קיימת ב-/preview (עוגן #sample), אך ללא טופס המרה כפול —
-  // PreviewClosing מחזיק את ההרשמה בסוף העמוד.
-  await expect(page.locator("#sample")).toHaveCount(1);
-  await expect(page.locator("#sample").getByRole("button", { name: CTA })).toHaveCount(0);
+  // חוויית קריאה אחת ורציפה: הקורא קיים, וההצצה הכפולה (#sample / tablist) הוסרה.
+  await expect(page.locator(".sample-reader")).toHaveCount(1);
+  await expect(page.locator("#sample")).toHaveCount(0);
+  await expect(page.getByRole("tablist")).toHaveCount(0);
 });
 
-test("Compass (pre-launch): no conversion CTA before an answer", async ({ page }) => {
+test("Compass (pre-launch): no purchase CTA before an answer", async ({ page }) => {
   await page.goto("/compass", { waitUntil: "networkidle" });
-  // במצב טרום-השקה המצפן אינו פעיל (coming-soon), ואין פעולת המרה כלל.
-  await expect(page.getByRole("button", { name: CTA })).toHaveCount(0);
+  // לפני מענה — המצפן מציג שאלות בלבד; אין פעולת רכישה על העמוד.
+  await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
 });

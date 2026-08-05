@@ -53,11 +53,11 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
   const banner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
   await expect(banner).toBeVisible();
 
-  // הבועה הצפה (position:fixed, aria-label „שאלו את הספר”) — מזוהה לפי fixed
+  // הבועה הצפה (position:fixed, aria-label „המצפן”) — מזוהה לפי fixed
   const fixedBubbleVisible = () =>
     page.evaluate(() => {
       const btns = Array.from(
-        document.querySelectorAll('button[aria-label="שאלו את הספר"]')
+        document.querySelectorAll('button[aria-label="המצפן: שלוש שאלות קצרות"]')
       );
       const fixed = btns.find((b) => getComputedStyle(b).position === "fixed");
       if (!fixed) return false;
@@ -95,7 +95,7 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
   });
   await page.waitForFunction(() => {
     const btns = Array.from(
-      document.querySelectorAll('button[aria-label="שאלו את הספר"]')
+      document.querySelectorAll('button[aria-label="המצפן: שלוש שאלות קצרות"]')
     );
     const fixed = btns.find((b) => getComputedStyle(b).position === "fixed");
     if (!fixed) return false;

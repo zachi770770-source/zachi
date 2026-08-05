@@ -1,15 +1,15 @@
 export const navLinks = [
   { href: "/author", label: "על המחבר" },
   { href: "/book", label: "הספר" },
-  { href: "/compass", label: "שאלו את הספר" },
+  { href: "/compass", label: "המצפן" },
   { href: "/preview", label: "טעימה" },
   { href: "/faq", label: "שאלות נפוצות" },
 ] as const;
 
 export const footerLinks = {
   main: [
-    { href: "/compass", label: "שאלו את הספר" },
-    { href: "/preview", label: "הצצה לספר" },
+    { href: "/compass", label: "המצפן" },
+    { href: "/preview", label: "טעימה מהספר" },
     { href: "/author", label: "מאחורי הספר" },
     { href: "/faq", label: "שאלות נפוצות" },
     { href: "/contact", label: "יצירת קשר" },

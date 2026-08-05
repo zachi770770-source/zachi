@@ -22,28 +22,16 @@ type Theme = "light" | "dark";
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
 
-/** מ״הערכת זמן קריאה: ספירת מילים בפועל / קצב עברי סביר. */
-function estimateMinutes() {
-  const words = [
-    sampleReader.opening,
-    ...sampleReader.passage,
-    sampleReader.principle.text,
-    sampleReader.readerQuestion,
-    sampleReader.ending,
-  ]
-    .join(" ")
-    .trim()
-    .split(/\s+/).length;
-  return Math.max(1, Math.round(words / 180));
-}
-
 /**
  * מצב קריאה נגיש לטעימה: תוכן HTML (לא תמונות), רוחב שורה נוח, טיפוגרפיה
- * עברית, מד התקדמות עדין, הערכת זמן קריאה, הגדלה/הקטנה של הכתב, ומצב
- * בהיר/כהה — הכל בתוך אזור הקריאה בלבד, עם שמירת העדפה מקומית. אין דפדוף
- * מלאכותי המדמה ספר פיזי.
+ * עברית, מד התקדמות עדין, הגדלה/הקטנה של הכתב, ומצב בהיר/כהה — הכל בתוך אזור
+ * הקריאה בלבד, עם שמירת העדפה מקומית. אין דפדוף מלאכותי המדמה ספר פיזי.
+ *
+ * `contextToolName` (אופציונלי) מגיע מ-Path Finder עם כלי+תחנה תקפים
+ * (`/preview?tool=&station=`): מוצגת שורת-הקשר אישית קצרה, אך התוכן עצמו נשאר
+ * הטעימה המאושרת בלבד — אין אבחון ואין תוכן שהומצא.
  */
-export function SampleReader() {
+export function SampleReader({ contextToolName }: { contextToolName?: string } = {}) {
   const [scale, setScale] = React.useState(1);
   const [theme, setTheme] = React.useState<Theme>("light");
   const [progress, setProgress] = React.useState(0);
@@ -54,7 +42,6 @@ export function SampleReader() {
   const articleRef = React.useRef<HTMLElement>(null);
   const livingRef = React.useRef<HTMLDivElement>(null);
   const completedRef = React.useRef(false);
-  const minutes = React.useMemo(() => estimateMinutes(), []);
 
   const principleParts = React.useMemo(() => {
     const { text, emphasis } = sampleReader.principle;
@@ -150,6 +137,31 @@ export function SampleReader() {
     return () => io.disconnect();
   }, []);
 
+  // „דפדוף” בין חלקי הקריאה: כל „עלה” (reader-leaf) נכנס במעבר-דף עדין (CSS
+  // בלבד, ללא WebGL) כשהוא מגיע לתצוגה. מצב הבסיס גלוי במלואו (ללא JS /
+  // reduced-motion → אין הסתרה); רק תחת motion-js ה-JS „מפדף” אותם פנימה.
+  React.useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    if (!document.documentElement.classList.contains("motion-js")) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const leaves = Array.from(root.querySelectorAll<HTMLElement>(".reader-leaf"));
+    root.classList.add("leaves-armed"); // רק כעת מסתירים — no-JS נשאר גלוי
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-turned");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
+    );
+    leaves.forEach((leaf) => io.observe(leaf));
+    return () => io.disconnect();
+  }, []);
+
   const adjust = (delta: number) =>
     setScale((s) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round((s + delta) * 10) / 10)));
 
@@ -185,10 +197,6 @@ export function SampleReader() {
         </Link>
 
         <div className="reader-tools">
-          <span className="reader-time" aria-hidden="true">
-            {sampleReader.ui.readingTime(minutes)}
-          </span>
-
           <div className="reader-fontgroup" role="group" aria-label={sampleReader.ui.fontLabel}>
             <button
               type="button"
@@ -247,13 +255,18 @@ export function SampleReader() {
         <div data-vt-book-dest className="reader-cover">
           <BookCover />
         </div>
-        <span className="kicker">{sampleReader.eyebrow}</span>
         <h1 className="reader-title">{sampleReader.title}</h1>
         <p className="reader-intro">{sampleReader.intro}</p>
 
+        {/* שורת-הקשר אישית — רק כשהגענו מ-Path Finder עם כלי+תחנה תקפים. התוכן
+            שמתחת נשאר הטעימה המאושרת בלבד (אין אבחון, אין תוכן שהומצא). */}
+        {contextToolName ? (
+          <p className="reader-context">{sampleReader.contextLine(contextToolName)}</p>
+        ) : null}
+
         {/* קטע הטעימה עם „דיו חי”: סמן קריאה בטרקוטה נמשך לצד השורות ומשפט-
             המפתח מודגש בדיו. הטקסט נשאר בחירה/נגיש; ה-marker דקורטיבי בלבד. */}
-        <div ref={livingRef} className={`living-ink${reading ? " is-reading" : ""}`}>
+        <div ref={livingRef} className={`living-ink reader-leaf${reading ? " is-reading" : ""}`}>
           <span className="living-ink__marker" aria-hidden="true" />
 
           <p className="reader-lead">{sampleReader.opening}</p>
@@ -279,11 +292,11 @@ export function SampleReader() {
           </aside>
         </div>
 
-        <p className="reader-question">{sampleReader.readerQuestion}</p>
+        <p className="reader-question reader-leaf">{sampleReader.readerQuestion}</p>
 
-        <p className="reader-p reader-ending">{sampleReader.ending}</p>
+        <p className="reader-p reader-ending reader-leaf">{sampleReader.ending}</p>
 
-        <div className="reader-closing">
+        <div className="reader-closing reader-leaf">
           <p className="reader-closing__prompt">{sampleReader.closingPrompt}</p>
           <p className="reader-closing__note">{sampleReader.closingNote}</p>
         </div>

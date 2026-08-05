@@ -64,7 +64,12 @@ export default function BookPage() {
             </div>
             <span className="kicker justify-center">הספר לעומק</span>
             <h1 className="type-h1 mt-4">מה יש בספר, ואיך הוא עובד</h1>
-            <p className="type-lead mt-6 text-foreground-muted">
+            {/* מיצוב: לא ספר חד-פעמי אלא מלווה לאורך כל המסע הזוגי (ללא טענה
+                השוואתית — לא „היחיד” / „הראשון מסוגו”). */}
+            <p className="mt-5 font-serif text-[19px] font-semibold leading-snug text-brand-hover">
+              לא ספר שקוראים פעם אחת — ספר שחוזרים אליו לאורך המסע הזוגי.
+            </p>
+            <p className="type-lead mt-5 text-foreground-muted">
               {siteConfig.description}
             </p>
             {/* נקודת האיזון של הגישה, הועברה לכאן מהשער כדי לשמור על עמוד בית חיובי. */}
@@ -90,9 +95,9 @@ export default function BookPage() {
       <ThesisSection />
       <AudienceSection />
       <MethodSection />
-      {/* ששת הכלים המעשיים — הועברו לכאן מעמוד הבית. עוגן #tools משמש את
-          הטעימה בבית ואת ה-CTA של השיטה. ה-CTA לעמוד הספר מוסתר (קישור-עצמי). */}
-      <ToolsBento hideCta />
+      {/* ששת הכלים המעשיים — אזור Editorial Luxury אינטראקטיבי. עוגני
+          #tool-<id> משמשים deep-link מ-Path Finder ומקישורים ישירים. */}
+      <ToolsBento />
       <InsideBookSection />
       <OutcomesSection />
       <PurchaseSection />
