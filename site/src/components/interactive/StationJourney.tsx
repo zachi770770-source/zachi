@@ -6,6 +6,7 @@ import { ArrowLeft, MapPin, RotateCcw } from "lucide-react";
 
 import { stations, stationOrder, type Station } from "@/content/stations";
 import { tools } from "@/content/book";
+import { resolveToolId } from "@/lib/pathfinder/toolMapping";
 import { Container } from "@/components/shared/Container";
 import { trackEvent } from "@/lib/analytics";
 
@@ -31,12 +32,14 @@ const Q1: { label: string; station: StationId }[] = [
   { label: "אני מתחיל/ה מחדש", station: "starting-again" },
   { label: "אני בתוך קשר ורוצה לבנות אותו טוב יותר", station: "inside-relationship" },
 ];
-// מה חוזר שוב ושוב → כלי מעשי אמיתי מהספר. ניסוח ניטרלי שמתאים גם למי שמחפש/ת
-// קשר, גם למי שמתחיל/ה מחדש וגם למי שכבר בזוגיות (לא מניח דייטינג).
-const Q2: { label: string; tool: string }[] = [
-  { label: "אני נועל/ת מסקנה מהר על אדם או על מצב", tool: "שלוש שאלות השער" },
-  { label: "קשה לי לדעת אם מה שאני מרגיש/ה זה סימן אמיתי", tool: "בדיקת השקט" },
-  { label: "אני מגיב/ה לרגע, ומתחרט/ת אחר כך", tool: "כלל 72 השעות" },
+// מה חוזר שוב ושוב → אינדקס-קושי (0/1/2). הכלי המעשי נגזר מצירוף התחנה (Q1)
+// והקושי (Q2) דרך המיפוי הדטרמיניסטי ב-lib/pathfinder/toolMapping — כך כל
+// ששת הכלים מהספר נגישים (ולא רק שלושה). ניסוח ניטרלי שמתאים לכל שלושת קהלי
+// היעד (חיפוש קשר / התחלה מחדש / זוגיות קיימת; לא מניח דייטינג).
+const Q2: { label: string }[] = [
+  { label: "אני נועל/ת מסקנה מהר על אדם או על מצב" },
+  { label: "קשה לי לדעת אם מה שאני מרגיש/ה זה סימן אמיתי" },
+  { label: "אני מגיב/ה לרגע, ומתחרט/ת אחר כך" },
 ];
 // מה הכי יעזור עכשיו → איזו פעולה ראשית להדגיש (כל הפעולות נשארות זמינות).
 type Emphasis = "sample" | "compass" | "station";
@@ -141,10 +144,13 @@ export function StationJourney() {
 
   const done = step === 3 && answers.every((a) => a !== null);
   const station = done ? stations[Q1[answers[0]!].station] : null;
-  // הקושי שנבחר (שאלה 2) והכלי המתאים — המיפוי הקיים. הכלי תמיד קיים ברשימה.
+  // הקושי שנבחר (שאלה 2) והכלי המתאים — נגזר מצירוף התחנה (Q1) והקושי (Q2) דרך
+  // המיפוי הדטרמיניסטי. כל הכלים קיימים ב-book.ts, ולכן ה-find תמיד מוצא.
   const difficulty = done ? Q2[answers[1]!].label : null;
   const tool = done
-    ? tools.items.find((t) => t.name === Q2[answers[1]!].tool) ?? tools.items[0]
+    ? tools.items.find(
+        (t) => t.id === resolveToolId(Q1[answers[0]!].station, answers[1]!),
+      ) ?? tools.items[0]
     : null;
   const emphasis: Emphasis | null = done ? Q3[answers[2]!].emphasis : null;
 

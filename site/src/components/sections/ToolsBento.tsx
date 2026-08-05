@@ -104,6 +104,30 @@ export function ToolsBento({ hideCta = false }: { hideCta?: boolean } = {}) {
                   <p className="text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
                     {tool.description}
                   </p>
+                  {/* נגן שמע אופציונלי — מוצג אך ורק כשקיימים גם קובץ מאושר וגם
+                      תמלול. אין אוטו-פליי; preload="none" מבטיח שהקובץ נטען רק
+                      כשהמשתמש מנגן (הכרטיס ממילא סגור עד לפתיחה). כרגע אין הקלטות
+                      מאושרות, ולכן החסימה הזו לא מרנדרת דבר. */}
+                  {tool.audioSrc && tool.audioTranscript ? (
+                    <div className="mt-4">
+                      <audio
+                        controls
+                        preload="none"
+                        className="w-full"
+                        aria-label={`הקראה קצרה: ${tool.name}`}
+                      >
+                        <source src={tool.audioSrc} />
+                      </audio>
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-[13px] font-medium text-brand-hover underline-offset-4 hover:underline">
+                          תמלול ההקלטה
+                        </summary>
+                        <p className="mt-2 text-[14px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                          {tool.audioTranscript}
+                        </p>
+                      </details>
+                    </div>
+                  ) : null}
                 </div>
               </details>
             );

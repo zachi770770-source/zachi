@@ -47,12 +47,14 @@ test("/book deep-link (#tool-…) opens the matching tool card and moves focus t
   await expect
     .poll(() => page.evaluate(() => document.activeElement?.closest("details")?.id))
     .toBe("tool-gate-questions");
-  // הכרטיס יושב בראש אזור-הצפייה, מתחת ל-header הדביק (scroll-mt-24).
+  // הכרטיס יושב בראש אזור-הצפייה, מתחת ל-header הדביק (scroll-mt-24): קרוב
+  // לראש (top < 200) וגלוי בפועל למשתמש (summary נראה ב-viewport). נמנעים
+  // מהשוואת-פיקסל נוקשה על הגבול התחתון — היא מתחרה עם התייצבות-הגלילה תחת
+  // עומס CPU מקבילי, בעוד ההבטחה האמיתית היא שהכרטיס פתוח, ממוקד, וגלוי.
   await expect
     .poll(() => el.evaluate((n) => Math.round(n.getBoundingClientRect().top)))
     .toBeLessThan(200);
-  const top = await el.evaluate((n) => n.getBoundingClientRect().top);
-  expect(top).toBeGreaterThan(-10);
+  await expect(el.locator("summary")).toBeInViewport();
 });
 
 test("path finder result links directly to a real tool card in /book", async ({ page }) => {

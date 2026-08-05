@@ -177,10 +177,33 @@ export const outcomes = {
   ],
 };
 
-export const tools = {
+/**
+ * כלי בודד מהספר. `id`, `name` ו-`description` הם התוכן המאושר הקיים.
+ *
+ * `audioSrc` + `audioTranscript` הם *אופציונליים* ותמיד ריקים כאן: אין להוסיף
+ * הקלטה בלי קובץ שמע אמיתי ומאושר *וגם* תמלול מלא. הרכיב (ToolsBento) מציג נגן
+ * אך ורק כששני השדות מלאים — אחרת אין נגן, אין שטח ריק ואין קובץ דמה/קול AI.
+ * הנגן אינו מתנגן אוטומטית ואינו טוען את הקובץ עד שהכרטיס נפתח והמשתמש מנגן.
+ */
+export type ToolItem = {
+  id: string;
+  name: string;
+  description: string;
+  /** נתיב תחת /public לקובץ שמע מאושר. ריק = אין נגן. */
+  audioSrc?: string;
+  /** תמלול מלא ונגיש של ההקלטה. חובה יחד עם audioSrc — אחרת אין נגן. */
+  audioTranscript?: string;
+};
+
+export const tools: {
+  title: string;
+  description: string;
+  items: ToolItem[];
+} = {
   title: "כלים מעשיים מתוך הספר",
   description: "הספר אינו רק רעיוני. אלה דוגמאות לכלים שתמצאו בפנים.",
   // id = עוגן יציב לכל כלי (deep-link מתוצאת ה-Path Finder אל הכרטיס ב-/book).
+  // audioSrc/audioTranscript נשארים ריקים עד שתתקבל הקלטה אמיתית מאושרת + תמלול.
   items: [
     {
       id: "fact-story-action",
