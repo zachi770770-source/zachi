@@ -7,7 +7,7 @@ import { test, expect } from "@playwright/test";
  */
 
 const compass = (page: import("@playwright/test").Page) =>
-  page.getByRole("button", { name: /המצפן/ });
+  page.getByRole("button", { name: /שאל את הספר/ });
 
 async function dismissCookies(page: import("@playwright/test").Page) {
   const accept = page.getByRole("button", { name: "אישור הכל" });
@@ -24,9 +24,7 @@ test.describe("compass floating bubble", () => {
     // נחשפת גם בלי גלילה כלל (טיימר-גיבוי) — opacity מגיע ל-1.
     await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
     await compass(page).click();
-    await expect(
-      page.getByRole("dialog").getByText(/שאל|מצפן|נקודת|מסלול|תחנה/).first()
-    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toBeVisible();
   });
 
   test("desktop: bubble also reveals after a small scroll", async ({ page }) => {

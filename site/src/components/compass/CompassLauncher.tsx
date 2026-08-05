@@ -72,33 +72,27 @@ export function CompassLauncher() {
     return () => window.removeEventListener("cookie-banner-change", onChange);
   }, []);
 
-  // כשאין באנר — הבועה מכבדת את env(safe-area-inset-bottom).
-  const mobileBottom = "max(1.25rem, env(safe-area-inset-bottom))";
+  // מובייל: הבועה מורמת מעל בר-הטעימה הדביק (הבר יושב בתחתית ורוחבו כמעט מלא),
+  // כך שאין חפיפה בין שני הרכיבים הצפים. בדסקטופ היא בפינה התחתונה-מתחילה
+  // (שמאל ב-RTL), הפוך מבר-הטעימה שיושב בפינה הנגדית.
+  const mobileBottom = "max(5.5rem, calc(env(safe-area-inset-bottom) + 5rem))";
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-      {/* בועה צפה — כל הרוחב מהצד המתחיל של הקצה (שמאל ב-RTL) */}
+      {/* בועה צפה גדולה עם טקסט מפורש — פינה תחתונה-מתחילה (שמאל ב-RTL) */}
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label="המצפן: שלוש שאלות קצרות"
+          aria-label="שאל את הספר — שלוש שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
           style={{ ["--bubble-bottom" as string]: mobileBottom }}
           className={
-            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-2.5 transition-opacity duration-500 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2" +
+            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex items-center justify-center rounded-full bg-foreground px-6 py-4 text-[16px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-8 md:px-8 md:py-5 md:text-[18px]" +
             (bannerOpen ? " max-md:hidden" : "") +
             (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
           }
         >
-          {/* תווית קבועה, קטנה ועדינה — דסקטופ/טאבלט בלבד (במובייל היא הייתה
-              מתנגשת עם בר-הטעימה הדביק בפינה; שם הבועה העגולה מזוהה מספיק לבדה).
-              לא לשונית ולא כפתור גדול; hover/focus רק מחזקים מעט את הניגודיות. */}
-          <span className="hidden whitespace-nowrap rounded-full bg-surface px-3 py-1.5 text-[12.5px] font-medium text-foreground-muted shadow-sm ring-1 ring-border transition-colors group-hover:text-foreground group-focus-visible:text-foreground md:inline-block">
-            המצפן
-          </span>
-          {/* בועה: גוף Ink + טבעת דקה Terracotta + אייקון ספר לבן; ללא pulse */}
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background">
-            <Compass className="h-6 w-6" aria-hidden="true" />
-          </span>
+          {/* טקסט מפורש במקום אייקון — „שאל את הספר”. */}
+          <span className="whitespace-nowrap">שאל את הספר</span>
         </button>
       </DialogPrimitive.Trigger>
 

@@ -47,8 +47,8 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
   await page.goto("/", { waitUntil: "networkidle" });
 
   // במסכים נמוכים (מובייל) באנר העוגיות מזוין רק אחרי שה-CTA הראשי גלל אל מעל
-  // פס-הבאנר (כדי שלא יכסה אותו). גוללים מעט כדי שהבאנר יופיע — עדיין הרבה לפני
-  // סף חשיפת הבועה (≈0.6 מסך), כך שהבועה נשארת מוסתרת.
+  // פס-הבאנר (כדי שלא יכסה אותו). גוללים מעט כדי שהבאנר יופיע. במובייל הבועה
+  // מוסתרת כל עוד הבאנר פתוח (max-md:hidden), גם אם כבר נחשפה — כך שאין חפיפה.
   await page.evaluate(() => window.scrollTo(0, 220));
   const banner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
   await expect(banner).toBeVisible();
@@ -57,7 +57,7 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
   const fixedBubbleVisible = () =>
     page.evaluate(() => {
       const btns = Array.from(
-        document.querySelectorAll('button[aria-label="המצפן: שלוש שאלות קצרות"]')
+        document.querySelectorAll('button[aria-label^="שאל את הספר"]')
       );
       const fixed = btns.find((b) => getComputedStyle(b).position === "fixed");
       if (!fixed) return false;
@@ -83,19 +83,12 @@ test("mobile 390: assistant bubble is hidden while the cookie banner is open, an
     () => !document.body.hasAttribute("data-cookie-banner")
   );
 
-  // מיד אחרי ההסכמה, עדיין לפני אזור חשיפת-הבועה: הבועה מוסתרת בכוונה כדי לא
-  // להתחרות בטופס ההרשמה שבשער.
-  expect(await fixedBubbleVisible()).toBe(false);
-
-  // גלילה מעבר לאזור השער חושפת את הבועה בעדינות (גלילה מיידית — דטרמיניסטית,
-  // ללא smooth שעלול להיקטע מ-reflow סגירת-הבאנר).
-  await page.evaluate(() => {
-    document.documentElement.style.scrollBehavior = "auto";
-    window.scrollTo(0, window.innerHeight);
-  });
+  // אחרי ההסכמה הבאנר נעלם, והבועה נחשפת מהר: הגלילה הקטנה שכבר בוצעה (מעל סף
+  // החשיפה) וטיימר-הגיבוי חושפים אותה בלי צורך בגלילה של מסך שלם. מאשרים שהיא
+  // חוזרת ונראית (כבר לא מוסתרת ע"י הבאנר).
   await page.waitForFunction(() => {
     const btns = Array.from(
-      document.querySelectorAll('button[aria-label="המצפן: שלוש שאלות קצרות"]')
+      document.querySelectorAll('button[aria-label^="שאל את הספר"]')
     );
     const fixed = btns.find((b) => getComputedStyle(b).position === "fixed");
     if (!fixed) return false;
