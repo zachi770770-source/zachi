@@ -1,4 +1,5 @@
-import { ArrowLeft, Check } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Check, Compass } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { previewClosing } from "@/content/sample";
@@ -18,6 +19,7 @@ export function PreviewClosing() {
 
   return (
     <section
+      id="join"
       className="scroll-mt-20 bg-surface-muted py-16 sm:py-20"
       aria-labelledby="preview-closing-heading"
     >
@@ -73,7 +75,7 @@ export function PreviewClosing() {
             </div>
           )}
 
-          <div className="mt-8 border-t border-border pt-6 text-center">
+          <div className="mt-8 flex flex-col items-center gap-4 border-t border-border pt-6 text-center">
             <BookLink
               href="/book"
               className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
@@ -84,6 +86,14 @@ export function PreviewClosing() {
                 aria-hidden="true"
               />
             </BookLink>
+            {/* מעבר ברור למצפן — לקורא שסיים את הטעימה ולא בטוח מאיפה להתחיל. */}
+            <Link
+              href="/compass"
+              className="group inline-flex items-center gap-2 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              <Compass className="h-4 w-4 text-brand" aria-hidden="true" />
+              {previewClosing.compassLinkLabel}
+            </Link>
           </div>
         </div>
       </Container>

@@ -13,6 +13,9 @@ import {
 
 import type { WaitlistSource } from "@/lib/validation/waitlist";
 import { trackEvent } from "@/lib/analytics";
+import { loadCompass } from "@/lib/compass/quizStorage";
+import { stations } from "@/content/stations";
+import type { CompassStationId } from "@/lib/compass/quiz";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -54,11 +57,23 @@ export function WaitlistForm({
   const [status, setStatus] = React.useState<Status>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
+  // התחנה ששמורה מ„המצפן” (מקומית בלבד) — להתאמה אישית של מצב ההצלחה. *אינה*
+  // נשלחת לשרת: כך אין שינוי ב-backend ואין חשיפת מידע נוסף (פרטיות).
+  const [savedStation, setSavedStation] = React.useState<CompassStationId | null>(null);
 
   // מיקוד שדה האימייל כשהטופס נחשף (ניהול מיקוד נגיש). פעם אחת בהרכבה.
   React.useEffect(() => {
     if (autoFocus) emailRef.current?.focus();
   }, [autoFocus]);
+
+  // קריאה בטוחה של התחנה השמורה (rAF — לא ב-body של האפקט, בלי אי-התאמת הידרציה).
+  React.useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      const saved = loadCompass();
+      if (saved) setSavedStation(saved.stationId);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   // שיתוף/העתקת קישור רגיל: Web Share כשנתמך (מובייל), אחרת העתקה ללוח.
   const shareSite = React.useCallback(async () => {
@@ -147,6 +162,19 @@ export function WaitlistForm({
             <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">
               נעדכן אתכם ברגע שהספר ייצא — בינתיים אפשר לקרוא את הטעימה עכשיו.
             </p>
+            {/* התאמה אישית: אם „המצפן” הושלם — קישור לתחנה שהותאמה (מקומי בלבד). */}
+            {savedStation ? (
+              <p className="mt-3 text-[15px] leading-relaxed text-foreground">
+                בזמן שאתם מחכים — התחנה שלכם מהמצפן:{" "}
+                <Link
+                  href={`/${savedStation}`}
+                  className="font-semibold text-brand-hover underline underline-offset-4"
+                >
+                  {stations[savedStation].navLabel}
+                </Link>
+                .
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">

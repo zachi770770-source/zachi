@@ -6,6 +6,7 @@ import { MarkSampleSeen } from "@/components/preview/MarkSampleSeen";
 import { PeekInside } from "@/components/interactive/PeekInside";
 import { BookMap } from "@/components/preview/BookMap";
 import { PreviewClosing } from "@/components/preview/PreviewClosing";
+import { PreviewStickyCta } from "@/components/preview/PreviewStickyCta";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
@@ -37,6 +38,9 @@ export default function PreviewPage() {
 
       <BookMap />
       <PreviewClosing />
+
+      {/* CTA דביק במובייל בלבד — מפנה לטופס ההרשמה, נעלם ליד הטופס/הפוטר. */}
+      <PreviewStickyCta />
     </>
   );
 }
