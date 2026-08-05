@@ -1365,13 +1365,13 @@
    * בלבד, כך שה-LCP נמדד בזמן ציור התמונה (מוקדם) ולא בסוף האנימציה. */
   .hero-book {
     transform-origin: center 62%;
-    animation: heroBookEnter 1350ms var(--ease-settle) 60ms both;
+    animation: heroBookEnter 1450ms var(--ease-settle) 120ms both;
   }
   @keyframes heroBookEnter {
     0% {
       opacity: 1;
-      transform: perspective(1100px) translateY(76px) scale(0.82) rotateY(11deg)
-        rotateX(3.5deg);
+      transform: perspective(1100px) translateY(104px) scale(0.78) rotateY(14deg)
+        rotateX(4.5deg);
     }
     100% {
       opacity: 1;
@@ -1414,6 +1414,215 @@
         transform: translateY(0) scale(1);
       }
     }
+  }
+}
+
+/* ---- כניסת הרקע הקולנועית (השכבה הראשונה בכניסה המדורגת) ----
+ * מצב בסיס: הרקע גלוי במלואו (ללא JS / reduced-motion → אין קפיצה, אין ריק).
+ * תחת no-preference הוא עולה ומתרחב ראשון (~1s), לפני הקו/הכותרת/הספר. */
+.hero-book__link {
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-bg-enter {
+    opacity: 0;
+    transform: scale(1.04);
+    animation: heroBgEnter 1000ms var(--ease-settle) 0ms both;
+  }
+  @keyframes heroBgEnter {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* ===================================================================
+ * מסלול התחנות (StationJourney) — שלוש התחנות כקו-מסע מחובר.
+ * מבנה בסיס (גלוי במלואו תמיד, גם ללא JS / reduced-motion); הקו נמשך
+ * והצמתים „קופצים” רק תחת no-preference, כשהמסלול נכנס לתצוגה (.is-visible).
+ * =================================================================== */
+.station-journey__track {
+  position: relative;
+  align-items: start;
+}
+/* הקו המחבר — עובר דרך מרכזי שלוש הנקודות (1/6, 3/6, 5/6 מהרוחב). */
+.station-journey__track::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  inset-inline: 16.66%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to left,
+    var(--color-border-strong),
+    var(--color-secondary),
+    var(--color-border-strong)
+  );
+  transform: scaleX(1);
+  transform-origin: right center; /* RTL: נמשך מימין לשמאל */
+  z-index: 0;
+}
+.station-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: center;
+  padding-block: 2px;
+}
+.station-node__dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border-strong);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.station-node__dot::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+.station-node__pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 2px solid var(--color-brand);
+  opacity: 0;
+}
+.station-node__label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-brand-hover);
+  text-wrap: balance;
+  transition: color 0.2s ease;
+}
+@media (min-width: 640px) {
+  .station-node__label {
+    font-size: 14px;
+  }
+  .station-node__dot {
+    width: 28px;
+    height: 28px;
+  }
+  .station-journey__track::before {
+    top: 13px;
+  }
+}
+/* Hover / Focus — נוכחות ברורה ומורגשת. */
+.station-node:hover .station-node__dot,
+.station-node:focus-visible .station-node__dot {
+  border-color: var(--color-brand);
+  background: var(--color-brand-muted);
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--color-ink) 40%, transparent);
+}
+.station-node:hover .station-node__dot::after,
+.station-node:focus-visible .station-node__dot::after {
+  background: var(--color-brand);
+  transform: scale(1.25);
+}
+.station-node:hover .station-node__label,
+.station-node:focus-visible .station-node__label {
+  color: var(--color-foreground);
+}
+.station-node:focus-visible .station-node__dot {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+/* תחנה פעילה (הותאמה בשאלון) — נוכחות מלאה: נקודה ממולאת + טבעת. */
+.station-node[data-active] .station-node__dot {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px -6px color-mix(in oklab, var(--color-ink) 45%, transparent);
+}
+.station-node[data-active] .station-node__dot::after {
+  background: var(--color-brand-foreground);
+  transform: scale(1.3);
+}
+.station-node[data-active] .station-node__label {
+  color: var(--color-foreground);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* „חמוש” (journey-armed) בלבד: ה-JS הסתיר את הכניסה; „מעיר” (is-awake): הקו
+     נמשך מימין לשמאל כשהמסלול נכנס לתצוגה. ללא JS — הבסיס נשאר גלוי (scaleX 1). */
+  .station-journey.journey-armed .station-journey__track::before {
+    transform: scaleX(0);
+    transition: transform 900ms var(--ease-settle);
+  }
+  .station-journey.journey-armed.is-awake .station-journey__track::before {
+    transform: scaleX(1);
+  }
+  /* הצמתים „קופצים” אחד-אחד (סטגר לפי --i), אחרי שהקו התחיל להימשך. */
+  .station-journey.journey-armed .station-journey__item {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+  .station-journey.journey-armed.is-awake .station-journey__item {
+    animation: stationNodePop 520ms var(--ease-settle) both;
+    animation-delay: calc(260ms + var(--i) * 130ms);
+  }
+  @keyframes stationNodePop {
+    0% {
+      opacity: 0;
+      transform: translateY(10px) scale(0.92);
+    }
+    60% {
+      transform: translateY(-2px) scale(1.03);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  /* טבעת פעימה עדינה סביב התחנה הפעילה. */
+  .station-node[data-active] .station-node__pulse {
+    animation: stationPulse 2200ms ease-out infinite;
+  }
+  @keyframes stationPulse {
+    0% {
+      opacity: 0.55;
+      transform: scale(0.8);
+    }
+    70% {
+      opacity: 0;
+      transform: scale(1.5);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.5);
+    }
+  }
+}
+/* Reduced-motion / ללא JS — הכול במצב סופי גלוי, בלי תנועה. */
+@media (prefers-reduced-motion: reduce) {
+  .station-journey__item {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .station-journey__track::before {
+    transform: scaleX(1) !important;
   }
 }
 

@@ -142,6 +142,32 @@ export function StationJourney() {
     setStep(0);
   }, []);
 
+  // מסלול התחנות — כניסה מונפשת מקומית (IntersectionObserver ייעודי), בלתי-תלויה
+  // בבקר החשיפה הגלובלי. מצב הבסיס גלוי במלואו (ללא JS / reduced-motion); רק
+  // תחת no-preference ה-JS „חומש” את הכניסה (journey-armed → מוסתר) ואז „מעיר”
+  // אותה (is-awake → הקו נמשך והצמתים קופצים) כשהמסלול נכנס לתצוגה.
+  const journeyRef = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    const el = journeyRef.current;
+    if (!el) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    el.classList.add("journey-armed");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            el.classList.add("is-awake");
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const done = step === 3 && answers.every((a) => a !== null);
   const station = done ? stations[Q1[answers[0]!].station] : null;
   // הקושי שנבחר (שאלה 2) והכלי המתאים — נגזר מצירוף התחנה (Q1) והקושי (Q2) דרך
@@ -153,6 +179,8 @@ export function StationJourney() {
       ) ?? tools.items[0]
     : null;
   const emphasis: Emphasis | null = done ? Q3[answers[2]!].emphasis : null;
+  // התחנה שהותאמה בשאלון (אם הושלם) — מקבלת נוכחות פעילה במסלול התחנות.
+  const activeStationId: StationId | null = done ? Q1[answers[0]!].station : null;
 
   // פעולה ראשית: קישור ישיר לכרטיס הכלי ב-/book (העוגן פותח אותו ומעביר focus).
   const toolCta = tool ? { href: `/book#tool-${tool.id}`, label: "לכלי המלא בעמוד הספר" } : null;
@@ -347,19 +375,41 @@ export function StationJourney() {
             </article>
           )}
 
-          {/* דילוג ישיר לכל תחנה — עובד תמיד (גם ללא JS / בלי להשלים שאלות) */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
-            <span className="text-[13px] text-foreground-muted">או דלגו ישר לתחנה:</span>
-            {stationOrder.map((id) => (
-              <Link
-                key={id}
-                href={`/${id}`}
-                className="text-[14px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                {SKIP_LABELS[id]}
-              </Link>
-            ))}
-          </div>
+          {/* מסלול התחנות — שלוש התחנות כקו-מסע מחובר. הקו והצמתים „מתעוררים”
+              בגלילה (‎.reveal → .is-visible), כל צומת מוביל לעמוד הייעודי שלו,
+              והתחנה שהותאמה בשאלון (אם הושלם) מקבלת נוכחות ברורה. עובד תמיד —
+              גם ללא JS ובלי להשלים שאלות — וכל התוכן במצבו הסופי תחת
+              reduced-motion. */}
+          <nav
+            ref={journeyRef}
+            aria-label="דילוג לתחנות המסע"
+            className="station-journey mt-8"
+          >
+            <p className="mb-5 text-center text-[13px] text-foreground-muted">
+              או דלגו ישר לתחנה שמתאימה לכם:
+            </p>
+            <ol className="station-journey__track grid grid-cols-3 gap-1.5 sm:gap-3">
+              {stationOrder.map((id, i) => (
+                <li
+                  key={id}
+                  className="station-journey__item"
+                  style={{ "--i": i } as React.CSSProperties}
+                >
+                  <Link
+                    href={`/${id}`}
+                    aria-current={activeStationId === id ? "true" : undefined}
+                    data-active={activeStationId === id ? "" : undefined}
+                    className="station-node group focus-visible:outline-none"
+                  >
+                    <span className="station-node__dot" aria-hidden="true">
+                      <span className="station-node__pulse" aria-hidden="true" />
+                    </span>
+                    <span className="station-node__label">{SKIP_LABELS[id]}</span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </nav>
         </div>
       </Container>
     </section>

@@ -25,9 +25,9 @@ export function BookCover({
           width={620}
           height={930}
           priority={priority}
-          // גדלי התצוגה בפועל (Hero): 172px במובייל, 264px בטאבלט, 340px בדסקטופ.
+          // גדלי התצוגה בפועל (Hero): 196px במובייל, 264px בטאבלט, 392px בדסקטופ.
           // Next מייצר srcset מותאם, כך שמובייל אינו מוריד את המקור 1400×2100.
-          sizes="(max-width: 640px) 172px, (max-width: 1024px) 264px, 340px"
+          sizes="(max-width: 640px) 196px, (max-width: 1024px) 264px, 392px"
           className="book-cover__img"
         />
       </div>
