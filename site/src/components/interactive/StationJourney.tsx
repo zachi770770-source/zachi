@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin, RotateCcw } from "lucide-react";
 import { stations, stationOrder, type Station } from "@/content/stations";
 import { tools } from "@/content/book";
 import { resolveToolId } from "@/lib/pathfinder/toolMapping";
+import { loadCompass } from "@/lib/compass/quizStorage";
 import { Container } from "@/components/shared/Container";
 import { trackEvent } from "@/lib/analytics";
 
@@ -179,8 +180,25 @@ export function StationJourney() {
       ) ?? tools.items[0]
     : null;
   const emphasis: Emphasis | null = done ? Q3[answers[2]!].emphasis : null;
-  // התחנה שהותאמה בשאלון (אם הושלם) — מקבלת נוכחות פעילה במסלול התחנות.
-  const activeStationId: StationId | null = done ? Q1[answers[0]!].station : null;
+
+  // התחנה ששמורה מ„המצפן” (/compass) — נקראת בבטחה מ-localStorage (null אם
+  // ריק/חסום/פגום). מדגישה את התחנה המתאימה בבית ומאפשרת CTA „המשך”.
+  const [savedStationId, setSavedStationId] = React.useState<StationId | null>(null);
+  React.useEffect(() => {
+    // ה-setState נדחה ל-rAF (מחוץ לגוף האפקט) — צד-לקוח בלבד, בלי אי-התאמת
+    // הידרציה ובלי „cascading renders”.
+    const raf = requestAnimationFrame(() => {
+      const saved = loadCompass();
+      if (saved) setSavedStationId(saved.stationId);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // התחנה הפעילה במסלול: קודם מה שהותאם בשאלון בבית (אם הושלם), אחרת מה
+  // שהמצפן שמר. מקבלת נוכחות ברורה במסלול התחנות.
+  const activeStationId: StationId | null = done
+    ? Q1[answers[0]!].station
+    : savedStationId;
 
   // פעולה ראשית: קישור ישיר לכרטיס הכלי ב-/book (העוגן פותח אותו ומעביר focus).
   const toolCta = tool ? { href: `/book#tool-${tool.id}`, label: "לכלי המלא בעמוד הספר" } : null;
@@ -380,6 +398,38 @@ export function StationJourney() {
               והתחנה שהותאמה בשאלון (אם הושלם) מקבלת נוכחות ברורה. עובד תמיד —
               גם ללא JS ובלי להשלים שאלות — וכל התוכן במצבו הסופי תחת
               reduced-motion. */}
+          {/* המשך מהמצפן: אם הושלם „המצפן” (/compass) ועדיין לא ענו על השאלון
+              כאן — מציגים באנר „המשך” עם קישור ישיר לתחנה המתאימה. */}
+          {savedStationId && !done ? (
+            <div className="mx-auto mt-8 max-w-2xl rounded-xl border-s-2 border-brand bg-surface-muted/60 p-4 text-start">
+              <p className="text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
+                השלמתם את המצפן
+              </p>
+              <p className="mt-1 text-[15px] leading-relaxed text-foreground">
+                התחנה שמתאימה לכם:{" "}
+                <span className="font-semibold">{stations[savedStationId].navLabel}</span>.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <Link
+                  href={`/${savedStationId}`}
+                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  להמשיך לתחנה שלי
+                  <ArrowLeft
+                    className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                    aria-hidden="true"
+                  />
+                </Link>
+                <Link
+                  href="/compass"
+                  className="text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  למצפן
+                </Link>
+              </div>
+            </div>
+          ) : null}
+
           <nav
             ref={journeyRef}
             aria-label="דילוג לתחנות המסע"

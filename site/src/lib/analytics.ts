@@ -45,6 +45,8 @@ export type AnalyticsEventName =
   | "sticky_sample_click"
   | "path_finder_start"
   | "path_finder_complete"
+  | "compass_start"
+  | "compass_complete"
   | "audio_play"
   | "video_play";
 

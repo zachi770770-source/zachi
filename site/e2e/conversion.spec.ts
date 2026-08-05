@@ -92,6 +92,6 @@ test("the interactive peek now lives on /preview, without a duplicate conversion
 
 test("Compass (pre-launch): no conversion CTA before an answer", async ({ page }) => {
   await page.goto("/compass", { waitUntil: "networkidle" });
-  // במצב טרום-השקה המצפן אינו פעיל (coming-soon), ואין פעולת המרה כלל.
+  // לפני מענה — המצפן מציג שאלות בלבד; אין פעולת רכישה/המרה על העמוד.
   await expect(page.getByRole("button", { name: CTA })).toHaveCount(0);
 });

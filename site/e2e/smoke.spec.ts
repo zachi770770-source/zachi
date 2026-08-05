@@ -194,14 +194,16 @@ test("/api/compass sets a secure anonymous cookie (HttpOnly, SameSite=Lax, Path=
   expect(cookie).toMatch(/Max-Age=\d+/i);
 });
 
-test("/compass exists; while inert it shows a dignified coming-soon (no fixture)", async ({ page }) => {
+test("/compass is an active deterministic 3-question compass (closed choices, no free text)", async ({
+  page,
+}) => {
   const res = await page.goto("/compass", { waitUntil: "networkidle" });
   expect(res?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("יש לכם שאלה");
-  // ללא ספק מודל/מסד בסביבת הבדיקה → מצב „בקרוב”, לא תיבת שאלה פעילה.
-  // השם הפונה למשתמש הוא כעת „שאלו את הספר” (עודכן ב-PHASE 12).
-  await expect(page.getByText("תיפתח בקרוב")).toBeVisible();
-  await expect(page.locator("#compass-question")).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("נקודת הפתיחה");
+  // שאלה 1 מתוך 3, בחירות סגורות (radiogroup), ללא טקסט חופשי.
+  await expect(page.getByText("שאלה 1 מתוך 3")).toBeVisible();
+  await expect(page.getByRole("radiogroup")).toHaveCount(1);
+  await expect(page.getByRole("textbox")).toHaveCount(0);
 });
 
 test("/book is a real page (not a redirect) with the deep-dive content", async ({ page }) => {

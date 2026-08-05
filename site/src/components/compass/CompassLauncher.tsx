@@ -2,32 +2,23 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { BookOpen, X } from "lucide-react";
+import { Compass, X } from "lucide-react";
 
-import { compass } from "@/content/compass";
-import { CompassConsole } from "@/components/compass/CompassConsole";
+import { compassQuiz } from "@/content/compass";
+import { CompassQuiz } from "@/components/compass/CompassQuiz";
 
 /**
- * משגר „שאלו את הספר” בעמוד הבית — הבידול המרכזי, נגיש תמיד וללא ניווט החוצה.
- * (שם פנימי בקוד נשמר; זהו שם תצוגה בלבד.)
+ * משגר „המצפן” בעמוד הבית — חוויית שלוש-השאלות הדטרמיניסטית, נגישה תמיד וללא
+ * ניווט החוצה. אינו צ׳אטבוט ואינו AI: הבועה פותחת את אותו רכיב CompassQuiz
+ * שבעמוד /compass — בחירות סגורות בלבד, בלי קריאה ל-API חיצוני.
  *
  * - Desktop/Tablet (md ומעלה): בועה עגולה קבועה בצד המתחיל-לוגית של הקצה
- *   (שמאל ב-RTL), באמצע גובה המסך (לא בתחתית), עם תווית קטנה „שאלו את הספר”.
- * - Mobile: בועה עגולה צפה באותו צד, במרווח בטוח מעל באנר העוגיות (מחושב
- *   דינמית מה-padding שהבאנר שומר), כדי שלא תסתיר אותו. אין בועה תחתונה
- *   בסגנון צ׳אט שירות.
+ *   (שמאל ב-RTL), באמצע גובה המסך, עם תווית קטנה „המצפן”.
+ * - Mobile: בועה עגולה צפה באותו צד, במרווח בטוח מעל באנר העוגיות, כדי שלא
+ *   תסתיר אותו.
  * - הבועה נחשפת רק אחרי גלילה קלה, כדי שלא תתחרה בטופס ההרשמה שבשער בטעינה.
- *
- * הפתיחה מרנדרת את CompassConsole הקיים כמות שהוא — אותה קריאה ל-/api/compass,
- * אותה מכסה ואותו טיפול במצבים. אין שכפול של API, לוגיקה, prompt או חיפוש.
  */
-export function CompassLauncher({
-  salesOpen,
-  maxQuestionChars,
-}: {
-  salesOpen: boolean;
-  maxQuestionChars: number;
-}) {
+export function CompassLauncher() {
   const [open, setOpen] = React.useState(false);
   const [bannerOpen, setBannerOpen] = React.useState(false);
   // הבועה הצפה אינה מופיעה בטעינה הראשונית כדי שלא תתחרה בטופס ההרשמה שבשער;
@@ -81,7 +72,7 @@ export function CompassLauncher({
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label="שאלו את הספר"
+          aria-label="המצפן: שלוש שאלות קצרות"
           style={{ ["--bubble-bottom" as string]: mobileBottom }}
           className={
             "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-2.5 transition-opacity duration-500 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2" +
@@ -92,11 +83,11 @@ export function CompassLauncher({
           {/* תווית קבועה, קטנה ועדינה — דסקטופ/טאבלט בלבד. לא לשונית ולא כפתור
               גדול; hover/focus רק מחזקים מעט את הניגודיות. */}
           <span className="hidden whitespace-nowrap rounded-full bg-surface px-3 py-1.5 text-[12.5px] font-medium text-foreground-muted shadow-sm ring-1 ring-border transition-colors group-hover:text-foreground group-focus-visible:text-foreground md:inline-block">
-            שאלו את הספר
+            המצפן
           </span>
           {/* בועה: גוף Ink + טבעת דקה Terracotta + אייקון ספר לבן; ללא pulse */}
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background">
-            <BookOpen className="h-6 w-6" aria-hidden="true" />
+            <Compass className="h-6 w-6" aria-hidden="true" />
           </span>
         </button>
       </DialogPrimitive.Trigger>
@@ -113,10 +104,10 @@ export function CompassLauncher({
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-muted text-brand"
                 aria-hidden="true"
               >
-                <BookOpen className="h-4 w-4" />
+                <Compass className="h-4 w-4" />
               </span>
               <DialogPrimitive.Title className="font-serif text-lg font-semibold text-foreground">
-                {compass.card.eyebrow}
+                {compassQuiz.eyebrow}
               </DialogPrimitive.Title>
             </div>
             <DialogPrimitive.Close
@@ -128,7 +119,7 @@ export function CompassLauncher({
           </div>
 
           <div className="grow overflow-y-auto px-5 py-6 sm:px-6">
-            <CompassConsole salesOpen={salesOpen} maxQuestionChars={maxQuestionChars} />
+            <CompassQuiz />
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

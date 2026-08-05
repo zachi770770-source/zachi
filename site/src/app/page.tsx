@@ -9,7 +9,6 @@ import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StationJourney } from "@/components/interactive/StationJourney";
 import { StickyCta } from "@/components/interactive/StickyCta";
-import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 import { BuildSpine } from "@/components/shared/BuildSpine";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
@@ -73,10 +72,7 @@ export default function HomePage() {
       <AuthorTeaser />
       <Testimonials />
       <NewsletterSection />
-      <CompassLauncher
-        salesOpen={siteConfig.salesOpen}
-        maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
-      />
+      <CompassLauncher />
       <StickyCta />
     </>
   );

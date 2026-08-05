@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
-import { isCompassFeatureEnabled } from "@/lib/compass/assistant/config";
 
 const staticRoutes = [
   { path: "/", priority: 1, changeFrequency: "weekly" as const },
@@ -10,10 +9,8 @@ const staticRoutes = [
   { path: "/starting-again", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/inside-relationship", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/preview", priority: 0.8, changeFrequency: "monthly" as const },
-  // „המצפן” נכנס ל-sitemap רק כשהוא פעיל בפועל (ראו noindex בעמוד עצמו).
-  ...(isCompassFeatureEnabled()
-    ? [{ path: "/compass", priority: 0.6, changeFrequency: "monthly" as const }]
-    : []),
+  // „המצפן” — חוויית שלוש-שאלות דטרמיניסטית, תמיד פעילה וניתנת לאינדוקס.
+  { path: "/compass", priority: 0.6, changeFrequency: "monthly" as const },
   { path: "/author", priority: 0.6, changeFrequency: "monthly" as const },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" as const },
   { path: "/waitlist", priority: 0.5, changeFrequency: "monthly" as const },
