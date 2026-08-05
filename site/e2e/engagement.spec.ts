@@ -103,7 +103,7 @@ test("path finder: three questions map deterministically to a station + tool + d
   page,
 }) => {
   const where = await openWhere(page);
-  await expect(where.getByRole("heading", { name: "איפה אתם נמצאים במסע הזוגי שלכם?" })).toBeVisible();
+  await expect(where.getByRole("heading", { name: "איפה הספר פוגש אתכם עכשיו?" })).toBeVisible();
 
   // Q1 "אני מחפש/ת קשר" → deterministically the before-relationship station.
   await pick(where.getByRole("radio", { name: "אני מחפש/ת קשר" }));

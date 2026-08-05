@@ -59,6 +59,15 @@ export function Hero() {
               </span>
             </h1>
 
+            {/* משפט המיצוב: „ספר לכל המסע הזוגי” — בולט, מיד אחרי הכותרת, כדי
+                שגולש חדש יבין שהספר אינו רק לדייטים. אנימציית hero-fade בלבד. */}
+            <p
+              className="hero-fade mt-3.5 font-serif text-[18px] font-semibold leading-snug text-brand-hover lg:mt-4 lg:text-[22px]"
+              style={{ animationDelay: "380ms" }}
+            >
+              {hero.positioning}
+            </p>
+
             <p
               className="hero-fade mt-3 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted lg:mt-4"
               style={{ animationDelay: "460ms" }}
