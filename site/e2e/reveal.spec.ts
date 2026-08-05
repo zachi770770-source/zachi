@@ -44,9 +44,11 @@ test("/book: every reveal section is visible after scrolling through", async ({ 
   await page.evaluate(() => {
     document.documentElement.style.scrollBehavior = "auto";
   });
-  for (let y = 0; y <= 8000; y += 600) {
+  // גלילה עד גובה המסמך בפועל (עמיד לאורך העמוד — סקשנים חדשים מאריכים אותו).
+  const maxY = await page.evaluate(() => document.body.scrollHeight);
+  for (let y = 0; y <= maxY; y += 600) {
     await page.evaluate((v) => window.scrollTo(0, v), y);
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(110);
   }
   await expect.poll(() => noHiddenReveal(page)).toBe(0);
 });

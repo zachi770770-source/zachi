@@ -9,6 +9,8 @@ import { BookLink } from "@/components/shared/BookLink";
 import { BehindSection } from "@/components/sections/BehindSection";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
+import { PatternsSection } from "@/components/sections/PatternsSection";
+import { AttachmentSection } from "@/components/sections/AttachmentSection";
 import { MethodSection } from "@/components/sections/MethodSection";
 import { ToolsBento } from "@/components/sections/ToolsBento";
 import { InsideBookSection } from "@/components/sections/InsideBookSection";
@@ -98,6 +100,10 @@ export default function BookPage() {
       <BehindSection />
       <ThesisSection />
       <AudienceSection />
+      {/* זיהוי-עצמי לפני „השיטה”: שאלת המוכנות + הדפוסים הלא-מודעים, ואז ריקוד
+          ההיקשרות — הקורא מזהה את עצמו, ומשם עובר לפתרון. */}
+      <PatternsSection />
+      <AttachmentSection />
       <MethodSection />
       {/* ששת הכלים המעשיים — אזור Editorial Luxury אינטראקטיבי. עוגני
           #tool-<id> משמשים deep-link מ-Path Finder ומקישורים ישירים. */}
