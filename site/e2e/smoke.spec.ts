@@ -204,7 +204,7 @@ test("/book is a real page (not a redirect) with the deep-dive content", async (
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("מה יש בספר, ואיך הוא עובד");
   // ששת הכלים המעשיים מופיעים כאן (פעם אחת, בבנטו האינטראקטיבי), ולא נשארו בבית.
   await expect(page.getByRole("heading", { name: "כלים מעשיים מתוך הספר" })).toBeVisible();
-  await expect(page.locator("#tools details.tool-acc")).toHaveCount(6);
+  await expect(page.locator("#tools button.tool-lux-card")).toHaveCount(6);
 });
 
 test("home page has the canonical title and unique social metadata", async ({ page }) => {

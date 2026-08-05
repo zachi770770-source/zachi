@@ -1,77 +1,71 @@
 import { test, expect } from "./fixtures";
 
 /**
- * הכלים האינטראקטיביים ב-/book (בנטו `<details>` נגיש) + deep-link מתוצאת
- * ה-Path Finder. תוכן קיים בלבד; המיפוי תשובה→כלי נשמר.
+ * אזור ששת הכלים ב-/book (Editorial Luxury): כרטיסי-חזית אינטראקטיביים,
+ * חלונית פירוט אחת מתחת (רק כלי אחד פתוח), ו-deep-link מתוצאת ה-Path Finder.
+ * העוגנים `#tool-<id>` נשמרים. תוכן קיים בלבד; המיפוי תשובה→כלי נשמר.
  */
 
 const TOOL_IDS = [
+  "tool-quiet-check",
   "tool-fact-story-action",
   "tool-gate-questions",
-  "tool-quiet-check",
-  "tool-twenty-maintenance",
   "tool-boundary-ladder",
+  "tool-twenty-maintenance",
   "tool-emergency-kit",
 ];
 
 test("/book: six interactive tool cards, closed by default, keyboard toggles open/close", async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/book", { waitUntil: "networkidle" });
-  const details = page.locator("#tools details.tool-acc");
-  await expect(details).toHaveCount(6);
+  const cards = page.locator("#tools button.tool-lux-card");
+  await expect(cards).toHaveCount(6);
 
-  // כולם סגורים בטעינה; לכל אחד עוגן יציב.
+  // כולם סגורים בטעינה (aria-expanded=false), אין חלונית פתוחה, לכל אחד עוגן.
   for (const id of TOOL_IDS) {
     const el = page.locator(`#${id}`);
     await expect(el).toHaveCount(1);
-    await expect(el).toHaveJSProperty("open", false);
+    await expect(el).toHaveAttribute("aria-expanded", "false");
   }
+  await expect(page.locator("#tool-detail-panel.is-open")).toHaveCount(0);
 
-  // מקלדת: focus על ה-summary הראשון, Enter פותח, Enter סוגר.
-  const firstSummary = details.first().locator("summary");
-  await firstSummary.focus();
+  // מקלדת: focus על הכרטיס הראשון, Enter פותח (חלונית מופיעה), Enter סוגר.
+  const first = cards.first();
+  await first.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await first.focus();
   await page.keyboard.press("Enter");
-  await expect(details.first()).toHaveJSProperty("open", true);
+  await expect(first).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#tool-detail-panel.is-open")).toBeVisible();
   await page.keyboard.press("Enter");
-  await expect(details.first()).toHaveJSProperty("open", false);
+  await expect(first).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("#tool-detail-panel.is-open")).toHaveCount(0);
 });
 
-test("/book deep-link (#tool-…) opens the matching tool card and moves focus to it", async ({
+test("/book deep-link (#tool-…) opens the matching tool and moves focus to it", async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/book#tool-gate-questions", { waitUntil: "networkidle" });
   const el = page.locator("#tool-gate-questions");
-  await expect(el).toHaveJSProperty("open", true);
-  // ה-focus עבר ל-summary של אותו כלי (נגיש).
-  await expect
-    .poll(() => page.evaluate(() => document.activeElement?.closest("details")?.id))
-    .toBe("tool-gate-questions");
-  // ה-summary של הכרטיס מתייצב סמוך לראש אזור-הצפייה, מתחת ל-header הדביק
-  // (scroll-mt-24): בטווח [-5, 200). poll על הטווח כולו סופג ערכי-ביניים רגעיים
-  // בזמן שהגלילה עדיין מתמקמת (הכרטיס הפתוח גבוה ומשנה גובה-שורה בגריד), בלי
-  // להשוות פיקסל בודד שמתחרה עם ההתייצבות. ההבטחה: הכרטיס פתוח, ממוקד, וגלוי.
-  await expect
-    .poll(() =>
-      el.locator("summary").evaluate((n) => {
-        const top = n.getBoundingClientRect().top;
-        return top >= -5 && top < 200;
-      }),
-    )
-    .toBe(true);
+  await expect(el).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#tool-detail-panel.is-open")).toBeVisible();
+  // ה-focus עבר לכרטיס הנכון (נגיש).
+  await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe(
+    "tool-gate-questions",
+  );
+  // רק כלי אחד פתוח בכל רגע.
+  await expect(page.locator("#tools button[aria-expanded='true']")).toHaveCount(1);
 });
 
 test("path finder result links directly to a real tool card in /book", async ({ page }) => {
-  // reduced-motion: התוצאה/הכרטיסים מיד במצב סופי (בלי „element is not stable”).
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const where = page.locator("#where");
   await where.scrollIntoViewIfNeeded();
-  // סוגרים את באנר-העוגיות פעם אחת כדי שלא ישנה padding-bottom עם כל גלילה.
   await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
-  // בוחרים תשובה אחת בכל אחת משלוש השאלות (ראשונה בכל שאלה). מעגנים כל רדיו
-  // למרכז לפני הקליק — ה-header הדביק מכסה את ראש התצוגה ו-Playwright מגלגל
-  // יעד לראש כברירת מחדל.
+  // בוחרים תשובה אחת בכל שאלה (ראשונה); מעגנים כל רדיו למרכז (header דביק).
   for (let i = 0; i < 3; i++) {
     const radio = where.locator('[role="radio"]').first();
     await radio.evaluate((el) => el.scrollIntoView({ block: "center" }));
@@ -79,29 +73,43 @@ test("path finder result links directly to a real tool card in /book", async ({ 
   }
   const article = where.locator("article");
   await expect(article.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
-  // מציג את הקושי שנבחר + הכלי; ה-CTA הראשי הוא deep-link לכרטיס כלי אמיתי.
-  const primary = article.locator('a[href^="/book#tool-"]').first();
-  await expect(primary).toBeVisible();
-  const href = await primary.getAttribute("href");
+  // כלי אמיתי כ-deep-link (פעולת משנה, כי Q3=טעימה).
+  const toolLink = article.locator('a[href^="/book#tool-"]').first();
+  await expect(toolLink).toBeVisible();
+  const href = await toolLink.getAttribute("href");
   expect(TOOL_IDS).toContain(href!.replace("/book#", ""));
 
   // הקישור באמת פותח את הכלי המתאים ב-/book.
-  await primary.evaluate((el) => el.scrollIntoView({ block: "center" }));
-  await primary.click();
-  await expect(page).toHaveURL(new RegExp(`/book#${href!.split("#")[1]}$`));
-  await expect(page.locator(`#${href!.split("#")[1]}`)).toHaveJSProperty("open", true);
+  await toolLink.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await toolLink.click();
+  const anchor = href!.split("#")[1];
+  await expect(page).toHaveURL(new RegExp(`/book#${anchor}$`));
+  await expect(page.locator(`#${anchor}`)).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#tool-detail-panel.is-open")).toBeVisible();
 });
 
-test("no-JS: every tool card keeps its description in the DOM (native <details>)", async ({
-  browser,
+test("open tool exposes a single CTA to the related book sample (/preview?tool=&station=)", async ({
+  page,
 }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/book#tool-quiet-check", { waitUntil: "networkidle" });
+  const cta = page.locator("#tool-detail-panel a.tool-lux-panel__cta");
+  await expect(cta).toHaveCount(1);
+  await expect(cta).toHaveAttribute(
+    "href",
+    "/preview?tool=quiet-check&station=before-relationship",
+  );
+});
+
+test("no-JS: every tool front card keeps its name + promise in the DOM", async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto("/book", { waitUntil: "domcontentloaded" });
-  const bodies = page.locator("#tools details.tool-acc .tool-acc__body .tool-acc__desc");
-  await expect(bodies).toHaveCount(6);
+  await expect(page.locator("#tools button.tool-lux-card")).toHaveCount(6);
+  const promises = page.locator("#tools .tool-lux-card__promise");
+  await expect(promises).toHaveCount(6);
   for (let i = 0; i < 6; i++) {
-    await expect(bodies.nth(i)).not.toBeEmpty();
+    await expect(promises.nth(i)).not.toBeEmpty();
   }
   await ctx.close();
 });

@@ -107,7 +107,7 @@ test("/preview: invalid tool/station query falls back safely to the general samp
     waitUntil: "networkidle",
   });
   await expect(page.locator(".reader-context")).toHaveCount(1);
-  await expect(page.locator(".reader-context")).toContainText("שלוש שאלות השער");
+  await expect(page.locator(".reader-context")).toContainText("בדיקת הקצב");
 });
 
 test("deep-link, Back and modifier-click do not break the sample destination", async ({ page }) => {
@@ -127,7 +127,8 @@ test("deep-link, Back and modifier-click do not break the sample destination", a
   // ניווט רגיל: ה-deep-link פותח וממקד את כרטיס הכלי ב-/book.
   await primary.click();
   await expect(page).toHaveURL(/\/book#tool-gate-questions$/);
-  await expect(page.locator("#tool-gate-questions")).toHaveJSProperty("open", true);
+  await expect(page.locator("#tool-gate-questions")).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#tool-detail-panel.is-open")).toBeVisible();
 
   // Back חוזר לבית עם השאלון קיים.
   await page.goBack();

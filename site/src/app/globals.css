@@ -2542,3 +2542,297 @@ html.vt-book-nav::view-transition-group(book-cover) {
     animation: none !important;
   }
 }
+
+/* ============================================================================
+   Editorial Luxury — אזור ששת הכלים ב-/book (.tools-lux)
+   דסקטופ: Grid 3×2. מובייל: קרוסלה ~88% עם הצצה, Swipe נטיבי, חצים ומונה.
+   Hover מרים ומדגיש בלבד (ללא flip, ללא פתיחה ב-hover). כיבוד reduced-motion.
+   ========================================================================== */
+.tools-lux {
+  --lux-cream: #faf8f5;
+  --lux-copper: #c86a4b;
+}
+
+/* Viewport + track: מובייל קרוסלה, דסקטופ גריד */
+.tools-lux__track {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-inline: 6%;
+  padding-block: 0.35rem 0.6rem;
+  margin: 0;
+  list-style: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.tools-lux__track::-webkit-scrollbar {
+  display: none;
+}
+.tools-lux__cell {
+  flex: 0 0 88%;
+  scroll-snap-align: center;
+  display: flex;
+}
+@media (min-width: 640px) {
+  .tools-lux__track {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    overflow: visible;
+    padding-inline: 0;
+  }
+  .tools-lux__cell {
+    flex: initial;
+  }
+}
+
+/* כרטיס-חזית */
+.tool-lux-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: start;
+  border-radius: 1.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--lux-cream);
+  padding: 1.25rem 1.2rem 1.05rem;
+  cursor: pointer;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+.tool-lux-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--lux-copper) 45%, transparent);
+  box-shadow: 0 18px 40px -26px rgba(43, 36, 31, 0.55);
+}
+.tool-lux-card:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+.tool-lux-card[data-open] {
+  border-color: var(--lux-copper);
+  box-shadow: 0 20px 44px -24px rgba(200, 106, 75, 0.5);
+}
+.tool-lux-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.15rem;
+}
+.tool-lux-card__num {
+  font-family: var(--font-quote);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--lux-copper);
+  font-variant-numeric: tabular-nums;
+}
+.tool-lux-card__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lux-copper) 12%, transparent);
+  color: var(--lux-copper);
+}
+.tool-lux-card__svg {
+  width: 22px;
+  height: 22px;
+}
+.tool-lux-card__name {
+  font-family: var(--font-serif, serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-foreground);
+}
+.tool-lux-card__q {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-brand-hover);
+}
+.tool-lux-card__promise {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-foreground-muted);
+}
+.tool-lux-card__more {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  /* גוון הנחושת הכהה (brand-hover) — עומד ב-AA על הרקע השמנת (הנחושת הבהירה
+     #c86a4b לא עומדת בניגודיות לטקסט קטן). */
+  color: var(--color-brand-hover);
+}
+
+/* בקרות הקרוסלה — מובייל בלבד. שדה ה-display נשלט ע"י utilities של Tailwind
+   בלבד (`flex sm:hidden`) — הבלוק הזה אינו ב-@layer, ואם נגדיר בו display הוא
+   יגבר על `sm:hidden` ולא ייסגר בדסקטופ. כאן רק פריסה, ללא display. */
+.tools-lux__nav {
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  margin-top: 1rem;
+}
+.tools-lux__arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+.tools-lux__arrow:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+}
+.tools-lux__arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.tools-lux__arrow:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+.tools-lux__counter {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-foreground-muted);
+}
+.tools-lux__counter-sep {
+  color: var(--color-border-strong);
+}
+
+/* חלונית פירוט אחת מתחת לכרטיסים */
+.tool-lux-panel:not(.is-open) {
+  display: none;
+}
+.tool-lux-panel__inner {
+  margin-top: 1.35rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--lux-copper);
+  background: var(--color-surface);
+  padding: 1.5rem 1.4rem;
+  animation: luxPanelIn 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@media (min-width: 640px) {
+  .tool-lux-panel__inner {
+    padding: 1.9rem 2rem;
+  }
+}
+@keyframes luxPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tool-lux-panel__name {
+  margin-top: 0.6rem;
+  font-family: var(--font-serif, serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+}
+.tool-lux-panel__q {
+  margin-top: 0.4rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--color-brand-hover);
+}
+.tool-lux-panel__grid {
+  margin-top: 1.3rem;
+  display: grid;
+  gap: 1.1rem;
+}
+@media (min-width: 640px) {
+  .tool-lux-panel__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6rem;
+  }
+}
+.tool-lux-panel__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand-hover);
+}
+.tool-lux-panel__text {
+  margin-top: 0.45rem;
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: var(--color-foreground);
+  text-wrap: pretty;
+}
+.tool-lux-panel__insight {
+  margin-top: 1.4rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid var(--color-secondary);
+  font-family: var(--font-quote);
+  font-style: italic;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--color-foreground);
+}
+.tool-lux-panel__cite {
+  display: block;
+  margin-top: 0.5rem;
+  font-style: normal;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-foreground-muted);
+}
+.tool-lux-panel__cta {
+  margin-top: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding-inline: 1.5rem;
+  border-radius: 999px;
+  background: var(--color-foreground);
+  color: var(--color-surface);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+.tool-lux-panel__cta:hover {
+  background: color-mix(in srgb, var(--color-foreground) 90%, transparent);
+}
+.tool-lux-panel__cta:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-lux-card {
+    transition: none;
+  }
+  .tool-lux-card:hover {
+    transform: none;
+  }
+  .tool-lux-panel__inner {
+    animation: none;
+  }
+  .tools-lux__track {
+    scroll-behavior: auto;
+  }
+}

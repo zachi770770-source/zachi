@@ -90,9 +90,9 @@ export default function BookPage() {
       <ThesisSection />
       <AudienceSection />
       <MethodSection />
-      {/* ששת הכלים המעשיים — הועברו לכאן מעמוד הבית. עוגן #tools משמש את
-          הטעימה בבית ואת ה-CTA של השיטה. ה-CTA לעמוד הספר מוסתר (קישור-עצמי). */}
-      <ToolsBento hideCta />
+      {/* ששת הכלים המעשיים — אזור Editorial Luxury אינטראקטיבי. עוגני
+          #tool-<id> משמשים deep-link מ-Path Finder ומקישורים ישירים. */}
+      <ToolsBento />
       <InsideBookSection />
       <OutcomesSection />
       <PurchaseSection />
