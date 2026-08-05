@@ -1,10 +1,15 @@
 import type { WaitlistSource } from "@/lib/validation/waitlist";
+import type { PersonaId, PersonaSource } from "@/content/personas";
 
 export type WaitlistAddInput = {
   emailNormalized: string;
   emailOriginal: string;
   source: WaitlistSource;
   consentVersion: string;
+  /** הפרסונה שנבחרה בזמן ההרשמה (או null) — שיוך שיווקי בלבד. */
+  persona?: PersonaId | null;
+  /** מאיפה נבחרה הפרסונה (hero/section/url/stored/none). */
+  personaSource?: PersonaSource | null;
 };
 
 /**

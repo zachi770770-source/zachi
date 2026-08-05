@@ -44,7 +44,7 @@ export function PersonasSection() {
                 key={p.id}
                 type="button"
                 aria-pressed={active}
-                onClick={() => setPersona(active ? null : p.id)}
+                onClick={() => setPersona(active ? null : p.id, "section")}
                 className={`group rounded-2xl border p-6 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
                   active
                     ? "border-brand bg-brand-muted/40"

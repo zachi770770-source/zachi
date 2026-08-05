@@ -30,11 +30,16 @@ const CREATE_TABLE_SQL = `
     updated_at        timestamptz not null default now(),
     status            text        not null default 'active'
                          check (status in ('active', 'unsubscribed')),
-    notified_at       timestamptz
+    notified_at       timestamptz,
+    persona           text,
+    persona_source    text
   )
 `;
 
 const HARDENING_SQL = [
+  // עמודות הפרסונה — best-effort לטבלה שכבר קיימת ממיגרציה מוקדמת (002).
+  `alter table waitlist_subscribers add column if not exists persona text`,
+  `alter table waitlist_subscribers add column if not exists persona_source text`,
   `create index if not exists waitlist_subscribers_status_idx
      on waitlist_subscribers (status)`,
   `alter table waitlist_subscribers enable row level security`,
@@ -83,12 +88,14 @@ export class PostgresWaitlistRepository implements WaitlistRepository {
 
     await this.db.query(
       `insert into waitlist_subscribers
-         (email_normalized, email_original, source, consent_version, consent_at, status)
-       values ($1, $2, $3, $4, now(), 'active')
+         (email_normalized, email_original, source, consent_version, consent_at, status, persona, persona_source)
+       values ($1, $2, $3, $4, now(), 'active', $5, $6)
        on conflict (email_normalized) do update
          set status = 'active',
              source = excluded.source,
              consent_version = excluded.consent_version,
+             persona = excluded.persona,
+             persona_source = excluded.persona_source,
              consent_at = now(),
              updated_at = now()`,
       [
@@ -96,6 +103,8 @@ export class PostgresWaitlistRepository implements WaitlistRepository {
         input.emailOriginal,
         input.source,
         input.consentVersion,
+        input.persona ?? null,
+        input.personaSource ?? null,
       ]
     );
   }

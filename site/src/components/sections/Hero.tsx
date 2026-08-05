@@ -10,6 +10,7 @@ import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
 import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 import { PersonaPicker } from "@/components/persona/PersonaPicker";
+import { PersonaSubheadScript } from "@/components/persona/PersonaSubheadScript";
 import {
   PersonaHeroSubhead,
   PersonaHeroCta,
@@ -81,11 +82,16 @@ export function Hero() {
             </p>
 
             <p
+              id="hero-subhead"
+              suppressHydrationWarning
               className="hero-fade mt-3.5 max-w-[46ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:text-[21px] lg:leading-[1.6]"
               style={{ animationDelay: "540ms" }}
             >
               <PersonaHeroSubhead fallback={hero.subhead} />
             </p>
+            {/* מונע „הבזק כותרת-משנה” למבקר-חוזר/כניסת-URL: מחליף את הטקסט לפני
+                הצביעה. ה-SSR נשאר הדיפולט (קרולר/ללא-JS מקבלים את המסר הכללי). */}
+            <PersonaSubheadScript targetId="hero-subhead" />
 
             {/* פילוח מיידי — 4 פרסונות. הבחירה מתאימה את כותרת-המשנה, את ה-CTA
                 ואת הבר הדביק לאורך האתר, ונשמרת בין העמודים. */}

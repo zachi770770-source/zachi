@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { tools, type ToolItem } from "@/content/book";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
+import { usePersonaOptional } from "@/components/persona/PersonaProvider";
 
 /**
  * „הכלים המעשיים” — אזור Editorial Luxury חם ואינטראקטיבי לששת הכלים מהספר
@@ -93,6 +94,7 @@ function ToolIcon({ id }: { id: string }) {
 
 export function ToolsBento() {
   const items = tools.items.slice(0, 6);
+  const { personaId } = usePersonaOptional();
   const [openId, setOpenId] = React.useState<string | null>(null);
   const [active, setActive] = React.useState(0); // אינדקס הכרטיס במרכז (מובייל)
   const viewportRef = React.useRef<HTMLDivElement>(null);
@@ -274,6 +276,19 @@ export function ToolsBento() {
                   <p className="tool-lux-panel__text">{openTool.application}</p>
                 </div>
               </div>
+
+              {/* דוגמה מותאמת-פרסונה — רק כשנבחרה פרסונה ויש לכלי דוגמה עבורה.
+                  יישום של הכלי הקיים בשפת המצב, לא תוכן חדש. */}
+              {personaId && openTool.personaExamples?.[personaId] ? (
+                <div className="mt-4 rounded-xl border border-brand/30 bg-brand-muted/30 p-4">
+                  <p className="text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
+                    מותאם למצב שלכם
+                  </p>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-foreground">
+                    {openTool.personaExamples[personaId]}
+                  </p>
+                </div>
+              ) : null}
 
               <blockquote className="tool-lux-panel__insight">
                 {openTool.insight}

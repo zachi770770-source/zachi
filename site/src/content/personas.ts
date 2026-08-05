@@ -7,7 +7,29 @@
  * האתר. אין המלצות-דמה כאן — מבנה ההמלצות המפולח נדלק רק כשיש אמיתיות.
  */
 
-export type PersonaId = "single" | "breakup" | "divorced" | "married";
+/** מקור-אמת יחיד למזהי הפרסונות (טאפל — לשימוש זוד/ולידציה בשרת). */
+export const PERSONA_IDS = ["single", "breakup", "divorced", "married"] as const;
+
+export type PersonaId = (typeof PERSONA_IDS)[number];
+
+/** מקורות-הבחירה (טאפל — לוולידציה בשרת). */
+export const PERSONA_SOURCE_VALUES = [
+  "hero",
+  "section",
+  "url",
+  "stored",
+  "none",
+] as const;
+
+/**
+ * מאיפה הגיעה בחירת-הפרסונה — לשיוך רשומות רשימת-ההמתנה:
+ *  hero    — הפילים בראש העמוד
+ *  section — כרטיסי „אותו קוד — ארבעה עולמות”
+ *  url     — פרמטר ?persona= (כניסה ממודעה/פוסט ייעודי)
+ *  stored  — נטען מ-localStorage מביקור קודם (מקור מקורי לא ידוע)
+ *  none    — לא נבחרה פרסונה
+ */
+export type PersonaSource = (typeof PERSONA_SOURCE_VALUES)[number];
 
 export type Persona = {
   id: PersonaId;
@@ -26,6 +48,10 @@ export type Persona = {
 };
 
 export const PERSONA_STORAGE_KEY = "mlc.persona.v1";
+/** מקור-הבחירה נשמר בנפרד מהמזהה (המזהה נשאר סלוג נקי לסקריפט הקדם-צביעה). */
+export const PERSONA_SOURCE_STORAGE_KEY = "mlc.persona.src.v1";
+/** ה-slug ב-URL: ?persona=single|breakup|divorced|married. */
+export const PERSONA_QUERY_PARAM = "persona";
 
 export const personas: readonly Persona[] = [
   {
@@ -71,5 +97,23 @@ export function getPersona(id: PersonaId | null | undefined): Persona | undefine
 }
 
 export function isPersonaId(v: unknown): v is PersonaId {
-  return typeof v === "string" && personas.some((p) => p.id === v);
+  return typeof v === "string" && (PERSONA_IDS as readonly string[]).includes(v);
+}
+
+export function isPersonaSource(v: unknown): v is PersonaSource {
+  return (
+    typeof v === "string" &&
+    (PERSONA_SOURCE_VALUES as readonly string[]).includes(v)
+  );
+}
+
+/** מפת ה-hooks (כותרות-משנה) לפי מזהה — לשימוש סקריפט הקדם-צביעה. */
+export function personaHooks(): Record<PersonaId, string> {
+  return personas.reduce(
+    (acc, p) => {
+      acc[p.id] = p.hook;
+      return acc;
+    },
+    {} as Record<PersonaId, string>
+  );
 }

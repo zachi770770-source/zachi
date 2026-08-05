@@ -27,7 +27,7 @@ export function PersonaPicker({ className }: { className?: string }) {
               key={p.id}
               type="button"
               aria-pressed={active}
-              onClick={() => setPersona(active ? null : p.id)}
+              onClick={() => setPersona(active ? null : p.id, "hero")}
               className={`min-h-[40px] rounded-full border px-4 text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
                 active
                   ? "border-brand bg-brand text-brand-foreground"
