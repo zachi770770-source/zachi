@@ -202,8 +202,9 @@ test("/book is a real page (not a redirect) with the deep-dive content", async (
   const res = await page.goto("/book", { waitUntil: "domcontentloaded" });
   expect(res?.status()).toBe(200);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("מה יש בספר, ואיך הוא עובד");
-  // התוכן שהועבר מהבית מופיע כאן (כלים + מהדורות), ולא נשאר בבית.
-  await expect(page.getByText("כלים מעשיים בפנים")).toBeVisible();
+  // ששת הכלים המעשיים מופיעים כאן (פעם אחת, בבנטו האינטראקטיבי), ולא נשארו בבית.
+  await expect(page.getByRole("heading", { name: "כלים מעשיים מתוך הספר" })).toBeVisible();
+  await expect(page.locator("#tools details.tool-acc")).toHaveCount(6);
 });
 
 test("home page has the canonical title and unique social metadata", async ({ page }) => {

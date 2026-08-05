@@ -9,7 +9,7 @@ import { test, expect } from "./fixtures";
 test("zero-friction: hero sample link opens /preview with no registration", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   const hero = page.locator("main section").first();
-  const link = hero.getByRole("link", { name: "קראו 2 דקות עכשיו · בלי הרשמה" });
+  const link = hero.getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute("href", "/preview");
   // ניווט ישיר — בלי אימייל, בלי מודאל.
@@ -53,7 +53,7 @@ test("smart sticky sample bar: appears after hero, links to /preview, dismissal 
     window.scrollTo(0, y);
   });
   await expect(bar).toBeVisible();
-  const cta = bar.getByRole("link", { name: /קראו 2 דקות עכשיו/ });
+  const cta = bar.getByRole("link", { name: /קראו טעימה מהספר/ });
   await expect(cta).toHaveAttribute("href", "/preview");
   await expect(bar.getByText(/לרכישה|buy|קנ/i)).toHaveCount(0);
 
@@ -94,17 +94,23 @@ test("path finder: three questions map deterministically to a station + tool + d
   await where.getByRole("radio", { name: "אני מחפש/ת קשר" }).click();
   // Q1(before-relationship) × Q2(index 0 "נועל מסקנה") → "שלוש שאלות השער".
   await where.getByRole("radio", { name: /נועל.*מסקנה/ }).click();
-  await where.getByRole("radio", { name: /קטע קצר מהספר/ }).click(); // Q3 → sample emphasis
+  // Q3 = "לקרוא קטע שמתאים לי" → sample emphasis sets the PRIMARY CTA to a
+  // contextual /preview?tool=&station= link.
+  await where.getByRole("radio", { name: /קטע שמתאים לי/ }).click();
 
   // Result: the mapped station, the mapped real tool, the required disclaimer.
   await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
   await expect(where.getByText("שלוש שאלות השער")).toBeVisible();
   await expect(where.getByText("זו נקודת פתיחה לקריאה, לא אבחון או ייעוץ.")).toBeVisible();
+  // The station page stays reachable as a quiet secondary action.
   await expect(where.getByRole("link", { name: /לתחנה המלאה: לפני קשר/ })).toHaveAttribute(
     "href",
     "/before-relationship"
   );
-  await expect(where.getByRole("link", { name: "לקריאת הטעימה" })).toHaveAttribute("href", "/preview");
+  // Q3=sample → the primary action is the contextual sample (tool + station in the query).
+  await expect(
+    where.getByRole("link", { name: "לקרוא את הקטע שמתאים לי" })
+  ).toHaveAttribute("href", "/preview?tool=gate-questions&station=before-relationship");
 
   // Restart returns to question 1.
   await where.getByRole("button", { name: "להתחיל מחדש" }).click();
@@ -122,12 +128,12 @@ test("path finder: the life-stage (Q1) changes the mapped tool — all six tools
   // ממופה ל„בדיקת השקט” (לא „שלוש שאלות השער”) — הוכחה שהמיפוי תלוי גם ב-Q1.
   await where.getByRole("radio", { name: /בתוך קשר ורוצה לבנות/ }).click();
   await where.getByRole("radio", { name: /נועל.*מסקנה/ }).click();
-  await where.getByRole("radio", { name: /קטע קצר מהספר/ }).click();
+  await where.getByRole("radio", { name: /קטע שמתאים לי/ }).click();
 
   const article = where.locator("article");
   await expect(article.getByText("בדיקת השקט")).toBeVisible();
   await expect(article.getByText("שלוש שאלות השער")).toHaveCount(0);
-  // ה-CTA הראשי הוא deep-link לכרטיס הכלי הנכון ב-/book.
+  // הכלי הנכון נגיש כ-deep-link לכרטיס ב-/book (פעולת משנה, כי Q3=טעימה).
   await expect(article.locator('a[href="/book#tool-quiet-check"]')).toBeVisible();
 });
 
@@ -144,6 +150,6 @@ test("path finder does not transmit answer content to analytics", async ({ page 
   await where.getByRole("radio").first().click();
   await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
   // No request body may contain the answer/question text.
-  const leaked = posts.filter((p) => /בתוך קשר|נועל|קטע קצר/.test(p));
+  const leaked = posts.filter((p) => /בתוך קשר|נועל|קטע שמתאים/.test(p));
   expect(leaked, "answer text must never be transmitted").toEqual([]);
 });

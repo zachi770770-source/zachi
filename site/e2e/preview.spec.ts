@@ -37,8 +37,10 @@ test("/preview mobile: sticky waitlist CTA appears after scroll, hides at the fo
   await expect(sticky).not.toBeInViewport();
 
   // גלילה חושפת גם את ה-CTA וגם את באנר העוגיות. ה-CTA מוסתר בכוונה כל עוד
-  // הבאנר פתוח (כדי לא לכסותו); אחרי אישור העוגיות — הוא מופיע.
-  await page.mouse.wheel(0, 1400);
+  // הבאנר פתוח (כדי לא לכסותו); אחרי אישור העוגיות — הוא מופיע. גוללים אל תוך
+  // אזור הקריאה (מעבר לסף החשיפה ≈0.7 מסך) אך לפני טופס-הסיום (#join),
+  // שבעמוד הקריאה האחיד יושב גבוה יותר מבעבר.
+  await page.mouse.wheel(0, 900);
   await page.getByRole("button", { name: "אישור הכל" }).click().catch(() => {});
   await expect(sticky).toBeInViewport();
 

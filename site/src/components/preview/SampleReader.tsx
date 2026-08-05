@@ -22,28 +22,16 @@ type Theme = "light" | "dark";
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
 
-/** מ״הערכת זמן קריאה: ספירת מילים בפועל / קצב עברי סביר. */
-function estimateMinutes() {
-  const words = [
-    sampleReader.opening,
-    ...sampleReader.passage,
-    sampleReader.principle.text,
-    sampleReader.readerQuestion,
-    sampleReader.ending,
-  ]
-    .join(" ")
-    .trim()
-    .split(/\s+/).length;
-  return Math.max(1, Math.round(words / 180));
-}
-
 /**
  * מצב קריאה נגיש לטעימה: תוכן HTML (לא תמונות), רוחב שורה נוח, טיפוגרפיה
- * עברית, מד התקדמות עדין, הערכת זמן קריאה, הגדלה/הקטנה של הכתב, ומצב
- * בהיר/כהה — הכל בתוך אזור הקריאה בלבד, עם שמירת העדפה מקומית. אין דפדוף
- * מלאכותי המדמה ספר פיזי.
+ * עברית, מד התקדמות עדין, הגדלה/הקטנה של הכתב, ומצב בהיר/כהה — הכל בתוך אזור
+ * הקריאה בלבד, עם שמירת העדפה מקומית. אין דפדוף מלאכותי המדמה ספר פיזי.
+ *
+ * `contextToolName` (אופציונלי) מגיע מ-Path Finder עם כלי+תחנה תקפים
+ * (`/preview?tool=&station=`): מוצגת שורת-הקשר אישית קצרה, אך התוכן עצמו נשאר
+ * הטעימה המאושרת בלבד — אין אבחון ואין תוכן שהומצא.
  */
-export function SampleReader() {
+export function SampleReader({ contextToolName }: { contextToolName?: string } = {}) {
   const [scale, setScale] = React.useState(1);
   const [theme, setTheme] = React.useState<Theme>("light");
   const [progress, setProgress] = React.useState(0);
@@ -54,7 +42,6 @@ export function SampleReader() {
   const articleRef = React.useRef<HTMLElement>(null);
   const livingRef = React.useRef<HTMLDivElement>(null);
   const completedRef = React.useRef(false);
-  const minutes = React.useMemo(() => estimateMinutes(), []);
 
   const principleParts = React.useMemo(() => {
     const { text, emphasis } = sampleReader.principle;
@@ -210,10 +197,6 @@ export function SampleReader() {
         </Link>
 
         <div className="reader-tools">
-          <span className="reader-time" aria-hidden="true">
-            {sampleReader.ui.readingTime(minutes)}
-          </span>
-
           <div className="reader-fontgroup" role="group" aria-label={sampleReader.ui.fontLabel}>
             <button
               type="button"
@@ -272,9 +255,14 @@ export function SampleReader() {
         <div data-vt-book-dest className="reader-cover">
           <BookCover />
         </div>
-        <span className="kicker">{sampleReader.eyebrow}</span>
         <h1 className="reader-title">{sampleReader.title}</h1>
         <p className="reader-intro">{sampleReader.intro}</p>
+
+        {/* שורת-הקשר אישית — רק כשהגענו מ-Path Finder עם כלי+תחנה תקפים. התוכן
+            שמתחת נשאר הטעימה המאושרת בלבד (אין אבחון, אין תוכן שהומצא). */}
+        {contextToolName ? (
+          <p className="reader-context">{sampleReader.contextLine(contextToolName)}</p>
+        ) : null}
 
         {/* קטע הטעימה עם „דיו חי”: סמן קריאה בטרקוטה נמשך לצד השורות ומשפט-
             המפתח מודגש בדיו. הטקסט נשאר בחירה/נגיש; ה-marker דקורטיבי בלבד. */}

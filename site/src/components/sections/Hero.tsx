@@ -9,7 +9,6 @@ import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
 import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
-import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
 
 /**
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
@@ -85,50 +84,52 @@ export function Hero() {
                 {siteConfig.preLaunchPriceLabel}
               </p>
 
-              {/* פעולת המרה דומיננטית אחת. טרום-השקה: „קבלו טעימה ועדכון…”
-                  שנפתחת לטופס inline ומובילה ל-/preview אחרי הרשמה מוצלחת.
-                  אחרי פתיחת המכירה: אותו מקום הופך לכפתור הרכישה. הפעולה
-                  המשנית („למצוא את המסלול שלי”) קלה ולא שוות-משקל.
+              {/* היררכיית פעולה אחת וברורה. טרום-השקה: פעולה דומיננטית *יחידה* —
+                  „קראו טעימה מהספר · 2 דקות” אל /preview (עם מעבר-הכריכה
+                  morphCover). אין טופס אימייל בשער: הטעימה נפתחת מיד וללא הרשמה.
+                  אחרי פתיחת המכירה: אותו מקום הופך לכפתור הרכישה.
                   hero-rise-soft: תזוזה בלבד (opacity=1) ⇒ ה-CTA גלוי ולחיץ מיידית. */}
               <div
-                className="hero-rise-soft flex w-full flex-col items-start gap-2.5 lg:gap-3.5"
+                className="hero-rise-soft flex w-full flex-col items-start gap-3 lg:gap-4"
                 style={{ animationDelay: "160ms" }}
               >
                 {siteConfig.salesOpen ? (
-                  <Button asChild size="lg" className="h-14 px-7 text-[17px]">
+                  <Button asChild size="lg" className="h-14 w-full px-7 text-[17px] sm:w-auto">
                     <Link href="/book#purchase">לרכישת הספר</Link>
                   </Button>
                 ) : (
-                  // טרום-השקה: פעולה דומיננטית אחת — הצטרפות לעדכון ההשקה
-                  // שמעניקה גם גישה לטעימה. טופס הרשמה קומפקטי ישיר; אין צורך
-                  // באימייל כדי לקרוא את הטעימה (קישור משני נפרד).
-                  <div className="hero-cta-pulse flex w-full flex-col items-start gap-2 lg:gap-2.5">
-                    <p className="text-[15px] font-semibold text-foreground">
-                      הצטרפו לעדכון ההשקה וקבלו גישה מיידית לטעימה
-                    </p>
-                    <WaitlistCta source="hero" inline />
-                  </div>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="hero-cta-pulse h-14 w-full px-7 text-[17px] sm:w-auto"
+                  >
+                    <BookLink href="/preview" morphCover>
+                      קראו טעימה מהספר · 2 דקות
+                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    </BookLink>
+                  </Button>
                 )}
 
-                {/* פעולת משנה קלה: קריאת טעימה חינם (מפעילה את מעבר „כניסה
-                    לטעימה” — הכריכה בשער נמשכת אל עמוד ההצצה). אינה דורשת אימייל. */}
-                <BookLink
-                  href="/preview"
-                  morphCover
-                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                >
-                  קראו 2 דקות עכשיו · בלי הרשמה
-                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                </BookLink>
-
-                {/* פעולה שלישונית, שקטה עוד יותר. */}
+                {/* פעולה משנית שקטה: מציאת נקודת הפתיחה (Path Finder). קישור-טקסט,
+                    לא כפתור — לא שווה-משקל לפעולה הדומיננטית. */}
                 <Link
                   href="/#where"
-                  className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 >
-                  למצוא את המסלול שלי
-                  <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1" aria-hidden="true" />
+                  מצאו את נקודת הפתיחה שלכם
+                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                 </Link>
+
+                {/* פעולה שלישונית, שקטה עוד יותר — למי שרק רוצה עדכון בהשקה. */}
+                <p className="text-[13.5px] leading-relaxed text-foreground-muted">
+                  רוצים רק לדעת כשהספר יוצא?{" "}
+                  <Link
+                    href="/#waitlist"
+                    className="font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    הצטרפו לעדכון ההשקה
+                  </Link>
+                </p>
               </div>
             </div>
           </div>

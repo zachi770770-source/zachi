@@ -42,12 +42,14 @@ const Q2: { label: string }[] = [
   { label: "קשה לי לדעת אם מה שאני מרגיש/ה זה סימן אמיתי" },
   { label: "אני מגיב/ה לרגע, ומתחרט/ת אחר כך" },
 ];
-// מה הכי יעזור עכשיו → איזו פעולה ראשית להדגיש (כל הפעולות נשארות זמינות).
-type Emphasis = "sample" | "compass" | "station";
+// מה הכי יעזור עכשיו → קובע את הפעולה הראשית *ואת יעדה האמיתי*. שלוש הפעולות
+// אמיתיות: קריאת קטע מותאם (‏/preview עם הקשר), הכלי המעשי (‏/book#tool-…), או
+// הבנת התחנה (עמוד התחנה). הבחירה כאן היא שקובעת מי ה-CTA הראשי — אין שאלון נוסף.
+type Emphasis = "sample" | "tool" | "station";
 const Q3: { label: string; emphasis: Emphasis }[] = [
-  { label: "לקרוא קטע קצר מהספר על זה", emphasis: "sample" },
-  { label: "לשאול את הספר שאלה משלי", emphasis: "compass" },
-  { label: "לראות מה הספר מציע בתחנה שלי", emphasis: "station" },
+  { label: "לקרוא קטע שמתאים לי", emphasis: "sample" },
+  { label: "לראות כלי מעשי שמתאים לי", emphasis: "tool" },
+  { label: "להבין את התחנה שלי", emphasis: "station" },
 ];
 
 const QUESTIONS = [
@@ -200,14 +202,43 @@ export function StationJourney() {
     ? Q1[answers[0]!].station
     : savedStationId;
 
-  // פעולה ראשית: קישור ישיר לכרטיס הכלי ב-/book (העוגן פותח אותו ומעביר focus).
-  const toolCta = tool ? { href: `/book#tool-${tool.id}`, label: "לכלי המלא בעמוד הספר" } : null;
-  // סדר הפעולות המשניות לפי תשובת שאלה 3 (כולן זמינות תמיד).
-  const sampleCta = { href: "/preview", label: "לקריאת הטעימה" };
-  const compassCta = { href: "/compass", label: "שאלו את הספר" };
-  const stationCta = station
-    ? { href: `/${station.id}`, label: `לתחנה המלאה: ${station.navLabel}` }
+  // שלוש פעולות אמיתיות שנגזרות מהתוצאה. תשובת שאלה 3 קובעת מי מהן היא ה-CTA
+  // הראשי (הבולט), ושתי האחרות יורדות לפעולות-משנה שקטות. אין „לשאול את הספר”:
+  // כל יעד הוא עמוד אמיתי עם תוכן מאושר.
+  //  • sample  → קטע מותאם ב-/preview (הקשר לפי כלי+תחנה, בלי אבחון).
+  //  • tool    → כרטיס הכלי ב-/book (העוגן פותח אותו ומעביר focus).
+  //  • station → עמוד התחנה המלא.
+  const sampleCta =
+    tool && station
+      ? {
+          key: "sample" as const,
+          href: `/preview?tool=${tool.id}&station=${station.id}`,
+          label: "לקרוא את הקטע שמתאים לי",
+        }
+      : null;
+  const toolCta = tool
+    ? { key: "tool" as const, href: `/book#tool-${tool.id}`, label: "לכלי המעשי בעמוד הספר" }
     : null;
+  const stationCta = station
+    ? { key: "station" as const, href: `/${station.id}`, label: `לתחנה המלאה: ${station.navLabel}` }
+    : null;
+
+  // סדר לפי תשובת שאלה 3: הפעולה שנבחרה ראשונה (ראשית/בולטת), אחריה השתיים
+  // האחרות (משניות שקטות). לכל היותר שלוש — פעולה ראשית + עד שתי משניות.
+  const byKey: Record<Emphasis, { key: Emphasis; href: string; label: string } | null> = {
+    sample: sampleCta,
+    tool: toolCta,
+    station: stationCta,
+  };
+  const emphasisOrder: Emphasis[] =
+    emphasis === "tool"
+      ? ["tool", "sample", "station"]
+      : emphasis === "station"
+        ? ["station", "sample", "tool"]
+        : ["sample", "tool", "station"];
+  const resultActions = emphasisOrder
+    .map((k) => byKey[k])
+    .filter((c): c is { key: Emphasis; href: string; label: string } => Boolean(c));
 
   return (
     <section
@@ -312,9 +343,9 @@ export function StationJourney() {
               className="stuck-answer rounded-2xl border border-border bg-surface p-6 text-start sm:p-8"
               aria-live="polite"
             >
-              <p className="kicker">נקודת הפתיחה שלכם</p>
+              <p className="kicker">התאמה אישית</p>
               <h3 className="mt-3 font-serif text-[1.4rem] font-semibold leading-snug text-foreground">
-                {station!.navLabel} — {station!.h1.split(":")[0]}
+                נקודת הפתיחה שלכם: {station!.navLabel}
               </h3>
               <p className="mt-3 text-[1.05rem] leading-[1.75] text-foreground">
                 {station!.lead}
@@ -338,44 +369,40 @@ export function StationJourney() {
                 </p>
               </div>
 
-              {/* פעולה אחת עכשיו — ניווט לכרטיס הכלי (לא הבטחה ולא תוכן מומצא). */}
+              {/* פעולה אחת ברורה — הניסוח נגזר מתשובת שאלה 3 (לא הבטחה, לא תוכן
+                  מומצא). ה-CTA הראשי מתחתיה מוביל בדיוק לאותו יעד. */}
               <p className="mt-5 text-[15px] leading-relaxed text-foreground">
-                פעולה אחת עכשיו: פתחו את כרטיס הכלי בעמוד הספר וראו איך הוא עובד.
+                {emphasis === "tool"
+                  ? "פעולה אחת עכשיו: פתחו את כרטיס הכלי בעמוד הספר וראו איך הוא עובד."
+                  : emphasis === "station"
+                    ? "פעולה אחת עכשיו: עברו לעמוד התחנה שלכם והבינו מה הספר מציע בה."
+                    : "פעולה אחת עכשיו: קראו קטע קצר שמתכתב עם מה שאתם מזהים — בלי הרשמה."}
               </p>
 
-              {/* פעולות — הראשית: הכלי המלא ב-/book (deep-link לכרטיס שנפתח וממוקד).
-                  המשניות מסודרות לפי תשובת שאלה 3. כולן זמינות תמיד. */}
+              {/* פעולות — הראשית (בולטת) נקבעת בתשובת שאלה 3; אחריה עד שתי פעולות
+                  משנה שקטות. כל יעד הוא עמוד אמיתי עם תוכן מאושר. */}
               <div className="mt-4 flex flex-col gap-3">
-                {[
-                  toolCta,
-                  ...(emphasis === "compass"
-                    ? [compassCta, sampleCta, stationCta]
-                    : emphasis === "station"
-                      ? [stationCta, sampleCta, compassCta]
-                      : [sampleCta, stationCta, compassCta]),
-                ]
-                  .filter((c): c is { href: string; label: string } => Boolean(c))
-                  .map((c, i) => (
-                    <Link
-                      key={c.href}
-                      href={c.href}
+                {resultActions.map((c, i) => (
+                  <Link
+                    key={c.key}
+                    href={c.href}
+                    className={
+                      i === 0
+                        ? "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-foreground px-6 text-[16px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        : "group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                    }
+                  >
+                    {c.label}
+                    <ArrowLeft
                       className={
                         i === 0
-                          ? "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-foreground px-6 text-[16px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                          : "group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                          ? "h-4 w-4"
+                          : "h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                       }
-                    >
-                      {c.label}
-                      <ArrowLeft
-                        className={
-                          i === 0
-                            ? "h-4 w-4"
-                            : "h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                        }
-                        aria-hidden="true"
-                      />
-                    </Link>
-                  ))}
+                      aria-hidden="true"
+                    />
+                  </Link>
+                ))}
               </div>
 
               <p className="mt-6 border-t border-border pt-4 text-[13px] leading-relaxed text-foreground-muted">
