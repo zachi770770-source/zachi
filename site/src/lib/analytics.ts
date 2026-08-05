@@ -47,6 +47,7 @@ export type AnalyticsEventName =
   | "path_finder_complete"
   | "compass_start"
   | "compass_complete"
+  | "persona_select"
   | "audio_play"
   | "video_play";
 

@@ -9,6 +9,11 @@ import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
 import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
+import { PersonaPicker } from "@/components/persona/PersonaPicker";
+import {
+  PersonaHeroSubhead,
+  PersonaHeroCta,
+} from "@/components/persona/PersonaHeroCopy";
 
 /**
  * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
@@ -79,8 +84,12 @@ export function Hero() {
               className="hero-fade mt-3.5 max-w-[46ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:text-[21px] lg:leading-[1.6]"
               style={{ animationDelay: "540ms" }}
             >
-              {hero.subhead}
+              <PersonaHeroSubhead fallback={hero.subhead} />
             </p>
+
+            {/* פילוח מיידי — 4 פרסונות. הבחירה מתאימה את כותרת-המשנה, את ה-CTA
+                ואת הבר הדביק לאורך האתר, ונשמרת בין העמודים. */}
+            <PersonaPicker className="hero-fade mt-5" />
 
             {/* יחידת המרה אחת: סטטוס+מחיר, CTA ראשי ופעולה משנית — מקובצים
                 תחת קו שיער עדין, כך שהמחיר והסטטוס נראים חלק מהגוש ולא טקסט
@@ -102,6 +111,10 @@ export function Hero() {
                 className="hero-rise-soft flex w-full flex-col items-start gap-3 lg:gap-4"
                 style={{ animationDelay: "160ms" }}
               >
+                {/* CTA דינמי לפי הפרסונה שנבחרה (רק אחרי בחירה) — המשפט הרגשי של
+                    אותו קהל, אל רשימת ההמתנה. „קראו טעימה” נשאר מתחתיו. */}
+                <PersonaHeroCta />
+
                 {siteConfig.salesOpen ? (
                   <Button asChild size="lg" className="h-14 w-full px-7 text-[17px] sm:w-auto">
                     <Link href="/book#purchase">לרכישת הספר</Link>
