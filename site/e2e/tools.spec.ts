@@ -10,8 +10,8 @@ const TOOL_IDS = [
   "tool-gate-questions",
   "tool-quiet-check",
   "tool-twenty-maintenance",
-  "tool-rule-72h",
-  "tool-process-30-days",
+  "tool-boundary-ladder",
+  "tool-emergency-kit",
 ];
 
 test("/book: six interactive tool cards, closed by default, keyboard toggles open/close", async ({
@@ -47,12 +47,18 @@ test("/book deep-link (#tool-…) opens the matching tool card and moves focus t
   await expect
     .poll(() => page.evaluate(() => document.activeElement?.closest("details")?.id))
     .toBe("tool-gate-questions");
-  // הכרטיס יושב בראש אזור-הצפייה, מתחת ל-header הדביק (scroll-mt-24).
+  // ה-summary של הכרטיס מתייצב סמוך לראש אזור-הצפייה, מתחת ל-header הדביק
+  // (scroll-mt-24): בטווח [-5, 200). poll על הטווח כולו סופג ערכי-ביניים רגעיים
+  // בזמן שהגלילה עדיין מתמקמת (הכרטיס הפתוח גבוה ומשנה גובה-שורה בגריד), בלי
+  // להשוות פיקסל בודד שמתחרה עם ההתייצבות. ההבטחה: הכרטיס פתוח, ממוקד, וגלוי.
   await expect
-    .poll(() => el.evaluate((n) => Math.round(n.getBoundingClientRect().top)))
-    .toBeLessThan(200);
-  const top = await el.evaluate((n) => n.getBoundingClientRect().top);
-  expect(top).toBeGreaterThan(-10);
+    .poll(() =>
+      el.locator("summary").evaluate((n) => {
+        const top = n.getBoundingClientRect().top;
+        return top >= -5 && top < 200;
+      }),
+    )
+    .toBe(true);
 });
 
 test("path finder result links directly to a real tool card in /book", async ({ page }) => {
@@ -83,7 +89,7 @@ test("no-JS: every tool card keeps its description in the DOM (native <details>)
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto("/book", { waitUntil: "domcontentloaded" });
-  const bodies = page.locator("#tools details.tool-acc .tool-acc__body p");
+  const bodies = page.locator("#tools details.tool-acc .tool-acc__body .tool-acc__desc");
   await expect(bodies).toHaveCount(6);
   for (let i = 0; i < 6; i++) {
     await expect(bodies.nth(i)).not.toBeEmpty();

@@ -92,7 +92,8 @@ test("path finder: three questions map deterministically to a station + tool + d
 
   // Q1 "אני מחפש/ת קשר" → deterministically the before-relationship station.
   await where.getByRole("radio", { name: "אני מחפש/ת קשר" }).click();
-  await where.getByRole("radio", { name: /נועל.*מסקנה/ }).click(); // Q2 → "שלוש שאלות השער"
+  // Q1(before-relationship) × Q2(index 0 "נועל מסקנה") → "שלוש שאלות השער".
+  await where.getByRole("radio", { name: /נועל.*מסקנה/ }).click();
   await where.getByRole("radio", { name: /קטע קצר מהספר/ }).click(); // Q3 → sample emphasis
 
   // Result: the mapped station, the mapped real tool, the required disclaimer.
@@ -108,6 +109,26 @@ test("path finder: three questions map deterministically to a station + tool + d
   // Restart returns to question 1.
   await where.getByRole("button", { name: "להתחיל מחדש" }).click();
   await expect(where.getByText("שאלה 1/3")).toBeVisible();
+});
+
+test("path finder: the life-stage (Q1) changes the mapped tool — all six tools reachable", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  const where = page.locator("#where");
+  await where.scrollIntoViewIfNeeded();
+
+  // אותו קושי (index 0 "נועל מסקנה"), תחנה אחרת → כלי אחר. „בתוך קשר” + קושי 0
+  // ממופה ל„בדיקת השקט” (לא „שלוש שאלות השער”) — הוכחה שהמיפוי תלוי גם ב-Q1.
+  await where.getByRole("radio", { name: /בתוך קשר ורוצה לבנות/ }).click();
+  await where.getByRole("radio", { name: /נועל.*מסקנה/ }).click();
+  await where.getByRole("radio", { name: /קטע קצר מהספר/ }).click();
+
+  const article = where.locator("article");
+  await expect(article.getByText("בדיקת השקט")).toBeVisible();
+  await expect(article.getByText("שלוש שאלות השער")).toHaveCount(0);
+  // ה-CTA הראשי הוא deep-link לכרטיס הכלי הנכון ב-/book.
+  await expect(article.locator('a[href="/book#tool-quiet-check"]')).toBeVisible();
 });
 
 test("path finder does not transmit answer content to analytics", async ({ page }) => {
