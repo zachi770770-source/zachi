@@ -46,15 +46,12 @@ export default function AccessibilityPage() {
         <h2 className="mt-8 font-serif text-xl font-semibold">
           התאמות שבוצעו
         </h2>
-        <ul className="mt-3 flex flex-col gap-2.5 list-none">
+        <ul className="mt-3 ms-5 list-disc space-y-2.5 marker:text-brand">
           {adaptations.map((item) => (
             <li
               key={item}
-              className="flex gap-3 text-base leading-relaxed text-foreground-muted"
+              className="ps-1 text-base leading-relaxed text-foreground-muted"
             >
-              <span aria-hidden="true" className="mt-1 text-brand">
-                •
-              </span>
               {item}
             </li>
           ))}

@@ -169,30 +169,10 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
     return () => io.disconnect();
   }, []);
 
-  // „דפדוף” בין חלקי הקריאה: כל „עלה” (reader-leaf) נכנס במעבר-דף עדין (CSS
-  // בלבד, ללא WebGL) כשהוא מגיע לתצוגה. מצב הבסיס גלוי במלואו (ללא JS /
-  // reduced-motion → אין הסתרה); רק תחת motion-js ה-JS „מפדף” אותם פנימה.
-  React.useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    if (!document.documentElement.classList.contains("motion-js")) return;
-    if (typeof IntersectionObserver === "undefined") return;
-    const leaves = Array.from(root.querySelectorAll<HTMLElement>(".reader-leaf"));
-    root.classList.add("leaves-armed"); // רק כעת מסתירים — no-JS נשאר גלוי
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add("is-turned");
-            io.unobserve(e.target);
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
-    );
-    leaves.forEach((leaf) => io.observe(leaf));
-    return () => io.disconnect();
-  }, []);
+  // (הוסר) „דפדוף עלים”: בעבר ה-JS הוסיף `leaves-armed` שהסתיר כל `.reader-leaf`
+  // ב-opacity:0 עד שנחשף ב-IntersectionObserver. אם ה-IO לא נורה (אלמנט גבוה,
+  // כשל JS/hydration, chunk חסר) התוכן נשאר בלתי-נראה. התוכן אינו נשען יותר על
+  // JS כדי להיראות — הוא גלוי תמיד; ה-CSS של „דפדוף” הוסר גם הוא.
 
   const adjust = (delta: number) =>
     setScale((s) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round((s + delta) * 10) / 10)));

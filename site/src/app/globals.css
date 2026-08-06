@@ -2186,32 +2186,14 @@ details[open] .faq-answer {
   }
 }
 
-/* „דפדוף” בין חלקי הקריאה — מעבר-דף עדין (CSS בלבד, ללא WebGL). כל „עלה”
-   (reader-leaf) מסתובב פנימה מהשוליים הפותחים כשהוא מגיע לתצוגה. מצב הבסיס
-   גלוי במלואו; רק `.leaves-armed` (מתווסף ע״י JS כשתנועה מותרת) מסתיר ומפדף,
-   כך ש-no-JS / reduced-motion אינם מסתירים תוכן. */
+/* תוכן הטעימה גלוי תמיד ב-100%.
+   בעבר היה כאן „דפדוף עלים” שהסתיר כל `.reader-leaf` ב-opacity:0/transform עד
+   שנחשף ב-IntersectionObserver. זה הוסר: אם ה-IO לא נורה (אלמנט גבוה מסף
+   ה-threshold, כשל JS/hydration, chunk שלא נטען) — התוכן נותר בלתי-נראה בלי
+   failsafe. עכשיו התוכן אינו נשען על JS כדי להיראות: אין opacity:0 ואין
+   transform שמסתיר. */
 .reader-content {
   perspective: 1600px;
-}
-.sample-reader.leaves-armed .reader-leaf {
-  opacity: 0;
-  transform: rotateY(7deg) translateY(16px);
-  transform-origin: right center;
-  transition:
-    opacity 620ms var(--ease-settle),
-    transform 720ms var(--ease-settle);
-  will-change: transform, opacity;
-}
-.sample-reader.leaves-armed .reader-leaf.is-turned {
-  opacity: 1;
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .sample-reader.leaves-armed .reader-leaf {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
 }
 
 /* עמוד-שער זעיר: העטיפה בפתח הקורא, מיושרת ל-inline-start כמו הכותרת (עוגן

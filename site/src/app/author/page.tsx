@@ -138,15 +138,12 @@ export default function AuthorPage() {
         >
           {authorContent.notTitle}
         </h2>
-        <ul className="mt-4 flex list-none flex-col gap-2.5">
+        <ul className="mt-4 ms-5 list-disc space-y-2.5 marker:text-brand">
           {authorContent.notList.map((item) => (
             <li
               key={item}
-              className="flex gap-3 text-[1.03rem] leading-relaxed text-foreground/90"
+              className="ps-1 text-[1.03rem] leading-relaxed text-foreground/90"
             >
-              <span aria-hidden="true" className="mt-1 text-brand">
-                •
-              </span>
               {item}
             </li>
           ))}
