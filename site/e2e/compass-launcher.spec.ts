@@ -101,4 +101,44 @@ test.describe("compass floating bubble", () => {
     await compass(page).click();
     await expect(page.getByRole("dialog")).toBeVisible();
   });
+
+  // דרישת-אישור מפורשת: כשהבאנר פתוח הגלולה נשארת גלויה, מעליו עם מרווח ברור,
+  // שומרת על aria-label וניתנת למיקוד-מקלדת ולהפעלה — בשני המכשירים.
+  for (const vp of [
+    { label: "desktop", width: 1440, height: 900, scroll: 0 },
+    { label: "mobile", width: 390, height: 844, scroll: 220 },
+  ]) {
+    test(`${vp.label}: pill stays visible+clickable while cookie banner is open — clear gap, aria-label, keyboard focus`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await page.goto("/", { waitUntil: "networkidle" });
+      if (vp.scroll) await page.evaluate((y) => window.scrollTo(0, y), vp.scroll);
+
+      // הבאנר פתוח (לא סוגרים אותו).
+      await expect(banner(page)).toBeVisible();
+      const pill = compass(page);
+      // גלויה (opacity=1), לא מוסתרת.
+      await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
+      await expect(pill).toHaveCSS("pointer-events", "auto");
+
+      // מרווח ברור מעל הבאנר — בלי חפיפה, ובטווח מכובד (≥10px).
+      const b = (await pill.boundingBox())!;
+      const c = (await banner(page).boundingBox())!;
+      const gap = c.y - (b.y + b.height);
+      expect(gap).toBeGreaterThanOrEqual(10);
+
+      // aria-label נשמר (זהות נגישה יציבה).
+      await expect(pill).toHaveAttribute(
+        "aria-label",
+        /שאל את הספר — שלוש שאלות/,
+      );
+
+      // מיקוד-מקלדת עובד, ו-Enter פותח את החלונית — גם כשהבאנר פתוח.
+      await pill.focus();
+      await expect(pill).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(page.getByRole("dialog")).toBeVisible();
+    });
+  }
 });
