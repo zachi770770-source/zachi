@@ -42,8 +42,8 @@ test.describe("compass floating bubble", () => {
     ).toBeVisible();
     // אין ניסוח שמרמז על צ׳אט חופשי / שיחה עם AI.
     await expect(dialog.getByText(/צ.אט|בינה מלאכות|שיחה עם|AI/)).toHaveCount(0);
-    // מנוע שלוש-השאלות עצמו נשאר (שאלה 1/3 מוצגת).
-    await expect(dialog.getByText("שאלה 1/3")).toBeVisible();
+    // מנוע ההכוונה הסגור עצמו נשאר (מסך בחירת התחנה).
+    await expect(dialog.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
   });
 
   test("desktop: bubble also reveals after a small scroll", async ({ page }) => {

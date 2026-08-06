@@ -47,6 +47,19 @@ export type AnalyticsEventName =
   | "path_finder_complete"
   | "compass_start"
   | "compass_complete"
+  // „שאל את הספר” — מנוע הכוונה סגור ודטרמיניסטי (תחנה→דילמה→הקשר→תוצאה).
+  // מזהים בלבד (תחנה/דילמה/הקשר/כלי), לעולם לא טקסט אישי או תוכן חופשי.
+  | "ask_open"
+  | "ask_station"
+  | "ask_dilemma"
+  | "ask_context"
+  | "ask_result"
+  | "ask_safety"
+  | "ask_tool_click"
+  | "ask_sample_click"
+  | "ask_waitlist_click"
+  | "ask_change"
+  | "ask_restart"
   | "persona_select"
   | "audio_play"
   | "video_play";

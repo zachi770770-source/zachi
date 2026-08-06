@@ -45,9 +45,8 @@ test("result container appears promptly after question 3 and takes focus (opacit
   page,
 }) => {
   await page.goto("/compass", { waitUntil: "networkidle" });
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click(); // Q3 → תוצאה
+  await page.getByRole("radio").first().click(); // Q1
+  await page.getByRole("radio").first().click(); // Q2 → תוצאה
 
   const heading = page.getByRole("article").getByRole("heading");
   await expect(heading).toBeVisible();
@@ -58,13 +57,7 @@ test("result container appears promptly after question 3 and takes focus (opacit
     })
     .toBeGreaterThan(0.9);
   // המיקוד נוחת על כותרת התוצאה (נגישות + „נחיתה” על התוצאה).
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        (document.activeElement?.textContent ?? "").includes("נקודת הפתיחה שלכם"),
-      ),
-    )
-    .toBe(true);
+  await expect(heading).toBeFocused();
 });
 
 test("reduced-motion: the result is fully visible immediately after question 3", async ({
@@ -72,9 +65,8 @@ test("reduced-motion: the result is fully visible immediately after question 3",
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
+  await page.getByRole("radio").first().click(); // Q1
+  await page.getByRole("radio").first().click(); // Q2 → תוצאה
   const heading = page.getByRole("article").getByRole("heading");
   await expect(heading).toBeVisible();
   const opacity = await heading.evaluate((el) => parseFloat(getComputedStyle(el).opacity));

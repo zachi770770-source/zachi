@@ -5,7 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
 
 import { compassQuiz } from "@/content/compass";
-import { PathFinder } from "@/components/interactive/PathFinder";
+import { AskRoute } from "@/components/interactive/AskRoute";
 
 /**
  * משגר „המצפן” בעמוד הבית — חוויית שלוש-השאלות הדטרמיניסטית, נגישה תמיד וללא
@@ -160,7 +160,7 @@ export function CompassLauncher() {
           </div>
 
           <div className="grow overflow-y-auto px-5 py-6 sm:px-6">
-            <PathFinder />
+            <AskRoute />
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
