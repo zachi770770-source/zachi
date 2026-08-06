@@ -38,7 +38,7 @@ test.describe("compass floating bubble", () => {
     // כותרת + כותרת-משנה מיושרות ל„שאל את הספר” (3 שאלות, לא צ׳אט).
     await expect(dialog.getByText("שאל את הספר")).toBeVisible();
     await expect(
-      dialog.getByText(/ענה על 3 שאלות קצרות/)
+      dialog.getByText(/ענו על 3–4 שאלות קצרות/)
     ).toBeVisible();
     // אין ניסוח שמרמז על צ׳אט חופשי / שיחה עם AI.
     await expect(dialog.getByText(/צ.אט|בינה מלאכות|שיחה עם|AI/)).toHaveCount(0);
@@ -131,7 +131,7 @@ test.describe("compass floating bubble", () => {
       // aria-label נשמר (זהות נגישה יציבה).
       await expect(pill).toHaveAttribute(
         "aria-label",
-        /שאל את הספר — שלוש שאלות/,
+        /שאל את הספר — 3–4 שאלות/,
       );
 
       // מיקוד-מקלדת עובד, ו-Enter פותח את החלונית — גם כשהבאנר פתוח.

@@ -110,7 +110,7 @@ export function CompassLauncher() {
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label="שאל את הספר — שלוש שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
+          aria-label="שאל את הספר — 3–4 שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
           style={{
             ["--bubble-bottom" as string]: mobileBottom,
             ["--banner-offset" as string]: bannerOffset,

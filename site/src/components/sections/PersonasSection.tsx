@@ -27,7 +27,7 @@ export function PersonasSection() {
         <div className="mx-auto max-w-2xl text-center">
           <span className="kicker justify-center">למי הספר הזה</span>
           <h2 id="who-heading" className="type-h2 mt-4">
-            אותו קוד — ארבעה עולמות
+            אותו שורש — ארבע מציאויות שונות
           </h2>
           <p className="type-lead mt-4 text-foreground-muted">
             אותו שורש בעיה, ארבעה מצבים שונים לגמרי. בחרו את שלכם, והאתר ידבר אליכם
