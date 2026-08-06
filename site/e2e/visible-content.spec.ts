@@ -124,6 +124,94 @@ test.describe("/preview — התוכן המרכזי גלוי בפועל בכל �
   });
 });
 
+test.describe("/preview — ציר-זמן: התוכן לא נעלם אחרי hydration", () => {
+  const READER = ".living-ink .reader-lead";
+
+  /** בדיקה קשיחה: opacity≥0.95, יש bbox, והאלמנט בתוך המסך. */
+  async function strictlyVisible(page: Page, sel: string) {
+    const loc = page.locator(sel);
+    const info = await loc.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return {
+        op: parseFloat(cs.opacity),
+        vis: cs.visibility,
+        disp: cs.display,
+        w: r.width,
+        h: r.height,
+        top: r.top,
+        bottom: r.bottom,
+        vh: window.innerHeight,
+        text: (el.textContent || "").trim().length,
+      };
+    });
+    expect(info.op, `opacity≥0.95 (${sel})`).toBeGreaterThanOrEqual(0.95);
+    expect(info.vis, "visible").toBe("visible");
+    expect(info.disp, "not display:none").not.toBe("none");
+    expect(info.w, "width>0").toBeGreaterThan(0);
+    expect(info.h, "height>0").toBeGreaterThan(0);
+    expect(info.text, "has text").toBeGreaterThan(10);
+    // בתוך המסך: לא כולו מעל הצג ולא כולו מתחתיו.
+    expect(info.bottom, "not entirely above screen").toBeGreaterThan(0);
+    expect(info.top, "not entirely below screen").toBeLessThan(info.vh);
+  }
+
+  test("גלוי ב-100ms / 1s / 3s / 8s אחרי הטעינה (כולל אחרי hydration)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 768 });
+    await page.goto("/preview", { waitUntil: "commit" });
+    await page.waitForTimeout(100);
+    await strictlyVisible(page, READER);
+    await page.waitForTimeout(900); // ~1s
+    await strictlyVisible(page, READER);
+    // ודא ש-hydration אכן קרתה (motion-js נוסף) והתוכן עדיין גלוי.
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.classList.contains("motion-js")))
+      .toBe(true);
+    await strictlyVisible(page, READER);
+    await page.waitForTimeout(2000); // ~3s
+    await strictlyVisible(page, READER);
+    await page.waitForTimeout(5000); // ~8s
+    await strictlyVisible(page, READER);
+  });
+
+  test("נשאר גלוי אחרי scroll, resize, הגדלת-טקסט ורענון קשיח", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 768 });
+    await page.goto("/preview", { waitUntil: "networkidle" });
+    await strictlyVisible(page, READER);
+    // scroll למטה ובחזרה
+    await page.mouse.wheel(0, 400);
+    await page.waitForTimeout(200);
+    await page.mouse.wheel(0, -400);
+    await page.waitForTimeout(200);
+    await strictlyVisible(page, READER);
+    // resize
+    await page.setViewportSize({ width: 900, height: 700 });
+    await page.waitForTimeout(200);
+    await strictlyVisible(page, READER);
+    // הגדלת-טקסט ×2
+    const plus = page.getByRole("button", { name: /הגדל/ });
+    await plus.click();
+    await plus.click();
+    await page.waitForTimeout(200);
+    await strictlyVisible(page, READER);
+    // רענון קשיח
+    await page.reload({ waitUntil: "networkidle" });
+    await strictlyVisible(page, READER);
+  });
+
+  test("reduced-motion: התוכן גלוי לכל אורך 8 השניות", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 1280, height: 768 });
+    await page.goto("/preview", { waitUntil: "commit" });
+    for (const ms of [100, 900, 2000, 5000]) {
+      await page.waitForTimeout(ms);
+      await strictlyVisible(page, READER);
+    }
+  });
+});
+
 test.describe("עמודים מרכזיים — כותרת + תוכן גוף גלויים בפועל", () => {
   const pages: { path: string; body: string }[] = [
     { path: "/", body: "#who h2" },

@@ -65,12 +65,8 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
   const [scale, setScale] = React.useState(1);
   const [theme, setTheme] = React.useState<Theme>("light");
   const [progress, setProgress] = React.useState(0);
-  // „דיו חי” (PHASE 4B): כשקטע הטעימה נכנס לתצוגה, סמן קריאה בטרקוטה נמשך
-  // לצד השורות ומשפט-המפתח מודגש בדיו. חד-פעמי (IO), לא נגרר-גלילה — נוח במובייל.
-  const [reading, setReading] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const articleRef = React.useRef<HTMLElement>(null);
-  const livingRef = React.useRef<HTMLDivElement>(null);
   const completedRef = React.useRef(false);
 
   // חישוב זול (ללא hook) — פיצול משפט-המפתח שמודגש „בדיו”. React Compiler ממילא
@@ -150,29 +146,11 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
     };
   }, []);
 
-  // „דיו חי” — הפעלה חד-פעמית כשקטע הטעימה נכנס לתצוגה (רק כשתנועה מותרת).
-  React.useEffect(() => {
-    const el = livingRef.current;
-    if (!el) return;
-    if (!document.documentElement.classList.contains("motion-js")) return;
-    if (typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setReading(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.28 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  // (הוסר) „דפדוף עלים”: בעבר ה-JS הוסיף `leaves-armed` שהסתיר כל `.reader-leaf`
-  // ב-opacity:0 עד שנחשף ב-IntersectionObserver. אם ה-IO לא נורה (אלמנט גבוה,
-  // כשל JS/hydration, chunk חסר) התוכן נשאר בלתי-נראה. התוכן אינו נשען יותר על
-  // JS כדי להיראות — הוא גלוי תמיד; ה-CSS של „דפדוף” הוסר גם הוא.
+  // (הוסר לחלוטין) כל מנגנוני החשיפה של הקורא — „דפדוף עלים” (leaves-armed/
+  // reader-leaf/is-turned) ו„דיו חי” מבוסס-IO (is-reading). הם הסתירו תוכן
+  // אחרי hydration (opacity:0/transform) עד שאירוע-חשיפה יפעל, וכשלא פעל —
+  // התוכן נשאר בלתי-נראה. עכשיו התוכן הוא סטטי וגלוי במלואו: אין state, אין IO,
+  // אין setTimeout, ואין class שמתווסף אחרי הטעינה ומשנה נראוּת/מיקום.
 
   const adjust = (delta: number) =>
     setScale((s) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round((s + delta) * 10) / 10)));
@@ -274,9 +252,9 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
             שמתחת נגזר כולו מהתוכן המאושר של אותו כלי (אין אבחון, אין תוכן שהומצא). */}
         {contextLine ? <p className="reader-context">{contextLine}</p> : null}
 
-        {/* קטע הטעימה עם „דיו חי”: סמן קריאה בטרקוטה נמשך לצד השורות ומשפט-
-            המפתח מודגש בדיו. הטקסט נשאר בחירה/נגיש; ה-marker דקורטיבי בלבד. */}
-        <div ref={livingRef} className={`living-ink reader-leaf${reading ? " is-reading" : ""}`}>
+        {/* קטע הטעימה — סמן-קריאה בטרקוטה ומשפט-מפתח מודגש, במצבם הסופי מיד
+            (סטטי, בלי היתלות ב-JS). ה-marker דקורטיבי בלבד (aria-hidden). */}
+        <div className="living-ink">
           <span className="living-ink__marker" aria-hidden="true" />
 
           <p className="reader-lead">{opening}</p>
@@ -303,17 +281,17 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
         </div>
 
         {readerQuestion ? (
-          <p className="reader-question reader-leaf">{readerQuestion}</p>
+          <p className="reader-question">{readerQuestion}</p>
         ) : null}
 
-        {ending ? <p className="reader-p reader-ending reader-leaf">{ending}</p> : null}
+        {ending ? <p className="reader-p reader-ending">{ending}</p> : null}
 
-        <div className="reader-closing reader-leaf">
+        <div className="reader-closing">
           <p className="reader-closing__prompt">{closingPrompt}</p>
           <p className="reader-closing__note">{sampleReader.closingNote}</p>
         </div>
 
-        <div className={`reader-cta${reading ? " is-ready" : ""}`}>
+        <div className="reader-cta">
           <Button asChild size="lg" className="h-[56px] w-full px-8 text-[17px] sm:w-auto">
             <Link href={primaryHref}>
               {primaryLabel}

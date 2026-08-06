@@ -14,8 +14,10 @@ test("/preview opens immediately (no email gate) with the reading experience", a
   await expect(page.getByRole("progressbar", { name: "התקדמות הקריאה" })).toHaveCount(1);
   // עוגן מעבר הכריכה מה-Hero קיים ביעד.
   await expect(page.locator("[data-vt-book-dest]")).toHaveCount(1);
-  // „עלים” לדפדוף קיימים ולא מסתירים תוכן (הטקסט קיים ב-DOM).
-  await expect(page.locator(".reader-leaf")).not.toHaveCount(0);
+  // גוף הקריאה גלוי בפועל (סטטי, בלי מנגנון-חשיפה שיכול להשאיר opacity:0).
+  const lead = page.locator(".living-ink .reader-lead");
+  await expect(lead).toBeVisible();
+  await expect(lead).toHaveCSS("opacity", "1");
 });
 
 test("/preview has a clear transition to the compass and no purchase CTA", async ({ page }) => {

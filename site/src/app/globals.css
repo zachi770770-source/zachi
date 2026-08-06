@@ -2318,51 +2318,10 @@ details[open] .faq-answer {
   box-shadow: inset 0 -0.4em 0 color-mix(in srgb, var(--reader-accent) 18%, transparent);
 }
 
-/* מצב-פתיחה (עד כניסה לתצוגה): הסמן לא-משוך וההדגשה כבויה. */
-.motion-js .living-ink:not(.is-reading) .living-ink__marker {
-  transform: scaleY(0);
-}
-.motion-js .living-ink:not(.is-reading) .ink-key {
-  color: var(--reader-fg-muted);
-  box-shadow: inset 0 -0.4em 0 transparent;
-}
-/* כניסה לתצוגה — משתמשים ב-animation (ולא transition) כדי שהמשיכה תיראה גם
-   כשהקטע כבר בתצוגה בטעינה: animation תמיד מתנגן מ-0% עם החלת ה-class. */
-.motion-js .living-ink.is-reading .living-ink__marker {
-  animation: ink-draw var(--motion-slow) var(--ease-settle) both;
-}
-.motion-js .living-ink.is-reading .ink-key {
-  animation: ink-emphasize var(--motion-reveal) var(--ease-standard) 340ms both;
-}
-@keyframes ink-draw {
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-@keyframes ink-emphasize {
-  from {
-    color: var(--reader-fg-muted);
-    box-shadow: inset 0 -0.4em 0 transparent;
-  }
-  to {
-    color: var(--reader-fg);
-    box-shadow: inset 0 -0.4em 0 color-mix(in srgb, var(--reader-accent) 18%, transparent);
-  }
-}
-
-/* חיזוק עדין ל-CTA אחרי שהקטע נקרא — „הגעה” רכה, בלי להסתיר את הכפתור. */
-.motion-js .reader-cta a {
-  transition:
-    transform var(--motion-panel) var(--ease-settle),
-    opacity var(--motion-panel) var(--ease-standard);
-}
-.motion-js .reader-cta:not(.is-ready) a {
-  transform: translateY(6px);
-  opacity: 0.92;
-}
+/* (הוסר) מצבי „דיו חי” המגודרים ב-.motion-js: בעבר הסמן היה scaleY(0)
+   ומשפט-המפתח מעומעם עד ש-is-reading נוסף ב-IO, וה-CTA היה opacity:0.92/
+   translateY עד is-ready. כל אלה הוסרו — הקורא סטטי וגלוי במלואו במצבו הסופי
+   (הסמן מלא, ההדגשה פעילה, ה-CTA חד), בלי מחלקה שמתווספת אחרי הטעינה. */
 
 /* ===== מפת הספר החיה ===== */
 .book-map__station {
