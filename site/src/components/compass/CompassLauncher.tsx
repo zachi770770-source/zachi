@@ -21,6 +21,9 @@ import { PathFinder } from "@/components/interactive/PathFinder";
 export function CompassLauncher() {
   const [open, setOpen] = React.useState(false);
   const [bannerOpen, setBannerOpen] = React.useState(false);
+  // גובה באנר-העוגיות (נמדד מריפוד-התחתית שה-CookieConsent שומר על ה-body) —
+  // לצורך הרמת הגלולה *מעל* הבאנר עם מרווח ברור, במקום להסתירה.
+  const [bannerHeight, setBannerHeight] = React.useState(0);
   // הבועה הצפה אינה מופיעה בפריים הראשון ממש (כדי לא לקפוץ מעל השער), אך נחשפת
   // מהר וברור בשני המכשירים: אחרי גלילה קטנה, או אחרי השהיה קצרה גם בלי גלילה —
   // כך מי שלא גולל עדיין רואה אותה, ולא רק אחרי חצי מסך.
@@ -55,10 +58,9 @@ export function CompassLauncher() {
   }, []);
 
   // מצב באנר העוגיות מגיע כאות-מצב מפורש מ-CookieConsent (data-attribute על
-  // ה-body + אירוע „cookie-banner-change”), ולא מהסקה של ריווח CSS. הגלולה
-  // (בקרה לא-חיונית) מוסתרת בכל רוחב-מסך כל עוד הבאנר פתוח — הבאנר הוא פס תחתון
-  // ברוחב מלא והגלולה יושבת בפינה תחתונה, ולכן ההסתרה מונעת כיסוי/חפיפה.
-  // משוחזרת אוטומטית עם סגירת ההסכמה. הפתרון אינו מבוסס z-index.
+  // ה-body + אירוע „cookie-banner-change”). כשהבאנר פתוח הגלולה *אינה* מוסתרת —
+  // היא מורמת דינמית מעל הבאנר עם מרווח ברור (ראו bannerOffset למטה), ונשארת
+  // גלויה ולחיצה למשתמש חדש. עם סגירת ההסכמה היא חוזרת חלק למיקום התחתון הרגיל.
   React.useEffect(() => {
     const readAttr = () =>
       document.body.getAttribute("data-cookie-banner") === "open";
@@ -73,10 +75,34 @@ export function CompassLauncher() {
     return () => window.removeEventListener("cookie-banner-change", onChange);
   }, []);
 
+  // גובה הבאנר נמדד מריפוד-התחתית שה-CookieConsent שומר על ה-body (אותו מנגנון
+  // של בר-הטעימה) — מתאפס ל-0 עם סגירת הבאנר, ואז הגלולה חוזרת למיקומה הרגיל.
+  React.useEffect(() => {
+    const read = () => {
+      const pb = parseInt(getComputedStyle(document.body).paddingBottom, 10);
+      setBannerHeight(Number.isFinite(pb) ? pb : 0);
+    };
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+    window.addEventListener("resize", read);
+    return () => {
+      mo.disconnect();
+      window.removeEventListener("resize", read);
+    };
+  }, []);
+
   // מובייל: הבועה מורמת מעל בר-הטעימה הדביק (הבר יושב בתחתית ורוחבו כמעט מלא),
   // כך שאין חפיפה בין שני הרכיבים הצפים. בדסקטופ היא בפינה התחתונה-מתחילה
   // (שמאל ב-RTL), הפוך מבר-הטעימה שיושב בפינה הנגדית.
   const mobileBottom = "max(5.5rem, calc(env(safe-area-inset-bottom) + 5rem))";
+
+  // כשהבאנר פתוח — הרמה דינמית מעל גובהו עם מרווח ברור (16px, בטווח 12–20).
+  // גובה הבאנר כולל כבר את ה-safe-area (הבאנר עצמו מרפד אותו). כשסגור → 0,
+  // וה-max() בתחתית מחזיר את הגלולה למיקומה הרגיל. המעבר על „bottom” חלק.
+  const BANNER_GAP = 16;
+  const bannerOffset =
+    bannerOpen && bannerHeight > 0 ? `${bannerHeight + BANNER_GAP}px` : "0px";
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
@@ -85,14 +111,15 @@ export function CompassLauncher() {
         <button
           type="button"
           aria-label="שאל את הספר — שלוש שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
-          style={{ ["--bubble-bottom" as string]: mobileBottom }}
+          style={{
+            ["--bubble-bottom" as string]: mobileBottom,
+            ["--banner-offset" as string]: bannerOffset,
+          }}
           className={
-            // ה-display אינו בבסיס אלא בתנאי — כך „hidden” גובר תמיד על „inline-flex”
-            // (שתיהן אותה קטגוריית display; בבסיס נתן ה-inline-flex לנצח).
-            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 items-center justify-center rounded-full bg-foreground px-6 py-4 text-[16px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-8 md:px-8 md:py-5 md:text-[18px]" +
-            // באנר-העוגיות הוא פס תחתון ברוחב מלא והגלולה יושבת בפינה תחתונה —
-            // לכן מסתירים אותה בכל רוחב-מסך כל עוד הבאנר פתוח, ומשחזרים עם ההסכמה.
-            (bannerOpen ? " hidden" : " inline-flex") +
+            // ה-bottom הוא max(בסיס-רספונסיבי, היסט-הבאנר): כשהבאנר סגור ההיסט 0
+            // והבסיס קובע; כשפתוח ההיסט (גובה-הבאנר+מרווח) גדול מהבסיס ומרים את
+            // הגלולה מעליו. המעבר על „bottom” חלק (בלי קפיצה/הבהוב). RTL: end-*.
+            "group fixed end-4 bottom-[max(var(--bubble-bottom),var(--banner-offset))] top-auto z-40 inline-flex items-center justify-center rounded-full bg-foreground px-6 py-4 text-[16px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform,bottom] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-[max(2rem,var(--banner-offset))] md:px-8 md:py-5 md:text-[18px]" +
             (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
           }
         >

@@ -10,8 +10,8 @@ import { test, expect } from "@playwright/test";
 const compass = (page: import("@playwright/test").Page) =>
   page.getByRole("button", { name: /שאל את הספר/ });
 
-// הגלולה בפינה התחתונה מוסתרת כל עוד באנר-העוגיות (פס תחתון) פתוח — בשני
-// המכשירים. לכן חובה לסגור אותו קודם כדי לראות/ללחוץ על הגלולה.
+// הגלולה נשארת גלויה גם כשבאנר-העוגיות פתוח (מורמת מעליו) — הבדיקות למטה
+// מוודאות זאת. סגירת הבאנר משמשת לבדיקת המצב התחתון הרגיל.
 async function dismissCookies(page: import("@playwright/test").Page) {
   const accept = page.getByRole("button", { name: "אישור הכל" });
   await accept.first().waitFor({ state: "visible", timeout: 3000 }).catch(() => {});
@@ -64,5 +64,41 @@ test.describe("compass floating bubble", () => {
     // יעד מגע נגיש (≥44px).
     const box = await compass(page).boundingBox();
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+
+  const banner = (page: import("@playwright/test").Page) =>
+    page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
+
+  test("desktop: bubble stays visible + clickable WHILE the cookie banner is open (no overlap)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/", { waitUntil: "networkidle" });
+    // לא סוגרים את הבאנר — הוא מופיע בטעינה בדסקטופ.
+    await expect(banner(page)).toBeVisible();
+    await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
+    // אין חפיפה: הגלולה כולה מעל ראש הבאנר.
+    const b = await compass(page).boundingBox();
+    const c = await banner(page).boundingBox();
+    expect(c!.y - (b!.y + b!.height)).toBeGreaterThan(0);
+    // ולחיצה עובדת גם כשהבאנר פתוח → החלונית נפתחת.
+    await compass(page).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+  });
+
+  test("mobile: bubble stays visible + clickable WHILE the cookie banner is open (no overlap)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/", { waitUntil: "networkidle" });
+    // במובייל הבאנר מזוין אחרי גלילה קטנה (מעל סף החשיפה).
+    await page.evaluate(() => window.scrollTo(0, 220));
+    await expect(banner(page)).toBeVisible();
+    await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
+    const b = await compass(page).boundingBox();
+    const c = await banner(page).boundingBox();
+    expect(c!.y - (b!.y + b!.height)).toBeGreaterThan(0);
+    await compass(page).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
   });
 });
