@@ -14,6 +14,11 @@ import {
   type Dilemma,
 } from "@/content/askRoute";
 import { tools } from "@/content/book";
+import {
+  routeIllustrations,
+  type IllustratedStationId,
+} from "@/content/routeIllustrations";
+import { RouteIllustration } from "@/components/shared/RouteIllustration";
 import { loadAsk, saveAsk, clearAsk } from "@/lib/ask/askStorage";
 import { trackEvent } from "@/lib/analytics";
 
@@ -291,6 +296,11 @@ function Result({
   const a = dilemma.answer;
   const isAfterBreakup = stationId === "after-breakup";
   const opener = isAfterBreakup ? askUi.openerAfterBreakup : askUi.openerStation;
+  // איור מאושר לתחנה (רק לתחנות שיש להן איור — „חיפוש ודייטים” נשארת ללא איור).
+  const illustration =
+    stationId && stationId !== "dating"
+      ? routeIllustrations[stationId as IllustratedStationId]
+      : null;
   const opt = dilemma.context?.options.find((o) => o.id === ctxId);
   const adapt = opt?.adapt ?? null;
   const tool = a.toolId ? tools.items.find((t) => t.id === a.toolId) ?? null : null;
@@ -303,6 +313,9 @@ function Result({
       className="stuck-answer rounded-2xl border border-border bg-surface p-6 text-start sm:p-8"
       aria-live="polite"
     >
+      {illustration ? (
+        <RouteIllustration illustration={illustration} className="mb-5 max-w-md" />
+      ) : null}
       <p className="text-[14px] font-semibold text-brand-hover">{opener}</p>
       <h3
         ref={headingRef}

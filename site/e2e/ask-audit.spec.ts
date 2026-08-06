@@ -84,6 +84,24 @@ test("audit: „אחרי פרידה” מסמנת במפורש שהיא תחנת
   await expect(article.getByText(/זו תחנת מעבר/)).toBeVisible();
 });
 
+test("audit: איור מאושר מוצג בתוצאת התחנה — עם alt תיאורי, ולא בתחנה ללא איור", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  // „אחרי פרידה” — האיור מופיע עם ה-alt המאושר (לא ריק).
+  await walk(page, /אחרי פרידה/, /רוצה לחזור בעיקר בגלל בדידות/);
+  await expect(
+    page.getByRole("article").getByRole("img", {
+      name: /אישה עוצרת בין קשר שנותר מאחור/,
+    }).first(),
+  ).toBeVisible();
+
+  // „חיפוש ודייטים” — אין איור מאושר, ולכן אין תמונה בתוצאה.
+  await walk(page, /חיפוש ודייטים/, /מתקשה להתחיל/);
+  await expect(page.getByRole("article").getByRole("img")).toHaveCount(0);
+});
+
 test("audit: שכבת פרק ב' (התאמה) נגישה בכל אחת משלוש תחנות-הקשר", async ({
   page,
 }) => {
