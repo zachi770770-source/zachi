@@ -63,10 +63,11 @@ test("ask result links directly to a real tool card in /book", async ({ page }) 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
-  // פותחים את חלונית „שאל את הספר” מכפתור מקטע ה-#where בבית.
-  const where = page.locator("#where");
-  await where.scrollIntoViewIfNeeded();
-  await where.getByRole("button", { name: "שאל את הספר" }).click();
+  // פותחים את חלונית „שאל את הספר” מהגלולה הצפה (מקטע ה-#where הוסר בקיצור העמוד).
+  const pill = page.getByRole("button", { name: /שאל את הספר — / });
+  await page.mouse.wheel(0, 200);
+  await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
+  await pill.click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
 

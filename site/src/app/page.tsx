@@ -1,14 +1,10 @@
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
-import { PersonasSection } from "@/components/sections/PersonasSection";
-import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
-import { HubTeaser } from "@/components/sections/HubTeaser";
-import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
-import { Testimonials } from "@/components/sections/Testimonials";
+import { HomeStations } from "@/components/sections/HomeStations";
+import { HomeWhyDifferent } from "@/components/sections/HomeWhyDifferent";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
-import { AskInvite } from "@/components/interactive/AskInvite";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { BuildSpine } from "@/components/shared/BuildSpine";
 import { BookSchema } from "@/components/schema/BookSchema";
@@ -23,21 +19,19 @@ export const metadata = pageMetadata({
 });
 
 /**
- * עמוד הבית = מסלול עריכתי קצר וממוקד (לא הדף המלא). כל סקשן ממלא תפקיד יחיד
- * ומוביל הלאה, בלי לחזור על אותו מסר/‏CTA וללא כפילות מול הדפים הייעודיים:
+ * עמוד הבית = דף קצר וממוקד. חמישה חלקים בלבד, בלי כפילות מסר/‏CTA וללא שכפול
+ * מול הדפים הייעודיים:
  *
- *   1. Hero — מה/למי/הבטחה/פעולה ראשית (הרשמה לעדכון ההשקה).
- *   2. Search→Build — סצנת החתימה (התזה, אות-אחר-אות).
- *   3. „שאל את הספר” — הזמנה יחידה למנוע ההכוונה האחד (#where) — נקודת האינטראקציה.
- *   4. הצצה לספר/כלים → /book.
- *   5. הצצה לטעימה → /preview.
- *   6. מילת המחבר הקצרה → /author.
- *   7. הרשמה לעדכון ההשקה.
+ *   1. Hero — כותרת, משפט הסבר אחד, מחיר, פעולה ראשית „קראו טעימה מהספר”
+ *      ופעולה משנית „שאל את הספר”.
+ *   2. „שלוש תחנות ושער מעבר אחד” — אזור קומפקטי אחד, ארבעה כרטיסים קצרים.
+ *   3. „למה הספר שונה” — שלושה יתרונות מעשיים וקישור ל-/book.
+ *   4. רשימת המתנה (טופס ההרשמה).
+ *   5. Footer (ברמת ה-layout).
  *
- * כל העומק חי בדפים הייעודיים ולא משוכפל כאן: השיטה המלאה וששת הכלים ב-/book,
- * הקורא וההצצה המלאה ב-/preview, הסיפור האישי המלא ב-/author, ממשק המצפן המלא
- * ב-/compass (בבית — רק המשגר הצף כהזמנה קצרה), ושאלות ותשובות ב-/faq.
- * ההמלצות מרונדרות רק כשיש שלוש מאושרות (אחרת null — נשאר מוסתר עד לנכסים אמיתיים).
+ * המנוע „שאל את הספר” נשאר זמין כגלולה צפה (CompassLauncher) בלבד — הוא אינו
+ * מוטמע שוב בגוף העמוד. כל העומק חי בדפים הייעודיים: השיטה והכלים ב-/book,
+ * הקורא וההצצה המלאה ב-/preview, הסיפור האישי ב-/author, המנוע המלא ב-/compass.
  */
 export default function HomePage() {
   return (
@@ -47,33 +41,8 @@ export default function HomePage() {
       <ProductSchema />
       <BuildSpine />
       <Hero />
-      {/* פילוח ל-4 פרסונות — מוקדם בעמוד, מיד אחרי ה-Hero. */}
-      <PersonasSection />
-      {/* „שאל את הספר” — הזמנה יחידה למנוע ההכוונה האחד (#where). אין כאן שאלון
-          נפרד; הכפתור פותח את חלונית „שאל את הספר” (AskRoute), אותו מנוע כמו
-          ב-/compass ובבועה הצפה. קישור „מצאו את נקודת הפתיחה” /#where נוחת כאן. */}
-      <AskInvite />
-      <ThesisMotifSection />
-      {/* הצצה לספר + כלים — השיטה המלאה וששת הכלים (ToolsBento) חיים ב-/book. */}
-      <HubTeaser
-        id="book-teaser"
-        kicker="כלים, לא רק רעיון"
-        heading="שיטה מעשית וכלים לכל תחנה בקשר"
-        text="שיטה בת שלושה שלבים וכלים לשימוש חוזר — לא רק רעיון. כולם מרוכזים בעמוד הספר."
-        href="/book"
-        linkLabel="לעמוד הספר המלא"
-      />
-      {/* הצצה לטעימה — ההצצה האינטראקטיבית והקורא המלא חיים ב-/preview. */}
-      <HubTeaser
-        id="sample-teaser"
-        kicker="טעימה מהספר"
-        heading="טעימה קצרה, כדי שתדעו לאן אתם נכנסים"
-        text="טעימה מהספר לקריאה של כ-2 דקות, ללא הרשמה — מחכה בעמוד הטעימה."
-        href="/preview"
-        linkLabel="לקריאת טעימה מהספר"
-      />
-      <AuthorTeaser />
-      <Testimonials />
+      <HomeStations />
+      <HomeWhyDifferent />
       <NewsletterSection />
       <CompassLauncher />
       <StickyCta />

@@ -6,15 +6,18 @@ import { test, expect, type Locator, type Page } from "./fixtures";
  * מפנה ל-/preview, נסגר ונזכר ל-session.
  */
 
-/** פותח את חלונית „שאל את הספר” (drawer) מכפתור מקטע ה-#where בבית, יציב:
- *  reduced-motion (בלי אנימציית-כניסה) + סגירת באנר-העוגיות. מחזיר את ה-dialog. */
+/** פותח את חלונית „שאל את הספר” (drawer) מהגלולה הצפה בבית, יציב: reduced-motion
+ *  (בלי אנימציית-כניסה) + סגירת באנר-העוגיות. מקטע ה-#where הוסר בקיצור העמוד —
+ *  המנוע נשאר זמין רק כגלולה הצפה. מחזיר את ה-dialog. */
 async function openAsk(page: Page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
-  const where = page.locator("#where");
-  await where.scrollIntoViewIfNeeded();
-  await where.getByRole("button", { name: "שאל את הספר" }).click();
+  // הגלולה הצפה נבדלת ב-aria-label המלא (עם מקף); נחשפת אחרי גלילה קלה.
+  const pill = page.getByRole("button", { name: /שאל את הספר — / });
+  await page.mouse.wheel(0, 200);
+  await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
+  await pill.click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   return dialog;
@@ -102,7 +105,7 @@ test("no fabricated social proof rendered in pre-launch (no stars, no reader cou
   await expect(page.getByText(/מעל \d+ קוראים|★|⭐/)).toHaveCount(0);
 });
 
-test("ask (from #where): station → dilemma → result with tool + sample + disclaimer", async ({
+test("ask (from the floating pill): station → dilemma → result with tool + sample + disclaimer", async ({
   page,
 }) => {
   const dialog = await openAsk(page);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MessageCircleQuestion } from "lucide-react";
 
 import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
@@ -9,20 +9,16 @@ import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
 import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
-import { PersonaPicker } from "@/components/persona/PersonaPicker";
-import { PersonaSubheadScript } from "@/components/persona/PersonaSubheadScript";
-import {
-  PersonaHeroSubhead,
-  PersonaHeroCta,
-} from "@/components/persona/PersonaHeroCopy";
 
 /**
- * Hero — גריד אמיתי של שתי עמודות: 54% תוכן (ימין ב-RTL) / 46% ספר (שמאל),
- * מיושר אנכית למרכז. יחידת תוכן רציפה אחת.
+ * Hero — גריד אמיתי של שתי עמודות: תוכן (ימין ב-RTL) / ספר (שמאל), מיושר אנכית
+ * למרכז. יחידת תוכן רציפה אחת, מקוצרת: כותרת, משפט הסבר אחד, מחיר, ושתי פעולות
+ * בלבד — פעולה ראשית „קראו טעימה מהספר” אל /preview, ופעולה משנית „שאל את הספר”
+ * אל /compass. אין כאן בורר-פרסונה, פסקאות חוזרות או CTA כפול — כל היתר חי
+ * בהמשך העמוד ובדפים הייעודיים.
  *
- * מצב Pre-launch: ה-CTA הראשי פעיל ומזמין להצטרף לרשימת ההמתנה
- * ("קבלו עדכון כשהספר יוצא") ומגלגל אל טופס ההרשמה. אין כפתור רכישה חסום.
- * כאשר salesOpen יהפוך ל-true, אותו כפתור הופך אוטומטית ל"לרכישת הספר".
+ * מצב Pre-launch: אין כפתור רכישה חסום; כשה-salesOpen יהפוך ל-true הפעולה
+ * הראשית הופכת אוטומטית ל„לרכישת הספר”.
  */
 export function Hero() {
   return (
@@ -65,62 +61,31 @@ export function Hero() {
               </span>
             </h1>
 
-            {/* משפט המיצוב: „ספר לכל המסע הזוגי” — בולט, מיד אחרי הכותרת, כדי
-                שגולש חדש יבין שהספר אינו רק לדייטים. אנימציית hero-fade בלבד. */}
+            {/* משפט הסבר יחיד: מבהיר שהספר אינו נעצר בשלב הדייטים אלא מלווה את כל
+                המסע הזוגי. תוכן מאושר קיים (hero.subhead) — ללא בורר-פרסונה. */}
             <p
-              className="hero-fade mt-3.5 font-serif text-[18px] font-semibold leading-snug text-brand-hover lg:mt-4 lg:text-[22px]"
+              className="hero-fade mt-4 max-w-[46ch] text-[17.5px] leading-[1.55] text-foreground/80 lg:mt-5 lg:text-[21px] lg:leading-[1.6]"
               style={{ animationDelay: "380ms" }}
             >
-              {hero.positioning}
+              {hero.subhead}
             </p>
 
-            <p
-              className="hero-fade mt-3 text-[15px] font-semibold tracking-[0.02em] text-foreground-muted lg:mt-4"
-              style={{ animationDelay: "460ms" }}
-            >
-              מאת צחי חן
-            </p>
-
-            <p
-              id="hero-subhead"
-              suppressHydrationWarning
-              className="hero-fade mt-3.5 max-w-[46ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:text-[21px] lg:leading-[1.6]"
-              style={{ animationDelay: "540ms" }}
-            >
-              <PersonaHeroSubhead fallback={hero.subhead} />
-            </p>
-            {/* מונע „הבזק כותרת-משנה” למבקר-חוזר/כניסת-URL: מחליף את הטקסט לפני
-                הצביעה. ה-SSR נשאר הדיפולט (קרולר/ללא-JS מקבלים את המסר הכללי). */}
-            <PersonaSubheadScript targetId="hero-subhead" />
-
-            {/* פילוח מיידי — 4 פרסונות. הבחירה מתאימה את כותרת-המשנה, את ה-CTA
-                ואת הבר הדביק לאורך האתר, ונשמרת בין העמודים. */}
-            <PersonaPicker className="hero-fade mt-5" />
-
-            {/* יחידת המרה אחת: סטטוס+מחיר, CTA ראשי ופעולה משנית — מקובצים
-                תחת קו שיער עדין, כך שהמחיר והסטטוס נראים חלק מהגוש ולא טקסט
-                אקראי. ה-CTA הראשי נשאר הפעולה הבולטת ביותר. */}
-            <div className="mt-4 flex w-full max-w-[46ch] flex-col items-start gap-3 border-t border-border pt-4 lg:mt-7 lg:gap-4 lg:pt-6">
+            {/* יחידת המרה אחת: מחיר, פעולה ראשית ופעולה משנית — מקובצים תחת קו
+                שיער עדין, כך שהמחיר נראה חלק מהגוש. */}
+            <div className="mt-5 flex w-full max-w-[46ch] flex-col items-start gap-3 border-t border-border pt-4 lg:mt-7 lg:gap-4 lg:pt-6">
               <p
                 className="hero-fade text-[16px] font-semibold text-brand-hover"
-                style={{ animationDelay: "700ms" }}
+                style={{ animationDelay: "620ms" }}
               >
                 {siteConfig.preLaunchPriceLabel}
               </p>
 
-              {/* היררכיית פעולה אחת וברורה. טרום-השקה: פעולה דומיננטית *יחידה* —
-                  „קראו טעימה מהספר · 2 דקות” אל /preview (עם מעבר-הכריכה
-                  morphCover). אין טופס אימייל בשער: הטעימה נפתחת מיד וללא הרשמה.
-                  אחרי פתיחת המכירה: אותו מקום הופך לכפתור הרכישה.
-                  hero-rise-soft: תזוזה בלבד (opacity=1) ⇒ ה-CTA גלוי ולחיץ מיידית. */}
               <div
                 className="hero-rise-soft flex w-full flex-col items-start gap-3 lg:gap-4"
                 style={{ animationDelay: "160ms" }}
               >
-                {/* CTA דינמי לפי הפרסונה שנבחרה (רק אחרי בחירה) — המשפט הרגשי של
-                    אותו קהל, אל רשימת ההמתנה. „קראו טעימה” נשאר מתחתיו. */}
-                <PersonaHeroCta />
-
+                {/* פעולה ראשית: קריאת טעימה מיד וללא הרשמה (עם מעבר-כריכה
+                    morphCover). אחרי פתיחת המכירה — הופכת לכפתור הרכישה. */}
                 {siteConfig.salesOpen ? (
                   <Button asChild size="lg" className="h-14 w-full px-7 text-[17px] sm:w-auto">
                     <Link href="/book#purchase">לרכישת הספר</Link>
@@ -138,26 +103,16 @@ export function Hero() {
                   </Button>
                 )}
 
-                {/* פעולה משנית שקטה: מציאת נקודת הפתיחה (Path Finder). קישור-טקסט,
-                    לא כפתור — לא שווה-משקל לפעולה הדומיננטית. */}
+                {/* פעולה משנית שקטה: „שאל את הספר” → /compass — מנוע ההכוונה האחד
+                    (אותו מנוע כמו בגלולה הצפה). קישור-טקסט, לא כפתור. */}
                 <Link
-                  href="/#where"
+                  href="/compass"
                   className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 >
-                  מצאו את נקודת הפתיחה שלכם
+                  <MessageCircleQuestion className="h-4 w-4 text-brand" aria-hidden="true" />
+                  שאל את הספר
                   <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                 </Link>
-
-                {/* פעולה שלישונית, שקטה עוד יותר — למי שרק רוצה עדכון בהשקה. */}
-                <p className="text-[13.5px] leading-relaxed text-foreground-muted">
-                  רוצים רק לדעת כשהספר יוצא?{" "}
-                  <Link
-                    href="/#waitlist"
-                    className="font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                  >
-                    הצטרפו לעדכון ההשקה
-                  </Link>
-                </p>
               </div>
             </div>
           </div>
@@ -218,8 +173,7 @@ export function Hero() {
                 </div>
               </div>
               {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,
-                  סימן-בסיס עדין מתחת לכריכה. דקורטיבי בלבד. המסר „חיפוש→בנייה”
-                  נמסר פעם אחת, נחרצות, בבאנד המרווה שבהמשך העמוד. */}
+                  סימן-בסיס עדין מתחת לכריכה. דקורטיבי בלבד. */}
               <span
                 aria-hidden="true"
                 className="flex items-center gap-1.5 opacity-80"

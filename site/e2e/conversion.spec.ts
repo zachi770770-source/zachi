@@ -70,24 +70,39 @@ test("/preview is publicly accessible directly, without any registration", async
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("only one station experience remains (no duplicate static station section)", async ({ page }) => {
+test("home stations: one compact area of four station cards, each linking to its page", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // חוויית התחנות היחידה: מקטע „שאל את הספר” (#where). הסקשן הסטטי #stations הוסר.
-  await expect(page.locator("#where")).toHaveCount(1);
-  await expect(page.locator("#stations")).toHaveCount(0);
+  // בקיצור העמוד: מקטע „שאל את הספר” המוטמע (#where) הוסר — המנוע נשאר כגלולה
+  // צפה בלבד. במקומו אזור קומפקטי אחד „שלוש תחנות ושער מעבר אחד” (#stations)
+  // עם ארבעה כרטיסים, כל אחד מקשר לדף התחנה הייעודי.
+  await expect(page.locator("#where")).toHaveCount(0);
+  const stations = page.locator("#stations");
+  await expect(stations).toHaveCount(1);
+  await expect(
+    stations.getByRole("heading", { name: "שלוש תחנות ושער מעבר אחד" }),
+  ).toBeVisible();
+  for (const href of [
+    "/before-relationship",
+    "/building-relationship",
+    "/inside-relationship",
+    "/after-breakup",
+  ]) {
+    await expect(stations.locator(`a[href="${href}"]`)).toHaveCount(1);
+  }
 });
 
-test("home sample teaser is a slim presence that links to /preview (peek moved off home)", async ({
+test("home: the repeated sample teaser was removed; /preview is reached from the hero action", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // ההצצה האינטראקטיבית (#sample) הוסרה לגמרי; בבית נשארת נוכחות מצומצמת.
+  // אזור הטעימה החוזר (#sample-teaser) וההצצה האינטראקטיבית (#sample) הוסרו מהבית.
   await expect(page.locator("#sample")).toHaveCount(0);
-  const teaser = page.locator("#sample-teaser");
-  await expect(teaser.getByRole("link", { name: "לקריאת טעימה מהספר" })).toHaveAttribute(
-    "href",
-    "/preview"
-  );
+  await expect(page.locator("#sample-teaser")).toHaveCount(0);
+  // הכניסה לטעימה נשארת דרך הפעולה הראשית בשער.
+  const hero = page.locator("main section").first();
+  await expect(
+    hero.getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" }),
+  ).toHaveAttribute("href", "/preview");
 });
 
 test("/preview is a single reading experience — the duplicate peek (carousel) was removed", async ({

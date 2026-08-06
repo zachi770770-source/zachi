@@ -1,43 +1,13 @@
 import { test, expect } from "./fixtures";
 
 /**
- * שיפורים ממוקדים לעמוד הבית (מעל הרדיזיין המאושר): פס עובדות, טיזר מחבר
- * בגוף ראשון, ציטוט מהספר, תיאום בקרות צפות מול באנר העוגיות, וללא גלישה
- * אופקית ב-320/360/390. התנועה המאושרת אינה משתנה כאן.
+ * שיפורים ממוקדים לעמוד הבית (מעל הרדיזיין המאושר): תיאום בקרות צפות מול באנר
+ * העוגיות, וללא גלישה אופקית ב-320/360/390. התנועה המאושרת אינה משתנה כאן.
  */
 
-// (פס-העובדות „TrustStrip” הוסר מעמוד הבית בקיצור העריכתי — הבדיקה שלו הוסרה
-//  בהתאם; אין להמציא/להחזיר תוכן שלא מוצג.)
-
-test("author teaser is written in the first person", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  const author = page.locator("#author-teaser");
-  await expect(author).toContainText("כתבתי את");
-  await expect(author).toContainText("רציתי ליצור ספר");
-  await expect(author).not.toContainText("צחי חן זיהה");
-});
-
-test("conversion journey: the ask invite (#where) precedes the Search→Build thesis scene", async ({
-  page,
-}) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  await expect(page.locator("#where")).toBeVisible();
-  await expect(page.locator("#thesis-heading")).toBeVisible();
-
-  // סדר ה-DOM אחרי הקיצור/הארגון-מחדש: מקטע „שאל את הספר” (#where) *לפני* סצנת
-  // Search→Build (#thesis-heading) — כדי שלחיצה על „למצוא את המסלול שלי” תגיע
-  // לשאלון בלי לחצות את טווח ה-pin של הסצנה.
-  const stationsBeforeThesis = await page.evaluate(() => {
-    const stations = document.querySelector("#where");
-    const thesis = document.querySelector("#thesis-heading");
-    if (!thesis || !stations) return false;
-    return !!(
-      stations.compareDocumentPosition(thesis) &
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
-  });
-  expect(stationsBeforeThesis).toBe(true);
-});
+// בקיצור העמוד הוסרו מהבית: פס-העובדות („TrustStrip”), טיזר-המחבר (#author-teaser),
+// מקטע „שאל את הספר” המוטמע (#where) וסצנת Search→Build (#thesis-heading). הבדיקות
+// שנשענו עליהם הוסרו בהתאם — אין להמציא/להחזיר תוכן שלא מוצג.
 
 test("mobile 390: assistant bubble stays visible ABOVE the cookie banner (no overlap), and returns to the bottom after consent", async ({
   browser,
@@ -118,7 +88,7 @@ for (const w of [320, 360, 390]) {
   });
 }
 
-test("reduced-motion: thesis text is fully visible", async ({ browser }) => {
+test("reduced-motion: the compact stations area is fully visible", async ({ browser }) => {
   const ctx = await browser.newContext({
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
@@ -126,8 +96,8 @@ test("reduced-motion: thesis text is fully visible", async ({ browser }) => {
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "networkidle" });
   // תחת reduced-motion אין הסתרה (motion-js לא מתווסף) — התוכן קריא במלואו.
-  const thesis = page.locator("#thesis-heading");
-  await thesis.scrollIntoViewIfNeeded();
-  await expect(thesis).toContainText("אהבה היא בנייה.");
+  const stations = page.locator("#stations");
+  await stations.scrollIntoViewIfNeeded();
+  await expect(stations).toContainText("שלוש תחנות ושער מעבר אחד");
   await ctx.close();
 });

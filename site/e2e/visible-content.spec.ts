@@ -214,7 +214,7 @@ test.describe("/preview — ציר-זמן: התוכן לא נעלם אחרי hyd
 
 test.describe("עמודים מרכזיים — כותרת + תוכן גוף גלויים בפועל", () => {
   const pages: { path: string; body: string }[] = [
-    { path: "/", body: "#who h2" },
+    { path: "/", body: "#stations h2" },
     { path: "/book", body: "#tools" },
     { path: "/before-relationship", body: "#difficulty-heading" },
     { path: "/building-relationship", body: "#difficulty-heading" },

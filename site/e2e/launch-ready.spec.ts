@@ -3,7 +3,7 @@ import { test, expect } from "./fixtures";
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
-  test("home Hero: one dominant sample action + quiet secondaries (find my path, launch update)", async ({ page }) => {
+  test("home Hero: one dominant sample action + one quiet secondary (ask the book)", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     const heroSection = page.locator("main section").first();
@@ -19,12 +19,9 @@ test.describe("Launch-readiness", () => {
     await expect(heroSection.getByLabel("כתובת אימייל")).toHaveCount(0);
     await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
 
-    // פעולות משנה שקטות (קישורי טקסט): „מצאו את נקודת הפתיחה שלכם” → /#where,
-    // ו„הצטרפו לעדכון ההשקה” → /#waitlist.
-    const findPath = heroSection.getByRole("link", { name: "מצאו את נקודת הפתיחה שלכם" });
-    await expect(findPath).toHaveAttribute("href", "/#where");
-    const launchUpdate = heroSection.getByRole("link", { name: "הצטרפו לעדכון ההשקה" });
-    await expect(launchUpdate).toHaveAttribute("href", "/#waitlist");
+    // פעולה משנית יחידה ושקטה (קישור-טקסט): „שאל את הספר” → /compass.
+    const ask = heroSection.getByRole("link", { name: "שאל את הספר" });
+    await expect(ask).toHaveAttribute("href", "/compass");
   });
 
   test("home newsletter section: the waitlist form still submits successfully", async ({ page }) => {
@@ -133,7 +130,7 @@ test.describe("Launch-readiness", () => {
     await expect(page.getByText(/תתווסף/)).toHaveCount(0);
   });
 
-  test("hero: floating thoughts and the small refrain were removed; message lives in the Sage Thesis band; CTA stays active", async ({
+  test("hero: floating thoughts and the small refrain were removed; the dominant sample CTA stays active", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
@@ -141,13 +138,8 @@ test.describe("Launch-readiness", () => {
     // פתקי „המחשבות” המרחפים הוסרו בכוונה (PHASE 13) — ה-Hero נקי מהם.
     await expect(page.locator(".hero-thoughts")).toHaveCount(0);
     await expect(page.locator(".hero-thought")).toHaveCount(0);
-
-    // הפזמון הקטן שמתחת לכריכה הוסר — המסר „חיפוש→בנייה” נמסר פעם אחת,
-    // נחרצות, בבאנד המרווה (סקשן התזה).
+    // הפזמון הקטן שמתחת לכריכה הוסר גם הוא.
     await expect(page.locator(".hero-refrain")).toHaveCount(0);
-    const thesis = page.locator("#thesis-heading");
-    await expect(thesis).toContainText("דייטינג הוא חיפוש.");
-    await expect(thesis).toContainText("אהבה היא בנייה.");
 
     // פעולת ההמרה הראשית בשער — „קראו טעימה מהספר · 2 דקות” → /preview — פעילה.
     await expect(
@@ -157,27 +149,32 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
   });
 
-  test("stations: home invites to the ask engine; dedicated pages cross-link and CTA to the sample", async ({
+  test("stations: home shows the compact station cards + floating ask engine; dedicated pages cross-link and CTA to the sample", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
-    // מקטע ה-#where (AskInvite): הזמנה יחידה למנוע „שאל את הספר”. הכפתור פותח את
-    // החלונית עם בורר התחנות; קישור-המשנה מוביל לעמוד המלא /compass.
-    const where = page.locator("#where");
-    await where.scrollIntoViewIfNeeded();
+    // אזור התחנות הקומפקטי (#stations): כרטיס „לפני קשר” מקשר לדף התחנה.
+    const stations = page.locator("#stations");
+    await stations.scrollIntoViewIfNeeded();
     await expect(
-      where.getByRole("heading", { name: "לא בטוחים מאיפה להתחיל? שאלו את הספר" }),
+      stations.getByRole("heading", { name: "שלוש תחנות ושער מעבר אחד" }),
     ).toBeVisible();
     await expect(
-      where.getByRole("link", { name: /לעמוד המלא של/ }),
-    ).toHaveAttribute("href", "/compass");
-    await where.getByRole("button", { name: "שאל את הספר" }).click();
+      stations.locator('a[href="/before-relationship"]'),
+    ).toHaveCount(1);
+
+    // מנוע ההכוונה נשאר זמין כגלולה צפה — פותחת את בורר התחנות.
+    const pill = page.getByRole("button", { name: /שאל את הספר — / });
+    await page.mouse.wheel(0, 200);
+    await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
+    await pill.click();
     await expect(
       page.getByRole("dialog").getByRole("heading", { name: "איפה אתם עכשיו?" }),
     ).toBeVisible();
+    await page.keyboard.press("Escape");
 
     // עמוד התחנה הייעודי נגיש ומקושר-צולב: פירורי לחם, CTA לטעימה, ומעבר לתחנה אחרת.
     await page.goto("/before-relationship", { waitUntil: "networkidle" });
