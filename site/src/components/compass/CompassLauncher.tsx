@@ -5,12 +5,19 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
 
 import { compassQuiz } from "@/content/compass";
-import { AskRoute } from "@/components/interactive/AskRoute";
+
+// טעינה עצלה של מנוע „שאל את הספר”: הקוד והנתונים (askRoute.ts) נטענים כ-chunk
+// נפרד רק כשהחלונית נפתחת בפועל — לא בטעינת כל עמוד שבו המשגר קיים.
+const AskRoute = React.lazy(() =>
+  import("@/components/interactive/AskRoute").then((m) => ({
+    default: m.AskRoute,
+  })),
+);
 
 /**
- * משגר „המצפן” בעמוד הבית — חוויית שלוש-השאלות הדטרמיניסטית, נגישה תמיד וללא
- * ניווט החוצה. אינו צ׳אטבוט ואינו AI: הבועה פותחת את אותו מנוע שאלון (PathFinder)
- * שבעמוד /compass ובבית — שלוש שאלות סגורות → תחנה + כלי + פעולה, בלי API חיצוני.
+ * משגר „שאל את הספר” בעמוד הבית — מנוע ההכוונה הדטרמיניסטי, נגיש תמיד וללא
+ * ניווט החוצה. אינו צ׳אטבוט ואינו AI: הבועה פותחת את אותו מנוע (AskRoute) שבעמוד
+ * /compass ובבית — 3–4 שאלות סגורות → תחנה + כלי + פעולה, בלי API חיצוני.
  *
  * - Desktop/Tablet (md ומעלה): בועה עגולה קבועה בצד המתחיל-לוגית של הקצה
  *   (שמאל ב-RTL), באמצע גובה המסך, עם תווית קטנה „המצפן”.
@@ -160,7 +167,15 @@ export function CompassLauncher() {
           </div>
 
           <div className="grow overflow-y-auto px-5 py-6 sm:px-6">
-            <AskRoute />
+            <React.Suspense
+              fallback={
+                <p className="py-10 text-center text-[15px] text-foreground-muted" role="status">
+                  טוען…
+                </p>
+              }
+            >
+              <AskRoute />
+            </React.Suspense>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

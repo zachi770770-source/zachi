@@ -6,17 +6,15 @@ import type { NextRequest } from "next/server";
  * ב-Next 16 `middleware` הוחלף ב-`proxy`. הפניות ב-next.config מחזירות 308;
  * כאן אנחנו מחזירים 301 מדויק (כפי שנדרש) דרך NextResponse.redirect.
  *
- * שים לב: /about מפנה ל-/author (על המחבר) — הפניה סמנטית נכונה.
+ * הפניות סמנטיות (301):
+ *   /about     → /author (על המחבר)
+ *   /articles* → /book   (עמוד הספר — התוכן המהותי הקרוב ביותר לכל „מאמר”
+ *                דייטינג/זוגיות ישן; לא הפניה ל-/faq גנרי, ולא soft-404 שרירותי).
  * פרמטרי query (כגון UTM) נשמרים לצורך שיוך.
- *
- * כתובות /articles* אינן מטופלות כאן בכוונה: הן מעולם לא קיימו כעמוד באתר או
- * בהיסטוריית הפרויקט, ולכן הן מחזירות 404 טבעי. soft-404 (הפניה ל-/faq גנרי)
- * גרוע יותר ל-SEO מ-404 אמיתי.
- *
- * הערה: /book הוא כעת עמוד אמיתי (הספר לעומק), ולכן אינו מופיע כאן כהפניה.
  */
 const REDIRECTS: Record<string, string> = {
   "/about": "/author",
+  "/articles": "/book",
 };
 
 export function proxy(request: NextRequest) {
@@ -27,7 +25,9 @@ export function proxy(request: NextRequest) {
       ? pathname.slice(0, -1)
       : pathname;
 
-  const destination = REDIRECTS[key] ?? null;
+  // כל תת-נתיב של /articles/* מופנה סמנטית לעמוד הספר.
+  const destination =
+    REDIRECTS[key] ?? (key.startsWith("/articles/") ? "/book" : null);
 
   if (destination) {
     const url = request.nextUrl.clone();
@@ -39,5 +39,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/about"],
+  matcher: ["/about", "/articles", "/articles/:path*"],
 };

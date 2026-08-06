@@ -8,12 +8,17 @@ const AVAILABILITY_MAP: Record<string, string> = {
 };
 
 /**
- * Product structured data — נתונים אמיתיים בלבד. אין דירוגים, ביקורות
- * או זמינות מומצאים. כל עוד המכירה סגורה (`salesOpen=false`) אין הצעת
- * מכר פעילה, ולכן לא נוצר בלוק `offers` עם זמינות/מחיר שאי אפשר לרכוש
- * בפועל — רק כשהמכירה נפתחת מתווספת ההצעה עם המחיר והזמינות האמיתיים.
+ * Product structured data — נתונים אמיתיים בלבד. אין דירוגים, ביקורות או
+ * זמינות מומצאים. לפני פתיחת המכירה (`salesOpen=false`) אין כאן כלל בלוק
+ * Product/Offer: הספר עדיין אינו למכירה, ולכן אין להציג סימון מוצר/מחיר/זמינות
+ * שאי אפשר לממש. זהות הספר לפני ההשקה מיוצגת דרך BookSchema (@type Book).
+ * רק כשהמכירה נפתחת נוצר Product עם ההצעה, המחיר והזמינות האמיתיים.
  */
 export function ProductSchema() {
+  if (!siteConfig.salesOpen) {
+    return null;
+  }
+
   const base = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -23,10 +28,6 @@ export function ProductSchema() {
     category: "ספר דיגיטלי",
     brand: { "@type": "Brand", name: siteConfig.bookTitle },
   } as const;
-
-  if (!siteConfig.salesOpen) {
-    return <JsonLd data={base} />;
-  }
 
   return (
     <JsonLd

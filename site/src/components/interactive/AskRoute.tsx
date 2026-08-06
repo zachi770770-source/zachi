@@ -110,9 +110,15 @@ export function AskRoute() {
     setStep("station");
   };
 
-  // מיקוד על כותרת התוצאה/הבטיחות (נגישות + „נחיתה” על התוכן).
+  // ניהול פוקוס נגיש: בכל מעבר-שלב (למעט הרינדור הראשון, שבו רדיקס כבר ממקד את
+  // החלונית) מעבירים את הפוקוס לכותרת השלב החדש, כדי שקורא-מסך „ינחת” על התוכן
+  // ולא יישאר על כפתור שנעלם. אותה כותרת (headingRef) מוזרקת לכל שלב פעיל.
+  const firstRenderRef = React.useRef(true);
   React.useEffect(() => {
-    if (step !== "result" && step !== "safety") return;
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
     const el = headingRef.current;
     if (!el) return;
     const raf = requestAnimationFrame(() => {
@@ -124,8 +130,21 @@ export function AskRoute() {
 
   const station = stationId ? askStations.find((s) => s.id === stationId) ?? null : null;
 
+  // הכרזת-התקדמות לקורא-מסך (aria-live) בכל מעבר-שלב — בלי תלות בפוקוס.
+  const stepAnnounce: Record<Step, string> = {
+    station: "שלב ראשון: איפה אתם עכשיו?",
+    dilemma: "שלב הבא: מה הכי מעסיק אתכם כרגע?",
+    context: "שאלה משלימה אחת",
+    result: "ההכוונה מתוך הספר מוכנה",
+    safety: "מידע חשוב",
+  };
+
   return (
     <div className="pathfinder mx-auto max-w-2xl">
+      {/* הכרזת-התקדמות נגישה (מוסתרת חזותית) — קורא-מסך שומע לאיזה שלב עברנו. */}
+      <div className="sr-only" role="status" aria-live="polite">
+        {stepAnnounce[step]}
+      </div>
       {/* פירורי-דרך עדינים (שיחה מודרכת, לא מבחן) */}
       {station && step !== "station" ? (
         <div className="mb-4 flex flex-wrap items-center justify-center gap-2 text-[13px] text-foreground-muted">
@@ -144,6 +163,7 @@ export function AskRoute() {
       {step === "station" ? (
         <Choice
           title={askUi.stationTitle}
+          headingRef={headingRef}
           options={askStations.map((s) => ({
             key: s.id,
             label: s.name,
@@ -157,6 +177,7 @@ export function AskRoute() {
       {step === "dilemma" && stationId ? (
         <Choice
           title={askUi.dilemmaTitle}
+          headingRef={headingRef}
           options={dilemmasFor(stationId).map((d) => ({ key: d.id, label: d.label }))}
           selectedKey={dilemmaId}
           onBack={() => setStep("station")}
@@ -171,6 +192,7 @@ export function AskRoute() {
       {step === "context" && dilemma?.context ? (
         <Choice
           title={dilemma.context.question}
+          headingRef={headingRef}
           options={dilemma.context.options.map((o) => ({ key: o.id, label: o.label }))}
           selectedKey={ctxId}
           onBack={() => setStep("dilemma")}
@@ -210,6 +232,7 @@ function Choice({
   onChoose,
   onBack,
   backLabel,
+  headingRef,
 }: {
   title: string;
   options: { key: string; label: string; hint?: string }[];
@@ -217,10 +240,15 @@ function Choice({
   onChoose: (key: string) => void;
   onBack?: () => void;
   backLabel?: string;
+  headingRef?: React.RefObject<HTMLHeadingElement | null>;
 }) {
   return (
     <div className="pathfinder__q rounded-2xl border border-border bg-surface p-6 text-center shadow-sm sm:p-8">
-      <h3 className="font-serif text-[1.5rem] font-semibold leading-snug text-foreground">
+      <h3
+        ref={headingRef}
+        tabIndex={-1}
+        className="font-serif text-[1.5rem] font-semibold leading-snug text-foreground focus:outline-none"
+      >
         {title}
       </h3>
       <div role="radiogroup" aria-label={title} className="mt-6 grid gap-2.5 text-start">
