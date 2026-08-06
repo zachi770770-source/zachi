@@ -111,6 +111,51 @@ export default function AuthorPage() {
       {/* „למה כתבתי את הספר הזה” — שמע בקולו של המחבר (או placeholder + תמלול) */}
       <AuthorAudio />
 
+      {/* איך נוצרו הכלים — התבוננות ותרגול, לא מתודולוגיה קלינית. */}
+      <section
+        aria-labelledby="tools-origin-heading"
+        className="reveal mx-auto mt-14 max-w-[64ch] border-t border-border pt-10"
+      >
+        <h2
+          id="tools-origin-heading"
+          className="font-serif text-2xl font-semibold text-foreground"
+        >
+          {authorContent.toolsTitle}
+        </h2>
+        <p className="mt-4 text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]">
+          {authorContent.toolsBody}
+        </p>
+      </section>
+
+      {/* מה הספר אינו — גבולות ברורים + גילוי נאות שאין כאן טיפול/אבחון. */}
+      <section
+        aria-labelledby="not-heading"
+        className="reveal mx-auto mt-12 max-w-[64ch] rounded-2xl bg-surface-muted p-6 sm:p-8"
+      >
+        <h2
+          id="not-heading"
+          className="font-serif text-2xl font-semibold text-foreground"
+        >
+          {authorContent.notTitle}
+        </h2>
+        <ul className="mt-4 flex list-none flex-col gap-2.5">
+          {authorContent.notList.map((item) => (
+            <li
+              key={item}
+              className="flex gap-3 text-[1.03rem] leading-relaxed text-foreground/90"
+            >
+              <span aria-hidden="true" className="mt-1 text-brand">
+                •
+              </span>
+              {item}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-5 border-t border-border pt-4 text-[15px] leading-relaxed text-foreground-muted">
+          {authorContent.disclosure}
+        </p>
+      </section>
+
       {/* קריאה לפעולה — עטיפה אמיתית לצד הפעולה, שהיא גם מקור המעבר המשותף
           אל עמוד ההצצה. אין כאן מכירה: הפעולה מובילה לטעימה החינמית. */}
       <div className="mx-auto mt-14 flex max-w-[64ch] flex-col items-start gap-x-8 gap-y-6 border-t border-border pt-10 sm:flex-row sm:items-center">

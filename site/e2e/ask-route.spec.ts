@@ -6,9 +6,9 @@ import { test, expect } from "./fixtures";
  */
 
 const STATIONS: { name: RegExp; dilemmas: number }[] = [
-  { name: /חיפוש ודייטים/, dilemmas: 5 },
+  { name: /לפני קשר/, dilemmas: 5 },
   { name: /בניית קשר/, dilemmas: 5 },
-  { name: /קשר קיים/, dilemmas: 5 },
+  { name: /בתוך קשר/, dilemmas: 5 },
   { name: /אחרי פרידה/, dilemmas: 4 },
 ];
 
@@ -42,7 +42,7 @@ for (const width of [320, 360, 390]) {
     expect(await noOverflow()).toBeLessThanOrEqual(0);
 
     // תחנה → דילמה (עם הקשר) → תוצאה — בכל שלב אין גלילה אופקית.
-    await page.getByRole("radio", { name: /קשר קיים/ }).click();
+    await page.getByRole("radio", { name: /בתוך קשר/ }).click();
     expect(await noOverflow()).toBeLessThanOrEqual(0);
     await page.getByRole("radio", { name: /אותם ריבים חוזרים/ }).click(); // הקשר בטיחות
     expect(await noOverflow()).toBeLessThanOrEqual(0);
@@ -65,7 +65,7 @@ test("ask: analytics receives ids only — no personal/free text", async ({ page
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
-  await page.getByRole("radio", { name: /חיפוש ודייטים/ }).click();
+  await page.getByRole("radio", { name: /לפני קשר/ }).click();
   await page.getByRole("radio", { name: /מתקשה להתחיל/ }).click();
   await expect(page.getByRole("article")).toBeVisible();
 

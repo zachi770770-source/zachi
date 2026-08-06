@@ -37,9 +37,9 @@ test("audit: 4 stations reach a result — clean console, focus, no overflow, no
   page.on("pageerror", (e) => errors.push(String(e)));
 
   const cases: [RegExp, RegExp][] = [
-    [/חיפוש ודייטים/, /מתקשה להתחיל/],
+    [/לפני קשר/, /מתקשה להתחיל/],
     [/בניית קשר/, /פער בין המילים/],
-    [/קשר קיים/, /נוצרו ריחוק ושגרה/],
+    [/בתוך קשר/, /נוצרו ריחוק ושגרה/],
     [/אחרי פרידה/, /רוצה לחזור בעיקר בגלל בדידות/],
   ];
 
@@ -97,8 +97,8 @@ test("audit: איור מאושר מוצג בתוצאת התחנה — עם alt �
     }).first(),
   ).toBeVisible();
 
-  // „חיפוש ודייטים” — אין איור מאושר, ולכן אין תמונה בתוצאה.
-  await walk(page, /חיפוש ודייטים/, /מתקשה להתחיל/);
+  // „לפני קשר” — אין איור מאושר, ולכן אין תמונה בתוצאה.
+  await walk(page, /לפני קשר/, /מתקשה להתחיל/);
   await expect(page.getByRole("article").getByRole("img")).toHaveCount(0);
 });
 
@@ -107,9 +107,9 @@ test("audit: שכבת פרק ב' (התאמה) נגישה בכל אחת משלו�
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   const c2Cases: [RegExp, RegExp][] = [
-    [/חיפוש ודייטים/, /פוסל.*מהר מדי/],
+    [/לפני קשר/, /פוסל.*מהר מדי/],
     [/בניית קשר/, /אחד מאיתנו מתקדם/],
-    [/קשר קיים/, /נוצרו ריחוק ושגרה/],
+    [/בתוך קשר/, /נוצרו ריחוק ושגרה/],
   ];
   for (const [st, dl] of c2Cases) {
     await page.goto("/compass", { waitUntil: "networkidle" });

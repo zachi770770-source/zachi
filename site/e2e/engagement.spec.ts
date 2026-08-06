@@ -6,15 +6,18 @@ import { test, expect, type Locator, type Page } from "./fixtures";
  * מפנה ל-/preview, נסגר ונזכר ל-session.
  */
 
-/** פותח את השאלון (#where) יציב: reduced-motion (בלי אנימציית-כניסה) + סגירת
- *  באנר-העוגיות (בלי churn של padding). */
-async function openWhere(page: Page) {
+/** פותח את חלונית „שאל את הספר” (drawer) מכפתור מקטע ה-#where בבית, יציב:
+ *  reduced-motion (בלי אנימציית-כניסה) + סגירת באנר-העוגיות. מחזיר את ה-dialog. */
+async function openAsk(page: Page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
   const where = page.locator("#where");
   await where.scrollIntoViewIfNeeded();
-  await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
-  return where;
+  await where.getByRole("button", { name: "שאל את הספר" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  return dialog;
 }
 
 /** לוחצים על רדיו/כפתור אחרי עיגון למרכז — ה-header הדביק מכסה את ראש התצוגה. */
@@ -99,69 +102,66 @@ test("no fabricated social proof rendered in pre-launch (no stars, no reader cou
   await expect(page.getByText(/מעל \d+ קוראים|★|⭐/)).toHaveCount(0);
 });
 
-test("path finder: three questions map deterministically to a station + tool + disclaimer", async ({
+test("ask (from #where): station → dilemma → result with tool + sample + disclaimer", async ({
   page,
 }) => {
-  const where = await openWhere(page);
-  await expect(where.getByRole("heading", { name: "איפה הספר פוגש אתכם עכשיו?" })).toBeVisible();
+  const dialog = await openAsk(page);
+  await expect(dialog.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
 
-  // Q1 "אני מחפש/ת קשר" → deterministically the before-relationship station.
-  await pick(where.getByRole("radio", { name: "אני מחפש/ת קשר" }));
-  // Q1(before-relationship) × Q2(index 0 "נועל מסקנה") → הכלי gate-questions
-  // (מוצג כ„בדיקת הקצב”).
-  await pick(where.getByRole("radio", { name: /נועל.*מסקנה/ }));
-  // Q3 = "לקרוא קטע שמתאים לי" → sample emphasis sets the PRIMARY CTA to a
-  // contextual /preview?tool=&station= link.
-  await pick(where.getByRole("radio", { name: /קטע שמתאים לי/ }));
+  // תחנה „לפני קשר” → דילמה „מתקשה להתחיל” (בלי שאלת-הקשר) → תוצאה דטרמיניסטית
+  // הממופה לכלי fact-story-action ולטעימת before-relationship.
+  await pick(dialog.getByRole("radio", { name: /לפני קשר/ }));
+  await pick(dialog.getByRole("radio", { name: /מתקשה להתחיל/ }));
 
-  // Result: the mapped station, the mapped real tool, the required disclaimer.
-  await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
-  await expect(where.getByText("בדיקת הקצב")).toBeVisible();
-  await expect(where.getByText("זו נקודת פתיחה לקריאה, לא אבחון או ייעוץ.")).toBeVisible();
-  // The station page stays reachable as a quiet secondary action.
-  await expect(where.getByRole("link", { name: /לתחנה המלאה: לפני קשר/ })).toHaveAttribute(
-    "href",
-    "/before-relationship"
-  );
-  // Q3=sample → the primary action is the contextual sample (tool + station in the query).
+  const article = dialog.getByRole("article");
+  await expect(article.getByText("זה הכיוון שהספר מציע לכם כרגע")).toBeVisible();
+  // פסקת ההבהרה (לא אבחון/ייעוץ).
   await expect(
-    where.getByRole("link", { name: "לקרוא את הקטע שמתאים לי" })
-  ).toHaveAttribute("href", "/preview?tool=gate-questions&station=before-relationship");
+    article.getByText("זו הכוונה מתוך הספר, לא אבחון או ייעוץ. אתם מכירים את עצמכם הכי טוב."),
+  ).toBeVisible();
+  // הכלי כ-deep-link + טעימה מותאמת (tool + station ב-query) + רשימת המתנה.
+  await expect(article.locator('a[href="/book#tool-fact-story-action"]')).toBeVisible();
+  await expect(
+    article.locator('a[href="/preview?tool=fact-story-action&station=before-relationship"]'),
+  ).toBeVisible();
+  await expect(article.locator('a[href="/waitlist"]')).toBeVisible();
 
-  // Restart returns to question 1.
-  await pick(where.getByRole("button", { name: "להתחיל מחדש" }));
-  await expect(where.getByText("שאלה 1/3")).toBeVisible();
+  // אפשר להתחיל מחדש — חוזרים לבורר התחנות.
+  await pick(dialog.getByRole("button", { name: /להתחיל מחדש/ }));
+  await expect(dialog.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
 });
 
-test("path finder: the life-stage (Q1) changes the mapped tool — all six tools reachable", async ({
+test("ask: the station drives the mapped tool — a different station yields a different tool", async ({
   page,
 }) => {
-  const where = await openWhere(page);
+  const dialog = await openAsk(page);
 
-  // אותו קושי (index 0 "נועל מסקנה"), תחנה אחרת → כלי אחר. „בתוך קשר” + קושי 0
-  // ממופה ל„בדיקת השקט” (לא ל„בדיקת הקצב” של „מחפש קשר”) — הוכחה שהמיפוי תלוי ב-Q1.
-  await pick(where.getByRole("radio", { name: /בתוך קשר ורוצה לבנות/ }));
-  await pick(where.getByRole("radio", { name: /נועל.*מסקנה/ }));
-  await pick(where.getByRole("radio", { name: /קטע שמתאים לי/ }));
+  // תחנה אחרת („בתוך קשר”) → דילמה → כלי אחר מזה של „לפני קשר”, הוכחה שהמיפוי
+  // תלוי בתחנה. „נוצרו ריחוק ושגרה” ממופה ל-twenty-maintenance.
+  await pick(dialog.getByRole("radio", { name: /בתוך קשר/ }));
+  await pick(dialog.getByRole("radio", { name: /נוצרו ריחוק ושגרה/ }));
+  // ייתכן שתופיע שאלת-הקשר אחת (פרק ב') — בוחרים אפשרות ראשונה.
+  const ctx = dialog.getByText("האם משהו מאלה חלק מהתמונה שלכם עכשיו?");
+  if (await ctx.count()) await pick(dialog.getByRole("radio").first());
 
-  const article = where.locator("article");
-  await expect(article.getByText("בדיקת השקט")).toBeVisible();
-  await expect(article.getByText("בדיקת הקצב")).toHaveCount(0);
-  // הכלי הנכון נגיש כ-deep-link לכרטיס ב-/book (פעולת משנה, כי Q3=טעימה).
-  await expect(article.locator('a[href="/book#tool-quiet-check"]')).toBeVisible();
+  const article = dialog.getByRole("article");
+  await expect(article).toBeVisible();
+  await expect(article.locator('a[href="/book#tool-twenty-maintenance"]')).toBeVisible();
+  await expect(article.locator('a[href="/book#tool-fact-story-action"]')).toHaveCount(0);
 });
 
-test("path finder does not transmit answer content to analytics", async ({ page }) => {
+test("ask does not transmit answer content to analytics", async ({ page }) => {
   const posts: string[] = [];
   page.on("request", (r) => {
     if (r.method() === "POST") posts.push((r.postData() || "") + " " + r.url());
   });
-  const where = await openWhere(page);
-  await pick(where.getByRole("radio", { name: "בתוך קשר" }));
-  await pick(where.getByRole("radio").first());
-  await pick(where.getByRole("radio").first());
-  await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
+  const dialog = await openAsk(page);
+  await pick(dialog.getByRole("radio", { name: /בתוך קשר/ }));
+  await pick(dialog.getByRole("radio", { name: /נוצרו ריחוק ושגרה/ }));
+  const ctx = dialog.getByText("האם משהו מאלה חלק מהתמונה שלכם עכשיו?");
+  if (await ctx.count()) await pick(dialog.getByRole("radio").first());
+  await expect(dialog.getByRole("article")).toBeVisible();
   // No request body may contain the answer/question text.
-  const leaked = posts.filter((p) => /בתוך קשר|נועל|קטע שמתאים/.test(p));
+  const leaked = posts.filter((p) => /בתוך קשר|ריחוק ושגרה|נוצרו/.test(p));
   expect(leaked, "answer text must never be transmitted").toEqual([]);
 });

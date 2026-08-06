@@ -12,6 +12,8 @@ function trackErrors(page: Page) {
 const STATIC_ROUTES = [
   "/",
   "/before-relationship",
+  "/building-relationship",
+  "/after-breakup",
   "/starting-again",
   "/inside-relationship",
   "/waitlist",
@@ -163,16 +165,21 @@ test("checkout is closed during pre-launch (no form, no payment)", async ({
 });
 
 test("legacy URLs 301-redirect to the most relevant page", async ({ request }) => {
-  const cases: [string, string][] = [
-    ["/about", "/author"],
-    ["/articles", "/faq"],
-    ["/articles/some-old-post", "/faq"],
-  ];
+  // /about → /author הוא ההפניה הסמנטית היחידה (proxy.ts). כתובות /articles*
+  // אינן מטופלות בכוונה — הן מעולם לא קיימו כעמוד, ולכן מחזירות 404 טבעי
+  // (soft-404 גרוע יותר ל-SEO). ראו ההערה ב-src/proxy.ts.
+  const cases: [string, string][] = [["/about", "/author"]];
   for (const [from, to] of cases) {
     const res = await request.get(from, { maxRedirects: 0 });
     expect(res.status(), `status for ${from}`).toBe(301);
     const location = res.headers()["location"] ?? "";
     expect(new URL(location, "http://localhost").pathname, `target for ${from}`).toBe(to);
+  }
+
+  // /articles* מחזירות 404 אמיתי (לא הפניה) — לפי המדיניות המפורשת.
+  for (const legacy of ["/articles", "/articles/some-old-post"]) {
+    const res = await request.get(legacy, { maxRedirects: 0 });
+    expect(res.status(), `no redirect for ${legacy}`).toBe(404);
   }
 });
 

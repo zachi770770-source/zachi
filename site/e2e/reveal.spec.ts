@@ -34,6 +34,13 @@ test("/author: body copy reveals (fade-up) once scrolled into view, not stuck at
   });
   await expect.poll(() => opacityOf(body)).toBeGreaterThan(0.95);
   await expect(page.getByText(/זיהיתי קושי משותף/)).toBeVisible();
+  // גלילה דטרמיניסטית עד תחתית העמוד — כדי שגם המקטעים החדשים שנמוך יותר
+  // („איך נוצרו הכלים”, „מה הספר אינו”) ייכנסו לתצוגה וייחשפו לפני הבדיקה.
+  const maxY = await page.evaluate(() => document.body.scrollHeight);
+  for (let y = 0; y <= maxY; y += 600) {
+    await page.evaluate((v) => window.scrollTo(0, v), y);
+    await page.waitForTimeout(110);
+  }
   await expect.poll(() => noHiddenReveal(page)).toBe(0);
 });
 

@@ -2,7 +2,7 @@ import { test, expect } from "./fixtures";
 
 /**
  * אזור ששת הכלים ב-/book (Editorial Luxury): כרטיסי-חזית אינטראקטיביים,
- * חלונית פירוט אחת מתחת (רק כלי אחד פתוח), ו-deep-link מתוצאת ה-Path Finder.
+ * חלונית פירוט אחת מתחת (רק כלי אחד פתוח), ו-deep-link מתוצאת „שאל את הספר”.
  * העוגנים `#tool-<id>` נשמרים. תוכן קיים בלבד; המיפוי תשובה→כלי נשמר.
  */
 
@@ -59,28 +59,32 @@ test("/book deep-link (#tool-…) opens the matching tool and moves focus to it"
   await expect(page.locator("#tools button[aria-expanded='true']")).toHaveCount(1);
 });
 
-test("path finder result links directly to a real tool card in /book", async ({ page }) => {
+test("ask result links directly to a real tool card in /book", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
+  // פותחים את חלונית „שאל את הספר” מכפתור מקטע ה-#where בבית.
   const where = page.locator("#where");
   await where.scrollIntoViewIfNeeded();
-  await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
-  // בוחרים תשובה אחת בכל שאלה (ראשונה); מעגנים כל רדיו למרכז (header דביק).
-  for (let i = 0; i < 3; i++) {
-    const radio = where.locator('[role="radio"]').first();
-    await radio.evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await radio.click();
-  }
-  const article = where.locator("article");
-  await expect(article.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
-  // כלי אמיתי כ-deep-link (פעולת משנה, כי Q3=טעימה).
+  await where.getByRole("button", { name: "שאל את הספר" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+
+  // תחנה → דילמה → תוצאה. „לפני קשר” + „מתקשה להתחיל” (בלי שאלת-הקשר)
+  // ממופה לכלי fact-story-action.
+  await dialog.getByRole("radio", { name: /לפני קשר/ }).click();
+  await dialog.getByRole("radio", { name: /מתקשה להתחיל/ }).click();
+  const article = dialog.getByRole("article");
+  await expect(article.getByText("זה הכיוון שהספר מציע לכם כרגע")).toBeVisible();
+
+  // כלי אמיתי כ-deep-link לכרטיס ב-/book.
   const toolLink = article.locator('a[href^="/book#tool-"]').first();
   await expect(toolLink).toBeVisible();
   const href = await toolLink.getAttribute("href");
   expect(TOOL_IDS).toContain(href!.replace("/book#", ""));
 
   // הקישור באמת פותח את הכלי המתאים ב-/book.
-  await toolLink.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await toolLink.scrollIntoViewIfNeeded();
   await toolLink.click();
   const anchor = href!.split("#")[1];
   await expect(page).toHaveURL(new RegExp(`/book#${anchor}$`));

@@ -157,25 +157,31 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
   });
 
-  test("stations: home experience links to dedicated pages, which cross-link and CTA to the sample", async ({
+  test("stations: home invites to the ask engine; dedicated pages cross-link and CTA to the sample", async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
-    // מגלה-המסלול (#where): שלוש שאלות → בחירת „אני מחפש/ת קשר” + השלמת השאלות
-    // חושפת נקודת-פתיחה עם קישור לדף התחנה הייעודי.
+    // מקטע ה-#where (AskInvite): הזמנה יחידה למנוע „שאל את הספר”. הכפתור פותח את
+    // החלונית עם בורר התחנות; קישור-המשנה מוביל לעמוד המלא /compass.
     const where = page.locator("#where");
     await where.scrollIntoViewIfNeeded();
-    await where.getByRole("radio", { name: "אני מחפש/ת קשר" }).click(); // שאלה 1
-    await where.getByRole("radio").first().click(); // שאלה 2
-    await where.getByRole("radio").first().click(); // שאלה 3
-    await where
-      .getByRole("link", { name: /לתחנה המלאה: לפני קשר/ })
-      .click();
-    await expect(page).toHaveURL(/\/before-relationship$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("לפני קשר");
+    await expect(
+      where.getByRole("heading", { name: "לא בטוחים מאיפה להתחיל? שאלו את הספר" }),
+    ).toBeVisible();
+    await expect(
+      where.getByRole("link", { name: /לעמוד המלא של/ }),
+    ).toHaveAttribute("href", "/compass");
+    await where.getByRole("button", { name: "שאל את הספר" }).click();
+    await expect(
+      page.getByRole("dialog").getByRole("heading", { name: "איפה אתם עכשיו?" }),
+    ).toBeVisible();
 
-    // פירורי לחם נגישים + פעולה מרכזית: לקריאת הטעימה שמתאימה לי (טרום-השקה).
+    // עמוד התחנה הייעודי נגיש ומקושר-צולב: פירורי לחם, CTA לטעימה, ומעבר לתחנה אחרת.
+    await page.goto("/before-relationship", { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("לפני קשר");
     await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
     const cta = page.getByRole("link", { name: "לקריאת הטעימה שמתאימה לי" });
     await expect(cta).toHaveAttribute("href", "/preview");
@@ -201,6 +207,8 @@ test.describe("Launch-readiness", () => {
     for (const path of [
       "/",
       "/before-relationship",
+      "/building-relationship",
+      "/after-breakup",
       "/starting-again",
       "/inside-relationship",
       "/waitlist",

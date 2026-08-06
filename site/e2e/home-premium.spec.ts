@@ -17,14 +17,14 @@ test("author teaser is written in the first person", async ({ page }) => {
   await expect(author).not.toContainText("צחי חן זיהה");
 });
 
-test("conversion journey: the Path Finder (#where) precedes the Search→Build thesis scene", async ({
+test("conversion journey: the ask invite (#where) precedes the Search→Build thesis scene", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   await expect(page.locator("#where")).toBeVisible();
   await expect(page.locator("#thesis-heading")).toBeVisible();
 
-  // סדר ה-DOM אחרי הקיצור/הארגון-מחדש: מגלה-המסלול (#where) *לפני* סצנת
+  // סדר ה-DOM אחרי הקיצור/הארגון-מחדש: מקטע „שאל את הספר” (#where) *לפני* סצנת
   // Search→Build (#thesis-heading) — כדי שלחיצה על „למצוא את המסלול שלי” תגיע
   // לשאלון בלי לחצות את טווח ה-pin של הסצנה.
   const stationsBeforeThesis = await page.evaluate(() => {
@@ -55,7 +55,8 @@ test("mobile 390: assistant bubble stays visible ABOVE the cookie banner (no ove
     () => document.body.getAttribute("data-cookie-banner") === "open"
   );
 
-  const bubble = page.getByRole("button", { name: /שאל את הספר/ });
+  // הגלולה הצפה (aria-label מלא) — נבדלת מכפתור ה-#where „שאל את הספר” המדויק.
+  const bubble = page.getByRole("button", { name: /שאל את הספר — / });
 
   // הגלולה נשארת גלויה כשהבאנר פתוח (לא מוסתרת) — נוכחת ולחיצה למשתמש חדש.
   await expect(bubble).toBeVisible();

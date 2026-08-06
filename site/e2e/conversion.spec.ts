@@ -72,7 +72,7 @@ test("/preview is publicly accessible directly, without any registration", async
 
 test("only one station experience remains (no duplicate static station section)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // חוויית התחנות היחידה: הבורר האינטראקטיבי #where. הסקשן הסטטי #stations הוסר.
+  // חוויית התחנות היחידה: מקטע „שאל את הספר” (#where). הסקשן הסטטי #stations הוסר.
   await expect(page.locator("#where")).toHaveCount(1);
   await expect(page.locator("#stations")).toHaveCount(0);
 });

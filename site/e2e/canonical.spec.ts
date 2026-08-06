@@ -10,7 +10,7 @@ import { test, expect } from "./fixtures";
 
 const PROD_ORIGIN = "https://www.zachi.co.il";
 
-// כל 14 העמודים הניתנים לגילוי (בלי /api ובלי עמודים דינמיים של סליקה שאינם
+// כל 16 העמודים הניתנים לגילוי (בלי /api ובלי עמודים דינמיים של סליקה שאינם
 // לאינדוקס). המפתח הוא הנתיב; הערך הוא ה-canonical המצופה המלא.
 const ROUTES: Array<[string, string]> = [
   // עמוד הבית: Next פולט את מקור הפרודקשן ללא לוכסן-סיום.
@@ -26,6 +26,8 @@ const ROUTES: Array<[string, string]> = [
   ["/privacy", `${PROD_ORIGIN}/privacy`],
   ["/shipping-returns", `${PROD_ORIGIN}/shipping-returns`],
   ["/before-relationship", `${PROD_ORIGIN}/before-relationship`],
+  ["/building-relationship", `${PROD_ORIGIN}/building-relationship`],
+  ["/after-breakup", `${PROD_ORIGIN}/after-breakup`],
   ["/starting-again", `${PROD_ORIGIN}/starting-again`],
   ["/inside-relationship", `${PROD_ORIGIN}/inside-relationship`],
 ];

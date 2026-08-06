@@ -39,7 +39,9 @@ test.describe("reduced-motion: content is in its final visible state", () => {
 test("stage pages share a journey motif that marks the current station", async ({
   page,
 }) => {
-  await page.goto("/starting-again", { waitUntil: "networkidle" });
+  // מחוון המסע (עם סימון התחנה הנוכחית) מוצג לתחנות המרכזיות בלבד — לא לגשר
+  // החזרה („מתחילים מחדש”) ולא לשער המעבר („אחרי פרידה”). בודקים תחנה מרכזית.
+  await page.goto("/building-relationship", { waitUntil: "networkidle" });
   await expect(page.locator("h1")).toBeVisible();
   // שלוש התחנות קיימות כנקודות בתוך ה-header.
   const dots = page.locator("header span.rounded-full");

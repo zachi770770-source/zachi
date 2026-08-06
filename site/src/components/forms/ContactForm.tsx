@@ -100,8 +100,10 @@ export function ContactForm() {
         <FieldError message={errors.message?.message} />
       </div>
 
-      {/* שדה honeypot - מוסתר ממשתמשים אנושיים, נועד ללכידת בוטים בלבד. */}
-      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
+      {/* שדה honeypot — מוסתר חזותית (sr-only: 1px + clip, בלי הסטה של 9999px
+          שהייתה יוצרת overflow אופקי ב-RTL) ומוסר מעץ הנגישות (aria-hidden),
+          כך שאינו נראה, אינו מוקרא לקוראי מסך, ואינו משנה את רוחב העמוד. */}
+      <div className="sr-only" aria-hidden="true">
         <label htmlFor="website">אל תמלאו שדה זה</label>
         <input
           id="website"
