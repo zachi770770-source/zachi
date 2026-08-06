@@ -164,19 +164,27 @@ test("checkout is closed during pre-launch (no form, no payment)", async ({
   await expect(page.getByLabel(/אימייל/)).toHaveCount(0);
 });
 
-test("legacy URLs 301-redirect to the most relevant semantic page", async ({ request }) => {
-  // הפניות סמנטיות (proxy.ts): /about → /author; /articles* → /book (עמוד
-  // הספר — התוכן הקרוב ביותר לכל „מאמר” ישן, לא /faq גנרי ולא soft-404 שרירותי).
-  const cases: [string, string][] = [
+test("legacy URLs: explicit per-target mapping (301 semantic, 410 for gone article subpaths)", async ({
+  request,
+}) => {
+  // טבלת המיפוי (proxy.ts) — כל יעד נבחר במפורש, אין 301 שרירותי:
+  //   /about    → /author (301)  — „אודות” → עמוד המחבר.
+  //   /articles → /book   (301)  — אינדקס-מאמרים ישן → עמוד הספר (אין בלוג חלופי).
+  const redirects: [string, string][] = [
     ["/about", "/author"],
     ["/articles", "/book"],
-    ["/articles/some-old-post", "/book"],
   ];
-  for (const [from, to] of cases) {
+  for (const [from, to] of redirects) {
     const res = await request.get(from, { maxRedirects: 0 });
     expect(res.status(), `status for ${from}`).toBe(301);
     const location = res.headers()["location"] ?? "";
     expect(new URL(location, "http://localhost").pathname, `target for ${from}`).toBe(to);
+  }
+
+  // כתובות-מאמר בודדות מעולם לא קיימו ואין להן תחליף → 410 Gone (לא 301 שרירותי).
+  for (const gone of ["/articles/some-old-post", "/articles/2024/dating-tips"]) {
+    const res = await request.get(gone, { maxRedirects: 0 });
+    expect(res.status(), `410 for ${gone}`).toBe(410);
   }
 });
 
@@ -214,12 +222,41 @@ test("/book is a real page (not a redirect) with the deep-dive content", async (
 test("home page has the canonical title and unique social metadata", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveTitle("מדייטים לאהבה: ספר מעשי לדייטינג ולזוגיות | צחי חן");
-  // WebSite + Book structured data present.
+  // WebSite + Book structured data present. לפני פתיחת המכירה — אין Product/Offer.
   const ldTypes = await page.$$eval('script[type="application/ld+json"]', (els) =>
     els.map((e) => JSON.parse(e.textContent || "{}")["@type"])
   );
   expect(ldTypes).toContain("WebSite");
   expect(ldTypes).toContain("Book");
+  expect(ldTypes, "אין Product לפני פתיחת המכירה").not.toContain("Product");
+});
+
+test("station pages emit accurate structured data (WebPage + BreadcrumbList, not Article, no duplicates)", async ({
+  page,
+}) => {
+  for (const path of [
+    "/before-relationship",
+    "/building-relationship",
+    "/inside-relationship",
+    "/after-breakup",
+    "/starting-again",
+  ]) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    const types = await page.$$eval('script[type="application/ld+json"]', (els) =>
+      els.map((e) => JSON.parse(e.textContent || "{}")["@type"]),
+    );
+    expect(types, `${path}: WebPage`).toContain("WebPage");
+    expect(types, `${path}: BreadcrumbList`).toContain("BreadcrumbList");
+    // עמודי-תחנה אינם מאמרים מתוארכים — אין Article, ואין Product (טרום-מכירה).
+    expect(types, `${path}: no Article`).not.toContain("Article");
+    expect(types, `${path}: no Product`).not.toContain("Product");
+    // בלי כפילויות סכימה (בדיוק WebPage אחד ו-BreadcrumbList אחד).
+    expect(types.filter((t) => t === "WebPage"), `${path}: single WebPage`).toHaveLength(1);
+    expect(
+      types.filter((t) => t === "BreadcrumbList"),
+      `${path}: single BreadcrumbList`,
+    ).toHaveLength(1);
+  }
 });
 
 test("sitemap, robots and manifest are served correctly", async ({ request }) => {

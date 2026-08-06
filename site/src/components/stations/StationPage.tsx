@@ -11,7 +11,7 @@ import {
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
-import { ArticleSchema } from "@/components/schema/ArticleSchema";
+import { StationSchema } from "@/components/schema/StationSchema";
 import { RouteIllustration } from "@/components/shared/RouteIllustration";
 import { stationPageIllustration } from "@/content/routeIllustrations";
 
@@ -52,8 +52,8 @@ export function StationPage({ station }: { station: Station }) {
           { name: station.navLabel, path: `/${station.id}` },
         ]}
       />
-      <ArticleSchema
-        headline={station.h1}
+      <StationSchema
+        name={station.h1}
         description={station.metaDescription}
         path={`/${station.id}`}
       />
