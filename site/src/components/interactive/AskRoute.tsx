@@ -289,8 +289,8 @@ function Result({
   onSafety: () => void;
 }) {
   const a = dilemma.answer;
-  const opener =
-    stationId === "after-breakup" ? askUi.openerAfterBreakup : askUi.openerStation;
+  const isAfterBreakup = stationId === "after-breakup";
+  const opener = isAfterBreakup ? askUi.openerAfterBreakup : askUi.openerStation;
   const opt = dilemma.context?.options.find((o) => o.id === ctxId);
   const adapt = opt?.adapt ?? null;
   const tool = a.toolId ? tools.items.find((t) => t.id === a.toolId) ?? null : null;
@@ -314,6 +314,14 @@ function Result({
 
       {/* 1. שיקוף קצר */}
       <p className="mt-3 text-[1.05rem] leading-[1.75] text-foreground">{a.reflection}</p>
+
+      {/* „אחרי פרידה” היא תחנת-מעבר — התוצאה לא דוחפת לכיוון, מזכירה שמותר לא למהר. */}
+      {isAfterBreakup ? (
+        <p className="mt-3 rounded-xl bg-surface-muted/70 px-4 py-3 text-[14px] leading-relaxed text-foreground-muted">
+          זו תחנת מעבר. אין כאן כיוון „נכון” — לא חזרה ולא דייטים חדשים. מותר לעצור,
+          לעבד ולהבין לפני שמחליטים לאן.
+        </p>
+      ) : null}
 
       {/* התאמת-הקשר (פרק ב' וכו') — רק כשנבחרה */}
       {adapt?.note ? (

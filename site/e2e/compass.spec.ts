@@ -120,7 +120,8 @@ test("ask: persists only station + dilemma ids; reset clears them", async ({ pag
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
   await page.getByRole("radio", { name: station.existing }).click();
-  await page.getByRole("radio", { name: /נוצרו ריחוק ושגרה/ }).click(); // d-distance-routine (בלי הקשר)
+  await page.getByRole("radio", { name: /נוצרו ריחוק ושגרה/ }).click(); // d-distance-routine (הקשר פרק ב')
+  await page.getByRole("radio", { name: /אין כרגע מורכבות/ }).click(); // ללא התאמת פרק ב'
   await expect(page.getByRole("article")).toBeVisible();
 
   const saved = await page.evaluate(() => window.localStorage.getItem("mlc.ask.v1"));
