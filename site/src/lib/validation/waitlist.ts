@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { PERSONA_IDS, PERSONA_SOURCE_VALUES } from "@/content/personas";
+
 /** גרסת ההסכמה — לתיעוד consent לפי דרישות פרטיות. */
 export const WAITLIST_CONSENT_VERSION = "2026-07-v1";
 
@@ -30,6 +32,12 @@ export const waitlistSchema = z.object({
     .boolean()
     .refine((v) => v === true, "יש לאשר את קבלת העדכון כדי להירשם"),
   source: z.enum(WAITLIST_SOURCES).default("homepage"),
+  /**
+   * הפרסונה שנבחרה (אם בכלל) ומאיפה נבחרה — לשיוך שיווקי בלבד. אופציונליים,
+   * מקבלים גם null (גולש שלא בחר פרסונה). אינם נתונים אישיים.
+   */
+  persona: z.enum(PERSONA_IDS).nullish(),
+  personaSource: z.enum(PERSONA_SOURCE_VALUES).nullish(),
   /** honeypot — לא נשמר; אם מולא, מדובר כנראה בבוט. */
   company: z.string().max(120).optional().or(z.literal("")),
 });

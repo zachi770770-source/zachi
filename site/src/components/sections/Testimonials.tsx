@@ -1,15 +1,25 @@
+"use client";
+
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
-import { approvedTestimonials, hasEnoughTestimonials } from "@/content/testimonials";
+import {
+  hasEnoughTestimonials,
+  personaFirstTestimonials,
+} from "@/content/testimonials";
+import { usePersonaOptional } from "@/components/persona/PersonaProvider";
 
 /**
  * המלצות קוראים. הרכיב נגזר ישירות מהנתונים: הוא מרונדר רק כאשר יש לפחות
  * שלוש המלצות מאושרות (ראו testimonials.ts). אם אין שלוש, הפונקציה מחזירה
  * null ואין שום שטח ריק בעמוד. אין כאן טקסט דוגמה או המלצות מומצאות.
+ *
+ * מבנה מפולח: כשנבחרה פרסונה, ההמלצות המשויכות לה מוקדמות לראש (מיון יציב).
+ * כל עוד אין המלצות אמיתיות מאושרות — הרכיב פשוט לא מרונדר.
  */
 export function Testimonials() {
+  const { personaId } = usePersonaOptional();
   if (!hasEnoughTestimonials()) return null;
-  const items = approvedTestimonials();
+  const items = personaFirstTestimonials(personaId);
 
   return (
     <section

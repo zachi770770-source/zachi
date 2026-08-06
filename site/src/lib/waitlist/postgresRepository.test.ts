@@ -55,11 +55,29 @@ describe("PostgresWaitlistRepository self-provisioning", () => {
     expect(createIdx).toBeGreaterThanOrEqual(0);
     expect(insertIdx).toBeGreaterThan(createIdx);
 
+    // persona/persona_source ריקים כשלא סופקו → NULL, NULL בסוף.
     expect(insertCalls(db)[0].params).toEqual([
       "a@b.com",
       "a@b.com",
       "hero",
       "v1",
+      null,
+      null,
+    ]);
+  });
+
+  it("passes persona and persona_source through to the insert when provided", async () => {
+    const db = new MockSql();
+    const repo = new PostgresWaitlistRepository(db);
+    await repo.add({ ...input, persona: "married", personaSource: "hero" });
+
+    expect(insertCalls(db)[0].params).toEqual([
+      "a@b.com",
+      "a@b.com",
+      "hero",
+      "v1",
+      "married",
+      "hero",
     ]);
   });
 

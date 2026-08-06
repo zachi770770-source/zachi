@@ -11,6 +11,8 @@ import {
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+import { RouteIllustration } from "@/components/shared/RouteIllustration";
+import { stationPageIllustration } from "@/content/routeIllustrations";
 
 /**
  * רכיב משותף לשלושת דפי התחנות. מקבל אובייקט תחנה יחיד ומרנדר את הדף
@@ -31,6 +33,8 @@ export function StationPage({ station }: { station: Station }) {
     .map((id) => stations[id]);
 
   const currentIndex = stationOrder.indexOf(station.id);
+  // איור מאושר לתחנה — רק כשההתאמה הסמנטית נקייה (בתוך קשר / מתחילים מחדש).
+  const illustration = stationPageIllustration[station.id];
 
   return (
     <Container className="py-10 sm:py-14 lg:py-16">
@@ -95,6 +99,14 @@ export function StationPage({ station }: { station: Station }) {
           ))}
         </div>
       </header>
+
+      {/* איור התחנה — חלק מאזור הפתיחה, לא מקטע חדש. נטען בעצלות, מתחת לקפל. */}
+      {illustration ? (
+        <RouteIllustration
+          illustration={illustration}
+          className="reveal mt-10 max-w-[60ch]"
+        />
+      ) : null}
 
       <div className="mx-auto mt-12 flex max-w-[64ch] flex-col gap-12 sm:mt-14">
         {/* תיאור הקושי */}

@@ -7,6 +7,8 @@ import { ArrowLeft, X } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
+import { getPersona } from "@/content/personas";
+import { usePersona } from "@/components/persona/PersonaProvider";
 
 /**
  * בר-הטעימה החכם — פעולה דביקה אחת ומאוחדת. בטרום-השקה זו תמיד הטעימה החינמית
@@ -20,6 +22,8 @@ import { trackEvent } from "@/lib/analytics";
 const DISMISS_KEY = "mdl_sticky_dismissed";
 
 export function StickyCta() {
+  const { personaId } = usePersona();
+  const persona = getPersona(personaId);
   const [visible, setVisible] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
   const [bannerHeight, setBannerHeight] = React.useState(0);
@@ -136,10 +140,24 @@ export function StickyCta() {
   // כשבאנר העוגיות פתוח — מוסתר אף הוא (אין תחרות על שטח התחתית).
   if (dismissed || !visible || formInView || sceneInView || bannerOpen) return null;
 
-  // טרום-השקה: תמיד הטעימה החינמית ללא הרשמה. אחרי פתיחת המכירה — רכישה.
+  // טרום-השקה: אם נבחרה פרסונה — ה-CTA הרגשי שלה (אל רשימת ההמתנה); אחרת הטעימה
+  // החינמית ללא הרשמה. אחרי פתיחת המכירה — רכישה.
   const preLaunch = !siteConfig.salesOpen;
-  const href = preLaunch ? "/preview" : "/book#purchase";
-  const label = preLaunch ? "קראו טעימה מהספר · 2 דקות" : "לרכישת הספר";
+  const href = !preLaunch
+    ? "/book#purchase"
+    : persona
+      ? persona.ctaHref
+      : "/preview";
+  const label = !preLaunch
+    ? "לרכישת הספר"
+    : persona
+      ? persona.ctaLabel
+      : "קראו טעימה מהספר · 2 דקות";
+  const subline = preLaunch
+    ? persona
+      ? "מותאם למצב שלכם"
+      : "טעימה מהספר · בלי הרשמה"
+    : null;
 
   return (
     <aside
@@ -168,9 +186,9 @@ export function StickyCta() {
       >
         <span className="flex flex-col items-start leading-tight">
           <span>{label}</span>
-          {preLaunch ? (
+          {subline ? (
             <span className="text-[12px] font-medium text-foreground-muted">
-              טעימה מהספר · בלי הרשמה
+              {subline}
             </span>
           ) : null}
         </span>

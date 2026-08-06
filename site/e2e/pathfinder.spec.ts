@@ -146,6 +146,8 @@ test("Path Finder never transmits answer content to the server or analytics", as
   await pick(where.getByRole("radio", { name: /נועל.*מסקנה/ }));
   await pick(where.getByRole("radio", { name: /קטע שמתאים לי/ }));
   await expect(where.getByText(/נקודת הפתיחה שלכם/)).toBeVisible();
+  // פתיח התוצאה מנוסח כהצעה מהספר (לא אבחון, לא שיחה עם AI).
+  await expect(where.getByText("זה הכיוון שהספר מציע לך עכשיו")).toBeVisible();
   const leaked = posts.filter((p) =>
     /מחפש|נועל|קטע שמתאים|before-relationship|gate-questions/.test(p),
   );

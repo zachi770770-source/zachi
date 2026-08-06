@@ -9,6 +9,7 @@ import { CookieConsent } from "@/components/layout/CookieConsent";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 import { MotionRoot } from "@/components/shared/MotionRoot";
+import { PersonaProvider } from "@/components/persona/PersonaProvider";
 
 /**
  * Heebo משמש לממשק, לגוף ולכותרות המרכזיות.
@@ -86,16 +87,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-svh flex-col bg-background text-foreground antialiased">
-        <MotionRoot />
-        <SkipToContent />
-        <Header />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <StickyPurchaseBar />
-        <CookieConsent />
-        <AnalyticsScripts />
+        <PersonaProvider>
+          <MotionRoot />
+          <SkipToContent />
+          <Header />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <StickyPurchaseBar />
+          <CookieConsent />
+          <AnalyticsScripts />
+        </PersonaProvider>
       </body>
     </html>
   );

@@ -84,6 +84,8 @@ export async function POST(request: Request) {
       emailOriginal: parsed.data.email,
       source: parsed.data.source,
       consentVersion: WAITLIST_CONSENT_VERSION,
+      persona: parsed.data.persona ?? null,
+      personaSource: parsed.data.personaSource ?? null,
     });
   } catch (err) {
     // אבחון מאובטח: מדפיסים רק מטא-נתונים לא-רגישים (name / code / cause.code /

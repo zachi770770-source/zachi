@@ -13,6 +13,7 @@ import {
 
 import type { WaitlistSource } from "@/lib/validation/waitlist";
 import { trackEvent } from "@/lib/analytics";
+import { usePersonaOptional } from "@/components/persona/PersonaProvider";
 import { loadCompass } from "@/lib/compass/quizStorage";
 import { stations } from "@/content/stations";
 import type { CompassStationId } from "@/lib/compass/quiz";
@@ -50,6 +51,8 @@ export function WaitlistForm({
   compact?: boolean;
 }) {
   const id = React.useId();
+  // הפרסונה הפעילה (אם נבחרה) לשיוך הרשמה — שיווקי בלבד, בלי נתונים אישיים.
+  const { personaId, source: personaSource } = usePersonaOptional();
   const emailRef = React.useRef<HTMLInputElement>(null);
   const [email, setEmail] = React.useState("");
   const [consent, setConsent] = React.useState(false);
@@ -116,7 +119,14 @@ export function WaitlistForm({
         const res = await fetch("/api/waitlist", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, consent, source, company }),
+          body: JSON.stringify({
+            email,
+            consent,
+            source,
+            company,
+            persona: personaId,
+            personaSource,
+          }),
         });
         if (!res.ok) {
           const data = await res.json().catch(() => null);
@@ -140,7 +150,7 @@ export function WaitlistForm({
         setError("בעיית תקשורת. בדקו את החיבור ונסו שוב.");
       }
     },
-    [email, consent, company, source, onSuccess]
+    [email, consent, company, source, personaId, personaSource, onSuccess]
   );
 
   if (status === "success") {

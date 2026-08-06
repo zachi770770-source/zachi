@@ -5,7 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
 
 import { compassQuiz } from "@/content/compass";
-import { PathFinder } from "@/components/interactive/PathFinder";
+import { AskRoute } from "@/components/interactive/AskRoute";
 
 /**
  * משגר „המצפן” בעמוד הבית — חוויית שלוש-השאלות הדטרמיניסטית, נגישה תמיד וללא
@@ -21,8 +21,12 @@ import { PathFinder } from "@/components/interactive/PathFinder";
 export function CompassLauncher() {
   const [open, setOpen] = React.useState(false);
   const [bannerOpen, setBannerOpen] = React.useState(false);
-  // הבועה הצפה אינה מופיעה בטעינה הראשונית כדי שלא תתחרה בטופס ההרשמה שבשער;
-  // היא נחשפת בעדינות אחרי גלילה קלה (או מיד אם המשתמש כבר גלל / פתח את החלונית).
+  // גובה באנר-העוגיות (נמדד מריפוד-התחתית שה-CookieConsent שומר על ה-body) —
+  // לצורך הרמת הגלולה *מעל* הבאנר עם מרווח ברור, במקום להסתירה.
+  const [bannerHeight, setBannerHeight] = React.useState(0);
+  // הבועה הצפה אינה מופיעה בפריים הראשון ממש (כדי לא לקפוץ מעל השער), אך נחשפת
+  // מהר וברור בשני המכשירים: אחרי גלילה קטנה, או אחרי השהיה קצרה גם בלי גלילה —
+  // כך מי שלא גולל עדיין רואה אותה, ולא רק אחרי חצי מסך.
   const [revealed, setRevealed] = React.useState(false);
 
   // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון.
@@ -32,23 +36,31 @@ export function CompassLauncher() {
     return () => window.removeEventListener("open-compass", handler);
   }, []);
 
-  // חשיפה אחרי גלילה מעבר לכ-60% מגובה החלון (מעבר לאזור השער).
+  // חשיפה מהירה: גלילה קלה (מעל 120px) *או* טיימר-גיבוי קצר, מה שקורה קודם.
   React.useEffect(() => {
+    let timer = 0;
+    const reveal = () => {
+      setRevealed(true);
+      cleanup();
+    };
     const onScroll = () => {
-      if (window.scrollY > window.innerHeight * 0.6) {
-        setRevealed(true);
-        window.removeEventListener("scroll", onScroll);
-      }
+      if (window.scrollY > 120) reveal();
+    };
+    const cleanup = () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timer) window.clearTimeout(timer);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    // גיבוי: גם בלי גלילה כלל — הבועה נוכחת אחרי השהיה קצרה.
+    timer = window.setTimeout(reveal, 1200);
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    return cleanup;
   }, []);
 
   // מצב באנר העוגיות מגיע כאות-מצב מפורש מ-CookieConsent (data-attribute על
-  // ה-body + אירוע „cookie-banner-change”), ולא מהסקה של ריווח CSS. במובייל
-  // הבועה (בקרה לא-חיונית) מוסתרת כל עוד הבאנר פתוח, כדי שלא תכסה
-  // טקסט/CTA/טופס, ומשוחזרת אוטומטית עם סגירת ההסכמה. הפתרון אינו מבוסס z-index.
+  // ה-body + אירוע „cookie-banner-change”). כשהבאנר פתוח הגלולה *אינה* מוסתרת —
+  // היא מורמת דינמית מעל הבאנר עם מרווח ברור (ראו bannerOffset למטה), ונשארת
+  // גלויה ולחיצה למשתמש חדש. עם סגירת ההסכמה היא חוזרת חלק למיקום התחתון הרגיל.
   React.useEffect(() => {
     const readAttr = () =>
       document.body.getAttribute("data-cookie-banner") === "open";
@@ -63,32 +75,56 @@ export function CompassLauncher() {
     return () => window.removeEventListener("cookie-banner-change", onChange);
   }, []);
 
-  // כשאין באנר — הבועה מכבדת את env(safe-area-inset-bottom).
-  const mobileBottom = "max(1.25rem, env(safe-area-inset-bottom))";
+  // גובה הבאנר נמדד מריפוד-התחתית שה-CookieConsent שומר על ה-body (אותו מנגנון
+  // של בר-הטעימה) — מתאפס ל-0 עם סגירת הבאנר, ואז הגלולה חוזרת למיקומה הרגיל.
+  React.useEffect(() => {
+    const read = () => {
+      const pb = parseInt(getComputedStyle(document.body).paddingBottom, 10);
+      setBannerHeight(Number.isFinite(pb) ? pb : 0);
+    };
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+    window.addEventListener("resize", read);
+    return () => {
+      mo.disconnect();
+      window.removeEventListener("resize", read);
+    };
+  }, []);
+
+  // מובייל: הבועה מורמת מעל בר-הטעימה הדביק (הבר יושב בתחתית ורוחבו כמעט מלא),
+  // כך שאין חפיפה בין שני הרכיבים הצפים. בדסקטופ היא בפינה התחתונה-מתחילה
+  // (שמאל ב-RTL), הפוך מבר-הטעימה שיושב בפינה הנגדית.
+  const mobileBottom = "max(5.5rem, calc(env(safe-area-inset-bottom) + 5rem))";
+
+  // כשהבאנר פתוח — הרמה דינמית מעל גובהו עם מרווח ברור (16px, בטווח 12–20).
+  // גובה הבאנר כולל כבר את ה-safe-area (הבאנר עצמו מרפד אותו). כשסגור → 0,
+  // וה-max() בתחתית מחזיר את הגלולה למיקומה הרגיל. המעבר על „bottom” חלק.
+  const BANNER_GAP = 16;
+  const bannerOffset =
+    bannerOpen && bannerHeight > 0 ? `${bannerHeight + BANNER_GAP}px` : "0px";
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-      {/* בועה צפה — כל הרוחב מהצד המתחיל של הקצה (שמאל ב-RTL) */}
+      {/* בועה צפה גדולה עם טקסט מפורש — פינה תחתונה-מתחילה (שמאל ב-RTL) */}
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label="המצפן: שלוש שאלות קצרות"
-          style={{ ["--bubble-bottom" as string]: mobileBottom }}
+          aria-label="שאל את הספר — שלוש שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
+          style={{
+            ["--bubble-bottom" as string]: mobileBottom,
+            ["--banner-offset" as string]: bannerOffset,
+          }}
           className={
-            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex translate-y-0 items-center gap-2.5 transition-opacity duration-500 focus-visible:outline-none md:end-5 md:bottom-auto md:top-1/2 md:-translate-y-1/2" +
-            (bannerOpen ? " max-md:hidden" : "") +
+            // ה-bottom הוא max(בסיס-רספונסיבי, היסט-הבאנר): כשהבאנר סגור ההיסט 0
+            // והבסיס קובע; כשפתוח ההיסט (גובה-הבאנר+מרווח) גדול מהבסיס ומרים את
+            // הגלולה מעליו. המעבר על „bottom” חלק (בלי קפיצה/הבהוב). RTL: end-*.
+            "group fixed end-4 bottom-[max(var(--bubble-bottom),var(--banner-offset))] top-auto z-40 inline-flex items-center justify-center rounded-full bg-foreground px-6 py-4 text-[16px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform,bottom] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-[max(2rem,var(--banner-offset))] md:px-8 md:py-5 md:text-[18px]" +
             (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
           }
         >
-          {/* תווית קבועה, קטנה ועדינה — דסקטופ/טאבלט בלבד. לא לשונית ולא כפתור
-              גדול; hover/focus רק מחזקים מעט את הניגודיות. */}
-          <span className="hidden whitespace-nowrap rounded-full bg-surface px-3 py-1.5 text-[12.5px] font-medium text-foreground-muted shadow-sm ring-1 ring-border transition-colors group-hover:text-foreground group-focus-visible:text-foreground md:inline-block">
-            המצפן
-          </span>
-          {/* בועה: גוף Ink + טבעת דקה Terracotta + אייקון ספר לבן; ללא pulse */}
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-surface shadow-lg ring-2 ring-brand group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-background">
-            <Compass className="h-6 w-6" aria-hidden="true" />
-          </span>
+          {/* טקסט מפורש במקום אייקון — „שאל את הספר”. */}
+          <span className="whitespace-nowrap">שאל את הספר</span>
         </button>
       </DialogPrimitive.Trigger>
 
@@ -96,19 +132,24 @@ export function CompassLauncher() {
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-[2px] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <DialogPrimitive.Content
           className="fixed inset-y-0 end-0 z-50 flex w-[min(94vw,32rem)] flex-col overflow-hidden bg-background shadow-2xl focus:outline-none will-change-transform data-[state=open]:animate-compass-in data-[state=closed]:animate-compass-out"
-          aria-describedby={undefined}
         >
-          <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
+            <div className="flex items-start gap-2.5">
+              {/* אייקון מצפן קטן — מלווה בלבד, לא הכותרת הראשית. */}
               <span
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-muted text-brand"
+                className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand"
                 aria-hidden="true"
               >
                 <Compass className="h-4 w-4" />
               </span>
-              <DialogPrimitive.Title className="font-serif text-lg font-semibold text-foreground">
-                {compassQuiz.eyebrow}
-              </DialogPrimitive.Title>
+              <div>
+                <DialogPrimitive.Title className="font-serif text-lg font-semibold text-foreground">
+                  {compassQuiz.ask.title}
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Description className="mt-1 max-w-[34ch] text-[13.5px] leading-snug text-foreground-muted">
+                  {compassQuiz.ask.subtitle}
+                </DialogPrimitive.Description>
+              </div>
             </div>
             <DialogPrimitive.Close
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
@@ -119,7 +160,7 @@ export function CompassLauncher() {
           </div>
 
           <div className="grow overflow-y-auto px-5 py-6 sm:px-6">
-            <PathFinder />
+            <AskRoute />
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

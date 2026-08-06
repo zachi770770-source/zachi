@@ -1,104 +1,164 @@
 import { test, expect } from "./fixtures";
 
 /**
- * „המצפן” (/compass) מציג את *אותו* מנוע שאלון (PathFinder) כמו הבית (#where):
- * שלוש שאלות סגורות → תחנה + כלי מעשי מהספר + פעולה אחת אמיתית. דטרמיניסטי,
- * ללא AI/טקסט חופשי. מנוע אחד, אותה תוצאה בשני המקומות.
- *
- * Q1[0]=„מחפש/ת קשר”→לפני קשר, Q2[0], Q3[0]=„לקרוא קטע”→פעולה ראשית לטעימה
- * המותאמת. הכלי לצירוף (לפני קשר, קושי 0) הוא gate-questions („בדיקת הקצב”).
+ * „שאל את הספר” (/compass) — מנוע הכוונה סגור ודטרמיניסטי בשלוש שכבות:
+ * תחנה → דילמה → שאלת-הקשר אחת (רק כשרלוונטי) → תוצאה בת 8 חלקים. שכבת בטיחות
+ * דורסת במצבי סכנה. אין AI, אין טקסט חופשי, אין אבחון/אחוזי-ביטחון.
  */
 
-test("compass: three closed questions → station + tool + real actions (no %)", async ({ page }) => {
+const station = {
+  dating: /חיפוש ודייטים/,
+  building: /בניית קשר/,
+  existing: /קשר קיים/,
+  afterBreakup: /אחרי פרידה/,
+};
+
+test("ask: station → dilemma → 8-part result (tool + sample + waitlist), no %", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
 
-  await expect(page.getByText("שאלה 1/3")).toBeVisible();
-  await page.getByRole("radio").first().click();
-  await expect(page.getByText("שאלה 2/3")).toBeVisible();
-  await page.getByRole("radio").first().click();
-  await expect(page.getByText("שאלה 3/3")).toBeVisible();
-  await page.getByRole("radio").first().click();
+  await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
+  await page.getByRole("radio", { name: station.dating }).click();
+  await expect(page.getByRole("heading", { name: "מה הכי מעסיק אתכם כרגע?" })).toBeVisible();
+  await page.getByRole("radio", { name: /מתקשה להתחיל/ }).click(); // d-start (בלי הקשר)
 
-  const result = page.getByRole("article");
-  await expect(result).toHaveAttribute("aria-live", "polite");
-  await expect(result.getByRole("heading")).toContainText("לפני קשר");
-  // אותה תוצאה כמו הבית: כלי מהספר + שלוש פעולות אמיתיות (טעימה מותאמת/כלי/תחנה).
-  await expect(result.getByText("כלי מהספר שיכול לעזור כאן")).toBeVisible();
+  const r = page.getByRole("article");
+  await expect(r).toHaveAttribute("aria-live", "polite");
+  await expect(r.getByText("זה הכיוון שהספר מציע לכם כרגע")).toBeVisible();
+  await expect(r.getByRole("heading")).toContainText("מתקשה להתחיל");
+  // 8 החלקים
+  await expect(r.getByText("ההבחנה המרכזית")).toBeVisible();
+  await expect(r.getByText("כדאי לבדוק לפני שמחליטים")).toBeVisible();
+  await expect(r.getByText("כלי מהספר שמתאים כאן")).toBeVisible();
+  await expect(r.getByText("פעולה קטנה להיום")).toBeVisible();
+  await expect(r.getByText("מה לא כדאי להסיק מהר מדי")).toBeVisible();
+  // כלי + טעימה מתאימה (d-start → fact-story-action) + רשימת המתנה
+  await expect(r.locator('a[href="/book#tool-fact-story-action"]')).toBeVisible();
   await expect(
-    result.locator('a[href="/preview?tool=gate-questions&station=before-relationship"]'),
+    r.locator('a[href="/preview?tool=fact-story-action&station=before-relationship"]'),
   ).toBeVisible();
-  await expect(result.locator('a[href="/book#tool-gate-questions"]')).toBeVisible();
-  await expect(result.locator('a[href="/before-relationship"]')).toBeVisible();
-  await expect(result.getByText("זו נקודת פתיחה לקריאה, לא אבחון או ייעוץ.")).toBeVisible();
-  // אין אחוזי-ביטחון
-  await expect(result.getByText(/%/)).toHaveCount(0);
+  await expect(r.locator('a[href="/waitlist"]')).toBeVisible();
+  await expect(r.getByText(/%/)).toHaveCount(0);
+  await expect(r.getByText(/צ.אט|בינה מלאכות|שיחה עם|AI/)).toHaveCount(0);
 });
 
-test("compass: back keeps the answer, and restart clears it", async ({ page }) => {
+test("ask: a context question appears only for dilemmas that need it, and adds an adaptation", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
-  await page.getByRole("radio").first().click(); // Q1
-  await expect(page.getByText("שאלה 2/3")).toBeVisible();
-  await page.getByRole("button", { name: "לשאלה הקודמת" }).click();
-  await expect(page.getByText("שאלה 1/3")).toBeVisible();
-  await expect(page.getByRole("radio").first()).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("radio", { name: station.dating }).click();
+  await page.getByRole("radio", { name: /פוסל.*מהר מדי/ }).click(); // d-reject-fast (יש הקשר)
 
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await expect(page.getByRole("article")).toBeVisible();
-  await page.getByRole("button", { name: /להתחיל מחדש/ }).click();
-  await expect(page.getByText("שאלה 1/3")).toBeVisible();
+  // שאלת-הקשר אחת בלבד
+  await expect(page.getByText("האם משהו מאלה חלק מהתמונה שלכם עכשיו?")).toBeVisible();
+  await page.getByRole("radio", { name: /ילדים, גרוש/ }).click();
+
+  const r = page.getByRole("article");
+  await expect(r.getByText("התאמה למצב שלכם")).toBeVisible();
+  await expect(r.getByText(/אין המון זמן פנוי, יש ילדים/)).toBeVisible();
 });
 
-test("compass: keyboard-only — focus a radio and Enter advances the flow", async ({ page }) => {
+test("ask: safety routing overrides the normal result (fear/control/danger)", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/compass", { waitUntil: "networkidle" });
+  await page.getByRole("radio", { name: station.existing }).click();
+  await page.getByRole("radio", { name: /אותם ריבים חוזרים/ }).click(); // d-same-fights (הקשר בטיחות)
+  await expect(page.getByText(/איך זה מרגיש בבית כרגע/)).toBeVisible();
+  await page.getByRole("radio", { name: /פחד, שליטה, פגיעה או סכנה/ }).click();
+
+  const r = page.getByRole("article");
+  await expect(r.getByRole("heading")).toContainText("לא המקום המתאים");
+  await expect(r.getByText(/פנו לעזרה מקצועית/)).toBeVisible();
+  // אין עצה זוגית רגילה
+  await expect(r.getByText("ההבחנה המרכזית")).toHaveCount(0);
+  await expect(r.getByText("כלי מהספר שמתאים כאן")).toHaveCount(0);
+});
+
+test("ask: after-breakup is a transition station (does not force a direction)", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/compass", { waitUntil: "networkidle" });
+  await page.getByRole("radio", { name: station.afterBreakup }).click();
+  await page.getByRole("radio", { name: /רוצה לחזור בעיקר בגלל בדידות/ }).click(); // d-loneliness (בלי הקשר)
+
+  const r = page.getByRole("article");
+  await expect(r.getByText("נראה שזה המקום שבו הספר יכול לפגוש אתכם עכשיו")).toBeVisible();
+  await expect(r.getByRole("heading")).toContainText("בדידות");
+});
+
+test("ask: back, change dilemma/station and restart", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/compass", { waitUntil: "networkidle" });
+  await page.getByRole("radio", { name: station.building }).click();
+  await expect(page.getByRole("heading", { name: "מה הכי מעסיק אתכם כרגע?" })).toBeVisible();
+  await page.getByRole("button", { name: "תחנה אחרת" }).click();
+  await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
+
+  await page.getByRole("radio", { name: station.building }).click();
+  await page.getByRole("radio", { name: /פער בין המילים/ }).click(); // d-words-actions (בלי הקשר)
+  await expect(page.getByRole("article")).toBeVisible();
+  await page.getByRole("button", { name: "דילמה אחרת" }).click();
+  await expect(page.getByRole("heading", { name: "מה הכי מעסיק אתכם כרגע?" })).toBeVisible();
+  await page.getByRole("radio", { name: /פער בין המילים/ }).click();
+  await page.getByRole("button", { name: /להתחיל מחדש/ }).click();
+  await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
+});
+
+test("ask: keyboard-only — focus a radio and Enter advances", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
   const first = page.getByRole("radio").first();
   await first.focus();
   await expect(first).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.getByText("שאלה 2/3")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "מה הכי מעסיק אתכם כרגע?" })).toBeVisible();
 });
 
-test("compass persists only the station id, and home highlights the matched station", async ({
-  page,
-}) => {
+test("ask: persists only station + dilemma ids; reset clears them", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await expect(page.getByRole("article").getByRole("heading")).toContainText("לפני קשר");
-  // רק מזהה התחנה + השלמה נשמרים (ללא תשובות).
-  const saved = await page.evaluate(() => window.localStorage.getItem("mlc.compass.v1"));
-  expect(JSON.parse(saved!)).toEqual({ stationId: "before-relationship", completed: true });
+  await page.getByRole("radio", { name: station.existing }).click();
+  await page.getByRole("radio", { name: /נוצרו ריחוק ושגרה/ }).click(); // d-distance-routine (הקשר פרק ב')
+  await page.getByRole("radio", { name: /אין כרגע מורכבות/ }).click(); // ללא התאמת פרק ב'
+  await expect(page.getByRole("article")).toBeVisible();
 
-  // בבית: התחנה שהמצפן שמר מודגשת, עם באנר „המשך”.
-  await page.goto("/", { waitUntil: "networkidle" });
-  const where = page.locator("#where");
-  await where.scrollIntoViewIfNeeded();
-  await expect(where.getByText("השלמתם את המצפן")).toBeVisible();
-  await expect(where.locator('a[href="/before-relationship"]').first()).toBeVisible();
-  await expect(where.locator(".station-node[data-active]")).toHaveCount(1);
+  const saved = await page.evaluate(() => window.localStorage.getItem("mlc.ask.v1"));
+  expect(JSON.parse(saved!)).toEqual({ stationId: "existing", dilemmaId: "d-distance-routine" });
+
+  await page.getByRole("button", { name: /להתחיל מחדש/ }).click();
+  const cleared = await page.evaluate(() => window.localStorage.getItem("mlc.ask.v1"));
+  expect(cleared).toBeNull();
 });
 
-test("compass: corrupt saved data still shows the quiz and completes (no crash)", async ({
-  page,
-}) => {
+test("ask: a returning visitor with a saved route sees the result directly", async ({ page }) => {
   await page.addInitScript(() => {
     try {
-      window.localStorage.setItem("mlc.compass.v1", "{corrupt");
+      window.localStorage.setItem(
+        "mlc.ask.v1",
+        JSON.stringify({ stationId: "existing", dilemmaId: "d-emotional-gap" }),
+      );
     } catch {
       /* ignore */
     }
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
-  await expect(page.getByText("שאלה 1/3")).toBeVisible();
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await page.getByRole("radio").first().click();
-  await expect(page.getByRole("article").getByRole("heading")).toContainText("לפני קשר");
+  await expect(page.getByRole("article").getByRole("heading")).toContainText(
+    "פער בצרכים הרגשיים",
+  );
+});
+
+test("ask: corrupt saved data still shows the station chooser (no crash)", async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      window.localStorage.setItem("mlc.ask.v1", "{corrupt");
+    } catch {
+      /* ignore */
+    }
+  });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/compass", { waitUntil: "networkidle" });
+  await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
 });

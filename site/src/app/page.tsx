@@ -1,6 +1,7 @@
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
+import { PersonasSection } from "@/components/sections/PersonasSection";
 import { ThesisMotifSection } from "@/components/sections/ThesisMotifSection";
 import { HubTeaser } from "@/components/sections/HubTeaser";
 import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
@@ -46,6 +47,8 @@ export default function HomePage() {
       <ProductSchema />
       <BuildSpine />
       <Hero />
+      {/* פילוח ל-4 פרסונות — מוקדם בעמוד, מיד אחרי ה-Hero. */}
+      <PersonasSection />
       {/* Path Finder לפני סצנת החתימה: המשתמש מגיע לשאלון מיד אחרי ה-Hero
           (וקישור „למצוא את המסלול שלי” ‏/#where מגיע אליו ≤800ms, בלי לחצות את
           טווח ה-pin של Search→Build). בגלילה טבעית הסצנה והאנימציה נשארות מלאות. */}

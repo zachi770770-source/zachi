@@ -2,8 +2,9 @@ import { Compass } from "lucide-react";
 
 import { pageMetadata } from "@/lib/seo";
 import { compassQuiz } from "@/content/compass";
+import { askUi } from "@/content/askRoute";
 import { Container } from "@/components/shared/Container";
-import { PathFinder } from "@/components/interactive/PathFinder";
+import { AskRoute } from "@/components/interactive/AskRoute";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
@@ -13,10 +14,12 @@ export const metadata = pageMetadata({
   ogType: "article",
 });
 
+const POINTS = ["3–4 שאלות קצרות", "בחירה מתוך תשובות", "נקודת פתיחה, לא אבחון"];
+
 /**
- * עמוד „המצפן” — חוויית שלוש-שאלות דטרמיניסטית שמכוונת את הקורא/ת לתחנה
- * המתאימה בספר. אינו צ׳אטבוט ואינו AI: כל האפשרויות סגורות, המיפוי דטרמיניסטי
- * בצד-הלקוח, ואין קריאה ל-API חיצוני. העמוד תמיד פעיל וניתן לאינדוקס.
+ * עמוד „שאל את הספר” — מסלול אישי סגור ודטרמיניסטי שמכוון את הקורא/ת אל התחנה
+ * והכלי המתאימים בספר, עם התאמת פרק ב' ושער „אחרי פרידה”. אינו צ׳אטבוט ואינו
+ * AI: כל האפשרויות סגורות, המיפוי דטרמיניסטי בצד-הלקוח, ואין קריאה ל-API חיצוני.
  */
 export default function CompassPage() {
   return (
@@ -24,7 +27,7 @@ export default function CompassPage() {
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
-          { name: compassQuiz.eyebrow, path: "/compass" },
+          { name: askUi.eyebrow, path: "/compass" },
         ]}
       />
 
@@ -35,16 +38,16 @@ export default function CompassPage() {
         >
           <Compass className="h-6 w-6" />
         </span>
-        <span className="kicker mt-6 justify-center">{compassQuiz.eyebrow}</span>
+        <span className="kicker mt-6 justify-center">{askUi.eyebrow}</span>
         <h1 className="mt-4 font-serif text-[clamp(2rem,4.2vw,2.85rem)] font-semibold leading-[1.1] text-balance text-foreground">
-          {compassQuiz.title}
+          {compassQuiz.ask.title}
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-[clamp(1.05rem,1.5vw,1.2rem)] leading-relaxed text-balance text-foreground-muted">
-          {compassQuiz.lead}
+          {compassQuiz.ask.subtitle}
         </p>
 
         <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-          {compassQuiz.points.map((point) => (
+          {POINTS.map((point) => (
             <li
               key={point}
               className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-[13.5px] font-medium text-foreground-muted"
@@ -57,7 +60,7 @@ export default function CompassPage() {
       </header>
 
       <div className="enter mt-10 sm:mt-12" style={{ animationDelay: "160ms" }}>
-        <PathFinder />
+        <AskRoute />
       </div>
     </Container>
   );
