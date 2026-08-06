@@ -6,8 +6,10 @@ const staticRoutes = [
   { path: "/", priority: 1, changeFrequency: "weekly" as const },
   { path: "/book", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/before-relationship", priority: 0.8, changeFrequency: "monthly" as const },
-  { path: "/starting-again", priority: 0.8, changeFrequency: "monthly" as const },
+  { path: "/building-relationship", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/inside-relationship", priority: 0.8, changeFrequency: "monthly" as const },
+  { path: "/after-breakup", priority: 0.8, changeFrequency: "monthly" as const },
+  { path: "/starting-again", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/preview", priority: 0.8, changeFrequency: "monthly" as const },
   // „המצפן” — חוויית שלוש-שאלות דטרמיניסטית, תמיד פעילה וניתנת לאינדוקס.
   { path: "/compass", priority: 0.6, changeFrequency: "monthly" as const },

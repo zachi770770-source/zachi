@@ -14,15 +14,23 @@ import {
 import type { WaitlistSource } from "@/lib/validation/waitlist";
 import { trackEvent } from "@/lib/analytics";
 import { usePersonaOptional } from "@/components/persona/PersonaProvider";
-import { loadCompass } from "@/lib/compass/quizStorage";
-import { stations } from "@/content/stations";
-import type { CompassStationId } from "@/lib/compass/quiz";
+import { loadAsk } from "@/lib/ask/askStorage";
+import { stations, type Station } from "@/content/stations";
+import type { AskStationId } from "@/content/askRoute";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 type Status = "idle" | "loading" | "success" | "error";
+
+/** מיפוי תחנת „שאל את הספר” לעמוד-התחנה המתאים (להתאמה אישית של מצב ההצלחה). */
+const ASK_TO_PAGE: Record<AskStationId, Station["id"]> = {
+  dating: "before-relationship",
+  building: "building-relationship",
+  existing: "inside-relationship",
+  "after-breakup": "after-breakup",
+};
 
 /** דגל מקומי (ללא שרת) שמסמן שהמשתמש כבר נרשם לעדכון — כדי לא לבקש אימייל שוב
     (למשל אחרי תשובת „שאלו את הספר”). לא נשמר תוכן ולא נשלח מזהה אישי. */
@@ -62,7 +70,7 @@ export function WaitlistForm({
   const [copied, setCopied] = React.useState(false);
   // התחנה ששמורה מ„המצפן” (מקומית בלבד) — להתאמה אישית של מצב ההצלחה. *אינה*
   // נשלחת לשרת: כך אין שינוי ב-backend ואין חשיפת מידע נוסף (פרטיות).
-  const [savedStation, setSavedStation] = React.useState<CompassStationId | null>(null);
+  const [savedStation, setSavedStation] = React.useState<Station["id"] | null>(null);
 
   // מיקוד שדה האימייל כשהטופס נחשף (ניהול מיקוד נגיש). פעם אחת בהרכבה.
   React.useEffect(() => {
@@ -72,8 +80,8 @@ export function WaitlistForm({
   // קריאה בטוחה של התחנה השמורה (rAF — לא ב-body של האפקט, בלי אי-התאמת הידרציה).
   React.useEffect(() => {
     const raf = requestAnimationFrame(() => {
-      const saved = loadCompass();
-      if (saved) setSavedStation(saved.stationId);
+      const saved = loadAsk();
+      if (saved) setSavedStation(ASK_TO_PAGE[saved.stationId]);
     });
     return () => cancelAnimationFrame(raf);
   }, []);
@@ -172,10 +180,10 @@ export function WaitlistForm({
             <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">
               נעדכן אתכם ברגע שהספר ייצא — בינתיים אפשר לקרוא את הטעימה עכשיו.
             </p>
-            {/* התאמה אישית: אם „המצפן” הושלם — קישור לתחנה שהותאמה (מקומי בלבד). */}
+            {/* התאמה אישית: אם „שאל את הספר” הושלם — קישור לתחנה שהותאמה (מקומי בלבד). */}
             {savedStation ? (
               <p className="mt-3 text-[15px] leading-relaxed text-foreground">
-                בזמן שאתם מחכים — התחנה שלכם מהמצפן:{" "}
+                בזמן שאתם מחכים — התחנה שהתאמתם לעצמכם:{" "}
                 <Link
                   href={`/${savedStation}`}
                   className="font-semibold text-brand-hover underline underline-offset-4"

@@ -28,12 +28,19 @@ export function StationPage({ station }: { station: Station }) {
     ? "לרכישת הספר"
     : "לקריאת הטעימה שמתאימה לי";
 
-  const others = stationOrder
-    .filter((id) => id !== station.id)
-    .map((id) => stations[id]);
-
+  // תחנה מרכזית = אחת משלוש התחנות במחזור. „אחרי פרידה” (שער) ו„מתחילים מחדש”
+  // (גשר) אינם במחזור — הם מציגים kicker משלהם, בלי מחוון-המסע, ומקשרים דרך
+  // `related` המפורש במקום „שתי התחנות האחרות”.
+  const isCore = stationOrder.includes(station.id);
   const currentIndex = stationOrder.indexOf(station.id);
-  // איור מאושר לתחנה — רק כשההתאמה הסמנטית נקייה (בתוך קשר / מתחילים מחדש).
+
+  const others = (
+    station.related ?? stationOrder.filter((id) => id !== station.id)
+  ).map((id) => stations[id]);
+
+  const eyebrow = station.eyebrow ?? stationsUi.eyebrow;
+  const relatedTitle = station.relatedTitle ?? stationsUi.otherStationsTitle;
+  // איור מאושר לתחנה — רק כשההתאמה הסמנטית נקייה.
   const illustration = stationPageIllustration[station.id];
 
   return (
@@ -65,17 +72,18 @@ export function StationPage({ station }: { station: Station }) {
 
       {/* כותרת — כניסה מתואמת (kicker → כותרת → תיאור → מחוון מסע). */}
       <header className="enter-stagger mx-auto mt-8 max-w-[54ch]">
-        <span className="kicker">{stationsUi.eyebrow}</span>
+        <span className="kicker">{eyebrow}</span>
         <h1 className="mt-4 font-serif text-[clamp(1.9rem,4vw,2.9rem)] font-semibold leading-[1.15] text-foreground">
           {station.h1}
         </h1>
         <p className="mt-5 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted">
           {station.lead}
         </p>
-        {/* מחוון מסע מרוסן — התחנה הנוכחית מתוך שלוש. דקורטיבי. */}
+        {/* מחוון מסע מרוסן — התחנה הנוכחית מתוך שלוש. דקורטיבי, לתחנות המרכזיות
+            בלבד (לא לשער המעבר ולגשר החזרה). */}
         <div
           aria-hidden="true"
-          className="mt-7 flex items-center gap-2.5"
+          className={`mt-7 flex items-center gap-2.5 ${isCore ? "" : "hidden"}`}
         >
           {stationOrder.map((id, i) => (
             <span key={id} className="flex items-center gap-2.5">
@@ -238,7 +246,7 @@ export function StationPage({ station }: { station: Station }) {
           id="other-stations-heading"
           className="font-serif text-xl font-semibold text-foreground"
         >
-          {stationsUi.otherStationsTitle}
+          {relatedTitle}
         </h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {others.map((other) => (

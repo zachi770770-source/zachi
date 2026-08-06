@@ -6,7 +6,7 @@
  * נכונה”. המנוע מכוון אל התוכן והכלים הקיימים בספר.
  *
  * שלוש שכבות:
- *   1) תחנה  — איפה האדם עכשיו: חיפוש ודייטים · בניית קשר · קשר קיים · אחרי פרידה.
+ *   1) תחנה  — איפה האדם עכשיו: לפני קשר · בניית קשר · בתוך קשר · אחרי פרידה.
  *   2) דילמה — מה מעסיק אותו כרגע (רשימה קצרה ורלוונטית לכל תחנה).
  *   3) הקשר  — שאלה משלימה *אחת בלבד*, ורק כשהיא באמת משנה את התשובה (פרק ב'/
  *      ילדים/גרוש-ה/קצב/בטיחות).
@@ -22,8 +22,10 @@
 export type AskStationId = "dating" | "building" | "existing" | "after-breakup";
 export type PageStationId =
   | "before-relationship"
+  | "building-relationship"
   | "starting-again"
-  | "inside-relationship";
+  | "inside-relationship"
+  | "after-breakup";
 
 /** מבנה-תשובה אחיד לכל דילמה (8 חלקים). */
 export interface AskAnswer {
@@ -75,13 +77,13 @@ export interface AskStation {
 }
 
 export const askStations: AskStation[] = [
-  { id: "dating", name: "חיפוש ודייטים", tagline: "מחפשים, יוצאים ומכירים." },
+  { id: "dating", name: "לפני קשר", tagline: "מחפשים, יוצאים ומכירים." },
   { id: "building", name: "בניית קשר", tagline: "בתחילת קשר, בונים אותו נכון." },
-  { id: "existing", name: "קשר קיים", tagline: "כבר יחד — לחזק או לתקן." },
+  { id: "existing", name: "בתוך קשר", tagline: "כבר יחד — לחזק או לתקן." },
   {
     id: "after-breakup",
     name: "אחרי פרידה",
-    tagline: "תחנת מעבר. אין למהר לשום כיוון.",
+    tagline: "שער מעבר. אין למהר לשום כיוון.",
   },
 ];
 
@@ -237,7 +239,7 @@ export const dilemmas: Dilemma[] = [
       toolId: "gate-questions",
       action: "בחרו יחד צעד-קרבה אחד קטן שנוח לשניכם — במקום שאחד ידחוף והשני יבלום.",
       avoid: "אל תקראו קצב איטי כחוסר-רצון, ואל תקראו קצב מהיר כחוסר-רצינות. לכל אחד יש שעון אחר.",
-      sampleStation: "before-relationship",
+      sampleStation: "building-relationship",
     },
     context: CTX_CHAPTER2(
       "בפרק ב', „הצעד הבא” הוא לא רק אתם — יש שאלה מתי (ואם) לחבר עולמות, מתי הילדים נכנסים לתמונה, מתי זה מפסיק להיות סוד.",
@@ -260,7 +262,7 @@ export const dilemmas: Dilemma[] = [
       toolId: "twenty-maintenance",
       action: "פִתחו שיחה קצרה ורגועה: „חשוב לי לדעת איפה אנחנו — מה זה בשבילך?” בלי אשמה, בלי דרמה.",
       avoid: "אל תסיקו בלעדיות (או היעדרה) מרמזים עקיפים. שאלה ישירה אחת שווה יותר ממאה פרשנויות.",
-      sampleStation: "inside-relationship",
+      sampleStation: "building-relationship",
     },
   },
   {
@@ -279,7 +281,7 @@ export const dilemmas: Dilemma[] = [
       toolId: "quiet-check",
       action: "במקום לשלוח הודעת-בירור טעונה, חִזרו לערב שלכם. תנו לעובדות זמן להתברר לפני שאתם מגיבים לסרט.",
       avoid: "אל תסיקו מ„קור” אחד שהקשר נגמר. דפוס נמדד לאורך זמן, לא ברגע חרד אחד.",
-      sampleStation: "before-relationship",
+      sampleStation: "building-relationship",
     },
   },
   {
@@ -298,7 +300,7 @@ export const dilemmas: Dilemma[] = [
       toolId: "twenty-maintenance",
       action: "נסחו משפט אחד רגוע: „חשוב לי ___, וכיף לי כש___”. תרגלו אותו בקול לפני שאתם אומרים אותו לו/לה.",
       avoid: "אל תניחו שכל בקשה נשמעת כלחץ. אנשים דווקא נמשכים למי שיודע לומר בשקט מה הוא רוצה.",
-      sampleStation: "inside-relationship",
+      sampleStation: "building-relationship",
     },
   },
   {
@@ -317,7 +319,7 @@ export const dilemmas: Dilemma[] = [
       toolId: "fact-story-action",
       action: "רשמו שלוש עובדות מהשבוע האחרון — לא כוונות, לא הבטחות — ובדקו אם הן תואמות למילים.",
       avoid: "אל תקראו כל פער יחיד כרמאות — אבל אל תשכנעו את עצמכם להתעלם מדפוס שחוזר שוב ושוב.",
-      sampleStation: "before-relationship",
+      sampleStation: "building-relationship",
     },
   },
 

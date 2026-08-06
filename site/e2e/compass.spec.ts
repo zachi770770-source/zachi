@@ -7,9 +7,9 @@ import { test, expect } from "./fixtures";
  */
 
 const station = {
-  dating: /חיפוש ודייטים/,
+  dating: /לפני קשר/,
   building: /בניית קשר/,
-  existing: /קשר קיים/,
+  existing: /בתוך קשר/,
   afterBreakup: /אחרי פרידה/,
 };
 

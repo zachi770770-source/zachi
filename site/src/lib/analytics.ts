@@ -60,6 +60,7 @@ export type AnalyticsEventName =
   | "ask_waitlist_click"
   | "ask_change"
   | "ask_restart"
+  | "ask_open_home"
   | "persona_select"
   | "audio_play"
   | "video_play";

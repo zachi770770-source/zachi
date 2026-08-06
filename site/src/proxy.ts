@@ -6,17 +6,17 @@ import type { NextRequest } from "next/server";
  * ב-Next 16 `middleware` הוחלף ב-`proxy`. הפניות ב-next.config מחזירות 308;
  * כאן אנחנו מחזירים 301 מדויק (כפי שנדרש) דרך NextResponse.redirect.
  *
- * שים לב: אף אחת מהכתובות האלה לא קיימה כעמוד באתר או בהיסטוריית הפרויקט,
- * ולכן אין תוכן ישן לשחזר — ההפניה מובילה לעמוד הרלוונטי ביותר:
- *   /about    → /author (על המחבר)
- *   /articles → /faq (העמוד המידעי הקרוב ביותר; אין באתר בלוג/מאמרים)
+ * שים לב: /about מפנה ל-/author (על המחבר) — הפניה סמנטית נכונה.
  * פרמטרי query (כגון UTM) נשמרים לצורך שיוך.
+ *
+ * כתובות /articles* אינן מטופלות כאן בכוונה: הן מעולם לא קיימו כעמוד באתר או
+ * בהיסטוריית הפרויקט, ולכן הן מחזירות 404 טבעי. soft-404 (הפניה ל-/faq גנרי)
+ * גרוע יותר ל-SEO מ-404 אמיתי.
  *
  * הערה: /book הוא כעת עמוד אמיתי (הספר לעומק), ולכן אינו מופיע כאן כהפניה.
  */
 const REDIRECTS: Record<string, string> = {
   "/about": "/author",
-  "/articles": "/faq",
 };
 
 export function proxy(request: NextRequest) {
@@ -27,8 +27,7 @@ export function proxy(request: NextRequest) {
       ? pathname.slice(0, -1)
       : pathname;
 
-  const destination =
-    REDIRECTS[key] ?? (key.startsWith("/articles/") ? "/faq" : null);
+  const destination = REDIRECTS[key] ?? null;
 
   if (destination) {
     const url = request.nextUrl.clone();
@@ -40,5 +39,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/about", "/articles", "/articles/:path*"],
+  matcher: ["/about"],
 };

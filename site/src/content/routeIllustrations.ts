@@ -43,10 +43,22 @@ export const routeIllustrations: Record<IllustratedStationId, RouteIllustrationD
   },
 };
 
-/** מיפוי מעמוד-תחנה (PageStationId) לאיור, רק כשההתאמה הסמנטית נקייה. */
+/**
+ * מיפוי מעמוד-תחנה לאיור, רק כשההתאמה הסמנטית נקייה. „לפני קשר” ו„מתחילים
+ * מחדש” נשארים ללא איור (אין לשכפל איור של תחנה אחרת). „אחרי פרידה” מקבל את
+ * האיור שלו ישירות.
+ */
 export const stationPageIllustration: Partial<
-  Record<"before-relationship" | "inside-relationship" | "starting-again", RouteIllustrationData>
+  Record<
+    | "before-relationship"
+    | "building-relationship"
+    | "inside-relationship"
+    | "after-breakup"
+    | "starting-again",
+    RouteIllustrationData
+  >
 > = {
+  "building-relationship": routeIllustrations.building,
   "inside-relationship": routeIllustrations.existing,
-  "starting-again": routeIllustrations["after-breakup"],
+  "after-breakup": routeIllustrations["after-breakup"],
 };

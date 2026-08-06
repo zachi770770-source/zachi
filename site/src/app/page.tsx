@@ -8,7 +8,7 @@ import { AuthorTeaser } from "@/components/sections/AuthorTeaser";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
-import { StationJourney } from "@/components/interactive/StationJourney";
+import { AskInvite } from "@/components/interactive/AskInvite";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { BuildSpine } from "@/components/shared/BuildSpine";
 import { BookSchema } from "@/components/schema/BookSchema";
@@ -28,7 +28,7 @@ export const metadata = pageMetadata({
  *
  *   1. Hero — מה/למי/הבטחה/פעולה ראשית (הרשמה לעדכון ההשקה).
  *   2. Search→Build — סצנת החתימה (התזה, אות-אחר-אות).
- *   3. Path Finder — 3 תחנות + ניתוב אישי (#where) — נקודת האינטראקציה.
+ *   3. „שאל את הספר” — הזמנה יחידה למנוע ההכוונה האחד (#where) — נקודת האינטראקציה.
  *   4. הצצה לספר/כלים → /book.
  *   5. הצצה לטעימה → /preview.
  *   6. מילת המחבר הקצרה → /author.
@@ -49,10 +49,10 @@ export default function HomePage() {
       <Hero />
       {/* פילוח ל-4 פרסונות — מוקדם בעמוד, מיד אחרי ה-Hero. */}
       <PersonasSection />
-      {/* Path Finder לפני סצנת החתימה: המשתמש מגיע לשאלון מיד אחרי ה-Hero
-          (וקישור „למצוא את המסלול שלי” ‏/#where מגיע אליו ≤800ms, בלי לחצות את
-          טווח ה-pin של Search→Build). בגלילה טבעית הסצנה והאנימציה נשארות מלאות. */}
-      <StationJourney />
+      {/* „שאל את הספר” — הזמנה יחידה למנוע ההכוונה האחד (#where). אין כאן שאלון
+          נפרד; הכפתור פותח את חלונית „שאל את הספר” (AskRoute), אותו מנוע כמו
+          ב-/compass ובבועה הצפה. קישור „מצאו את נקודת הפתיחה” /#where נוחת כאן. */}
+      <AskInvite />
       <ThesisMotifSection />
       {/* הצצה לספר + כלים — השיטה המלאה וששת הכלים (ToolsBento) חיים ב-/book. */}
       <HubTeaser

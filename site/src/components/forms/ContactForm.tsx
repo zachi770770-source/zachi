@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
+import Link from "next/link";
+
 import { contactSchema, type ContactInput } from "@/lib/validation/contact";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,7 +101,7 @@ export function ContactForm() {
       </div>
 
       {/* שדה honeypot - מוסתר ממשתמשים אנושיים, נועד ללכידת בוטים בלבד. */}
-      <div className="sr-only" aria-hidden="true">
+      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
         <label htmlFor="website">אל תמלאו שדה זה</label>
         <input
           id="website"
@@ -109,6 +111,11 @@ export function ContactForm() {
           {...register("website")}
         />
       </div>
+
+      <p className="text-sm text-foreground-muted">
+        בשליחת הטופס אתם מאשרים את{" "}
+        <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">מדיניות הפרטיות</Link>.
+      </p>
 
       <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
         {isSubmitting ? (
