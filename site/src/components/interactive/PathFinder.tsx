@@ -238,11 +238,13 @@ export function PathFinder({
           className="stuck-answer rounded-2xl border border-border bg-surface p-6 text-start sm:p-8"
           aria-live="polite"
         >
-          <p className="kicker">התאמה אישית</p>
+          <p className="text-[14px] font-semibold text-brand-hover">
+            זה הכיוון שהספר מציע לך עכשיו
+          </p>
           <h3
             ref={resultHeadingRef}
             tabIndex={-1}
-            className="mt-3 scroll-mt-24 font-serif text-[1.4rem] font-semibold leading-snug text-foreground focus:outline-none"
+            className="mt-2 scroll-mt-24 font-serif text-[1.4rem] font-semibold leading-snug text-foreground focus:outline-none"
           >
             נקודת הפתיחה שלכם: {station!.navLabel}
           </h3>

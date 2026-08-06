@@ -55,9 +55,10 @@ export function CompassLauncher() {
   }, []);
 
   // מצב באנר העוגיות מגיע כאות-מצב מפורש מ-CookieConsent (data-attribute על
-  // ה-body + אירוע „cookie-banner-change”), ולא מהסקה של ריווח CSS. במובייל
-  // הבועה (בקרה לא-חיונית) מוסתרת כל עוד הבאנר פתוח, כדי שלא תכסה
-  // טקסט/CTA/טופס, ומשוחזרת אוטומטית עם סגירת ההסכמה. הפתרון אינו מבוסס z-index.
+  // ה-body + אירוע „cookie-banner-change”), ולא מהסקה של ריווח CSS. הגלולה
+  // (בקרה לא-חיונית) מוסתרת בכל רוחב-מסך כל עוד הבאנר פתוח — הבאנר הוא פס תחתון
+  // ברוחב מלא והגלולה יושבת בפינה תחתונה, ולכן ההסתרה מונעת כיסוי/חפיפה.
+  // משוחזרת אוטומטית עם סגירת ההסכמה. הפתרון אינו מבוסס z-index.
   React.useEffect(() => {
     const readAttr = () =>
       document.body.getAttribute("data-cookie-banner") === "open";
@@ -86,8 +87,12 @@ export function CompassLauncher() {
           aria-label="שאל את הספר — שלוש שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
           style={{ ["--bubble-bottom" as string]: mobileBottom }}
           className={
-            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 inline-flex items-center justify-center rounded-full bg-foreground px-6 py-4 text-[16px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-8 md:px-8 md:py-5 md:text-[18px]" +
-            (bannerOpen ? " max-md:hidden" : "") +
+            // ה-display אינו בבסיס אלא בתנאי — כך „hidden” גובר תמיד על „inline-flex”
+            // (שתיהן אותה קטגוריית display; בבסיס נתן ה-inline-flex לנצח).
+            "group fixed end-4 bottom-[var(--bubble-bottom)] top-auto z-40 items-center justify-center rounded-full bg-foreground px-6 py-4 text-[16px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-8 md:px-8 md:py-5 md:text-[18px]" +
+            // באנר-העוגיות הוא פס תחתון ברוחב מלא והגלולה יושבת בפינה תחתונה —
+            // לכן מסתירים אותה בכל רוחב-מסך כל עוד הבאנר פתוח, ומשחזרים עם ההסכמה.
+            (bannerOpen ? " hidden" : " inline-flex") +
             (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
           }
         >
@@ -100,19 +105,24 @@ export function CompassLauncher() {
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-[2px] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <DialogPrimitive.Content
           className="fixed inset-y-0 end-0 z-50 flex w-[min(94vw,32rem)] flex-col overflow-hidden bg-background shadow-2xl focus:outline-none will-change-transform data-[state=open]:animate-compass-in data-[state=closed]:animate-compass-out"
-          aria-describedby={undefined}
         >
-          <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
+            <div className="flex items-start gap-2.5">
+              {/* אייקון מצפן קטן — מלווה בלבד, לא הכותרת הראשית. */}
               <span
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-muted text-brand"
+                className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand"
                 aria-hidden="true"
               >
                 <Compass className="h-4 w-4" />
               </span>
-              <DialogPrimitive.Title className="font-serif text-lg font-semibold text-foreground">
-                {compassQuiz.eyebrow}
-              </DialogPrimitive.Title>
+              <div>
+                <DialogPrimitive.Title className="font-serif text-lg font-semibold text-foreground">
+                  {compassQuiz.ask.title}
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Description className="mt-1 max-w-[34ch] text-[13.5px] leading-snug text-foreground-muted">
+                  {compassQuiz.ask.subtitle}
+                </DialogPrimitive.Description>
+              </div>
             </div>
             <DialogPrimitive.Close
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
