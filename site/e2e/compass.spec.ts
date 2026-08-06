@@ -58,7 +58,7 @@ test("ask: a context question appears only for dilemmas that need it, and adds a
 
   const r = page.getByRole("article");
   await expect(r.getByText("התאמה למצב שלכם")).toBeVisible();
-  await expect(r.getByText(/הסינון נוגע גם לזמן פנוי מוגבל/)).toBeVisible();
+  await expect(r.getByText(/אין המון זמן פנוי, יש ילדים/)).toBeVisible();
 });
 
 test("ask: safety routing overrides the normal result (fear/control/danger)", async ({ page }) => {
