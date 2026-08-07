@@ -33,6 +33,9 @@ export function PreviewClosing() {
             <p className="mx-auto mt-5 max-w-[52ch] text-[17px] leading-relaxed text-foreground-muted">
               {previewClosing.connect}
             </p>
+            <p className="mx-auto mt-3 text-[14px] italic text-foreground-muted">
+              לא כל ספק הוא סימן לעצור.
+            </p>
           </div>
 
           {salesOpen ? (

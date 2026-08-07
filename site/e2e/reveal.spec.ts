@@ -212,10 +212,12 @@ for (const route of ["/", "/author", "/book"]) {
 // כשגללו אל הסקשנים הם כבר היו במצב הסופי (ללא fade-up). שני ה-failsafes האלה
 // הוסרו; החשיפה מונעת אך ורק דרך IntersectionObserver פר-רכיב, עם גיבוי
 // מגודר-מיקום בלבד. הבדיקה הבאה הייתה *נכשלת* על הקוד הישן.
-test("home: 10s at scrollY=0 does NOT pre-reveal a far below-fold reveal, and scrolling to it triggers a real fade-up", async ({
+// נבדק על /book (עמוד עתיר-reveal). עמוד הבית האישי אינו משתמש עוד במערכת
+// ה-reveal (חשיפה מבוססת-בחירה, .path-panel), ולכן אין בו רכיב מתאים לבדיקה זו.
+test("/book: 10s at scrollY=0 does NOT pre-reveal a far below-fold reveal, and scrolling to it triggers a real fade-up", async ({
   page,
 }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/book", { waitUntil: "networkidle" });
   await expect
     .poll(() => page.evaluate(() => document.documentElement.classList.contains("motion-js")))
     .toBe(true);
@@ -229,7 +231,7 @@ test("home: 10s at scrollY=0 does NOT pre-reveal a far below-fold reveal, and sc
     }
     return -1;
   });
-  expect(farIdx, "expected a .reveal far below the fold on home").toBeGreaterThanOrEqual(0);
+  expect(farIdx, "expected a .reveal far below the fold on /book").toBeGreaterThanOrEqual(0);
 
   // המתנה ארוכה בראש העמוד — אסור שהרכיב הרחוק ייחשף לפי זמן.
   await page.evaluate(() => window.scrollTo(0, 0));

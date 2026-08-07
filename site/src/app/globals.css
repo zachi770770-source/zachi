@@ -358,6 +358,33 @@
     font-size: clamp(1.125rem, 1.4vw, 1.3125rem); /* 18px → 21px */
     line-height: 1.7;
   }
+  .type-h3 {
+    font-family: var(--font-quote);
+    font-weight: 700;
+    font-size: clamp(1.375rem, 2.2vw, 1.75rem); /* 22px → 28px */
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* בלוק „איפה זה פוגש אותך עכשיו?” — הבלוק הנבחר נכנס בעדינות (opacity/translate).
+     מצב הבסיס גלוי לחלוטין (opacity:1); זו אנימציית-כניסה בלבד, לא תנאי-נראוּת:
+     ב-reduced-motion / כשל-JS הבלוק פשוט מוצג מיד. (לא חוזרים על באג /preview.) */
+  @media (prefers-reduced-motion: no-preference) {
+    .path-panel:not([hidden]) {
+      animation: pathPanelIn 240ms var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)) both;
+    }
+  }
+  @keyframes pathPanelIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   .type-quote {
     font-family: var(--font-quote);
     font-weight: 500;
@@ -436,33 +463,6 @@
   .motion-js .reveal.is-visible {
     opacity: 1;
     transform: none;
-  }
-  /* וריאנטים מובחנים לכניסות סקשן — שכל מקטע נכנס אחרת (קצב/ריתמוס, לא
-     fade-up אחיד). מוחלפים דרך אותו .is-visible; ברירת מחדל גלוי ללא JS. */
-  .motion-js .reveal--zoom {
-    transform: scale(0.86);
-  }
-  .motion-js .reveal--start {
-    transform: translateX(64px) scale(0.98);
-  }
-  .motion-js .reveal--end {
-    transform: translateX(-64px) scale(0.98);
-  }
-  .motion-js .reveal--zoom.is-visible,
-  .motion-js .reveal--start.is-visible,
-  .motion-js .reveal--end.is-visible {
-    transform: none;
-  }
-  /* חשיפת-מסכה: הכותרת „נמשכת” מלמטה למעלה מאחורי מסכה (clip-path). גלויה
-     תמיד ללא JS; opacity נשארת 1 ⇒ אין הבהוב ניגודיות. */
-  .motion-js .reveal--mask {
-    opacity: 1;
-    transform: none;
-    clip-path: inset(0 0 100% 0);
-    transition: clip-path 900ms var(--ease-settle);
-  }
-  .motion-js .reveal--mask.is-visible {
-    clip-path: inset(0 0 0 0);
   }
   /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה (--i נקבע ב-JSX / מונה). */
   .motion-js .reveal[data-stagger] {

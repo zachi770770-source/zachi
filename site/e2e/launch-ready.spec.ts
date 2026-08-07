@@ -149,22 +149,21 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
   });
 
-  test("stations: home shows the compact station cards + floating ask engine; dedicated pages cross-link and CTA to the sample", async ({
+  test("home path selector opens the matching content + floating ask engine; dedicated pages cross-link and CTA to the sample", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
-    // אזור התחנות הקומפקטי (#stations): כרטיס „לפני קשר” מקשר לדף התחנה.
-    const stations = page.locator("#stations");
-    await stations.scrollIntoViewIfNeeded();
-    await expect(
-      stations.getByRole("heading", { name: "שלוש תחנות ושער מעבר אחד" }),
-    ).toBeVisible();
-    await expect(
-      stations.locator('a[href="/before-relationship"]'),
-    ).toHaveCount(1);
+    // אזור הבחירה האישי (#path): בחירת „אני מחפש/ת קשר” פותחת את התוכן המתאים
+    // עם קישור לעמוד „לפני קשר”.
+    const path = page.locator("#path");
+    await path.scrollIntoViewIfNeeded();
+    await path.getByRole("button", { name: /אני מחפש/ }).click();
+    const panel = page.locator("#path-panel-dating");
+    await expect(panel).toBeVisible();
+    await expect(panel.locator('a[href="/before-relationship"]')).toBeVisible();
 
     // מנוע ההכוונה נשאר זמין כגלולה צפה — פותחת את בורר התחנות.
     const pill = page.getByRole("button", { name: /שאל את הספר — / });

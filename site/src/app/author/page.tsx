@@ -93,6 +93,9 @@ export default function AuthorPage() {
             <span className="h-px w-8 bg-border-strong sm:w-12" />
             <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
           </span>
+          <p className="mt-6 text-[14px] italic text-foreground-muted">
+            הספר הזה נולד מהתבוננות, לא מתשובות מוכנות.
+          </p>
         </div>
       </div>
 

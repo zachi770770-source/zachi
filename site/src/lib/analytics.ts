@@ -62,6 +62,10 @@ export type AnalyticsEventName =
   | "ask_restart"
   | "ask_open_home"
   | "persona_select"
+  // בחירת מצב במסע בעמוד הבית (orientation דטרמיניסטי מקומי) + שכבת פרק ב’.
+  // מזהה בלבד (dating/building/existing/breakup), ללא טקסט אישי או PII.
+  | "home_path_selected"
+  | "chapter2_context_selected"
   | "audio_play"
   | "video_play";
 

@@ -1,8 +1,7 @@
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
-import { HomeStations } from "@/components/sections/HomeStations";
-import { HomeWhyDifferent } from "@/components/sections/HomeWhyDifferent";
+import { HomePathSelector } from "@/components/sections/HomePathSelector";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StickyCta } from "@/components/interactive/StickyCta";
@@ -19,19 +18,18 @@ export const metadata = pageMetadata({
 });
 
 /**
- * עמוד הבית = דף קצר וממוקד. חמישה חלקים בלבד, בלי כפילות מסר/‏CTA וללא שכפול
- * מול הדפים הייעודיים:
+ * עמוד הבית = gateway אישי וקצר, לא קטלוג. שלושה אזורים בלבד:
  *
- *   1. Hero — כותרת, משפט הסבר אחד, מחיר, פעולה ראשית „קראו טעימה מהספר”
- *      ופעולה משנית „שאל את הספר”.
- *   2. „שלוש תחנות ושער מעבר אחד” — אזור קומפקטי אחד, ארבעה כרטיסים קצרים.
- *   3. „למה הספר שונה” — שלושה יתרונות מעשיים וקישור ל-/book.
- *   4. רשימת המתנה (טופס ההרשמה).
- *   5. Footer (ברמת ה-layout).
+ *   1. Hero — כותרת, משפט הסבר אחד, פעולה ראשית „קראו טעימה מהספר”
+ *      ופעולה משנית „שאל את הספר”, ושורת מחיר קטנה.
+ *   2. „איפה זה פוגש אותך עכשיו?” — בחירה דטרמיניסטית מקומית של אחד מארבעה
+ *      מצבים; התוכן הרלוונטי בלבד נפתח במקום (שכבת „פרק ב’” אופציונלית).
+ *   3. סיום + רשימת המתנה.
  *
- * המנוע „שאל את הספר” נשאר זמין כגלולה צפה (CompassLauncher) בלבד — הוא אינו
- * מוטמע שוב בגוף העמוד. כל העומק חי בדפים הייעודיים: השיטה והכלים ב-/book,
- * הקורא וההצצה המלאה ב-/preview, הסיפור האישי ב-/author, המנוע המלא ב-/compass.
+ * לפני בחירה העמוד שימושי לחלוטין (Hero → מצבים → הרשמה); אחרי בחירה נפתח
+ * בלוק התוכן בין המצבים לבין ההרשמה. „שאל את הספר” נשאר כגלולה צפה (המנוע
+ * העמוק), ולא מנוע שני. כל העומק חי בדפים הייעודיים (/book, התחנות, /preview,
+ * /author, /compass) — הבית רק מכוון אליהם.
  */
 export default function HomePage() {
   return (
@@ -41,8 +39,7 @@ export default function HomePage() {
       <ProductSchema />
       <BuildSpine />
       <Hero />
-      <HomeStations />
-      <HomeWhyDifferent />
+      <HomePathSelector />
       <NewsletterSection />
       <CompassLauncher />
       <StickyCta />

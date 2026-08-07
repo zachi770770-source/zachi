@@ -70,24 +70,27 @@ test("/preview is publicly accessible directly, without any registration", async
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("home stations: one compact area of four station cards, each linking to its page", async ({ page }) => {
+test("home path selector: four real state buttons + station links present in HTML (SEO)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // בקיצור העמוד: מקטע „שאל את הספר” המוטמע (#where) הוסר — המנוע נשאר כגלולה
-  // צפה בלבד. במקומו אזור קומפקטי אחד „שלוש תחנות ושער מעבר אחד” (#stations)
-  // עם ארבעה כרטיסים, כל אחד מקשר לדף התחנה הייעודי.
+  // הבית האישי: אזור „איפה זה פוגש אותך עכשיו?” (#path) עם ארבעה כפתורי-מצב
+  // אמיתיים. מקטע „שאל את הספר” המוטמע (#where) אינו קיים (רק הגלולה הצפה).
   await expect(page.locator("#where")).toHaveCount(0);
-  const stations = page.locator("#stations");
-  await expect(stations).toHaveCount(1);
+  const path = page.locator("#path");
+  await expect(path).toHaveCount(1);
   await expect(
-    stations.getByRole("heading", { name: "שלוש תחנות ושער מעבר אחד" }),
+    path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" }),
   ).toBeVisible();
+  for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/]) {
+    await expect(path.getByRole("button", { name })).toHaveCount(1);
+  }
+  // הקישורים לארבע התחנות קיימים ב-HTML גם לפני בחירה (SSR, לצורכי SEO/נגישות).
   for (const href of [
     "/before-relationship",
     "/building-relationship",
     "/inside-relationship",
     "/after-breakup",
   ]) {
-    await expect(stations.locator(`a[href="${href}"]`)).toHaveCount(1);
+    await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
 });
 

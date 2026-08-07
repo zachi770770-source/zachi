@@ -41,7 +41,7 @@ test.describe("compass floating bubble", () => {
     // כותרת + כותרת-משנה מיושרות ל„שאל את הספר” (3 שאלות, לא צ׳אט).
     await expect(dialog.getByText("שאל את הספר")).toBeVisible();
     await expect(
-      dialog.getByText(/ענו על 3–4 שאלות קצרות/)
+      dialog.getByText(/3–4 שאלות קצרות/)
     ).toBeVisible();
     // אין ניסוח שמרמז על צ׳אט חופשי / שיחה עם AI.
     await expect(dialog.getByText(/צ.אט|בינה מלאכות|שיחה עם|AI/)).toHaveCount(0);

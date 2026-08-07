@@ -45,6 +45,9 @@ export default function CompassPage() {
         <p className="mx-auto mt-5 max-w-xl text-[clamp(1.05rem,1.5vw,1.2rem)] leading-relaxed text-balance text-foreground-muted">
           {compassQuiz.ask.subtitle}
         </p>
+        <p className="mx-auto mt-3 max-w-xl text-[14px] italic text-foreground-muted">
+          כאן לא שופטים אתכם — מבינים.
+        </p>
 
         <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
           {POINTS.map((point) => (

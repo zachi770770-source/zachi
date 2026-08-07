@@ -1,18 +1,17 @@
 import { test, expect, type Page } from "./fixtures";
 
 /**
- * „נראה בפועל” לדף הבית המקוצר: כל אחד מארבעת אזורי-התוכן (Hero, שלוש התחנות,
- * למה הספר שונה, רשימת המתנה) מרונדר עם bounding-box חיובי, display/visibility
- * גלויים, opacity גלוי, טקסט ממשי — ואינו חופף לאזור אחר (סדר אנכי תקין).
- * נבדק ב-reduced-motion כדי לאמת את מצב-הבסיס הגלוי (ללא תלות באנימציית-חשיפה).
+ * „נראה בפועל” לדף הבית האישי המקוצר: שלושת אזורי-התוכן (Hero, „איפה זה פוגש
+ * אותך עכשיו?” #path, ורשימת המתנה #waitlist) מרונדרים עם bounding-box חיובי,
+ * display/visibility גלויים, opacity גלוי, טקסט ממשי — ואינם חופפים (סדר אנכי
+ * תקין). נבדק ב-reduced-motion כדי לאמת את מצב-הבסיס הגלוי.
  *
  * בנוסף: אין גלישה אופקית ברוחבי מובייל/טאבלט/דסקטופ נפוצים (כולל 430).
  */
 
 const SECTIONS = [
   { name: "Hero", sel: "main > section:first-of-type" },
-  { name: "שלוש תחנות", sel: "#stations" },
-  { name: "למה הספר שונה", sel: "#why-different" },
+  { name: "בחירת המצב", sel: "#path" },
   { name: "רשימת המתנה", sel: "#waitlist" },
 ];
 
@@ -33,7 +32,7 @@ async function boxOf(page: Page, sel: string) {
   });
 }
 
-test("home: all four content areas are really visible, with real text, in vertical order (no overlap)", async ({
+test("home (before selection): three content areas really visible, real text, vertical order (no overlap)", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
@@ -54,7 +53,6 @@ test("home: all four content areas are really visible, with real text, in vertic
     expect(b.text, `${name}: has real text`).toBeGreaterThan(10);
     boxes.push({ name, top: b.top, bottom: b.bottom });
   }
-  // סדר אנכי תקין — כל אזור מתחיל אחרי שקודמו נגמר (אין חפיפה בין sections).
   for (let i = 1; i < boxes.length; i++) {
     expect(
       boxes[i].top,
@@ -64,7 +62,7 @@ test("home: all four content areas are really visible, with real text, in vertic
   await ctx.close();
 });
 
-test("home: the four station cards link to real station pages, one line each", async ({
+test("home: four real state buttons + four station links present in HTML", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
@@ -73,27 +71,28 @@ test("home: the four station cards link to real station pages, one line each", a
   });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "networkidle" });
-  const stations = page.locator("#stations");
+  const path = page.locator("#path");
+  for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/]) {
+    await expect(path.getByRole("button", { name })).toBeVisible();
+  }
   for (const href of [
     "/before-relationship",
     "/building-relationship",
     "/inside-relationship",
     "/after-breakup",
   ]) {
-    const card = stations.locator(`a[href="${href}"]`);
-    await expect(card).toHaveCount(1);
-    await expect(card).toBeVisible();
+    await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
-  // „למה הספר שונה” → קישור יחיד לעמוד הספר.
-  await expect(page.locator('#why-different a[href="/book"]')).toHaveCount(1);
   await ctx.close();
 });
 
 for (const w of [320, 360, 390, 430, 768, 1024, 1280, 1440]) {
-  test(`home: no horizontal overflow at ${w}px (scrolled through)`, async ({ browser }) => {
+  test(`home: no horizontal overflow at ${w}px (scrolled through, one state open)`, async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: w, height: 850 } });
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
+    // גם עם בלוק-תוכן פתוח (המצב הרחב ביותר) — אין גלישה אופקית.
+    await page.getByRole("button", { name: /אני מחפש/ }).click();
     await page.evaluate(async () => {
       const h = document.body.scrollHeight;
       for (let y = 0; y <= h; y += 400) {

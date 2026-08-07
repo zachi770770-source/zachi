@@ -17,7 +17,10 @@ export default function ContactPage() {
           יצירת קשר
         </h1>
         <p className="mt-3 text-lg text-foreground-muted">
-          שאלה על ההזמנה, על הספר, או כל דבר אחר - נשמח לעזור.
+          שאלה על הספר, על רשימת ההמתנה או כל דבר אחר — נשמח לענות.
+        </p>
+        <p className="mt-2 text-[14px] italic text-foreground-muted">
+          כל שאלה ראויה לתשובה.
         </p>
 
         <div className="mt-8">

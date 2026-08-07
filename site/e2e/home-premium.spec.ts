@@ -88,16 +88,17 @@ for (const w of [320, 360, 390]) {
   });
 }
 
-test("reduced-motion: the compact stations area is fully visible", async ({ browser }) => {
+test("reduced-motion: the path-selector area is fully visible", async ({ browser }) => {
   const ctx = await browser.newContext({
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
   });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "networkidle" });
-  // תחת reduced-motion אין הסתרה (motion-js לא מתווסף) — התוכן קריא במלואו.
-  const stations = page.locator("#stations");
-  await stations.scrollIntoViewIfNeeded();
-  await expect(stations).toContainText("שלוש תחנות ושער מעבר אחד");
+  // תחת reduced-motion אין הסתרה — כותרת אזור הבחירה והכפתורים קריאים במלואם.
+  const path = page.locator("#path");
+  await path.scrollIntoViewIfNeeded();
+  await expect(path).toContainText("איפה זה פוגש אותך עכשיו?");
+  await expect(path.getByRole("button", { name: /אני מחפש/ })).toBeVisible();
   await ctx.close();
 });

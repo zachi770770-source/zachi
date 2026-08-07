@@ -17,6 +17,7 @@ import { InsideBookSection } from "@/components/sections/InsideBookSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+import { BookSchema } from "@/components/schema/BookSchema";
 
 export const metadata = pageMetadata({
   title: "הספר לעומק: השיטה, המבנה והכלים",
@@ -34,6 +35,9 @@ export const metadata = pageMetadata({
 export default function BookPage() {
   return (
     <>
+      {/* עמוד הספר הקנוני נושא את סכימת ה-Book (בנוסף לבית) — הישות המבנית
+          מופיעה על ה-URL הייעודי של המוצר. */}
+      <BookSchema />
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
@@ -92,6 +96,9 @@ export default function BookPage() {
             {/* נקודת האיזון של הגישה, הועברה לכאן מהשער כדי לשמור על עמוד בית חיובי. */}
             <p className="mx-auto mt-5 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted/90">
               {bigIdea.clarification}
+            </p>
+            <p className="mx-auto mt-4 max-w-[60ch] text-[14px] italic text-foreground-muted">
+              לפני שמחליטים, כדאי לראות את התמונה כולה.
             </p>
           </div>
         </Container>
