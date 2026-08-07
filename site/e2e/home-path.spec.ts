@@ -3,9 +3,9 @@ import { test, expect, type Page } from "./fixtures";
 /**
  * „איפה זה פוגש אותך עכשיו?” — בחירה דטרמיניסטית מקומית בעמוד הבית. הבדיקות
  * מוודאות: הבחירה מחליפה תוכן, רק המצב הנבחר מוצג, מעבר בין מצבים, שחזור מ-
- * localStorage אחרי refresh, שכבת „פרק ב’” משנה את ההתאמה, מקלדת מלאה,
- * reduced-motion, ובעיקר — התוכן הנבחר נשאר גלוי לאורך זמן (100ms→15s), לא
- * חוזרים על באג /preview.
+ * localStorage אחרי refresh, פעולה ראשית „שאל את הספר” + קישור-תחנה, מקלדת
+ * מלאה, reduced-motion, ובעיקר — התוכן הנבחר נשאר גלוי לאורך זמן (100ms→15s),
+ * לא חוזרים על באג /preview.
  */
 
 const PANELS = ["dating", "building", "existing", "breakup"] as const;
@@ -66,37 +66,28 @@ test("selection persists across reload within the session (sessionStorage), with
   await fresh.close();
 });
 
-test("chapter-2 toggle adds the matching context paragraph to the selected state", async ({ page }) => {
+test("selected panel shows the primary „שאל את הספר” CTA (→/compass) and the station link", async ({ page }) => {
   await selectByReducedMotion(page);
   await page.getByRole("button", { name: /אני מחפש/ }).click();
   const panel = page.locator("#path-panel-dating");
   await expect(panel).toBeVisible();
-  // לפני הפעלה — אין פסקת פרק ב’.
-  await expect(panel).not.toContainText("הפעם אתם לא מגיעים לקשר כדף חלק");
-  // הפעלת המתג — פסקת ההתאמה מופיעה במצב הנבחר.
-  await page.getByLabel("זה פרק ב׳ עבורי").check();
-  await expect(panel).toContainText("הפעם אתם לא מגיעים לקשר כדף חלק");
-  // מצב אחר מקבל פסקת פרק ב’ אחרת.
-  await page.getByRole("button", { name: /אני אחרי/ }).click();
-  await expect(page.locator("#path-panel-breakup")).toContainText(
-    "פרידה נוספת יכולה לעורר פחד עמוק יותר",
-  );
+  // פעולה ראשית „שאל את הספר” → /compass.
+  const ask = panel.getByRole("link", { name: "שאל את הספר" });
+  await expect(ask).toHaveAttribute("href", "/compass");
+  // קישור משני לעמוד התחנה.
+  await expect(panel.locator('a[href="/before-relationship"]')).toHaveCount(1);
+  // התוצאה המקוצרת אינה כוללת עוד את פסקת הפתיחה הארוכה של הכלי.
+  await expect(panel).not.toContainText("אולי יצאתם כבר ללא מעט דייטים");
 });
 
-test("keyboard: Enter selects a state, Space toggles chapter-2", async ({ page }) => {
+test("keyboard: Enter selects a state", async ({ page }) => {
   await selectByReducedMotion(page);
   const btn = page.getByRole("button", { name: /אני בתחילת/ });
   await btn.focus();
   await expect(btn).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#path-panel-building")).toBeVisible();
-
-  const toggle = page.getByLabel("זה פרק ב׳ עבורי");
-  await toggle.focus();
-  await page.keyboard.press("Space");
-  await expect(page.locator("#path-panel-building")).toContainText(
-    "לפעמים נפגשות גם משפחות",
-  );
+  await expect(btn).toHaveAttribute("aria-pressed", "true");
 });
 
 test("no-JS safety: the four state buttons + station links exist in HTML without JavaScript", async ({ browser }) => {
