@@ -4,67 +4,58 @@ import { ArrowLeft } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { stations as stationContent } from "@/content/stations";
-import { stations as bookStations } from "@/content/book";
 
 /**
- * אזור קומפקטי אחד: „שלוש תחנות ושער מעבר אחד” — ארבעה כרטיסים קצרים, משפט אחד
- * וקישור בכל כרטיס אל דף התחנה הייעודי. כל הטקסטים לקוחים ממקור-האמת של דפי
- * התחנות (src/content/stations.ts) — ללא תוכן חדש. הכרטיס הרביעי הוא „שער מעבר”
- * (אחרי פרידה), ומסומן ככזה. מחליף את בורר-הפרסונות ואת מקטע ה„שאל את הספר”
- * שהיו כאן: הבית קצר יותר, שער-סריקה בלבד.
+ * האזור היחיד בדף הבית שמציג את מבנה המסע: „שלוש תחנות ושער מעבר אחד”. ארבעה
+ * כרטיסים קומפקטיים — כותרת, שורה אחת, וקישור HTML אמיתי לעמוד התחנה. אין כאן
+ * שאלון, אין CTA לרשימת המתנה, ואין טקסטים ארוכים. „אחרי פרידה” הוא שער מעבר,
+ * לא תחנה רביעית; „פרק ב’” הוא שכבת הקשר בתוך התחנות ואינו מוצג כתחנה מקבילה.
  */
 const CARDS = [
-  { id: "before-relationship", gate: false, linkLabel: "לתחנה" },
-  { id: "building-relationship", gate: false, linkLabel: "לתחנה" },
-  { id: "inside-relationship", gate: false, linkLabel: "לתחנה" },
-  { id: "after-breakup", gate: true, linkLabel: "לשער המעבר" },
+  { id: "before-relationship", line: "חיפוש, דייטים ובחירה." },
+  { id: "building-relationship", line: "מהיכרות לקשר שיש לו בסיס." },
+  { id: "inside-relationship", line: "להבין דפוסים, לתקן ולחזק." },
+  {
+    id: "after-breakup",
+    line: "שער מעבר — להבין לפני שמחליטים לאן ממשיכים.",
+  },
 ] as const;
 
 export function HomeStations() {
   return (
     <section
       id="stations"
-      className="scroll-mt-20 py-14 sm:py-16"
+      className="scroll-mt-20 py-12 sm:py-14"
       aria-labelledby="stations-heading"
     >
       <Container>
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="kicker justify-center">{bookStations.eyebrow}</span>
-          <h2 id="stations-heading" className="type-h2 mt-4">
+          <h2 id="stations-heading" className="type-h2">
             שלוש תחנות ושער מעבר אחד
           </h2>
-          <p className="type-lead mt-4 text-foreground-muted [text-wrap:pretty]">
-            {bookStations.intro}
-          </p>
         </Reveal>
 
-        <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
-          {CARDS.map(({ id, gate, linkLabel }) => {
+        <div className="mx-auto mt-8 grid max-w-4xl gap-3.5 sm:grid-cols-2">
+          {CARDS.map(({ id, line }) => {
             const s = stationContent[id];
             return (
               <Link
                 key={id}
                 href={`/${id}`}
-                className="reveal group flex flex-col rounded-2xl border border-border bg-surface p-6 text-start transition-colors hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="reveal group flex items-center justify-between gap-4 rounded-2xl border border-border bg-surface px-5 py-4 text-start transition-colors hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
-                {gate ? (
-                  <span className="mb-2 inline-flex w-fit items-center rounded-full bg-brand px-2.5 py-0.5 text-[12px] font-semibold text-brand-foreground">
-                    {s.eyebrow}
+                <span className="min-w-0">
+                  <span className="block font-serif text-[1.15rem] font-semibold text-foreground">
+                    {s.navLabel}
                   </span>
-                ) : null}
-                <h3 className="font-serif text-[1.2rem] font-semibold text-foreground">
-                  {s.navLabel}
-                </h3>
-                <p className="mt-2 text-[15.5px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-                  {s.lead}
-                </p>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-semibold text-brand-hover">
-                  {linkLabel}
-                  <ArrowLeft
-                    className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                    aria-hidden="true"
-                  />
+                  <span className="mt-1 block text-[14.5px] leading-snug text-foreground-muted [text-wrap:pretty]">
+                    {line}
+                  </span>
                 </span>
+                <ArrowLeft
+                  className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                  aria-hidden="true"
+                />
               </Link>
             );
           })}

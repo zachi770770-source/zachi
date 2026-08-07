@@ -1,8 +1,6 @@
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
-import { BookLink } from "@/components/shared/BookLink";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
-import { TrustBar } from "@/components/sections/TrustBar";
 
 export function NewsletterSection() {
   if (!siteConfig.features.newsletter) return null;
@@ -34,18 +32,6 @@ export function NewsletterSection() {
             <p className="mt-3 max-w-md text-[16px] leading-relaxed text-foreground-muted">
               השאירו אימייל ונעדכן אתכם כשהמהדורה הדיגיטלית תיפתח לרכישה. בלי ספאם, אפשר להסיר בכל עת.
             </p>
-            <p className="mt-4 text-[15px] text-foreground-muted">
-              לא רוצים לחכות?{" "}
-              <BookLink
-                href="/preview"
-                className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                קראו עכשיו טעימה מהספר
-              </BookLink>
-              .
-            </p>
-            {/* עובדות אמון בנקודת ההחלטה — מה מקבלים בפועל. */}
-            <TrustBar className="mt-6" />
           </div>
           <div className="w-full text-start">
             <WaitlistForm source="homepage" />
