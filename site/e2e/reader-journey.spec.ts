@@ -91,15 +91,14 @@ test("compass ?station=<invalid> and direct /compass start normally at the stati
   await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
 });
 
-test("two actions from Home to real book content (dating → sample → reading)", async ({ page }) => {
+test("two actions from Home to real book content (state → journey page → sample)", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
-  // פעולה 1: בחירת מצב.
-  await page.getByRole("button", { name: /אני מחפש/ }).first().click();
-  const panel = page.locator("#path-panel-dating");
-  await expect(panel).toBeVisible();
+  // פעולה 1: בחירת מצב → ניווט לעמוד-המסע.
+  await page.locator("#path").getByRole("link", { name: /אני מחפש/ }).click();
+  await expect(page).toHaveURL(/\/before-relationship$/);
   // פעולה 2: הטעימה המותאמת → נחיתה על קטע אמיתי מהספר.
-  await panel.getByRole("link", { name: /קראו טעימה שמתאימה/ }).click();
+  await page.getByRole("link", { name: /קראו טעימה שמתאימה/ }).click();
   await expect(page).toHaveURL(/\/preview\?tool=fact-story-action/);
   await expect(page.locator(".sample-reader")).toContainText("כשאתה מפסיק להאמין לכל סיפור");
 });

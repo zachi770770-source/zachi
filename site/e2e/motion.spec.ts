@@ -36,19 +36,18 @@ test.describe("reduced-motion: content is in its final visible state", () => {
   }
 });
 
-test("stage pages share a journey motif that marks the current station", async ({
+test("each journey page has its own distinct hero identity (eyebrow + mood), not a shared station-progress motif", async ({
   page,
 }) => {
-  // מחוון המסע (עם סימון התחנה הנוכחית) מוצג לתחנות המרכזיות בלבד — לא לגשר
-  // החזרה („מתחילים מחדש”) ולא לשער המעבר („אחרי פרידה”). בודקים תחנה מרכזית.
+  // עמודי-המסע הם Landing אישי — לא „תחנה X מתוך 3”. מחוון-ההתקדמות הישן הוסר;
+  // הזהות מגיעה מהתוכן: eyebrow ייחודי + שורת מצב-רוח, כבר במסך הראשון.
   await page.goto("/building-relationship", { waitUntil: "networkidle" });
-  await expect(page.locator("h1")).toBeVisible();
-  // שלוש התחנות קיימות כנקודות בתוך ה-header.
-  const dots = page.locator("header span.rounded-full");
-  expect(await dots.count()).toBeGreaterThanOrEqual(3);
-  // הצומת הנוכחי בולט (טבעת) — נמצא אחד לפחות.
-  const current = page.locator("header span.ring-4");
-  expect(await current.count()).toBe(1);
+  const hero = page.locator("header.enter-stagger");
+  await expect(hero).toBeVisible();
+  await expect(hero.locator(".kicker")).toHaveText("מתחילים קשר");
+  await expect(hero).toContainText("מהתרגשות ראשונה");
+  // אין עוד מחוון-תחנה-נוכחית (טבעת).
+  await expect(page.locator("header span.ring-4")).toHaveCount(0);
 });
 
 test("all three stage pages render the shared coordinated entrance + progress", async ({

@@ -62,7 +62,7 @@ test("home (before selection): three content areas really visible, real text, ve
   await ctx.close();
 });
 
-test("home: four real state buttons + four station links present in HTML", async ({
+test("home: four real navigation cards linking to the four journey pages", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
@@ -73,7 +73,7 @@ test("home: four real state buttons + four station links present in HTML", async
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
   for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/]) {
-    await expect(path.getByRole("button", { name })).toBeVisible();
+    await expect(path.getByRole("link", { name })).toBeVisible();
   }
   for (const href of [
     "/before-relationship",
@@ -83,16 +83,17 @@ test("home: four real state buttons + four station links present in HTML", async
   ]) {
     await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
+  // אין עוד result-panel בבית.
+  await expect(page.locator(".path-panel")).toHaveCount(0);
   await ctx.close();
 });
 
 for (const w of [320, 360, 390, 430, 768, 1024, 1280, 1440]) {
-  test(`home: no horizontal overflow at ${w}px (scrolled through, one state open)`, async ({ browser }) => {
+  test(`home: no horizontal overflow at ${w}px (scrolled through)`, async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: w, height: 850 } });
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
-    // גם עם בלוק-תוכן פתוח (המצב הרחב ביותר) — אין גלישה אופקית.
-    await page.getByRole("button", { name: /אני מחפש/ }).click();
+    // הבית הוא שער (בלי result-panel) — אין גלישה אופקית לכל אורך הגלילה.
     await page.evaluate(async () => {
       const h = document.body.scrollHeight;
       for (let y = 0; y <= h; y += 400) {

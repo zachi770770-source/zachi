@@ -149,23 +149,14 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
   });
 
-  test("home path selector opens the matching content + floating ask engine; dedicated pages cross-link and CTA to the sample", async ({
+  test("home selector navigates to the journey page; the page is a personal landing with a contextual sample; floating ask engine still opens", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
-    // אזור הבחירה האישי (#path): בחירת „אני מחפש/ת קשר” פותחת את התוכן המתאים
-    // עם קישור לעמוד „לפני קשר”.
-    const path = page.locator("#path");
-    await path.scrollIntoViewIfNeeded();
-    await path.getByRole("button", { name: /אני מחפש/ }).click();
-    const panel = page.locator("#path-panel-dating");
-    await expect(panel).toBeVisible();
-    await expect(panel.locator('a[href="/before-relationship"]')).toBeVisible();
-
-    // מנוע ההכוונה נשאר זמין כגלולה צפה — פותחת את בורר התחנות.
+    // בבית: מנוע ההכוונה זמין כגלולה צפה — פותח את בורר התחנות.
     const pill = page.getByRole("button", { name: /שאל את הספר — / });
     await page.mouse.wheel(0, 200);
     await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
@@ -175,17 +166,26 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
     await page.keyboard.press("Escape");
 
-    // עמוד התחנה הייעודי נגיש ומקושר-צולב: פירורי לחם, CTA לטעימה, ומעבר לתחנה אחרת.
-    await page.goto("/before-relationship", { waitUntil: "networkidle" });
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("לפני קשר");
-    await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
-    const cta = page.getByRole("link", { name: "לקריאת הטעימה שמתאימה לי" });
-    await expect(cta).toHaveAttribute("href", "/preview");
+    // הבחירה ב-Home היא ניווט לעמוד-המסע — לא פתיחת תוכן בבית.
+    const path = page.locator("#path");
+    await path.scrollIntoViewIfNeeded();
+    await path.getByRole("link", { name: /אני מחפש/ }).click();
+    await expect(page).toHaveURL(/\/before-relationship$/);
 
-    // מעבר לתחנה אחרת דרך הקישורים בתחתית.
-    await page.getByRole("link", { name: /בתוך קשר/ }).first().click();
-    await expect(page).toHaveURL(/\/inside-relationship$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("בתוך קשר");
+    // עמוד-המסע: כותרת אישית, פירורי-לחם, וטעימה מותאמת (Primary → contextual preview).
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "לפני שבוחרים מישהו, כדאי להבין איך אתם בוחרים.",
+    );
+    await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "להמשך הקריאה" }).getByRole("link", { name: /קראו טעימה שמתאימה/ }),
+    ).toHaveAttribute("href", "/preview?tool=fact-story-action&station=before-relationship");
+
+    // „בחרו מסלול אחר” — קישור שקט חזרה לבורר, לא בורר-מלא בעמוד.
+    await expect(page.getByRole("link", { name: /בחרו מסלול אחר/ })).toHaveAttribute(
+      "href",
+      "/#path",
+    );
   });
 
   test("waitlist: dedicated page saves a real signup", async ({ page }) => {

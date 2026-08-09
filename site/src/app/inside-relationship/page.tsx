@@ -1,6 +1,7 @@
 import { stations } from "@/content/stations";
+import { journeyPages } from "@/content/journeyPages";
 import { pageMetadata } from "@/lib/seo";
-import { StationPage } from "@/components/stations/StationPage";
+import { JourneyPage } from "@/components/journey/JourneyPage";
 
 const station = stations["inside-relationship"];
 
@@ -13,5 +14,5 @@ export const metadata = pageMetadata({
 });
 
 export default function StationRoutePage() {
-  return <StationPage station={station} />;
+  return <JourneyPage journey={journeyPages["inside-relationship"]} />;
 }

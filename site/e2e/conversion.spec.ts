@@ -70,20 +70,16 @@ test("/preview is publicly accessible directly, without any registration", async
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("home path selector: four real state buttons + station links present in HTML (SEO)", async ({ page }) => {
+test("home path selector: four real navigation cards to the journey pages (SEO)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // הבית האישי: אזור „איפה זה פוגש אותך עכשיו?” (#path) עם ארבעה כפתורי-מצב
-  // אמיתיים. מקטע „שאל את הספר” המוטמע (#where) אינו קיים (רק הגלולה הצפה).
+  // הבית האישי: אזור „איפה זה פוגש אותך עכשיו?” (#path) — שער לארבע חוויות.
   await expect(page.locator("#where")).toHaveCount(0);
   const path = page.locator("#path");
   await expect(path).toHaveCount(1);
   await expect(
     path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" }),
   ).toBeVisible();
-  for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/]) {
-    await expect(path.getByRole("button", { name })).toHaveCount(1);
-  }
-  // הקישורים לארבע התחנות קיימים ב-HTML גם לפני בחירה (SSR, לצורכי SEO/נגישות).
+  // ארבעה כרטיסי-קישור אמיתיים ליעדים (SSR, ל-SEO/נגישות) — ואין עוד result-panel.
   for (const href of [
     "/before-relationship",
     "/building-relationship",
@@ -92,6 +88,7 @@ test("home path selector: four real state buttons + station links present in HTM
   ]) {
     await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
+  await expect(page.locator(".path-panel")).toHaveCount(0);
 });
 
 test("home: the repeated sample teaser was removed; /preview is reached from the hero action", async ({

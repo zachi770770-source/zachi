@@ -69,6 +69,7 @@ export type AnalyticsEventName =
   // Personalized Reader Journey — היעד: להכניס את הקורא לספר מהר. מזהה תחנה
   // בלבד (dating/building/existing/breakup), ללא טקסט אישי או PII.
   | "journey_selected"
+  | "journey_page_viewed"
   | "contextual_sample_clicked"
   | "ask_book_clicked"
   | "audio_play"
