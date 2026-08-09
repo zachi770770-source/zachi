@@ -1,34 +1,20 @@
-"use client";
-
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
-import { homePaths, homePathUi, type HomePathId } from "@/content/homePaths";
-import { trackEvent } from "@/lib/analytics";
-
-const STORAGE_KEY = "mdl_home_path";
+import { homePaths, homePathUi } from "@/content/homePaths";
 
 /**
  * לב עמוד הבית: „איפה זה פוגש אותך עכשיו?” — שער אמיתי לארבע חוויות. כל בחירה
- * היא *ניווט* לעמוד-המסע הייעודי (Landing אישי), לא כרטיס שנפתח בתוך הבית. אין
- * כאן עוד result-panel: הבית נשאר קצר ושער, והחוויה ממשיכה בעמוד המסלול.
+ * היא *ניווט* לעמוד-המסע הייעודי (Landing אישי), לא כרטיס שנפתח בתוך הבית.
  *
- * הכרטיסים הם קישורים אמיתיים (<a>) — נגישים, ניתנים ל„פתח בכרטיסייה חדשה”,
- * וקיימים ב-HTML ל-SEO. לחיצה שומרת הקשר-מסע מקומי (sessionStorage) ושולחת
- * אירוע אנונימי (מזהה תחנה בלבד), ואז מנווטת.
+ * ניווט קודם, persistence אחר כך: ארבעת הכרטיסים מרונדרים כ-<a> נטיביים בלבד,
+ * ללא "use client", ללא onClick, ללא state / sessionStorage / analytics /
+ * router.push. המעבר לעמוד קורה דרך ה-href הנטיבי — כך שהוא עובד גם אם ה-JS
+ * לא הידרט, גם ב„פתח בכרטיסייה חדשה”, גם ב-long-press, וגם אם ניתוב-הצד-לקוח
+ * של Next נכשל רגעית. שמירת הקשר-המסע והאירוע האנונימי (journey_page_viewed)
+ * קורים בעמוד היעד (JourneyView), אחרי שהניווט כבר הצליח.
  */
 export function HomePathSelector() {
-  const choose = (id: HomePathId) => {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ path: id }));
-    } catch {
-      /* אחסון חסום — לא קריטי */
-    }
-    trackEvent("home_path_selected", { path: id });
-    trackEvent("journey_selected", { station: id });
-  };
-
   return (
     <section id="path" className="scroll-mt-20 py-5 sm:py-10" aria-labelledby="path-heading">
       <Container>
@@ -44,17 +30,16 @@ export function HomePathSelector() {
           </p>
         </div>
 
-        {/* ארבעה שערים — כרטיס-קישור מלא ולחיץ. 2×2 בכל הרוחבים. לחיצה = ניווט
-            מיידי לעמוד-המסע (בלי תוכן נוסף שנפתח בבית). */}
+        {/* ארבעה שערים — קישור נטיבי מלא ולחיץ. 2×2 בכל הרוחבים. הניווט הוא ה-href
+            בלבד (בלי onClick / router.push), כדי שיהיה אמין במובייל אמיתי. */}
         <nav
           aria-label="בחירת המצב שלך במסע"
           className="mx-auto mt-5 grid max-w-4xl grid-cols-2 gap-2.5 sm:gap-4"
         >
           {homePaths.map((p) => (
-            <Link
+            <a
               key={p.id}
               href={p.stationHref}
-              onClick={() => choose(p.id)}
               className="group flex items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:border-brand/50 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:gap-3 sm:rounded-2xl sm:p-6"
             >
               <span className="min-w-0">
@@ -79,7 +64,7 @@ export function HomePathSelector() {
               >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </span>
-            </Link>
+            </a>
           ))}
         </nav>
       </Container>
