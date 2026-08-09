@@ -6,7 +6,7 @@ import { test, expect } from "./fixtures";
  *  1. Funnel אחיד — טעימה עכשיו / הספר המלא בהמשך / עדכון בהשקה; אין „קנה עכשיו”.
  *  2. Trust עובדתי — אין המלצות/דירוגים מזויפים; גבולות מפורשים („לא טיפול”).
  *  3. מחיר + סוג-מוצר — פורמט (דיגיטלי), סטטוס (טרם ניתן לרכישה) ומחיר, ליד ה-CTA.
- *  4. Micro-copy ל„שאל את הספר” — שורה אחת שמסבירה מה קורה בלחיצה (3–4 שאלות → תחנה).
+ *  4. Micro-copy ל„שאל את הספר” — שורה אחת שמסבירה מה קורה בלחיצה (2–3 שאלות → תחנה).
  *
  * הבדיקות נשענות רק על תוכן שמוצג בפועל — לא ממציאות עובדות/המלצות/רכישה.
  */
@@ -45,7 +45,7 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     // קישור ה„שאל את הספר” בשער → /compass (המנוע הדטרמיניסטי).
     const ask = hero.getByRole("link", { name: "שאל את הספר" });
     await expect(ask).toHaveAttribute("href", "/compass");
-    // שורת-הסבר צמודה: „3–4 שאלות קצרות … תחנה …” — לא ייעוץ/אבחון, לא AI.
+    // שורת-הסבר צמודה: „2–3 שאלות קצרות … תחנה …” — לא ייעוץ/אבחון, לא AI.
     await expect(hero.getByText(/שאלות קצרות/)).toBeVisible();
     await expect(hero.getByText(/תחנה/)).toBeVisible();
   });
@@ -110,8 +110,8 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     const trust = page.locator('[aria-labelledby="trust-heading"]');
     await trust.scrollIntoViewIfNeeded();
     const box = await trust.boundingBox();
-    // רצועה קומפקטית — פחות מגובה מסך מלא במובייל (844), ולא „מסך שלם”.
-    expect(box!.height, "trust band should stay compact on mobile").toBeLessThan(560);
+    // רצועה דחוסה — שורה אחת נמוכה, לא section (יעד ≤180px; סף בדיקה מרווח קל).
+    expect(box!.height, "trust band should stay a slim strip on mobile").toBeLessThan(200);
     await ctx.close();
   });
 });

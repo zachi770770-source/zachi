@@ -122,7 +122,7 @@ export function Hero() {
                     <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                   </Link>
                   <p className="text-[13px] leading-snug text-foreground-muted">
-                    3–4 שאלות קצרות — ותדעו מאיזו תחנה בספר להתחיל.
+                    2–3 שאלות קצרות — ותדעו מאיזו תחנה בספר להתחיל.
                   </p>
                 </div>
               </div>

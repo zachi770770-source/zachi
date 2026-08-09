@@ -8,7 +8,7 @@ import { test, expect } from "@playwright/test";
  */
 
 // הגלולה הצפה נבדלת מכפתור „שאל את הספר” שבמקטע ה-#where (AskInvite): שם-הנגישות
-// שלה הוא ה-aria-label המלא („שאל את הספר — 3–4 שאלות…”), בעוד כפתור ה-#where הוא
+// שלה הוא ה-aria-label המלא („שאל את הספר — 2–3 שאלות…”), בעוד כפתור ה-#where הוא
 // „שאל את הספר” בדיוק. מסננים לפי המקף כדי למקד רק את הגלולה.
 const compass = (page: import("@playwright/test").Page) =>
   page.getByRole("button", { name: /שאל את הספר — / });
@@ -38,10 +38,10 @@ test.describe("compass floating bubble", () => {
     await compass(page).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    // כותרת + כותרת-משנה מיושרות ל„שאל את הספר” (3 שאלות, לא צ׳אט).
+    // כותרת + כותרת-משנה מיושרות ל„שאל את הספר” (2–3 שאלות, לא צ׳אט).
     await expect(dialog.getByText("שאל את הספר")).toBeVisible();
     await expect(
-      dialog.getByText(/3–4 שאלות קצרות/)
+      dialog.getByText(/2–3 שאלות קצרות/)
     ).toBeVisible();
     // אין ניסוח שמרמז על צ׳אט חופשי / שיחה עם AI.
     await expect(dialog.getByText(/צ.אט|בינה מלאכות|שיחה עם|AI/)).toHaveCount(0);
@@ -134,7 +134,7 @@ test.describe("compass floating bubble", () => {
       // aria-label נשמר (זהות נגישה יציבה).
       await expect(pill).toHaveAttribute(
         "aria-label",
-        /שאל את הספר — 3–4 שאלות/,
+        /שאל את הספר — 2–3 שאלות/,
       );
 
       // מיקוד-מקלדת עובד, ו-Enter פותח את החלונית — גם כשהבאנר פתוח.
