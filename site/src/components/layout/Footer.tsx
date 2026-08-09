@@ -19,10 +19,10 @@ export function Footer() {
 
   return (
     <footer className="border-t border-secondary-foreground/15 bg-secondary text-secondary-foreground">
-      <Container className="flex flex-col gap-12 py-14 sm:py-16">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
-          {/* בלוק המותג */}
-          <div className="flex max-w-sm flex-col gap-4">
+      <Container className="flex flex-col gap-8 py-10 sm:gap-12 sm:py-16">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-10">
+          {/* בלוק המותג — רוחב מלא במובייל; שני טורי הקישורים יושבים זה לצד זה מתחתיו */}
+          <div className="col-span-2 flex max-w-sm flex-col gap-4 lg:col-span-1">
             <div className="flex items-center gap-2.5">
               <BrandMark
                 withRing

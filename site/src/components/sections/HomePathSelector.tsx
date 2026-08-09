@@ -71,7 +71,7 @@ export function HomePathSelector() {
   }, [selected]);
 
   return (
-    <section id="path" className="scroll-mt-20 py-11 sm:py-14" aria-labelledby="path-heading">
+    <section id="path" className="scroll-mt-20 py-8 sm:py-14" aria-labelledby="path-heading">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <h2 id="path-heading" className="type-h2">
@@ -90,7 +90,7 @@ export function HomePathSelector() {
         <div
           role="group"
           aria-label="בחירת המצב שלך במסע"
-          className="mx-auto mt-8 grid max-w-4xl gap-3 sm:grid-cols-2 sm:gap-4"
+          className="mx-auto mt-6 grid max-w-4xl gap-2.5 sm:grid-cols-2 sm:gap-4"
         >
           {homePaths.map((p) => {
             const active = selected === p.id;
@@ -100,7 +100,7 @@ export function HomePathSelector() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => choose(p.id)}
-                className={`group flex items-center justify-between gap-3 rounded-2xl border-2 p-4 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6 ${
+                className={`group flex items-center justify-between gap-3 rounded-2xl border-2 p-3.5 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6 ${
                   active
                     ? "border-brand bg-brand-muted/50 shadow-sm"
                     : "border-border bg-surface hover:border-brand/50 hover:bg-surface-muted"
@@ -137,7 +137,7 @@ export function HomePathSelector() {
         {/* בלוק התוצאה — אחד בלבד. כל הבלוקים ב-DOM (SEO/נגישות: קישורי-התחנות
             <a> אמיתיים); רק הנבחר גלוי (`hidden` על השאר). לפני בחירה — אין תוצאה.
             החלפת מצב מחליפה כאן את התוכן במקום, עם אנימציית-כניסה עדינה. */}
-        <div aria-live="polite" className="mx-auto mt-6 max-w-2xl">
+        <div aria-live="polite" className="mx-auto mt-5 max-w-2xl">
           {homePaths.map((p) => (
             <article
               key={p.id}

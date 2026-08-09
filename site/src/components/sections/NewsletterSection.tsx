@@ -8,18 +8,18 @@ export function NewsletterSection() {
   return (
     <section
       id="waitlist"
-      className="scroll-mt-24 py-12 sm:py-14"
+      className="scroll-mt-24 py-8 sm:py-14"
       aria-labelledby="newsletter-heading"
     >
       <Container>
         {/* משפט-גשר אחד: הספר לכל המסע, אבל מתחיל מהמקום שבו הקורא נמצא עכשיו. */}
-        <p className="mx-auto mb-6 max-w-2xl text-center font-serif text-[clamp(1.05rem,1.8vw,1.35rem)] leading-snug text-foreground [text-wrap:balance]">
+        <p className="mx-auto mb-5 max-w-2xl text-center font-serif text-[clamp(1.05rem,1.8vw,1.35rem)] leading-snug text-foreground [text-wrap:balance]">
           הספר נכתב לכל המסע. אבל הוא מתחיל מהמקום שאתם נמצאים בו עכשיו.
         </p>
-        <div className="mx-auto grid max-w-4xl items-center gap-10 rounded-lg bg-secondary-muted px-7 py-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:px-12 sm:py-12">
+        <div className="mx-auto grid max-w-4xl items-center gap-6 rounded-lg bg-secondary-muted px-6 py-7 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:gap-10 sm:px-12 sm:py-12">
           <div>
             {/* הד סוגר למוטיב „מנקודות למבנה”: מבנה יציב ובנוי במלואו */}
-            <span aria-hidden="true" className="mb-5 flex items-center gap-1.5">
+            <span aria-hidden="true" className="mb-4 flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-brand" />
               <span className="route-line h-px w-7 bg-border-strong" />
               <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />

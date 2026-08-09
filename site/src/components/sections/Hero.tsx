@@ -34,13 +34,13 @@ export function Hero() {
         <div className="absolute top-[22%] end-[4%] h-[360px] w-[360px] rounded-full bg-brand/[0.05] blur-[120px]" />
       </div>
 
-      <Container className="flex items-center py-4 lg:py-6">
-        <div className="grid w-full items-center gap-y-3 lg:grid-cols-[1fr_1fr] lg:gap-y-0 lg:gap-x-14">
+      <Container className="flex items-center py-3 lg:py-6">
+        <div className="grid w-full items-center gap-y-2 lg:grid-cols-[1fr_1fr] lg:gap-y-0 lg:gap-x-14">
           {/* תוכן — יחידה רציפה אחת. במובייל ראשון (הצעה + CTA לפני הכריכה);
               בדסקטופ בעמודה הימנית (order-1). */}
           <div className="order-1 flex flex-col items-start">
             {/* (1) קו המסלול הפותח — טרקוטה דק שנמשך ראשון */}
-            <span className="hero-rule mb-3 lg:mb-4" aria-hidden="true" />
+            <span className="hero-rule mb-2 lg:mb-4" aria-hidden="true" />
 
             <span
               className="kicker hero-fade"
@@ -50,7 +50,7 @@ export function Hero() {
             </span>
 
             {/* (2)+(3) חשיפת כותרת שורה-אחר-שורה דרך מסכה; „בונים אותה” מתיישבת */}
-            <h1 className="type-display mt-3 text-foreground lg:mt-4">
+            <h1 className="type-display mt-2 text-foreground lg:mt-4">
               <span className="hero-line hero-line--1">
                 <span className="hero-line__in">אהבה לא רק מוצאים.</span>
               </span>
@@ -64,7 +64,7 @@ export function Hero() {
             {/* משפט הסבר יחיד: מבהיר שהספר מלווה את הקורא בדיוק במקום שבו הוא
                 נמצא במסע הזוגי — מחיפוש ועד קשר קיים. */}
             <p
-              className="hero-fade mt-3.5 max-w-[48ch] text-[17.5px] leading-[1.55] text-foreground/80 lg:mt-4 lg:text-[20px] lg:leading-[1.6]"
+              className="hero-fade mt-3 max-w-[48ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:text-[20px] lg:leading-[1.6]"
               style={{ animationDelay: "380ms" }}
             >
               בין אם אתם עוד מחפשים, בתחילת קשר או כבר בתוכו — הספר עוזר להבין
@@ -73,7 +73,7 @@ export function Hero() {
 
             {/* יחידת המרה אחת: מחיר, פעולה ראשית ופעולה משנית — מקובצים תחת קו
                 שיער עדין, כך שהמחיר נראה חלק מהגוש. */}
-            <div className="mt-4 flex w-full max-w-[46ch] flex-col items-start gap-3 border-t border-border pt-4 lg:mt-5 lg:gap-3.5 lg:pt-5">
+            <div className="mt-3 flex w-full max-w-[46ch] flex-col items-start gap-2.5 border-t border-border pt-3 lg:mt-5 lg:gap-3.5 lg:pt-5">
               <p
                 className="hero-fade text-[16px] font-semibold text-brand-hover"
                 style={{ animationDelay: "620ms" }}
@@ -134,11 +134,11 @@ export function Hero() {
               <div className="absolute aspect-square w-[52%] translate-y-[8%] rounded-full bg-brand/[0.06] blur-[60px]" />
             </div>
 
-            <figure className="hero-book relative flex flex-col items-center gap-4 lg:gap-5">
+            <figure className="hero-book relative flex flex-col items-center gap-3 lg:gap-5">
               {/* הכריכה נסחפת מעט כלפי מעלה בגלילה (פרלקסה מרוסנת) — עומק בלי
                   להפריע לטילט/למעבר-הכריכה (שיושבים על אלמנטים פנימיים). */}
               <div
-                className="hero-depth-book relative w-[196px] sm:w-[264px] lg:w-[364px]"
+                className="hero-depth-book relative w-[152px] sm:w-[264px] lg:w-[364px]"
                 style={{ transform: "translateY(calc(var(--hero-parallax, 0) * -50px))" }}
               >
                 {/* צל משתנה: מעמיק ונפרש עם הגלילה (פרלקסה) — עומק „חי” בזמן
