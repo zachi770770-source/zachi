@@ -112,7 +112,7 @@ test("selected content stays visible at 100ms / 1s / 3s / 8s / 15s (post-hydrati
   await page.goto("/", { waitUntil: "commit" });
   // ודא hydration (motion-js נוסף), ואז בחר מצב.
   await expect
-    .poll(() => page.evaluate(() => document.documentElement.classList.contains("motion-js")))
+    .poll(() => page.evaluate(() => document.documentElement?.classList.contains("motion-js") ?? false))
     .toBe(true);
   await page.getByRole("button", { name: /אני מחפש/ }).click();
   const heading = page.locator("#path-panel-dating-heading");

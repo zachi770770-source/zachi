@@ -15,7 +15,7 @@ export function NewsletterSection() {
         {/* בלוק קומפקטי בעמודה אחת: כותרת קצרה, משפט אחד, שדה + כפתור
             (WaitlistForm compact) והסכמה קטנה מתחת — בלי section גבוה. */}
         <div className="mx-auto max-w-2xl rounded-lg bg-secondary-muted px-6 py-4 text-center sm:px-10 sm:py-9">
-          <span className="kicker justify-center">רשימת המתנה</span>
+          <span className="kicker justify-center">לפני ההשקה</span>
           <h2
             id="newsletter-heading"
             className="mt-1.5 font-serif text-[clamp(1.6rem,2.8vw,2.25rem)] font-semibold leading-[1.15] text-foreground sm:mt-2"

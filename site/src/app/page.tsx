@@ -2,6 +2,7 @@ import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { HomePathSelector } from "@/components/sections/HomePathSelector";
+import { TrustBand } from "@/components/sections/TrustBand";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StickyCta } from "@/components/interactive/StickyCta";
@@ -18,18 +19,21 @@ export const metadata = pageMetadata({
 });
 
 /**
- * עמוד הבית = gateway אישי וקצר, לא קטלוג. שלושה אזורים בלבד:
+ * עמוד הבית = gateway אישי וקצר, לא קטלוג. ארבעה אזורים קומפקטיים:
  *
- *   1. Hero — כותרת, משפט הסבר אחד, פעולה ראשית „קראו טעימה מהספר”
- *      ופעולה משנית „שאל את הספר”, ושורת מחיר קטנה.
+ *   1. Hero — כותרת, משפט הסבר אחד, שורת מחיר+סטטוס („המהדורה הדיגיטלית
+ *      המלאה · תושק ב-98 ₪” — פורמט, טרם-לרכישה, מחיר), פעולה ראשית „קראו
+ *      טעימה מהספר” ופעולה משנית „שאל את הספר” עם שורת-הסבר קצרה.
  *   2. „איפה זה פוגש אותך עכשיו?” — בחירה דטרמיניסטית מקומית של אחד מארבעה
  *      מצבים; התוכן הרלוונטי בלבד נפתח במקום (שכבת „פרק ב’” אופציונלית).
- *   3. סיום + רשימת המתנה.
+ *   3. רצועת-אמון עובדתית (TrustBand) — גישה, כלים וגבולות („לא טיפול/אבחון”)
+ *      וקישור למחבר. אין המלצות/דירוגים מזויפים בטרום-השקה.
+ *   4. סיום + רשימת המתנה — מסגור עדכון-השקה („לפני ההשקה”).
  *
- * לפני בחירה העמוד שימושי לחלוטין (Hero → מצבים → הרשמה); אחרי בחירה נפתח
- * בלוק התוכן בין המצבים לבין ההרשמה. „שאל את הספר” נשאר כגלולה צפה (המנוע
- * העמוק), ולא מנוע שני. כל העומק חי בדפים הייעודיים (/book, התחנות, /preview,
- * /author, /compass) — הבית רק מכוון אליהם.
+ * לפני בחירה העמוד שימושי לחלוטין (Hero → מצבים → אמון → הרשמה); אחרי בחירה
+ * נפתח בלוק התוכן בין המצבים לבין רצועת-האמון. „שאל את הספר” נשאר כגלולה צפה
+ * (המנוע העמוק), ולא מנוע שני. כל העומק חי בדפים הייעודיים (/book, התחנות,
+ * /preview, /author, /compass) — הבית רק מכוון אליהם.
  */
 export default function HomePage() {
   return (
@@ -40,6 +44,7 @@ export default function HomePage() {
       <BuildSpine />
       <Hero />
       <HomePathSelector />
+      <TrustBand />
       <NewsletterSection />
       <CompassLauncher />
       <StickyCta />

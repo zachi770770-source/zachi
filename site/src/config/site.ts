@@ -266,8 +266,9 @@ export const siteConfig = {
    */
   salesOpen: false,
 
-  /** תווית מחיר לתקופת ה-Pre-launch — עובדתית בלבד, ללא תחושת מכירה פעילה. */
-  preLaunchPriceLabel: "הספר הדיגיטלי יושק במחיר 98 ₪",
+  /** תווית מחיר/פורמט לתקופת ה-Pre-launch — מבהירה פורמט (מהדורה דיגיטלית מלאה)
+   * וסטטוס („תושק” = טרם ניתנת לרכישה), ללא תחושת מכירה פעילה. */
+  preLaunchPriceLabel: "המהדורה הדיגיטלית המלאה · תושק ב-98 ₪",
 } as const;
 
 export type SiteConfig = typeof siteConfig;

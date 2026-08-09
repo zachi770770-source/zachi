@@ -42,43 +42,32 @@ export function Hero() {
             {/* (1) קו המסלול הפותח — טרקוטה דק שנמשך ראשון */}
             <span className="hero-rule mb-2 lg:mb-4" aria-hidden="true" />
 
-            {/* מובייל: כריכה קטנה לצד הכותרת (חוסכת שורת-כריכה גבוהה של ~246px);
-                דסקטופ: הכותרת לבדה, והכריכה בעמודה הנפרדת (hero-stage). */}
-            <div className="flex w-full items-center gap-3.5 lg:block">
-              <Link
-                href="/preview"
-                aria-label="הציצו בספר — לקריאת טעימה"
-                className="block w-[70px] shrink-0 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand lg:hidden"
-              >
-                <BookCover className="w-full" />
-              </Link>
+            <span
+              className="kicker hero-fade"
+              style={{ animationDelay: "180ms" }}
+            >
+              {hero.eyebrow}
+            </span>
 
-              <div className="min-w-0">
-                <span
-                  className="kicker hero-fade"
-                  style={{ animationDelay: "180ms" }}
-                >
-                  {hero.eyebrow}
+            {/* חשיפת כותרת שורה-אחר-שורה דרך מסכה. במובייל הכותרת ברוחב מלא
+                (אין כריכה בתוך ה-Hero); הכריכה מוצגת רק בדסקטופ (hero-stage). */}
+            <h1 className="type-display mt-2 text-foreground lg:mt-4">
+              <span className="hero-line hero-line--1">
+                <span className="hero-line__in">אהבה לא רק מוצאים.</span>
+              </span>
+              <span className="hero-line hero-line--2">
+                <span className="hero-line__in">
+                  <span className="hero-build text-brand-hover">בונים אותה.</span>
                 </span>
-                {/* חשיפת כותרת שורה-אחר-שורה דרך מסכה; במובייל מוקטנת (max-lg)
-                    כדי לשבת לצד הכריכה בלי לבלוע גובה. דסקטופ ללא שינוי. */}
-                <h1 className="type-display mt-1.5 text-foreground max-lg:text-[clamp(1.85rem,8vw,2.25rem)]! max-lg:leading-[1.12]! lg:mt-4">
-                  <span className="hero-line hero-line--1">
-                    <span className="hero-line__in">אהבה לא רק מוצאים.</span>
-                  </span>
-                  <span className="hero-line hero-line--2">
-                    <span className="hero-line__in">
-                      <span className="hero-build text-brand-hover">בונים אותה.</span>
-                    </span>
-                  </span>
-                </h1>
-              </div>
-            </div>
+              </span>
+            </h1>
 
-            {/* משפט הסבר יחיד: מבהיר שהספר מלווה את הקורא בדיוק במקום שבו הוא
-                נמצא במסע הזוגי — מחיפוש ועד קשר קיים. */}
+            {/* מובייל: משפט הסבר אחד קצר בלבד. דסקטופ: המשפט המלא (ללא שינוי). */}
+            <p className="hero-fade mt-3 text-[17px] leading-[1.5] text-foreground/80 lg:hidden">
+              הספר שעוזר להבין מה מנהל אתכם — ולבנות קשר טוב.
+            </p>
             <p
-              className="hero-fade mt-3 max-w-[48ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:text-[20px] lg:leading-[1.6]"
+              className="hero-fade mt-3 hidden max-w-[48ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:block lg:text-[20px] lg:leading-[1.6]"
               style={{ animationDelay: "380ms" }}
             >
               בין אם אתם עוד מחפשים, בתחילת קשר או כבר בתוכו — הספר עוזר להבין
@@ -88,8 +77,10 @@ export function Hero() {
             {/* יחידת המרה אחת: מחיר, פעולה ראשית ופעולה משנית — מקובצים תחת קו
                 שיער עדין, כך שהמחיר נראה חלק מהגוש. */}
             <div className="mt-3 flex w-full max-w-[46ch] flex-col items-start gap-2.5 border-t border-border pt-3 lg:mt-5 lg:gap-3.5 lg:pt-5">
+              {/* פורמט + סטטוס + מחיר בשורה אחת ברורה: מהדורה דיגיטלית מלאה שעוד
+                  „תושק” — כדי שלא ייווצר הרושם שאפשר לרכוש עכשיו. גלוי בשני המכשירים. */}
               <p
-                className="hero-fade text-[16px] font-semibold text-brand-hover"
+                className="hero-fade text-[15px] font-semibold text-brand-hover lg:text-[16px]"
                 style={{ animationDelay: "620ms" }}
               >
                 {siteConfig.preLaunchPriceLabel}
@@ -118,16 +109,22 @@ export function Hero() {
                   </Button>
                 )}
 
-                {/* פעולה משנית שקטה: „שאל את הספר” → /compass — מנוע ההכוונה האחד
-                    (אותו מנוע כמו בגלולה הצפה). קישור-טקסט, לא כפתור. */}
-                <Link
-                  href="/compass"
-                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                >
-                  <MessageCircleQuestion className="h-4 w-4 text-brand" aria-hidden="true" />
-                  שאל את הספר
-                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                </Link>
+                {/* פעולה קונטקסטואלית „שאל את הספר” → /compass — כלי התאמה
+                    דטרמיניסטי (לא AI, לא ייעוץ), עם משפט-הסבר קצר שאומר מה יקרה
+                    בלחיצה. גלוי בשני המכשירים. */}
+                <div className="flex flex-col items-start gap-1">
+                  <Link
+                    href="/compass"
+                    className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    <MessageCircleQuestion className="h-4 w-4 text-brand" aria-hidden="true" />
+                    שאל את הספר
+                    <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
+                  </Link>
+                  <p className="text-[13px] leading-snug text-foreground-muted">
+                    3–4 שאלות קצרות — ותדעו מאיזו תחנה בספר להתחיל.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

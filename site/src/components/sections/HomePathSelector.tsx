@@ -181,9 +181,16 @@ export function HomePathSelector() {
                 ))}
               </ul>
 
+              {/* משפט-הסבר קצר ל„שאל את הספר”: מבהיר מה קורה בלחיצה (כלי התאמה
+                  דטרמיניסטי, לא AI ולא ייעוץ). */}
+              <p className="mt-6 text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty]">
+                לא בטוחים מאיפה בדיוק להתחיל? „שאל את הספר” — 3–4 שאלות קצרות
+                שיובילו אתכם לפרק ולכיוון המתאימים.
+              </p>
+
               {/* פעולה ראשית „שאל את הספר” + קישור משני לעמוד התחנה. אפשר לעבור
                   למצב אחר בכל רגע דרך הכפתורים שמעל. */}
-              <div className="mt-7 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <div className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="lg" className="w-full sm:w-auto">
                   <Link href="/compass">
                     {homePathUi.ctaSecondary}

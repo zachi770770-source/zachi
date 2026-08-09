@@ -118,6 +118,7 @@ export function CompassLauncher() {
         <button
           type="button"
           aria-label="שאל את הספר — 3–4 שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
+          title="3–4 שאלות קצרות — ותדעו מאיזו תחנה בספר להתחיל"
           style={{
             ["--bubble-bottom" as string]: mobileBottom,
             ["--banner-offset" as string]: bannerOffset,
