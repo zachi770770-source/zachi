@@ -31,6 +31,30 @@ for (const p of PREVIEW) {
   });
 }
 
+test("preview after-breakup: the excerpt opens with the tool's approved breakup framing, not the dating scenario", async ({
+  page,
+}) => {
+  await page.goto("/preview?tool=quiet-check&station=after-breakup", {
+    waitUntil: "networkidle",
+  });
+  const reader = page.locator(".sample-reader");
+  // מסגור פרידתי מאושר (personaExamples.breakup) מוביל את הקטע.
+  await expect(reader).toContainText("מה לא בסדר בי");
+  // ולא נפתח בתרחיש-הדייטינג הכללי של הכלי.
+  await expect(reader).not.toContainText("14:00");
+});
+
+test("preview scoping: the SAME tool on a non-breakup station keeps the general dating scenario", async ({
+  page,
+}) => {
+  await page.goto("/preview?tool=quiet-check&station=before-relationship", {
+    waitUntil: "networkidle",
+  });
+  const reader = page.locator(".sample-reader");
+  await expect(reader).toContainText("14:00");
+  await expect(reader).not.toContainText("מה לא בסדר בי");
+});
+
 test("preview: invalid tool/station falls back to the general sample (no invented content)", async ({
   page,
 }) => {

@@ -3,6 +3,7 @@ import { pageMetadata } from "@/lib/seo";
 import { tools } from "@/content/book";
 import { sampleReader } from "@/content/sample";
 import { stations } from "@/content/stations";
+import type { PersonaId } from "@/content/personas";
 import { Container } from "@/components/shared/Container";
 import { SampleReader, type ToolSample } from "@/components/preview/SampleReader";
 import { MarkSampleSeen } from "@/components/preview/MarkSampleSeen";
@@ -25,7 +26,16 @@ export const metadata = pageMetadata({
  * ‏`?tool=&station=` (מגיע מ-Path Finder): אם *שניהם* תקפים — מוצג קטע קריאה
  * שונה *בפועל* לאותו כלי, שנבנה כולו מהתוכן המאושר של הכלי (תרחיש, יישום,
  * תובנה ושאלה) — אין אבחון ואין תוכן שהומצא. query לא תקין → הטעימה הכללית.
+ *
+ * „אחרי פרידה” בלבד: התרחיש הכללי של הכלי הוא סצנת-דייטינג, שמרגישה זרה למי
+ * שאחרי פרידה. לכן כאן הקטע *נפתח* במסגור הפרידתי המאושר של אותו כלי
+ * (`personaExamples.breakup`) — עדיין תוכן קיים ומאושר, לא מומצא. שאר התחנות
+ * נשארות עם התרחיש הכללי (אושרו כחזקים).
  */
+const STATION_PERSONA: Partial<Record<string, PersonaId>> = {
+  "after-breakup": "breakup",
+};
+
 export default async function PreviewPage({
   searchParams,
 }: {
@@ -34,6 +44,11 @@ export default async function PreviewPage({
   const { tool: toolId, station: stationId } = await searchParams;
   const tool = toolId ? tools.items.find((t) => t.id === toolId) : undefined;
   const stationValid = stationId ? stationId in stations : false;
+  // מסגור-מצב מאושר לפתיחת הקטע (כרגע רק „אחרי פרידה”): אם לכלי יש דוגמת-פרסונה
+  // תואמת, היא מובילה את הקטע במקום התרחיש הכללי. אחרת — התרחיש הכללי כרגיל.
+  const persona = stationId ? STATION_PERSONA[stationId] : undefined;
+  const personaOpening =
+    tool && persona ? tool.personaExamples?.[persona] : undefined;
   // קטע מותאם-כלי מוצג רק כששני הפרמטרים תקפים (כלי קיים + תחנה קיימת), ונגזר
   // כולו מהתוכן המאושר של הכלי. אחרת — הטעימה הכללית (fallback בטוח).
   const toolSample: ToolSample | undefined =
@@ -41,7 +56,7 @@ export default async function PreviewPage({
       ? {
           toolName: tool.name,
           contextLine: sampleReader.contextLine(tool.name),
-          opening: tool.scenario,
+          opening: personaOpening ?? tool.scenario,
           passage: [tool.application],
           insight: tool.insight,
           question: tool.question,
