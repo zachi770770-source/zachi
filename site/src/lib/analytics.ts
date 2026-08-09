@@ -66,6 +66,11 @@ export type AnalyticsEventName =
   // מזהה בלבד (dating/building/existing/breakup), ללא טקסט אישי או PII.
   | "home_path_selected"
   | "chapter2_context_selected"
+  // Personalized Reader Journey — היעד: להכניס את הקורא לספר מהר. מזהה תחנה
+  // בלבד (dating/building/existing/breakup), ללא טקסט אישי או PII.
+  | "journey_selected"
+  | "contextual_sample_clicked"
+  | "ask_book_clicked"
   | "audio_play"
   | "video_play";
 

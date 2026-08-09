@@ -2,7 +2,7 @@ import { Compass } from "lucide-react";
 
 import { pageMetadata } from "@/lib/seo";
 import { compassQuiz } from "@/content/compass";
-import { askUi } from "@/content/askRoute";
+import { askStations, askUi, type AskStationId } from "@/content/askRoute";
 import { Container } from "@/components/shared/Container";
 import { AskRoute } from "@/components/interactive/AskRoute";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -20,8 +20,22 @@ const POINTS = ["2–3 שאלות קצרות", "בחירה מתוך תשובות
  * עמוד „שאל את הספר” — מסלול אישי סגור ודטרמיניסטי שמכוון את הקורא/ת אל התחנה
  * והכלי המתאימים בספר, עם התאמת פרק ב' ושער „אחרי פרידה”. אינו צ׳אטבוט ואינו
  * AI: כל האפשרויות סגורות, המיפוי דטרמיניסטי בצד-הלקוח, ואין קריאה ל-API חיצוני.
+ *
+ * הקשר-מסע מהבית: `?station=<id>` (מגיע מתוצאת „איפה זה פוגש אותך עכשיו?”) —
+ * כשהתחנה כבר ידועה, המנוע מדלג על שאלת „איפה אתם?” ומתחיל בדילמה. פרמטר לא תקין
+ * או כניסה ישירה ל-/compass → ההתנהגות הרגילה (מתחילים מבחירת התחנה).
  */
-export default function CompassPage() {
+export default async function CompassPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ station?: string }>;
+}) {
+  const { station } = await searchParams;
+  const initialStation: AskStationId | undefined =
+    station && askStations.some((s) => s.id === station)
+      ? (station as AskStationId)
+      : undefined;
+
   return (
     <Container className="py-12 sm:py-16 lg:py-20">
       <BreadcrumbSchema
@@ -63,7 +77,7 @@ export default function CompassPage() {
       </header>
 
       <div className="enter mt-10 sm:mt-12" style={{ animationDelay: "160ms" }}>
-        <AskRoute />
+        <AskRoute initialStation={initialStation} />
       </div>
     </Container>
   );

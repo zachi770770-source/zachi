@@ -5,6 +5,8 @@
  * הוא שער מעבר, לא מסלול חמישי; „פרק ב’” הוא שכבת התאמה, לא מצב נפרד.
  */
 
+import type { AskStationId } from "@/content/askRoute";
+
 export type HomePathId = "dating" | "building" | "existing" | "breakup";
 
 export interface HomePathFocus {
@@ -32,6 +34,22 @@ export interface HomePath {
   stationLabel: string;
   /** פסקת התאמה כשמופעל „פרק ב’”. */
   chapter2: string;
+
+  // ── התאמה אישית: המטרה היא להכניס את הקורא לתוך הספר מהר ──
+  /**
+   * הפעולה הראשית בתוצאה: טעימה מותאמת מהספר. נבנית מ-`/preview?tool=&station=`
+   * — תשתית קיימת שמציגה קטע קריאה אמיתי מהתוכן המאושר של הכלי. לא ממציאים קטע:
+   * הכלי שנבחר לכל תחנה הוא הקרוב-ביותר תמטית מתוך ששת הכלים המאושרים. תחנות
+   * „מתחילים קשר”/„אחרי פרידה” נעדרות כלי-native — ונקשרות לכלי-הליבה המתאים
+   * ביותר (בדיקת הקצב / בדיקת השקט) שאושר במפורש לשימוש זה.
+   */
+  sampleTool: string;
+  /** ה-station שמועבר ל-Preview (slug התחנה) — חייב להיות מפתח תקף ב-stations. */
+  sampleStation: string;
+  /** תווית ה-CTA הראשי לטעימה המותאמת (לפי המצב). */
+  samplePrimaryLabel: string;
+  /** מזהה התחנה המקביל במנוע „שאל את הספר” — להעברת הקשר וחיסכון שאלה חוזרת. */
+  askStation: AskStationId;
 }
 
 export const homePaths: HomePath[] = [
@@ -56,6 +74,10 @@ export const homePaths: HomePath[] = [
     stationLabel: "לעמוד „לפני קשר”",
     chapter2:
       "הפעם אתם לא מגיעים לקשר כדף חלק. יש עבר, אולי ילדים, אולי שני בתים, אולי פחד לחזור על מה שכבר כאב. הבחירה החדשה צריכה לקחת בחשבון גם את החיים שכבר בניתם.",
+    sampleTool: "fact-story-action",
+    sampleStation: "before-relationship",
+    samplePrimaryLabel: "קראו טעימה שמתאימה לשלב הזה",
+    askStation: "dating",
   },
   {
     id: "building",
@@ -81,6 +103,10 @@ export const homePaths: HomePath[] = [
     stationLabel: "לעמוד „בניית קשר”",
     chapter2:
       "כאן לא נפגשים רק שני אנשים. לפעמים נפגשות גם משפחות, היסטוריות, ילדים, לוחות זמנים ונאמנויות. לכן קצב נכון חשוב אפילו יותר.",
+    sampleTool: "gate-questions",
+    sampleStation: "building-relationship",
+    samplePrimaryLabel: "קראו טעימה שמתאימה לקשר שמתחיל",
+    askStation: "building",
   },
   {
     id: "existing",
@@ -107,6 +133,10 @@ export const homePaths: HomePath[] = [
     stationLabel: "לעמוד „בתוך קשר”",
     chapter2:
       "בקשר של פרק ב׳ לא כל ריחוק הוא רק זוגי. לעיתים נכנסים פנימה ילדים, בתים, אקסים, עומס ותיאום. צריך לזהות מה שייך לקשר ומה מגיע מהמערכת שסביבו.",
+    sampleTool: "twenty-maintenance",
+    sampleStation: "inside-relationship",
+    samplePrimaryLabel: "קראו טעימה שמתאימה לקשר קיים",
+    askStation: "existing",
   },
   {
     id: "breakup",
@@ -133,6 +163,10 @@ export const homePaths: HomePath[] = [
     stationLabel: "לעמוד „אחרי פרידה”",
     chapter2:
       "כשכבר עברנו קשר משמעותי, פרידה נוספת יכולה לעורר פחד עמוק יותר להתחיל שוב. אין צורך למהר להוכיח שאפשר לפתוח פרק חדש.",
+    sampleTool: "quiet-check",
+    sampleStation: "after-breakup",
+    samplePrimaryLabel: "קראו טעימה שמתאימה למה שאתם עוברים עכשיו",
+    askStation: "after-breakup",
   },
 ];
 

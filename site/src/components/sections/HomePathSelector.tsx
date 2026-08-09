@@ -6,6 +6,7 @@ import { ArrowLeft, Check } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
+import { BookLink } from "@/components/shared/BookLink";
 import { homePaths, homePathUi, type HomePathId } from "@/content/homePaths";
 import { trackEvent } from "@/lib/analytics";
 
@@ -56,6 +57,8 @@ export function HomePathSelector() {
       /* אחסון חסום — לא קריטי */
     }
     trackEvent("home_path_selected", { path: id });
+    // אירוע-מסע אנונימי (מזהה תחנה בלבד) — למדידת „בחירת מצב” בלי מידע אישי.
+    trackEvent("journey_selected", { station: id });
   };
 
   // מיקוד לכותרת הבלוק רק לאחר בחירה יזומה (לא בשחזור). נגישות: קורא-מסך קופץ
@@ -71,7 +74,7 @@ export function HomePathSelector() {
   }, [selected]);
 
   return (
-    <section id="path" className="scroll-mt-20 py-6 sm:py-14" aria-labelledby="path-heading">
+    <section id="path" className="scroll-mt-20 py-5 sm:py-10" aria-labelledby="path-heading">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <h2 id="path-heading" className="type-h2">
@@ -181,32 +184,49 @@ export function HomePathSelector() {
                 ))}
               </ul>
 
-              {/* משפט-הסבר קצר ל„שאל את הספר”: מבהיר מה קורה בלחיצה (כלי התאמה
-                  דטרמיניסטי, לא AI ולא ייעוץ). */}
-              <p className="mt-6 text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty]">
-                לא בטוחים מאיפה בדיוק להתחיל? „שאל את הספר” — 2–3 שאלות קצרות
-                שיובילו אתכם לפרק ולכיוון המתאימים.
-              </p>
-
-              {/* פעולה ראשית „שאל את הספר” + קישור משני לעמוד התחנה. אפשר לעבור
-                  למצב אחר בכל רגע דרך הכפתורים שמעל. */}
-              <div className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                <Button asChild size="lg" className="w-full sm:w-auto">
-                  <Link href="/compass">
-                    {homePathUi.ctaSecondary}
+              {/* פעולות התוצאה — היעד: להכניס לספר מהר. הראשית פותחת מיד קטע
+                  מהספר שמתאים למצב (טעימה מותאמת → /preview?tool=&station=,
+                  תשתית קיימת; הקטע נגזר מהתוכן המאושר של הכלי, לא מומצא).
+                  „שאל את הספר” נשאר משני ושקט (עם הקשר-המצב, כדי לא לשאול שוב
+                  „איפה אתם?”), וקישור-התחנה שלישי. */}
+              <div className="mt-5 flex flex-col items-stretch gap-3">
+                <Button asChild size="lg" className="w-full sm:w-auto sm:self-start">
+                  <BookLink
+                    href={`/preview?tool=${p.sampleTool}&station=${p.sampleStation}`}
+                    morphCover
+                    onClick={() =>
+                      trackEvent("contextual_sample_clicked", { station: p.id })
+                    }
+                  >
+                    {p.samplePrimaryLabel}
                     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  </Link>
+                  </BookLink>
                 </Button>
-                <Link
-                  href={p.stationHref}
-                  className="group inline-flex items-center gap-1.5 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand sm:ms-auto"
-                >
-                  {p.stationLabel}
-                  <ArrowLeft
-                    className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
-                    aria-hidden="true"
-                  />
-                </Link>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <Link
+                    href={`/compass?station=${p.askStation}`}
+                    onClick={() =>
+                      trackEvent("ask_book_clicked", { station: p.id })
+                    }
+                    className="group inline-flex items-center gap-1.5 text-[14px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    {homePathUi.ctaSecondary}
+                    <ArrowLeft
+                      className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                  <Link
+                    href={p.stationHref}
+                    className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand sm:ms-auto"
+                  >
+                    {p.stationLabel}
+                    <ArrowLeft
+                      className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </div>
               </div>
             </article>
           ))}

@@ -8,7 +8,7 @@ export function NewsletterSection() {
   return (
     <section
       id="waitlist"
-      className="scroll-mt-24 py-4 sm:py-12"
+      className="scroll-mt-24 py-4 sm:py-10"
       aria-labelledby="newsletter-heading"
     >
       <Container>

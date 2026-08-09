@@ -32,7 +32,15 @@ import { trackEvent } from "@/lib/analytics";
 
 type Step = "station" | "dilemma" | "context" | "result" | "safety";
 
-export function AskRoute() {
+export function AskRoute({
+  initialStation,
+}: {
+  /**
+   * הקשר-מסע מהבית: כשהתחנה כבר נבחרה ב„איפה זה פוגש אותך עכשיו?”, מדלגים על
+   * שאלת „איפה אתם?” ומתחילים בדילמה. undefined → מתחילים מבחירת התחנה (רגיל).
+   */
+  initialStation?: AskStationId;
+} = {}) {
   const [step, setStep] = React.useState<Step>("station");
   const [stationId, setStationId] = React.useState<AskStationId | null>(null);
   const [dilemmaId, setDilemmaId] = React.useState<string | null>(null);
@@ -43,10 +51,21 @@ export function AskRoute() {
     trackEvent("ask_open");
   }, []);
 
-  // שחזור עדין למבקר חוזר → מציג את התוצאה ישירות (המשך מסלול), עם איפוס ברור.
-  // rAF (לא בגוף האפקט) — בלי אי-התאמת הידרציה מול ה-SSR (מסך התחנות).
+  // מעבר ראשוני (אחרי הידרציה, ב-rAF — בלי אי-התאמה מול ה-SSR של מסך התחנות):
+  //  1. הקשר-מסע מהבית (`?station=`) גובר — כוונה טרייה ומפורשת: מדלגים על „איפה
+  //     אתם?” ומתחילים בדילמה של אותה תחנה.
+  //  2. אחרת, מבקר חוזר עם מסלול שמור → מציג את התוצאה ישירות (המשך מסלול).
+  //  3. אחרת — מתחילים רגיל מבחירת התחנה.
   React.useEffect(() => {
     const raf = requestAnimationFrame(() => {
+      if (initialStation) {
+        setStationId(initialStation);
+        setDilemmaId(null);
+        setCtxId(null);
+        setStep("dilemma");
+        trackEvent("ask_station", { station: initialStation, via: "home" });
+        return;
+      }
       const saved = loadAsk();
       if (!saved) return;
       setStationId(saved.stationId);
@@ -54,7 +73,7 @@ export function AskRoute() {
       setStep("result");
     });
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [initialStation]);
 
   const dilemma = getDilemma(dilemmaId) ?? null;
 

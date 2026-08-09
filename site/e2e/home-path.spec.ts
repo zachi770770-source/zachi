@@ -66,18 +66,48 @@ test("selection persists across reload within the session (sessionStorage), with
   await fresh.close();
 });
 
-test("selected panel shows the primary „שאל את הספר” CTA (→/compass) and the station link", async ({ page }) => {
+// Personalized Reader Journey: לכל מצב, הפעולה הראשית בתוצאה מכניסה ישירות
+// לקטע מהספר שמתאים למצב (טעימה מותאמת → /preview?tool=&station=), „שאל את הספר”
+// משני (עם הקשר-המצב), וקישור-התחנה שלישי. הכלי לכל תחנה הוא תוכן מאושר קיים.
+const JOURNEY = [
+  { btn: /אני מחפש/, id: "dating", tool: "fact-story-action", station: "before-relationship", ask: "dating" },
+  { btn: /אני בתחילת/, id: "building", tool: "gate-questions", station: "building-relationship", ask: "building" },
+  { btn: /אני בתוך/, id: "existing", tool: "twenty-maintenance", station: "inside-relationship", ask: "existing" },
+  { btn: /אני אחרי/, id: "breakup", tool: "quiet-check", station: "after-breakup", ask: "after-breakup" },
+] as const;
+
+for (const j of JOURNEY) {
+  test(`result for ${j.id}: primary = contextual book sample (/preview?tool=${j.tool}), secondary = ask (with context), tertiary = station page`, async ({
+    page,
+  }) => {
+    await selectByReducedMotion(page);
+    await page.getByRole("button", { name: j.btn }).first().click();
+    const panel = page.locator(`#path-panel-${j.id}`);
+    await expect(panel).toBeVisible();
+
+    // ראשי: טעימה מותאמת → /preview עם הכלי+התחנה הנכונים לאותו מצב.
+    const sample = panel.getByRole("link", { name: /קראו טעימה שמתאימה/ });
+    await expect(sample).toHaveAttribute(
+      "href",
+      `/preview?tool=${j.tool}&station=${j.station}`,
+    );
+    // משני: „שאל את הספר” נושא את הקשר-המצב (כדי לא לשאול שוב „איפה אתם?”).
+    const ask = panel.getByRole("link", { name: "שאל את הספר" });
+    await expect(ask).toHaveAttribute("href", `/compass?station=${j.ask}`);
+    // שלישי: קישור לעמוד-התחנה הייעודי.
+    await expect(panel.locator(`a[href="/${j.station}"]`)).toHaveCount(1);
+  });
+}
+
+test("result stays short: no long tool-intro paragraph, and only ONE panel is visible", async ({ page }) => {
   await selectByReducedMotion(page);
   await page.getByRole("button", { name: /אני מחפש/ }).click();
   const panel = page.locator("#path-panel-dating");
   await expect(panel).toBeVisible();
-  // פעולה ראשית „שאל את הספר” → /compass.
-  const ask = panel.getByRole("link", { name: "שאל את הספר" });
-  await expect(ask).toHaveAttribute("href", "/compass");
-  // קישור משני לעמוד התחנה.
-  await expect(panel.locator('a[href="/before-relationship"]')).toHaveCount(1);
-  // התוצאה המקוצרת אינה כוללת עוד את פסקת הפתיחה הארוכה של הכלי.
+  // התוצאה המקוצרת אינה כוללת את פסקת הפתיחה הארוכה של המצב.
   await expect(panel).not.toContainText("אולי יצאתם כבר ללא מעט דייטים");
+  // רק בלוק-תוצאה אחד גלוי (השאר hidden).
+  await expect(page.locator(".path-panel:visible")).toHaveCount(1);
 });
 
 test("keyboard: Enter selects a state", async ({ page }) => {
