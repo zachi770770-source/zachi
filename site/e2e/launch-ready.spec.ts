@@ -178,7 +178,7 @@ test.describe("Launch-readiness", () => {
     );
     await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
     await expect(
-      page.getByRole("region", { name: "להמשך הקריאה" }).getByRole("link", { name: /קראו טעימה שמתאימה/ }),
+      page.getByRole("region", { name: "להמשך הקריאה" }).getByRole("link", { name: "קראו את הקטע שמתאים לשלב הזה" }),
     ).toHaveAttribute("href", "/preview?tool=fact-story-action&station=before-relationship");
 
     // „בחרו מסלול אחר” — קישור שקט חזרה לבורר, לא בורר-מלא בעמוד.

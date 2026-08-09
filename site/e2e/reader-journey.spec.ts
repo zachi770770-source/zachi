@@ -98,7 +98,7 @@ test("two actions from Home to real book content (state → journey page → sam
   await page.locator("#path").getByRole("link", { name: /אני מחפש/ }).click();
   await expect(page).toHaveURL(/\/before-relationship$/);
   // פעולה 2: הטעימה המותאמת → נחיתה על קטע אמיתי מהספר.
-  await page.getByRole("link", { name: /קראו טעימה שמתאימה/ }).click();
+  await page.getByRole("link", { name: "קראו את הקטע שמתאים לשלב הזה" }).click();
   await expect(page).toHaveURL(/\/preview\?tool=fact-story-action/);
   await expect(page.locator(".sample-reader")).toContainText("כשאתה מפסיק להאמין לכל סיפור");
 });

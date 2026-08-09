@@ -2,7 +2,11 @@ import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 
 import { stations } from "@/content/stations";
-import type { JourneyPage as JourneyPageData } from "@/content/journeyPages";
+import type {
+  JourneyPage as JourneyPageData,
+  JourneyVariant,
+} from "@/content/journeyPages";
+import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
@@ -12,18 +16,83 @@ import { JourneyView } from "@/components/journey/JourneyView";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 
 /**
- * עמוד-מסע אישי (Landing) לאחת מארבע הבחירות ב-Home. מבנה UX עקבי בין הארבעה,
- * אך כל עמוד בשפת-המצב שלו: Hero אישי → שיקוף → 3 נושאים → טעימה מותאמת מהספר
- * (פעולה ראשית) → „שאל את הספר” (משני, עם הקשר-המצב) → מה לקרוא מכאן → עדכון
- * השקה. אין כאן בורר ארבעת-המצבים מחדש (זה יחזיר את הקורא לתפריט) — רק קישור
- * שקט „בחרו מסלול אחר”. הטעימה אמיתית ומגיעה מ-/preview?tool=&station=.
+ * עמוד-מסע אישי (Landing) לאחת מארבע הבחירות ב-Home — נכתב לשפת-המצב של הקורא,
+ * לא כרטיס-ניווט מוגדל. מבנה עריכתי אחיד A–J, אבל *לא* Template משוכפל: לכל מסלול
+ * `variant` (clarity/movement/depth/space) שמשנה בעדינות את הרכב ה-Hero, מיקום
+ * ציטוט-העצירה, פריסת שלוש נקודות-העומק והקצב האנכי — בלי לשבור את שפת המותג.
+ *
+ * המבנה: A. Hero דו-טורי · B. „מה באמת קורה” (שיקוף) · C. שלוש נקודות-עומק
+ * ממוספרות · D. Moment of recognition (ציטוט גדול) · E. „מה הספר יעזור לראות” ·
+ * F. משפט-מעבר · G. טעימה מותאמת (פעולה ראשית) · H. „שאל את הספר” (משני, עם
+ * הקשר-המצב) · I. Next step (רך, שונה לפי מסלול) · J. קישור שקט „מסלול אחר”.
+ *
+ * הטעימה עצמה אמיתית ומגיעה מ-/preview?tool=&station= (תוכן כלי מאושר). אין כאן
+ * בורר ארבעת-המצבים מחדש — רק קישור שקט חזרה אליו.
  */
+
+type VariantConfig = {
+  /** הרכב ה-Hero: מפוצל דו-טורי מול ריכוזי-אוורירי. */
+  hero: "split" | "centered";
+  /** באיזה צד יושבת אמירת-מצב-הרוח ב-Hero המפוצל. */
+  moodSide: "start" | "end";
+  /** היכן ציטוט-העצירה נופל בזרימה — פסק אחרי השיקוף, או שיא אחרי נקודות-העומק. */
+  quoteAfter: "reflection" | "points";
+  /** אופי ציטוט-העצירה: פס-רקע מלא מול ציטוט חשוף בין קווי-שׂיא. */
+  quoteTone: "band" | "rule";
+  /** פריסת שלוש נקודות-העומק בדסקטופ: טור-שלישיות מול שורות שכבתיות. */
+  points: "grid" | "rows";
+  /** קצב אנכי בין הפסים. */
+  rhythm: string;
+};
+
+const VARIANTS: Record<JourneyVariant, VariantConfig> = {
+  // לפני קשר — בהירות: פיצול רגוע, אמירה בצד-הסיום, פסק שקט לפני נקודות-העומק.
+  clarity: {
+    hero: "split",
+    moodSide: "end",
+    quoteAfter: "reflection",
+    quoteTone: "rule",
+    points: "grid",
+    rhythm: "space-y-16 sm:space-y-20 lg:space-y-24",
+  },
+  // מתחילים קשר — תנועה: הפיצול מתהפך, והציטוט הוא שיא-מומנטום אחרי נקודות-העומק.
+  movement: {
+    hero: "split",
+    moodSide: "start",
+    quoteAfter: "points",
+    quoteTone: "band",
+    points: "grid",
+    rhythm: "space-y-14 sm:space-y-16 lg:space-y-20",
+  },
+  // בתוך קשר — עומק: שורות שכבתיות במקום טור, וציטוט-שיא מלא אחרי נקודות-העומק.
+  depth: {
+    hero: "split",
+    moodSide: "end",
+    quoteAfter: "points",
+    quoteTone: "band",
+    points: "rows",
+    rhythm: "space-y-14 sm:space-y-16 lg:space-y-[4.5rem]",
+  },
+  // אחרי פרידה — מרחב: Hero ריכוזי אוורירי, וציטוט חשוף מבודד עוד לפני העומק.
+  space: {
+    hero: "centered",
+    moodSide: "end",
+    quoteAfter: "reflection",
+    quoteTone: "rule",
+    points: "grid",
+    rhythm: "space-y-16 sm:space-y-24 lg:space-y-28",
+  },
+};
+
 export function JourneyPage({ journey }: { journey: JourneyPageData }) {
   const station = stations[journey.id];
+  const v = VARIANTS[journey.variant];
   const previewHref = `/preview?tool=${journey.sampleTool}&station=${journey.sampleStation}`;
 
+  const quote = <PullQuote text={journey.pullQuote} tone={v.quoteTone} />;
+
   return (
-    <Container className="py-8 sm:py-12 lg:py-14">
+    <Container className="py-10 sm:py-14 lg:py-16">
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
@@ -55,72 +124,211 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         </ol>
       </nav>
 
-      {/* Hero אישי — kicker → כותרת → שיקוף. */}
-      <header className="enter-stagger mx-auto mt-8 max-w-[52ch]">
-        <span className="kicker">{journey.eyebrow}</span>
-        <h1 className="mt-4 font-serif text-[clamp(1.9rem,4vw,2.85rem)] font-semibold leading-[1.15] text-foreground [text-wrap:balance]">
-          {journey.h1}
-        </h1>
-        <p className="mt-5 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-          {journey.intro}
-        </p>
-        {/* שורת מצב-הרוח — הטון הרגשי הייחודי של המסלול, כבר במסך הראשון. */}
-        <p className="mt-5 border-e-2 border-brand pe-4 font-serif text-[1.15rem] italic leading-relaxed text-brand-hover [text-wrap:balance]">
-          {journey.moodLine}
-        </p>
-      </header>
+      {/* A. Hero — kicker → כותרת גדולה → שיקוף → אמירת מצב-רוח. הרכב לפי variant. */}
+      {v.hero === "split" ? (
+        <header className="enter-stagger mt-8 lg:mt-12 lg:grid lg:grid-cols-12 lg:items-end lg:gap-x-12">
+          <div
+            className={cn(
+              "lg:col-span-7",
+              v.moodSide === "start" && "lg:order-2",
+            )}
+          >
+            <span className="kicker">{journey.eyebrow}</span>
+            <h1 className="mt-5 max-w-[20ch] font-serif text-[clamp(2.1rem,4.6vw,3.6rem)] font-bold leading-[1.08] tracking-[-0.01em] text-foreground [text-wrap:balance]">
+              {journey.h1}
+            </h1>
+            <p className="mt-6 max-w-[46ch] text-[clamp(1.1rem,1.5vw,1.3125rem)] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+              {journey.intro}
+            </p>
+          </div>
+          <div
+            className={cn(
+              "mt-8 lg:mt-0 lg:col-span-5 lg:self-end",
+              v.moodSide === "start" && "lg:order-1",
+            )}
+          >
+            <p
+              className={cn(
+                "border-brand pt-5 font-serif text-[clamp(1.375rem,2.1vw,1.9rem)] italic leading-[1.35] text-brand-hover [text-wrap:balance]",
+                "border-t-2 lg:border-t-0",
+                v.moodSide === "start"
+                  ? "lg:border-e-2 lg:pe-6"
+                  : "lg:border-s-2 lg:ps-6",
+              )}
+            >
+              {journey.moodLine}
+            </p>
+          </div>
+        </header>
+      ) : (
+        <header className="enter-stagger mx-auto mt-10 max-w-[46ch] text-center lg:mt-16">
+          <span className="kicker justify-center">{journey.eyebrow}</span>
+          <h1 className="mx-auto mt-5 max-w-[22ch] font-serif text-[clamp(2.1rem,4.6vw,3.6rem)] font-bold leading-[1.1] tracking-[-0.01em] text-foreground [text-wrap:balance]">
+            {journey.h1}
+          </h1>
+          <p className="mx-auto mt-6 max-w-[42ch] text-[clamp(1.1rem,1.5vw,1.3125rem)] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+            {journey.intro}
+          </p>
+          <p className="mx-auto mt-8 max-w-[34ch] font-serif text-[clamp(1.375rem,2.1vw,1.85rem)] italic leading-[1.35] text-brand-hover [text-wrap:balance]">
+            {journey.moodLine}
+          </p>
+        </header>
+      )}
 
-      <div className="mx-auto mt-10 flex max-w-[52ch] flex-col gap-10 sm:mt-12">
-        {/* שלושה נושאים מרכזיים — קצר וממוקד. */}
-        <section aria-labelledby="topics-heading" className="reveal">
-          <h2 id="topics-heading" className="kicker">
-            {journey.topicsHeading}
+      <div className={cn("mt-16 lg:mt-24", v.rhythm)}>
+        {/* B. „מה באמת קורה בשלב הזה” — שיקוף (לא עצות). כותרת ברֵיל צדדי + טקסט. */}
+        <section
+          aria-labelledby="whats-happening-heading"
+          className="reveal lg:grid lg:grid-cols-12 lg:gap-x-12"
+        >
+          <div className="lg:col-span-4">
+            <span className="kicker">שיקוף</span>
+            <h2
+              id="whats-happening-heading"
+              className="mt-4 font-serif text-[clamp(1.6rem,2.6vw,2.25rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+            >
+              {journey.whatsHappeningHeading}
+            </h2>
+          </div>
+          <div className="mt-6 flex max-w-[60ch] flex-col gap-5 lg:col-span-8 lg:mt-0">
+            {journey.whatsHappening.map((para, i) => (
+              <p
+                key={i}
+                className={cn(
+                  "text-[1.125rem] leading-[1.75] text-foreground/90 [text-wrap:pretty]",
+                  i === 0 &&
+                    "text-[clamp(1.2rem,1.7vw,1.4rem)] font-medium leading-[1.6] text-foreground",
+                )}
+              >
+                {para}
+              </p>
+            ))}
+          </div>
+        </section>
+
+        {/* ציטוט-העצירה כפסק שקט (variant בהירות/מרחב). */}
+        {v.quoteAfter === "reflection" && quote}
+
+        {/* C. שלוש נקודות-עומק — ממוספרות 01/02/03, כותרת + משפט הסבר לכל אחת. */}
+        <section aria-labelledby="depth-heading" className="reveal">
+          <h2 id="depth-heading" className="kicker">
+            שלוש נקודות שכדאי לשים לב אליהן
           </h2>
-          <ul className="mt-4 flex flex-col gap-3">
-            {journey.topics.map((t) => (
+          {v.points === "grid" ? (
+            <ol className="mt-8 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              {journey.depthPoints.map((p, i) => (
+                <li
+                  key={p.title}
+                  className="border-t border-border-strong pt-5"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="font-serif text-[2rem] font-bold leading-none text-brand/85"
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="mt-3 font-serif text-[1.375rem] font-bold leading-tight text-foreground [text-wrap:balance]">
+                    {p.title}
+                  </h3>
+                  <p className="mt-2.5 text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                    {p.line}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <ol className="mt-8 flex flex-col">
+              {journey.depthPoints.map((p, i) => (
+                <li
+                  key={p.title}
+                  className="grid grid-cols-[auto_1fr] items-baseline gap-x-5 border-t border-border-strong py-6 sm:gap-x-8 lg:grid-cols-[5rem_1fr]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="font-serif text-[2.25rem] font-bold leading-none text-brand/85 sm:text-[2.75rem]"
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div className="max-w-[52ch]">
+                    <h3 className="font-serif text-[clamp(1.375rem,2vw,1.625rem)] font-bold leading-tight text-foreground [text-wrap:balance]">
+                      {p.title}
+                    </h3>
+                    <p className="mt-2.5 text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                      {p.line}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+
+        {/* ציטוט-העצירה כשיא-מומנטום/עומק (variant תנועה/עומק). */}
+        {v.quoteAfter === "points" && quote}
+
+        {/* E. „מה הספר יעזור לכם לראות” — תובנות ממוקדות (בלי הבטחת תוצאה). */}
+        <section
+          aria-labelledby="book-helps-heading"
+          className="reveal lg:grid lg:grid-cols-12 lg:gap-x-12"
+        >
+          <div className="lg:col-span-4">
+            <span className="kicker">מהספר</span>
+            <h2
+              id="book-helps-heading"
+              className="mt-4 font-serif text-[clamp(1.6rem,2.6vw,2.25rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+            >
+              {journey.bookHelpsHeading}
+            </h2>
+          </div>
+          <ul className="mt-6 flex max-w-[58ch] flex-col divide-y divide-border lg:col-span-8 lg:mt-0">
+            {journey.bookHelps.map((help) => (
               <li
-                key={t}
-                className="flex items-start gap-3 text-[1.05rem] leading-relaxed text-foreground/90"
+                key={help}
+                className="flex items-start gap-4 py-4 first:pt-0"
               >
                 <span
                   aria-hidden="true"
-                  className="mt-[0.7rem] h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
+                  className="mt-[0.6rem] h-1.5 w-6 shrink-0 rounded-full bg-brand"
                 />
-                <span className="[text-wrap:pretty]">{t}</span>
+                <span className="text-[1.0625rem] leading-relaxed text-foreground/90 [text-wrap:pretty]">
+                  {help}
+                </span>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* פעולה ראשית: טעימה מותאמת → נחיתה על קטע אמיתי מהספר. „שאל את הספר”
-            משני, עם הקשר-המצב (כדי לא לשאול שוב „איפה אתם?”). */}
+        {/* F+G+H. משפט-מעבר → טעימה מותאמת (פעולה ראשית) → „שאל את הספר” (משני). */}
         <section
-          aria-labelledby="cta-heading"
-          className="reveal flex flex-col items-start gap-4 border-t border-border pt-8"
+          aria-label="להמשך הקריאה"
+          className="reveal overflow-hidden rounded-3xl border border-border bg-surface-muted/60 px-6 py-10 sm:px-10 sm:py-12 lg:grid lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:px-12"
         >
-          <h2 id="cta-heading" className="sr-only">
-            להמשך הקריאה
-          </h2>
-          {/* משפט-מעבר לטעימה — ממסגר את נושא הכלי בשפת-המצב (התוכן מהספר עצמו). */}
-          <p className="text-[1.05rem] leading-relaxed text-foreground/90 [text-wrap:pretty]">
-            {journey.sampleLead}
-          </p>
-          <Button asChild size="lg" className="w-full px-7 sm:w-auto">
-            <BookLink href={previewHref} morphCover>
-              {journey.samplePrimaryLabel}
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </BookLink>
-          </Button>
-          <AskBookLink station={journey.compassStation} />
+          <div className="lg:col-span-7">
+            <span className="kicker">טעימה מהספר</span>
+            <p className="mt-4 max-w-[46ch] font-serif text-[clamp(1.3rem,1.9vw,1.6rem)] leading-[1.5] text-foreground [text-wrap:pretty]">
+              {journey.sampleLead}
+            </p>
+          </div>
+          <div className="mt-7 flex flex-col items-start gap-4 lg:col-span-5 lg:mt-0 lg:items-end">
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <BookLink href={previewHref} morphCover>
+                {journey.samplePrimaryLabel}
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </BookLink>
+            </Button>
+            <AskBookLink station={journey.compassStation} />
+          </div>
         </section>
 
-        {/* מה כדאי לקרוא מכאן — קישור אחד עיקרי (הספר המלא), ולתחנת-המעבר בלבד
-            הצעת-המשך עדינה ל„מתחילים מחדש” (לא CTA ראשי). */}
+        {/* I. Next step — רך, שונה לפי מסלול: הספר המלא + תחנת-המשך ייעודית. J בסוף. */}
         <section
           aria-labelledby="next-heading"
-          className="reveal border-t border-border pt-8"
+          className="reveal border-t border-border pt-10"
         >
-          <h2 id="next-heading" className="font-serif text-xl font-semibold text-foreground">
+          <h2
+            id="next-heading"
+            className="font-serif text-[1.25rem] font-bold text-foreground"
+          >
             מה כדאי לקרוא מכאן
           </h2>
           <div className="mt-4 flex flex-col gap-3">
@@ -131,39 +339,21 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
               <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
               מה עוד מחכה בספר
             </Link>
-            {journey.nextStep ? (
-              <p className="text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-                {journey.nextStep.prompt}{" "}
-                <Link
-                  href={journey.nextStep.href}
-                  className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                >
-                  {journey.nextStep.label}
-                </Link>
-              </p>
-            ) : null}
+            <p className="max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+              {journey.nextStep.prompt}{" "}
+              <Link
+                href={journey.nextStep.href}
+                className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                {journey.nextStep.label}
+              </Link>
+            </p>
           </div>
-        </section>
-
-        {/* עדכון השקה — פעולה שקטה אחת (טרום-השקה). */}
-        <section
-          aria-labelledby="launch-heading"
-          className="reveal rounded-2xl bg-secondary-muted px-6 py-6 sm:px-8"
-        >
-          <h2 id="launch-heading" className="font-serif text-lg font-semibold text-foreground">
-            הספר עדיין לפני השקה
-          </h2>
-          <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted">
-            השאירו אימייל ונעדכן אתכם ברגע שהוא יוצא. בלי ספאם.
-          </p>
-          <Button asChild variant="outline" className="mt-4">
-            <Link href="/waitlist">עדכנו אותי כשהספר יוצא</Link>
-          </Button>
         </section>
       </div>
 
-      {/* „זה לא המקום שלי” — קישור שקט חזרה לבורר, לא בורר מלא בתוך העמוד. */}
-      <div className="mx-auto mt-12 max-w-[52ch]">
+      {/* J. „זה לא המקום שלי” — קישור שקט חזרה לבורר, לא בורר מלא בעמוד. */}
+      <div className="mt-16">
         <Link
           href="/#path"
           className="inline-flex items-center gap-2 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
@@ -173,5 +363,34 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         </Link>
       </div>
     </Container>
+  );
+}
+
+/**
+ * D. Moment of recognition — משפט גדול לעצור עליו. שתי הופעות: פס-רקע מלא („band”)
+ * או ציטוט חשוף בין שני קווי-שׂיא („rule”). ממוקם בזרימה לפי ה-variant.
+ */
+function PullQuote({ text, tone }: { text: string; tone: "band" | "rule" }) {
+  if (tone === "band") {
+    return (
+      <figure className="reveal -mx-6 rounded-none bg-secondary-muted px-6 py-14 sm:mx-0 sm:rounded-3xl sm:px-10 sm:py-16 lg:py-20">
+        <blockquote className="mx-auto max-w-[24ch] text-center font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-bold leading-[1.2] tracking-[-0.01em] text-secondary [text-wrap:balance]">
+          {text}
+        </blockquote>
+      </figure>
+    );
+  }
+  return (
+    <figure className="reveal border-y border-border-strong py-12 sm:py-16 lg:py-20">
+      <blockquote className="mx-auto max-w-[26ch] text-center font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-[1.22] tracking-[-0.01em] text-foreground [text-wrap:balance]">
+        <span aria-hidden="true" className="text-brand">
+          „
+        </span>
+        {text}
+        <span aria-hidden="true" className="text-brand">
+          ”
+        </span>
+      </blockquote>
+    </figure>
   );
 }
