@@ -19,10 +19,10 @@ export function Footer() {
 
   return (
     <footer className="border-t border-secondary-foreground/15 bg-secondary text-secondary-foreground">
-      <Container className="flex flex-col gap-8 py-10 sm:gap-12 sm:py-16">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-10">
+      <Container className="flex flex-col gap-5 py-7 sm:gap-12 sm:py-16">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-6 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-10">
           {/* בלוק המותג — רוחב מלא במובייל; שני טורי הקישורים יושבים זה לצד זה מתחתיו */}
-          <div className="col-span-2 flex max-w-sm flex-col gap-4 lg:col-span-1">
+          <div className="col-span-2 flex max-w-sm flex-col gap-2.5 lg:col-span-1">
             <div className="flex items-center gap-2.5">
               <BrandMark
                 withRing
@@ -32,7 +32,7 @@ export function Footer() {
                 {siteConfig.bookTitle}
               </span>
             </div>
-            <p className="font-quote text-[1.05rem] italic leading-relaxed text-secondary-foreground/85">
+            <p className="hidden font-quote text-[1.05rem] italic leading-relaxed text-secondary-foreground/85 sm:block">
               {siteConfig.tagline}
             </p>
             {hasSocial ? (
@@ -67,7 +67,7 @@ export function Footer() {
           <FooterColumn title="מדיניות" links={footerLinks.legal} linkClass={linkClass} />
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-secondary-foreground/15 pt-6 text-[13px] text-secondary-foreground/85 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-secondary-foreground/15 pt-5 text-[13px] text-secondary-foreground/85 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
           <p>
             © {siteConfig.copyrightYear} {siteConfig.bookTitle}. כל הזכויות שמורות.
           </p>
@@ -96,11 +96,11 @@ function FooterColumn({
   linkClass: string;
 }) {
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-2.5">
       <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-secondary-foreground/90">
         {title}
       </span>
-      <ul className="flex flex-col gap-1.5">
+      <ul className="flex flex-col gap-1">
         {links.map((link) => (
           <li key={link.href}>
             <Link href={link.href} className={linkClass}>

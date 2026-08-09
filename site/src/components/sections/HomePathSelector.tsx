@@ -71,16 +71,16 @@ export function HomePathSelector() {
   }, [selected]);
 
   return (
-    <section id="path" className="scroll-mt-20 py-8 sm:py-14" aria-labelledby="path-heading">
+    <section id="path" className="scroll-mt-20 py-6 sm:py-14" aria-labelledby="path-heading">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <h2 id="path-heading" className="type-h2">
             {homePathUi.heading}
           </h2>
-          <p className="type-lead mt-3 text-foreground-muted [text-wrap:pretty]">
+          <p className="type-lead mx-auto mt-2 max-w-[42ch] text-foreground-muted [text-wrap:pretty]">
             {homePathUi.sub}
           </p>
-          <p className="mx-auto mt-3 max-w-xl text-[14px] italic text-foreground-muted">
+          <p className="mx-auto mt-2 max-w-xl text-[14px] italic text-foreground-muted">
             לא צריך לדעת הכול כדי להתחיל נכון.
           </p>
         </div>
@@ -90,7 +90,7 @@ export function HomePathSelector() {
         <div
           role="group"
           aria-label="בחירת המצב שלך במסע"
-          className="mx-auto mt-6 grid max-w-4xl gap-2.5 sm:grid-cols-2 sm:gap-4"
+          className="mx-auto mt-5 grid max-w-4xl grid-cols-2 gap-2.5 sm:gap-4"
         >
           {homePaths.map((p) => {
             const active = selected === p.id;
@@ -100,34 +100,35 @@ export function HomePathSelector() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => choose(p.id)}
-                className={`group flex items-center justify-between gap-3 rounded-2xl border-2 p-3.5 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6 ${
+                className={`group flex items-center justify-between gap-2 rounded-xl border-2 p-3 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:gap-3 sm:rounded-2xl sm:p-6 ${
                   active
                     ? "border-brand bg-brand-muted/50 shadow-sm"
                     : "border-border bg-surface hover:border-brand/50 hover:bg-surface-muted"
                 }`}
               >
                 <span className="min-w-0">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="font-serif text-[1.15rem] font-bold leading-tight text-foreground sm:text-[1.35rem]">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <span className="font-serif text-[15px] font-bold leading-tight text-foreground sm:text-[1.35rem]">
                       {p.buttonTitle}
                     </span>
                     {p.gate ? (
-                      <span className="inline-flex shrink-0 items-center rounded-full bg-brand px-2.5 py-0.5 text-[11px] font-semibold text-brand-foreground sm:text-[12px]">
+                      <span className="inline-flex shrink-0 items-center rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-brand-foreground sm:text-[12px]">
                         {homePathUi.gateBadge}
                       </span>
                     ) : null}
                   </span>
-                  <span className="mt-1 block text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[15px]">
+                  {/* שורת-משנה — מוסתרת במובייל (כרטיסי 2×2 קצרים), גלויה מ-sm. */}
+                  <span className="mt-1 hidden text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:block sm:text-[15px]">
                     {p.buttonSub}
                   </span>
                 </span>
                 <span
                   aria-hidden="true"
-                  className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors sm:h-11 sm:w-11 ${
+                  className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors sm:h-11 sm:w-11 ${
                     active ? "bg-brand text-brand-foreground" : "bg-surface-muted text-brand group-hover:bg-brand-muted"
                   }`}
                 >
-                  {active ? <Check className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
+                  {active ? <Check className="h-4 w-4 sm:h-5 sm:w-5" /> : <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />}
                 </span>
               </button>
             );

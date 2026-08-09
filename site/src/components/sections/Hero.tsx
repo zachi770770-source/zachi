@@ -42,24 +42,38 @@ export function Hero() {
             {/* (1) קו המסלול הפותח — טרקוטה דק שנמשך ראשון */}
             <span className="hero-rule mb-2 lg:mb-4" aria-hidden="true" />
 
-            <span
-              className="kicker hero-fade"
-              style={{ animationDelay: "180ms" }}
-            >
-              {hero.eyebrow}
-            </span>
+            {/* מובייל: כריכה קטנה לצד הכותרת (חוסכת שורת-כריכה גבוהה של ~246px);
+                דסקטופ: הכותרת לבדה, והכריכה בעמודה הנפרדת (hero-stage). */}
+            <div className="flex w-full items-center gap-3.5 lg:block">
+              <Link
+                href="/preview"
+                aria-label="הציצו בספר — לקריאת טעימה"
+                className="block w-[70px] shrink-0 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand lg:hidden"
+              >
+                <BookCover className="w-full" />
+              </Link>
 
-            {/* (2)+(3) חשיפת כותרת שורה-אחר-שורה דרך מסכה; „בונים אותה” מתיישבת */}
-            <h1 className="type-display mt-2 text-foreground lg:mt-4">
-              <span className="hero-line hero-line--1">
-                <span className="hero-line__in">אהבה לא רק מוצאים.</span>
-              </span>
-              <span className="hero-line hero-line--2">
-                <span className="hero-line__in">
-                  <span className="hero-build text-brand-hover">בונים אותה.</span>
+              <div className="min-w-0">
+                <span
+                  className="kicker hero-fade"
+                  style={{ animationDelay: "180ms" }}
+                >
+                  {hero.eyebrow}
                 </span>
-              </span>
-            </h1>
+                {/* חשיפת כותרת שורה-אחר-שורה דרך מסכה; במובייל מוקטנת (max-lg)
+                    כדי לשבת לצד הכריכה בלי לבלוע גובה. דסקטופ ללא שינוי. */}
+                <h1 className="type-display mt-1.5 text-foreground max-lg:text-[clamp(1.85rem,8vw,2.25rem)]! max-lg:leading-[1.12]! lg:mt-4">
+                  <span className="hero-line hero-line--1">
+                    <span className="hero-line__in">אהבה לא רק מוצאים.</span>
+                  </span>
+                  <span className="hero-line hero-line--2">
+                    <span className="hero-line__in">
+                      <span className="hero-build text-brand-hover">בונים אותה.</span>
+                    </span>
+                  </span>
+                </h1>
+              </div>
+            </div>
 
             {/* משפט הסבר יחיד: מבהיר שהספר מלווה את הקורא בדיוק במקום שבו הוא
                 נמצא במסע הזוגי — מחיפוש ועד קשר קיים. */}
@@ -121,7 +135,7 @@ export function Hero() {
           {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה
               מהרקע הבהיר (הפרדה טונאלית), ללא פתקים מרחפים, ללא מסגרת וללא
               רקע כהה. */}
-          <ParallaxScroll className="hero-stage order-2 flex items-center justify-center lg:self-stretch">
+          <ParallaxScroll className="hero-stage order-2 hidden items-center justify-center lg:flex lg:self-stretch">
             {/* במת המוצר: הילת Sage רכה + נגיעת אור חמה עדינה מאחורי הכריכה,
                 להפרדה טונאלית ולנפח (גוונים קיימים בלבד). ההילה נעה מעט עם
                 הגלילה (עומק) בקצב הפוך לכריכה. */}

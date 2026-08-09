@@ -52,7 +52,11 @@ test("/preview is directly loadable and immediately readable (no signup wall)", 
 test("smart sticky sample bar: appears after hero, links to /preview, dismissal persists for session", async ({
   browser,
 }) => {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  // בר-הטעימה הוא פיצ׳ר של גלילה ארוכה: הוא מופיע כשה-Hero יוצא מהתצוגה ומתחבא
+  // ליד טופסי הרשמה. בעיצוב-המובייל הדחוס (בית של ~2 מסכים) חלון-ההופעה נסגר —
+  // הטופס תמיד סמוך ל-Hero — ולכן הבר אינו מופיע במובייל (וזה הרצוי: לא מתחרה
+  // בגלולה הצפה). לכן מאמתים את התנהגות הבר בדסקטופ, שבו העמוד עדיין ארוך.
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 680 } });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "networkidle" });
   const bar = page.getByRole("complementary", { name: "בר הטעימה" });
