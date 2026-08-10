@@ -3,6 +3,7 @@ import { ArrowLeft, BookOpen } from "lucide-react";
 
 import { stations } from "@/content/stations";
 import type {
+  JourneyId,
   JourneyPage as JourneyPageData,
   JourneyVariant,
 } from "@/content/journeyPages";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
+import { AmazonBuyLink, type AmazonSource } from "@/components/purchase/AmazonBuyLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { JourneyView } from "@/components/journey/JourneyView";
@@ -82,6 +84,14 @@ const VARIANTS: Record<JourneyVariant, VariantConfig> = {
     points: "grid",
     rhythm: "space-y-16 sm:space-y-24 lg:space-y-28",
   },
+};
+
+/** מקור אנונימי לאירוע רכישת אמזון — מזהה תחנה בלבד, ללא PII. */
+const AMAZON_SOURCE: Record<JourneyId, AmazonSource> = {
+  "before-relationship": "journey_before",
+  "building-relationship": "journey_building",
+  "inside-relationship": "journey_inside",
+  "after-breakup": "journey_after",
 };
 
 export function JourneyPage({ journey }: { journey: JourneyPageData }) {
@@ -384,8 +394,23 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         </section>
       </div>
 
+      {/* Purchase exit — פעם אחת בלבד, אחרי הקשת: הספר המלא זמין עכשיו באמזון. */}
+      <div className="mt-14 rounded-2xl border border-border bg-surface-muted/60 px-6 py-7 text-center sm:px-10">
+        <p className="mx-auto max-w-[42ch] font-serif text-[clamp(1.15rem,1.7vw,1.4rem)] leading-[1.5] text-foreground [text-wrap:pretty]">
+          רוצים את הספר המלא? זמין עכשיו במהדורת Kindle באמזון.
+        </p>
+        <div className="mt-5">
+          <Button asChild size="lg" className="w-full sm:w-auto">
+            <AmazonBuyLink source={AMAZON_SOURCE[journey.id]}>
+              לרכישה באמזון
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </AmazonBuyLink>
+          </Button>
+        </div>
+      </div>
+
       {/* J. „זה לא המקום שלי” — קישור שקט חזרה לבורר, לא בורר מלא בעמוד. */}
-      <div className="mt-16">
+      <div className="mt-12">
         <Link
           href="/#path"
           className="inline-flex items-center gap-2 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"

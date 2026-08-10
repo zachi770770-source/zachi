@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowLeft, MessageCircleQuestion } from "lucide-react";
+import { ArrowLeft, MessageCircleQuestion, ShoppingCart } from "lucide-react";
 
 import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/button";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
@@ -77,13 +78,12 @@ export function Hero() {
             {/* יחידת המרה אחת: מחיר, פעולה ראשית ופעולה משנית — מקובצים תחת קו
                 שיער עדין, כך שהמחיר נראה חלק מהגוש. */}
             <div className="mt-3 flex w-full max-w-[46ch] flex-col items-start gap-2.5 border-t border-border pt-3 lg:mt-5 lg:gap-3.5 lg:pt-5">
-              {/* פורמט + סטטוס + מחיר בשורה אחת ברורה: מהדורה דיגיטלית מלאה שעוד
-                  „תושק” — כדי שלא ייווצר הרושם שאפשר לרכוש עכשיו. גלוי בשני המכשירים. */}
+              {/* סטטוס זמינות: הספר כבר זמין לרכישה במהדורת Kindle באמזון. */}
               <p
                 className="hero-fade text-[15px] font-semibold text-brand-hover lg:text-[16px]"
                 style={{ animationDelay: "620ms" }}
               >
-                {siteConfig.preLaunchPriceLabel}
+                {siteConfig.amazon.availableLabel}
               </p>
 
               <div
@@ -108,6 +108,17 @@ export function Hero() {
                     </BookLink>
                   </Button>
                 )}
+
+                {/* פעולת רכישה משנית — הספר זמין עכשיו באמזון (קישור חיצוני).
+                    משנית לטעימה, אך ברורה: מי שכבר מוכן לקנות מגיע ישירות. */}
+                <AmazonBuyLink
+                  source="home"
+                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  <ShoppingCart className="h-4 w-4 text-brand" aria-hidden="true" />
+                  הספר זמין עכשיו באמזון
+                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
+                </AmazonBuyLink>
 
                 {/* פעולה קונטקסטואלית „שאל את הספר” → /compass — כלי התאמה
                     דטרמיניסטי (לא AI, לא ייעוץ), עם משפט-הסבר קצר שאומר מה יקרה

@@ -17,6 +17,18 @@ export function BookSchema() {
           "@type": "Person",
           name: siteConfig.author.name,
         },
+        // הספר זמין לרכישה במהדורת Kindle באמזון. ללא מחיר מומצא — מציינים
+        // רק זמינות וכתובת המוצר החיצונית (מקור: siteConfig.amazon).
+        ...(siteConfig.amazon.available
+          ? {
+              sameAs: siteConfig.amazon.url,
+              offers: {
+                "@type": "Offer",
+                availability: "https://schema.org/InStock",
+                url: siteConfig.amazon.url,
+              },
+            }
+          : {}),
       }}
     />
   );

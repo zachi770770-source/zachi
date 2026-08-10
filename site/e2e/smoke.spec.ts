@@ -147,7 +147,7 @@ test("waitlist form submits successfully", async ({ page }) => {
   const waitlist = page.locator("#waitlist");
   await waitlist.getByLabel("כתובת אימייל").fill("waitlisttest@example.com");
   await waitlist.getByRole("checkbox").click();
-  await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+  await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
   await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
 });
 
@@ -157,7 +157,7 @@ test("checkout is closed during pre-launch (no form, no payment)", async ({
   await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
 
   await expect(
-    page.getByRole("heading", { name: "המכירה עדיין לא נפתחה" })
+    page.getByRole("heading", { name: "הרכישה הישירה באתר עדיין לא נפתחה" })
   ).toBeVisible();
   // אין טופס וללא הדגמת תשלום.
   await expect(page.getByLabel("שם מלא")).toHaveCount(0);

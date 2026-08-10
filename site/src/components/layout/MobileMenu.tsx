@@ -80,11 +80,8 @@ export function MobileMenu() {
 
           <div className="mt-auto">
             <Button asChild size="lg" className="w-full">
-              <Link
-                href={siteConfig.salesOpen ? "/book#purchase" : "/waitlist"}
-                onClick={() => setOpen(false)}
-              >
-                {siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון כשהספר יוצא"}
+              <Link href="/book#purchase" onClick={() => setOpen(false)}>
+                לרכישת הספר
               </Link>
             </Button>
           </div>

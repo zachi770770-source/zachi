@@ -14,7 +14,7 @@ async function fillWaitlistForm(page: Page, { consent }: { consent: boolean }) {
   await waitlist.scrollIntoViewIfNeeded();
   await waitlist.getByLabel("כתובת אימייל").fill("reader@example.com");
   if (consent) await waitlist.getByRole("checkbox").click();
-  await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+  await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
 }
 
 test("Hero: the single dominant action is the free sample, not an email form", async ({ page }) => {
@@ -117,6 +117,7 @@ test("/preview is a single reading experience — the duplicate peek (carousel) 
 
 test("Compass (pre-launch): no purchase CTA before an answer", async ({ page }) => {
   await page.goto("/compass", { waitUntil: "networkidle" });
-  // לפני מענה — המצפן מציג שאלות בלבד; אין פעולת רכישה על העמוד.
-  await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
+  // לפני מענה — אזור התוכן של המצפן מציג שאלות בלבד; אין פעולת רכישה בגוף העמוד
+  // (קישור הרכישה בניווט העליון הוא חלק מה-Header, לא מהמצפן).
+  await expect(page.locator("main").getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
 });

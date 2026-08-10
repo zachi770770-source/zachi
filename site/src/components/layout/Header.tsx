@@ -33,9 +33,7 @@ export function Header() {
         {/* מובייל: כפתור קומפקטי + המבורגר */}
         <div className="flex items-center gap-1.5 lg:hidden">
           <Button asChild size="sm" className="h-10 px-4 text-sm">
-            <Link href={siteConfig.salesOpen ? "/book#purchase" : "/waitlist"}>
-              {siteConfig.salesOpen ? "רכישה" : "עדכנו אותי"}
-            </Link>
+            <Link href="/book#purchase">לרכישת הספר</Link>
           </Button>
           <MobileMenu />
         </div>

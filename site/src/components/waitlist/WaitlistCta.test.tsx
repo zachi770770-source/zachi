@@ -64,7 +64,7 @@ describe("WaitlistCta", () => {
       target: { value: "reader@example.com" },
     });
     fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.click(screen.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }));
+    fireEvent.click(screen.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }));
 
     await screen.findByText(/נרשמת בהצלחה/);
     expect(screen.getByRole("link", { name: /לקריאת הטעימה/ })).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe("WaitlistCta", () => {
       target: { value: "reader@example.com" },
     });
     // ללא סימון ההסכמה — שליחה נכשלת בוולידציה, אין קריאה לשרת ואין ניווט.
-    fireEvent.click(screen.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }));
+    fireEvent.click(screen.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }));
 
     await screen.findByRole("alert");
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -98,7 +98,7 @@ describe("WaitlistCta", () => {
       target: { value: "reader@example.com" },
     });
     fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.click(screen.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }));
+    fireEvent.click(screen.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }));
 
     await screen.findByRole("alert");
     expect(pushMock).not.toHaveBeenCalled();

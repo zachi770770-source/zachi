@@ -4,10 +4,10 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, Minus, Plus, Sun, Moon, ArrowLeft } from "lucide-react";
 
-import { siteConfig } from "@/config/site";
 import { sampleReader } from "@/content/sample";
 import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookCover } from "@/components/shared/BookCover";
 
 const PREFS_KEY = "sample-reader-prefs";
@@ -168,11 +168,6 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
     }
   };
 
-  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/waitlist";
-  const primaryLabel = siteConfig.salesOpen
-    ? "לרכישת הספר"
-    : "קבלו עדכון כשהספר יוצא";
-
   return (
     <div
       ref={rootRef}
@@ -293,10 +288,10 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
 
         <div className="reader-cta">
           <Button asChild size="lg" className="h-[56px] w-full px-8 text-[17px] sm:w-auto">
-            <Link href={primaryHref}>
-              {primaryLabel}
+            <AmazonBuyLink source="preview">
+              רוצים את הספר המלא? זמין עכשיו באמזון
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            </AmazonBuyLink>
           </Button>
         </div>
       </article>

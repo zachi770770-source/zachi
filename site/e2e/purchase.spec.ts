@@ -13,15 +13,15 @@ test.describe("Pre-launch: המכירה סגורה", () => {
     // מצב טרום-השקה: הפעולה המרכזית היא ההרשמה (כפתור הטופס „עדכנו אותי…”) —
     // לא כפתור רכישה חסום ולא תשלום.
     await expect(
-      page.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).first()
+      page.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).first()
     ).toBeVisible();
-    // אין קישור רכישה פעיל אל התשלום כל עוד המכירה סגורה.
-    await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
+    // אין checkout מקומי כל עוד הרכישה הישירה סגורה — הרכישה עוברת לאמזון.
+    await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
 
-    // /checkout מציג עמוד "המכירה עדיין לא נפתחה", ללא טופס.
+    // /checkout מציג עמוד "הרכישה הישירה באתר עדיין לא נפתחה", ללא טופס.
     await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
     await expect(
-      page.getByRole("heading", { name: "המכירה עדיין לא נפתחה" })
+      page.getByRole("heading", { name: "הרכישה הישירה באתר עדיין לא נפתחה" })
     ).toBeVisible();
     await expect(page.getByLabel("שם מלא")).toHaveCount(0);
 

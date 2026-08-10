@@ -15,9 +15,11 @@ test.describe("Launch-readiness", () => {
     await expect(dominant).toBeVisible();
     await expect(dominant).toHaveAttribute("href", "/preview");
 
-    // אין שדה אימייל בשער, ואין כפתור רכישה מתחרה.
+    // אין שדה אימייל בשער. פעולת רכישה משנית: „הספר זמין עכשיו באמזון” → Amazon.
     await expect(heroSection.getByLabel("כתובת אימייל")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
+    await expect(
+      heroSection.getByRole("link", { name: /הספר זמין עכשיו באמזון/ }),
+    ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
     // פעולה משנית יחידה ושקטה (קישור-טקסט): „שאל את הספר” → /compass.
     const ask = heroSection.getByRole("link", { name: "שאל את הספר" });
@@ -31,7 +33,7 @@ test.describe("Launch-readiness", () => {
     await expect(waitlist).toBeVisible();
     await waitlist.getByLabel("כתובת אימייל").fill("dana@example.com");
     await waitlist.getByRole("checkbox").click();
-    await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+    await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
     await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
   });
 
@@ -190,10 +192,10 @@ test.describe("Launch-readiness", () => {
 
   test("waitlist: dedicated page saves a real signup", async ({ page }) => {
     await page.goto("/waitlist", { waitUntil: "networkidle" });
-    await expect(page.getByRole("heading", { level: 1, name: "קבלו עדכון כשהספר יוצא" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "עדכון כשהמהדורה הישירה באתר תיפתח" })).toBeVisible();
     await page.getByLabel("כתובת אימייל").fill("station-signup@example.com");
     await page.getByRole("checkbox").click();
-    await page.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+    await page.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
     await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
   });
 

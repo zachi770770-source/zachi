@@ -30,8 +30,10 @@ export function LegalContent({
 
         {!siteConfig.salesOpen ? (
           <p className="mt-6 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm leading-relaxed text-foreground-muted">
-            האתר נמצא כעת בשלב טרום-השקה, והמכירה טרם נפתחה. הסעיפים העוסקים
-            ברכישה, בתשלום, במסירה, במשלוח ובביטול יחולו החל ממועד פתיחת המכירה.
+            הספר זמין לרכישה במהדורת Kindle באמזון; רכישה זו מתבצעת בפלטפורמת
+            Amazon וכפופה לתנאי הרכישה, התשלום והאספקה שלה. מהדורה ישירה/מודפסת
+            באתר טרם נפתחה — הסעיפים העוסקים ברכישה, בתשלום, במסירה, במשלוח
+            ובביטול דרך האתר יחולו החל ממועד פתיחתה.
           </p>
         ) : null}
 

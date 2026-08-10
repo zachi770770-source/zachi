@@ -237,7 +237,7 @@ export function WaitlistForm({
           שולח...
         </>
       ) : (
-        "עדכנו אותי כשהספר יוצא"
+        "עדכנו אותי כשהמהדורה הישירה תיפתח"
       )}
     </Button>
   );
@@ -271,7 +271,7 @@ export function WaitlistForm({
             : "font-normal leading-relaxed"
         }
       >
-        אני מסכים/ה לקבל עדכון חד-פעמי כשהספר ייפתח לרכישה, בהתאם ל
+        אני מסכים/ה לקבל עדכון חד-פעמי כשהמהדורה הישירה באתר תיפתח לרכישה, בהתאם ל
         <Link href="/privacy" className="text-brand-hover underline underline-offset-2">
           מדיניות הפרטיות
         </Link>

@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 
 import { pageMetadata } from "@/lib/seo";
 import { waitlistPage } from "@/content/stations";
 import { Container } from "@/components/shared/Container";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
@@ -33,6 +34,16 @@ export default function WaitlistPage() {
           <p className="mt-5 max-w-[46ch] text-[1.075rem] leading-[1.8] text-foreground-muted">
             {waitlistPage.intro}
           </p>
+
+          <div className="mt-5">
+            <AmazonBuyLink
+              source="book"
+              className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              לא רוצים לחכות? הספר כבר זמין ב-Amazon Kindle
+              <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1" aria-hidden="true" />
+            </AmazonBuyLink>
+          </div>
 
           <h2 className="mt-8 text-[15px] font-semibold text-foreground">
             {waitlistPage.whatYouGetTitle}

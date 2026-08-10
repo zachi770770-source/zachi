@@ -266,9 +266,25 @@ export const siteConfig = {
    */
   salesOpen: false,
 
-  /** תווית מחיר/פורמט לתקופת ה-Pre-launch — מבהירה פורמט (מהדורה דיגיטלית מלאה)
-   * וסטטוס („תושק” = טרם ניתנת לרכישה), ללא תחושת מכירה פעילה. */
-  preLaunchPriceLabel: "המהדורה הדיגיטלית המלאה · תושק ב-98 ₪",
+  /**
+   * הספר זמין *עכשיו* לרכישה ב-Amazon Kindle (המהדורה העברית). זהו מקור האמת
+   * היחיד לכל קישור רכישה חיצוני. הרכישה מתבצעת בפלטפורמת Amazon בלבד — אין
+   * סליקה מקומית ואין checkout באתר. נפרד לחלוטין מ-`salesOpen` (המהדורה
+   * הישירה/המודפסת באתר, שעדיין עתידית). ASIN אושר ע"י המחבר.
+   */
+  amazon: {
+    available: true,
+    asin: "B0GJ3SL9H2",
+    /** קישור המוצר הקנוני (external). */
+    url: "https://www.amazon.com/dp/B0GJ3SL9H2",
+    editionLabel: "מהדורת Kindle",
+    /** מיסגור זמינות אחיד לכל האתר. */
+    availableLabel: "זמין עכשיו במהדורת Kindle באמזון",
+    buyLabel: "לרכישה באמזון",
+  },
+
+  /** תווית זמינות אחת ואחידה ל-Hero/עמוד הספר, כשהספר זמין באמזון. */
+  availabilityLabel: "מאת צחי חן · זמין עכשיו במהדורת Kindle באמזון",
 } as const;
 
 export type SiteConfig = typeof siteConfig;

@@ -533,7 +533,7 @@ export const askUi = {
     avoid: "מה לא כדאי להסיק מהר מדי",
     adapt: "התאמה למצב שלכם",
     sampleCta: "לקרוא את הקטע המתאים בספר",
-    waitlistCta: "לקבל עדכון כשהספר יוצא",
+    waitlistCta: "לקבל עדכון על המהדורה הישירה",
     changeDilemma: "דילמה אחרת",
     changeStation: "תחנה אחרת",
     restart: "להתחיל מחדש",

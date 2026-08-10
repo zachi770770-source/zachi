@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { ArrowLeft, Check, Compass } from "lucide-react";
+import { ArrowLeft, Compass } from "lucide-react";
 
-import { siteConfig } from "@/config/site";
 import { previewClosing } from "@/content/sample";
-import { waitlistPage } from "@/content/stations";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
-import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 
 /**
  * אזור סיום לעמוד ההצצה: מחבר את הטעימה לספר המלא, עם פעולה ראשית אחת בלבד
@@ -15,8 +13,6 @@ import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
  * מקבלים, וקישור משני ל-/book. אין באזור יותר מפעולה ראשית אחת.
  */
 export function PreviewClosing() {
-  const salesOpen = siteConfig.salesOpen;
-
   return (
     <section
       id="join"
@@ -38,52 +34,26 @@ export function PreviewClosing() {
             </p>
           </div>
 
-          {salesOpen ? (
-            <div className="mt-8 flex justify-center">
-              <Button asChild size="lg" className="w-full sm:w-auto">
-                <BookLink href="/book#purchase">
-                  לרכישת הספר
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                </BookLink>
-              </Button>
-            </div>
-          ) : (
-            <div className="mt-8 grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] sm:items-start">
-              <div>
-                <h3 className="text-[15px] font-semibold text-foreground">
-                  {waitlistPage.whatYouGetTitle}
-                </h3>
-                <ul className="mt-4 flex flex-col gap-3">
-                  {waitlistPage.whatYouGet.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <span
-                        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand-hover"
-                        aria-hidden="true"
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="text-[15px] leading-relaxed text-foreground/90">
-                        {item}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="mb-4 text-[15px] leading-relaxed text-foreground-muted">
-                  {previewClosing.waitlistLead}
-                </p>
-                <WaitlistForm source="preview" />
-              </div>
-            </div>
-          )}
+          {/* מי שסיים את הטעימה הוא הקורא החם ביותר — פעולה ראשית אחת וברורה:
+              רכישה עכשיו באמזון. */}
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <p className="text-[17px] font-semibold text-foreground [text-wrap:pretty]">
+              רוצים להמשיך לקרוא? הספר זמין עכשיו באמזון.
+            </p>
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <AmazonBuyLink source="preview">
+                לרכישת הספר באמזון
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </AmazonBuyLink>
+            </Button>
+          </div>
 
           <div className="mt-8 flex flex-col items-center gap-4 border-t border-border pt-6 text-center">
             <BookLink
               href="/book"
               className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
-              {previewClosing.bookLinkLabel}
+              מה עוד מחכה בספר
               <ArrowLeft
                 className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
@@ -96,6 +66,13 @@ export function PreviewClosing() {
             >
               <Compass className="h-4 w-4 text-brand" aria-hidden="true" />
               {previewClosing.compassLinkLabel}
+            </Link>
+            {/* שקט ולא-חוסם: עדכון על המהדורה הישירה/מודפסת העתידית באתר. */}
+            <Link
+              href="/waitlist"
+              className="text-[13px] text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              רוצים עדכון כשהמהדורה הישירה באתר תיפתח?
             </Link>
           </div>
         </div>

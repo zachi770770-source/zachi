@@ -74,9 +74,10 @@ export default function MockPaymentPage({
   if (!siteConfig.salesOpen) {
     return (
       <Container className="flex min-h-[60svh] flex-col items-center justify-center py-16 text-center">
-        <h1 className="type-h2 text-foreground">המכירה עדיין לא נפתחה</h1>
+        <h1 className="type-h2 text-foreground">הרכישה הישירה באתר עדיין לא נפתחה</h1>
         <p className="mt-4 max-w-[46ch] text-[18px] leading-relaxed text-foreground-muted">
-          האתר בשלב טרום-השקה. עם פתיחת המכירה תתאפשר רכישה מאובטחת.
+          הספר כבר זמין עכשיו במהדורת Kindle באמזון. המהדורה הישירה באתר תיפתח
+          בהמשך.
         </p>
         <Button asChild size="lg" className="mt-6 h-14 px-8 text-[17px]">
           <Link href="/">חזרה לעמוד הבית</Link>

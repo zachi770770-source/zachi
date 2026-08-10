@@ -93,7 +93,9 @@ test("mobile 390: nothing overlays the cards — elementFromPoint at each card c
         out.push({ href, hitsOwnLink: false, pointerEvents: "n/a", topTag: "MISSING" });
         continue;
       }
-      a.scrollIntoView({ block: "center" });
+      // גלילה מיידית (לא smooth) כדי שה-getBoundingClientRect מיד נכון —
+      // אחרת עם scroll-behavior:smooth הקואורדינטות עלולות לצאת מה-viewport.
+      a.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
       const r = a.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;

@@ -20,12 +20,12 @@ test("/preview opens immediately (no email gate) with the reading experience", a
   await expect(lead).toHaveCSS("opacity", "1");
 });
 
-test("/preview has a clear transition to the compass and no purchase CTA", async ({ page }) => {
+test("/preview has a clear transition to the compass and buys via Amazon (no local checkout)", async ({ page }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });
   await expect(page.locator('a[href="/compass"]').first()).toBeVisible();
-  // אין רכישה/מחיר/checkout בטרום-השקה.
-  await expect(page.getByRole("link", { name: "לרכישת הספר" })).toHaveCount(0);
-  await expect(page.locator('a[href*="checkout"]')).toHaveCount(0);
+  // הרכישה עוברת לאמזון (חיצוני) — לא checkout מקומי.
+  await expect(page.locator('a[href*="amazon.com/dp/B0GJ3SL9H2"]').first()).toBeVisible();
+  await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
 });
 
 test("/preview mobile: sticky waitlist CTA appears after scroll, hides at the form", async ({
@@ -51,21 +51,19 @@ test("/preview mobile: sticky waitlist CTA appears after scroll, hides at the fo
   await expect(sticky).not.toBeInViewport();
 });
 
-test("/preview waitlist: validation error, then a designed success state", async ({ page }) => {
+test("/preview closing: Amazon is the primary action, with a quiet future-edition waitlist link (no blocking form)", async ({ page }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });
-  const form = page.locator("#join");
-  await form.scrollIntoViewIfNeeded();
+  const join = page.locator("#join");
+  await join.scrollIntoViewIfNeeded();
 
-  const email = form.getByLabel("כתובת אימייל");
-  await email.fill(`preview_${Date.now()}@example.com`);
+  // פעולה ראשית: רכישה באמזון (חיצוני) — הקורא שסיים את הטעימה מוכן לקנות.
+  await expect(
+    join.getByRole("link", { name: /לרכישת הספר באמזון/ }),
+  ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
-  // שליחה בלי הסכמה → שגיאת ולידציה (aria-live), בלי לשלוח.
-  await form.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
-  await expect(form.getByRole("alert")).toContainText("לאשר את קבלת העדכון");
-
-  // אישור הסכמה ושליחה → מצב הצלחה מעוצב.
-  await form.getByRole("checkbox").check();
-  await form.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
-  await expect(page.getByText("נרשמת בהצלחה. הטעימה מחכה לכם.")).toBeVisible();
-  await expect(page.getByRole("link", { name: /לקריאת הטעימה/ })).toBeVisible();
+  // אין טופס הרשמה חוסם בתוך אזור הסיום — רק קישור שקט למהדורה הישירה העתידית.
+  await expect(join.getByLabel("כתובת אימייל")).toHaveCount(0);
+  await expect(
+    join.getByRole("link", { name: /המהדורה הישירה באתר/ }),
+  ).toHaveAttribute("href", "/waitlist");
 });

@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Compass } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { siteConfig } from "@/config/site";
 import { navLinks } from "@/config/nav";
 import { Button } from "@/components/ui/button";
 
@@ -23,8 +22,8 @@ function isActivePath(pathname: string, href: string): boolean {
 
 export function MainNav() {
   const pathname = usePathname();
-  const ctaHref = siteConfig.salesOpen ? "/book#purchase" : "/waitlist";
-  const ctaLabel = siteConfig.salesOpen ? "לרכישת הספר" : "קבלו עדכון";
+  const ctaHref = "/book#purchase";
+  const ctaLabel = "לרכישת הספר";
 
   return (
     <div className="hidden items-center gap-1 lg:flex">

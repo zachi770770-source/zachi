@@ -68,7 +68,7 @@ export function PreviewStickyCta() {
         }}
       >
         <span className="ps-1 text-[13px] font-medium text-foreground-muted">
-          הספר בדרך
+          הספר זמין
         </span>
         <Link
           href="#join"

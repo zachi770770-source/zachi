@@ -16,7 +16,7 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     await page.goto("/", { waitUntil: "networkidle" });
     const body = page.locator("body");
     // אין ניסוח מכירה פעילה בטרום-השקה.
-    for (const phrase of ["קנה עכשיו", "קנו עכשיו", "רכשו עכשיו", "הוסף לסל", "לרכישת הספר"]) {
+    for (const phrase of ["קנה עכשיו", "קנו עכשיו", "רכשו עכשיו", "הוסף לסל"]) {
       await expect(body).not.toContainText(phrase);
     }
     // אין קישור ישיר ל-checkout מהבית לפני פתיחת המכירה.
@@ -28,8 +28,8 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const hero = page.locator("main section").first();
-    // תווית אחת ליד ה-CTA שמכילה פורמט (דיגיטלי), סטטוס („תושק” = טרם לרכישה) ומחיר.
-    const label = hero.getByText(/דיגיטלית.*תושק.*98/);
+    // תווית זמינות אחת ליד ה-CTA: הספר זמין עכשיו במהדורת Kindle באמזון.
+    const label = hero.getByText(/זמין עכשיו במהדורת Kindle באמזון/);
     await expect(label).toBeVisible();
     // הפעולה הראשית (טעימה) קרובה לתווית המחיר — היררכיה ברורה.
     await expect(
@@ -91,15 +91,15 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     await page.goto("/", { waitUntil: "networkidle" });
     const waitlist = page.locator("#waitlist");
     await waitlist.scrollIntoViewIfNeeded();
-    // מסגור עדכון-השקה: „לפני ההשקה” + „קבלו עדכון כשהספר יוצא”.
-    await expect(waitlist).toContainText("לפני ההשקה");
+    // מסגור: „מהדורה ישירה · בקרוב” + הכותרת החדשה של רשימת ההמתנה.
+    await expect(waitlist).toContainText("מהדורה ישירה");
     await expect(
-      waitlist.getByRole("heading", { name: "קבלו עדכון כשהספר יוצא" }),
+      waitlist.getByRole("heading", { name: "רוצים עדכון כשהמהדורה הישירה באתר תיפתח?" }),
     ).toBeVisible();
     // עדיין נרשם בהצלחה.
     await waitlist.getByLabel("כתובת אימייל").fill("launch-update@example.com");
     await waitlist.getByRole("checkbox").click();
-    await waitlist.getByRole("button", { name: "עדכנו אותי כשהספר יוצא" }).click();
+    await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
     await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
   });
 

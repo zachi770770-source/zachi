@@ -72,6 +72,9 @@ export type AnalyticsEventName =
   | "journey_page_viewed"
   | "contextual_sample_clicked"
   | "ask_book_clicked"
+  // רכישה חיצונית באמזון — מזהה מקור בלבד (home/book/preview/journey_*),
+  // לעולם לא אימייל, לא תשובות Compass, לא תוכן אישי.
+  | "amazon_purchase_clicked"
   | "audio_play"
   | "video_play";
 

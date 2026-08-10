@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 
 /** הניסוח האחיד של פעולת ההמרה — חוזר בשלוש נקודות ההחלטה בלבד. */
-export const CONVERSION_CTA_LABEL = "קבלו טעימה ועדכון כשהספר יוצא";
+export const CONVERSION_CTA_LABEL = "קבלו עדכון על המהדורה הישירה באתר";
 
 /**
  * WaitlistCta — פעולת ההמרה האחת והחוזרת (PHASE 16). כפתור דומיננטי יחיד;
