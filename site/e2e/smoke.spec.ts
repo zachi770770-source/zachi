@@ -188,14 +188,24 @@ test("legacy URLs: explicit per-target mapping (301 semantic, 410 for gone artic
   }
 });
 
-test("/api/compass no longer exists — the AI endpoint was removed (no direct AI calls)", async ({
+test("/api/compass sets a secure anonymous cookie (HttpOnly, SameSite=Lax, Path=/, Max-Age)", async ({
   request,
 }) => {
-  // המצפן הדטרמיניסטי אינו קורא ל-API; נתיב ה-AI הישן הוסר לגמרי.
-  const get = await request.get("/api/compass");
-  expect(get.status()).toBe(404);
-  const post = await request.post("/api/compass", { data: { question: "x" } });
-  expect(post.status()).toBe(404);
+  // נתיב „השאלה החופשית” שוחזר. גם כשהעוזר כבוי (available:false) ה-GET
+  // מחזיר 200 וקובע מזהה אנונימי מאובטח — בלי לשלוח את נוסח השאלה לשום מקום.
+  const res = await request.get("/api/compass");
+  expect(res.status()).toBe(200);
+  const setCookies = res
+    .headersArray()
+    .filter((h) => h.name.toLowerCase() === "set-cookie")
+    .map((h) => h.value)
+    .filter((v) => v.startsWith("compass_uid="));
+  expect(setCookies.length).toBeGreaterThan(0);
+  const cookie = setCookies[0];
+  expect(cookie).toMatch(/HttpOnly/i);
+  expect(cookie).toMatch(/SameSite=Lax/i);
+  expect(cookie).toMatch(/Path=\//i);
+  expect(cookie).toMatch(/Max-Age=\d+/i);
 });
 
 test("/compass is an active deterministic closed route (closed choices, no free text)", async ({
