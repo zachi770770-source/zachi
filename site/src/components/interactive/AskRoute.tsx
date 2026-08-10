@@ -47,6 +47,26 @@ export function AskRoute({
   const [dilemmaId, setDilemmaId] = React.useState<string | null>(null);
   const [ctxId, setCtxId] = React.useState<string | null>(null);
   const headingRef = React.useRef<HTMLHeadingElement>(null);
+  // מעטפת + מודד יציבים לאנימציית-גובה חלקה בין שלבים (ראו .ask-shell ב-globals).
+  const shellRef = React.useRef<HTMLDivElement>(null);
+  const measureRef = React.useRef<HTMLDivElement>(null);
+
+  // מעבר שאלה/תשובה בלי „קפיצת layout”: מודדים את גובה התוכן היציב ומעבירים את
+  // גובה המעטפת אליו ב-transition (CSS). ה-fade+slide של השלב (transform/opacity)
+  // נשאר; רק הגובה מונפש כאן — על קונטיינר יחיד וקטן, אחת לכל החלפת-שלב. תחת
+  // reduced-motion ה-transition מבוטל ב-CSS ⇒ המעבר מיידי.
+  React.useLayoutEffect(() => {
+    const shell = shellRef.current;
+    const measure = measureRef.current;
+    if (!shell || !measure || typeof ResizeObserver === "undefined") return;
+    const apply = () => {
+      shell.style.height = `${measure.offsetHeight}px`;
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(measure);
+    return () => ro.disconnect();
+  }, []);
 
   React.useEffect(() => {
     trackEvent("ask_open");
@@ -180,8 +200,11 @@ export function AskRoute({
         </div>
       ) : null}
 
-      {/* עטיפת-שלב עם key=step: כל מעבר מרנדר מחדש ומפעיל אנימציית כניסה חלקה
-          (fade + slide) דרך .ask-step ב-globals.css. */}
+      {/* מעטפת מונפשת-גובה (overflow:hidden + transition:height) עוטפת מודד יציב,
+          כדי שהחלפת שלב לא תיצור „קפיצת layout”. בתוכה עטיפת-שלב עם key=step:
+          כל מעבר מרנדר מחדש ומפעיל כניסה חלקה (fade + slide) דרך .ask-step. */}
+      <div ref={shellRef} className="ask-shell">
+      <div ref={measureRef}>
       <div key={step} className="ask-step">
       {step === "station" ? (
         <Choice
@@ -243,6 +266,8 @@ export function AskRoute({
       {step === "safety" ? (
         <Safety headingRef={headingRef} onBack={() => setStep(dilemma ? "result" : "station")} onRestart={restart} />
       ) : null}
+      </div>
+      </div>
       </div>
     </div>
   );

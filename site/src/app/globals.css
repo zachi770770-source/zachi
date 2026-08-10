@@ -514,6 +514,18 @@
    * נכנס עם fade + slide קצר; transform+opacity בלבד ⇒ ללא קפיצת-פריסה נוספת
    * מעבר להפרש-הגובה הטבעי של התוכן. מגודר תחת reduced-motion.
    * =================================================================== */
+  /* מעטפת מונפשת-גובה: מעבר גובה חלק בין שלבים (JS מודד ומעדכן `height`), כדי
+     שלא תיווצר „קפיצת layout”. קונטיינר יחיד וקטן ⇒ הנפשת-גובה נקודתית בלבד. */
+  .ask-shell {
+    overflow: hidden;
+    transition: height var(--motion-panel) var(--ease-standard);
+    will-change: height;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ask-shell {
+      transition: none;
+    }
+  }
   .ask-step {
     animation: askStepIn var(--motion-panel) var(--ease-standard) both;
   }
@@ -528,23 +540,9 @@
     }
   }
 
-  /* FAQ (<details> נטיבי): פתיחה חלקה — התשובה נכנסת ב-fade + slide קצר במקום
-     „קפיצה” פתאומית. transform+opacity בלבד. הסגירה נטיבית ומיידית. */
-  @media (prefers-reduced-motion: no-preference) {
-    details[open] > .faq-answer {
-      animation: faqAnswerIn var(--motion-panel) var(--ease-standard) both;
-    }
-    @keyframes faqAnswerIn {
-      from {
-        opacity: 0;
-        transform: translateY(-4px);
-      }
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-  }
+  /* FAQ (<details> נטיבי): פתיחה *וגם* סגירה חלקות מונפשות ב-JS (Web Animations
+     API על `.faq-answer-wrap` — גובה+שקיפות) דרך רכיב Faq. תחת reduced-motion /
+     ללא JS → התנהגות נטיבית מיידית. אין כאן אנימציית-CSS כדי לא לכפול. */
 
   @media (prefers-reduced-motion: reduce) {
     .ask-step {
@@ -1845,20 +1843,9 @@
   }
 }
 
-/* חשיפה עדינה של תשובת ה-FAQ בפתיחה (details נטיבי). ללא קפיצה, קצר. */
-@keyframes faqAnswerIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-details[open] .faq-answer {
-  animation: faqAnswerIn 220ms ease-out both;
-}
+/* פתיחה *וגם* סגירה של תשובת ה-FAQ מונפשות ב-JS (Web Animations API על
+   `.faq-answer-wrap`, גובה+שקיפות) דרך רכיב Faq — ראו שם. אין כאן אנימציית-CSS
+   בפתיחה בלבד, כדי לא לכפול ולא להשאיר סגירה „קופצת”. */
 
 /* ===================================================================
  * שפת מיקרו-תנועה משותפת (premium, calm, editorial). כל התנועות מבוססות
@@ -1978,6 +1965,13 @@ details[open] .faq-answer {
 .lift-hover:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 14px 26px -18px rgba(43, 36, 31, 0.45);
+}
+/* reduced-motion: מבטלים את ההרמה (transform) ומשאירים הדגשת מסגרת/צל בלבד. */
+@media (prefers-reduced-motion: reduce) {
+  .lift-hover:hover,
+  .lift-hover:focus-visible {
+    transform: none;
+  }
 }
 
 /* מעבר עדין של שדה טופס בפוקוס (מעבר על מסגרת/טבעת בלבד — ללא זזת פריסה). */

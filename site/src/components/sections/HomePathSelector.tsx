@@ -40,7 +40,9 @@ export function HomePathSelector() {
             <a
               key={p.id}
               href={p.stationHref}
-              className="group flex items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:border-brand/50 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:gap-3 sm:rounded-2xl sm:p-6"
+              // lift-hover: הדגשה מונפשת ועדינה לתחנה הפעילה (hover/focus) — הרמה
+              // ‎-2px + מסגרת-מותג + צל רך (220ms ease-out); המעבר בין התחנות חלק.
+              className="group lift-hover flex items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:gap-3 sm:rounded-2xl sm:p-6"
             >
               <span className="min-w-0">
                 <span className="flex flex-wrap items-center gap-1.5">
