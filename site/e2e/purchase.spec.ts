@@ -7,7 +7,7 @@ test.describe("Pre-launch: המכירה סגורה", () => {
   }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "בונים אותה"
+      "אהבה בונים"
     );
 
     // מצב טרום-השקה: הפעולה המרכזית היא ההרשמה (כפתור הטופס „עדכנו אותי…”) —

@@ -53,11 +53,11 @@ export function Hero() {
                 (אין כריכה בתוך ה-Hero); הכריכה מוצגת רק בדסקטופ (hero-stage). */}
             <h1 className="type-display mt-2 text-foreground lg:mt-4">
               <span className="hero-line hero-line--1">
-                <span className="hero-line__in">אהבה לא רק מוצאים.</span>
+                <span className="hero-line__in">למצוא זה רק ההתחלה.</span>
               </span>
               <span className="hero-line hero-line--2">
                 <span className="hero-line__in">
-                  <span className="hero-build text-brand-hover">בונים אותה.</span>
+                  <span className="hero-build text-brand-hover">אהבה בונים.</span>
                 </span>
               </span>
             </h1>
