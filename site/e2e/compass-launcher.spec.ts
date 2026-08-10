@@ -11,7 +11,7 @@ import { test, expect } from "@playwright/test";
 // שלה הוא ה-aria-label המלא („שאל את הספר — 2–3 שאלות…”), בעוד כפתור ה-#where הוא
 // „שאל את הספר” בדיוק. מסננים לפי המקף כדי למקד רק את הגלולה.
 const compass = (page: import("@playwright/test").Page) =>
-  page.getByRole("button", { name: /שאל את הספר — / });
+  page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
 
 // הגלולה נשארת גלויה גם כשבאנר-העוגיות פתוח (מורמת מעליו) — הבדיקות למטה
 // מוודאות זאת. סגירת הבאנר משמשת לבדיקת המצב התחתון הרגיל.
@@ -38,10 +38,10 @@ test.describe("compass floating bubble", () => {
     await compass(page).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    // כותרת + כותרת-משנה מיושרות ל„שאל את הספר” (2–3 שאלות, לא צ׳אט).
-    await expect(dialog.getByText("שאל את הספר")).toBeVisible();
+    // כותרת + כותרת-משנה מיושרות ל„מה הספר אומר על המצב שלי?” (כמה שאלות, לא צ׳אט).
+    await expect(dialog.getByText("מה הספר אומר על המצב שלי?")).toBeVisible();
     await expect(
-      dialog.getByText(/2–3 שאלות קצרות/)
+      dialog.getByText(/כמה שאלות קצרות/)
     ).toBeVisible();
     // אין ניסוח שמרמז על צ׳אט חופשי / שיחה עם AI.
     await expect(dialog.getByText(/צ.אט|בינה מלאכות|שיחה עם|AI/)).toHaveCount(0);
@@ -134,7 +134,7 @@ test.describe("compass floating bubble", () => {
       // aria-label נשמר (זהות נגישה יציבה).
       await expect(pill).toHaveAttribute(
         "aria-label",
-        /שאל את הספר — 2–3 שאלות/,
+        /מה הספר אומר על המצב שלי\? — כמה שאלות/,
       );
 
       // מיקוד-מקלדת עובד, ו-Enter פותח את החלונית — גם כשהבאנר פתוח.
@@ -144,4 +144,45 @@ test.describe("compass floating bubble", () => {
       await expect(page.getByRole("dialog")).toBeVisible();
     });
   }
+});
+
+test.describe("compass bubble is site-wide and context-aware", () => {
+  // הבועה מלווה את הקורא בכל העמודים המרכזיים (מותקנת ב-layout), חוץ מ-/compass
+  // עצמו (שם העמוד *הוא* המנוע).
+  for (const path of ["/book", "/preview", "/before-relationship", "/author"]) {
+    test(`bubble is present on ${path}`, async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(path, { waitUntil: "networkidle" });
+      await dismissCookies(page);
+      await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
+    });
+  }
+
+  test("bubble is NOT rendered inside /compass itself", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/compass", { waitUntil: "networkidle" });
+    await dismissCookies(page);
+    await expect(compass(page)).toHaveCount(0);
+  });
+
+  test("on a journey page the bubble continues from the known station (skips „where are you?”)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    // /before-relationship → תחנת „dating”. פתיחת הבועה צריכה לדלג על שאלת התחנה
+    // ולפתוח ישר בשלב הדילמה — כי ההקשר כבר ידוע מהנתיב.
+    await page.goto("/before-relationship", { waitUntil: "networkidle" });
+    await dismissCookies(page);
+    await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
+    await compass(page).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    // מדלג על „איפה אתם עכשיו?” ומתחיל בדילמה.
+    await expect(
+      dialog.getByRole("heading", { name: "איפה אתם עכשיו?" }),
+    ).toHaveCount(0);
+    await expect(
+      dialog.getByRole("heading", { name: "מה הכי מעסיק אתכם כרגע?" }),
+    ).toBeVisible();
+  });
 });

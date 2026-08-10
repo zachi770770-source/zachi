@@ -42,12 +42,12 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const hero = page.locator("main section").first();
-    // קישור ה„שאל את הספר” בשער → /compass (המנוע הדטרמיניסטי).
-    const ask = hero.getByRole("link", { name: "שאל את הספר" });
+    // קישור ה„מה הספר אומר על המצב שלי?” בשער → /compass (המנוע הדטרמיניסטי).
+    const ask = hero.getByRole("link", { name: "מה הספר אומר על המצב שלי?" });
     await expect(ask).toHaveAttribute("href", "/compass");
-    // שורת-הסבר צמודה: „2–3 שאלות קצרות … תחנה …” — לא ייעוץ/אבחון, לא AI.
+    // שורת-הסבר צמודה: „כמה שאלות קצרות … הקטע והכלי …” — לא ייעוץ/אבחון, לא AI.
     await expect(hero.getByText(/שאלות קצרות/)).toBeVisible();
-    await expect(hero.getByText(/תחנה/)).toBeVisible();
+    await expect(hero.getByText(/הקטע והכלי/)).toBeVisible();
   });
 
   test("#4b Floating ask-the-book bubble carries an explanatory label (tooltip + aria)", async ({
@@ -57,7 +57,7 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
     await page.evaluate(() => window.scrollTo(0, 300));
-    const bubble = page.getByRole("button", { name: /שאל את הספר — / });
+    const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
     await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
     // תווית מסבירה (title) — לא רק אייקון/מילה בודדת.
     await expect(bubble).toHaveAttribute("title", /שאלות קצרות/);

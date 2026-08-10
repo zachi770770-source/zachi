@@ -4,6 +4,7 @@ import { tools } from "@/content/book";
 import { sampleReader } from "@/content/sample";
 import { stations } from "@/content/stations";
 import type { PersonaId } from "@/content/personas";
+import type { AskStationId } from "@/content/askRoute";
 import { Container } from "@/components/shared/Container";
 import { SampleReader, type ToolSample } from "@/components/preview/SampleReader";
 import { MarkSampleSeen } from "@/components/preview/MarkSampleSeen";
@@ -34,6 +35,14 @@ export const metadata = pageMetadata({
  */
 const STATION_PERSONA: Partial<Record<string, PersonaId>> = {
   "after-breakup": "breakup",
+};
+
+/** מזהה עמוד-תחנה (ב-`?station=`) → תחנת-עוזר, כדי לשאת את ההקשר לעוזר בסיום. */
+const STATION_TO_ASK: Partial<Record<string, AskStationId>> = {
+  "before-relationship": "dating",
+  "building-relationship": "building",
+  "inside-relationship": "existing",
+  "after-breakup": "after-breakup",
 };
 
 export default async function PreviewPage({
@@ -78,7 +87,9 @@ export default async function PreviewPage({
         <SampleReader toolSample={toolSample} />
       </Container>
 
-      <PreviewClosing />
+      <PreviewClosing
+        station={stationId ? STATION_TO_ASK[stationId] : undefined}
+      />
 
       {/* CTA דביק במובייל בלבד — מפנה לטופס ההרשמה, נעלם ליד הטופס/הפוטר. */}
       <PreviewStickyCta />

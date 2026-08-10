@@ -6,6 +6,7 @@ import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookLink } from "@/components/shared/BookLink";
+import { AskBookLink } from "@/components/journey/AskBookLink";
 import { BehindSection } from "@/components/sections/BehindSection";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
@@ -100,6 +101,11 @@ export default function BookPage() {
             <p className="mx-auto mt-4 max-w-[60ch] text-[14px] italic text-foreground-muted">
               לפני שמחליטים, כדאי לראות את התמונה כולה.
             </p>
+            {/* כניסה שקטה לעוזר — למי שלא בטוח מאיזה חלק בספר להתחיל. */}
+            <AskBookLink
+              prompt="לא בטוחים מאיזה חלק בספר להתחיל?"
+              className="mx-auto mt-6 max-w-[60ch] text-center"
+            />
           </div>
         </Container>
       </header>

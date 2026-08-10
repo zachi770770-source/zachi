@@ -14,7 +14,7 @@ async function openAsk(page: Page) {
   await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
   // הגלולה הצפה נבדלת ב-aria-label המלא (עם מקף); נחשפת אחרי גלילה קלה.
-  const pill = page.getByRole("button", { name: /שאל את הספר — / });
+  const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
   await page.mouse.wheel(0, 200);
   await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
   await pill.click();

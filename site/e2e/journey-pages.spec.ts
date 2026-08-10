@@ -74,8 +74,8 @@ for (const j of JOURNEYS) {
     await expect(
       cta.getByRole("link", { name: j.sampleLabel }),
     ).toHaveAttribute("href", `/preview?tool=${j.tool}&station=${j.station}`);
-    // Secondary: „שאל את הספר” עם הקשר-המצב.
-    await expect(cta.getByRole("link", { name: "שאל את הספר" })).toHaveAttribute(
+    // Secondary: „בדקו מה הספר אומר” עם הקשר-המצב.
+    await expect(cta.getByRole("link", { name: "בדקו מה הספר אומר" })).toHaveAttribute(
       "href",
       `/compass?station=${j.ask}`,
     );

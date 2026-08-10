@@ -16,6 +16,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { JourneyView } from "@/components/journey/JourneyView";
 import { AskBookLink } from "@/components/journey/AskBookLink";
+import { askBook } from "@/content/compass";
 
 /**
  * עמוד-מסע אישי (Landing) לאחת מארבע הבחירות ב-Home — נכתב לשפת-המצב של הקורא,
@@ -305,6 +306,12 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             >
               {journey.mirrorQuestion}
             </p>
+            {/* מיד אחרי „רגע של מראה” — כניסה לעוזר, בהקשר-המצב של המסלול. */}
+            <AskBookLink
+              station={journey.compassStation}
+              prompt={askBook.inlinePrompt}
+              className="mt-6 border-t border-border pt-5"
+            />
           </div>
         </section>
 

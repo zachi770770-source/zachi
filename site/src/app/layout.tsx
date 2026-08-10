@@ -10,6 +10,7 @@ import { SkipToContent } from "@/components/layout/SkipToContent";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 import { MotionRoot } from "@/components/shared/MotionRoot";
 import { PersonaProvider } from "@/components/persona/PersonaProvider";
+import { CompassLauncher } from "@/components/compass/CompassLauncher";
 
 /**
  * Heebo משמש לממשק, לגוף ולכותרות המרכזיות.
@@ -96,6 +97,9 @@ export default function RootLayout({
           </main>
           <Footer />
           <StickyPurchaseBar />
+          {/* בועת „מה הספר אומר על המצב שלי?” — מלווה את הקורא בכל האתר. מסתירה
+              את עצמה בתוך /compass (העמוד עצמו הוא המנוע). */}
+          <CompassLauncher />
           <CookieConsent />
           <AnalyticsScripts />
         </PersonaProvider>

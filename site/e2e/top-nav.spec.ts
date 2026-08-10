@@ -45,7 +45,7 @@ test("desktop top nav: every item is a real page and none uses a hash fragment",
   // מיפוי היעדים הנדרש (לפי התוויות הקיימות).
   expect(map["על המחבר"]).toBe("/author");
   expect(map["הספר"]).toBe("/book");
-  expect(map["שאל את הספר"]).toBe("/compass");
+  expect(map["מה הספר אומר?"]).toBe("/compass");
   expect(map["טעימה"]).toBe("/preview");
   expect(map["שאלות נפוצות"]).toBe("/faq");
 });

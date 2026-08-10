@@ -10,6 +10,7 @@ import {
 } from "@/content/stations";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
+import { AskBookLink } from "@/components/journey/AskBookLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { RouteIllustration } from "@/components/shared/RouteIllustration";
@@ -240,6 +241,8 @@ export function StationPage({ station }: { station: Station }) {
               />
             </Link>
           ) : null}
+          {/* כניסה שקטה לעוזר — למי שרוצה כיוון לפני שהוא בוחר מאיפה להתחיל. */}
+          <AskBookLink prompt="לא בטוחים מאיפה להתחיל?" />
         </section>
       </div>
 

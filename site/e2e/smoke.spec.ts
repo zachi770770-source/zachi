@@ -213,7 +213,7 @@ test("/compass is an active deterministic closed route (closed choices, no free 
 }) => {
   const res = await page.goto("/compass", { waitUntil: "networkidle" });
   expect(res?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("שאל את הספר");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("מה הספר אומר על המצב שלי?");
   // מסך פתיחה: בחירת תחנה — בחירות סגורות (radiogroup), ללא טקסט חופשי.
   await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
   await expect(page.getByRole("radiogroup")).toHaveCount(1);

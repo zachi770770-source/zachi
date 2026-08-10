@@ -178,6 +178,6 @@ export const homePathUi = {
   chapter2Label: "זה פרק ב׳ עבורי",
   // כל המצבים מגיעים לאותה טעימה — לכן ניסוח כללי ולא „טעימה שמתאימה לי”.
   ctaPrimary: "קראו טעימה מהספר",
-  ctaSecondary: "שאל את הספר",
+  ctaSecondary: "בדקו מה הספר אומר",
   focusesTitle: "שלושה מוקדים",
 };

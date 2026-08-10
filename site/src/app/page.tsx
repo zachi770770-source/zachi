@@ -3,7 +3,6 @@ import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { HomePathSelector } from "@/components/sections/HomePathSelector";
 import { TrustBand } from "@/components/sections/TrustBand";
-import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { BuildSpine } from "@/components/shared/BuildSpine";
@@ -23,7 +22,7 @@ export const metadata = pageMetadata({
  *
  *   1. Hero — כותרת, משפט הסבר אחד, שורת מחיר+סטטוס („המהדורה הדיגיטלית
  *      המלאה · תושק ב-98 ₪” — פורמט, טרם-לרכישה, מחיר), פעולה ראשית „קראו
- *      טעימה מהספר” ופעולה משנית „שאל את הספר” עם שורת-הסבר קצרה.
+ *      טעימה מהספר” ופעולה משנית „מה הספר אומר על המצב שלי?” עם שורת-הסבר קצרה.
  *   2. „איפה זה פוגש אותך עכשיו?” — שער אמיתי לארבע חוויות. כל בחירה היא
  *      *ניווט* לעמוד-המסע הייעודי (Landing אישי: /before-relationship,
  *      /building-relationship, /inside-relationship, /after-breakup). אין עוד
@@ -49,7 +48,6 @@ export default function HomePage() {
       <HomePathSelector />
       <TrustBand />
       <NewsletterSection />
-      <CompassLauncher />
       <StickyCta />
     </>
   );

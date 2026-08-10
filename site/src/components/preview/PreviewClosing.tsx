@@ -1,18 +1,23 @@
 import Link from "next/link";
-import { ArrowLeft, Compass } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { previewClosing } from "@/content/sample";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
+import { AskBookLink } from "@/components/journey/AskBookLink";
+import type { AskStationId } from "@/content/askRoute";
 
 /**
  * אזור סיום לעמוד ההצצה: מחבר את הטעימה לספר המלא, עם פעולה ראשית אחת בלבד
  * (הצטרפות לרשימת ההמתנה בטרום-השקה, או רכישה כשהמכירה פתוחה), הסבר קצר מה
  * מקבלים, וקישור משני ל-/book. אין באזור יותר מפעולה ראשית אחת.
+ *
+ * `station` (כשהקורא הגיע מעמוד-מסלול דרך `?station=`) נישא הלאה לעוזר, כדי
+ * שלא ישאל שוב „איפה אתם?”.
  */
-export function PreviewClosing() {
+export function PreviewClosing({ station }: { station?: AskStationId }) {
   return (
     <section
       id="join"
@@ -59,14 +64,13 @@ export function PreviewClosing() {
                 aria-hidden="true"
               />
             </BookLink>
-            {/* מעבר ברור למצפן — לקורא שסיים את הטעימה ולא בטוח מאיפה להתחיל. */}
-            <Link
-              href="/compass"
-              className="group inline-flex items-center gap-2 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              <Compass className="h-4 w-4 text-brand" aria-hidden="true" />
-              {previewClosing.compassLinkLabel}
-            </Link>
+            {/* מעבר ברור לעוזר — לקורא שסיים את הטעימה ולא בטוח מאיפה להתחיל.
+                נושא את ה-station אם הגיע מעמוד-מסלול, כדי לא לשאול שוב „איפה אתם?”. */}
+            <AskBookLink
+              station={station}
+              prompt={previewClosing.compassLinkLabel}
+              className="text-center"
+            />
             {/* שקט ולא-חוסם: עדכון על המהדורה הישירה/מודפסת העתידית באתר. */}
             <Link
               href="/waitlist"

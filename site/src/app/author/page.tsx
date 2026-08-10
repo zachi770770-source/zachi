@@ -8,6 +8,7 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookLink } from "@/components/shared/BookLink";
+import { AskBookLink } from "@/components/journey/AskBookLink";
 import { AuthorAudio } from "@/components/author/AuthorAudio";
 import { AuthorPageView } from "@/components/author/AuthorPageView";
 import { PersonSchema } from "@/components/schema/PersonSchema";
@@ -190,6 +191,11 @@ export default function AuthorPage() {
               />
             </Link>
           ) : null}
+          {/* כניסה שקטה לעוזר — למי שרוצה לדעת מה הספר אומר על המצב שלו. */}
+          <AskBookLink
+            prompt="רוצים לדעת מה הספר אומר על המצב שלכם?"
+            className="mt-1"
+          />
         </div>
       </div>
     </Container>

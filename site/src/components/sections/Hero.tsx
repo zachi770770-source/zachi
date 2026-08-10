@@ -14,8 +14,9 @@ import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 /**
  * Hero — גריד אמיתי של שתי עמודות: תוכן (ימין ב-RTL) / ספר (שמאל), מיושר אנכית
  * למרכז. יחידת תוכן רציפה אחת, מקוצרת: כותרת, משפט הסבר אחד, מחיר, ושתי פעולות
- * בלבד — פעולה ראשית „קראו טעימה מהספר” אל /preview, ופעולה משנית „שאל את הספר”
- * אל /compass. אין כאן בורר-פרסונה, פסקאות חוזרות או CTA כפול — כל היתר חי
+ * בלבד — פעולה ראשית „קראו טעימה מהספר” אל /preview, ופעולה משנית
+ * „מה הספר אומר על המצב שלי?” אל /compass. אין כאן בורר-פרסונה, פסקאות חוזרות
+ * או CTA כפול — כל היתר חי
  * בהמשך העמוד ובדפים הייעודיים.
  *
  * מצב Pre-launch: אין כפתור רכישה חסום; כשה-salesOpen יהפוך ל-true הפעולה
@@ -120,20 +121,20 @@ export function Hero() {
                   <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                 </AmazonBuyLink>
 
-                {/* פעולה קונטקסטואלית „שאל את הספר” → /compass — כלי התאמה
-                    דטרמיניסטי (לא AI, לא ייעוץ), עם משפט-הסבר קצר שאומר מה יקרה
-                    בלחיצה. גלוי בשני המכשירים. */}
+                {/* פעולה קונטקסטואלית „מה הספר אומר על המצב שלי?” → /compass —
+                    כלי התאמה דטרמיניסטי (לא AI, לא ייעוץ), עם משפט-הסבר קצר שאומר
+                    מה יקרה בלחיצה. גלוי בשני המכשירים. */}
                 <div className="flex flex-col items-start gap-1">
                   <Link
                     href="/compass"
                     className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                   >
                     <MessageCircleQuestion className="h-4 w-4 text-brand" aria-hidden="true" />
-                    שאל את הספר
+                    מה הספר אומר על המצב שלי?
                     <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                   </Link>
                   <p className="text-[13px] leading-snug text-foreground-muted">
-                    2–3 שאלות קצרות — ותדעו מאיזו תחנה בספר להתחיל.
+                    כמה שאלות קצרות — והקטע והכלי שמתאימים למה שעובר עליכם עכשיו.
                   </p>
                 </div>
               </div>

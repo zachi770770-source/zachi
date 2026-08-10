@@ -1,18 +1,35 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Compass, X } from "lucide-react";
+import { Compass, MessageCircleQuestion, X } from "lucide-react";
 
 import { compassQuiz } from "@/content/compass";
+import type { AskStationId } from "@/content/askRoute";
 
-// טעינה עצלה של מנוע „שאל את הספר”: הקוד והנתונים (askRoute.ts) נטענים כ-chunk
-// נפרד רק כשהחלונית נפתחת בפועל — לא בטעינת כל עמוד שבו המשגר קיים.
+// טעינה עצלה של מנוע העוזר: הקוד והנתונים (askRoute.ts) נטענים כ-chunk נפרד רק
+// כשהחלונית נפתחת בפועל — לא בטעינת כל עמוד שבו המשגר קיים.
 const AskRoute = React.lazy(() =>
   import("@/components/interactive/AskRoute").then((m) => ({
     default: m.AskRoute,
   })),
 );
+
+/** נתיב-מסלול → תחנת-עוזר (כדי לא לשאול שוב „איפה אתם?”). */
+const PATH_TO_STATION: Record<string, AskStationId> = {
+  "/before-relationship": "dating",
+  "/building-relationship": "building",
+  "/inside-relationship": "existing",
+  "/after-breakup": "after-breakup",
+};
+/** מזהה עמוד-תחנה (ב-`?station=` של /preview) → תחנת-עוזר. */
+const STATION_PAGE_TO_ASK: Record<string, AskStationId> = {
+  "before-relationship": "dating",
+  "building-relationship": "building",
+  "inside-relationship": "existing",
+  "after-breakup": "after-breakup",
+};
 
 /**
  * משגר „שאל את הספר” בעמוד הבית — מנוע ההכוונה הדטרמיניסטי, נגיש תמיד וללא
@@ -26,6 +43,7 @@ const AskRoute = React.lazy(() =>
  * - הבועה נחשפת רק אחרי גלילה קלה, כדי שלא תתחרה בטופס ההרשמה שבשער בטעינה.
  */
 export function CompassLauncher() {
+  const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const [bannerOpen, setBannerOpen] = React.useState(false);
   // גובה באנר-העוגיות (נמדד מריפוד-התחתית שה-CookieConsent שומר על ה-body) —
@@ -42,6 +60,21 @@ export function CompassLauncher() {
     window.addEventListener("open-compass", handler);
     return () => window.removeEventListener("open-compass", handler);
   }, []);
+
+  // התחנה הנוכחית — נגזרת ישירות בזמן רינדור מההקשר: בעמוד-מסלול לפי הנתיב;
+  // ב-/preview לפי ה-`?station=` שנשא מהמסלול. כך בלחיצה על הבועה המנוע ממשיך
+  // מהתחנה הידועה במקום לשאול שוב „איפה אתם?”. הערך אינו מרונדר ל-DOM עד שהחלונית
+  // נפתחת, ולכן קריאת `window.location.search` (מוגנת) אינה יוצרת חוסר-התאמת-הידרציה.
+  const station = React.useMemo<AskStationId | undefined>(() => {
+    if (!pathname) return undefined;
+    const byPath = PATH_TO_STATION[pathname];
+    if (byPath) return byPath;
+    if (pathname === "/preview" && typeof window !== "undefined") {
+      const raw = new URLSearchParams(window.location.search).get("station");
+      return raw ? STATION_PAGE_TO_ASK[raw] : undefined;
+    }
+    return undefined;
+  }, [pathname]);
 
   // חשיפה מהירה: גלילה קלה (מעל 120px) *או* טיימר-גיבוי קצר, מה שקורה קודם.
   React.useEffect(() => {
@@ -111,14 +144,18 @@ export function CompassLauncher() {
   const bannerOffset =
     bannerOpen && bannerHeight > 0 ? `${bannerHeight + BANNER_GAP}px` : "0px";
 
+  // בתוך /compass עצמו העמוד *הוא* המנוע — אין טעם בבועה צפה שמובילה אליו.
+  // (ההחזרה מוקדמת אך *אחרי* כל ה-hooks, כדי לא להפר את סדר ה-hooks.)
+  if (pathname?.startsWith("/compass")) return null;
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       {/* בועה צפה גדולה עם טקסט מפורש — פינה תחתונה-מתחילה (שמאל ב-RTL) */}
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label="שאל את הספר — 2–3 שאלות קצרות שמובילות אותך לתחנה ולכלי המתאימים"
-          title="2–3 שאלות קצרות — ותדעו מאיזו תחנה בספר להתחיל"
+          aria-label="מה הספר אומר על המצב שלי? — כמה שאלות קצרות שמובילות אותך לקטע ולכלי המתאימים"
+          title="כמה שאלות קצרות — ותדעו מאיזה קטע בספר להתחיל"
           style={{
             ["--bubble-bottom" as string]: mobileBottom,
             ["--banner-offset" as string]: bannerOffset,
@@ -127,12 +164,19 @@ export function CompassLauncher() {
             // ה-bottom הוא max(בסיס-רספונסיבי, היסט-הבאנר): כשהבאנר סגור ההיסט 0
             // והבסיס קובע; כשפתוח ההיסט (גובה-הבאנר+מרווח) גדול מהבסיס ומרים את
             // הגלולה מעליו. המעבר על „bottom” חלק (בלי קפיצה/הבהוב). RTL: end-*.
-            "group fixed end-4 bottom-[max(var(--bubble-bottom),var(--banner-offset))] top-auto z-40 inline-flex items-center justify-center rounded-full bg-foreground px-6 py-4 text-[16px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform,bottom] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-[max(2rem,var(--banner-offset))] md:px-8 md:py-5 md:text-[18px]" +
+            "group fixed end-4 bottom-[max(var(--bubble-bottom),var(--banner-offset))] top-auto z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3.5 text-[15px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform,bottom] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-[max(2rem,var(--banner-offset))] md:px-7 md:py-4.5 md:text-[17px]" +
             (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
           }
         >
-          {/* טקסט מפורש במקום אייקון — „שאל את הספר”. */}
-          <span className="whitespace-nowrap">שאל את הספר</span>
+          <MessageCircleQuestion
+            className="h-[18px] w-[18px] shrink-0 text-brand md:h-5 md:w-5"
+            aria-hidden="true"
+          />
+          {/* טקסט מלא בדסקטופ; במובייל נוסח קצר יותר כדי לא לחסום תוכן. */}
+          <span className="hidden whitespace-nowrap sm:inline">
+            מה הספר אומר על המצב שלי?
+          </span>
+          <span className="whitespace-nowrap sm:hidden">מה הספר אומר?</span>
         </button>
       </DialogPrimitive.Trigger>
 
@@ -175,7 +219,7 @@ export function CompassLauncher() {
                 </p>
               }
             >
-              <AskRoute />
+              <AskRoute initialStation={station} />
             </React.Suspense>
           </div>
         </DialogPrimitive.Content>

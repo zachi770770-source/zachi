@@ -21,8 +21,8 @@ test.describe("Launch-readiness", () => {
       heroSection.getByRole("link", { name: /הספר זמין עכשיו באמזון/ }),
     ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
-    // פעולה משנית יחידה ושקטה (קישור-טקסט): „שאל את הספר” → /compass.
-    const ask = heroSection.getByRole("link", { name: "שאל את הספר" });
+    // פעולה משנית יחידה ושקטה (קישור-טקסט): „מה הספר אומר על המצב שלי?” → /compass.
+    const ask = heroSection.getByRole("link", { name: "מה הספר אומר על המצב שלי?" });
     await expect(ask).toHaveAttribute("href", "/compass");
   });
 
@@ -159,7 +159,7 @@ test.describe("Launch-readiness", () => {
     await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
     // בבית: מנוע ההכוונה זמין כגלולה צפה — פותח את בורר התחנות.
-    const pill = page.getByRole("button", { name: /שאל את הספר — / });
+    const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
     await page.mouse.wheel(0, 200);
     await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
     await pill.click();
