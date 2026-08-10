@@ -266,6 +266,20 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         {/* ציטוט-העצירה כשיא-מומנטום/עומק (variant תנועה/עומק). */}
         {v.quoteAfter === "points" && quote}
 
+        {/* „שאלת מראה” — שאלה אחת לעצור עליה. אלמנט editorial (לא form/input/כפתור):
+            בולט טיפוגרפית, אישי, עם קו-רייל צדדי — נבדל מציטוט-העצירה הממורכז. */}
+        <section aria-labelledby="mirror-question" className="reveal">
+          <div className="mx-auto max-w-[52ch] border-s-2 border-brand ps-5 sm:ps-8">
+            <span className="kicker">רגע של מראה</span>
+            <p
+              id="mirror-question"
+              className="mt-3 font-serif text-[clamp(1.375rem,2.4vw,2rem)] font-medium italic leading-[1.4] text-foreground [text-wrap:balance]"
+            >
+              {journey.mirrorQuestion}
+            </p>
+          </div>
+        </section>
+
         {/* E. „מה הספר יעזור לכם לראות” — תובנות ממוקדות (בלי הבטחת תוצאה). */}
         <section
           aria-labelledby="book-helps-heading"
