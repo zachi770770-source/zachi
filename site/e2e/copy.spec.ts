@@ -17,7 +17,6 @@ const ROUTES = [
   "/",
   "/book",
   "/preview",
-  "/waitlist",
   "/preview?tool=quiet-check&station=before-relationship",
 ];
 

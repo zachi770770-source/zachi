@@ -2,7 +2,7 @@ import { test, expect, type Page } from "./fixtures";
 
 /**
  * „נראה בפועל” לדף הבית האישי המקוצר: שלושת אזורי-התוכן (Hero, „איפה זה פוגש
- * אותך עכשיו?” #path, ורשימת המתנה #waitlist) מרונדרים עם bounding-box חיובי,
+ * אותך עכשיו?” #path, וסגירת הרכישה באמזון #get-the-book) מרונדרים עם bounding-box חיובי,
  * display/visibility גלויים, opacity גלוי, טקסט ממשי — ואינם חופפים (סדר אנכי
  * תקין). נבדק ב-reduced-motion כדי לאמת את מצב-הבסיס הגלוי.
  *
@@ -12,7 +12,7 @@ import { test, expect, type Page } from "./fixtures";
 const SECTIONS = [
   { name: "Hero", sel: "main > section:first-of-type" },
   { name: "בחירת המצב", sel: "#path" },
-  { name: "רשימת המתנה", sel: "#waitlist" },
+  { name: "רכישה באמזון", sel: "#get-the-book" },
 ];
 
 async function boxOf(page: Page, sel: string) {

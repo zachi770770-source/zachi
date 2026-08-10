@@ -20,7 +20,6 @@ const ROUTES: Array<[string, string]> = [
   ["/compass", `${PROD_ORIGIN}/compass`],
   ["/preview", `${PROD_ORIGIN}/preview`],
   ["/faq", `${PROD_ORIGIN}/faq`],
-  ["/waitlist", `${PROD_ORIGIN}/waitlist`],
   ["/contact", `${PROD_ORIGIN}/contact`],
   ["/terms", `${PROD_ORIGIN}/terms`],
   ["/privacy", `${PROD_ORIGIN}/privacy`],

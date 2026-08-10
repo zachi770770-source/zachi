@@ -1,21 +1,11 @@
-import { test, expect, type Page } from "./fixtures";
+import { test, expect } from "./fixtures";
 
 /**
- * נתיב ההמרה (עודכן ל-PASS). ה-Hero כבר אינו ממיר בטופס אימייל: הפעולה
- * הדומיננטית בו היא „קראו טעימה מהספר · 2 דקות” → /preview (ללא הרשמה). הרשמה
- * לרשימת ההמתנה מרוכזת באזור הייעודי (#waitlist) ובסוף עמוד הטעימה. הרשמה
- * מוצלחת מציגה מצב-הצלחה עם „לקריאת הטעימה”; כשל אימות/שרת אינו מנווט;
- * /preview נשארת נגישה ישירות לכולם; וההצצה האינטראקטיבית הכפולה הוסרה.
+ * נתיב ההמרה (עודכן — אמזון הוא ערוץ הרכישה היחיד, אין רשימת המתנה). ה-Hero
+ * אינו ממיר בטופס אימייל: הפעולה הדומיננטית בו היא „קראו טעימה מהספר · 2 דקות”
+ * → /preview (ללא הרשמה). סגירת הבית מפנה לרכישה באמזון; /preview נשארת נגישה
+ * ישירות לכולם; וההצצה האינטראקטיבית הכפולה הוסרה.
  */
-
-/** טופס ההרשמה באזור רשימת ההמתנה (#waitlist) בעמוד הבית. */
-async function fillWaitlistForm(page: Page, { consent }: { consent: boolean }) {
-  const waitlist = page.locator("#waitlist");
-  await waitlist.scrollIntoViewIfNeeded();
-  await waitlist.getByLabel("כתובת אימייל").fill("reader@example.com");
-  if (consent) await waitlist.getByRole("checkbox").click();
-  await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
-}
 
 test("Hero: the single dominant action is the free sample, not an email form", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
@@ -26,41 +16,16 @@ test("Hero: the single dominant action is the free sample, not an email form", a
   await expect(dominant).toHaveAttribute("href", "/preview");
 });
 
-test("Waitlist: successful registration shows success + read-sample (no auto-redirect)", async ({ page }) => {
+test("home closing: Amazon is the only purchase channel — no waitlist, no email form", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-
-  await fillWaitlistForm(page, { consent: true });
-
-  const waitlist = page.locator("#waitlist");
-  await expect(waitlist.getByText(/נרשמת בהצלחה/)).toBeVisible();
-  await expect(waitlist.getByRole("link", { name: "לקריאת הטעימה" })).toBeVisible();
-  // נשארים בבית — אין ניווט אוטומטי; הטעימה נגישה דרך הכפתור.
-  await expect(page).toHaveURL(/\/$/);
-});
-
-test("Waitlist: validation failure (no consent) does not navigate", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-
-  await fillWaitlistForm(page, { consent: false });
-
-  await expect(page.locator("#waitlist").getByRole("alert")).toBeVisible();
-  await expect(page).toHaveURL(/\/$/);
-});
-
-test("Waitlist: API failure does not navigate", async ({ page }) => {
-  await page.route("**/api/waitlist", (route) =>
-    route.fulfill({
-      status: 500,
-      contentType: "application/json",
-      body: JSON.stringify({ error: "אירעה תקלה בשמירת הפרטים. נסו שוב." }),
-    })
+  // אין שום שדה אימייל בעמוד — רשימת ההמתנה הוסרה לחלוטין.
+  await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
+  const closing = page.locator("#get-the-book");
+  await expect(closing.getByRole("heading", { name: "הספר המלא זמין עכשיו באמזון" })).toBeVisible();
+  await expect(closing.getByRole("link", { name: "לרכישה באמזון" })).toHaveAttribute(
+    "href",
+    /amazon\.com\/dp\/B0GJ3SL9H2/
   );
-  await page.goto("/", { waitUntil: "networkidle" });
-
-  await fillWaitlistForm(page, { consent: true });
-
-  await expect(page.locator("#waitlist").getByRole("alert")).toBeVisible();
-  await expect(page).toHaveURL(/\/$/);
 });
 
 test("/preview is publicly accessible directly, without any registration", async ({ page }) => {

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { previewClosing } from "@/content/sample";
@@ -11,8 +10,8 @@ import type { AskStationId } from "@/content/askRoute";
 
 /**
  * אזור סיום לעמוד ההצצה: מחבר את הטעימה לספר המלא, עם פעולה ראשית אחת בלבד
- * (הצטרפות לרשימת ההמתנה בטרום-השקה, או רכישה כשהמכירה פתוחה), הסבר קצר מה
- * מקבלים, וקישור משני ל-/book. אין באזור יותר מפעולה ראשית אחת.
+ * (רכישה באמזון — ערוץ הרכישה היחיד), הסבר קצר מה מקבלים, וקישור משני ל-/book.
+ * אין באזור יותר מפעולה ראשית אחת.
  *
  * `station` (כשהקורא הגיע מעמוד-מסלול דרך `?station=`) נישא הלאה לעוזר, כדי
  * שלא ישאל שוב „איפה אתם?”.
@@ -71,13 +70,6 @@ export function PreviewClosing({ station }: { station?: AskStationId }) {
               prompt={previewClosing.compassLinkLabel}
               className="text-center"
             />
-            {/* שקט ולא-חוסם: עדכון על המהדורה הישירה/מודפסת העתידית באתר. */}
-            <Link
-              href="/waitlist"
-              className="text-[13px] text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              רוצים עדכון כשהמהדורה הישירה באתר תיפתח?
-            </Link>
           </div>
         </div>
       </Container>

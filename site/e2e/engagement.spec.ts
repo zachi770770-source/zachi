@@ -126,12 +126,13 @@ test("ask (from the floating pill): station → dilemma → result with tool + s
   await expect(
     article.getByText("זו הכוונה מתוך הספר, לא אבחון או ייעוץ. אתם מכירים את עצמכם הכי טוב."),
   ).toBeVisible();
-  // הכלי כ-deep-link + טעימה מותאמת (tool + station ב-query) + רשימת המתנה.
+  // הכלי כ-deep-link + טעימה מותאמת (tool + station ב-query) + רכישה באמזון.
   await expect(article.locator('a[href="/book#tool-fact-story-action"]')).toBeVisible();
   await expect(
     article.locator('a[href="/preview?tool=fact-story-action&station=before-relationship"]'),
   ).toBeVisible();
-  await expect(article.locator('a[href="/waitlist"]')).toBeVisible();
+  await expect(article.locator('a[href*="amazon.com/dp/B0GJ3SL9H2"]')).toBeVisible();
+  await expect(article.locator('a[href="/waitlist"]')).toHaveCount(0);
 
   // אפשר להתחיל מחדש — חוזרים לבורר התחנות.
   await pick(dialog.getByRole("button", { name: /להתחיל מחדש/ }));

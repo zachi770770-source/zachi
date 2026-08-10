@@ -72,12 +72,3 @@ test("contact form: a validation error appears with the shared calm entrance", a
   await expect(firstError).toBeVisible();
 });
 
-test("waitlist form: submitting without consent surfaces a calm inline error", async ({
-  page,
-}) => {
-  await page.goto("/waitlist", { waitUntil: "networkidle" });
-  await page.getByLabel("כתובת אימייל").fill("test@example.com");
-  await page.getByRole("button", { name: /עדכנו אותי/ }).click();
-  const err = page.locator("p.form-status[role='alert']");
-  await expect(err).toContainText("לאשר את קבלת העדכון");
-});

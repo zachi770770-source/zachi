@@ -51,7 +51,7 @@ test("/preview mobile: sticky waitlist CTA appears after scroll, hides at the fo
   await expect(sticky).not.toBeInViewport();
 });
 
-test("/preview closing: Amazon is the primary action, with a quiet future-edition waitlist link (no blocking form)", async ({ page }) => {
+test("/preview closing: Amazon is the primary and only purchase action (no waitlist, no form)", async ({ page }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });
   const join = page.locator("#join");
   await join.scrollIntoViewIfNeeded();
@@ -61,9 +61,7 @@ test("/preview closing: Amazon is the primary action, with a quiet future-editio
     join.getByRole("link", { name: /לרכישת הספר באמזון/ }),
   ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
-  // אין טופס הרשמה חוסם בתוך אזור הסיום — רק קישור שקט למהדורה הישירה העתידית.
+  // אין טופס הרשמה ואין קישור לרשימת המתנה — אמזון הוא ערוץ הרכישה היחיד.
   await expect(join.getByLabel("כתובת אימייל")).toHaveCount(0);
-  await expect(
-    join.getByRole("link", { name: /המהדורה הישירה באתר/ }),
-  ).toHaveAttribute("href", "/waitlist");
+  await expect(join.locator('a[href="/waitlist"]')).toHaveCount(0);
 });

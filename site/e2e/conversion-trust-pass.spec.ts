@@ -85,22 +85,24 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     await expect(trust.locator('[aria-label*="כוכב"], .stars, [class*="star"]')).toHaveCount(0);
   });
 
-  test("#1b Waitlist framed as a launch update (not a generic list), and still submits", async ({
+  test("#1b Home closing: Amazon is the only purchase channel (no waitlist, no email form)", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
-    const waitlist = page.locator("#waitlist");
-    await waitlist.scrollIntoViewIfNeeded();
-    // מסגור: „מהדורה ישירה · בקרוב” + הכותרת החדשה של רשימת ההמתנה.
-    await expect(waitlist).toContainText("מהדורה ישירה");
+    const closing = page.locator("#get-the-book");
+    await closing.scrollIntoViewIfNeeded();
+    // סגירה פשוטה וברורה: „הספר המלא זמין עכשיו באמזון” → „לרכישה באמזון”.
     await expect(
-      waitlist.getByRole("heading", { name: "רוצים עדכון כשהמהדורה הישירה באתר תיפתח?" }),
+      closing.getByRole("heading", { name: "הספר המלא זמין עכשיו באמזון" }),
     ).toBeVisible();
-    // עדיין נרשם בהצלחה.
-    await waitlist.getByLabel("כתובת אימייל").fill("launch-update@example.com");
-    await waitlist.getByRole("checkbox").click();
-    await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
-    await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
+    await expect(closing.getByRole("link", { name: "לרכישה באמזון" })).toHaveAttribute(
+      "href",
+      /amazon\.com\/dp\/B0GJ3SL9H2/,
+    );
+    // אין רשימת המתנה, אין טופס אימייל, ואין מסגור „מהדורה ישירה · בקרוב”.
+    await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
+    await expect(page.locator('a[href="/waitlist"]')).toHaveCount(0);
+    await expect(page.locator("body")).not.toContainText("מהדורה ישירה · בקרוב");
   });
 
   test("#7 Mobile: trust band is a compact section, not another full screen", async ({ browser }) => {

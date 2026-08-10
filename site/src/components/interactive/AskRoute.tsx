@@ -19,6 +19,7 @@ import {
   type IllustratedStationId,
 } from "@/content/routeIllustrations";
 import { RouteIllustration } from "@/components/shared/RouteIllustration";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { loadAsk, saveAsk, clearAsk } from "@/lib/ask/askStorage";
 import { trackEvent } from "@/lib/analytics";
 
@@ -449,17 +450,17 @@ function Result({
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           </Link>
         ) : null}
-        <Link
-          href="/waitlist"
-          onClick={() => trackEvent("ask_waitlist_click")}
+        {/* נקודת High Intent בסוף הכיוון: אמזון הוא ערוץ הרכישה היחיד. */}
+        <AmazonBuyLink
+          source="book"
           className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
         >
-          {L.waitlistCta}
+          הספר המלא זמין עכשיו באמזון
           <ArrowLeft
             className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
             aria-hidden="true"
           />
-        </Link>
+        </AmazonBuyLink>
       </div>
 
       <p className="mt-6 border-t border-border pt-4 text-[13px] leading-relaxed text-foreground-muted">

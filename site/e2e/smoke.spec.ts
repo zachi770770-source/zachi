@@ -16,7 +16,6 @@ const STATIC_ROUTES = [
   "/after-breakup",
   "/starting-again",
   "/inside-relationship",
-  "/waitlist",
   "/preview",
   "/compass",
   "/author",
@@ -142,13 +141,18 @@ test("contact form fails safely (clear Hebrew error) when email delivery is not 
   await expect(page.getByText("ההודעה נשלחה בהצלחה")).toHaveCount(0);
 });
 
-test("waitlist form submits successfully", async ({ page }) => {
+test("home closing: Amazon is the only purchase channel (no waitlist form)", async ({
+  page,
+}) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  const waitlist = page.locator("#waitlist");
-  await waitlist.getByLabel("כתובת אימייל").fill("waitlisttest@example.com");
-  await waitlist.getByRole("checkbox").click();
-  await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
-  await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
+  const closing = page.locator("#get-the-book");
+  await expect(closing.getByRole("heading", { name: "הספר המלא זמין עכשיו באמזון" })).toBeVisible();
+  await expect(closing.getByRole("link", { name: "לרכישה באמזון" })).toHaveAttribute(
+    "href",
+    /amazon\.com\/dp\/B0GJ3SL9H2/
+  );
+  // אין טופס רשימת המתנה בעמוד.
+  await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
 });
 
 test("checkout is closed during pre-launch (no form, no payment)", async ({

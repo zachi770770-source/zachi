@@ -26,15 +26,19 @@ test.describe("Launch-readiness", () => {
     await expect(ask).toHaveAttribute("href", "/compass");
   });
 
-  test("home newsletter section: the waitlist form still submits successfully", async ({ page }) => {
+  test("home closing: Amazon is the only purchase channel (no waitlist form)", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
-    const waitlist = page.locator("#waitlist");
-    await waitlist.scrollIntoViewIfNeeded();
-    await expect(waitlist).toBeVisible();
-    await waitlist.getByLabel("כתובת אימייל").fill("dana@example.com");
-    await waitlist.getByRole("checkbox").click();
-    await waitlist.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
-    await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
+    const closing = page.locator("#get-the-book");
+    await closing.scrollIntoViewIfNeeded();
+    await expect(closing).toBeVisible();
+    await expect(
+      closing.getByRole("heading", { name: "הספר המלא זמין עכשיו באמזון" }),
+    ).toBeVisible();
+    await expect(closing.getByRole("link", { name: "לרכישה באמזון" })).toHaveAttribute(
+      "href",
+      /amazon\.com\/dp\/B0GJ3SL9H2/,
+    );
+    await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
   });
 
   test("accessibility statement page exists and is linked from the footer", async ({ page }) => {
@@ -190,15 +194,6 @@ test.describe("Launch-readiness", () => {
     );
   });
 
-  test("waitlist: dedicated page saves a real signup", async ({ page }) => {
-    await page.goto("/waitlist", { waitUntil: "networkidle" });
-    await expect(page.getByRole("heading", { level: 1, name: "עדכון כשהמהדורה הישירה באתר תיפתח" })).toBeVisible();
-    await page.getByLabel("כתובת אימייל").fill("station-signup@example.com");
-    await page.getByRole("checkbox").click();
-    await page.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).click();
-    await expect(page.getByText(/נרשמת בהצלחה/)).toBeVisible();
-  });
-
   test("RTL + no horizontal overflow on home and key pages (mobile)", async ({ browser }) => {
     const context = await browser.newContext({ viewport: MOBILE });
     const page = await context.newPage();
@@ -209,7 +204,6 @@ test.describe("Launch-readiness", () => {
       "/after-breakup",
       "/starting-again",
       "/inside-relationship",
-      "/waitlist",
       "/author",
       "/faq",
       "/accessibility",

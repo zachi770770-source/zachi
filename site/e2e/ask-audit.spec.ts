@@ -48,9 +48,10 @@ test("audit: 4 stations reach a result — clean console, focus, no overflow, no
     const article = page.getByRole("article");
     // פוקוס על כותרת התוצאה.
     await expect(article.getByRole("heading")).toBeFocused();
-    // CTA ראשי ברור (טעימה) + רשימת המתנה.
+    // CTA ראשי ברור (טעימה) + רכישה באמזון (ערוץ הרכישה היחיד).
     await expect(article.locator('a[href^="/preview?tool="]')).toBeVisible();
-    await expect(article.locator('a[href="/waitlist"]')).toBeVisible();
+    await expect(article.locator('a[href*="amazon.com/dp/B0GJ3SL9H2"]')).toBeVisible();
+    await expect(article.locator('a[href="/waitlist"]')).toHaveCount(0);
     // שפה לא-טיפולית/מאבחנת בגוף התוצאה, בלי אחוזי-ביטחון. פסקת ההבהרה
     // („לא אבחון או ייעוץ”) *שוללת* אבחון בכוונה — ולכן מוחרגת מהבדיקה.
     const therapyLeak = await article.evaluate((el) => {

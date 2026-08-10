@@ -13,7 +13,7 @@ const station = {
   afterBreakup: /אחרי פרידה/,
 };
 
-test("ask: station → dilemma → 8-part result (tool + sample + waitlist), no %", async ({
+test("ask: station → dilemma → 8-part result (tool + sample + amazon), no %", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -34,12 +34,13 @@ test("ask: station → dilemma → 8-part result (tool + sample + waitlist), no 
   await expect(r.getByText("כלי מהספר שמתאים כאן")).toBeVisible();
   await expect(r.getByText("פעולה קטנה להיום")).toBeVisible();
   await expect(r.getByText("מה לא כדאי להסיק מהר מדי")).toBeVisible();
-  // כלי + טעימה מתאימה (d-start → fact-story-action) + רשימת המתנה
+  // כלי + טעימה מתאימה (d-start → fact-story-action) + רכישה באמזון (ערוץ יחיד)
   await expect(r.locator('a[href="/book#tool-fact-story-action"]')).toBeVisible();
   await expect(
     r.locator('a[href="/preview?tool=fact-story-action&station=before-relationship"]'),
   ).toBeVisible();
-  await expect(r.locator('a[href="/waitlist"]')).toBeVisible();
+  await expect(r.locator('a[href*="amazon.com/dp/B0GJ3SL9H2"]')).toBeVisible();
+  await expect(r.locator('a[href="/waitlist"]')).toHaveCount(0);
   await expect(r.getByText(/%/)).toHaveCount(0);
   await expect(r.getByText(/צ.אט|בינה מלאכות|שיחה עם|AI/)).toHaveCount(0);
 });

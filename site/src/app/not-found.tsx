@@ -3,6 +3,7 @@ import { BookX } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 
 export default function NotFound() {
   return (
@@ -15,7 +16,7 @@ export default function NotFound() {
       </h1>
       <p className="mt-3 max-w-md text-lg leading-relaxed text-foreground-muted">
         נראה שהעמוד שחיפשתם לא קיים, או שהקישור השתנה. אפשר לחזור לעמוד
-        הבית, לקרוא טעימה מהספר, או להצטרף לרשימת ההמתנה.
+        הבית, לקרוא טעימה מהספר, או לרכוש את הספר באמזון.
       </p>
       {/* היררכיה ברורה: פעולה ראשית אחת בולטת, ושתי פעולות משניות עדינות. */}
       <div className="mt-8 flex flex-col items-center gap-4">
@@ -27,7 +28,7 @@ export default function NotFound() {
             <Link href="/preview">לקריאת טעימה</Link>
           </Button>
           <Button asChild variant="link" className="min-h-[44px]">
-            <Link href="/waitlist">לרשימת ההמתנה</Link>
+            <AmazonBuyLink source="book">לרכישה באמזון</AmazonBuyLink>
           </Button>
         </div>
       </div>

@@ -10,12 +10,12 @@ test.describe("Pre-launch: המכירה סגורה", () => {
       "אהבה בונים"
     );
 
-    // מצב טרום-השקה: הפעולה המרכזית היא ההרשמה (כפתור הטופס „עדכנו אותי…”) —
-    // לא כפתור רכישה חסום ולא תשלום.
+    // אמזון הוא ערוץ הרכישה היחיד: סגירת הבית מפנה לרכישה באמזון (אין רשימת
+    // המתנה ואין טופס אימייל), ואין כפתור/קישור checkout מקומי פעיל.
     await expect(
-      page.getByRole("button", { name: "עדכנו אותי כשהמהדורה הישירה תיפתח" }).first()
+      page.locator("#get-the-book").getByRole("link", { name: "לרכישה באמזון" })
     ).toBeVisible();
-    // אין checkout מקומי כל עוד הרכישה הישירה סגורה — הרכישה עוברת לאמזון.
+    await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
     await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
 
     // /checkout מציג עמוד "הרכישה הישירה באתר עדיין לא נפתחה", ללא טופס.

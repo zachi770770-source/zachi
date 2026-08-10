@@ -43,7 +43,7 @@ export type Persona = {
   hook: string;
   /** תווית ה-CTA הדינמי. */
   ctaLabel: string;
-  /** יעד ה-CTA (טרום-השקה: רשימת ההמתנה — המרת-המאקרו). */
+  /** יעד ה-CTA — הטעימה (כניסה למסע שמסתיים ברכישה באמזון). אין רשימת המתנה. */
   ctaHref: string;
 };
 
@@ -61,7 +61,7 @@ export const personas: readonly Persona[] = [
     pain: "„למה אני תמיד נמשך/ת לאותו דפוס?”",
     hook: "יש קוד — וזה לא אשמתך. שוב ושוב נמשכים לאותו טיפוס כי דפוס לא-מודע עובד ברקע. הספר מראה איך לזהות אותו ולשבור את הלופ.",
     ctaLabel: "אני רוצה סוף סוף קשר בטוח",
-    ctaHref: "/waitlist",
+    ctaHref: "/preview",
   },
   {
     id: "breakup",
@@ -70,7 +70,7 @@ export const personas: readonly Persona[] = [
     pain: "„איך לא ראיתי את זה? מה לא בסדר בי?”",
     hook: "לפני שקופצים הלאה — כדאי להבין מה באמת קרה. הספר עוזר לסגור את המעגל, להחלים נכון, ולא לשחזר את אותה טעות בפעם הבאה.",
     ctaLabel: "אני רוצה להבין ולהחלים נכון",
-    ctaHref: "/waitlist",
+    ctaHref: "/preview",
   },
   {
     id: "divorced",
@@ -79,7 +79,7 @@ export const personas: readonly Persona[] = [
     pain: "„אני מפחד/ת לשחזר את אותו סיפור לילדים שלי.”",
     hook: "אפשר להיכנס לפרק ב' נקי/ה יותר — בלי לגרור את המטענים מהעבר, ולבנות הפעם קשר בריא, גם בשביל הילדים.",
     ctaLabel: "אני רוצה פרק ב' בריא",
-    ctaHref: "/waitlist",
+    ctaHref: "/preview",
   },
   {
     id: "married",
@@ -88,7 +88,7 @@ export const personas: readonly Persona[] = [
     pain: "„אנחנו אוהבים — אבל הבית הפך לרכבת הרים.”",
     hook: "לא לפרק — לחזור הביתה. הספר מראה איך לעצור את הריקוד החרדתי-נמנע שהפך את הבית לרכבת הרים, ולבנות מחדש קרבה.",
     ctaLabel: "אנחנו רוצים לחזור הביתה",
-    ctaHref: "/waitlist",
+    ctaHref: "/preview",
   },
 ] as const;
 
