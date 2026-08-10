@@ -452,21 +452,32 @@
    * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
   .motion-js .reveal {
     opacity: 0;
-    /* fade-up מורגש: translateY 34px → 0, opacity 0 → 1, 0.72s,
-       cubic-bezier(0.22,1,0.36,1) (=var(--ease-settle)). */
-    transform: translateY(34px);
+    /* fade-up עדין ואחיד: translateY 16px → 0, opacity 0 → 1, 560ms, ease-out
+       (var(--ease-standard)). מרוסן ו-Premium — לא „מוקפץ”, transform+opacity
+       בלבד (ללא CLS). */
+    transform: translateY(16px);
     transition:
-      opacity 720ms var(--ease-settle),
-      transform 720ms var(--ease-settle);
+      opacity 560ms var(--ease-standard),
+      transform 560ms var(--ease-standard);
     will-change: opacity, transform;
   }
   .motion-js .reveal.is-visible {
     opacity: 1;
     transform: none;
   }
-  /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה (--i נקבע ב-JSX / מונה). */
+  /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה בסטגר עדין (--i נקבע ב-JSX / מונה). */
   .motion-js .reveal[data-stagger] {
-    transition-delay: calc(var(--i, 0) * 115ms);
+    transition-delay: calc(var(--i, 0) * 80ms);
+  }
+  /* מובייל: תנועה וסטגר מופחתים — תחושת מהירות, בלי לעכב תוכן. */
+  @media (max-width: 640px) {
+    .motion-js .reveal {
+      transform: translateY(12px);
+      transition-duration: 460ms;
+    }
+    .motion-js .reveal[data-stagger] {
+      transition-delay: calc(var(--i, 0) * 55ms);
+    }
   }
   /* אין כאן „גיבוי-על” מבוסס-זמן: אנימציית reveal-failsafe שחשפה כל .reveal
      אחרי 4s מהטעינה הוסרה בכוונה — היא גרמה לסקשנים מתחת-לקיפול להגיע למצב
@@ -498,6 +509,49 @@
     transition-delay: var(--staged-delay, 0ms);
   }
 
+  /* ===================================================================
+   * „מה הספר אומר על המצב שלי?” — מעבר חלק בין שאלה/תשובה. כל שלב (key=step)
+   * נכנס עם fade + slide קצר; transform+opacity בלבד ⇒ ללא קפיצת-פריסה נוספת
+   * מעבר להפרש-הגובה הטבעי של התוכן. מגודר תחת reduced-motion.
+   * =================================================================== */
+  .ask-step {
+    animation: askStepIn var(--motion-panel) var(--ease-standard) both;
+  }
+  @keyframes askStepIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* FAQ (<details> נטיבי): פתיחה חלקה — התשובה נכנסת ב-fade + slide קצר במקום
+     „קפיצה” פתאומית. transform+opacity בלבד. הסגירה נטיבית ומיידית. */
+  @media (prefers-reduced-motion: no-preference) {
+    details[open] > .faq-answer {
+      animation: faqAnswerIn var(--motion-panel) var(--ease-standard) both;
+    }
+    @keyframes faqAnswerIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ask-step {
+      animation: none;
+    }
+  }
+
   /* עומק/פרלקסה מרוסנת לכריכת השער (ההזזה מונעת מ-JS ב-ParallaxScroll דרך
      המשתנה --hero-parallax; ברירת מחדל 0 ⇒ אין הזזה עד שיש גלילה, אין קפיצה
      ב-first-paint). transform בלבד ⇒ מרוכב ב-compositor. */
@@ -506,42 +560,31 @@
     will-change: transform;
   }
 
-  /* הכריכה מרחפת ונושמת ברצף (עומק חי) — נראה תמיד, גם ללא סמן ובמובייל.
-     שכבה ייעודית: לא מתנגשת בפרלקסה/כניסה/טילט. transform בלבד ⇒ 60fps.
-     מתחיל אחרי כניסת הכריכה (delay) כדי לא להילחם באנימציית הנחיתה. */
+  /* כניסת הכריכה — פעם אחת בלבד: fade + scale עדין (0.97→1) ועלייה קצרה.
+     אין לולאה קבועה. transform+opacity בלבד ⇒ 60fps, ללא CLS. */
   .motion-js .hero-float {
-    animation: heroFloat 5.5s ease-in-out 1.15s infinite;
+    animation: heroBookIn var(--motion-reveal) var(--ease-standard) 120ms both;
     transform-origin: center 60%;
   }
-  @keyframes heroFloat {
-    0% {
-      transform: translateY(0) rotate(0deg) perspective(900px) rotateY(0deg);
+  @keyframes heroBookIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.97);
     }
-    30% {
-      transform: translateY(-13px) rotate(-0.9deg) perspective(900px) rotateY(3deg);
-    }
-    65% {
-      transform: translateY(-20px) rotate(0.5deg) perspective(900px) rotateY(-2.5deg);
-    }
-    100% {
-      transform: translateY(0) rotate(0deg) perspective(900px) rotateY(0deg);
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
-  /* ההילה „נושמת” בקצב איטי ומנוגד — נפח שמתרחב ומתכווץ מאחורי הכריכה. */
+  /* ההילה נכנסת פעם אחת (opacity בלבד) — בלי „נשימה” אינסופית. */
   .motion-js .hero-depth-halo > div {
-    animation: heroHaloBreathe 7s ease-in-out infinite;
+    animation: heroHaloIn var(--motion-slow) var(--ease-standard) both;
   }
-  .motion-js .hero-depth-halo > div:last-child {
-    animation-delay: -3.5s;
-  }
-  @keyframes heroHaloBreathe {
-    0%,
-    100% {
-      transform: scale(1);
-      opacity: 0.85;
+  @keyframes heroHaloIn {
+    from {
+      opacity: 0;
     }
-    50% {
-      transform: scale(1.12);
+    to {
       opacity: 1;
     }
   }
@@ -1927,14 +1970,14 @@ details[open] .faq-answer {
 }
 @media (hover: hover) {
   .lift-hover:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
     border-color: color-mix(in oklab, var(--color-brand) 45%, var(--color-border-strong));
-    box-shadow: 0 16px 30px -18px rgba(43, 36, 31, 0.5);
+    box-shadow: 0 14px 26px -18px rgba(43, 36, 31, 0.45);
   }
 }
 .lift-hover:focus-visible {
-  transform: translateY(-5px);
-  box-shadow: 0 16px 30px -18px rgba(43, 36, 31, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px -18px rgba(43, 36, 31, 0.45);
 }
 
 /* מעבר עדין של שדה טופס בפוקוס (מעבר על מסגרת/טבעת בלבד — ללא זזת פריסה). */
@@ -2749,3 +2792,4 @@ html.vt-book-nav::view-transition-group(book-cover) {
     scroll-behavior: auto;
   }
 }
+

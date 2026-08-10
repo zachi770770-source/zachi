@@ -180,6 +180,9 @@ export function AskRoute({
         </div>
       ) : null}
 
+      {/* עטיפת-שלב עם key=step: כל מעבר מרנדר מחדש ומפעיל אנימציית כניסה חלקה
+          (fade + slide) דרך .ask-step ב-globals.css. */}
+      <div key={step} className="ask-step">
       {step === "station" ? (
         <Choice
           title={askUi.stationTitle}
@@ -240,6 +243,7 @@ export function AskRoute({
       {step === "safety" ? (
         <Safety headingRef={headingRef} onBack={() => setStep(dilemma ? "result" : "station")} onRestart={restart} />
       ) : null}
+      </div>
     </div>
   );
 }
