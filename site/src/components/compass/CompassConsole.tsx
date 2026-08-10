@@ -10,8 +10,7 @@ import { trackEvent } from "@/lib/analytics";
 import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
 import { CompassAnswer } from "@/components/compass/CompassAnswer";
-import { WaitlistCta } from "@/components/waitlist/WaitlistCta";
-import { WAITLIST_JOINED_KEY } from "@/components/waitlist/WaitlistForm";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 
 /** שאלות פתיחה אמיתיות — שאלת ההתלבטות של כל אחת משלוש התחנות הקיימות. */
 const STARTER_QUESTIONS = stationOrder.map((id) => stations[id].question);
@@ -47,18 +46,7 @@ export function CompassConsole({
   const [company, setCompany] = React.useState(""); // honeypot
   const [answer, setAnswer] = React.useState<AnswerState>(null);
   const [submitting, setSubmitting] = React.useState(false);
-  const [joined, setJoined] = React.useState(false);
   const formRef = React.useRef<HTMLFormElement>(null);
-
-  // האם המשתמש כבר נרשם לעדכון (דגל מקומי) — כדי לא לבקש אימייל שוב אחרי תשובה.
-  React.useEffect(() => {
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- קריאה חד-פעמית מ-localStorage אחרי mount
-      setJoined(localStorage.getItem(WAITLIST_JOINED_KEY) === "1");
-    } catch {
-      /* אחסון חסום — נשארים במצב „לא נרשם” */
-    }
-  }, []);
 
   // טעינת מצב זמינות + כמה שאלות נותרו (בלי לצרוך).
   React.useEffect(() => {
@@ -144,8 +132,14 @@ export function CompassConsole({
     }
   }, []);
 
-  const ctaHref = salesOpen ? compass.cta.openHref : compass.cta.closedHref;
-  const ctaLabel = salesOpen ? compass.cta.openLabel : compass.cta.closedLabel;
+  // ה-CTA הראשי מתחת לתשובה/במצב „בקרוב”: כשיש רכישה ישירה באתר — לעמוד הספר;
+  // אחרת (המצב הנוכחי) — רכישה חיצונית באמזון, ה-CTA האחיד של האתר. אין רשימת
+  // המתנה ואין הבטחת „כשהספר יוצא” — הספר כבר זמין.
+  const primaryCta = salesOpen ? (
+    <Link href={compass.cta.openHref}>{compass.cta.openLabel}</Link>
+  ) : (
+    <AmazonBuyLink source="book">{compass.cta.closedLabel}</AmazonBuyLink>
+  );
 
   // מצב „בקרוב” — כשהעוזר עדיין אינו פעיל.
   if (availability === "soon") {
@@ -165,7 +159,7 @@ export function CompassConsole({
         </p>
         <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Button asChild size="lg">
-            <Link href={ctaHref}>{ctaLabel}</Link>
+            {primaryCta}
           </Button>
           <Link
             href={compass.cta.sampleHref}
@@ -332,36 +326,27 @@ export function CompassConsole({
                 {formatCitation(answer.citation)}
               </p>
             ) : null}
-            {/* מסגור אחרי תשובה: „זו רק הצצה…” ואז קריאה לפרק הטעימה. אם כבר
-                נרשמו — לא מבקשים אימייל שוב; מציגים את קריאת הטעימה כפעולה ראשית. */}
+            {/* מסגור אחרי תשובה: „זו רק הצצה…” ואז ה-CTA האחיד — רכישת הספר באמזון
+                (הספר כבר זמין; אין רשימת המתנה), וקריאה לפרק הטעימה כפעולה משנית. */}
             <div className="mt-7 border-t border-border pt-6">
               <p className="text-[15px] leading-relaxed text-foreground-muted">
                 {compass.afterAnswer}
               </p>
-              {joined ? (
-                <div className="mt-4">
-                  <Button asChild size="lg">
-                    <Link href={compass.cta.sampleHref}>
-                      {compass.cta.readSampleLabel}
-                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="mt-4">
-                  <WaitlistCta source="compass" align="start" />
-                  <Link
-                    href={compass.cta.sampleHref}
-                    className="group mt-4 inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                  >
-                    {compass.cta.readSampleLabel}
-                    <ArrowLeft
-                      className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                      aria-hidden="true"
-                    />
-                  </Link>
-                </div>
-              )}
+              <div className="mt-4 flex flex-col items-start gap-4">
+                <Button asChild size="lg">
+                  {primaryCta}
+                </Button>
+                <Link
+                  href={compass.cta.sampleHref}
+                  className="group inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  {compass.cta.readSampleLabel}
+                  <ArrowLeft
+                    className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </div>
             </div>
           </article>
         ) : answer?.kind === "refused" ? (

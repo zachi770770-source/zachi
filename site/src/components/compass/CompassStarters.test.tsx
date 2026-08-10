@@ -3,17 +3,13 @@ import { render, cleanup, screen, fireEvent } from "@testing-library/react";
 
 import { CompassConsole } from "@/components/compass/CompassConsole";
 import { stations, stationOrder } from "@/content/stations";
-import { CONVERSION_CTA_LABEL } from "@/components/waitlist/WaitlistCta";
+import { compass } from "@/content/compass";
 
 /**
- * שאלות פתיחה (PHASE 15) + פעולת ההמרה האחידה (PHASE 16): שלוש שאלות ההתלבטות
- * האמיתיות מפעילות את אותה זרימת שאילתה, ופעולת ההמרה „קבלו טעימה ועדכון…”
- * מופיעה רק אחרי תשובה מוצלחת אמיתית — לא לפני, ולא בשגיאה. הרשת מדומה במלואה.
+ * שאלות פתיחה + פעולת ההמרה האחידה: שלוש שאלות ההתלבטות האמיתיות מפעילות את אותה
+ * זרימת שאילתה, ופעולת ההמרה — ה-CTA האחיד לרכישת הספר באמזון (הספר כבר זמין;
+ * אין רשימת המתנה) — מופיעה רק אחרי תשובה מוצלחת אמיתית, לא לפני ולא בשגיאה.
  */
-
-// WaitlistCta משתמש ב-useRouter של next/navigation — ממקים אותו בסביבת הבדיקה.
-const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: pushMock }) }));
 
 type FetchImpl = (url: string, init?: RequestInit) => unknown;
 
@@ -34,7 +30,6 @@ const STARTERS = stationOrder.map((id) => stations[id].question);
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
-  pushMock.mockReset();
 });
 
 beforeEach(() => {
@@ -52,9 +47,9 @@ async function renderReadyConsole() {
   await screen.findByLabelText("השאלה שלכם");
 }
 
-/** פעולת ההמרה (הכפתור שנפתח לטופס). לפני פתיחתו אין שדה אימייל. */
+/** פעולת ההמרה האחידה — הקישור לרכישת הספר באמזון. מופיע רק אחרי תשובה מוצלחת. */
 function conversionCta() {
-  return screen.queryByRole("button", { name: CONVERSION_CTA_LABEL });
+  return screen.queryByRole("link", { name: compass.cta.closedLabel });
 }
 
 describe("CompassConsole — starters + unified conversion CTA", () => {
