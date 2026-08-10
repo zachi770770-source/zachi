@@ -186,3 +186,57 @@ test.describe("compass bubble is site-wide and context-aware", () => {
     ).toBeVisible();
   });
 });
+
+test.describe("compass drawer: „לקרוא את הקטע המתאים בספר” navigates to the sample and closes the overlay", () => {
+  // רגרסיה: מתוך ה-drawer (ה-Dialog של הבועה) לחיצה על ה-CTA לקטע היא ניווט
+  // צד-לקוח דרך <Link>. ה-CompassLauncher חי ב-layout המתמיד ולכן ה-Dialog נשאר
+  // פתוח וה-Overlay (fixed inset-0) כיסה את עמוד /preview — המשתמש „לא הגיע”
+  // לקטע. הבדיקה מוודאת שהניווט מצליח *וגם* שה-drawer נסגר, בשני המכשירים.
+  for (const vp of [
+    { label: "desktop", width: 1440, height: 900 },
+    { label: "mobile", width: 390, height: 844 },
+  ]) {
+    test(`${vp.label}: clicking the sample CTA reaches /preview with the right tool+station and dismisses the drawer`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      // עמוד-מסלול „לפני קשר” → תחנת „dating” ידועה מהנתיב, כך שהבועה נפתחת
+      // ישר בשלב הדילמה.
+      await page.goto("/before-relationship", { waitUntil: "networkidle" });
+      await dismissCookies(page);
+
+      await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
+      await compass(page).click();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
+
+      // דילמה ללא שלב-הקשר → תוצאה מיידית (עם כלי, ולכן ה-CTA לקטע מוצג).
+      await dialog
+        .getByRole("radio", { name: /שחוק.* מאפליקציות ומדייטים/ })
+        .click();
+      await expect(dialog.getByRole("article")).toBeVisible();
+
+      const sampleCta = dialog.getByRole("link", {
+        name: "לקרוא את הקטע המתאים בספר",
+      });
+      await expect(sampleCta).toBeVisible();
+      await sampleCta.click();
+
+      // 1. הגענו לקטע הנכון: /preview עם הכלי והתחנה שנגזרו מהתשובה.
+      await page.waitForURL(/\/preview\?/);
+      const url = new URL(page.url());
+      expect(url.pathname).toBe("/preview");
+      expect(url.searchParams.get("tool")).toBe("boundary-ladder");
+      expect(url.searchParams.get("station")).toBe("before-relationship");
+
+      // 2. ה-drawer נסגר וה-Overlay אינו מכסה את העמוד — הקטע נגיש בפועל.
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(
+        page.getByRole("progressbar", { name: /התקדמות|קריאה/ }).first(),
+      ).toBeVisible();
+      // שורת-ההקשר האישית מופיעה רק כשכלי+תחנה תקפים — אישור שהקטע המותאם נטען.
+      await expect(page.locator(".reader-context")).toBeVisible();
+    });
+  }
+});

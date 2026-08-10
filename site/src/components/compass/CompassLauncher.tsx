@@ -149,7 +149,19 @@ export function CompassLauncher() {
             </DialogPrimitive.Close>
           </div>
 
-          <div className="grow overflow-y-auto px-5 py-6 sm:px-6">
+          <div
+            className="grow overflow-y-auto px-5 py-6 sm:px-6"
+            // סגירת ה-drawer בעת ניווט מתוך התוצאה: לחיצה על קישור (למשל „לקרוא את
+            // הקטע המתאים בספר” → /preview?tool=&station=, או הכלי → /book#tool-…) היא
+            // ניווט צד-לקוח דרך <Link>. ה-CompassLauncher חי ב-layout המתמיד, ולכן
+            // בלי סגירה מפורשת ה-Dialog נשאר `open` וה-Overlay (fixed inset-0) ממשיך
+            // לכסות את העמוד החדש — המשתמש „לא מגיע” לקטע. דלגציה על כל <a> סוגרת את
+            // החלונית לכל היעדים, כולל שינוי `?query` בלבד (כבר ב-/preview) שבו הנתיב
+            // אינו משתנה. הניווט עצמו אינו נמנע — setOpen(false) רק סוגר במקביל.
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("a")) setOpen(false);
+            }}
+          >
             <React.Suspense
               fallback={
                 <p className="py-10 text-center text-[15px] text-foreground-muted" role="status">
