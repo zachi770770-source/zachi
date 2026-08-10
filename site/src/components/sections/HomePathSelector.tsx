@@ -40,8 +40,10 @@ export function HomePathSelector() {
             <a
               key={p.id}
               href={p.stationHref}
-              // lift-hover: הדגשה מונפשת ועדינה לתחנה הפעילה (hover/focus) — הרמה
-              // ‎-2px + מסגרת-מותג + צל רך (220ms ease-out); המעבר בין התחנות חלק.
+              // אלה קישורי-ניווט בלבד — אין כאן תחנה „נבחרת/פעילה” מתמשכת (המשתמש
+              // עדיין לא בחר). lift-hover הוא אפוֹרדנס hover/focus בלבד (הרמה ‎-2px +
+              // מסגרת-מותג + צל רך, 220ms ease-out), *לא* מצב-active — ולכן אין
+              // aria-current ואין הדגשה שנשארת אחרי שהעכבר עוזב. המעבר ביניהן חלק.
               className="group lift-hover flex items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:gap-3 sm:rounded-2xl sm:p-6"
             >
               <span className="min-w-0">
