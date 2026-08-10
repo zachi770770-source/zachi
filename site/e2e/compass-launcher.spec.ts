@@ -27,14 +27,14 @@ async function dismissCookies(page: import("@playwright/test").Page) {
 }
 
 test.describe("compass floating bubble", () => {
-  test("desktop: bubble reveals without any scroll, then opens the drawer", async ({
+  test("desktop: bubble is present immediately on load, then opens the drawer", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/", { waitUntil: "networkidle" });
     await dismissCookies(page);
-    // נחשפת גם בלי גלילה כלל (טיימר-גיבוי) — opacity מגיע ל-1.
-    await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
+    // נוכחת מיד עם הטעינה — בלי גלילה וללא המתנה לטיימר. opacity=1 מיידית.
+    await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 1500 });
     await compass(page).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();

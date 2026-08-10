@@ -31,6 +31,7 @@ const STATION_PAGE_TO_ASK: Record<string, AskStationId> = {
   "after-breakup": "after-breakup",
 };
 
+
 /**
  * משגר „שאל את הספר” בעמוד הבית — מנוע ההכוונה הדטרמיניסטי, נגיש תמיד וללא
  * ניווט החוצה. אינו צ׳אטבוט ואינו AI: הבועה פותחת את אותו מנוע (AskRoute) שבעמוד
@@ -40,19 +41,12 @@ const STATION_PAGE_TO_ASK: Record<string, AskStationId> = {
  *   (שמאל ב-RTL), באמצע גובה המסך, עם תווית קטנה „שאל את הספר”.
  * - Mobile: בועה עגולה צפה באותו צד, במרווח בטוח מעל באנר העוגיות, כדי שלא
  *   תסתיר אותו.
- * - הבועה נחשפת רק אחרי גלילה קלה, כדי שלא תתחרה בטופס ההרשמה שבשער בטעינה.
+ * - הבועה נוכחת וזמינה מיד עם טעינת כל עמוד (בלי המתנה לגלילה/טיימר), אך עדינה
+ *   ולא-חוסמת: אינה מסתירה CTA/טקסט/פוטר/ניווט/באנרים.
  */
 export function CompassLauncher() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
-  const [bannerOpen, setBannerOpen] = React.useState(false);
-  // גובה באנר-העוגיות (נמדד מריפוד-התחתית שה-CookieConsent שומר על ה-body) —
-  // לצורך הרמת הגלולה *מעל* הבאנר עם מרווח ברור, במקום להסתירה.
-  const [bannerHeight, setBannerHeight] = React.useState(0);
-  // הבועה הצפה אינה מופיעה בפריים הראשון ממש (כדי לא לקפוץ מעל השער), אך נחשפת
-  // מהר וברור בשני המכשירים: אחרי גלילה קטנה, או אחרי השהיה קצרה גם בלי גלילה —
-  // כך מי שלא גולל עדיין רואה אותה, ולא רק אחרי חצי מסך.
-  const [revealed, setRevealed] = React.useState(false);
 
   // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון.
   React.useEffect(() => {
@@ -76,73 +70,18 @@ export function CompassLauncher() {
     return undefined;
   }, [pathname]);
 
-  // חשיפה מהירה: גלילה קלה (מעל 120px) *או* טיימר-גיבוי קצר, מה שקורה קודם.
-  React.useEffect(() => {
-    let timer = 0;
-    const reveal = () => {
-      setRevealed(true);
-      cleanup();
-    };
-    const onScroll = () => {
-      if (window.scrollY > 120) reveal();
-    };
-    const cleanup = () => {
-      window.removeEventListener("scroll", onScroll);
-      if (timer) window.clearTimeout(timer);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    // גיבוי: גם בלי גלילה כלל — הבועה נוכחת אחרי השהיה קצרה.
-    timer = window.setTimeout(reveal, 1200);
-    onScroll();
-    return cleanup;
-  }, []);
-
-  // מצב באנר העוגיות מגיע כאות-מצב מפורש מ-CookieConsent (data-attribute על
-  // ה-body + אירוע „cookie-banner-change”). כשהבאנר פתוח הגלולה *אינה* מוסתרת —
-  // היא מורמת דינמית מעל הבאנר עם מרווח ברור (ראו bannerOffset למטה), ונשארת
-  // גלויה ולחיצה למשתמש חדש. עם סגירת ההסכמה היא חוזרת חלק למיקום התחתון הרגיל.
-  React.useEffect(() => {
-    const readAttr = () =>
-      document.body.getAttribute("data-cookie-banner") === "open";
-    const sync = (nextOpen: boolean) => setBannerOpen(nextOpen);
-    const onChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ open?: boolean }>).detail;
-      sync(typeof detail?.open === "boolean" ? detail.open : readAttr());
-    };
-    // מצב התחלתי מהאות המפורש (data-attribute), למקרה שהאירוע כבר נורה.
-    sync(readAttr());
-    window.addEventListener("cookie-banner-change", onChange);
-    return () => window.removeEventListener("cookie-banner-change", onChange);
-  }, []);
-
-  // גובה הבאנר נמדד מריפוד-התחתית שה-CookieConsent שומר על ה-body (אותו מנגנון
-  // של בר-הטעימה) — מתאפס ל-0 עם סגירת הבאנר, ואז הגלולה חוזרת למיקומה הרגיל.
-  React.useEffect(() => {
-    const read = () => {
-      const pb = parseInt(getComputedStyle(document.body).paddingBottom, 10);
-      setBannerHeight(Number.isFinite(pb) ? pb : 0);
-    };
-    read();
-    const mo = new MutationObserver(read);
-    mo.observe(document.body, { attributes: true, attributeFilter: ["style"] });
-    window.addEventListener("resize", read);
-    return () => {
-      mo.disconnect();
-      window.removeEventListener("resize", read);
-    };
-  }, []);
-
   // מובייל: הבועה מורמת מעל בר-הטעימה הדביק (הבר יושב בתחתית ורוחבו כמעט מלא),
   // כך שאין חפיפה בין שני הרכיבים הצפים. בדסקטופ היא בפינה התחתונה-מתחילה
   // (שמאל ב-RTL), הפוך מבר-הטעימה שיושב בפינה הנגדית.
-  const mobileBottom = "max(5.5rem, calc(env(safe-area-inset-bottom) + 5rem))";
-
-  // כשהבאנר פתוח — הרמה דינמית מעל גובהו עם מרווח ברור (16px, בטווח 12–20).
-  // גובה הבאנר כולל כבר את ה-safe-area (הבאנר עצמו מרפד אותו). כשסגור → 0,
-  // וה-max() בתחתית מחזיר את הגלולה למיקומה הרגיל. המעבר על „bottom” חלק.
-  const BANNER_GAP = 16;
-  const bannerOffset =
-    bannerOpen && bannerHeight > 0 ? `${bannerHeight + BANNER_GAP}px` : "0px";
+  // מיקום ה-bottom נקבע כ-*inline style* (לא דרך class ב-stylesheet) בכוונה:
+  // Chromium אינו מתקף מחדש ערך `bottom` שמגיע מכלל-stylesheet כשמשתנה-CSS
+  // *יורש* (כאן `--cookie-banner-height`, שה-CookieConsent קובע על ה-body בעת
+  // פתיחת הבאנר) משתנה — אך *כן* מתקף inline style. לכן הגלולה מתרוממת מעל
+  // הבאנר מיידית, בלי פיגור ובלי חפיפה. הבסיס הרספונסיבי (`--bubble-bottom”)
+  // נקבע דרך class לפי breakpoint (מובייל 5.5rem / דסקטופ 2rem), וההיסט מעל
+  // הבאנר נצרך ישירות מהמשתנה היורש. ברירת-מחדל 0px כשאין באנר.
+  const bubbleBottom =
+    "max(var(--bubble-bottom), calc(var(--cookie-banner-height, 0px) + 16px))";
 
   // בתוך /compass עצמו העמוד *הוא* המנוע — אין טעם בבועה צפה שמובילה אליו.
   // (ההחזרה מוקדמת אך *אחרי* כל ה-hooks, כדי לא להפר את סדר ה-hooks.)
@@ -156,16 +95,15 @@ export function CompassLauncher() {
           type="button"
           aria-label="מה הספר אומר על המצב שלי? — כמה שאלות קצרות שמובילות אותך לקטע ולכלי המתאימים"
           title="כמה שאלות קצרות — ותדעו מאיזה קטע בספר להתחיל"
-          style={{
-            ["--bubble-bottom" as string]: mobileBottom,
-            ["--banner-offset" as string]: bannerOffset,
-          }}
+          // ה-bottom נקבע inline (ולא דרך class), אחרת Chromium לא מתקף אותו מחדש
+          // כשמשתנה הבאנר היורש משתנה — ואז הגלולה חופפת לבאנר. הבסיס הרספונסיבי
+          // (`--bubble-bottom”) מגיע דרך class לפי breakpoint.
+          style={{ bottom: bubbleBottom }}
           className={
-            // ה-bottom הוא max(בסיס-רספונסיבי, היסט-הבאנר): כשהבאנר סגור ההיסט 0
-            // והבסיס קובע; כשפתוח ההיסט (גובה-הבאנר+מרווח) גדול מהבסיס ומרים את
-            // הגלולה מעליו. המעבר על „bottom” חלק (בלי קפיצה/הבהוב). RTL: end-*.
-            "group fixed end-4 bottom-[max(var(--bubble-bottom),var(--banner-offset))] top-auto z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3.5 text-[15px] font-bold leading-none text-surface shadow-xl ring-2 ring-brand transition-[opacity,transform,bottom] duration-500 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:bottom-[max(2rem,var(--banner-offset))] md:px-7 md:py-4.5 md:text-[17px]" +
-            (revealed || open ? " opacity-100" : " opacity-0 pointer-events-none")
+            // הבסיס הרספונסיבי כמשתנה: מובייל 5.5rem (מעל בר-הטעימה), דסקטופ 2rem.
+            // „bottom” אינו ב-transition — ההרמה מעל הבאנר מיידית, בלי חפיפה זמנית.
+            // נוכחת ולחיצה מיד עם טעינת העמוד — בלי המתנה לגלילה/טיימר. RTL: end-*.
+            "group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3.5 text-[15px] font-bold leading-none text-surface opacity-100 shadow-xl ring-2 ring-brand transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:px-7 md:py-4.5 md:text-[17px]"
           }
         >
           <MessageCircleQuestion

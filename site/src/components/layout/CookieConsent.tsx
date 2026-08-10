@@ -111,8 +111,15 @@ export function CookieConsent() {
   }, []);
 
   React.useEffect(() => {
-    if (!visible) {
+    // ניקוי משותף של ריווח-הפריסה ושל משתנה-הגובה (`--cookie-banner-height`)
+    // שבקרות צפות (הבועה „מה הספר אומר על המצב שלי?”) קוראות ב-CSS טהור כדי
+    // להתרומם מעל הבאנר — בלי מדידת-JS ובלי פיגור-רינדור.
+    const clear = () => {
       document.body.style.paddingBottom = "";
+      document.body.style.removeProperty("--cookie-banner-height");
+    };
+    if (!visible) {
+      clear();
       setBannerState(false);
       return;
     }
@@ -122,7 +129,11 @@ export function CookieConsent() {
       return () => setBannerState(false);
     }
     const apply = () => {
-      document.body.style.paddingBottom = `${el.offsetHeight}px`;
+      const h = `${el.offsetHeight}px`;
+      document.body.style.paddingBottom = h;
+      // המשתנה יורש לכל צאצאי ה-body (כולל הבועה ה-fixed); CSS מגיב מיידית
+      // ברגע שהוא נקבע — אין צורך ב-observer/re-render בצד הבועה.
+      document.body.style.setProperty("--cookie-banner-height", h);
     };
     apply();
     const ro =
@@ -132,7 +143,7 @@ export function CookieConsent() {
     return () => {
       ro?.disconnect();
       window.removeEventListener("resize", apply);
-      document.body.style.paddingBottom = "";
+      clear();
       setBannerState(false);
     };
   }, [visible, setBannerState]);
