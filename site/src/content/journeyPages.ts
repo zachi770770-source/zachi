@@ -58,6 +58,9 @@ export interface JourneyPage {
   sampleLead: string;
   /** G. תווית הפעולה הראשית — הטעימה מהספר. */
   samplePrimaryLabel: string;
+  /** Early CTA — נקודת כניסה מוקדמת ושקטה לטעימה (מיד אחרי ה-reflection הראשון,
+      לקורא שכבר השתכנע). אותה טעימה מותאמת — לא /preview כללי. */
+  earlyCtaLabel: string;
 
   /** הכלי המאושר + ה-station ל-Preview, והתחנה המקבילה ב„שאל את הספר”. */
   sampleTool: string;
@@ -117,6 +120,9 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
       "הקטע הבא מתחיל ברגע קטן שקל לפרש מהר מדי — ומראה איך להפריד בין מה שקרה לבין הסיפור שכבר בנינו סביבו. עוד לפני שיש קשר, ההפרדה הזו היא מה שמאפשר לפגוש אדם אמיתי, ולא רק את הפרשנות שלנו עליו.",
     samplePrimaryLabel: "קראו את הקטע שמתאים לשלב הזה",
 
+    earlyCtaLabel:
+      "רוצים לראות איך מפרידים בין מה שקרה לבין הסיפור שכבר בנינו עליו? קראו את הקטע",
+
     sampleTool: "fact-story-action",
     sampleStation: "before-relationship",
     compassStation: "dating",
@@ -174,6 +180,9 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     sampleLead:
       "הקטע הבא עוסק בקצב — ברגע שבו הרצון להתקרב פוגש את הצורך להשאיר מקום לקשר להיבנות. קצב אינו מבחן; הוא הדרך לראות אם שני אנשים מצליחים לבנות מרחב משותף, בלי שאחד רץ קדימה והשני נשאר מאחור.",
     samplePrimaryLabel: "קראו טעימה לקשר שמתחיל",
+
+    earlyCtaLabel:
+      "רוצים לראות איך הספר מסתכל על קצב בתחילת קשר? קראו את הקטע",
 
     sampleTool: "gate-questions",
     sampleStation: "building-relationship",
@@ -234,6 +243,9 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
       "הקטע הבא לוקח משפט זוגי מוכר ומראה מה משתנה כשמפסיקים להאשים ומתחילים לדבר מתוך הצורך עצמו. לפעמים שינוי קטן במילה אחת — מהאשמה לבקשה — משנה את כל מהלך השיחה.",
     samplePrimaryLabel: "קראו טעימה שמתאימה לקשר קיים",
 
+    earlyCtaLabel:
+      "רוצים לראות איך שינוי קטן בשפה משנה שיחה זוגית שלמה? קראו את הקטע",
+
     sampleTool: "twenty-maintenance",
     sampleStation: "inside-relationship",
     compassStation: "existing",
@@ -293,6 +305,9 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     sampleLead:
       "הקטע הבא מתחיל במקום שבו השתיקה של האדם שכבר איננו בקשר מתחילה לקבל משמעות משל עצמה. כשאין תשובה מהצד השני, השתיקה נעשית מקום שבו אנחנו מתחילים לכתוב לעצמנו את התשובות — לא תמיד את הנכונות.",
     samplePrimaryLabel: "קראו טעימה שמתאימה למה שאתם עוברים עכשיו",
+
+    earlyCtaLabel:
+      "רוצים לראות מה קורה כשהשתיקה של מי שכבר איננו מתחילה לקבל משמעות? קראו את הקטע",
 
     sampleTool: "quiet-check",
     sampleStation: "after-breakup",

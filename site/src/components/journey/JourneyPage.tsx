@@ -206,6 +206,24 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           </div>
         </section>
 
+        {/* Early Reading Entry — נקודת כניסה מוקדמת ושקטה לטעימה, מיד אחרי
+            ה-reflection הראשון: לקורא שכבר זיהה את עצמו ורוצה להיכנס לספר בלי
+            לעבור עוד שלושה מסכים. קישור editorial (לא band/כפתור מלא), אל אותה
+            טעימה מותאמת של הפעולה הראשית. ה-Primary block המלא נשאר בסוף הקשת. */}
+        <div className="reveal border-t border-border pt-6">
+          <BookLink
+            href={previewHref}
+            morphCover
+            className="group inline-flex items-center gap-2.5 text-[1.0625rem] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand [text-wrap:pretty]"
+          >
+            {journey.earlyCtaLabel}
+            <ArrowLeft
+              className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+              aria-hidden="true"
+            />
+          </BookLink>
+        </div>
+
         {/* ציטוט-העצירה כפסק שקט (variant בהירות/מרחב). */}
         {v.quoteAfter === "reflection" && quote}
 
