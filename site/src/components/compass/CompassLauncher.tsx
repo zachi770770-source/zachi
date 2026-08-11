@@ -83,9 +83,22 @@ export function CompassLauncher() {
   const bubbleBottom =
     "max(var(--bubble-bottom), calc(var(--cookie-banner-height, 0px) + 16px))";
 
-  // בתוך /compass עצמו העמוד *הוא* המנוע — אין טעם בבועה צפה שמובילה אליו.
-  // (ההחזרה מוקדמת אך *אחרי* כל ה-hooks, כדי לא להפר את סדר ה-hooks.)
-  if (pathname?.startsWith("/compass")) return null;
+  // עמודים שבהם הבועה הצפה *לא* מופיעה (ההחזרה מוקדמת אך *אחרי* כל ה-hooks,
+  // כדי לא להפר את סדר ה-hooks):
+  //   • /compass — העמוד עצמו *הוא* המנוע; בועה צפה שמובילה אליו מיותרת.
+  //   • /book ו-/preview — תחתית-המשפך: הקורא כבר בכוונת-רכישה, והבועה
+  //     הצפה מתחרה ב-CTA הקנייה (ממצא E באודיט ההמרה). הכניסה לעוזר נשמרת
+  //     בעמודים אלה דרך AskBookLink הפנימי (קישור ל-/compass) — איש אינו מנותק
+  //     מהעוזר, רק הבועה הצפה הוסרה מהמקום שבו היא מסיחה מהרכישה.
+  // שאר האתר (בית, מסלולים, מדריכים, מחבר, FAQ…) ממשיך לשאת את הבועה כפתח-גילוי
+  // עליון-משפך.
+  const hideLauncherOn = ["/compass", "/book", "/preview"];
+  if (
+    pathname &&
+    hideLauncherOn.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+  ) {
+    return null;
+  }
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>

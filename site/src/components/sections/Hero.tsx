@@ -110,20 +110,29 @@ export function Hero() {
                   </Button>
                 )}
 
-                {/* פעולת רכישה משנית — הספר זמין עכשיו באמזון (קישור חיצוני).
-                    משנית לטעימה, אך ברורה: מי שכבר מוכן לקנות מגיע ישירות. */}
-                <AmazonBuyLink
-                  source="home"
-                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                {/* פעולת רכישה משנית — הספר זמין עכשיו באמזון (ערוץ הרכישה
+                    היחיד, קישור חיצוני). דורגה מחדש לכפתור-מתאר (outline) כדי
+                    שתהיה מדרגה ברורה *מעל* הכלי הקונטקסטואלי שמתחתיה, במקום
+                    קישור-טקסט זהה שמתחרה בו. משנית לטעימה (כפתור מלא), אך מובחנת
+                    ומזמינה: מי שכבר מוכן לקנות מגיע ישירות. יעד/נוסח/מדידה ללא
+                    שינוי (source="home"). */}
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="h-12 w-full px-7 text-[16px] sm:w-auto"
                 >
-                  <ShoppingCart className="h-4 w-4 text-brand" aria-hidden="true" />
-                  הספר זמין עכשיו באמזון
-                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                </AmazonBuyLink>
+                  <AmazonBuyLink source="home">
+                    <ShoppingCart className="h-4 w-4 text-brand" aria-hidden="true" />
+                    הספר זמין עכשיו באמזון
+                    <ArrowLeft className="h-4 w-4 text-brand" aria-hidden="true" />
+                  </AmazonBuyLink>
+                </Button>
 
                 {/* פעולה קונטקסטואלית „מה הספר אומר על המצב שלי?” → /compass —
                     כלי התאמה דטרמיניסטי (לא AI, לא ייעוץ), עם משפט-הסבר קצר שאומר
-                    מה יקרה בלחיצה. גלוי בשני המכשירים. */}
+                    מה יקרה בלחיצה. הדרגה השלישית והשקטה: קישור-טקסט בלבד, מתחת
+                    לשני הכפתורים. גלוי בשני המכשירים. */}
                 <div className="flex flex-col items-start gap-1">
                   <Link
                     href="/compass"

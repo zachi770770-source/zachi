@@ -147,9 +147,14 @@ test.describe("compass floating bubble", () => {
 });
 
 test.describe("compass bubble is site-wide and context-aware", () => {
-  // הבועה מלווה את הקורא בכל העמודים המרכזיים (מותקנת ב-layout), חוץ מ-/compass
-  // עצמו (שם העמוד *הוא* המנוע).
-  for (const path of ["/book", "/preview", "/before-relationship", "/author"]) {
+  // הבועה מלווה את הקורא בעמודי הגילוי (עליון/אמצע-משפך) — מותקנת ב-layout —
+  // ומופיעה בבית, בעמודי-המסלול, במדריכים, במחבר וב-FAQ.
+  for (const path of [
+    "/before-relationship",
+    "/building-relationship",
+    "/author",
+    "/faq",
+  ]) {
     test(`bubble is present on ${path}`, async ({ page }) => {
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.goto(path, { waitUntil: "networkidle" });
@@ -158,12 +163,18 @@ test.describe("compass bubble is site-wide and context-aware", () => {
     });
   }
 
-  test("bubble is NOT rendered inside /compass itself", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/compass", { waitUntil: "networkidle" });
-    await dismissCookies(page);
-    await expect(compass(page)).toHaveCount(0);
-  });
+  // הבועה הצפה *לא* מרונדרת בעמודים שבהם היא מיותרת או מסיחה מהרכישה:
+  //   • /compass — העמוד עצמו הוא המנוע.
+  //   • /book ו-/preview — תחתית-המשפך: הקורא כבר בכוונת-רכישה, והבועה מתחרה
+  //     ב-CTA הקנייה (Phase B, ממצא E). הכניסה לעוזר נשמרת דרך AskBookLink הפנימי.
+  for (const path of ["/compass", "/book", "/preview"]) {
+    test(`bubble is NOT rendered on ${path}`, async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(path, { waitUntil: "networkidle" });
+      await dismissCookies(page);
+      await expect(compass(page)).toHaveCount(0);
+    });
+  }
 
   test("on a journey page the bubble continues from the known station (skips „where are you?”)", async ({
     page,
