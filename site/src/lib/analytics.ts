@@ -10,45 +10,28 @@
  * `hasAnalyticsConsent`.
  */
 
+/**
+ * מודל האירועים. חלק מהשמות דורמנטיים (רשימת המתנה / סליקה מקומית / קונסולת
+ * ה-Compass הישנה) — הם נשמרים כדי לא לשבור callers, אך *אינם נורים* בזרימה
+ * החיה. ראו הסימון „DORMANT” ליד כל קבוצה.
+ *
+ * המשפך החי למדידה (Phase A) — מודל שיוך, לא רצף כפוי:
+ *   home_viewed
+ *     → journey_page_viewed  |  guide_viewed
+ *       → ask_open / ask_result / ask_book_clicked   (היכן שנעשה שימוש בעוזר)
+ *         → preview_opened / view_sample
+ *           → book_viewed
+ *             → amazon_purchase_clicked { source, source_detail? }
+ *   „amazon_purchase_clicked” = קליק יוצא לאמזון (כוונת-רכישה), לא מכירה מאושרת.
+ */
 export type AnalyticsEventName =
-  | "view_home"
-  | "view_product"
-  | "click_buy_hero"
-  | "click_buy_sticky"
-  | "view_sample"
-  | "download_sample"
-  | "view_author"
-  | "add_to_cart"
-  | "begin_checkout"
-  | "checkout_error"
-  | "payment_success"
-  | "payment_failure"
-  | "purchase"
-  | "faq_open"
-  | "newsletter_signup"
-  | "waitlist_signup"
-  | "stuck_open"
-  | "stuck_select"
-  | "stuck_to_sample"
-  | "compass_ask"
-  | "compass_answer_success"
-  | "preview_opened"
-  | "preview_reached_end"
-  | "waitlist_from_preview"
-  | "author_page_opened"
-  // PHASE 16 — נתיב ההמרה האחיד (טופס ה-Hero, הרשמה מוצלחת, פתיחת הטעימה
-  // אחרי הרשמה). ללא מידע אישי; עוברים דרך אותה שכבת consent קיימת.
-  | "hero_waitlist_open"
-  | "waitlist_submit_success"
-  | "preview_open_after_signup"
-  // בר-הטעימה החכם + עוגני-מדיה עתידיים (ללא מידע אישי; no-op עד להגדרת ספק).
-  | "sticky_sample_click"
-  | "path_finder_start"
-  | "path_finder_complete"
-  | "compass_start"
-  | "compass_complete"
-  // „שאל את הספר” — מנוע הכוונה סגור ודטרמיניסטי (תחנה→דילמה→הקשר→תוצאה).
-  // מזהים בלבד (תחנה/דילמה/הקשר/כלי), לעולם לא טקסט אישי או תוכן חופשי.
+  // ═══ המשפך החי (מדידה — Phase A). מזהים בלבד, ללא PII. ═══
+  // צפייה בעמוד:
+  | "home_viewed"
+  | "book_viewed"
+  | "guide_viewed"
+  | "journey_page_viewed"
+  // „שאל את הספר” — מנוע הכוונה סגור ודטרמיניסטי (תחנה→דילמה→הקשר→תוצאה):
   | "ask_open"
   | "ask_station"
   | "ask_dilemma"
@@ -57,26 +40,60 @@ export type AnalyticsEventName =
   | "ask_safety"
   | "ask_tool_click"
   | "ask_sample_click"
-  | "ask_waitlist_click"
   | "ask_change"
   | "ask_restart"
-  | "ask_open_home"
+  | "ask_book_clicked"
+  // טעימה:
+  | "view_sample"
+  | "preview_opened"
+  | "preview_reached_end"
+  // רכישה חיצונית — קליק יוצא לאמזון (כוונת-רכישה): { source, source_detail? }.
+  | "amazon_purchase_clicked"
+  //
+  // ═══ אירועים פעילים שאינם חלק מהמשפך ═══
+  | "faq_open"
+  | "author_page_opened"
+  | "sticky_sample_click"
   | "persona_select"
-  // בחירת מצב במסע בעמוד הבית (orientation דטרמיניסטי מקומי) + שכבת פרק ב’.
-  // מזהה בלבד (dating/building/existing/breakup), ללא טקסט אישי או PII.
+  | "audio_play"
+  | "video_play"
+  //
+  // ═══ DORMANT — נשמרים לתאימות callers, אך *אינם נורים* בזרימה החיה ═══
+  // (רשימת המתנה / סליקה מקומית סגורה / קונסולת Compass ישנה / קדם-Phase A /
+  //  בוררים לא-מותקנים). לא למחוק ללא בדיקת callers.
+  | "view_home"
+  | "view_product"
+  | "view_author"
+  | "download_sample"
+  | "click_buy_hero"
+  | "click_buy_sticky"
+  | "add_to_cart"
+  | "begin_checkout"
+  | "checkout_error"
+  | "payment_success"
+  | "payment_failure"
+  | "purchase"
+  | "newsletter_signup"
+  | "waitlist_signup"
+  | "waitlist_from_preview"
+  | "hero_waitlist_open"
+  | "waitlist_submit_success"
+  | "preview_open_after_signup"
+  | "ask_waitlist_click"
+  | "ask_open_home"
+  | "stuck_open"
+  | "stuck_select"
+  | "stuck_to_sample"
+  | "compass_ask"
+  | "compass_answer_success"
+  | "path_finder_start"
+  | "path_finder_complete"
+  | "compass_start"
+  | "compass_complete"
   | "home_path_selected"
   | "chapter2_context_selected"
-  // Personalized Reader Journey — היעד: להכניס את הקורא לספר מהר. מזהה תחנה
-  // בלבד (dating/building/existing/breakup), ללא טקסט אישי או PII.
   | "journey_selected"
-  | "journey_page_viewed"
-  | "contextual_sample_clicked"
-  | "ask_book_clicked"
-  // רכישה חיצונית באמזון — מזהה מקור בלבד (home/book/preview/journey_*),
-  // לעולם לא אימייל, לא תשובות Compass, לא תוכן אישי.
-  | "amazon_purchase_clicked"
-  | "audio_play"
-  | "video_play";
+  | "contextual_sample_clicked";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
 

@@ -9,6 +9,7 @@ import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { ArticleSchema } from "@/components/schema/ArticleSchema";
+import { ViewEvent } from "@/components/analytics/ViewEvent";
 
 /**
  * רכיב משותף למאמרי המדריך (אשכול „לפני קשר”). מרנדר מאמר מלא בשפה החזותית
@@ -19,6 +20,8 @@ import { ArticleSchema } from "@/components/schema/ArticleSchema";
 export function GuidePage({ guide }: { guide: Guide }) {
   return (
     <Container className="py-10 sm:py-14 lg:py-16">
+      {/* מדידה (Phase A) — צפייה במדריך, פעם אחת, עם זהות המדריך (slug). */}
+      <ViewEvent event="guide_viewed" params={{ guide: guide.slug }} />
       <ArticleSchema
         headline={guide.h1}
         description={guide.metaDescription}
@@ -171,7 +174,9 @@ export function GuidePage({ guide }: { guide: Guide }) {
           />
           <div className="flex flex-col items-start gap-x-8 gap-y-4 sm:flex-row sm:items-center">
             <Button asChild size="lg" className="w-full px-7 sm:w-auto">
-              <AmazonBuyLink source="book">{guidesUi.bookCtaLabel}</AmazonBuyLink>
+              <AmazonBuyLink source="guide" sourceDetail={guide.slug}>
+                {guidesUi.bookCtaLabel}
+              </AmazonBuyLink>
             </Button>
             <BookLink
               href="/preview"

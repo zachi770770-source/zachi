@@ -19,6 +19,7 @@ import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { BookSchema } from "@/components/schema/BookSchema";
+import { ViewEvent } from "@/components/analytics/ViewEvent";
 
 export const metadata = pageMetadata({
   title: "ספר זוגיות: מדריך מעשי לדייטינג ולבניית קשר",
@@ -36,6 +37,8 @@ export const metadata = pageMetadata({
 export default function BookPage() {
   return (
     <>
+      {/* מדידה (Phase A) — צפייה בעמוד הספר, פעם אחת. */}
+      <ViewEvent event="book_viewed" />
       {/* עמוד הספר הקנוני נושא את סכימת ה-Book (בנוסף לבית) — הישות המבנית
           מופיעה על ה-URL הייעודי של המוצר. */}
       <BookSchema />

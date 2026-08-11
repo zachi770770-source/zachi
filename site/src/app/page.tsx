@@ -6,6 +6,7 @@ import { TrustBand } from "@/components/sections/TrustBand";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { BuildSpine } from "@/components/shared/BuildSpine";
+import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
@@ -40,6 +41,7 @@ export const metadata = pageMetadata({
 export default function HomePage() {
   return (
     <>
+      <ViewEvent event="home_viewed" />
       <WebSiteSchema />
       <BookSchema />
       <ProductSchema />
