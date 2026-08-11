@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
+import { guideOrder, guides } from "@/content/guides";
 
 const staticRoutes = [
   { path: "/", priority: 1, changeFrequency: "weekly" as const },
@@ -20,6 +21,12 @@ const staticRoutes = [
   { path: "/privacy", priority: 0.2, changeFrequency: "yearly" as const },
   { path: "/shipping-returns", priority: 0.3, changeFrequency: "yearly" as const },
   { path: "/accessibility", priority: 0.2, changeFrequency: "yearly" as const },
+  // אשכול-התוכן „לפני קשר” — ארבעה מדריכים ממוקדי-חיפוש.
+  ...guideOrder.map((slug) => ({
+    path: guides[slug].path,
+    priority: 0.7,
+    changeFrequency: "monthly" as const,
+  })),
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

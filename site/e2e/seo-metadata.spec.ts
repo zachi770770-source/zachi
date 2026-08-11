@@ -23,6 +23,10 @@ const ROUTES = [
   "/privacy",
   "/shipping-returns",
   "/accessibility",
+  "/guide/finding-a-relationship",
+  "/guide/choosing-a-partner",
+  "/guide/relationship-doubts",
+  "/guide/compatibility",
 ];
 
 const BRAND = "מדייטים לאהבה";

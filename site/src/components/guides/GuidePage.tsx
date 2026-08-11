@@ -1,0 +1,263 @@
+import Link from "next/link";
+import { ArrowLeft, ArrowUpLeft, Info } from "lucide-react";
+
+import { guidesUi, type Guide } from "@/content/guides";
+import { Container } from "@/components/shared/Container";
+import { Button } from "@/components/ui/button";
+import { AskBookLink } from "@/components/journey/AskBookLink";
+import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
+import { BookLink } from "@/components/shared/BookLink";
+import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+import { ArticleSchema } from "@/components/schema/ArticleSchema";
+
+/**
+ * רכיב משותף למאמרי המדריך (אשכול „לפני קשר”). מרנדר מאמר מלא בשפה החזותית
+ * של האתר: פירורי-לחם, Article + Breadcrumb schema, כותרת + תשובה קצרה, גוף
+ * לפי כוונת-החיפוש, כלי מהספר, קישורים פנימיים לעמוד-האם ולמאמרים הקרובים,
+ * כניסה לעוזר, ו-CTA מרוסן אחד לספר/אמזון. אין רידיזיין — אותם primitives.
+ */
+export function GuidePage({ guide }: { guide: Guide }) {
+  return (
+    <Container className="py-10 sm:py-14 lg:py-16">
+      <ArticleSchema
+        headline={guide.h1}
+        description={guide.metaDescription}
+        path={guide.path}
+        datePublished={guide.datePublished}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "בית", path: "/" },
+          { name: "לפני קשר", path: guide.hub.href },
+          { name: guide.h1, path: guide.path },
+        ]}
+      />
+
+      {/* פירורי לחם נגישים — בית → עמוד-האם → המאמר */}
+      <nav aria-label="פירורי לחם" className="text-sm text-foreground-muted">
+        <ol className="flex flex-wrap items-center gap-1.5">
+          <li>
+            <Link
+              href="/"
+              className="rounded-sm underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              בית
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li>
+            <Link
+              href={guide.hub.href}
+              className="rounded-sm underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              לפני קשר
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="font-medium text-foreground">
+            {guide.metaTitle}
+          </li>
+        </ol>
+      </nav>
+
+      {/* כותרת + תשובה קצרה מיד (עונה על השאלה מוקדם) */}
+      <header className="enter-stagger mx-auto mt-8 max-w-[54ch]">
+        <span className="kicker">{guide.kicker}</span>
+        <h1 className="mt-4 font-serif text-[clamp(1.9rem,4vw,2.9rem)] font-semibold leading-[1.15] text-foreground">
+          {guide.h1}
+        </h1>
+        <p className="mt-5 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted">
+          {guide.lead}
+        </p>
+      </header>
+
+      <article className="mx-auto mt-12 flex max-w-[64ch] flex-col gap-12 sm:mt-14">
+        {/* פתיח */}
+        <section className="reveal flex flex-col gap-4">
+          {guide.intro.map((p, i) => (
+            <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90">
+              {p}
+            </p>
+          ))}
+          {guide.disclaimer ? (
+            <p className="mt-2 flex items-start gap-2.5 rounded-2xl bg-surface-muted p-4 text-[15px] leading-relaxed text-foreground-muted">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+              <span>{guide.disclaimer}</span>
+            </p>
+          ) : null}
+        </section>
+
+        {/* מקטעי גוף — H2 + פסקאות (+ H3 אופציונלי) */}
+        {guide.sections.map((section) => (
+          <section key={section.heading} className="reveal">
+            <h2 className="font-serif text-2xl font-semibold text-foreground">
+              {section.heading}
+            </h2>
+            <div className="mt-4 flex flex-col gap-4">
+              {section.paragraphs.map((p, i) => (
+                <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90">
+                  {p}
+                </p>
+              ))}
+            </div>
+            {section.points ? (
+              <ul className="mt-5 flex flex-col gap-4">
+                {section.points.map((pt) => (
+                  <li
+                    key={pt.title}
+                    className="rounded-2xl border border-border bg-surface p-5 sm:p-6"
+                  >
+                    <h3 className="font-serif text-lg font-semibold text-foreground">
+                      {pt.title}
+                    </h3>
+                    <p className="mt-2 text-[16px] leading-relaxed text-foreground-muted">
+                      {pt.body}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        ))}
+
+        {/* כלי מהספר */}
+        {guide.framework ? (
+          <section className="reveal rounded-2xl border border-border bg-surface-muted p-6 sm:p-8">
+            <p className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
+              {guide.framework.kicker}
+            </p>
+            <h2 className="mt-2 font-serif text-xl font-semibold text-foreground">
+              {guide.framework.title}
+            </h2>
+            {guide.framework.intro ? (
+              <p className="mt-3 text-[1.02rem] leading-relaxed text-foreground/90">
+                {guide.framework.intro}
+              </p>
+            ) : null}
+            <ol className="mt-4 flex flex-col gap-3">
+              {guide.framework.items.map((item, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span
+                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-[13px] font-bold text-brand-foreground tabular-nums"
+                    aria-hidden="true"
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="text-[1.02rem] leading-relaxed text-foreground/90">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            {guide.framework.note ? (
+              <p className="mt-5 border-e-2 border-brand pe-4 text-[15px] italic leading-relaxed text-foreground-muted">
+                {guide.framework.note}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+
+        {/* כניסה שקטה לעוזר + CTA מרוסן אחד לספר */}
+        <section
+          aria-labelledby="guide-cta-heading"
+          className="reveal flex flex-col gap-5 border-t border-border pt-8"
+        >
+          <h2 id="guide-cta-heading" className="sr-only">
+            להמשך
+          </h2>
+          <AskBookLink
+            station={guide.askStation}
+            prompt="רוצים כיוון למצב הספציפי שלכם?"
+          />
+          <div className="flex flex-col items-start gap-x-8 gap-y-4 sm:flex-row sm:items-center">
+            <Button asChild size="lg" className="w-full px-7 sm:w-auto">
+              <AmazonBuyLink source="book">{guidesUi.bookCtaLabel}</AmazonBuyLink>
+            </Button>
+            <BookLink
+              href="/preview"
+              morphCover
+              className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              {guidesUi.sampleLabel}
+              <ArrowLeft
+                className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                aria-hidden="true"
+              />
+            </BookLink>
+          </div>
+        </section>
+      </article>
+
+      {/* מאמרים קרובים באשכול + עמוד-האם */}
+      <section
+        aria-labelledby="guide-related-heading"
+        className="reveal mx-auto mt-16 max-w-[64ch] border-t border-border pt-10"
+      >
+        <h2
+          id="guide-related-heading"
+          className="font-serif text-xl font-semibold text-foreground"
+        >
+          {guidesUi.relatedTitle}
+        </h2>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          {guide.related.map((rel) => (
+            <Link
+              key={rel.href}
+              href={rel.href}
+              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              <div>
+                <span className="font-serif text-[1.05rem] font-semibold leading-tight text-foreground">
+                  {rel.label}
+                </span>
+                {rel.sub ? (
+                  <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
+                    {rel.sub}
+                  </p>
+                ) : null}
+              </div>
+              <ArrowUpLeft
+                className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5 group-hover:-translate-y-1.5 group-focus-visible:-translate-y-1.5"
+                aria-hidden="true"
+              />
+            </Link>
+          ))}
+        </div>
+
+        {/* קישור-הקשר משני (למשל בתוך קשר / בניית קשר) — רק כשקיים */}
+        {guide.secondary ? (
+          <Link
+            href={guide.secondary.href}
+            className="lift-hover group mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-surface p-5 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            <div>
+              <span className="font-serif text-[1.05rem] font-semibold text-foreground">
+                {guide.secondary.label}
+              </span>
+              {guide.secondary.sub ? (
+                <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
+                  {guide.secondary.sub}
+                </p>
+              ) : null}
+            </div>
+            <ArrowUpLeft
+              className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5 group-hover:-translate-y-1.5 group-focus-visible:-translate-y-1.5"
+              aria-hidden="true"
+            />
+          </Link>
+        ) : null}
+
+        {/* עמוד-האם של האשכול */}
+        <div className="mt-8">
+          <Link
+            href={guide.hub.href}
+            className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            {guidesUi.hubTitle}: {guide.hub.label}
+          </Link>
+        </div>
+      </section>
+    </Container>
+  );
+}
