@@ -21,8 +21,8 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { BookSchema } from "@/components/schema/BookSchema";
 
 export const metadata = pageMetadata({
-  title: "הספר לעומק: השיטה, המבנה והכלים",
-  description: `כל מה שיש ב${siteConfig.bookTitle}: למה הוא נכתב, למי הוא מיועד, השיטה, מבנה הספר, הכלים המעשיים ומה משתנה אחרי הקריאה.`,
+  title: "ספר זוגיות: מדריך מעשי לדייטינג ולבניית קשר",
+  description: `מדריך מעשי לזוגיות ולדייטינג: כל מה שיש ב${siteConfig.bookTitle} — למי הספר מיועד, השיטה, מבנה הספר, הכלים המעשיים לבניית קשר, ומה משתנה אחרי הקריאה.`,
   path: "/book",
   ogType: "article",
 });
@@ -72,7 +72,7 @@ export default function BookPage() {
               </div>
             </div>
             <span className="kicker justify-center">הספר לעומק</span>
-            <h1 className="type-h1 mt-4">מה יש בספר, ואיך הוא עובד</h1>
+            <h1 className="type-h1 mt-4">ספר זוגיות: מה יש בו ואיך הוא עובד</h1>
             {/* מיצוב: לא ספר חד-פעמי אלא מלווה לאורך כל המסע הזוגי (ללא טענה
                 השוואתית — לא „היחיד” / „הראשון מסוגו”). */}
             <p className="mt-4 font-serif text-[19px] font-semibold leading-snug text-brand-hover">

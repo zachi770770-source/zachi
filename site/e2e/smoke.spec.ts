@@ -227,7 +227,7 @@ test("/compass is an active deterministic closed route (closed choices, no free 
 test("/book is a real page (not a redirect) with the deep-dive content", async ({ page }) => {
   const res = await page.goto("/book", { waitUntil: "domcontentloaded" });
   expect(res?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("מה יש בספר, ואיך הוא עובד");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("ספר זוגיות: מה יש בו ואיך הוא עובד");
   // ששת הכלים המעשיים מופיעים כאן (פעם אחת, בבנטו האינטראקטיבי), ולא נשארו בבית.
   await expect(page.getByRole("heading", { name: "כלים מעשיים מתוך הספר" })).toBeVisible();
   await expect(page.locator("#tools button.tool-lux-card")).toHaveCount(6);

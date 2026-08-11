@@ -15,7 +15,7 @@ import { PersonSchema } from "@/components/schema/PersonSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
-  title: "על המחבר",
+  title: "צחי חן, מחבר הספר",
   description: `צחי חן מספר למה כתב את ${siteConfig.bookTitle}, למי הספר נכתב ומה מטרתו.`,
   path: "/author",
   ogType: "article",

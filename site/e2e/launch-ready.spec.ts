@@ -180,7 +180,7 @@ test.describe("Launch-readiness", () => {
 
     // עמוד-המסע: כותרת אישית, פירורי-לחם, וטעימה מותאמת (Primary → contextual preview).
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "לפני שבוחרים מישהו, כדאי להבין איך אתם בוחרים.",
+      "לפני שבוחרים בן או בת זוג, כדאי להבין איך אתם בוחרים.",
     );
     await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
     await expect(

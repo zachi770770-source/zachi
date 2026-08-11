@@ -241,7 +241,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         {/* C. שלוש נקודות-עומק — ממוספרות 01/02/03, כותרת + משפט הסבר לכל אחת. */}
         <section aria-labelledby="depth-heading" className="reveal">
           <h2 id="depth-heading" className="kicker">
-            שלוש נקודות שכדאי לשים לב אליהן
+            {journey.depthHeading}
           </h2>
           {v.points === "grid" ? (
             <ol className="mt-8 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">

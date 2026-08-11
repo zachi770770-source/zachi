@@ -8,7 +8,9 @@ import { AskRoute } from "@/components/interactive/AskRoute";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
+  // metaTitle כבר כולל „| מדייטים לאהבה”; absoluteTitle מונע הכפלת הסיומת ע"י תבנית ה-<title>.
   title: compassQuiz.metaTitle,
+  absoluteTitle: true,
   description: compassQuiz.metaDescription,
   path: "/compass",
   ogType: "article",

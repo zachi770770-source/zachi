@@ -27,7 +27,7 @@ export default function FaqPage() {
           שאלות נפוצות
         </h1>
         <p className="mt-3 text-lg text-foreground-muted">
-          כל מה שכדאי לדעת על הספר — לפני שהוא יוצא.
+          כל מה שכדאי לדעת על הספר לפני שקוראים.
         </p>
         <p className="mt-2 text-[14px] italic text-foreground-muted">
           אין תשובה אחת שמתאימה לכולם.

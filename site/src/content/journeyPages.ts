@@ -41,7 +41,9 @@ export interface JourneyPage {
   whatsHappeningHeading: string;
   whatsHappening: string[];
 
-  /** C. שלוש נקודות עומק — כותרת + משפט הסבר לכל אחת. */
+  /** C. שלוש נקודות עומק — כותרת + משפט הסבר לכל אחת. הכותרת נושאת את נושא
+   *  החיפוש של העמוד (SEO), במקום ניסוח גנרי אחיד לכל התחנות. */
+  depthHeading: string;
   depthPoints: [JourneyDepthPoint, JourneyDepthPoint, JourneyDepthPoint];
 
   /** D. Moment of recognition — משפט גדול לעצור עליו. */
@@ -76,7 +78,8 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     id: "before-relationship",
     variant: "clarity",
     eyebrow: "לפני קשר",
-    h1: "לפני שבוחרים מישהו, כדאי להבין איך אתם בוחרים.",
+    h1: "לפני שבוחרים בן או בת זוג, כדאי להבין איך אתם בוחרים.",
+    depthHeading: "שלוש נקודות בבחירת בן או בת זוג",
     intro:
       "לפעמים הקושי אינו למצוא מישהו — אלא להבין למה דווקא אנשים מסוימים מושכים אותנו, למה אנחנו פוסלים מהר, ומה אנחנו באמת צריכים מקשר.",
     moodLine: "רגע של בהירות — עוד לפני הדייט הבא.",
@@ -138,7 +141,8 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     id: "building-relationship",
     variant: "movement",
     eyebrow: "מתחילים קשר",
-    h1: "כשהקשר מתחיל להיות אמיתי, גם השאלות משתנות.",
+    h1: "בניית קשר: כשהקשר מתחיל להיות אמיתי, גם השאלות משתנות.",
+    depthHeading: "גבולות, אמון ותקשורת בתחילת קשר",
     intro:
       "כימיה יכולה לפתוח את הדלת. עכשיו מתחילים לפגוש קצב, ציפיות, בלעדיות והפער שבין מה שאומרים למה שעושים.",
     moodLine: "מהתרגשות ראשונה — לתנועה מכוונת.",
@@ -200,6 +204,7 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     variant: "depth",
     eyebrow: "בתוך קשר",
     h1: "קשר טוב לא נשמר מעצמו. הוא נבנה שוב ושוב.",
+    depthHeading: "תקשורת וריבים חוזרים בזוגיות",
     intro:
       "גם קשר שיש בו אהבה יכול לפגוש ריחוק, שגרה וריבים שחוזרים. השאלה היא לא רק מה התקלקל — אלא מה אפשר להתחיל לעשות אחרת.",
     moodLine: "לא להתחיל מחדש — להעמיק ולתקן את מה שכבר יש.",
@@ -261,7 +266,8 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     id: "after-breakup",
     variant: "space",
     eyebrow: "אחרי פרידה",
-    h1: "לא צריך לדעת כבר עכשיו מה הצעד הבא.",
+    h1: "אחרי פרידה: לא צריך לדעת כבר עכשיו מה הצעד הבא.",
+    depthHeading: "שלוש נקודות בהתמודדות עם פרידה",
     intro:
       "פרידה לא מסתיימת ברגע שהקשר נגמר. לפעמים נשארים געגוע, שאלות ורצון להבין מה היה — לפני שמחליטים אם להביט לאחור או להתחיל מחדש.",
     moodLine: "בלי למהר לשום כיוון. קודם מקום לעצור ולהבין.",
