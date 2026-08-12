@@ -11,6 +11,7 @@ import {
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
+import { StationGuides } from "@/components/guides/StationGuides";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { RouteIllustration } from "@/components/shared/RouteIllustration";
@@ -247,6 +248,12 @@ export function StationPage({ station }: { station: Station }) {
       </div>
 
       {/* מעבר לשתי התחנות האחרות */}
+      {/* אשכול המדריכים של התחנה (hub/spoke) — רכיב משותף עם JourneyPage, כדי
+          שגם StationPage (למשל /starting-again) יקשר למדריכים ששויכו אליו. */}
+      <div className="mx-auto mt-16 max-w-[64ch]">
+        <StationGuides stationPath={`/${station.id}`} />
+      </div>
+
       <section
         aria-labelledby="other-stations-heading"
         className="reveal mx-auto mt-16 max-w-[64ch] border-t border-border pt-10"

@@ -88,6 +88,11 @@ const HUB_AFTER: GuideLink = {
   label: "אחרי פרידה: לעבד, ורק אז להחליט",
   sub: "עמוד-המסע המלא לשלב שאחרי הפרידה.",
 };
+const HUB_STARTING: GuideLink = {
+  href: "/starting-again",
+  label: "מתחילים מחדש: חזרה לעולם ההיכרויות",
+  sub: "עמוד-המסע המלא לחזרה אחרי קשר משמעותי.",
+};
 
 const PUBLISHED = "2026-08-11";
 
@@ -825,9 +830,9 @@ const howToEndARelationship: Guide = {
     },
   ],
   askStation: "after-breakup",
-  hub: HUB_AFTER,
+  hub: HUB_STARTING,
   bookTool: { id: "emergency-kit", name: "יציאה נקייה" },
-  secondary: { href: "/starting-again", label: "מתחילים מחדש", sub: "מה שאחרי הסיום הנקי." },
+  secondary: { href: "/after-breakup", label: "אחרי פרידה", sub: "לעבד את מה שנגמר." },
   related: [
     { href: "/guide/getting-back-with-ex", label: "חזרה לאקס: איך יודעים אם זה נכון", sub: "כשמתלבטים אם בכלל לסיים." },
     { href: "/guide/over-a-breakup", label: "איך יודעים שסיימתי לעבד פרידה", sub: "מה שבא אחרי." },

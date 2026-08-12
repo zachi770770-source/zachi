@@ -21,7 +21,7 @@ const GUIDES = [
   { path: "/guide/couple-communication", h1: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", hub: "/inside-relationship" },
   { path: "/guide/attracted-to-unavailable", h1: "למה אני נמשך/ת לאנשים לא זמינים", hub: "/before-relationship" },
   { path: "/guide/recurring-fights", h1: "ריבים חוזרים: איך יוצאים מהלולאה", hub: "/inside-relationship" },
-  { path: "/guide/how-to-end-a-relationship", h1: "לסיים קשר בכבוד — בלי היעלמות", hub: "/after-breakup" },
+  { path: "/guide/how-to-end-a-relationship", h1: "לסיים קשר בכבוד — בלי היעלמות", hub: "/starting-again" },
   { path: "/guide/how-fast-is-too-fast", h1: "כמה מהר זה מהר מדי בתחילת קשר", hub: "/building-relationship" },
   { path: "/guide/defining-the-relationship", h1: "בלעדיות: מתי ואיך מדברים על „מה אנחנו”", hub: "/building-relationship" },
   { path: "/guide/hot-and-cold", h1: "חם-קר בקשר: כשמישהו מתקרב ומתרחק", hub: "/building-relationship" },
@@ -155,6 +155,30 @@ test.describe("guide cluster — each article", () => {
         if (!base || base === "/") continue;
         const r = await page.request.get(base);
         expect(r.status(), `${g.path} → ${href} resolves`).toBeLessThan(400);
+      }
+    }
+  });
+
+  test("sample link deep-links to the guide's book tool (opens the tool excerpt)", async ({
+    page,
+  }) => {
+    for (const g of GUIDES) {
+      await page.goto(g.path, { waitUntil: "domcontentloaded" });
+      const href = await page
+        .getByRole("link", { name: "לקריאת טעימה מהספר" })
+        .first()
+        .getAttribute("href");
+      expect(href, `${g.path} has a sample link`).toBeTruthy();
+      // מדריכים עם כלי-ספר → deep-link ל-/preview עם tool+station; פותח בפועל
+      // את קטע הכלי הממוקד (‎.reader-context מוצג רק כשהטעימה מותאמת-כלי).
+      if (href!.includes("tool=")) {
+        expect(href, `${g.path} deep-link has station`).toContain("station=");
+        const res = await page.goto(href!, { waitUntil: "domcontentloaded" });
+        expect(res?.status(), `${g.path} preview deep-link 200`).toBe(200);
+        await expect(
+          page.locator(".reader-context"),
+          `${g.path} deep-link renders the tool excerpt`,
+        ).toBeVisible();
       }
     }
   });

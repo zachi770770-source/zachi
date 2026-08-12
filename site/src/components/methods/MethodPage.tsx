@@ -136,7 +136,7 @@ export function MethodPage({ method }: { method: Method }) {
               </AmazonBuyLink>
             </Button>
             <BookLink
-              href="/preview"
+              href={`/preview?tool=${method.bookTool.id}&station=${method.previewStation}`}
               morphCover
               className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >

@@ -96,6 +96,21 @@ test.describe("method (concept) pages", () => {
     }
   });
 
+  test("method sample link deep-links to the tool excerpt", async ({ page }) => {
+    for (const m of METHODS) {
+      await page.goto(m.path, { waitUntil: "domcontentloaded" });
+      const href = await page
+        .getByRole("link", { name: "לקריאת טעימה מהספר" })
+        .first()
+        .getAttribute("href");
+      expect(href, `${m.path} sample link`).toContain(`tool=${m.tool}`);
+      expect(href, `${m.path} sample link station`).toContain("station=");
+      const res = await page.goto(href!, { waitUntil: "domcontentloaded" });
+      expect(res?.status()).toBe(200);
+      await expect(page.locator(".reader-context")).toBeVisible();
+    }
+  });
+
   test("method↔guide bidirectional linking", async ({ page }) => {
     // עמוד-מושג מקשר למדריך, והמדריך חזרה למושג (דרך קישור /method/*).
     await page.goto("/method/quiet-check", { waitUntil: "domcontentloaded" });

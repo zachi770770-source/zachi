@@ -39,6 +39,12 @@ export interface Method {
   sections: MethodSection[];
   /** הכלי המקביל בעמוד הספר (עוגן #tool-<id>). id תואם ל-ToolItem.id. */
   bookTool: { id: string; name: string };
+  /**
+   * תחנה לטעימה הממוקדת (`/preview?tool=&station=`). הערך הוא ה-station הקנוני
+   * של הכלי כפי שמוגדר ב-book.ts (ToolItem.station) — מפתח תקף ב-stations. אין
+   * המצאת ערכי station.
+   */
+  previewStation: "before-relationship" | "starting-again" | "inside-relationship";
   askStation?: AskStationId;
   /** מדריכי /guide/* שמיישמים את המושג — קישור הדדי. */
   relatedGuides: MethodLink[];
@@ -85,6 +91,7 @@ const quietCheck: Method = {
     },
   ],
   bookTool: { id: "quiet-check", name: "בדיקת השקט" },
+  previewStation: "before-relationship",
   askStation: "dating",
   relatedGuides: [
     { href: "/guide/hot-and-cold", label: "חם-קר בקשר: כשמישהו מתקרב ומתרחק", sub: "יישום ישיר של בדיקת השקט." },
@@ -131,6 +138,7 @@ const factStory: Method = {
     },
   ],
   bookTool: { id: "fact-story-action", name: "עובדה, סיפור, פעולה" },
+  previewStation: "before-relationship",
   askStation: "dating",
   relatedGuides: [
     { href: "/guide/attracted-to-unavailable", label: "למה אני נמשך/ת לאנשים לא זמינים", sub: "להפריד את הקסם מהעובדה." },
@@ -177,6 +185,7 @@ const coreValues: Method = {
     },
   ],
   bookTool: { id: "boundary-ladder", name: "קו אדום מול גמישות" },
+  previewStation: "starting-again",
   askStation: "dating",
   relatedGuides: [
     { href: "/guide/dating-red-flags", label: "דגלים אדומים בדייטים — ומה באמת קו אדום", sub: "המיון בפעולה." },

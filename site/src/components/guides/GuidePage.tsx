@@ -18,6 +18,12 @@ import { ViewEvent } from "@/components/analytics/ViewEvent";
  * כניסה לעוזר, ו-CTA מרוסן אחד לספר/אמזון. אין רידיזיין — אותם primitives.
  */
 export function GuidePage({ guide }: { guide: Guide }) {
+  // deep-link לטעימה: כשלמדריך יש כלי-ספר מאומת, הטעימה נפתחת ישירות על הכלי
+  // ובהקשר התחנה (ה-hub). ה-station נגזר מ-hub.href (תמיד מפתח תקף ב-stations),
+  // וה-tool מ-bookTool.id (תמיד מזהה כלי אמיתי). אחרת — הטעימה הכללית.
+  const samplePreviewHref = guide.bookTool
+    ? `/preview?tool=${guide.bookTool.id}&station=${guide.hub.href.slice(1)}`
+    : "/preview";
   return (
     <Container className="py-10 sm:py-14 lg:py-16">
       {/* מדידה (Phase A) — צפייה במדריך, פעם אחת, עם זהות המדריך (slug). */}
@@ -193,7 +199,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
               </AmazonBuyLink>
             </Button>
             <BookLink
-              href="/preview"
+              href={samplePreviewHref}
               morphCover
               className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
