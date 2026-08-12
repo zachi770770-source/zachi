@@ -132,17 +132,33 @@ export function hasMarketingConsent(): boolean {
   return getConsent()?.marketing === true;
 }
 
-export function trackEvent(name: AnalyticsEventName, payload: AnalyticsPayload = {}) {
-  if (typeof window === "undefined") return;
-  if (!hasAnalyticsConsent()) return;
+/**
+ * שולח אירוע לספקי האנליטיקה. מחזיר `true` רק אם האירוע *באמת* נשלח לספק
+ * GA4/GTM (gtag או dataLayer קיימים) — כלומר יש הסכמה *וגם* ספק מוכן. מחזיר
+ * `false` כשאין הסכמה או שהספק עדיין לא נטען, כדי שקוראים כמו `ViewEvent`
+ * יוכלו לנסות שוב מאוחר יותר במקום לאבד את האירוע. הערך המוחזר אופציונלי
+ * לקוראים קיימים (למשל קליק אמזון) — הם מתעלמים ממנו וההתנהגות אינה משתנה.
+ */
+export function trackEvent(
+  name: AnalyticsEventName,
+  payload: AnalyticsPayload = {},
+): boolean {
+  if (typeof window === "undefined") return false;
+  if (!hasAnalyticsConsent()) return false;
 
+  // „נשלח” נמדד רק מול ספקי GA4/GTM. Meta Pixel (שיווק) אינו חלק ממשפך
+  // הצפיות ולכן אינו קובע את הערך המוחזר.
+  let dispatched = false;
   if (window.gtag) {
     window.gtag("event", name, payload);
+    dispatched = true;
   }
   if (window.dataLayer) {
     window.dataLayer.push({ event: name, ...payload });
+    dispatched = true;
   }
   if (window.fbq && hasMarketingConsent()) {
     window.fbq("trackCustom", name, payload);
   }
+  return dispatched;
 }
