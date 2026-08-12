@@ -8,11 +8,13 @@ import { entityId } from "@/components/schema/ids";
  * המדריכים) יתחבר לאותה ישות אחת.
  *
  * הקשר „מחבר-של-הספר” מבוטא בצד הספר (Book.author → הישות הזו) — הכיוון הקנוני
- * ב-schema.org. כאן מוסיפים גם `worksFor`/`sameAs`? לא: אין ארגון מאמת ואין
- * פרופילים חיצוניים מאומתים, ולכן אין `sameAs` (רק פרופילים אמיתיים מאומתים).
- * אין המצאת תארים/הסמכות/מומחיות — רק שם, תיאור-עצמי אמיתי, וכתובת העמוד.
+ * ב-schema.org. `sameAs` נפלט *רק* כשיש פרופילים חיצוניים אמיתיים ומאומתים של
+ * המחבר (siteConfig.author.sameAs) — הם מחברים את הישות למקורות מאמתים. כל עוד
+ * אין — לא נפלט `sameAs` (אין המצאת אישוש/פרופילים). אין המצאת תארים/הסמכות/
+ * מומחיות — רק שם, תיאור-עצמי אמיתי, תמונה וכתובת העמוד.
  */
 export function PersonSchema() {
+  const sameAs = siteConfig.author.sameAs.filter(Boolean);
   return (
     <JsonLd
       data={{
@@ -24,6 +26,8 @@ export function PersonSchema() {
         url: `${siteConfig.url}/author`,
         mainEntityOfPage: `${siteConfig.url}/author`,
         image: `${siteConfig.url}${siteConfig.author.photo}`,
+        // מקורות חיצוניים מאמתים — נפלט רק כשקיים לפחות אחד (אחרת מושמט לגמרי).
+        ...(sameAs.length ? { sameAs: sameAs.length === 1 ? sameAs[0] : sameAs } : {}),
       }}
     />
   );
