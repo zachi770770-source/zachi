@@ -160,6 +160,20 @@ export function GuidePage({ guide }: { guide: Guide }) {
           </section>
         ) : null}
 
+        {/* קישור פנימי לכלי המאומת בעמוד הספר (עוגן #tool-<id>) */}
+        {guide.bookTool ? (
+          <p className="reveal text-[15px] leading-relaxed text-foreground-muted">
+            הכלי הזה מופיע בהרחבה בספר —{" "}
+            <Link
+              href={`/book#tool-${guide.bookTool.id}`}
+              className="font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              „{guide.bookTool.name}” בעמוד הספר
+            </Link>
+            .
+          </p>
+        ) : null}
+
         {/* כניסה שקטה לעוזר + CTA מרוסן אחד לספר */}
         <section
           aria-labelledby="guide-cta-heading"
@@ -228,6 +242,32 @@ export function GuidePage({ guide }: { guide: Guide }) {
             </Link>
           ))}
         </div>
+
+        {/* קישור לעמוד-המושג המקורי (/method/*) — רק כשקיים */}
+        {guide.method ? (
+          <Link
+            href={guide.method.href}
+            className="lift-hover group mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-brand/40 bg-surface p-5 hover:border-brand/60 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            <div>
+              <span className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
+                מושג מהספר
+              </span>
+              <span className="mt-1 block font-serif text-[1.05rem] font-semibold leading-tight text-foreground">
+                {guide.method.label}
+              </span>
+              {guide.method.sub ? (
+                <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
+                  {guide.method.sub}
+                </p>
+              ) : null}
+            </div>
+            <ArrowUpLeft
+              className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5 group-hover:-translate-y-1.5 group-focus-visible:-translate-y-1.5"
+              aria-hidden="true"
+            />
+          </Link>
+        ) : null}
 
         {/* קישור-הקשר משני (למשל בתוך קשר / בניית קשר) — רק כשקיים */}
         {guide.secondary ? (

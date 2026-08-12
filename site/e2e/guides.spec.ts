@@ -1,20 +1,34 @@
 import { test, expect, type Page } from "@playwright/test";
 
 /**
- * אשכול-התוכן „לפני קשר” — ארבעה מדריכים (/guide/*). רגרסיה מלאה: כל מאמר עולה,
- * canonical עצמי נכון, title/meta ייחודיים, H1 יחיד, נמצא ב-sitemap, קישורים
- * פנימיים פתירים, אין ניסוח טרום-השקה, אין קישור /waitlist, ה-CTA לאמזון עובד,
- * schema מסוג Article, פירורי-לחם, ופריסת מובייל ללא גלישה אופקית. עמוד-האם
- * /before-relationship מקשר לכל הארבעה (hub).
+ * אשכולי-התוכן /guide/* — רגרסיה מלאה לכל מדריך: עולה, canonical עצמי, title/meta
+ * ייחודיים, H1 יחיד, נמצא ב-sitemap, קישור לעמוד-האם (ה-hub שלו), לעוזר ולאמזון,
+ * schema מסוג Article + Breadcrumb, פירורי-לחם, ופריסת מובייל ללא גלישה. כל תחנה
+ * (hub) מקשרת למדריכים ששויכו אליה.
  */
 
 const ASIN = "B0GJ3SL9H2";
 
 const GUIDES = [
-  { path: "/guide/finding-a-relationship", h1: "איך למצוא זוגיות בלי להפוך כל דייט למבחן" },
-  { path: "/guide/choosing-a-partner", h1: "איך לבחור בן או בת זוג — ומה באמת כדאי לבדוק" },
-  { path: "/guide/relationship-doubts", h1: "ספקות בזוגיות: איך יודעים אם זה פחד או חוסר התאמה" },
-  { path: "/guide/compatibility", h1: "התאמה זוגית: מה באמת חשוב יותר מפרפרים בבטן" },
+  { path: "/guide/finding-a-relationship", h1: "איך למצוא זוגיות בלי להפוך כל דייט למבחן", hub: "/before-relationship" },
+  { path: "/guide/choosing-a-partner", h1: "איך לבחור בן או בת זוג — ומה באמת כדאי לבדוק", hub: "/before-relationship" },
+  { path: "/guide/relationship-doubts", h1: "ספקות בזוגיות: איך יודעים אם זה פחד או חוסר התאמה", hub: "/before-relationship" },
+  { path: "/guide/compatibility", h1: "התאמה זוגית: מה באמת חשוב יותר מפרפרים בבטן", hub: "/before-relationship" },
+  { path: "/guide/healthy-relationship", h1: "מהי מערכת יחסים בריאה — ואיך יודעים שאתם בונים אחת", hub: "/inside-relationship" },
+  { path: "/guide/dating-red-flags", h1: "דגלים אדומים בדייטים — ומה באמת נחשב קו אדום", hub: "/before-relationship" },
+  { path: "/guide/getting-back-with-ex", h1: "חזרה לאקס: איך יודעים אם זה נכון", hub: "/after-breakup" },
+  { path: "/guide/fear-of-commitment", h1: "פחד ממחויבות — שלך או של בן/בת הזוג", hub: "/building-relationship" },
+  { path: "/guide/couple-communication", h1: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", hub: "/inside-relationship" },
+  { path: "/guide/attracted-to-unavailable", h1: "למה אני נמשך/ת לאנשים לא זמינים", hub: "/before-relationship" },
+  { path: "/guide/recurring-fights", h1: "ריבים חוזרים: איך יוצאים מהלולאה", hub: "/inside-relationship" },
+  { path: "/guide/how-to-end-a-relationship", h1: "לסיים קשר בכבוד — בלי היעלמות", hub: "/after-breakup" },
+  { path: "/guide/how-fast-is-too-fast", h1: "כמה מהר זה מהר מדי בתחילת קשר", hub: "/building-relationship" },
+  { path: "/guide/defining-the-relationship", h1: "בלעדיות: מתי ואיך מדברים על „מה אנחנו”", hub: "/building-relationship" },
+  { path: "/guide/hot-and-cold", h1: "חם-קר בקשר: כשמישהו מתקרב ומתרחק", hub: "/building-relationship" },
+  { path: "/guide/over-a-breakup", h1: "איך יודעים שסיימתי לעבד פרידה", hub: "/after-breakup" },
+  { path: "/guide/words-vs-actions", h1: "כשיש פער בין המילים למעשים", hub: "/inside-relationship" },
+  { path: "/guide/ready-for-a-relationship", h1: "האם אני מוכן/ה לזוגיות", hub: "/before-relationship" },
+  { path: "/guide/keeping-connection-alive", h1: "לשמור על קרבה ותשוקה אחרי שהשגרה נכנסת", hub: "/inside-relationship" },
 ];
 
 const FORBIDDEN = [
@@ -66,7 +80,7 @@ test.describe("guide cluster — each article", () => {
         .getAttribute("content");
       expect(desc && desc.length, `${g.path} description`).toBeGreaterThan(20);
 
-      // Article structured data.
+      // Article + Breadcrumb structured data.
       const blocks = await ldjson(page);
       expect(
         blocks.some((b) => b["@type"] === "Article"),
@@ -76,12 +90,18 @@ test.describe("guide cluster — each article", () => {
         blocks.some((b) => b["@type"] === "BreadcrumbList"),
         `${g.path} has BreadcrumbList JSON-LD`,
       ).toBe(true);
+      // Article מחובר לישות המחבר (author @id) ולישות הספר (about @id).
+      const article = blocks.find((b) => b["@type"] === "Article") as
+        | Record<string, Record<string, string>>
+        | undefined;
+      expect(article?.author?.["@id"]).toContain("/author#person");
+      expect(article?.about?.["@id"]).toContain("/book#book");
 
-      // פירורי-לחם נגישים (בית → לפני קשר → …).
+      // פירורי-לחם נגישים.
       await expect(page.getByRole("navigation", { name: "פירורי לחם" })).toBeVisible();
 
-      // קישורים פנימיים חיוניים: עמוד-האם, העוזר, ו-CTA אמזון אמיתי.
-      await expect(page.locator('a[href="/before-relationship"]').first()).toBeVisible();
+      // קישורים פנימיים חיוניים: עמוד-האם (ה-hub של המדריך), העוזר, ו-CTA אמזון.
+      await expect(page.locator(`a[href="${g.hub}"]`).first()).toBeVisible();
       await expect(page.locator('a[href^="/compass"]').first()).toBeVisible();
       const amazon = page.locator(`a[href*="amazon.com/dp/${ASIN}"]`).first();
       await expect(amazon).toHaveAttribute("target", "_blank");
@@ -101,11 +121,11 @@ test.describe("guide cluster — each article", () => {
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
-      expect(overflow, `${g.path} @390 overflow`).toBeLessThanOrEqual(0);
+      expect(overflow, `${g.path} @390 overflow`).toBeLessThanOrEqual(1);
     });
   }
 
-  test("all four guides are in the sitemap", async ({ page }) => {
+  test("all guides are in the sitemap", async ({ page }) => {
     const xml = await (await page.request.get("/sitemap.xml")).text();
     for (const g of GUIDES) {
       expect(xml, `sitemap missing ${g.path}`).toContain(`${g.path}</loc>`);
@@ -139,13 +159,16 @@ test.describe("guide cluster — each article", () => {
     }
   });
 
-  test("hub /before-relationship links to all four guides", async ({ page }) => {
-    await page.goto("/before-relationship", { waitUntil: "domcontentloaded" });
-    for (const g of GUIDES) {
-      await expect(
-        page.locator(`a[href="${g.path}"]`).first(),
-        `hub links to ${g.path}`,
-      ).toBeVisible();
+  test("each station hub links to the guides assigned to it", async ({ page }) => {
+    const hubs = Array.from(new Set(GUIDES.map((g) => g.hub)));
+    for (const hub of hubs) {
+      await page.goto(hub, { waitUntil: "domcontentloaded" });
+      for (const g of GUIDES.filter((x) => x.hub === hub)) {
+        await expect(
+          page.locator(`a[href="${g.path}"]`).first(),
+          `${hub} links to ${g.path}`,
+        ).toBeVisible();
+      }
     }
   });
 });

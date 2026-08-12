@@ -401,28 +401,31 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           </div>
         </section>
 
-        {/* אשכול המדריכים — עמוד „לפני קשר” הוא ה-hub. מקשר את ארבעת המאמרים
-            ממוקדי-החיפוש (איך למצוא זוגיות / לבחור בן זוג / ספקות / התאמה). מוצג
-            רק כאן, כדי לא לשכפל בכל תחנה ולא לקנבל את עמוד-האם. */}
-        {journey.id === "before-relationship" ? (
-          <section
-            aria-labelledby="guides-heading"
-            className="reveal border-t border-border pt-10"
-          >
-            <h2
-              id="guides-heading"
-              className="font-serif text-[1.25rem] font-bold text-foreground"
+        {/* אשכול המדריכים — כל תחנה היא ה-hub של המדריכים ששויכו אליה (לפי
+            guide.hub.href). מוצג רק את המדריכים של התחנה הנוכחית, כדי לא לשכפל
+            בין תחנות ולא לקנבל את עמוד-האם. */}
+        {(() => {
+          const stationGuides = guideOrder
+            .map((slug) => guides[slug])
+            .filter((g) => g.hub.href === `/${journey.id}`);
+          if (stationGuides.length === 0) return null;
+          return (
+            <section
+              aria-labelledby="guides-heading"
+              className="reveal border-t border-border pt-10"
             >
-              מדריכים להעמקה בשאלות ספציפיות
-            </h2>
-            <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-              עמוד זה הוא נקודת-המוצא; לכל שאלה יש מדריך ייעודי מתוך הגישה של הספר.
-            </p>
-            <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-              {guideOrder.map((slug) => {
-                const g = guides[slug];
-                return (
-                  <li key={slug}>
+              <h2
+                id="guides-heading"
+                className="font-serif text-[1.25rem] font-bold text-foreground"
+              >
+                מדריכים להעמקה בשאלות ספציפיות
+              </h2>
+              <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                עמוד זה הוא נקודת-המוצא; לכל שאלה יש מדריך ייעודי מתוך הגישה של הספר.
+              </p>
+              <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+                {stationGuides.map((g) => (
+                  <li key={g.slug}>
                     <Link
                       href={g.path}
                       className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
@@ -436,11 +439,11 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
                       />
                     </Link>
                   </li>
-                );
-              })}
-            </ul>
-          </section>
-        ) : null}
+                ))}
+              </ul>
+            </section>
+          );
+        })()}
       </div>
 
       {/* Purchase exit — פעם אחת בלבד, אחרי הקשת: הספר המלא זמין עכשיו באמזון. */}

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
 import { guideOrder, guides } from "@/content/guides";
+import { methodOrder, methods } from "@/content/methods";
 
 type SitemapRoute = {
   path: string;
@@ -36,6 +37,13 @@ const staticRoutes: SitemapRoute[] = [
     priority: 0.7,
     changeFrequency: "monthly" as const,
     lastModified: guides[slug].datePublished,
+  })),
+  // עמודי-מושג /method/* — ההגדרות הקנוניות של הכלים המקוריים של הספר.
+  ...methodOrder.map((slug) => ({
+    path: methods[slug].path,
+    priority: 0.7,
+    changeFrequency: "monthly" as const,
+    lastModified: methods[slug].datePublished,
   })),
 ];
 
