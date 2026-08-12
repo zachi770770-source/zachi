@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site";
 import { JsonLd } from "@/components/schema/JsonLd";
+import { entityId } from "@/components/schema/ids";
 
 /**
  * Article structured data למאמרי המדריך (cluster „לפני קשר”). בניגוד לעמודי
@@ -34,7 +35,12 @@ export function ArticleSchema({
         image: `${siteConfig.url}${siteConfig.images.cover}`,
         datePublished,
         dateModified: dateModified ?? datePublished,
-        author: { "@type": "Person", name: siteConfig.author.name },
+        // אותו מחבר (אותו `@id`) של הספר והאתר — כל התוכן מתחבר לישות-מחבר אחת.
+        author: {
+          "@type": "Person",
+          "@id": entityId.person,
+          name: siteConfig.author.name,
+        },
         publisher: {
           "@type": "Organization",
           name: siteConfig.bookTitle,
@@ -43,12 +49,9 @@ export function ArticleSchema({
             url: `${siteConfig.url}${siteConfig.images.cover}`,
           },
         },
-        about: { "@type": "Book", name: siteConfig.bookTitle },
-        isPartOf: {
-          "@type": "WebSite",
-          name: siteConfig.bookTitle,
-          url: siteConfig.url,
-        },
+        // המאמר עוסק בישות הספר (אותו `@id`).
+        about: { "@type": "Book", "@id": entityId.book, name: siteConfig.bookTitle },
+        isPartOf: { "@id": entityId.website },
       }}
     />
   );
