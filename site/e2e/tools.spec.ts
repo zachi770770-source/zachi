@@ -1,4 +1,5 @@
 import { test, expect } from "./fixtures";
+import AxeBuilder from "@axe-core/playwright";
 
 /**
  * אזור ששת הכלים ב-/book (Editorial Luxury): כרטיסי-חזית אינטראקטיביים,
@@ -104,6 +105,74 @@ test("open tool exposes a single CTA to the related book sample (/preview?tool=&
     "href",
     "/preview?tool=quiet-check&station=before-relationship",
   );
+});
+
+test("/book fact-story tool: shows the עובדה↔סיפור split, then reveals פעולה", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/book#tool-fact-story-action", { waitUntil: "networkidle" });
+  const panel = page.locator("#tool-detail-panel");
+  await expect(panel).toHaveClass(/is-open/);
+
+  // ההפרדה גלויה מיד — לא פסקה שטוחה אחת.
+  await expect(
+    panel.getByRole("group", { name: "אותו רגע, מופרד לעובדה ולסיפור" })
+  ).toBeVisible();
+  await expect(panel.getByText("הצד השני הסתכל בשעון.", { exact: true })).toBeVisible();
+  await expect(panel.getByText("משעמם לו או לה איתי; הקשר הזה נגמר.")).toBeVisible();
+
+  // „פעולה” מוסתרת עד לחשיפה מכוונת אחת (aria-expanded).
+  const reveal = panel.getByRole("button", { name: "אז מה עושים עם זה?" });
+  await expect(reveal).toHaveAttribute("aria-expanded", "false");
+  await expect(panel.getByRole("group", { name: "פעולה" })).toHaveCount(0);
+
+  await reveal.click();
+  await expect(reveal).toHaveAttribute("aria-expanded", "true");
+  await expect(panel.getByRole("group", { name: "פעולה" })).toBeVisible();
+  await expect(panel.getByText(/הכול בסדר עם הזמנים שלך/)).toBeVisible();
+
+  // עדיין רק כרטיס-כלי אחד פתוח, וה-CTA לקטע מהספר נשמר.
+  await expect(
+    page.locator("#tools button.tool-lux-card[aria-expanded='true']")
+  ).toHaveCount(1);
+  await expect(page.locator("#tool-detail-panel a.tool-lux-panel__cta")).toHaveAttribute(
+    "href",
+    "/preview?tool=fact-story-action&station=before-relationship"
+  );
+});
+
+for (const width of [360, 390]) {
+  test(`/book fact-story tool @${width}px: no horizontal overflow through the reveal`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 780 });
+    await page.goto("/book#tool-fact-story-action", { waitUntil: "networkidle" });
+    const overflow = () =>
+      page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth + 1
+      );
+    expect(await overflow()).toBe(false);
+    await page.getByRole("button", { name: "אז מה עושים עם זה?" }).click();
+    await expect(page.getByRole("group", { name: "פעולה" })).toBeVisible();
+    expect(await overflow()).toBe(false);
+  });
+}
+
+test("/book fact-story tool: no axe violations with the split and פעולה open", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/book#tool-fact-story-action", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "אז מה עושים עם זה?" }).click();
+  await expect(page.getByRole("group", { name: "פעולה" })).toBeVisible();
+  const results = await new AxeBuilder({ page })
+    .include("#tool-detail-panel")
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(results.violations).toEqual([]);
 });
 
 test("no-JS: every tool front card keeps its name + promise in the DOM", async ({ browser }) => {

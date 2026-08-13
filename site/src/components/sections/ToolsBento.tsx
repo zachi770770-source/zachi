@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, CircleDot, Cloud } from "lucide-react";
 
 import { tools, type ToolItem } from "@/content/book";
 import { methodByToolId } from "@/content/methods";
@@ -105,7 +105,12 @@ export function ToolsBento() {
   const openTool: ToolItem | null =
     (openId && items.find((t) => t.id === openId)) || null;
 
+  // חשיפת „פעולה” בכלי „עובדה/סיפור/פעולה” בלבד — צעד קטן ומכוון (לא חידון).
+  // מתאפס בכל החלפת/סגירת כלי כדי שהחלונית תיפתח תמיד על ההפרדה עצמה.
+  const [showAction, setShowAction] = React.useState(false);
+
   const toggle = (id: string) => {
+    setShowAction(false);
     setOpenId((cur) => (cur === id ? null : id));
   };
 
@@ -117,6 +122,7 @@ export function ToolsBento() {
       if (!hash.startsWith("#tool-")) return;
       const id = hash.slice("#tool-".length);
       if (!items.some((t) => t.id === id)) return;
+      setShowAction(false);
       setOpenId(id);
       const el = cardRefs.current[id];
       if (!el) return;
@@ -267,16 +273,82 @@ export function ToolsBento() {
                 <p className="tool-lux-panel__q">{openTool.question}</p>
               </div>
 
-              <div className="tool-lux-panel__grid">
-                <div className="tool-lux-panel__block">
-                  <p className="tool-lux-panel__label">תרחיש מהחיים</p>
-                  <p className="tool-lux-panel__text">{openTool.scenario}</p>
+              {openTool.factStory ? (
+                <>
+                  {/* 1 — התרחיש (אותו תרחיש קיים, מותאם-פרסונה נשאר למטה) */}
+                  <div className="mt-[1.3rem]">
+                    <p className="tool-lux-panel__label">תרחיש מהחיים</p>
+                    <p className="tool-lux-panel__text">{openTool.scenario}</p>
+                  </div>
+
+                  {/* 2 — אותו רגע, מופרד: עובדה מול סיפור (RTL: עובדה מימין) */}
+                  <div
+                    className="tool-lux-panel__grid"
+                    role="group"
+                    aria-label="אותו רגע, מופרד לעובדה ולסיפור"
+                  >
+                    <div className="rounded-xl border border-border bg-surface-muted/50 p-4">
+                      <p className="tool-lux-panel__label inline-flex items-center gap-1.5">
+                        <CircleDot className="h-3.5 w-3.5 text-secondary" aria-hidden="true" />
+                        עובדה
+                      </p>
+                      <p className="tool-lux-panel__text">{openTool.factStory.fact}</p>
+                      <p className="mt-1.5 text-[12.5px] leading-relaxed text-foreground-muted">
+                        מה שקרה בפועל.
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-brand/30 bg-brand-muted/30 p-4">
+                      <p className="tool-lux-panel__label inline-flex items-center gap-1.5">
+                        <Cloud className="h-3.5 w-3.5" aria-hidden="true" />
+                        סיפור
+                      </p>
+                      <p className="tool-lux-panel__text">{openTool.factStory.story}</p>
+                      <p className="mt-1.5 text-[12.5px] leading-relaxed text-foreground-muted">
+                        הפרשנות שהמוח הוסיף.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 3 — הצעד מכאן: נחשף בפעולה מכוונת אחת (הפיך, לא חידון) */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAction((v) => !v)}
+                    aria-expanded={showAction}
+                    {...(showAction
+                      ? { "aria-controls": `fsa-action-${openTool.id}` }
+                      : {})}
+                    className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border-strong bg-surface px-5 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    אז מה עושים עם זה?
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  {showAction ? (
+                    <div
+                      id={`fsa-action-${openTool.id}`}
+                      role="group"
+                      aria-label="פעולה"
+                      className="animate-slide-up mt-3 rounded-xl border border-border bg-surface p-4"
+                    >
+                      <p className="tool-lux-panel__label inline-flex items-center gap-1.5">
+                        <ArrowLeft className="h-3.5 w-3.5 text-brand-hover" aria-hidden="true" />
+                        פעולה
+                      </p>
+                      <p className="tool-lux-panel__text">{openTool.factStory.action}</p>
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <div className="tool-lux-panel__grid">
+                  <div className="tool-lux-panel__block">
+                    <p className="tool-lux-panel__label">תרחיש מהחיים</p>
+                    <p className="tool-lux-panel__text">{openTool.scenario}</p>
+                  </div>
+                  <div className="tool-lux-panel__block">
+                    <p className="tool-lux-panel__label">איך מיישמים</p>
+                    <p className="tool-lux-panel__text">{openTool.application}</p>
+                  </div>
                 </div>
-                <div className="tool-lux-panel__block">
-                  <p className="tool-lux-panel__label">איך מיישמים</p>
-                  <p className="tool-lux-panel__text">{openTool.application}</p>
-                </div>
-              </div>
+              )}
 
               {/* דוגמה מותאמת-פרסונה — רק כשנבחרה פרסונה ויש לכלי דוגמה עבורה.
                   יישום של הכלי הקיים בשפת המצב, לא תוכן חדש. */}
