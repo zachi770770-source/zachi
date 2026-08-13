@@ -1,24 +1,20 @@
 import { test, expect } from "./fixtures";
 
 /**
- * „איפה זה פוגש אותך עכשיו?” — רגע-זיהוי, לא רק תפריט ניווט. כל מצב הוא
- * `<details>` נטיבי: ה-summary היא הבחירה, פתיחתה חושפת זיהוי + מוקד אחד,
- * וההמשך הוא קישור אמיתי לעמוד-המסע. בחירה וניווט הן פעולות נפרדות. הקישורים
- * קיימים ב-HTML (SEO / ללא-JS), והאקורדיון עובד נטיבית גם בלי JS.
+ * „איפה זה פוגש אותך עכשיו?” — רגע-זיהוי, לא רק תפריט ניווט. רשת 2×2 של
+ * radio-cards + תגובה משותפת אחת מתחת: בחירת מצב חושפת זיהוי + מוקד אחד +
+ * קישור-המשך אמיתי. בחירה (radio) וניווט (link) נפרדות. הקישורים קיימים תמיד
+ * ב-HTML (SEO / ללא-JS); התגובה מתחלפת דרך CSS ‏:has(:checked) — בלי JS.
  */
 
 const STAGES = [
-  { title: /אני מחפש/, href: "/before-relationship", reveal: "גם הדרך שבה בוחרים" },
-  { title: /אני בתחילת/, href: "/building-relationship", reveal: "מה בונים ממנה" },
-  { title: /אני בתוך/, href: "/inside-relationship", reveal: "לא כל קושי אומר" },
-  { title: /אני אחרי/, href: "/after-breakup", reveal: "מה בדיוק הסתיים" },
+  { name: /אני מחפש/, href: "/before-relationship", reveal: "גם הדרך שבה בוחרים" },
+  { name: /אני בתחילת/, href: "/building-relationship", reveal: "מה בונים ממנה" },
+  { name: /אני בתוך/, href: "/inside-relationship", reveal: "לא כל קושי אומר" },
+  { name: /אני אחרי/, href: "/after-breakup", reveal: "מה בדיוק הסתיים" },
 ] as const;
 
-function detailsFor(page: import("./fixtures").Page, href: string) {
-  return page.locator("#path details", { has: page.locator(`a[href="${href}"]`) });
-}
-
-test("#path: four stage choices as a native accordion; recognition hidden until selected", async ({
+test("#path: 2×2 radio selector; four links present; recognition hidden until a stage is chosen", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -28,25 +24,25 @@ test("#path: four stage choices as a native accordion; recognition hidden until 
     path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" })
   ).toBeVisible();
 
-  // ארבע בחירות (summary) גלויות; ארבעת קישורי-ההמשך קיימים ב-DOM (SEO/ללא-JS).
-  await expect(path.locator("summary")).toHaveCount(4);
+  // ארבע בחירות (radio) + ארבעה קישורי-המשך קיימים ב-DOM (SEO/ללא-JS).
+  await expect(path.getByRole("radio")).toHaveCount(4);
   for (const s of STAGES) {
-    await expect(path.locator("summary", { hasText: s.title })).toBeVisible();
+    await expect(path.getByRole("radio", { name: s.name })).toHaveCount(1);
     await expect(path.locator(`a[href="${s.href}"]`)).toHaveCount(1);
   }
-  // תוכן הזיהוי סגור כברירת מחדל (אין result-panel נפרד; אין ארכיטקטורה ישנה).
+  // אין בחירה בהתחלה → אין תגובה גלויה.
   await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
-  await expect(page.locator(".path-panel")).toHaveCount(0);
+  await expect(page.locator(".path-panel")).toHaveCount(4);
 });
 
-test("selecting a stage reveals its recognition, then the continue link navigates", async ({
+test("choosing a stage reveals its recognition in the shared panel; continue link navigates", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
 
-  await detailsFor(page, "/before-relationship").locator("summary").click();
+  await path.getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
   await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeVisible();
 
   const cont = path.locator('a[href="/before-relationship"]');
@@ -56,46 +52,50 @@ test("selecting a stage reveals its recognition, then the continue link navigate
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("opening a different stage replaces the response (single-open accordion)", async ({
+test("switching the stage replaces the content in the same shared region (one at a time)", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
 
-  await detailsFor(page, "/before-relationship").locator("summary").click();
+  await path.getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
   await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeVisible();
 
-  await detailsFor(page, "/after-breakup").locator("summary").click();
+  await path.getByRole("radio", { name: /אני אחרי/ }).check({ force: true });
   await expect(path.getByText("מה בדיוק הסתיים", { exact: false })).toBeVisible();
   await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
 });
 
-test("keyboard: focus a summary and Enter reveals its recognition", async ({ page }) => {
+test("keyboard: focus a radio and Space selects it, revealing its recognition", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
-  const sum = path.locator("summary", { hasText: /אני בתחילת/ });
-  await sum.focus();
-  await page.keyboard.press("Enter");
+  const radio = path.getByRole("radio", { name: /אני בתחילת/ });
+  await radio.focus();
+  await page.keyboard.press("Space");
+  await expect(radio).toBeChecked();
   await expect(path.getByText("מה בונים ממנה", { exact: false })).toBeVisible();
 });
 
-test("no-JS: stage links exist, and native details still reveals + navigates the continue link", async ({
+test("no-JS: links exist in the DOM; native radio selection reveals + navigates the continue link", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
     javaScriptEnabled: false,
-    reducedMotion: "reduce", // ללא אנימציית-חשיפה → הקישור יציב לקליק
+    reducedMotion: "reduce",
   });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  const path = page.locator("#path");
   for (const s of STAGES) {
-    await expect(page.locator(`#path a[href="${s.href}"]`)).toHaveCount(1);
+    await expect(path.locator(`a[href="${s.href}"]`)).toHaveCount(1);
   }
-  // ללא JS: פתיחת ה-summary נטיבית, ואז קישור-ההמשך מנווט.
-  await detailsFor(page, "/after-breakup").locator("summary").click();
-  const cont = page.locator('#path a[href="/after-breakup"]');
+  // ללא JS: בחירת radio נטיבית → CSS חושף את הפאנל → קישור-ההמשך מנווט.
+  await path.getByRole("radio", { name: /אני אחרי/ }).check({ force: true });
+  const cont = path.locator('a[href="/after-breakup"]');
   await expect(cont).toBeVisible();
   await Promise.all([page.waitForURL(/\/after-breakup$/), cont.click()]);
   await ctx.close();
@@ -108,15 +108,14 @@ test("mobile 390: the revealed continue link is not overlaid by sticky/floating 
   const page = await ctx.newPage();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
 
-  const summary = detailsFor(page, "/before-relationship").locator("summary");
-  await summary.scrollIntoViewIfNeeded();
-  await summary.click();
-  const cont = page.locator('#path a[href="/before-relationship"]');
+  await path.getByRole("radio", { name: /אני אחרי/ }).check({ force: true });
+  const cont = path.locator('a[href="/after-breakup"]');
   await cont.scrollIntoViewIfNeeded();
 
   const hit = await page.evaluate(() => {
-    const a = document.querySelector('#path a[href="/before-relationship"]');
+    const a = document.querySelector('#path a[href="/after-breakup"]');
     if (!a) return { ok: false, tag: "MISSING", pe: "n/a" };
     const r = a.getBoundingClientRect();
     const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);

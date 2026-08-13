@@ -95,7 +95,7 @@ test("two actions from Home to real book content (state → journey page → sam
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   // פעולה 1: בחירת מצב → חשיפת רגע-זיהוי → המשך לעמוד-המסע.
-  await page.locator("#path").locator("summary", { hasText: /אני מחפש/ }).click();
+  await page.locator("#path").getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
   await page.locator('#path a[href="/before-relationship"]').click();
   await expect(page).toHaveURL(/\/before-relationship$/);
   // פעולה 2: הטעימה המותאמת → נחיתה על קטע אמיתי מהספר.

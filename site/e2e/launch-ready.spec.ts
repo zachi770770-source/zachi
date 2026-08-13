@@ -175,7 +175,7 @@ test.describe("Launch-readiness", () => {
     // הבחירה ב-Home חושפת רגע-זיהוי, וההמשך הוא קישור אמיתי לעמוד-המסע.
     const path = page.locator("#path");
     await path.scrollIntoViewIfNeeded();
-    await path.locator("summary", { hasText: /אני מחפש/ }).click();
+    await path.getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
     await path.locator('a[href="/before-relationship"]').click();
     await expect(page).toHaveURL(/\/before-relationship$/);
 

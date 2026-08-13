@@ -1,22 +1,20 @@
 import Link from "next/link";
-import { ArrowLeft, ChevronDown } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
 import { homePaths, homePathUi } from "@/content/homePaths";
 
 /**
- * לב עמוד הבית: „איפה זה פוגש אותך עכשיו?” — לא עוד תפריט ניווט בלבד, אלא רגע
- * זיהוי קטן. כל מצב הוא `<details>` נטיבי: הכותרת (summary) היא הבחירה, ופתיחתה
- * חושפת *זיהוי* קצר (משפט שמשקף מתח אמיתי של אותו שלב) + *מוקד אחד* (הבחנה/בדיקה),
- * ואז *המשך* — קישור אמיתי לעמוד-המסע. בחירה וניווט הן שתי פעולות נפרדות וברורות:
- * ה-summary פותח (אינו קישור ואינו „חוטף” קליק), והקישור מנווט.
+ * לב עמוד הבית: „איפה זה פוגש אותך עכשיו?” — לא רק תפריט ניווט, אלא רגע זיהוי.
+ * רשת 2×2 סורקת (ארבעה מצבים במבט אחד) + *תגובה משותפת אחת* מתחת: בחירת מצב
+ * חושפת זיהוי קצר + מוקד אחד + קישור-המשך אמיתי לעמוד-המסע. בחירה וניווט נפרדות:
+ * הכרטיס בוחר (radio), הקישור מנווט — אין „חטיפת” קליק.
  *
- * ארכיטקטורה: רכיב שרת בלבד (ללא "use client"), על בסיס `<details name>` נטיבי —
- * בחירה יחידה (פתיחת מצב סוגרת את הקודם) קורית בדפדפן, בלי JS ובלי state. עובד
- * גם ללא הידרציה: ה-summary נפתח נטיבית וארבעת קישורי-ההמשך קיימים ב-HTML
- * (SEO + ללא-JS). ללא persona, ללא localStorage, ללא אנליטיקה — הקשר-המסע נקבע
- * בעמוד היעד (JourneyView) כמו קודם. התוכן (זיהוי + מוקד) הוא תוכן מאושר קיים
- * מ-`homePaths` (heading + focuses[0]); אין קופי חדש.
+ * ארכיטקטורה: רכיב שרת בלבד (ללא "use client"). בחירה = radiogroup נטיבי;
+ * התגובה המשותפת מתחלפת דרך CSS ‏`:has(input:checked)` — בלי JS, בלי state.
+ * עובד גם ללא הידרציה: ה-radio נבחר נטיבית, וארבעת קישורי-ההמשך קיימים תמיד
+ * ב-HTML (SEO + ללא-JS). התוכן (זיהוי + מוקד) הוא תוכן מאושר קיים מ-`homePaths`
+ * (heading + focuses[0]); אין קופי חדש, אין persona, אין localStorage, אין אנליטיקה.
  */
 export function HomePathSelector() {
   return (
@@ -34,43 +32,54 @@ export function HomePathSelector() {
           </p>
         </div>
 
-        {/* אקורדיון-בחירה: ארבעה מצבים, מצב פתוח אחד בכל רגע (name משותף). */}
-        <div className="mx-auto mt-5 grid max-w-2xl gap-2.5 sm:gap-3">
-          {homePaths.map((p) => {
-            const micro = p.focuses[0];
-            return (
-              <details
-                key={p.id}
-                name="home-stage"
-                className="path-acc rounded-xl border-2 border-border bg-surface open:border-brand/40 open:bg-surface-muted/40"
-              >
-                <summary className="path-acc__summary flex cursor-pointer items-center justify-between gap-3 rounded-xl p-3 text-start transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-5">
-                  <span className="min-w-0">
-                    <span className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-serif text-[16px] font-bold leading-tight text-foreground sm:text-[1.35rem]">
-                        {p.buttonTitle}
-                      </span>
-                      {p.gate ? (
-                        <span className="inline-flex shrink-0 items-center rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-brand-foreground sm:text-[12px]">
-                          {homePathUi.gateBadge}
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="mt-1 block text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[15px]">
-                      {p.buttonSub}
-                    </span>
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    className="path-acc__chev inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-brand transition-transform sm:h-11 sm:w-11"
-                  >
-                    <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </span>
-                </summary>
+        <fieldset className="path-choose mx-auto mt-5 max-w-2xl border-0 p-0">
+          <legend className="sr-only">{homePathUi.heading}</legend>
 
-                {/* גוף החשיפה: זיהוי → מוקד אחד → המשך. תוכן מאושר קיים. */}
-                <div className="path-acc__body px-3 pb-4 sm:px-5 sm:pb-5">
-                  <p className="border-t border-border pt-4 font-serif text-[16px] font-semibold leading-snug text-foreground [text-wrap:pretty] sm:text-[18px]">
+          {/* רשת 2×2 סורקת — כל מצב הוא radio-card נגיש (הכרטיס הוא label). */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+            {homePaths.map((p) => (
+              <label
+                key={p.id}
+                className="lift-hover flex cursor-pointer items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-surface-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:gap-3 sm:rounded-2xl sm:p-5"
+              >
+                <input type="radio" name="home-stage" value={p.id} className="sr-only" />
+                <span className="min-w-0">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <span className="font-serif text-[15px] font-bold leading-tight text-foreground sm:text-[1.3rem]">
+                      {p.buttonTitle}
+                    </span>
+                    {p.gate ? (
+                      <span className="inline-flex shrink-0 items-center rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-brand-foreground sm:text-[12px]">
+                        {homePathUi.gateBadge}
+                      </span>
+                    ) : null}
+                  </span>
+                  {/* שורת-משנה — מוסתרת במובייל (כרטיסי 2×2 קצרים), גלויה מ-sm. */}
+                  <span className="mt-1 hidden text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:block sm:text-[15px]">
+                    {p.buttonSub}
+                  </span>
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="path-arrow inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-brand transition-colors sm:h-10 sm:w-10"
+                >
+                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                </span>
+              </label>
+            ))}
+          </div>
+
+          {/* תגובה משותפת אחת, במקום יציב מתחת לרשת — מתחלפת לפי הבחירה. */}
+          <div className="path-panels mt-3 sm:mt-4" aria-live="polite">
+            {homePaths.map((p) => {
+              const micro = p.focuses[0];
+              return (
+                <div
+                  key={p.id}
+                  data-stage={p.id}
+                  className="path-panel rounded-xl border-s-2 border-s-brand bg-surface-muted/50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5"
+                >
+                  <p className="font-serif text-[16px] font-semibold leading-snug text-foreground [text-wrap:pretty] sm:text-[18px]">
                     {p.heading}
                   </p>
                   <p className="mt-3 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
@@ -90,10 +99,10 @@ export function HomePathSelector() {
                     />
                   </Link>
                 </div>
-              </details>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </fieldset>
       </Container>
     </section>
   );
