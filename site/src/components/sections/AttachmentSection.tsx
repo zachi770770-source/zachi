@@ -82,6 +82,16 @@ export function AttachmentSection() {
               {attachment.reflectCtaLabel}
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </Link>
+            {/* קישור הקשרי אחד למדריך-העוגן על סגנונות ההתקשרות (דפוס חרדתי/נמנע
+                והמעגל ביניהם) — הרחבה מלאה של הריקוד המתואר כאן. */}
+            <p className="mt-5 text-[15px] leading-relaxed text-foreground-muted">
+              <Link
+                href="/guide/attachment-styles"
+                className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                להבין לעומק: סגנונות התקשרות בזוגיות — חרדתי, נמנע ומה קורה ביניהם
+              </Link>
+            </p>
           </div>
         </Reveal>
       </Container>
