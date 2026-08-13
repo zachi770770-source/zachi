@@ -76,6 +76,19 @@ export default function BookPage() {
             </div>
             <span className="kicker justify-center">הספר לעומק</span>
             <h1 className="type-h1 mt-4">ספר זוגיות: מה יש בו ואיך הוא עובד</h1>
+            {/* שורת זהות-ישות — שם הספר + המחבר + הקטגוריה, כדי שאדם/מנוע-חיפוש/
+                מערכת אחזור-AI יזהו מיד: „מדייטים לאהבה מאת צחי חן — ספר על
+                דייטינג, בחירת בן/בת זוג ובניית קשר”. השם והמחבר מ-config; מונחי
+                הקטגוריה נתמכים בתוכן קיים („לבחור בן או בת זוג” —
+                /guide/choosing-a-partner; „אהבה היא בנייה” / „בניית קשר” —
+                tagline ו-/guide). בלי טענה חדשה או מילות-מפתח כפויות. */}
+            <p className="mt-3 text-[15px] font-medium leading-relaxed text-foreground-muted">
+              <span className="font-semibold text-foreground">
+                {siteConfig.bookTitle}
+              </span>{" "}
+              מאת {siteConfig.author.name} — מדריך מעשי לדייטינג, לבחירת בן או בת
+              זוג ולבניית קשר זוגי.
+            </p>
             {/* מיצוב: לא ספר חד-פעמי אלא מלווה לאורך כל המסע הזוגי (ללא טענה
                 השוואתית — לא „היחיד” / „הראשון מסוגו”). */}
             <p className="mt-4 font-serif text-[19px] font-semibold leading-snug text-brand-hover">
