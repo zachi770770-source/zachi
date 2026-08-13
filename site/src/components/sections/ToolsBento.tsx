@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { tools, type ToolItem } from "@/content/book";
+import { methodByToolId } from "@/content/methods";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { usePersonaOptional } from "@/components/persona/PersonaProvider";
@@ -306,6 +307,34 @@ export function ToolsBento() {
             </div>
           ) : null}
         </div>
+
+        {/* אינדקס מושגים — קישור קבוע ומרונדר-בשרת מכל כלי אל עמוד-המושג המלא
+            שלו (/method/*). נותן לקוראים ולסורקים נתיב ישיר „כלי בספר → הסבר
+            המושג המלא”, ללא תלות בפתיחת הכרטיס האינטראקטיבי. */}
+        <Reveal>
+          <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-border bg-surface-muted/60 p-5 sm:p-6">
+            <p className="text-[15px] font-semibold text-foreground">
+              כל כלי הוא מושג מהספר — עם עמוד הסבר מלא משלו:
+            </p>
+            <ul className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+              {items.map((item) => {
+                const method = methodByToolId[item.id];
+                if (!method) return null;
+                return (
+                  <li key={item.id}>
+                    <Link
+                      href={method.path}
+                      className="inline-flex items-center gap-1.5 text-[15px] font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                      „{method.term}” — הסבר המושג
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </Reveal>
       </Container>
     </section>
   );

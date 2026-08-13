@@ -163,6 +163,11 @@ const findingRelationship: Guide = {
       sub: "מה מבדיל משיכה מהתאמה שנשארת.",
     },
   ],
+  method: {
+    href: "/method/core-values",
+    label: "„קו אדום מול גמישות” — שלושה ערכי-ברזל",
+    sub: "המושג מהספר לבחירה לפי ערכים.",
+  },
   datePublished: PUBLISHED,
 };
 
@@ -234,6 +239,11 @@ const choosingPartner: Guide = {
       sub: "כשלא בטוחים אם להמשיך.",
     },
   ],
+  method: {
+    href: "/method/core-values",
+    label: "„קו אדום מול גמישות” — שלושה ערכי-ברזל",
+    sub: "המושג מהספר לבחירת בן/בת זוג.",
+  },
   datePublished: PUBLISHED,
 };
 
@@ -313,6 +323,11 @@ const relationshipDoubts: Guide = {
       sub: "לפני שמחליטים אם להמשיך.",
     },
   ],
+  method: {
+    href: "/method/fact-story",
+    label: "„עובדה, סיפור, פעולה” — לעצור פרשנות",
+    sub: "המושג מהספר להפרדת עובדה מפרשנות.",
+  },
   datePublished: PUBLISHED,
 };
 
@@ -384,6 +399,11 @@ const compatibility: Guide = {
       sub: "מהתאמה — להכרעה.",
     },
   ],
+  method: {
+    href: "/method/core-values",
+    label: "„קו אדום מול גמישות” — שלושה ערכי-ברזל",
+    sub: "ערכים לפני כימיה — המושג מהספר.",
+  },
   datePublished: PUBLISHED,
 };
 

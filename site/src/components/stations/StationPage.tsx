@@ -244,6 +244,16 @@ export function StationPage({ station }: { station: Station }) {
           ) : null}
           {/* כניסה שקטה לעוזר — למי שרוצה כיוון לפני שהוא בוחר מאיפה להתחיל. */}
           <AskBookLink prompt="לא בטוחים מאיפה להתחיל?" />
+          {/* קישור הקשרי אחד לעמוד-המושג שהתחנה נשענת עליו (/method/*). */}
+          {station.method ? (
+            <Link
+              href={station.method.href}
+              className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              המושג מהספר: „{station.method.term}”
+            </Link>
+          ) : null}
         </section>
       </div>
 

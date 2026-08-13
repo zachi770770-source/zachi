@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 
 import { stations } from "@/content/stations";
+import { methodByToolId } from "@/content/methods";
 import { StationGuides } from "@/components/guides/StationGuides";
 import type {
   JourneyId,
@@ -100,6 +101,9 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
   const station = stations[journey.id];
   const v = VARIANTS[journey.variant];
   const previewHref = `/preview?tool=${journey.sampleTool}&station=${journey.sampleStation}`;
+  // עמוד-המושג המלא של הכלי שהתחנה משתמשת בו (נגזר מ-sampleTool) — קישור הקשרי
+  // אחד אל /method/*, כדי שהתחנה תוביל גם אל ההגדרה הקנונית של הכלי.
+  const stationMethod = methodByToolId[journey.sampleTool];
 
   const quote = <PullQuote text={journey.pullQuote} tone={v.quoteTone} />;
 
@@ -398,6 +402,15 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
                 {journey.nextStep.label}
               </Link>
             </p>
+            {stationMethod ? (
+              <Link
+                href={stationMethod.path}
+                className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
+                המושג מהספר: „{stationMethod.term}”
+              </Link>
+            ) : null}
           </div>
         </section>
 

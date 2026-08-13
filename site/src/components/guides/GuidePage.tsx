@@ -37,7 +37,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
-          { name: "לפני קשר", path: guide.hub.href },
+          { name: guide.hub.label, path: guide.hub.href },
           { name: guide.h1, path: guide.path },
         ]}
       />
@@ -59,7 +59,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
               href={guide.hub.href}
               className="rounded-sm underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              לפני קשר
+              {guide.hub.label}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
