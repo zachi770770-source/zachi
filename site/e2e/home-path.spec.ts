@@ -1,118 +1,132 @@
 import { test, expect } from "./fixtures";
 
 /**
- * „איפה זה פוגש אותך עכשיו?” — שער אמיתי לארבע חוויות. הבדיקות מוודאות את
- * הארכיטקטורה החדשה: כל אחת מארבע הבחירות היא *קישור* שמנווט לעמוד-המסע הייעודי,
- * אין עוד result-panel שנפתח בבית, והכרטיסים קיימים כ-<a> אמיתיים גם בלי JS.
+ * „איפה זה פוגש אותך עכשיו?” — רגע-זיהוי, לא רק תפריט ניווט. כל מצב הוא
+ * `<details>` נטיבי: ה-summary היא הבחירה, פתיחתה חושפת זיהוי + מוקד אחד,
+ * וההמשך הוא קישור אמיתי לעמוד-המסע. בחירה וניווט הן פעולות נפרדות. הקישורים
+ * קיימים ב-HTML (SEO / ללא-JS), והאקורדיון עובד נטיבית גם בלי JS.
  */
 
-const CARDS = [
-  { name: /אני מחפש/, href: "/before-relationship" },
-  { name: /אני בתחילת/, href: "/building-relationship" },
-  { name: /אני בתוך/, href: "/inside-relationship" },
-  { name: /אני אחרי/, href: "/after-breakup" },
+const STAGES = [
+  { title: /אני מחפש/, href: "/before-relationship", reveal: "גם הדרך שבה בוחרים" },
+  { title: /אני בתחילת/, href: "/building-relationship", reveal: "מה בונים ממנה" },
+  { title: /אני בתוך/, href: "/inside-relationship", reveal: "לא כל קושי אומר" },
+  { title: /אני אחרי/, href: "/after-breakup", reveal: "מה בדיוק הסתיים" },
 ] as const;
 
-test("the four choices are links to the four journey pages — no in-Home result panel", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  const path = page.locator("#path");
-  await expect(path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" })).toBeVisible();
-
-  // ארבעה קישורים אמיתיים ליעדים הנכונים.
-  for (const c of CARDS) {
-    await expect(path.getByRole("link", { name: c.name })).toHaveAttribute("href", c.href);
-  }
-  // אין עוד בלוק-תוצאה בבית (הארכיטקטורה הישנה הוסרה).
-  await expect(page.locator(".path-panel")).toHaveCount(0);
-  await expect(page.locator('[id^="path-panel-"]')).toHaveCount(0);
-});
-
-for (const c of CARDS) {
-  test(`clicking "${c.href}" navigates to that journey page`, async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-    await page.locator("#path").getByRole("link", { name: c.name }).click();
-    await expect(page).toHaveURL(new RegExp(`${c.href}$`));
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  });
+function detailsFor(page: import("./fixtures").Page, href: string) {
+  return page.locator("#path details", { has: page.locator(`a[href="${href}"]`) });
 }
 
-test("keyboard: Enter on a focused card navigates to its journey page", async ({ page }) => {
+test("#path: four stage choices as a native accordion; recognition hidden until selected", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
-  const link = page.locator("#path").getByRole("link", { name: /אני בתחילת/ });
-  await link.focus();
-  await expect(link).toBeFocused();
-  await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/building-relationship$/);
-});
+  const path = page.locator("#path");
+  await expect(
+    path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" })
+  ).toBeVisible();
 
-test("no-JS safety: the four cards exist as real <a> to the journey pages without JavaScript", async ({ browser }) => {
-  const ctx = await browser.newContext({ javaScriptEnabled: false });
-  const page = await ctx.newPage();
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  for (const c of CARDS) {
-    await expect(page.locator(`#path a[href="${c.href}"]`)).toHaveCount(1);
+  // ארבע בחירות (summary) גלויות; ארבעת קישורי-ההמשך קיימים ב-DOM (SEO/ללא-JS).
+  await expect(path.locator("summary")).toHaveCount(4);
+  for (const s of STAGES) {
+    await expect(path.locator("summary", { hasText: s.title })).toBeVisible();
+    await expect(path.locator(`a[href="${s.href}"]`)).toHaveCount(1);
   }
-  await ctx.close();
+  // תוכן הזיהוי סגור כברירת מחדל (אין result-panel נפרד; אין ארכיטקטורה ישנה).
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
+  await expect(page.locator(".path-panel")).toHaveCount(0);
 });
 
-test("no-JS navigation: with JavaScript disabled, clicking a card still lands on its journey page", async ({
+test("selecting a stage reveals its recognition, then the continue link navigates", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+
+  await detailsFor(page, "/before-relationship").locator("summary").click();
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeVisible();
+
+  const cont = path.locator('a[href="/before-relationship"]');
+  await expect(cont).toBeVisible();
+  await cont.click();
+  await expect(page).toHaveURL(/\/before-relationship$/);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+});
+
+test("opening a different stage replaces the response (single-open accordion)", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+
+  await detailsFor(page, "/before-relationship").locator("summary").click();
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeVisible();
+
+  await detailsFor(page, "/after-breakup").locator("summary").click();
+  await expect(path.getByText("מה בדיוק הסתיים", { exact: false })).toBeVisible();
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
+});
+
+test("keyboard: focus a summary and Enter reveals its recognition", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+  const sum = path.locator("summary", { hasText: /אני בתחילת/ });
+  await sum.focus();
+  await page.keyboard.press("Enter");
+  await expect(path.getByText("מה בונים ממנה", { exact: false })).toBeVisible();
+});
+
+test("no-JS: stage links exist, and native details still reveals + navigates the continue link", async ({
   browser,
 }) => {
-  // התלות המסוכנת: ניווט שנשען על JS. הכרטיסים הם <a href> נטיביים, ולכן
-  // הניווט חייב לעבוד גם כשה-JS כבוי לחלוטין (אין hydration, אין router.push).
-  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const ctx = await browser.newContext({
+    javaScriptEnabled: false,
+    reducedMotion: "reduce", // ללא אנימציית-חשיפה → הקישור יציב לקליק
+  });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.locator('#path a[href="/after-breakup"]').click();
-  await expect(page).toHaveURL(/\/after-breakup$/);
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  for (const s of STAGES) {
+    await expect(page.locator(`#path a[href="${s.href}"]`)).toHaveCount(1);
+  }
+  // ללא JS: פתיחת ה-summary נטיבית, ואז קישור-ההמשך מנווט.
+  await detailsFor(page, "/after-breakup").locator("summary").click();
+  const cont = page.locator('#path a[href="/after-breakup"]');
+  await expect(cont).toBeVisible();
+  await Promise.all([page.waitForURL(/\/after-breakup$/), cont.click()]);
   await ctx.close();
 });
 
-test("mobile 390: nothing overlays the cards — elementFromPoint at each card center hits its own link", async ({
+test("mobile 390: the revealed continue link is not overlaid by sticky/floating UI", async ({
   browser,
 }) => {
-  // audit אמיתי מול overlays (cookie banner, floating „שאל את הספר”, sticky,
-  // ::before/::after, absolute/fixed, z-index, pointer-events). במרכז כל
-  // כרטיס — האלמנט העליון חייב להיות הקישור עצמו או ילד שלו, ולא overlay.
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await ctx.newPage();
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
 
-  const results = await page.evaluate((hrefs) => {
-    const out: Array<{
-      href: string;
-      hitsOwnLink: boolean;
-      pointerEvents: string;
-      topTag: string;
-    }> = [];
-    for (const href of hrefs) {
-      const a = document.querySelector<HTMLAnchorElement>(`#path a[href="${href}"]`);
-      if (!a) {
-        out.push({ href, hitsOwnLink: false, pointerEvents: "n/a", topTag: "MISSING" });
-        continue;
-      }
-      // גלילה מיידית (לא smooth) כדי שה-getBoundingClientRect מיד נכון —
-      // אחרת עם scroll-behavior:smooth הקואורדינטות עלולות לצאת מה-viewport.
-      a.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
-      const r = a.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const top = document.elementFromPoint(cx, cy);
-      out.push({
-        href,
-        // האלמנט שנפגע במרכז הוא הקישור עצמו, או צאצא שלו (span/svg בתוך <a>).
-        hitsOwnLink: !!top && (top === a || a.contains(top)),
-        pointerEvents: top ? getComputedStyle(top).pointerEvents : "none",
-        topTag: top ? top.tagName : "null",
-      });
-    }
-    return out;
-  }, CARDS.map((c) => c.href));
+  const summary = detailsFor(page, "/before-relationship").locator("summary");
+  await summary.scrollIntoViewIfNeeded();
+  await summary.click();
+  const cont = page.locator('#path a[href="/before-relationship"]');
+  await cont.scrollIntoViewIfNeeded();
 
-  for (const res of results) {
-    expect(res.hitsOwnLink, `overlay intercepts tap at ${res.href} (top=${res.topTag})`).toBe(true);
-    expect(res.pointerEvents, `pointer-events blocked at ${res.href}`).not.toBe("none");
-  }
+  const hit = await page.evaluate(() => {
+    const a = document.querySelector('#path a[href="/before-relationship"]');
+    if (!a) return { ok: false, tag: "MISSING", pe: "n/a" };
+    const r = a.getBoundingClientRect();
+    const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return {
+      ok: !!top && (top === a || a.contains(top)),
+      tag: top ? top.tagName : "null",
+      pe: top ? getComputedStyle(top).pointerEvents : "none",
+    };
+  });
+  expect(hit.ok, `overlay intercepts the continue link (top=${hit.tag})`).toBe(true);
+  expect(hit.pe).not.toBe("none");
+  await ctx.close();
 });

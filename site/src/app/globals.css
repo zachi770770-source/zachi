@@ -733,6 +733,24 @@
     }
   }
 
+  /* „איפה זה פוגש אותך עכשיו?” — אקורדיון-בחירה נטיבי (זהה בשפתו ל-.tool-acc):
+     הסרת סמן ברירת-המחדל, סיבוב השברון בפתיחה, וחשיפת-גוף עדינה (motion-safe,
+     ללא-JS, מכבד reduced-motion). */
+  .path-acc > summary {
+    list-style: none;
+  }
+  .path-acc > summary::-webkit-details-marker {
+    display: none;
+  }
+  .path-acc[open] .path-acc__chev {
+    transform: rotate(180deg);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .path-acc[open] .path-acc__body {
+      animation: toolAccBody 260ms var(--ease-settle) both;
+    }
+  }
+
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
     transform-box: fill-box;

@@ -99,6 +99,6 @@ test("reduced-motion: the path-selector area is fully visible", async ({ browser
   const path = page.locator("#path");
   await path.scrollIntoViewIfNeeded();
   await expect(path).toContainText("איפה זה פוגש אותך עכשיו?");
-  await expect(path.getByRole("link", { name: /אני מחפש/ })).toBeVisible();
+  await expect(path.locator("summary", { hasText: /אני מחפש/ })).toBeVisible();
   await ctx.close();
 });

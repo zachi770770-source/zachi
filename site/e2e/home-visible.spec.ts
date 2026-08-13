@@ -73,7 +73,7 @@ test("home: four real navigation cards linking to the four journey pages", async
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
   for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/]) {
-    await expect(path.getByRole("link", { name })).toBeVisible();
+    await expect(path.locator("summary", { hasText: name })).toBeVisible();
   }
   for (const href of [
     "/before-relationship",

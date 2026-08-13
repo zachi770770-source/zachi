@@ -94,8 +94,9 @@ test("compass ?station=<invalid> and direct /compass start normally at the stati
 test("two actions from Home to real book content (state → journey page → sample)", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
-  // פעולה 1: בחירת מצב → ניווט לעמוד-המסע.
-  await page.locator("#path").getByRole("link", { name: /אני מחפש/ }).click();
+  // פעולה 1: בחירת מצב → חשיפת רגע-זיהוי → המשך לעמוד-המסע.
+  await page.locator("#path").locator("summary", { hasText: /אני מחפש/ }).click();
+  await page.locator('#path a[href="/before-relationship"]').click();
   await expect(page).toHaveURL(/\/before-relationship$/);
   // פעולה 2: הטעימה המותאמת → נחיתה על קטע אמיתי מהספר.
   await page.getByRole("link", { name: "קראו את הקטע שמתאים לשלב הזה" }).click();
