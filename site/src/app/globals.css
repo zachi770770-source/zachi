@@ -811,6 +811,45 @@
     }
   }
 
+  /* „רגע אחד — שלוש שכבות” (/method/fact-story) — צ׳יפ-בחירה נטיבי (radio חבוי),
+     הדגשה ניטרלית כשנבחר, ושכבות שנחשפות בהדרגה. אי-לקוח: המצב ephemeral, אבל
+     ההדגשה עצמה נשענת על :has(:checked) — עובד עם מקלדת וקורא-מסך. */
+  .fslab-chip {
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    border-radius: 999px;
+    border: 1.5px solid var(--color-border-strong);
+    background: var(--color-surface);
+    padding: 0.5rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  @media (hover: hover) {
+    .fslab-chip:hover {
+      background: var(--color-surface-muted);
+    }
+  }
+  .fslab-chip:has(input:checked) {
+    border-color: var(--color-brand);
+    background: var(--color-brand-muted);
+    color: var(--color-brand-hover);
+  }
+  .fslab-chip:has(input:focus-visible) {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  .fslab-step {
+    letter-spacing: 0.02em;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .fslab-reveal {
+      animation: toolAccBody 240ms var(--ease-settle) both;
+    }
+  }
+
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
     transform-box: fill-box;

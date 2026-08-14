@@ -205,6 +205,11 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     sampleTool: "gate-questions",
     sampleStation: "building-relationship",
     compassStation: "building",
+    // המושג ההקשרי לעומק בשלב הזה הוא אי-הוודאות שבפרשנות — „עובדה, סיפור, פעולה”,
+    // הכלי שכעת אפשר *לתרגל* על רגע אמיתי (הודעה/שתיקה/שינוי בטון). הטעימה נשארת
+    // „בדיקת הקצב” (gate-questions); בדיקת-הקצב זמינה גם דרך המצפן, /method/pace-check
+    // והמדריכים. הפניה הזו מפעילה את המסלול Homepage → בתחילת קשר → fact-story.
+    featuredMethodSlug: "fact-story",
 
     nextStep: {
       prompt: "וכשהקשר יעמיק — הספר ממשיך גם אל מה שקורה בתוך זוגיות של ממש.",
