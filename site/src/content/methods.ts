@@ -46,6 +46,49 @@ export interface FilterMap {
   closing: string;
 }
 
+/** רגע-פתיחה מוצע ל„עובדה, סיפור, פעולה” — עובדה חשופה, בלי פרשנות. */
+export interface FactStoryMoment {
+  id: string;
+  /** מה שקרה בפועל — משפט קצר, חף מפרשנות. */
+  fact: string;
+}
+
+/**
+ * „רגע אחד — שלוש שכבות”: הפעלה אינטראקטיבית של „עובדה, סיפור, פעולה”. הקורא/ת
+ * בוחר/ת רגע אמיתי אחד (או כותב/ת משלו), מזהה/ה את הסיפור שהוסיף/ה עליו, ואז
+ * רואה/ה את שניהם זה לצד זה — „רק הראשון קרה באמת” — ומקבל/ת שאלות-פעולה שנשענות
+ * על העובדה. אין ניקוד, אין נכון/לא-נכון, אין עצה אלגוריתמית — רק ההפרדה עצמה.
+ * הרגעים רחבים בכוונה (הודעה, דייט שנדחה, שינוי בטון, משהו שנאמר, קצב) כדי
+ * שהכלי יתאים גם למי שלא מכיר/ה דרך אפליקציות ולפרק ב'.
+ */
+export interface FactStoryLab {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  /** שלב 1 — העובדה. */
+  factPrompt: string;
+  moments: FactStoryMoment[];
+  customMomentLabel: string;
+  customMomentPlaceholder: string;
+  /** שלב 2 — הסיפור (דפוסי-פרשנות אוניברסליים שמתאימים כמעט לכל רגע). */
+  storyPrompt: string;
+  stories: string[];
+  customStoryLabel: string;
+  customStoryPlaceholder: string;
+  /** ההפרדה — תוויות + השורה שמפרידה עובדה מסיפור. */
+  factTag: string;
+  storyTag: string;
+  separationLine: string;
+  /** שלב 3 — הפעולה (שאלות רפלקציה, לא הוראות). */
+  actionEyebrow: string;
+  actionIntro: string;
+  actionPrompts: string[];
+  /** שורת-סגירה שמחזירה אל הכלי ואל המשך הקריאה. */
+  closing: string;
+  /** תווית „להתחיל מרגע אחר”. */
+  resetLabel: string;
+}
+
 export interface Method {
   slug: string;
   path: string;
@@ -74,6 +117,8 @@ export interface Method {
   relatedGuides: MethodLink[];
   /** „מפת סינון” אינטראקטיבית (אופציונלי) — קיימת רק ל„קו אדום מול גמישות”. */
   filterMap?: FilterMap;
+  /** „רגע אחד — שלוש שכבות” אינטראקטיבי (אופציונלי) — קיים רק ל„עובדה, סיפור, פעולה”. */
+  factStory?: FactStoryLab;
   datePublished: string;
 }
 
@@ -171,6 +216,47 @@ const factStory: Method = {
     { href: "/guide/words-vs-actions", label: "כשיש פער בין המילים למעשים", sub: "מה נאמר מול מה שקרה." },
     { href: "/guide/dating-red-flags", label: "דגלים אדומים בדייטים", sub: "עובדה לפני שמסמנים דגל." },
   ],
+  // „רגע אחד — שלוש שכבות”: הפעלה של הכלי על רגע אמיתי של הקורא/ת. הרגעים
+  // מכוונים לשלב תחילת-הקשר/אי-הוודאות, ורחבים בכוונה (לא רק הודעות באפליקציה).
+  factStory: {
+    eyebrow: "נסו על רגע אחד",
+    title: "רגע אחד, שלוש שכבות",
+    intro:
+      "קחו רגע אחד שקרה לכם לאחרונה, משהו קטן שהעסיק אתכם. נפריד יחד בין מה שקרה באמת לבין מה שהראש כבר הוסיף עליו.",
+    factPrompt: "מה קרה בפועל?",
+    moments: [
+      { id: "silence", fact: "לא ענה/תה לי מאתמול" },
+      { id: "postponed", fact: "הדייט נדחה ברגע האחרון" },
+      { id: "cooler", fact: "הטון היה קריר מהרגיל" },
+      { id: "said", fact: "נאמר משהו שלא הבנתי עד הסוף" },
+      { id: "slower", fact: "הקצב איטי ממה שקיוויתי" },
+    ],
+    customMomentLabel: "רגע אחר…",
+    customMomentPlaceholder: "מה קרה? במשפט אחד, בלי פרשנות",
+    storyPrompt: "ומה הראש כבר סיפר על זה?",
+    stories: [
+      "כנראה איבד/ה בי עניין",
+      "בטח עשיתי משהו לא בסדר",
+      "זה עומד להיגמר",
+      "כנראה שלא באמת אכפת לו/לה",
+    ],
+    customStoryLabel: "משהו אחר…",
+    customStoryPlaceholder: "מה הראש הוסיף, במילים שלכם",
+    factTag: "מה שקרה",
+    storyTag: "מה שהוספתם",
+    separationLine: "רק הראשון קרה באמת. השני הוא סיפור אפשרי, לא עובדה.",
+    actionEyebrow: "פעולה",
+    actionIntro: "עכשיו, כשהעובדה עומדת לבדה, הפעולה נראית אחרת:",
+    actionPrompts: [
+      "מה אני באמת יודע/ת כרגע, ומה רק שיערתי?",
+      "איך הייתי מגיב/ה אילו הגבתי רק לעובדה?",
+      "יש כאן משהו ששווה לשאול, במקום להניח?",
+      "אולי דווקא לחכות רגע היא הפעולה הרגועה יותר?",
+    ],
+    closing:
+      "זהו הכלי: עובדה, סיפור, פעולה. כך בדיוק עושה זאת הספר, ברגע הבא.",
+    resetLabel: "להתחיל מרגע אחר",
+  },
   datePublished: PUBLISHED,
 };
 

@@ -6,6 +6,7 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { MethodFilterMap } from "@/components/methods/MethodFilterMap";
+import { MethodFactStory } from "@/components/methods/MethodFactStory";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -90,11 +91,14 @@ export function MethodPage({ method }: { method: Method }) {
           ))}
         </section>
 
-        {/* רגע אינטראקטיבי (רק למושג שהרעיון שלו הוא המיון עצמו) — „מפת הסינון”.
-            מוקדם בכוונה: אחרי מספיק הקשר (Hero + פתיח) אבל *לפני* הפירוק המלא של
-            שני הטורים והטעויות, כדי שהקורא/ת ישפוט/תשפוט מתוך האינטואיציה — ולא
-            יקבל/תקבל את התשובות מראש. ההסבר המעמיק בא מיד אחרי. */}
+        {/* רגע אינטראקטיבי (רק למושג שהרעיון שלו הוא ההשתתפות עצמה). מוקדם בכוונה:
+            אחרי מספיק הקשר (Hero + פתיח) אבל *לפני* הפירוק המלא, כדי שהקורא/ת
+            ישתתף/תשתתף מתוך האינטואיציה — ולא יקבל/תקבל את התשובות מראש. ההסבר
+            המעמיק (שלושת השלבים, הדוגמה מהספר, ה„למה”) בא מיד אחרי.
+            „מפת הסינון” לקו-אדום-מול-גמישות; „רגע אחד — שלוש שכבות” לעובדה/סיפור/
+            פעולה. לכל היותר אחד מהם קיים למושג נתון. */}
         {method.filterMap ? <MethodFilterMap map={method.filterMap} /> : null}
+        {method.factStory ? <MethodFactStory lab={method.factStory} /> : null}
 
         {/* מקטעי גוף — ההסבר המלא (שני הטורים, הטעויות, העיקרון), אחרי השיפוט. */}
         {method.sections.map((section) => (

@@ -107,6 +107,19 @@ test("before-relationship: the contextual concept link leads to core-values (cho
   ).toHaveAttribute("href", "/preview?tool=fact-story-action&station=before-relationship");
 });
 
+test("building-relationship: the contextual concept link leads to fact-story (interpretation), while the sample stays pace-check", async ({
+  page,
+}) => {
+  await page.goto("/building-relationship", { waitUntil: "networkidle" });
+  // המושג ההקשרי לעומק — „עובדה, סיפור, פעולה” (אי-הוודאות/פרשנות), הכלי שכעת ניתן לתרגל.
+  const concept = page.getByRole("link", { name: /המושג מהספר/ });
+  await expect(concept).toHaveAttribute("href", "/method/fact-story");
+  // הטעימה (הפעולה הראשית) נשארת „בדיקת הקצב” (gate-questions) — לא הושפעה מה-override.
+  await expect(
+    page.getByRole("link", { name: "קראו טעימה לקשר שמתחיל" }),
+  ).toHaveAttribute("href", "/preview?tool=gate-questions&station=building-relationship");
+});
+
 test("after-breakup gently offers 'starting again' as a next step (not a primary CTA)", async ({ page }) => {
   await page.goto("/after-breakup", { waitUntil: "networkidle" });
   await expect(page.getByText(/סקרנות לחזור לעולם ההיכרויות/)).toBeVisible();
