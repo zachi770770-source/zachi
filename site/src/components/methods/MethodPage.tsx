@@ -5,6 +5,7 @@ import { methodsUi, type Method } from "@/content/methods";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
+import { MethodFilterMap } from "@/components/methods/MethodFilterMap";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -104,6 +105,10 @@ export function MethodPage({ method }: { method: Method }) {
             </div>
           </section>
         ))}
+
+        {/* רגע אינטראקטיבי (רק למושג שהרעיון שלו הוא המיון עצמו) — „מפת הסינון”.
+            אחרי ההסבר, המבקר/ת מנסה את ההבחנה בעצמו/ה. */}
+        {method.filterMap ? <MethodFilterMap map={method.filterMap} /> : null}
 
         {/* הכלי בעמוד הספר (עוגן #tool-<id>) */}
         <p className="reveal rounded-2xl bg-surface-muted p-5 text-[15px] leading-relaxed text-foreground-muted sm:p-6">

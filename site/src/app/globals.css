@@ -760,6 +760,57 @@
     color: var(--color-brand-foreground);
   }
 
+  /* „מפת הסינון” (/method/core-values) — שיפוט עצמי קטן: בוחרים צד (radio),
+     ואז נחשפת נקודת-המבט של הספר. ללא JS: :has(:checked) חושף את הרפלקציה.
+     קידוד-צד לבּאדג' של הספר: קו אדום = טרקוטה, גמישות = זית (בתווית + צבע). */
+  .fmap-chip {
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    border-radius: 999px;
+    border: 1.5px solid var(--color-border-strong);
+    background: var(--color-surface);
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  @media (hover: hover) {
+    .fmap-chip:hover {
+      background: var(--color-surface-muted);
+    }
+  }
+  /* הבחירה של המשתמש/ת — הדגשה ניטרלית (לא „נכון”), זהה לשני הצדדים. */
+  .fmap-chip:has(input:checked) {
+    border-color: var(--color-brand);
+    background: var(--color-brand-muted);
+    color: var(--color-brand-hover);
+  }
+  .fmap-chip:has(input:focus-visible) {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  .fmap-reflect {
+    display: none;
+  }
+  .fmap-item:has(input:checked) .fmap-reflect {
+    display: block;
+  }
+  .fmap-item[data-side="line"] .fmap-badge {
+    background: var(--color-brand-muted);
+    color: var(--color-brand-hover);
+  }
+  .fmap-item[data-side="flex"] .fmap-badge {
+    background: var(--color-secondary-muted);
+    color: var(--color-foreground);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .fmap-item:has(input:checked) .fmap-reflect {
+      animation: toolAccBody 240ms var(--ease-settle) both;
+    }
+  }
+
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
     transform-box: fill-box;
