@@ -11,7 +11,7 @@ import { siteConfig } from "./site";
  * נעלה לאוויר עם placeholder. היא תעבור ברגע שצחי יחליף את הערך בכתובת אמיתית
  * (למשל hello@zachi.co.il) בקובץ src/config/site.ts.
  */
-describe("siteConfig.contact.email — launch gate", () => {
+describe("siteConfig.contact.email, launch gate", () => {
   const email = siteConfig.contact.email;
   const lower = email.toLowerCase();
 

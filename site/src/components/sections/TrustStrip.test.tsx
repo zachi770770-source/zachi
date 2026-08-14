@@ -16,7 +16,7 @@ describe("TrustStrip", () => {
     expect(items[2]).toHaveTextContent("טעימה חופשית מהספר");
   });
 
-  it("marks the visual separators as decorative (aria-hidden) — SR gets items, not dots", () => {
+  it("marks the visual separators as decorative (aria-hidden), SR gets items, not dots", () => {
     const { container } = render(<TrustStrip />);
     const decorative = container.querySelectorAll('[aria-hidden="true"]');
     expect(decorative.length).toBe(2); // שתי נקודות בין שלושת הפריטים

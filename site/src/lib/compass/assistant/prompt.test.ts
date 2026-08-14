@@ -19,7 +19,7 @@ const match = (n: number, name: string): CompassMatch => ({
   score: 0.5,
 });
 
-describe("isBlockedRequest — הגנת ספר והזרקה", () => {
+describe("isBlockedRequest, הגנת ספר והזרקה", () => {
   it("חוסם בקשות סיכום/פרק/רשימת עקרונות/הזרקה", () => {
     for (const q of [
       "סכם את הספר",
@@ -52,7 +52,7 @@ describe("isBlockedRequest — הגנת ספר והזרקה", () => {
   });
 });
 
-describe("buildCitation — ייחוס דטרמיניסטי, ללא מקף ארוך", () => {
+describe("buildCitation, ייחוס דטרמיניסטי, ללא מקף ארוך", () => {
   it("מציג עד שני פרקים ומתחיל ב„מבוסס על”", () => {
     const c = buildCitation([match(3, "בחירה מפוכחת"), match(3, "בחירה מפוכחת"), match(7, "בנייה")]);
     expect(c.startsWith("מבוסס על")).toBe(true);

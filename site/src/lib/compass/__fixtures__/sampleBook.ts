@@ -7,7 +7,7 @@ import type { BookSource } from "@/lib/compass/types";
  */
 export const sampleBook: BookSource = {
   version: "fixture-v1",
-  title: "מדייטים לאהבה — פיקסצ'ר בדיקה",
+  title: "מדייטים לאהבה, פיקסצ'ר בדיקה",
   chapters: [
     {
       number: 1,

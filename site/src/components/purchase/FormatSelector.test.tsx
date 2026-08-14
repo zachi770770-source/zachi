@@ -12,7 +12,7 @@ function renderSelector(value: ProductFormat = "digital") {
   return { onChange };
 }
 
-describe("FormatSelector — selected-state transitions", () => {
+describe("FormatSelector, selected-state transitions", () => {
   it("marks the selected edition with aria-checked and a fully-shown check mark", () => {
     renderSelector("digital");
     const digital = screen.getByRole("radio", { name: /ספר דיגיטלי/ });
@@ -28,7 +28,7 @@ describe("FormatSelector — selected-state transitions", () => {
     expect(anyCheck?.getAttribute("class") ?? "").toContain("scale-100");
   });
 
-  it("keeps the check mark hidden (not removed) on unselected, selectable editions — no layout shift", () => {
+  it("keeps the check mark hidden (not removed) on unselected, selectable editions, no layout shift", () => {
     // ניתן לבחור רק את הדיגיטלי בטרום-השקה; כשהערך אינו „digital”
     // (מצב היפותטי לבדיקת המעבר), הסימן קיים אך שקוף.
     renderSelector("physical");

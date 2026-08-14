@@ -12,7 +12,7 @@ import { patterns, attachment } from "@/content/book";
  * אחת הבדיקות כאן תיפול.
  */
 
-describe("מנוע „שאל את הספר” (AskRoute) — שלמות", () => {
+describe("מנוע „שאל את הספר” (AskRoute), שלמות", () => {
   it("ארבע תחנות עם שמות התצוגה המאושרים", () => {
     const byId = Object.fromEntries(askStations.map((s) => [s.id, s.name]));
     expect(byId.dating).toBe("לפני קשר");
@@ -49,7 +49,7 @@ describe("מנוע „שאל את הספר” (AskRoute) — שלמות", () => 
   });
 });
 
-describe("מבנה התחנות — שלוש תחנות + שער מעבר", () => {
+describe("מבנה התחנות, שלוש תחנות + שער מעבר", () => {
   it("חמשת עמודי-התחנה קיימים", () => {
     for (const id of [
       "before-relationship",

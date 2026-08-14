@@ -54,7 +54,7 @@ for (const width of [320, 360, 390]) {
   });
 }
 
-test("ask: analytics receives ids only — no personal/free text", async ({ page }) => {
+test("ask: analytics receives ids only, no personal/free text", async ({ page }) => {
   // מיירטים את dataLayer לפני טעינה; אין consent-gate בבדיקה, אז בודקים את הקריאה
   // ל-window.dataLayer.push דרך stub. כל payload חייב להכיל מזהים בלבד.
   await page.addInitScript(() => {

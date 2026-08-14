@@ -36,7 +36,7 @@ async function expectAboveFold(loc: Locator, page: Page) {
 
 const READER_BODY = ".living-ink .reader-lead";
 
-test.describe("/preview — התוכן המרכזי גלוי בפועל בכל מצב", () => {
+test.describe("/preview, התוכן המרכזי גלוי בפועל בכל מצב", () => {
   test("1280×768: יש טקסט קריאה ממשי מעל הקפל (לא רק המעטפת)", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 768 });
     await page.goto("/preview", { waitUntil: "networkidle" });
@@ -91,14 +91,14 @@ test.describe("/preview — התוכן המרכזי גלוי בפועל בכל �
     }
   });
 
-  test("רענון קשיח (reload) — התוכן עדיין גלוי", async ({ page }) => {
+  test("רענון קשיח (reload), התוכן עדיין גלוי", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 768 });
     await page.goto("/preview", { waitUntil: "networkidle" });
     await page.reload({ waitUntil: "networkidle" });
     await expectReallyVisible(page.locator(READER_BODY), { minText: 20 });
   });
 
-  test("מצב קריאה כהה — התוכן גלוי", async ({ page }) => {
+  test("מצב קריאה כהה, התוכן גלוי", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 768 });
     await page.goto("/preview", { waitUntil: "networkidle" });
     // כפתור מצב-הקריאה הכהה/בהיר הוא היחיד עם aria-pressed בסרגל הקורא.
@@ -107,7 +107,7 @@ test.describe("/preview — התוכן המרכזי גלוי בפועל בכל �
     await expectReallyVisible(page.locator(READER_BODY), { minText: 20 });
   });
 
-  test("באנר-עוגיות פתוח — התוכן מאחוריו גלוי", async ({ page }) => {
+  test("באנר-עוגיות פתוח, התוכן מאחוריו גלוי", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 768 });
     await page.goto("/preview", { waitUntil: "networkidle" });
     // לא סוגרים את הבאנר.
@@ -124,7 +124,7 @@ test.describe("/preview — התוכן המרכזי גלוי בפועל בכל �
   });
 });
 
-test.describe("/preview — ציר-זמן: התוכן לא נעלם אחרי hydration", () => {
+test.describe("/preview, ציר-זמן: התוכן לא נעלם אחרי hydration", () => {
   const READER = ".living-ink .reader-lead";
 
   /** בדיקה קשיחה: opacity≥0.95, יש bbox, והאלמנט בתוך המסך. */
@@ -212,7 +212,7 @@ test.describe("/preview — ציר-זמן: התוכן לא נעלם אחרי hyd
   });
 });
 
-test.describe("עמודים מרכזיים — כותרת + תוכן גוף גלויים בפועל", () => {
+test.describe("עמודים מרכזיים, כותרת + תוכן גוף גלויים בפועל", () => {
   const pages: { path: string; body: string }[] = [
     { path: "/", body: "#path h2" },
     { path: "/book", body: "#tools" },

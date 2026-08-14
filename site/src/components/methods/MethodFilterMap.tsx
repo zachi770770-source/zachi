@@ -37,13 +37,13 @@ export function MethodFilterMap({ map }: { map: FilterMap }) {
                 className="fmap-item rounded-xl border border-border bg-background p-4"
               >
                 <legend className="fmap-q float-none text-[15px] font-semibold text-foreground">
-                  {it.label}{" "}
-                  <span className="font-normal text-foreground-muted">— אצלכם?</span>
+                  {it.label}
+                  <span className="font-normal text-foreground-muted">, אצלכם?</span>
                 </legend>
 
                 <div
                   role="radiogroup"
-                  aria-label={`${it.label} — קו אדום או גמישות?`}
+                  aria-label={`${it.label}, קו אדום או גמישות?`}
                   className="mt-3 flex flex-wrap gap-2"
                 >
                   {(["line", "flex"] as const).map((choice) => (

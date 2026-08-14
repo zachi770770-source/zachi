@@ -23,7 +23,7 @@ describe("parseInline (emphasis)", () => {
     ]);
   });
 
-  it("never emits html — angle brackets stay literal text", () => {
+  it("never emits html, angle brackets stay literal text", () => {
     const spans = parseInline("<b>לא</b> מודגש");
     expect(spans.every((s) => s.type === "text")).toBe(true);
     expect(spans.map((s) => s.value).join("")).toBe("<b>לא</b> מודגש");

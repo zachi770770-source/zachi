@@ -19,7 +19,7 @@ for (const route of ROUTES) {
     const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
     expect(
       serious,
-      serious.map((v) => `${v.id} (${v.impact}) — ${v.nodes.length} node(s)`).join("\n")
+      serious.map((v) => `${v.id} (${v.impact}), ${v.nodes.length} node(s)`).join("\n")
     ).toEqual([]);
   });
 }

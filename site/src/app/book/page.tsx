@@ -23,7 +23,7 @@ import { ViewEvent } from "@/components/analytics/ViewEvent";
 
 export const metadata = pageMetadata({
   title: "ספר זוגיות: מדריך מעשי לדייטינג ולבניית קשר",
-  description: `מדריך מעשי לזוגיות ולדייטינג: כל מה שיש ב${siteConfig.bookTitle} — למי הספר מיועד, השיטה, מבנה הספר, הכלים המעשיים לבניית קשר, ומה משתנה אחרי הקריאה.`,
+  description: `מדריך מעשי לזוגיות ולדייטינג: כל מה שיש ב${siteConfig.bookTitle}, למי הספר מיועד, השיטה, מבנה הספר, הכלים המעשיים לבניית קשר, ומה משתנה אחרי הקריאה.`,
   path: "/book",
   ogType: "article",
 });

@@ -53,7 +53,7 @@ async function renderReadyConsole() {
   await screen.findByLabelText("השאלה שלכם");
 }
 
-describe("CompassConsole — motion states", () => {
+describe("CompassConsole, motion states", () => {
   it("renders the ask form once availability resolves to ready", async () => {
     await renderReadyConsole();
     expect(screen.getByRole("button", { name: /קבלו כיוון מהספר/ })).toBeInTheDocument();

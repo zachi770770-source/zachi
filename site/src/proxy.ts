@@ -36,7 +36,7 @@ export function proxy(request: NextRequest) {
   // כתובת-מאמר בודדת (/articles/<slug>) — אין תחליף אמיתי → 410 Gone מפורש.
   if (key.startsWith("/articles/")) {
     return new NextResponse(
-      "410 Gone — הכתובת הזו הוסרה לצמיתות ואין לה עמוד חלופי.",
+      "410 Gone: הכתובת הזו הוסרה לצמיתות ואין לה עמוד חלופי.",
       { status: 410, headers: { "content-type": "text/plain; charset=utf-8" } },
     );
   }

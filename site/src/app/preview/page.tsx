@@ -14,7 +14,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   title: "טעימה מהספר",
-  description: `טעימה קצרה מתוך ${siteConfig.bookTitle} — קטע לקריאה של כשתי דקות, ללא הרשמה.`,
+  description: `טעימה קצרה מתוך ${siteConfig.bookTitle}, קטע לקריאה של כשתי דקות, ללא הרשמה.`,
   path: "/preview",
   ogType: "article",
 });

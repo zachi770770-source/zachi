@@ -22,7 +22,7 @@ export function TrustBand() {
             className="text-[13.5px] font-semibold leading-snug text-foreground [text-wrap:pretty] sm:text-[15px]"
           >
             כלים מעשיים וגישה אנושית
-            <span className="font-normal text-foreground-muted"> — לא טיפול ולא אבחון.</span>
+            <span className="font-normal text-foreground-muted">, לא טיפול ולא אבחון.</span>
           </h2>
           <Link
             href="/author"

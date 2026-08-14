@@ -293,7 +293,7 @@ export function ToolsBento() {
 
               <blockquote className="tool-lux-panel__insight">
                 {openTool.insight}
-                <cite className="tool-lux-panel__cite">— צחי חן</cite>
+                <cite className="tool-lux-panel__cite">צחי חן</cite>
               </blockquote>
 
               {/* CTA יחיד לכל כלי פתוח — קטע מהספר הקשור לכלי (ללא הרשמה). */}

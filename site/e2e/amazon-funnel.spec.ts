@@ -19,7 +19,7 @@ async function expectAmazonBuy(scope: Locator) {
   await expect(link).toHaveAttribute("href", AMAZON_RE);
 }
 
-test("Flow A — Home offers a real external Amazon purchase (secondary to the sample)", async ({ page }) => {
+test("Flow A, Home offers a real external Amazon purchase (secondary to the sample)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   // הפעולה הראשית נשארת הטעימה.
   await expect(
@@ -29,12 +29,12 @@ test("Flow A — Home offers a real external Amazon purchase (secondary to the s
   await expectAmazonBuy(page.locator("main"));
 });
 
-test("Flow B — /preview closing routes the warm reader to Amazon", async ({ page }) => {
+test("Flow B, /preview closing routes the warm reader to Amazon", async ({ page }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });
   await expectAmazonBuy(page.locator("#join"));
 });
 
-test("Flow B2 — /book leads to Amazon, with sample as the quiet secondary", async ({ page }) => {
+test("Flow B2, /book leads to Amazon, with sample as the quiet secondary", async ({ page }) => {
   await page.goto("/book", { waitUntil: "networkidle" });
   await expectAmazonBuy(page.locator("#purchase"));
   await expect(
@@ -48,7 +48,7 @@ for (const path of [
   "/inside-relationship",
   "/after-breakup",
 ]) {
-  test(`Flow C — ${path} ends with one Amazon purchase exit`, async ({ page }) => {
+  test(`Flow C, ${path} ends with one Amazon purchase exit`, async ({ page }) => {
     await page.goto(path, { waitUntil: "networkidle" });
     await expectAmazonBuy(page.locator("main"));
     // פעם אחת בלבד — לא כפתור אמזון בכל שני מסכים.

@@ -61,7 +61,7 @@ test("the assistant drawer result offers the Amazon purchase, never a waitlist C
   const accept = page.getByRole("button", { name: "אישור הכל" });
   if (await accept.count()) await accept.first().click().catch(() => {});
 
-  await page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / }).click();
+  await page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("radio", { name: /שחוק.* מאפליקציות ומדייטים/ }).click();
   await expect(dialog.getByRole("article")).toBeVisible();

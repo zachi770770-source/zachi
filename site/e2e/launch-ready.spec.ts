@@ -163,7 +163,7 @@ test.describe("Launch-readiness", () => {
     await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
     // בבית: מנוע ההכוונה זמין כגלולה צפה — פותח את בורר התחנות.
-    const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
+    const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
     await page.mouse.wheel(0, 200);
     await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
     await pill.click();

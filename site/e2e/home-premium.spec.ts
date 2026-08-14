@@ -26,7 +26,7 @@ test("mobile 390: assistant bubble stays visible ABOVE the cookie banner (no ove
   );
 
   // הגלולה הצפה (aria-label מלא) — נבדלת מכפתור ה-#where „שאל את הספר” המדויק.
-  const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
+  const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
 
   // הגלולה נשארת גלויה כשהבאנר פתוח (לא מוסתרת) — נוכחת ולחיצה למשתמש חדש.
   await expect(bubble).toBeVisible();

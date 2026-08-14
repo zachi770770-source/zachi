@@ -14,7 +14,7 @@ async function openAsk(page: Page) {
   await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
   // הגלולה הצפה נבדלת ב-aria-label המלא (עם מקף); נחשפת אחרי גלילה קלה.
-  const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
+  const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
   await page.mouse.wheel(0, 200);
   await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
   await pill.click();
@@ -139,7 +139,7 @@ test("ask (from the floating pill): station → dilemma → result with tool + s
   await expect(dialog.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
 });
 
-test("ask: the station drives the mapped tool — a different station yields a different tool", async ({
+test("ask: the station drives the mapped tool, a different station yields a different tool", async ({
   page,
 }) => {
   const dialog = await openAsk(page);

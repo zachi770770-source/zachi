@@ -26,7 +26,7 @@ describe("CompassAnswer display", () => {
     expect(container.querySelectorAll("ul li")).toHaveLength(2);
   });
 
-  it("blocks raw HTML — no <script>, <img> or <b> elements are created", () => {
+  it("blocks raw HTML, no <script>, <img> or <b> elements are created", () => {
     const { container } = render(
       <CompassAnswer text={'<script>alert(1)</script> <img src=x onerror=y> <b>bold</b>'} />
     );

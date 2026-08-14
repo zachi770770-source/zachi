@@ -16,7 +16,7 @@ test("Hero: the single dominant action is the free sample, not an email form", a
   await expect(dominant).toHaveAttribute("href", "/preview");
 });
 
-test("home closing: Amazon is the only purchase channel — no waitlist, no email form", async ({ page }) => {
+test("home closing: Amazon is the only purchase channel, no waitlist, no email form", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   // אין שום שדה אימייל בעמוד — רשימת ההמתנה הוסרה לחלוטין.
   await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
@@ -72,7 +72,7 @@ test("home: the repeated sample teaser was removed; /preview is reached from the
   ).toHaveAttribute("href", "/preview");
 });
 
-test("/preview is a single reading experience — the duplicate peek (carousel) was removed", async ({
+test("/preview is a single reading experience, the duplicate peek (carousel) was removed", async ({
   page,
 }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });

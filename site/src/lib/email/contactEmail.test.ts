@@ -85,7 +85,7 @@ describe("sendContactEmail", () => {
     expect(sent.reply_to).toBeUndefined();
   });
 
-  it("never logs PII (name, message, email) on failure — only a status code", async () => {
+  it("never logs PII (name, message, email) on failure, only a status code", async () => {
     setEnv();
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 502 }));

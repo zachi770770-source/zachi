@@ -57,7 +57,7 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
     await page.evaluate(() => window.scrollTo(0, 300));
-    const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
+    const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
     await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
     // תווית מסבירה (title) — לא רק אייקון/מילה בודדת.
     await expect(bubble).toHaveAttribute("title", /שאלות קצרות/);
