@@ -16,7 +16,7 @@ export function MethodFilterMap({ map }: { map: FilterMap }) {
     <section
       id="filter-map"
       aria-labelledby="fmap-heading"
-      className="reveal rounded-2xl border border-border bg-surface p-5 sm:p-7"
+      className="rounded-2xl border border-border bg-surface p-5 sm:p-7"
     >
       <span className="kicker">{map.eyebrow}</span>
       <h2 id="fmap-heading" className="mt-3 font-serif text-2xl font-semibold text-foreground">

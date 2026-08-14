@@ -90,7 +90,13 @@ export function MethodPage({ method }: { method: Method }) {
           ))}
         </section>
 
-        {/* מקטעי גוף */}
+        {/* רגע אינטראקטיבי (רק למושג שהרעיון שלו הוא המיון עצמו) — „מפת הסינון”.
+            מוקדם בכוונה: אחרי מספיק הקשר (Hero + פתיח) אבל *לפני* הפירוק המלא של
+            שני הטורים והטעויות, כדי שהקורא/ת ישפוט/תשפוט מתוך האינטואיציה — ולא
+            יקבל/תקבל את התשובות מראש. ההסבר המעמיק בא מיד אחרי. */}
+        {method.filterMap ? <MethodFilterMap map={method.filterMap} /> : null}
+
+        {/* מקטעי גוף — ההסבר המלא (שני הטורים, הטעויות, העיקרון), אחרי השיפוט. */}
         {method.sections.map((section) => (
           <section key={section.heading} className="reveal">
             <h2 className="font-serif text-2xl font-semibold text-foreground">
@@ -105,10 +111,6 @@ export function MethodPage({ method }: { method: Method }) {
             </div>
           </section>
         ))}
-
-        {/* רגע אינטראקטיבי (רק למושג שהרעיון שלו הוא המיון עצמו) — „מפת הסינון”.
-            אחרי ההסבר, המבקר/ת מנסה את ההבחנה בעצמו/ה. */}
-        {method.filterMap ? <MethodFilterMap map={method.filterMap} /> : null}
 
         {/* הכלי בעמוד הספר (עוגן #tool-<id>) */}
         <p className="reveal rounded-2xl bg-surface-muted p-5 text-[15px] leading-relaxed text-foreground-muted sm:p-6">
