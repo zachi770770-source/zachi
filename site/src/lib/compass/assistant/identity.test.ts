@@ -10,7 +10,7 @@ import {
 } from "@/lib/compass/assistant/identity";
 import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 
-describe("עוגיית המבקר — דגלי אבטחה", () => {
+describe("עוגיית המבקר, דגלי אבטחה", () => {
   it("HttpOnly, SameSite=Lax, Path=/, ומשך חיים ארוך שמכסה את מגבלת 7 המצטברת", () => {
     const o = subjectCookieOptions();
     expect(o.httpOnly).toBe(true);

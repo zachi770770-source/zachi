@@ -172,7 +172,7 @@ describe("StagedTextReveal", () => {
     expect(container.textContent).toContain("אהבה היא בנייה.");
   });
 
-  it("7. reveals only once — observer disconnects after first intersection", () => {
+  it("7. reveals only once, observer disconnects after first intersection", () => {
     const { container } = render(<StagedTextReveal groups={GROUPS} />);
     const root = container.querySelector(".staged-reveal")!;
     expect(root.classList.contains("is-armed")).toBe(true);

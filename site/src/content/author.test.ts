@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import { authorContent } from "@/content/author";
 
-describe("author home teaser — first person", () => {
+describe("author home teaser, first person", () => {
   it("is written in the first person and opens with כתבתי", () => {
     expect(authorContent.homeTeaser.startsWith("כתבתי")).toBe(true);
     expect(authorContent.homeTeaser).toContain("רציתי ליצור ספר");

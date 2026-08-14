@@ -19,7 +19,7 @@ function reset() {
 beforeEach(reset);
 afterEach(reset);
 
-describe("getWaitlistRepository — real persistence selection", () => {
+describe("getWaitlistRepository, real persistence selection", () => {
   it("uses Postgres when DATABASE_URL is set", () => {
     process.env.DATABASE_URL = DUMMY_DB;
     expect(getWaitlistRepository()).toBeInstanceOf(PostgresWaitlistRepository);
@@ -35,7 +35,7 @@ describe("getWaitlistRepository — real persistence selection", () => {
   });
 });
 
-describe("getWaitlistRepository — no silent memory fallback on Vercel", () => {
+describe("getWaitlistRepository, no silent memory fallback on Vercel", () => {
   it("NEVER uses memory on Vercel Production even if WAITLIST_ALLOW_MEMORY=true", () => {
     process.env.VERCEL_ENV = "production";
     process.env.WAITLIST_ALLOW_MEMORY = "true";

@@ -26,7 +26,7 @@ async function walk(
   await page.getByRole("article").waitFor();
 }
 
-test("audit: 4 stations reach a result — clean console, focus, no overflow, no therapy-speak", async ({
+test("audit: 4 stations reach a result, clean console, focus, no overflow, no therapy-speak", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -85,7 +85,7 @@ test("audit: „אחרי פרידה” מסמנת במפורש שהיא תחנת
   await expect(article.getByText(/זו תחנת מעבר/)).toBeVisible();
 });
 
-test("audit: איור מאושר מוצג בתוצאת התחנה — עם alt תיאורי, ולא בתחנה ללא איור", async ({
+test("audit: איור מאושר מוצג בתוצאת התחנה, עם alt תיאורי, ולא בתחנה ללא איור", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });

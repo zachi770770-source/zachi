@@ -93,8 +93,8 @@ export function CompassLauncher() {
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          aria-label="מה הספר אומר על המצב שלי? — כמה שאלות קצרות שמובילות אותך לקטע ולכלי המתאימים"
-          title="כמה שאלות קצרות — ותדעו מאיזה קטע בספר להתחיל"
+          aria-label="מה הספר אומר על המצב שלי?, כמה שאלות קצרות שמובילות אותך לקטע ולכלי המתאימים"
+          title="כמה שאלות קצרות, ותדעו מאיזה קטע בספר להתחיל"
           // ה-bottom נקבע inline (ולא דרך class), אחרת Chromium לא מתקף אותו מחדש
           // כשמשתנה הבאנר היורש משתנה — ואז הגלולה חופפת לבאנר. הבסיס הרספונסיבי
           // (`--bubble-bottom”) מגיע דרך class לפי breakpoint.

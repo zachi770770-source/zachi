@@ -52,7 +52,7 @@ function conversionCta() {
   return screen.queryByRole("link", { name: compass.cta.closedLabel });
 }
 
-describe("CompassConsole — starters + unified conversion CTA", () => {
+describe("CompassConsole, starters + unified conversion CTA", () => {
   it("renders the three real station questions as starters before any answer", async () => {
     await renderReadyConsole();
     for (const q of STARTERS) {

@@ -107,7 +107,7 @@ test("ask: back, change dilemma/station and restart", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
 });
 
-test("ask: keyboard-only — focus a radio and Enter advances", async ({ page }) => {
+test("ask: keyboard-only, focus a radio and Enter advances", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/compass", { waitUntil: "networkidle" });
   const first = page.getByRole("radio").first();

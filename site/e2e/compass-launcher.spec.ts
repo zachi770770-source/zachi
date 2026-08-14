@@ -8,10 +8,10 @@ import { test, expect } from "@playwright/test";
  */
 
 // הגלולה הצפה נבדלת מכפתור „שאל את הספר” שבמקטע ה-#where (AskInvite): שם-הנגישות
-// שלה הוא ה-aria-label המלא („שאל את הספר — 2–3 שאלות…”), בעוד כפתור ה-#where הוא
-// „שאל את הספר” בדיוק. מסננים לפי המקף כדי למקד רק את הגלולה.
+// שלה הוא ה-aria-label המלא („מה הספר אומר על המצב שלי?, כמה שאלות…”), בעוד כפתור
+// ה-#where הוא „שאל את הספר” בדיוק. מסננים לפי הכיתוב המלא כדי למקד רק את הגלולה.
 const compass = (page: import("@playwright/test").Page) =>
-  page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
+  page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
 
 // הגלולה נשארת גלויה גם כשבאנר-העוגיות פתוח (מורמת מעליו) — הבדיקות למטה
 // מוודאות זאת. סגירת הבאנר משמשת לבדיקת המצב התחתון הרגיל.
@@ -111,7 +111,7 @@ test.describe("compass floating bubble", () => {
     { label: "desktop", width: 1440, height: 900, scroll: 0 },
     { label: "mobile", width: 390, height: 844, scroll: 220 },
   ]) {
-    test(`${vp.label}: pill stays visible+clickable while cookie banner is open — clear gap, aria-label, keyboard focus`, async ({
+    test(`${vp.label}: pill stays visible+clickable while cookie banner is open, clear gap, aria-label, keyboard focus`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
@@ -134,7 +134,7 @@ test.describe("compass floating bubble", () => {
       // aria-label נשמר (זהות נגישה יציבה).
       await expect(pill).toHaveAttribute(
         "aria-label",
-        /מה הספר אומר על המצב שלי\? — כמה שאלות/,
+        /מה הספר אומר על המצב שלי\?, כמה שאלות/,
       );
 
       // מיקוד-מקלדת עובד, ו-Enter פותח את החלונית — גם כשהבאנר פתוח.

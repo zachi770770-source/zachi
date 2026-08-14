@@ -52,7 +52,7 @@ async function dismissCookies(page: Page) {
 }
 
 const compass = (page: Page) =>
-  page.getByRole("button", { name: /מה הספר אומר על המצב שלי\? — / });
+  page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
 
 /** מפרק href לבסיס-מסלול פנימי (בלי origin/hash/query), או null לחיצוני. */
 function internalPath(href: string, origin: string): string | null {
@@ -66,7 +66,7 @@ function internalPath(href: string, origin: string): string | null {
   return u.pathname.replace(/\/+$/, "") || "/";
 }
 
-test.describe("Home — no dead links or ghost buttons anywhere on the page", () => {
+test.describe("Home, no dead links or ghost buttons anywhere on the page", () => {
   test("every <a> on the home page points to a real destination (never empty / #)", async ({
     page,
   }) => {
@@ -140,7 +140,7 @@ test.describe("Home — no dead links or ghost buttons anywhere on the page", ()
   });
 });
 
-test.describe("Assistant bubble — the tool link and the Amazon link both work", () => {
+test.describe("Assistant bubble, the tool link and the Amazon link both work", () => {
   test("desktop: tool link inside the drawer navigates to /book and reveals that tool; Amazon link is a real external buy", async ({
     page,
   }) => {
@@ -173,7 +173,7 @@ test.describe("Assistant bubble — the tool link and the Amazon link both work"
   });
 });
 
-test.describe("Footer — every link resolves to a real page", () => {
+test.describe("Footer, every link resolves to a real page", () => {
   test("desktop: all footer links land on a 200 page with an <h1>", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     await dismissCookies(page);
@@ -194,7 +194,7 @@ test.describe("Footer — every link resolves to a real page", () => {
   });
 });
 
-test.describe("Real mobile pass — main screens, no overlay eating the CTAs", () => {
+test.describe("Real mobile pass, main screens, no overlay eating the CTAs", () => {
   const SCREENS = ["/", "/book", "/preview", "/before-relationship", "/compass"];
   for (const path of SCREENS) {
     test(`mobile 390: ${path} renders with a visible H1 and captures a screenshot`, async ({

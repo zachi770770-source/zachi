@@ -10,9 +10,9 @@ import { test, expect, type Page } from "@playwright/test";
 const ASIN = "B0GJ3SL9H2";
 
 const METHODS = [
-  { path: "/method/quiet-check", h1: "„בדיקת השקט” — להפריד בין שקט לדחייה", tool: "quiet-check" },
-  { path: "/method/core-values", h1: "„קו אדום מול גמישות” — שלושה ערכי-ברזל", tool: "boundary-ladder" },
-  { path: "/method/fact-story", h1: "„עובדה, סיפור, פעולה” — לעצור פרשנות לפני שהיא פוגעת", tool: "fact-story-action" },
+  { path: "/method/quiet-check", h1: "„בדיקת השקט”: להפריד בין שקט לדחייה", tool: "quiet-check" },
+  { path: "/method/core-values", h1: "„קו אדום מול גמישות”: שלושה ערכי-ברזל", tool: "boundary-ladder" },
+  { path: "/method/fact-story", h1: "„עובדה, סיפור, פעולה”: לעצור פרשנות לפני שהיא פוגעת", tool: "fact-story-action" },
 ];
 
 const FORBIDDEN = ["כשהספר יוצא", "המכירה תיפתח בקרוב", "רשימת ההמתנה"];

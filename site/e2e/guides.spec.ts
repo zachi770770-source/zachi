@@ -11,17 +11,17 @@ const ASIN = "B0GJ3SL9H2";
 
 const GUIDES = [
   { path: "/guide/finding-a-relationship", h1: "איך למצוא זוגיות בלי להפוך כל דייט למבחן", hub: "/before-relationship" },
-  { path: "/guide/choosing-a-partner", h1: "איך לבחור בן או בת זוג — ומה באמת כדאי לבדוק", hub: "/before-relationship" },
+  { path: "/guide/choosing-a-partner", h1: "איך לבחור בן או בת זוג, ומה באמת כדאי לבדוק", hub: "/before-relationship" },
   { path: "/guide/relationship-doubts", h1: "ספקות בזוגיות: איך יודעים אם זה פחד או חוסר התאמה", hub: "/before-relationship" },
   { path: "/guide/compatibility", h1: "התאמה זוגית: מה באמת חשוב יותר מפרפרים בבטן", hub: "/before-relationship" },
-  { path: "/guide/healthy-relationship", h1: "מהי מערכת יחסים בריאה — ואיך יודעים שאתם בונים אחת", hub: "/inside-relationship" },
-  { path: "/guide/dating-red-flags", h1: "דגלים אדומים בדייטים — ומה באמת נחשב קו אדום", hub: "/before-relationship" },
+  { path: "/guide/healthy-relationship", h1: "מהי מערכת יחסים בריאה, ואיך יודעים שאתם בונים אחת", hub: "/inside-relationship" },
+  { path: "/guide/dating-red-flags", h1: "דגלים אדומים בדייטים, ומה באמת נחשב קו אדום", hub: "/before-relationship" },
   { path: "/guide/getting-back-with-ex", h1: "חזרה לאקס: איך יודעים אם זה נכון", hub: "/after-breakup" },
-  { path: "/guide/fear-of-commitment", h1: "פחד ממחויבות — שלך או של בן/בת הזוג", hub: "/building-relationship" },
+  { path: "/guide/fear-of-commitment", h1: "פחד ממחויבות, שלך או של בן/בת הזוג", hub: "/building-relationship" },
   { path: "/guide/couple-communication", h1: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", hub: "/inside-relationship" },
   { path: "/guide/attracted-to-unavailable", h1: "למה אני נמשך/ת לאנשים לא זמינים", hub: "/before-relationship" },
   { path: "/guide/recurring-fights", h1: "ריבים חוזרים: איך יוצאים מהלולאה", hub: "/inside-relationship" },
-  { path: "/guide/how-to-end-a-relationship", h1: "לסיים קשר בכבוד — בלי היעלמות", hub: "/starting-again" },
+  { path: "/guide/how-to-end-a-relationship", h1: "לסיים קשר בכבוד, בלי היעלמות", hub: "/starting-again" },
   { path: "/guide/how-fast-is-too-fast", h1: "כמה מהר זה מהר מדי בתחילת קשר", hub: "/building-relationship" },
   { path: "/guide/defining-the-relationship", h1: "בלעדיות: מתי ואיך מדברים על „מה אנחנו”", hub: "/building-relationship" },
   { path: "/guide/hot-and-cold", h1: "חם-קר בקשר: כשמישהו מתקרב ומתרחק", hub: "/building-relationship" },
@@ -52,7 +52,7 @@ async function ldjson(page: Page): Promise<Record<string, unknown>[]> {
   return out;
 }
 
-test.describe("guide cluster — each article", () => {
+test.describe("guide cluster, each article", () => {
   for (const g of GUIDES) {
     test(`${g.path}: 200, one H1, self-canonical, Article schema, breadcrumb, CTAs, no stale/waitlist`, async ({
       page,

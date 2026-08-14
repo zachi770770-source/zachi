@@ -39,7 +39,7 @@ function eventCalls(gtag: ReturnType<typeof vi.fn>, name: string) {
   return gtag.mock.calls.filter((c) => c[0] === "event" && c[1] === name);
 }
 
-describe("ViewEvent — E1 first-view retry", () => {
+describe("ViewEvent, E1 first-view retry", () => {
   beforeEach(() => {
     window.localStorage.clear();
     delete (window as { gtag?: unknown }).gtag;

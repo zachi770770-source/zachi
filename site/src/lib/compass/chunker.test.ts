@@ -41,7 +41,7 @@ describe("chunkBook", () => {
     }
   });
 
-  it("is deterministic — same input yields identical checksums", () => {
+  it("is deterministic, same input yields identical checksums", () => {
     const a = chunkBook(sampleBook);
     const b = chunkBook(sampleBook);
     expect(a.map((c) => c.checksum)).toEqual(b.map((c) => c.checksum));

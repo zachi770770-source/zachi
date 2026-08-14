@@ -79,7 +79,7 @@ run("compass quota (integration)", () => {
     expect(c.remainingDay).toBe(1);
   });
 
-  it("אטומי תחת בקשות מקבילות — אין עקיפה במקביליות", async () => {
+  it("אטומי תחת בקשות מקבילות, אין עקיפה במקביליות", async () => {
     const h = hashSubject("subject-parallel");
     const attempts = COMPASS_LIMITS.perDay + 5; // הרבה יותר מהתקרה
     const results = await Promise.all(
