@@ -324,7 +324,7 @@ export function ToolsBento() {
                   <li key={item.id}>
                     <Link
                       href={method.path}
-                      className="inline-flex items-center gap-1.5 text-[15px] font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      className="inline-flex items-center gap-1.5 text-[15px] font-medium text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                     >
                       <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
                       „{method.term}” — הסבר המושג
