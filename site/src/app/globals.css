@@ -277,6 +277,11 @@
     font-family: var(--font-sans);
     font-size: 1.0625rem; /* 17px רצפת קריאות */
     line-height: 1.65;
+    /* עידון-רינדור: קצוות חדים יותר לעברית ב-webkit/macOS, קרנינג וליגטורות
+       איפה שיש. ללא שינוי פריסה, ללא שינוי משפחת-גופן. */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   /* תחושת נייר כמעט בלתי נראית (≈2%) — לא נקראת כ"טקסטורה". */

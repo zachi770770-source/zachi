@@ -137,7 +137,7 @@ export function StationPage({ station }: { station: Station }) {
             {station.difficulty.paragraphs.map((p, i) => (
               <p
                 key={i}
-                className="text-[1.075rem] leading-[1.85] text-foreground/90"
+                className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]"
               >
                 {p}
               </p>
@@ -157,7 +157,7 @@ export function StationPage({ station }: { station: Station }) {
             {station.offer.paragraphs.map((p, i) => (
               <p
                 key={i}
-                className="text-[1.075rem] leading-[1.85] text-foreground/90"
+                className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]"
               >
                 {p}
               </p>
@@ -184,7 +184,7 @@ export function StationPage({ station }: { station: Station }) {
                 key={chapter.title}
                 className="rounded-2xl border border-border bg-surface p-5 sm:p-6"
               >
-                <h3 className="font-serif text-lg font-semibold text-foreground">
+                <h3 className="font-serif text-[1.3rem] font-semibold leading-snug text-foreground">
                   {chapter.title}
                 </h3>
                 <p className="mt-2 text-[16px] leading-relaxed text-foreground-muted">

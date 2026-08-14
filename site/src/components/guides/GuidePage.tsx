@@ -84,7 +84,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
         {/* פתיח */}
         <section className="reveal flex flex-col gap-4">
           {guide.intro.map((p, i) => (
-            <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90">
+            <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]">
               {p}
             </p>
           ))}
@@ -104,7 +104,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
             </h2>
             <div className="mt-4 flex flex-col gap-4">
               {section.paragraphs.map((p, i) => (
-                <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90">
+                <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]">
                   {p}
                 </p>
               ))}
@@ -116,7 +116,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
                     key={pt.title}
                     className="rounded-2xl border border-border bg-surface p-5 sm:p-6"
                   >
-                    <h3 className="font-serif text-lg font-semibold text-foreground">
+                    <h3 className="font-serif text-[1.3rem] font-semibold leading-snug text-foreground">
                       {pt.title}
                     </h3>
                     <p className="mt-2 text-[16px] leading-relaxed text-foreground-muted">

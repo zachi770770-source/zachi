@@ -86,7 +86,7 @@ export function MethodPage({ method }: { method: Method }) {
         {/* פתיח */}
         <section className="reveal flex flex-col gap-4">
           {method.intro.map((p, i) => (
-            <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90">
+            <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]">
               {p}
             </p>
           ))}
@@ -112,7 +112,7 @@ export function MethodPage({ method }: { method: Method }) {
             </h2>
             <div className="mt-4 flex flex-col gap-4">
               {section.paragraphs.map((p, i) => (
-                <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90">
+                <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]">
                   {p}
                 </p>
               ))}
