@@ -32,7 +32,7 @@ export default async function CheckoutPage({
           הרכישה הישירה באתר עדיין לא נפתחה
         </h1>
         <p className="mt-5 max-w-[48ch] text-[18px] leading-relaxed text-foreground-muted">
-          אבל אין צורך לחכות — {siteConfig.bookTitle} כבר זמין עכשיו במהדורת
+          אבל אין צורך לחכות: {siteConfig.bookTitle} כבר זמין עכשיו במהדורת
           Kindle באמזון. המהדורה הישירה/המודפסת באתר תיפתח בהמשך.
         </p>
         <Button asChild size="lg" className="mt-8 h-14 px-8 text-[17px]">

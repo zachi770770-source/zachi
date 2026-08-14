@@ -178,12 +178,12 @@ export function WaitlistForm({
               נרשמת בהצלחה. הטעימה מחכה לכם.
             </p>
             <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">
-              נעדכן אתכם ברגע שהספר ייצא — בינתיים אפשר לקרוא את הטעימה עכשיו.
+              נעדכן אתכם ברגע שהספר ייצא. בינתיים אפשר לקרוא את הטעימה עכשיו.
             </p>
             {/* התאמה אישית: אם „שאל את הספר” הושלם — קישור לתחנה שהותאמה (מקומי בלבד). */}
             {savedStation ? (
               <p className="mt-3 text-[15px] leading-relaxed text-foreground">
-                בזמן שאתם מחכים — התחנה שהתאמתם לעצמכם:{" "}
+                בזמן שאתם מחכים, התחנה שהתאמתם לעצמכם:{" "}
                 <Link
                   href={`/${savedStation}`}
                   className="font-semibold text-brand-hover underline underline-offset-4"

@@ -67,13 +67,13 @@ export function Hero() {
 
             {/* מובייל: משפט הסבר אחד קצר בלבד. דסקטופ: המשפט המלא (ללא שינוי). */}
             <p className="hero-fade mt-3 text-[17px] leading-[1.5] text-foreground/80 lg:hidden">
-              הספר שעוזר להבין מה מנהל אתכם — ולבנות קשר טוב.
+              הספר שעוזר להבין מה מנהל אתכם, ולבנות קשר טוב.
             </p>
             <p
               className="hero-fade mt-3 hidden max-w-[48ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:block lg:text-[20px] lg:leading-[1.6]"
               style={{ animationDelay: "380ms" }}
             >
-              בין אם אתם עוד מחפשים, בתחילת קשר או כבר בתוכו — הספר עוזר להבין
+              בין אם אתם עוד מחפשים, בתחילת קשר או כבר בתוכו, הספר עוזר להבין
               מה באמת מנהל אתכם, ולבנות קשר טוב במקום רק לחפש אותו.
             </p>
 
@@ -135,7 +135,7 @@ export function Hero() {
                     <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                   </Link>
                   <p className="text-[13px] leading-snug text-foreground-muted">
-                    כמה שאלות קצרות — והקטע והכלי שמתאימים למה שעובר עליכם עכשיו.
+                    כמה שאלות קצרות, והקטע והכלי שמתאימים למה שעובר עליכם עכשיו.
                   </p>
                 </div>
               </div>

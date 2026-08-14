@@ -17,7 +17,7 @@ export default function ContactPage() {
           יצירת קשר
         </h1>
         <p className="mt-3 text-lg text-foreground-muted">
-          שאלה על הספר, על הרכישה באמזון או כל דבר אחר — נשמח לענות.
+          שאלה על הספר, על הרכישה באמזון או כל דבר אחר, נשמח לענות.
         </p>
         <p className="mt-2 text-[14px] italic text-foreground-muted">
           כל שאלה ראויה לתשובה.

@@ -121,8 +121,9 @@ export function MethodPage({ method }: { method: Method }) {
           </section>
         ))}
 
-        {/* הכלי בעמוד הספר (עוגן #tool-<id>) */}
-        <p className="reveal rounded-2xl bg-surface-muted p-5 text-[15px] leading-relaxed text-foreground-muted sm:p-6">
+        {/* הכלי בעמוד הספר (עוגן #tool-<id>). מצביע-קריאה שקט, לא „קלף” —
+            אותה שפה בדיוק כמו במדריכים (/guide/*), כדי שהתפקיד יהיה עקבי. */}
+        <p className="reveal text-[15px] leading-relaxed text-foreground-muted">
           {methodsUi.bookToolLead}{" "}
           <Link
             href={`/book#tool-${method.bookTool.id}`}

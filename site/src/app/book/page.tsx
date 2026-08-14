@@ -86,13 +86,13 @@ export default function BookPage() {
               <span className="font-semibold text-foreground">
                 {siteConfig.bookTitle}
               </span>{" "}
-              מאת {siteConfig.author.name} — מדריך מעשי לדייטינג, לבחירת בן או בת
+              מאת {siteConfig.author.name}, מדריך מעשי לדייטינג, לבחירת בן או בת
               זוג ולבניית קשר זוגי.
             </p>
             {/* מיצוב: לא ספר חד-פעמי אלא מלווה לאורך כל המסע הזוגי (ללא טענה
                 השוואתית — לא „היחיד” / „הראשון מסוגו”). */}
             <p className="mt-4 font-serif text-[19px] font-semibold leading-snug text-brand-hover">
-              לא ספר שקוראים פעם אחת — ספר שחוזרים אליו לאורך המסע הזוגי.
+              לא ספר שקוראים פעם אחת, אלא ספר שחוזרים אליו לאורך המסע הזוגי.
             </p>
             {/* ה-CTA הראשי מיד אחרי המיצוב — כדי שיהיה מעל הקיפול בדסקטופ. הפסקאות
                 התיאוריות (תיאור + נקודת האיזון) מגיעות אחריו כפירוט תומך. */}

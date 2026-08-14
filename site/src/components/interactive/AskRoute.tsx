@@ -408,7 +408,7 @@ function Result({
       {/* „אחרי פרידה” היא תחנת-מעבר — התוצאה לא דוחפת לכיוון, מזכירה שמותר לא למהר. */}
       {isAfterBreakup ? (
         <p className="mt-3 rounded-xl bg-surface-muted/70 px-4 py-3 text-[14px] leading-relaxed text-foreground-muted">
-          זו תחנת מעבר. אין כאן כיוון „נכון” — לא חזרה ולא דייטים חדשים. מותר לעצור,
+          זו תחנת מעבר. אין כאן כיוון „נכון”, לא חזרה ולא דייטים חדשים. מותר לעצור,
           לעבד ולהבין לפני שמחליטים לאן.
         </p>
       ) : null}
@@ -517,7 +517,7 @@ function Result({
         className="mt-4 inline-flex items-start gap-1.5 text-[12.5px] leading-relaxed text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
       >
         <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" aria-hidden="true" />
-        יש בבית פחד, שליטה או סכנה? זה לא המקום — לחצו כאן.
+        יש בבית פחד, שליטה או סכנה? זה לא המקום. לחצו כאן.
       </button>
     </article>
   );

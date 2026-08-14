@@ -450,7 +450,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           className="inline-flex items-center gap-2 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          זה לא המקום שלי — בחרו מסלול אחר
+          זה לא המקום שלי, בחרו מסלול אחר
         </Link>
       </div>
     </Container>

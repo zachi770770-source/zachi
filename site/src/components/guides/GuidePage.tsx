@@ -169,7 +169,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
         {/* קישור פנימי לכלי המאומת בעמוד הספר (עוגן #tool-<id>) */}
         {guide.bookTool ? (
           <p className="reveal text-[15px] leading-relaxed text-foreground-muted">
-            הכלי הזה מופיע בהרחבה בספר —{" "}
+            הכלי הזה מופיע בהרחבה בספר:{" "}
             <Link
               href={`/book#tool-${guide.bookTool.id}`}
               className="font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
