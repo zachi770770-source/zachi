@@ -367,6 +367,25 @@
     text-wrap: balance;
   }
 
+  /* מערכת ה-Hero המאוחדת. אותה משפחה של ה-JourneyPage (font-serif נשאר על
+     האלמנט; כאן רק סקאלה, משקל, leading ואיזון). שתי דרגות באותה מערכת:
+     .type-hero      — עמודי-תוכן (method/guide/faq/compass/author), ~54px.
+     .type-hero-lg   — דרגת-הדגל: „מתחילים מחדש” כעמית של עמודי-המסע, ~58px. */
+  .type-hero {
+    font-weight: 700;
+    font-size: clamp(2.05rem, 4.4vw, 3.35rem); /* 32.8px → 53.6px */
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .type-hero-lg {
+    font-weight: 700;
+    font-size: clamp(2.1rem, 4.6vw, 3.6rem); /* 33.6px → 57.6px, כמו JourneyPage */
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
   /* בלוק „איפה זה פוגש אותך עכשיו?” — הבלוק הנבחר נכנס בעדינות (opacity/translate).
      מצב הבסיס גלוי לחלוטין (opacity:1); זו אנימציית-כניסה בלבד, לא תנאי-נראוּת:
      ב-reduced-motion / כשל-JS הבלוק פשוט מוצג מיד. (לא חוזרים על באג /preview.) */

@@ -22,11 +22,12 @@ export default function FaqPage() {
           { name: "שאלות נפוצות", path: "/faq" },
         ]}
       />
-      <div className="mx-auto max-w-2xl">
-        <h1 className="font-serif text-3xl font-semibold sm:text-4xl">
+      <div className="mx-auto mt-6 max-w-2xl">
+        <span className="kicker">על הספר</span>
+        <h1 className="mt-4 font-serif type-hero text-foreground">
           שאלות נפוצות
         </h1>
-        <p className="mt-3 text-lg text-foreground-muted">
+        <p className="mt-5 text-lg text-foreground-muted">
           כל מה שכדאי לדעת על הספר לפני שקוראים.
         </p>
         <p className="mt-2 text-[14px] italic text-foreground-muted">
