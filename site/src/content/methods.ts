@@ -89,6 +89,38 @@ export interface FactStoryLab {
   resetLabel: string;
 }
 
+/**
+ * „עוגן חזותי” סטטי לעמוד-מושג שאין לו אינטראקציה (quiet-check / pace-check /
+ * eye-level-talk / clean-exit). מטרתו לשבור את קיר-הפרוזה ולייצר מקצב של
+ * „מושג ⟶ תובנה חזותית ⟶ קריאה מעמיקה”, בלי כלי אינטראקטיבי מזויף. כל עוגן נגזר
+ * אך ורק מהתוכן הקיים של אותו מושג (ציטוט-עיקרון, ניסוח לפני/אחרי, שלילה מול
+ * חיוב), וכל סוג נראה שונה מהאחרים כדי שלא כל העמודים ייראו זהים. אין כאן CTA,
+ * אין רכיב אינטראקטיבי, ואין „קופסה” גנרית — טיפוגרפיה, קווים ומרווח בלבד.
+ */
+export type MethodAnchor =
+  /** ציטוט-עורך בולט — עיקרון-מפתח מתוך גוף המושג. */
+  | { kind: "pullquote"; quote: string; caption: string }
+  /** עיקרון ממוסגר עם מוטיב-שכבות מרוסן. */
+  | { kind: "principle"; eyebrow: string; statement: string; note: string }
+  /** השוואה דו-חלקית — אותו תוכן, „לפני” מול „אחרי”. */
+  | {
+      kind: "contrast";
+      eyebrow: string;
+      beforeTag: string;
+      beforeLines: string[];
+      afterTag: string;
+      afterLines: string[];
+      note: string;
+    }
+  /** הבחנה — מה זה *לא* (שלילה) מול מה זה *כן* (חיוב). */
+  | {
+      kind: "distinction";
+      eyebrow: string;
+      notLabel: string;
+      notItems: string[];
+      statement: string;
+    };
+
 export interface Method {
   slug: string;
   path: string;
@@ -119,6 +151,8 @@ export interface Method {
   filterMap?: FilterMap;
   /** „רגע אחד — שלוש שכבות” אינטראקטיבי (אופציונלי) — קיים רק ל„עובדה, סיפור, פעולה”. */
   factStory?: FactStoryLab;
+  /** עוגן חזותי סטטי (אופציונלי) — לעמודי-המושג שאין להם אינטראקציה. */
+  anchor?: MethodAnchor;
   datePublished: string;
 }
 
@@ -169,6 +203,13 @@ const quietCheck: Method = {
     { href: "/guide/getting-back-with-ex", label: "חזרה לאקס: איך יודעים אם זה נכון", sub: "עובדה מול געגוע." },
     { href: "/guide/over-a-breakup", label: "איך יודעים שסיימתי לעבד פרידה", sub: "בדיקת שקט עם עצמכם." },
   ],
+  // עוגן חזותי — ציטוט-העיקרון מתוך „מה זה” (שקט אינו דחייה), כפול-כמשקל
+  // כדי לשבור את הפרוזה לפני ההסבר המלא.
+  anchor: {
+    kind: "pullquote",
+    quote: "שקט הוא לא בהכרח דחייה, הוא לעיתים קרובות פשוט שקט.",
+    caption: "העיקרון שמאחורי „בדיקת השקט”",
+  },
   datePublished: PUBLISHED,
 };
 
@@ -372,6 +413,14 @@ const paceCheck: Method = {
     { href: "/guide/fear-of-commitment", label: "פחד ממחויבות, שלך או של בן/בת הזוג", sub: "קצב מול בריחה." },
     { href: "/guide/defining-the-relationship", label: "בלעדיות: מתי ואיך מדברים על „מה אנחנו”", sub: "תזמון מתוך צורך אמיתי." },
   ],
+  // עוגן חזותי — העיקרון (אינטימיות בשכבות) עם מוטיב-שכבות מרוסן, נגזר מ„מה זה”
+  // ומהדוגמה (מרווחי נשימה, לא חוק קשיח של 72 שעות).
+  anchor: {
+    kind: "principle",
+    eyebrow: "העיקרון",
+    statement: "אינטימיות אמיתית נבנית בשכבות, לא במכה אחת.",
+    note: "מרווחי נשימה, זמן לעיבוד, וקצב שמתאים לשני הצדדים; לא חוק קשיח של 72 שעות.",
+  },
   datePublished: PUBLISHED,
 };
 
@@ -419,6 +468,20 @@ const eyeLevelTalk: Method = {
     { href: "/guide/recurring-fights", label: "ריבים חוזרים: איך יוצאים מהלולאה", sub: "הצורך שמתחת לריב." },
     { href: "/guide/healthy-relationship", label: "מהי מערכת יחסים בריאה", sub: "בקשה במקום האשמה." },
   ],
+  // עוגן חזותי — ההשוואה „לפני/אחרי” מתוך הדוגמה בספר: אותו צורך, פעם כהאשמה
+  // ופעם בגובה העיניים. הציטוטים מובאים מילה במילה מגוף המושג.
+  anchor: {
+    kind: "contrast",
+    eyebrow: "אותו צורך, שתי דרכים",
+    beforeTag: "כשזה נשמע כהאשמה",
+    beforeLines: ["„אתה אף פעם לא מתקשר”", "„את לא יוזמת”"],
+    afterTag: "אותו צורך, בגובה העיניים",
+    afterLines: [
+      "„חשוב לי להרגיש את ההדדיות בינינו.”",
+      "„כיף לי כשאת או אתה יוזמים; זה נותן לי ביטחון בקשר.”",
+    ],
+    note: "אותו צורך בדיוק, נאמר כך שהצד השני שומע בקשה ולא כתב אישום.",
+  },
   datePublished: PUBLISHED,
 };
 
@@ -466,6 +529,15 @@ const cleanExit: Method = {
     { href: "/guide/getting-back-with-ex", label: "חזרה לאקס: איך יודעים אם זה נכון", sub: "סגירה נקייה מול פתח פתוח." },
     { href: "/guide/over-a-breakup", label: "איך יודעים שסיימתי לעבד פרידה", sub: "להמשיך הלאה בלי סימני שאלה." },
   ],
+  // עוגן חזותי — ההבחנה מתוך „מה זה”: ארבע הדרכים שיציאה נקייה *אינה*, מול המשפט
+  // האחד שהיא *כן*. השלילות והחיוב מובאים מילה במילה מגוף המושג.
+  anchor: {
+    kind: "distinction",
+    eyebrow: "ההבדל",
+    notLabel: "יציאה נקייה היא לא",
+    notItems: ["היעלמות", "האשמות", "מריחת זמן", "פתח לתקוות שווא"],
+    statement: "אלא אומרים את האמת בכבוד, וברור.",
+  },
   datePublished: PUBLISHED,
 };
 

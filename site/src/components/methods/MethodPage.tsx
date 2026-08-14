@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { MethodFilterMap } from "@/components/methods/MethodFilterMap";
 import { MethodFactStory } from "@/components/methods/MethodFactStory";
+import { MethodAnchor } from "@/components/methods/MethodAnchor";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -99,6 +100,9 @@ export function MethodPage({ method }: { method: Method }) {
             פעולה. לכל היותר אחד מהם קיים למושג נתון. */}
         {method.filterMap ? <MethodFilterMap map={method.filterMap} /> : null}
         {method.factStory ? <MethodFactStory lab={method.factStory} /> : null}
+        {/* עוגן חזותי סטטי — לעמודי-המושג שאין להם אינטראקציה. תופס את אותו חריץ
+            (אחרי הפתיח, לפני הגוף) כדי לשמור על מקצב זהה לשני העמודים העשירים. */}
+        {method.anchor ? <MethodAnchor anchor={method.anchor} /> : null}
 
         {/* מקטעי גוף — ההסבר המלא (שני הטורים, הטעויות, העיקרון), אחרי השיפוט. */}
         {method.sections.map((section) => (
