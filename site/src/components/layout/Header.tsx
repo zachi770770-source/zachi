@@ -13,16 +13,17 @@ import { BrandMark } from "@/components/shared/BrandMark";
  */
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-[76px]">
-        {/* לוגו + סמל מותג (בצד המתחיל ב-RTL) */}
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+      <div className="container-page flex h-16 items-center justify-between gap-3 sm:h-[76px] sm:gap-4">
+        {/* לוגו + סמל מותג (בצד המתחיל ב-RTL). nowrap כדי שהשם לעולם לא יישבר
+            לשתי שורות במובייל. */}
         <Link
           href="/"
-          className="group flex items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          className="group flex shrink-0 items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           aria-label={`${siteConfig.bookTitle}, לעמוד הבית`}
         >
-          <BrandMark withRing className="h-8 w-8 shrink-0 text-foreground" />
-          <span className="font-sans text-lg font-extrabold tracking-tight sm:text-[1.35rem]">
+          <BrandMark withRing className="h-9 w-9 shrink-0 text-foreground" />
+          <span className="whitespace-nowrap font-sans text-base font-extrabold tracking-tight sm:text-[1.35rem]">
             {siteConfig.bookTitle}
           </span>
         </Link>
@@ -30,10 +31,10 @@ export function Header() {
         {/* ניווט דסקטופ מלוכד: קישורים + מפריד + CTA */}
         <MainNav />
 
-        {/* מובייל: כפתור קומפקטי + המבורגר */}
-        <div className="flex items-center gap-1.5 lg:hidden">
-          <Button asChild size="sm" className="h-10 px-4 text-sm">
-            <Link href="/book#purchase">לרכישת הספר</Link>
+        {/* מובייל: CTA קומפקטי (שלא ישתלט על הלוגו) + המבורגר עם מרווח ברור */}
+        <div className="flex items-center gap-1 lg:hidden">
+          <Button asChild size="sm" className="h-10 px-3.5 text-sm">
+            <Link href="/book#purchase">לרכישה</Link>
           </Button>
           <MobileMenu />
         </div>
