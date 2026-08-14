@@ -69,6 +69,16 @@ export interface JourneyPage {
   sampleStation: JourneyId;
   compassStation: AskStationId;
 
+  /**
+   * override מפורש לקישור-המושג ההקשרי („המושג מהספר”), כ-slug של /method/*.
+   * ברירת המחדל: הקישור נגזר מ-sampleTool (המושג של כלי הטעימה). אבל לפעמים
+   * המושג שממסגר את *הבחירה* בשלב הזה אינו הכלי של הטעימה — ואז מציינים אותו
+   * כאן במפורש, בלי לגעת בטעימה. „לפני קשר”: „קו אדום מול גמישות” (core-values)
+   * הוא המושג שעונה ישירות על „למה אני פוסל/ת מהר, ומה אני באמת צריך/ה” —
+   * בעוד הטעימה נשארת „עובדה, סיפור, פעולה”.
+   */
+  featuredMethodSlug?: string;
+
   /** I. Next step — שונה לפי המסלול (רך). */
   nextStep: { prompt: string; href: string; label: string };
 }
@@ -129,6 +139,10 @@ export const journeyPages: Record<JourneyId, JourneyPage> = {
     sampleTool: "fact-story-action",
     sampleStation: "before-relationship",
     compassStation: "dating",
+    // המושג ההקשרי של השלב הזה הוא הבחירה עצמה — „קו אדום מול גמישות”, שעונה
+    // ישירות על „למה אני פוסל/ת מהר, ומה אני באמת צריך/ה”. הטעימה נשארת „עובדה,
+    // סיפור, פעולה” (sampleTool), אבל המושג שאליו מובילים לעומק הוא core-values.
+    featuredMethodSlug: "core-values",
 
     nextStep: {
       prompt: "כשתרצו לראות את התמונה המלאה — הספר ממשיך מהבחירה אל הקשר עצמו.",
