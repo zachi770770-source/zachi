@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 
 import { stations } from "@/content/stations";
-import { methodByToolId } from "@/content/methods";
+import { methods, methodByToolId } from "@/content/methods";
 import { StationGuides } from "@/components/guides/StationGuides";
 import type {
   JourneyId,
@@ -101,9 +101,13 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
   const station = stations[journey.id];
   const v = VARIANTS[journey.variant];
   const previewHref = `/preview?tool=${journey.sampleTool}&station=${journey.sampleStation}`;
-  // עמוד-המושג המלא של הכלי שהתחנה משתמשת בו (נגזר מ-sampleTool) — קישור הקשרי
-  // אחד אל /method/*, כדי שהתחנה תוביל גם אל ההגדרה הקנונית של הכלי.
-  const stationMethod = methodByToolId[journey.sampleTool];
+  // עמוד-המושג ההקשרי (/method/*) — קישור אחד אל ההגדרה הקנונית של המושג שממסגר
+  // את השלב. כברירת מחדל הוא נגזר מ-sampleTool (המושג של כלי הטעימה); אם התחנה
+  // מגדירה featuredMethodSlug מפורש — המושג שעונה על *הבחירה* בשלב הזה אינו הכלי
+  // של הטעימה — מובילים לעומק לפיו, בלי לגעת בטעימה עצמה.
+  const stationMethod = journey.featuredMethodSlug
+    ? methods[journey.featuredMethodSlug]
+    : methodByToolId[journey.sampleTool];
 
   const quote = <PullQuote text={journey.pullQuote} tone={v.quoteTone} />;
 

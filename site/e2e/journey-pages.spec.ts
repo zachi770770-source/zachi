@@ -93,6 +93,20 @@ for (const j of JOURNEYS) {
   });
 }
 
+test("before-relationship: the contextual concept link leads to core-values (choosing), while the sample stays fact-story", async ({
+  page,
+}) => {
+  await page.goto("/before-relationship", { waitUntil: "networkidle" });
+  // המושג ההקשרי לעומק — „קו אדום מול גמישות” (הבחירה עצמה), לא „עובדה, סיפור, פעולה”.
+  const concept = page.getByRole("link", { name: /המושג מהספר/ });
+  await expect(concept).toHaveAttribute("href", "/method/core-values");
+  await expect(concept).not.toHaveAttribute("href", "/method/fact-story");
+  // הטעימה (הפעולה הראשית) נשארת „עובדה, סיפור, פעולה” — לא הושפעה מה-override.
+  await expect(
+    page.getByRole("link", { name: "קראו את הקטע שמתאים לשלב הזה" }),
+  ).toHaveAttribute("href", "/preview?tool=fact-story-action&station=before-relationship");
+});
+
 test("after-breakup gently offers 'starting again' as a next step (not a primary CTA)", async ({ page }) => {
   await page.goto("/after-breakup", { waitUntil: "networkidle" });
   await expect(page.getByText(/סקרנות לחזור לעולם ההיכרויות/)).toBeVisible();
