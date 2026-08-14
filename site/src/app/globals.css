@@ -733,6 +733,33 @@
     }
   }
 
+  /* „איפה זה פוגש אותך עכשיו?” — בחירה (radiogroup נטיבי) + תגובה משותפת אחת
+     מתחת לרשת ה-2×2, המתחלפת לפי המצב הנבחר. ללא JS: ה-radio נבחר נטיבית ו-
+     :has(:checked) חושף את הפאנל המתאים. ארבעת קישורי-היעד קיימים תמיד ב-DOM. */
+  .path-panel {
+    display: none;
+  }
+  .path-choose:has(input[value="dating"]:checked) [data-stage="dating"],
+  .path-choose:has(input[value="building"]:checked) [data-stage="building"],
+  .path-choose:has(input[value="existing"]:checked) [data-stage="existing"],
+  .path-choose:has(input[value="breakup"]:checked) [data-stage="breakup"] {
+    display: block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .path-choose:has(input[value="dating"]:checked) [data-stage="dating"],
+    .path-choose:has(input[value="building"]:checked) [data-stage="building"],
+    .path-choose:has(input[value="existing"]:checked) [data-stage="existing"],
+    .path-choose:has(input[value="breakup"]:checked) [data-stage="breakup"] {
+      animation: toolAccBody 260ms var(--ease-settle) both;
+    }
+  }
+  /* החץ של הכרטיס הנבחר — מודגש מעבר לצבע (מילוי מלא), כדי שהמצב הנבחר לא
+     יסומן בצבע בלבד. */
+  .path-choose label:has(input:checked) .path-arrow {
+    background: var(--color-brand);
+    color: var(--color-brand-foreground);
+  }
+
   /* קו „מסלול” מתמלא (תחנות המסע) — ברירת מחדל: מלא (scale 1) */
   .route-line {
     transform-box: fill-box;

@@ -1,118 +1,131 @@
 import { test, expect } from "./fixtures";
 
 /**
- * „איפה זה פוגש אותך עכשיו?” — שער אמיתי לארבע חוויות. הבדיקות מוודאות את
- * הארכיטקטורה החדשה: כל אחת מארבע הבחירות היא *קישור* שמנווט לעמוד-המסע הייעודי,
- * אין עוד result-panel שנפתח בבית, והכרטיסים קיימים כ-<a> אמיתיים גם בלי JS.
+ * „איפה זה פוגש אותך עכשיו?” — רגע-זיהוי, לא רק תפריט ניווט. רשת 2×2 של
+ * radio-cards + תגובה משותפת אחת מתחת: בחירת מצב חושפת זיהוי + מוקד אחד +
+ * קישור-המשך אמיתי. בחירה (radio) וניווט (link) נפרדות. הקישורים קיימים תמיד
+ * ב-HTML (SEO / ללא-JS); התגובה מתחלפת דרך CSS ‏:has(:checked) — בלי JS.
  */
 
-const CARDS = [
-  { name: /אני מחפש/, href: "/before-relationship" },
-  { name: /אני בתחילת/, href: "/building-relationship" },
-  { name: /אני בתוך/, href: "/inside-relationship" },
-  { name: /אני אחרי/, href: "/after-breakup" },
+const STAGES = [
+  { name: /אני מחפש/, href: "/before-relationship", reveal: "גם הדרך שבה בוחרים" },
+  { name: /אני בתחילת/, href: "/building-relationship", reveal: "מה בונים ממנה" },
+  { name: /אני בתוך/, href: "/inside-relationship", reveal: "לא כל קושי אומר" },
+  { name: /אני אחרי/, href: "/after-breakup", reveal: "מה בדיוק הסתיים" },
 ] as const;
 
-test("the four choices are links to the four journey pages — no in-Home result panel", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  const path = page.locator("#path");
-  await expect(path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" })).toBeVisible();
-
-  // ארבעה קישורים אמיתיים ליעדים הנכונים.
-  for (const c of CARDS) {
-    await expect(path.getByRole("link", { name: c.name })).toHaveAttribute("href", c.href);
-  }
-  // אין עוד בלוק-תוצאה בבית (הארכיטקטורה הישנה הוסרה).
-  await expect(page.locator(".path-panel")).toHaveCount(0);
-  await expect(page.locator('[id^="path-panel-"]')).toHaveCount(0);
-});
-
-for (const c of CARDS) {
-  test(`clicking "${c.href}" navigates to that journey page`, async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-    await page.locator("#path").getByRole("link", { name: c.name }).click();
-    await expect(page).toHaveURL(new RegExp(`${c.href}$`));
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  });
-}
-
-test("keyboard: Enter on a focused card navigates to its journey page", async ({ page }) => {
+test("#path: 2×2 radio selector; four links present; recognition hidden until a stage is chosen", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
-  const link = page.locator("#path").getByRole("link", { name: /אני בתחילת/ });
-  await link.focus();
-  await expect(link).toBeFocused();
-  await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/building-relationship$/);
-});
+  const path = page.locator("#path");
+  await expect(
+    path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" })
+  ).toBeVisible();
 
-test("no-JS safety: the four cards exist as real <a> to the journey pages without JavaScript", async ({ browser }) => {
-  const ctx = await browser.newContext({ javaScriptEnabled: false });
-  const page = await ctx.newPage();
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  for (const c of CARDS) {
-    await expect(page.locator(`#path a[href="${c.href}"]`)).toHaveCount(1);
+  // ארבע בחירות (radio) + ארבעה קישורי-המשך קיימים ב-DOM (SEO/ללא-JS).
+  await expect(path.getByRole("radio")).toHaveCount(4);
+  for (const s of STAGES) {
+    await expect(path.getByRole("radio", { name: s.name })).toHaveCount(1);
+    await expect(path.locator(`a[href="${s.href}"]`)).toHaveCount(1);
   }
-  await ctx.close();
+  // אין בחירה בהתחלה → אין תגובה גלויה.
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
+  await expect(page.locator(".path-panel")).toHaveCount(4);
 });
 
-test("no-JS navigation: with JavaScript disabled, clicking a card still lands on its journey page", async ({
+test("choosing a stage reveals its recognition in the shared panel; continue link navigates", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+
+  await path.getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeVisible();
+
+  const cont = path.locator('a[href="/before-relationship"]');
+  await expect(cont).toBeVisible();
+  await cont.click();
+  await expect(page).toHaveURL(/\/before-relationship$/);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+});
+
+test("switching the stage replaces the content in the same shared region (one at a time)", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+
+  await path.getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeVisible();
+
+  await path.getByRole("radio", { name: /אני אחרי/ }).check({ force: true });
+  await expect(path.getByText("מה בדיוק הסתיים", { exact: false })).toBeVisible();
+  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
+});
+
+test("keyboard: focus a radio and Space selects it, revealing its recognition", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+  const radio = path.getByRole("radio", { name: /אני בתחילת/ });
+  await radio.focus();
+  await page.keyboard.press("Space");
+  await expect(radio).toBeChecked();
+  await expect(path.getByText("מה בונים ממנה", { exact: false })).toBeVisible();
+});
+
+test("no-JS: links exist in the DOM; native radio selection reveals + navigates the continue link", async ({
   browser,
 }) => {
-  // התלות המסוכנת: ניווט שנשען על JS. הכרטיסים הם <a href> נטיביים, ולכן
-  // הניווט חייב לעבוד גם כשה-JS כבוי לחלוטין (אין hydration, אין router.push).
-  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const ctx = await browser.newContext({
+    javaScriptEnabled: false,
+    reducedMotion: "reduce",
+  });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.locator('#path a[href="/after-breakup"]').click();
-  await expect(page).toHaveURL(/\/after-breakup$/);
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  const path = page.locator("#path");
+  for (const s of STAGES) {
+    await expect(path.locator(`a[href="${s.href}"]`)).toHaveCount(1);
+  }
+  // ללא JS: בחירת radio נטיבית → CSS חושף את הפאנל → קישור-ההמשך מנווט.
+  await path.getByRole("radio", { name: /אני אחרי/ }).check({ force: true });
+  const cont = path.locator('a[href="/after-breakup"]');
+  await expect(cont).toBeVisible();
+  await Promise.all([page.waitForURL(/\/after-breakup$/), cont.click()]);
   await ctx.close();
 });
 
-test("mobile 390: nothing overlays the cards — elementFromPoint at each card center hits its own link", async ({
+test("mobile 390: the revealed continue link is not overlaid by sticky/floating UI", async ({
   browser,
 }) => {
-  // audit אמיתי מול overlays (cookie banner, floating „שאל את הספר”, sticky,
-  // ::before/::after, absolute/fixed, z-index, pointer-events). במרכז כל
-  // כרטיס — האלמנט העליון חייב להיות הקישור עצמו או ילד שלו, ולא overlay.
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await ctx.newPage();
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
 
-  const results = await page.evaluate((hrefs) => {
-    const out: Array<{
-      href: string;
-      hitsOwnLink: boolean;
-      pointerEvents: string;
-      topTag: string;
-    }> = [];
-    for (const href of hrefs) {
-      const a = document.querySelector<HTMLAnchorElement>(`#path a[href="${href}"]`);
-      if (!a) {
-        out.push({ href, hitsOwnLink: false, pointerEvents: "n/a", topTag: "MISSING" });
-        continue;
-      }
-      // גלילה מיידית (לא smooth) כדי שה-getBoundingClientRect מיד נכון —
-      // אחרת עם scroll-behavior:smooth הקואורדינטות עלולות לצאת מה-viewport.
-      a.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
-      const r = a.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const top = document.elementFromPoint(cx, cy);
-      out.push({
-        href,
-        // האלמנט שנפגע במרכז הוא הקישור עצמו, או צאצא שלו (span/svg בתוך <a>).
-        hitsOwnLink: !!top && (top === a || a.contains(top)),
-        pointerEvents: top ? getComputedStyle(top).pointerEvents : "none",
-        topTag: top ? top.tagName : "null",
-      });
-    }
-    return out;
-  }, CARDS.map((c) => c.href));
+  await path.getByRole("radio", { name: /אני אחרי/ }).check({ force: true });
+  const cont = path.locator('a[href="/after-breakup"]');
+  await cont.scrollIntoViewIfNeeded();
 
-  for (const res of results) {
-    expect(res.hitsOwnLink, `overlay intercepts tap at ${res.href} (top=${res.topTag})`).toBe(true);
-    expect(res.pointerEvents, `pointer-events blocked at ${res.href}`).not.toBe("none");
-  }
+  const hit = await page.evaluate(() => {
+    const a = document.querySelector('#path a[href="/after-breakup"]');
+    if (!a) return { ok: false, tag: "MISSING", pe: "n/a" };
+    const r = a.getBoundingClientRect();
+    const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return {
+      ok: !!top && (top === a || a.contains(top)),
+      tag: top ? top.tagName : "null",
+      pe: top ? getComputedStyle(top).pointerEvents : "none",
+    };
+  });
+  expect(hit.ok, `overlay intercepts the continue link (top=${hit.tag})`).toBe(true);
+  expect(hit.pe).not.toBe("none");
+  await ctx.close();
 });

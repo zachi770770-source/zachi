@@ -172,10 +172,11 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
     await page.keyboard.press("Escape");
 
-    // הבחירה ב-Home היא ניווט לעמוד-המסע — לא פתיחת תוכן בבית.
+    // הבחירה ב-Home חושפת רגע-זיהוי, וההמשך הוא קישור אמיתי לעמוד-המסע.
     const path = page.locator("#path");
     await path.scrollIntoViewIfNeeded();
-    await path.getByRole("link", { name: /אני מחפש/ }).click();
+    await path.getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
+    await path.locator('a[href="/before-relationship"]').click();
     await expect(page).toHaveURL(/\/before-relationship$/);
 
     // עמוד-המסע: כותרת אישית, פירורי-לחם, וטעימה מותאמת (Primary → contextual preview).

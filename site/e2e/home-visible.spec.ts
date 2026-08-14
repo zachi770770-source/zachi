@@ -73,7 +73,7 @@ test("home: four real navigation cards linking to the four journey pages", async
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
   for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/]) {
-    await expect(path.getByRole("link", { name })).toBeVisible();
+    await expect(path.getByText(name).first()).toBeVisible();
   }
   for (const href of [
     "/before-relationship",
@@ -83,8 +83,9 @@ test("home: four real navigation cards linking to the four journey pages", async
   ]) {
     await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
-  // אין עוד result-panel בבית.
-  await expect(page.locator(".path-panel")).toHaveCount(0);
+  // תגובה משותפת אחת מתחת לרשת — ארבעה פאנלים ב-DOM, מוסתרים עד בחירה.
+  await expect(page.locator(".path-panel")).toHaveCount(4);
+  await expect(page.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
   await ctx.close();
 });
 
