@@ -16,7 +16,7 @@ test("fact-story lab: pick a moment + the story, and the separation + action rev
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(PAGE, { waitUntil: "networkidle" });
 
-  await expect(page.getByRole("heading", { name: "רגע אחד — ושלוש שכבות" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "רגע אחד, שלוש שכבות" })).toBeVisible();
   const lab = page.locator("#fact-story-lab");
 
   // בהתחלה: רק שלב 1. אין שלב סיפור ואין ההפרדה.
@@ -55,9 +55,9 @@ test("fact-story lab: free-text moment stays usable (ephemeral, offline-friendly
   const lab = page.locator("#fact-story-lab");
 
   await lab.getByRole("radio", { name: "רגע אחר…" }).check({ force: true });
-  await lab.getByPlaceholder("מה קרה — במשפט אחד, בלי פרשנות").fill("הפגישה בבית קפה הסתיימה מוקדם");
+  await lab.getByPlaceholder("מה קרה? במשפט אחד, בלי פרשנות").fill("הפגישה בבית קפה הסתיימה מוקדם");
   await lab.getByRole("radio", { name: "משהו אחר…" }).check({ force: true });
-  await lab.getByPlaceholder("מה הראש הוסיף — במילים שלכם").fill("בטח לא נהנה/נהנתה");
+  await lab.getByPlaceholder("מה הראש הוסיף, במילים שלכם").fill("בטח לא נהנה/נהנתה");
 
   await expect(lab.getByText("הפגישה בבית קפה הסתיימה מוקדם").last()).toBeVisible();
   await expect(lab.getByText("בטח לא נהנה/נהנתה").last()).toBeVisible();
