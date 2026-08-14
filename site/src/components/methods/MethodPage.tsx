@@ -5,6 +5,7 @@ import { methodsUi, type Method } from "@/content/methods";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
+import { MethodFilterMap } from "@/components/methods/MethodFilterMap";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -89,7 +90,13 @@ export function MethodPage({ method }: { method: Method }) {
           ))}
         </section>
 
-        {/* מקטעי גוף */}
+        {/* רגע אינטראקטיבי (רק למושג שהרעיון שלו הוא המיון עצמו) — „מפת הסינון”.
+            מוקדם בכוונה: אחרי מספיק הקשר (Hero + פתיח) אבל *לפני* הפירוק המלא של
+            שני הטורים והטעויות, כדי שהקורא/ת ישפוט/תשפוט מתוך האינטואיציה — ולא
+            יקבל/תקבל את התשובות מראש. ההסבר המעמיק בא מיד אחרי. */}
+        {method.filterMap ? <MethodFilterMap map={method.filterMap} /> : null}
+
+        {/* מקטעי גוף — ההסבר המלא (שני הטורים, הטעויות, העיקרון), אחרי השיפוט. */}
         {method.sections.map((section) => (
           <section key={section.heading} className="reveal">
             <h2 className="font-serif text-2xl font-semibold text-foreground">

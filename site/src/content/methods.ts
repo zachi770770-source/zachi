@@ -22,6 +22,30 @@ export interface MethodLink {
   sub?: string;
 }
 
+/** פריט ב„מפת הסינון” — דוגמה קונקרטית וצדה (קו אדום / גמישות) + נימוק קצר. */
+export interface FilterMapItem {
+  label: string;
+  side: "line" | "flex";
+  reason: string;
+}
+
+/**
+ * „מפת הסינון” האינטראקטיבית של „קו אדום מול גמישות” — אופציונלית, לעמוד-מושג
+ * שהרעיון שלו הוא המיון עצמו. הדוגמאות והצדדים נגזרים מהתוכן הקיים של המושג
+ * (שתי הטעויות ושני הטורים); הנימוקים הם משפט-גישור קצר לפי „העיקרון שמנחה”.
+ */
+export interface FilterMap {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  lineLabel: string;
+  flexLabel: string;
+  items: FilterMapItem[];
+  principle: string;
+  /** שורת-רפלקציה סוגרת — מפנה את הזרקור פנימה (לא ניקוד, לא נכון/לא-נכון). */
+  closing: string;
+}
+
 export interface Method {
   slug: string;
   path: string;
@@ -48,6 +72,8 @@ export interface Method {
   askStation?: AskStationId;
   /** מדריכי /guide/* שמיישמים את המושג — קישור הדדי. */
   relatedGuides: MethodLink[];
+  /** „מפת סינון” אינטראקטיבית (אופציונלי) — קיימת רק ל„קו אדום מול גמישות”. */
+  filterMap?: FilterMap;
   datePublished: string;
 }
 
@@ -192,6 +218,27 @@ const coreValues: Method = {
     { href: "/guide/choosing-a-partner", label: "איך לבחור בן או בת זוג", sub: "לבחור לפי מה שיש." },
     { href: "/guide/healthy-relationship", label: "מהי מערכת יחסים בריאה", sub: "כבוד ואמינות כערכי-ברזל." },
   ],
+  // דוגמאות וצדדים — מתוך „שתי הטעויות” ו„שני הטורים” שלמעלה. הנימוקים הם
+  // גישור קצר ל„העיקרון שמנחה”. אין ניקוד ואין נכון/לא-נכון לגבי הקורא.
+  filterMap: {
+    eyebrow: "נסו את הכלי",
+    title: "קו אדום או גמישות?",
+    intro:
+      "לכל דוגמה — סמנו איך אתם נוטים להתייחס אליה, ואז נראה מה מציע הספר. אין כאן תשובה „נכונה” עליכם; רק הזמנה לשים לב.",
+    lineLabel: "קו אדום",
+    flexLabel: "גמישות",
+    items: [
+      { label: "כבוד הדדי", side: "line", reason: "האופן שבו אדם מתייחס אליכם נוגע במי שהוא — ועל זה לא מתפשרים." },
+      { label: "אמינות", side: "line", reason: "שאפשר לסמוך על מה שנאמר. בסיס לקשר, לא בונוס." },
+      { label: "כיוון-חיים דומה", side: "line", reason: "לאן שניכם רוצים ללכת בגדול — לא פרט של טעם." },
+      { label: "גובה", side: "flex", reason: "מראה חיצוני — עניין של טעם, לא של התאמה אמיתית." },
+      { label: "סגנון לבוש", side: "flex", reason: "קל לשינוי, וממילא אינו מגדיר מי האדם." },
+      { label: "קצב היכרות", side: "flex", reason: "אפשר לתאם ולדבר עליו — אינו קו אדום כשלעצמו." },
+    ],
+    principle: "אל תתפשר על מי שהוא; תתגמש על איפה הוא שותה את הקפה שלו.",
+    closing:
+      "שווה לשים לב: רבים מתפשרים דווקא על הטור הראשון — ונוקשים בשני. איפה זה קורה לכם?",
+  },
   datePublished: PUBLISHED,
 };
 
