@@ -39,7 +39,7 @@ export default async function CompassPage({
       : undefined;
 
   return (
-    <Container className="py-12 sm:py-16 lg:py-20">
+    <Container className="pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-12 lg:pb-20">
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
@@ -62,7 +62,7 @@ export default async function CompassPage({
           {compassQuiz.ask.subtitle}
         </p>
         <p className="mx-auto mt-3 max-w-xl text-[14px] italic text-foreground-muted">
-          כאן לא שופטים אתכם — מבינים.
+          כאן לא שופטים אתכם, מבינים.
         </p>
 
         <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">

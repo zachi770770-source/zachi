@@ -25,7 +25,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
     ? `/preview?tool=${guide.bookTool.id}&station=${guide.hub.href.slice(1)}`
     : "/preview";
   return (
-    <Container className="py-10 sm:py-14 lg:py-16">
+    <Container className="pt-7 pb-10 sm:pt-8 sm:pb-14 lg:pt-10 lg:pb-16">
       {/* מדידה (Phase A) — צפייה במדריך, פעם אחת, עם זהות המדריך (slug). */}
       <ViewEvent event="guide_viewed" params={{ guide: guide.slug }} />
       <ArticleSchema
@@ -70,7 +70,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
       </nav>
 
       {/* כותרת + תשובה קצרה מיד (עונה על השאלה מוקדם) */}
-      <header className="enter-stagger mx-auto mt-10 max-w-[62ch]">
+      <header className="enter-stagger mx-auto mt-8 max-w-[62ch]">
         <span className="kicker">{guide.kicker}</span>
         <h1 className="mt-5 font-serif type-hero text-foreground">
           {guide.h1}
