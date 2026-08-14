@@ -3,7 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Compass, MessageCircleQuestion, X } from "lucide-react";
+import { Compass, X } from "lucide-react";
 
 import { compassQuiz } from "@/content/compass";
 import type { AskStationId } from "@/content/askRoute";
@@ -100,16 +100,22 @@ export function CompassLauncher() {
           // (`--bubble-bottom”) מגיע דרך class לפי breakpoint.
           style={{ bottom: bubbleBottom }}
           className={
-            // הבסיס הרספונסיבי כמשתנה: מובייל 5.5rem (מעל בר-הטעימה), דסקטופ 2rem.
-            // „bottom” אינו ב-transition — ההרמה מעל הבאנר מיידית, בלי חפיפה זמנית.
-            // נוכחת ולחיצה מיד עם טעינת העמוד — בלי המתנה לגלילה/טיימר. RTL: end-*.
-            "group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3.5 text-[15px] font-bold leading-none text-surface opacity-100 shadow-xl ring-2 ring-brand transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:px-7 md:py-4.5 md:text-[17px]"
+            // „מצפן הקשר” — לא בועת-צ׳אט. משטח חם (surface) עם מסגרת מרוסנת וצל
+            // רך, וסמל-מצפן טרקוטה זהה לזה של עמוד /compass ולראש המגירה, כך
+            // שהזהות היא „איפה אני עכשיו?” ולא „פתח צ׳אט”. שקט אך נוכח: לא
+            // מתחרה ב-CTA הכהה, לא כבד. הבסיס הרספונסיבי כמשתנה: מובייל 5.5rem
+            // (מעל בר-הטעימה), דסקטופ 2rem. „bottom” אינו ב-transition —
+            // ההרמה מעל הבאנר מיידית. נוכח ולחיץ מיד עם טעינת העמוד. RTL: end-*.
+            "group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:pe-5 md:text-[15px]"
           }
         >
-          <MessageCircleQuestion
-            className="h-[18px] w-[18px] shrink-0 text-brand md:h-5 md:w-5"
+          {/* סמל-המצפן הטרקוטה — הזהות של „מה הספר אומר על המצב שלי”. */}
+          <span
             aria-hidden="true"
-          />
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand md:h-9 md:w-9"
+          >
+            <Compass className="h-[18px] w-[18px] md:h-5 md:w-5" />
+          </span>
           {/* טקסט מלא בדסקטופ; במובייל נוסח קצר יותר כדי לא לחסום תוכן. */}
           <span className="hidden whitespace-nowrap sm:inline">
             מה הספר אומר על המצב שלי?
