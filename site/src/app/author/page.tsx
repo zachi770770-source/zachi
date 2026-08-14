@@ -7,6 +7,7 @@ import { authorContent } from "@/content/author";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/shared/BookCover";
+import { SignatureMark } from "@/components/shared/SignatureMark";
 import { BookLink } from "@/components/shared/BookLink";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { AuthorAudio } from "@/components/author/AuthorAudio";
@@ -83,17 +84,8 @@ export default function AuthorPage() {
           <p className="mt-5 font-serif text-[clamp(1.15rem,2vw,1.4rem)] italic text-brand-hover">
             {siteConfig.tagline}
           </p>
-          {/* קו מבנה זעיר — מחבר את סיפור המחבר לתזת הספר („חיפוש→בנייה”). */}
-          <span
-            aria-hidden="true"
-            className="mt-6 flex items-center gap-1.5 opacity-80"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
-            <span className="h-px w-8 bg-border-strong sm:w-12" />
-            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-            <span className="h-px w-8 bg-border-strong sm:w-12" />
-            <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
-          </span>
+          {/* הסימן החתום „מחיפוש לבנייה” — מחבר את סיפור המחבר לתזת הספר. */}
+          <SignatureMark className="mt-6" />
           <p className="mt-6 text-[14px] italic text-foreground-muted">
             הספר הזה נולד מהתבוננות, לא מתשובות מוכנות.
           </p>

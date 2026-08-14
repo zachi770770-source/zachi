@@ -8,6 +8,7 @@ import { AskBookLink } from "@/components/journey/AskBookLink";
 import { MethodFilterMap } from "@/components/methods/MethodFilterMap";
 import { MethodFactStory } from "@/components/methods/MethodFactStory";
 import { MethodAnchor } from "@/components/methods/MethodAnchor";
+import { SignatureMark } from "@/components/shared/SignatureMark";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -132,10 +133,16 @@ export function MethodPage({ method }: { method: Method }) {
           .
         </p>
 
+        {/* הסימן החתום „מחיפוש לבנייה” כמעבר: מהבנת המושג אל הפעולה (הספר).
+            מחליף את קו-ההפרדה הרגיל ברגע-מותג שקט אחד לעמוד. */}
+        <div className="reveal flex justify-center pt-2" aria-hidden="true">
+          <SignatureMark />
+        </div>
+
         {/* כניסה שקטה לעוזר + CTA מרוסן אחד לספר */}
         <section
           aria-labelledby="method-cta-heading"
-          className="reveal flex flex-col gap-5 border-t border-border pt-8"
+          className="reveal flex flex-col gap-5 pt-6"
         >
           <h2 id="method-cta-heading" className="sr-only">
             להמשך
