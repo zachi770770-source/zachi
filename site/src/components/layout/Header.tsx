@@ -33,7 +33,9 @@ export function Header() {
 
         {/* מובייל: CTA קומפקטי (שלא ישתלט על הלוגו) + המבורגר עם מרווח ברור */}
         <div className="flex items-center gap-1 lg:hidden">
-          <Button asChild size="sm" className="h-10 px-3.5 text-sm">
+          {/* גובה 44px (h-11) — יעד-מגע תקין במובייל, תואם את כפתור ההמבורגר
+              שלצדו, ונשאר בתוך גובה ההדר (h-16). הרוחב נשאר קומפקטי (px-3.5). */}
+          <Button asChild size="sm" className="h-11 px-3.5 text-sm">
             <Link href="/book#purchase">לרכישה</Link>
           </Button>
           <MobileMenu />
