@@ -56,7 +56,8 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
-    await page.evaluate(() => window.scrollTo(0, 300));
+    // במובייל הגלולה נחשפת מעבר לקיפול-הראשון — גוללים מעבר לסף החשיפה.
+    await page.evaluate(() => window.scrollTo(0, 700));
     const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
     await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
     // תווית מסבירה (title) — לא רק אייקון/מילה בודדת.

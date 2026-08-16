@@ -1873,6 +1873,20 @@
   }
 }
 
+/* CompassLauncher — חשיפה תלוית-גלילה *במובייל בלבד*. במובייל ה-Hero נערם
+ * לרוחב-מלא ויכול להגיע עד תחתית המסך, כך שהגלולה הצפה כיסתה תוכן קיפול-ראשון
+ * (שורת-התזה והפעולה הראשית ב-/book). מתחת ל-768px, כל עוד `data-past-hero="false"`
+ * (טרם-גלילה מעבר ל-Hero) הגלולה שקופה ולא-לחיצה; היא נחשפת ברכות בגלילה. בדסקטופ
+ * הכלל אינו חל — הנוכחות המיידית נשמרת. opacity/transform בלבד ⇒ ללא CLS.
+ * מכובד תחת prefers-reduced-motion (ה-transition מתאפס גלובלית). */
+@media (max-width: 767px) {
+  .compass-pill[data-past-hero="false"] {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
+}
+
 /* #4 מצפן חי — טבעות סטטיות + מחט שמתייצבת לכיוון עם spring. */
 .living-compass {
   display: block;

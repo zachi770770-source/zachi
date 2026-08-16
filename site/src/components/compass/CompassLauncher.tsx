@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { compassQuiz } from "@/content/compass";
 import type { AskStationId } from "@/content/askRoute";
 
@@ -41,19 +42,66 @@ const STATION_PAGE_TO_ASK: Record<string, AskStationId> = {
  *   (שמאל ב-RTL), באמצע גובה המסך, עם תווית קטנה „שאל את הספר”.
  * - Mobile: בועה עגולה צפה באותו צד, במרווח בטוח מעל באנר העוגיות, כדי שלא
  *   תסתיר אותו.
- * - הבועה נוכחת וזמינה מיד עם טעינת כל עמוד (בלי המתנה לגלילה/טיימר), אך עדינה
- *   ולא-חוסמת: אינה מסתירה CTA/טקסט/פוטר/ניווט/באנרים.
+ * - הבועה עדינה ולא-חוסמת: אינה מסתירה CTA/טקסט/פוטר/ניווט/באנרים. כדי להבטיח
+ *   זאת גם בקיפול-הראשון (שבו תוכן-Hero יכול להגיע עד תחתית המסך, למשל שורת-התזה
+ *   והפעולה הראשית ב-/book), היא מוסתרת מעל ה-Hero ונחשפת ברכות אחרי שהמשתמש גלל
+ *   מעברו. הנגישות לעוזר בראש העמוד נשמרת דרך ה-CTA שב-Hero וקישור הניווט.
  */
 export function CompassLauncher() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  // חשיפה תלוית-גלילה *במובייל בלבד*: שם ה-Hero נערם לרוחב-מלא ויכול להגיע עד
+  // תחתית המסך, כך שהגלולה הבתחתית-מתחילה כיסתה תוכן קיפול-ראשון משמעותי ב-/book
+  // (שורת-התזה והפעולה הראשית). לכן במובייל היא מוסתרת מעל ה-Hero ונחשפת אחרי
+  // גלילה מעברו. בדסקטופ אין חפיפה (הפריסה טורית, הגלולה בפינה) — ושם היא נשארת
+  // נוכחת מיד כבעבר. שני הערכים ברירת-מחדל תואמים SSR (לא-מובייל, טרם-גלילה) ⇒
+  // אין אי-התאמת-הידרציה; המיקום fixed ⇒ אין CLS.
+  const [pastHero, setPastHero] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
 
-  // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון.
+  // ה-CTA שבתוך ה-Hero (מובייל) פותח את אותו drawer דרך אירוע חלון. הפתיחה הזו
+  // עובדת גם כשהגלולה עדיין מוסתרת (בקיפול-הראשון) — הנגישות לעוזר נשמרת בראש
+  // העמוד דרך ה-CTA שב-Hero ודרך קישור „מה הספר אומר?” בניווט.
   React.useEffect(() => {
     const handler = () => setOpen(true);
     window.addEventListener("open-compass", handler);
     return () => window.removeEventListener("open-compass", handler);
   }, []);
+
+  // מעקב breakpoint (<768px = מובייל) — קובע אם החשיפה תלוית-הגלילה חלה בכלל.
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // סף החשיפה: אחרי ~60% מגובה-המסך (לפחות 320px). מוסתר שוב סמוך לראש העמוד, כך
+  // שהקיפול-הראשון במובייל תמיד פנוי מהבקרה הצפה. עדכון ממותג ב-rAF כדי לא להעמיס
+  // על הגלילה. מכובד תחת reduced-motion (המעבר מתאפס גלובלית).
+  React.useEffect(() => {
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const threshold = Math.max(320, Math.round(window.innerHeight * 0.6));
+      setPastHero(window.scrollY > threshold);
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(compute);
+    };
+    compute(); // מצב התחלתי (במקרה של שחזור מיקום-גלילה)
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  // מוסתרת-ולא-אינטראקטיבית רק כשמובייל *וגם* טרם-גלילה. בדסקטופ תמיד פעילה.
+  const hiddenOnFold = isMobile && !pastHero;
 
   // התחנה הנוכחית — נגזרת ישירות בזמן רינדור מההקשר: בעמוד-מסלול לפי הנתיב;
   // ב-/preview לפי ה-`?station=` שנשא מהמסלול. כך בלחיצה על הבועה המנוע ממשיך
@@ -95,19 +143,27 @@ export function CompassLauncher() {
           type="button"
           aria-label="מה הספר אומר על המצב שלי?, כמה שאלות קצרות שמובילות אותך לקטע ולכלי המתאימים"
           title="כמה שאלות קצרות, ותדעו מאיזה קטע בספר להתחיל"
+          // במובייל-טרם-גלילה הגלולה מוצאת ממסלול-הטאב ומ-AT, כדי שלא תהיה
+          // יעד-מגע/פוקוס נסתר מעל תוכן ה-Hero. בדסקטופ היא תמיד פעילה.
+          aria-hidden={hiddenOnFold ? true : undefined}
+          tabIndex={hiddenOnFold ? -1 : undefined}
+          // מצב-החשיפה נמסר כ-data-attribute; כלל-CSS ייעודי (globals.css) מסתיר
+          // את הגלולה *רק במובייל* כש-`data-past-hero="false"`. בדסקטופ הכלל אינו
+          // חל, ולכן ההתנהגות המיידית נשמרת בדיוק כבעבר.
+          data-past-hero={pastHero ? "true" : "false"}
           // ה-bottom נקבע inline (ולא דרך class), אחרת Chromium לא מתקף אותו מחדש
           // כשמשתנה הבאנר היורש משתנה — ואז הגלולה חופפת לבאנר. הבסיס הרספונסיבי
           // (`--bubble-bottom”) מגיע דרך class לפי breakpoint.
           style={{ bottom: bubbleBottom }}
-          className={
+          className={cn(
             // „מצפן הקשר” — לא בועת-צ׳אט. משטח חם (surface) עם מסגרת מרוסנת וצל
             // רך, וסמל-מצפן טרקוטה זהה לזה של עמוד /compass ולראש המגירה, כך
             // שהזהות היא „איפה אני עכשיו?” ולא „פתח צ׳אט”. שקט אך נוכח: לא
             // מתחרה ב-CTA הכהה, לא כבד. הבסיס הרספונסיבי כמשתנה: מובייל 5.5rem
             // (מעל בר-הטעימה), דסקטופ 2rem. „bottom” אינו ב-transition —
-            // ההרמה מעל הבאנר מיידית. נוכח ולחיץ מיד עם טעינת העמוד. RTL: end-*.
-            "group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:pe-5 md:text-[15px]"
-          }
+            // ההרמה מעל הבאנר מיידית. RTL: end-*.
+            "compass-pill group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:pe-5 md:text-[15px]"
+          )}
         >
           {/* סמל-המצפן הטרקוטה — הזהות של „מה הספר אומר על המצב שלי”. */}
           <span
