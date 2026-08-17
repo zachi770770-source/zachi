@@ -33,11 +33,14 @@ export function Footer() {
                 {siteConfig.bookTitle}
               </span>
             </div>
-            <p className="hidden font-quote text-[1.05rem] italic leading-relaxed text-secondary-foreground/85 sm:block">
+            {/* משפט-המותג + הסימן החתום נוכחים גם במובייל: הם „חתימת-הספר” שסוגרת
+                את החוויה. הסתרתם במובייל חסכה גובה זניח אך רוקנה את סגירת-המותג —
+                לכן הם מוצגים בכל רוחב. */}
+            <p className="font-quote text-[1.05rem] italic leading-relaxed text-secondary-foreground/85">
               {siteConfig.tagline}
             </p>
             {/* הסימן החתום „מחיפוש לבנייה” — סוגר שקט מתחת למשפט-המותג. */}
-            <SignatureMark tone="inverse" className="mt-1 hidden sm:inline-flex" />
+            <SignatureMark tone="inverse" className="mt-1 inline-flex" />
             {hasSocial ? (
               <div className="mt-1 flex gap-3">
                 {siteConfig.social.instagram ? (
