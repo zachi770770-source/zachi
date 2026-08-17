@@ -174,18 +174,33 @@ test("legacy URLs: explicit per-target mapping (301 semantic, 410 for gone artic
   // טבלת המיפוי (proxy.ts) — כל יעד נבחר במפורש, אין 301 שרירותי:
   //   /about    → /author (301)  — „אודות” → עמוד המחבר.
   //   /articles → /book   (301)  — אינדקס-מאמרים ישן → עמוד הספר (אין בלוג חלופי).
+  //   /articles/<slug> → /guide/<slug> (301) — כתובות-מאמר מהאתר הישן (אומתו
+  //     כ-404 ב-Search Console) שיש להן עמוד חי שווה-ערך מובהק.
   const redirects: [string, string][] = [
     ["/about", "/author"],
     ["/articles", "/book"],
+    ["/articles/stop-auditioning-dates", "/guide/finding-a-relationship"],
+    ["/articles/why-attracted-unavailable", "/guide/attracted-to-unavailable"],
   ];
   for (const [from, to] of redirects) {
     const res = await request.get(from, { maxRedirects: 0 });
     expect(res.status(), `status for ${from}`).toBe(301);
     const location = res.headers()["location"] ?? "";
     expect(new URL(location, "http://localhost").pathname, `target for ${from}`).toBe(to);
+    // היעד עצמו חי (200) — אין שרשרת הפניות.
+    const dest = await request.get(to, { maxRedirects: 0 });
+    expect(dest.status(), `destination ${to} is 200 (no redirect chain)`).toBe(200);
   }
 
-  // כתובות-מאמר בודדות מעולם לא קיימו ואין להן תחליף → 410 Gone (לא 301 שרירותי).
+  // פרמטרי query (UTM) נשמרים דרך ה-301 לצורך שיוך.
+  const utm = await request.get("/articles/stop-auditioning-dates?utm_source=google", {
+    maxRedirects: 0,
+  });
+  expect(new URL(utm.headers()["location"] ?? "", "http://localhost").search).toBe(
+    "?utm_source=google",
+  );
+
+  // כתובת-מאמר בודדת ללא עמוד שווה-ערך → 410 Gone (לא 301 שרירותי, לא לדף הבית).
   for (const gone of ["/articles/some-old-post", "/articles/2024/dating-tips"]) {
     const res = await request.get(gone, { maxRedirects: 0 });
     expect(res.status(), `410 for ${gone}`).toBe(410);
@@ -286,4 +301,10 @@ test("sitemap, robots and manifest are served correctly", async ({ request }) =>
   expect(manifest.status()).toBe(200);
   const manifestJson = await manifest.json();
   expect(manifestJson.dir).toBe("rtl");
+
+  // /favicon.ico מוגש כקובץ אמיתי (200) עבור בקשות ברירת-המחדל של דפדפנים/סורקים,
+  // בנוסף ל-/icon המחולל. (בעבר החזיר 404 כי היה קיים רק icon.tsx.)
+  const favicon = await request.get("/favicon.ico");
+  expect(favicon.status()).toBe(200);
+  expect(favicon.headers()["content-type"] ?? "").toContain("image/x-icon");
 });
