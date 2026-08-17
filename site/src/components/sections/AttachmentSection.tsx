@@ -47,21 +47,29 @@ export function AttachmentSection() {
             <p className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
               {attachment.cycleTitle}
             </p>
-            <ol className="mt-5 grid gap-3 sm:grid-cols-5">
+            {/* מובייל: שורות-רצף אופקיות (מספר מוביל + צעד/טקסט) — ממלאות את הרוחב
+                וקוראות כרצף אחד, בלי כרטיסים גבוהים עם חצי-שמאל ריק. מ-sm ומעלה:
+                חמישה כרטיסים מוערמים בשורה אחת (עיצוב הדסקטופ נשמר). */}
+            <ol className="mt-5 grid gap-2.5 sm:grid-cols-5 sm:gap-3">
               {attachment.cycle.map((c, i) => (
-                <li key={c.step} className="rounded-xl border border-border bg-surface p-4">
+                <li
+                  key={c.step}
+                  className="flex items-baseline gap-3.5 rounded-xl border border-border bg-surface p-4 sm:block sm:gap-0"
+                >
                   <span
                     className="type-quote text-lg tabular-nums text-foreground-muted"
                     aria-hidden="true"
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <p className="mt-1 font-serif text-[1rem] font-semibold text-foreground">
-                    {c.step}
-                  </p>
-                  <p className="mt-1 text-[13.5px] leading-relaxed text-foreground-muted">
-                    {c.text}
-                  </p>
+                  <div className="sm:mt-1">
+                    <p className="font-serif text-[1rem] font-semibold text-foreground">
+                      {c.step}
+                    </p>
+                    <p className="mt-1 text-[13.5px] leading-relaxed text-foreground-muted">
+                      {c.text}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ol>

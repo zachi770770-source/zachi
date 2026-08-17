@@ -17,8 +17,9 @@ test("mobile 390: assistant bubble stays visible ABOVE the cookie banner (no ove
   await page.goto("/", { waitUntil: "networkidle" });
 
   // במסכים נמוכים (מובייל) באנר העוגיות מזוין רק אחרי שה-CTA הראשי גלל אל מעל
-  // פס-הבאנר. גוללים מעט כדי שהבאנר יופיע (וגם מעל סף חשיפת הגלולה).
-  await page.evaluate(() => window.scrollTo(0, 220));
+  // פס-הבאנר, והגלולה נחשפת רק מעבר לקיפול-הראשון. גוללים מעבר לסף החשיפה כדי
+  // לבדוק את הדו-קיום של השניים.
+  await page.evaluate(() => window.scrollTo(0, 700));
   const banner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
   await expect(banner).toBeVisible();
   await page.waitForFunction(

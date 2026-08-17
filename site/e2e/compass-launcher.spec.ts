@@ -57,12 +57,21 @@ test.describe("compass floating bubble", () => {
     await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
   });
 
-  test("mobile: bubble reveals (after cookie banner dismissed)", async ({
+  test("mobile: bubble reveals after scrolling past the first fold (kept off the hero)", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/", { waitUntil: "networkidle" });
     await dismissCookies(page);
+    // במובייל הגלולה מוסתרת מעל ה-Hero (קיפול-ראשון) כדי לא לכסות תוכן: שקופה,
+    // לא-לחיצה, ומוצאת מעץ-הנגישות (aria-hidden) — ולכן getByRole אינו מאתר אותה.
+    // בודקים את מצב-ההסתרה דרך סלקטור-CSS ישיר.
+    const pillCss = page.locator("button.compass-pill");
+    await expect(pillCss).toHaveCSS("opacity", "0");
+    await expect(pillCss).toHaveCSS("pointer-events", "none");
+    await expect(compass(page)).toHaveCount(0); // aria-hidden ⇒ מחוץ לעץ-הנגישות
+    // נחשפת אחרי גלילה מעבר לקיפול — וחוזרת לעץ-הנגישות (getByRole מאתר).
+    await page.evaluate(() => window.scrollTo(0, 700));
     await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
     // יעד מגע נגיש (≥44px).
     const box = await compass(page).boundingBox();
@@ -94,8 +103,9 @@ test.describe("compass floating bubble", () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/", { waitUntil: "networkidle" });
-    // במובייל הבאנר מזוין אחרי גלילה קטנה (מעל סף החשיפה).
-    await page.evaluate(() => window.scrollTo(0, 220));
+    // במובייל הבאנר מזוין אחרי גלילה, והגלולה נחשפת מעבר לקיפול-הראשון — גוללים
+    // מעבר לסף החשיפה כדי לבדוק את הדו-קיום שלהם.
+    await page.evaluate(() => window.scrollTo(0, 700));
     await expect(banner(page)).toBeVisible();
     await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
     const b = await compass(page).boundingBox();
@@ -109,7 +119,7 @@ test.describe("compass floating bubble", () => {
   // שומרת על aria-label וניתנת למיקוד-מקלדת ולהפעלה — בשני המכשירים.
   for (const vp of [
     { label: "desktop", width: 1440, height: 900, scroll: 0 },
-    { label: "mobile", width: 390, height: 844, scroll: 220 },
+    { label: "mobile", width: 390, height: 844, scroll: 700 },
   ]) {
     test(`${vp.label}: pill stays visible+clickable while cookie banner is open, clear gap, aria-label, keyboard focus`, async ({
       page,
@@ -206,6 +216,8 @@ test.describe("compass drawer: „לקרוא את הקטע המתאים בספר
       await page.goto("/before-relationship", { waitUntil: "networkidle" });
       await dismissCookies(page);
 
+      // במובייל הגלולה נחשפת רק מעבר לקיפול-הראשון — גוללים לפני שמפעילים אותה.
+      if (vp.width < 768) await page.evaluate(() => window.scrollTo(0, 700));
       await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
       await compass(page).click();
       const dialog = page.getByRole("dialog");
