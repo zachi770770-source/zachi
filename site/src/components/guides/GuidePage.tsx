@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
+import { SignatureMark } from "@/components/shared/SignatureMark";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { ArticleSchema } from "@/components/schema/ArticleSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
@@ -180,10 +181,17 @@ export function GuidePage({ guide }: { guide: Guide }) {
           </p>
         ) : null}
 
+        {/* הסימן החתום „מחיפוש לבנייה” כמעבר אל הפעולה, זהה לעמודי-המושג
+            (/method/*), כדי שהתאומים העריכתיים יתנהגו אותו דבר וגם המדריך
+            יורגש כחלק ממערכת-הספר ולא כמאמר גנרי. */}
+        <div className="reveal flex justify-center pt-2" aria-hidden="true">
+          <SignatureMark />
+        </div>
+
         {/* כניסה שקטה לעוזר + CTA מרוסן אחד לספר */}
         <section
           aria-labelledby="guide-cta-heading"
-          className="reveal flex flex-col gap-5 border-t border-border pt-8"
+          className="reveal flex flex-col gap-5 pt-6"
         >
           <h2 id="guide-cta-heading" className="sr-only">
             להמשך
