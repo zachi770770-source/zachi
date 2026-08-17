@@ -22,7 +22,7 @@ import { ViewEvent } from "@/components/analytics/ViewEvent";
  */
 export function MethodPage({ method }: { method: Method }) {
   return (
-    <Container className="py-10 sm:py-14 lg:py-16">
+    <Container className="pt-7 pb-10 sm:pt-8 sm:pb-14 lg:pt-10 lg:pb-16">
       {/* מדידה (Phase A) — צפייה במדריך/מושג. משתמש ב-guide_viewed עם ה-slug. */}
       <ViewEvent event="guide_viewed" params={{ guide: method.slug }} />
       <ArticleSchema
@@ -72,7 +72,7 @@ export function MethodPage({ method }: { method: Method }) {
       </nav>
 
       {/* כותרת + הגדרה קצרה מיד */}
-      <header className="enter-stagger mx-auto mt-10 max-w-[62ch]">
+      <header className="enter-stagger mx-auto mt-8 max-w-[62ch]">
         <span className="kicker">{method.kicker}</span>
         <h1 className="mt-5 font-serif type-hero text-foreground">
           {method.h1}

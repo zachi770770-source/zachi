@@ -47,7 +47,7 @@ export function StationPage({ station }: { station: Station }) {
   const illustration = stationPageIllustration[station.id];
 
   return (
-    <Container className="py-10 sm:py-14 lg:py-16">
+    <Container className="pt-7 pb-10 sm:pt-8 sm:pb-14 lg:pt-10 lg:pb-16">
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },
@@ -79,7 +79,7 @@ export function StationPage({ station }: { station: Station }) {
       </nav>
 
       {/* כותרת — כניסה מתואמת (kicker → כותרת → תיאור → מחוון מסע). */}
-      <header className="enter-stagger mx-auto mt-10 max-w-[62ch]">
+      <header className="enter-stagger mx-auto mt-8 max-w-[62ch]">
         <span className="kicker">{eyebrow}</span>
         <h1 className="mt-5 font-serif type-hero-lg text-foreground">
           {station.h1}
