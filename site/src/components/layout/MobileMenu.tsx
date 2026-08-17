@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { navLinks } from "@/config/nav";
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/shared/BrandMark";
 
 function isActivePath(pathname: string, href: string): boolean {
   if (href.includes("#")) return false;
@@ -38,7 +39,8 @@ export function MobileMenu() {
           aria-describedby={undefined}
         >
           <div className="flex items-center justify-between">
-            <DialogPrimitive.Title className="font-serif text-lg font-semibold">
+            <DialogPrimitive.Title className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight">
+              <BrandMark withRing className="h-8 w-8 shrink-0 text-foreground" />
               {siteConfig.bookTitle}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close
