@@ -12,6 +12,7 @@ import type {
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { SignatureMark } from "@/components/shared/SignatureMark";
+import { JourneyMirror } from "@/components/journey/JourneyMirror";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
 import { AmazonBuyLink, type AmazonSource } from "@/components/purchase/AmazonBuyLink";
@@ -252,58 +253,23 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         {/* ציטוט-העצירה כפסק שקט (variant בהירות/מרחב). */}
         {v.quoteAfter === "reflection" && quote}
 
-        {/* C. שלוש נקודות-עומק — ממוספרות 01/02/03, כותרת + משפט הסבר לכל אחת. */}
+        {/* C. „רגע של מראה” אינטראקטיבי — שלוש נקודות-העומק הופכות לרגע זיהוי-עצמי
+            on-page: הקורא בוחר את מה שהכי קרוב אליו, נחשפת הפסקה שמעמיקה בה, ומוצע
+            המשך (המושג מהספר). מערכת אחת החוזרת בכל ארבעת המסלולים, מוזנת מתוכן
+            העמוד הקיים בלבד. הכותרת (depthHeading) נשמרת כעוגן-הסקשן (SEO). */}
         <section aria-labelledby="depth-heading" className="reveal">
           <h2 id="depth-heading" className="kicker">
             {journey.depthHeading}
           </h2>
-          {v.points === "grid" ? (
-            <ol className="mt-8 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-              {journey.depthPoints.map((p, i) => (
-                <li
-                  key={p.title}
-                  className="border-t border-border-strong pt-5"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="font-serif text-[2rem] font-bold leading-none text-brand/85"
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="mt-3 font-serif text-[1.375rem] font-bold leading-tight text-foreground [text-wrap:balance]">
-                    {p.title}
-                  </h3>
-                  <p className="mt-2.5 text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-                    {p.line}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <ol className="mt-8 flex flex-col">
-              {journey.depthPoints.map((p, i) => (
-                <li
-                  key={p.title}
-                  className="grid grid-cols-[auto_1fr] items-baseline gap-x-5 border-t border-border-strong py-6 sm:gap-x-8 lg:grid-cols-[5rem_1fr]"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="font-serif text-[2.25rem] font-bold leading-none text-brand/85 sm:text-[2.75rem]"
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <div className="max-w-[52ch]">
-                    <h3 className="font-serif text-[clamp(1.375rem,2vw,1.625rem)] font-bold leading-tight text-foreground [text-wrap:balance]">
-                      {p.title}
-                    </h3>
-                    <p className="mt-2.5 text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-                      {p.line}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
+          <JourneyMirror
+            id={journey.id}
+            points={journey.depthPoints}
+            method={
+              stationMethod
+                ? { path: stationMethod.path, term: stationMethod.term }
+                : null
+            }
+          />
         </section>
 
         {/* ציטוט-העצירה כשיא-מומנטום/עומק (variant תנועה/עומק). */}
