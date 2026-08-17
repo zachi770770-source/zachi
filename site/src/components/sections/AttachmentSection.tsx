@@ -76,7 +76,7 @@ export function AttachmentSection() {
           </div>
 
           {/* משפט ההבטחה + שאלה סוגרת + CTA יחיד */}
-          <blockquote className="type-quote mx-auto mt-14 max-w-[42ch] text-center text-[clamp(1.3rem,2.8vw,1.75rem)] italic leading-snug text-foreground">
+          <blockquote className="type-literary mx-auto mt-14 max-w-[42ch] text-center text-[clamp(1.3rem,2.8vw,1.75rem)] font-medium leading-snug text-foreground">
             {attachment.promise}
           </blockquote>
           <div className="mt-8 text-center">

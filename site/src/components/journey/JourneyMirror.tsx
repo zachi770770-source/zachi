@@ -31,7 +31,7 @@ export function JourneyMirror({
   const name = `journey-mirror-${id}`;
   return (
     <div className="group/mirror mt-7">
-      <p className="font-serif text-[clamp(1.2rem,2vw,1.45rem)] font-semibold text-foreground">
+      <p className="type-literary text-[clamp(1.2rem,2vw,1.45rem)] font-semibold text-foreground">
         מה הכי קרוב אליי כרגע?
       </p>
       <p className="mt-1.5 text-[14px] leading-relaxed text-foreground-muted">

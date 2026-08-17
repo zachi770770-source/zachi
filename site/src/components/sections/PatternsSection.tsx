@@ -18,7 +18,7 @@ export function PatternsSection() {
         {/* שאלת המוכנות — ציטוט + השאלה שמזיזה את הפוקוס פנימה */}
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="kicker justify-center">{readiness.kicker}</span>
-          <blockquote className="type-quote mt-6 text-[clamp(1.25rem,2.6vw,1.65rem)] italic leading-snug text-foreground">
+          <blockquote className="type-literary mt-6 text-[clamp(1.25rem,2.6vw,1.65rem)] font-medium leading-snug text-foreground">
             „{readiness.quote}”
           </blockquote>
           <p className="mt-8 font-serif text-[clamp(1.5rem,3.4vw,2.15rem)] font-semibold leading-tight text-brand-hover">
