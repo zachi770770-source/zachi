@@ -314,7 +314,7 @@ export function ToolsBento() {
         <Reveal>
           <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-border bg-surface-muted/60 p-5 sm:p-6">
             <p className="text-[15px] font-semibold text-foreground">
-              כל כלי הוא מושג מהספר — עם עמוד הסבר מלא משלו:
+              כל כלי הוא מושג מהספר, עם עמוד הסבר מלא משלו:
             </p>
             <ul className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
               {items.map((item) => {
@@ -327,7 +327,7 @@ export function ToolsBento() {
                       className="inline-flex items-center gap-1.5 text-[15px] font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                     >
                       <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                      „{method.term}” — הסבר המושג
+                      „{method.term}”: הסבר המושג
                     </Link>
                   </li>
                 );

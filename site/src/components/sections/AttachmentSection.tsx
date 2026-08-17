@@ -89,7 +89,7 @@ export function AttachmentSection() {
                 href="/guide/attachment-styles"
                 className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                להבין לעומק: סגנונות התקשרות בזוגיות — חרדתי, נמנע ומה קורה ביניהם
+                להבין לעומק: סגנונות התקשרות בזוגיות, חרדתי, נמנע ומה קורה ביניהם
               </Link>
             </p>
           </div>

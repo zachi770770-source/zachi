@@ -29,7 +29,7 @@ export function NewsletterSection() {
             הספר המלא זמין עכשיו באמזון
           </h2>
           <p className="mx-auto mt-2 max-w-md text-[15px] leading-relaxed text-foreground-muted">
-            {siteConfig.amazon.editionLabel} — קריאה מיידית לאחר הרכישה,
+            {siteConfig.amazon.editionLabel}: קריאה מיידית לאחר הרכישה,
             באפליקציית Kindle או בכל מכשיר תואם.
           </p>
           <div className="mt-5 flex justify-center">

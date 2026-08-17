@@ -53,7 +53,7 @@ export function PurchaseCard() {
             <ul className="flex flex-col gap-2.5 border-t border-foreground/12 pt-5 text-[15px] text-foreground-muted">
               <li className="flex items-center gap-2.5">
                 <BookOpen className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                {siteConfig.amazon.editionLabel} — קריאה מיידית אחרי הרכישה
+                {siteConfig.amazon.editionLabel}: קריאה מיידית אחרי הרכישה
               </li>
               <li className="flex items-center gap-2.5">
                 <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
@@ -87,7 +87,7 @@ export function PurchaseCard() {
 
           <p className="text-[13px] leading-relaxed text-foreground-muted">
             הרכישה מתבצעת בפלטפורמת Amazon וכפופה לתנאי הרכישה, התשלום והאספקה
-            שלה. אם בעתיד תיפתח רכישה ישירה באתר —{" "}
+            שלה. אם בעתיד תיפתח רכישה ישירה באתר,{" "}
             <Link
               href="/shipping-returns"
               className="text-brand-hover underline underline-offset-2 hover:text-foreground"
