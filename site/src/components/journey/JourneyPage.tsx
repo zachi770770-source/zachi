@@ -11,6 +11,7 @@ import type {
 } from "@/content/journeyPages";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
+import { SignatureMark } from "@/components/shared/SignatureMark";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
 import { AmazonBuyLink, type AmazonSource } from "@/components/purchase/AmazonBuyLink";
@@ -160,6 +161,8 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             <p className="mt-6 max-w-[46ch] text-[clamp(1.1rem,1.5vw,1.3125rem)] leading-relaxed text-foreground-muted [text-wrap:pretty]">
               {journey.intro}
             </p>
+            {/* הסימן החתום „מחיפוש לבנייה” — עמוד-המסע הוא ביטוי-העל שלו. */}
+            <SignatureMark className="mt-7" />
           </div>
           <div
             className={cn(
@@ -192,6 +195,8 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           <p className="mx-auto mt-8 max-w-[34ch] font-serif text-[clamp(1.375rem,2.1vw,1.85rem)] italic leading-[1.35] text-brand-hover [text-wrap:balance]">
             {journey.moodLine}
           </p>
+          {/* הסימן החתום „מחיפוש לבנייה” — עמוד-המסע הוא ביטוי-העל שלו. */}
+          <SignatureMark className="mt-8 justify-center" />
         </header>
       )}
 

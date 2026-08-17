@@ -9,6 +9,7 @@ import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
+import { SignatureMark } from "@/components/shared/SignatureMark";
 import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 
 /**
@@ -196,18 +197,8 @@ export function Hero() {
                   </BookTilt>
                 </div>
               </div>
-              {/* קו מבנה זעיר: הד למוטיב „מנקודות למבנה” — נקודת מותג במרכז,
-                  סימן-בסיס עדין מתחת לכריכה. דקורטיבי בלבד. */}
-              <span
-                aria-hidden="true"
-                className="flex items-center gap-1.5 opacity-80"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
-                <span className="route-line h-px w-8 bg-border-strong sm:w-12" />
-                <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                <span className="route-line h-px w-8 bg-border-strong sm:w-12" />
-                <span className="h-1.5 w-1.5 rounded-full bg-border-strong" />
-              </span>
+              {/* הסימן החתום „מחיפוש לבנייה” — מתחת לכריכה, כרגע-מותג מרכזי. */}
+              <SignatureMark />
             </figure>
           </ParallaxScroll>
         </div>
