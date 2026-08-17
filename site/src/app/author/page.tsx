@@ -77,7 +77,7 @@ export default function AuthorPage() {
           <span className="kicker">
             {siteConfig.author.name}, מחבר {siteConfig.bookTitle}
           </span>
-          <h1 className="mt-4 font-serif text-[clamp(1.95rem,4.2vw,2.85rem)] font-semibold leading-[1.15] text-foreground">
+          <h1 className="mt-4 font-serif type-hero text-foreground">
             {authorContent.sectionTitle}
           </h1>
           <p className="mt-5 font-serif text-[clamp(1.15rem,2vw,1.4rem)] italic text-brand-hover">

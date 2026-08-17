@@ -55,7 +55,7 @@ export default async function CompassPage({
           <Compass className="h-6 w-6" />
         </span>
         <span className="kicker mt-6 justify-center">{askUi.eyebrow}</span>
-        <h1 className="mt-4 font-serif text-[clamp(2rem,4.2vw,2.85rem)] font-semibold leading-[1.1] text-balance text-foreground">
+        <h1 className="mt-4 font-serif type-hero text-foreground">
           {compassQuiz.ask.title}
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-[clamp(1.05rem,1.5vw,1.2rem)] leading-relaxed text-balance text-foreground-muted">

@@ -71,12 +71,12 @@ export function MethodPage({ method }: { method: Method }) {
       </nav>
 
       {/* כותרת + הגדרה קצרה מיד */}
-      <header className="enter-stagger mx-auto mt-8 max-w-[54ch]">
+      <header className="enter-stagger mx-auto mt-10 max-w-[62ch]">
         <span className="kicker">{method.kicker}</span>
-        <h1 className="mt-4 font-serif text-[clamp(1.9rem,4vw,2.9rem)] font-semibold leading-[1.15] text-foreground">
+        <h1 className="mt-5 font-serif type-hero text-foreground">
           {method.h1}
         </h1>
-        <p className="mt-5 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted">
+        <p className="mt-6 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted">
           {method.lead}
         </p>
       </header>
