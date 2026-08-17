@@ -47,7 +47,10 @@
 
   --font-sans: var(--font-body);
   --font-serif: var(--font-body);
-  --font-quote: var(--font-quote);
+  /* type-quote (מספרים דקורטיביים, מחיר) נשאר Heebo — הוגדר במפורש כדי לא ליצור
+     הפניה-עצמית (שאיפסה בעבר את הערך). הקול הספרותי (Frank Ruhl) חי בנפרד תחת
+     --font-literary ומיושם רק על רגעים ספרותיים דרך .type-literary. */
+  --font-quote: var(--font-body);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
@@ -412,6 +415,12 @@
   .type-quote {
     font-family: var(--font-quote);
     font-weight: 500;
+  }
+  /* הקול הספרותי (Frank Ruhl Libre) — מיושם *רק* על רגעים רפלקטיביים/ציטוטיים
+     ועל שורת-המותג. לא גוף, לא ממשק, לא כותרות-הירו, לא מספרים/מחיר. זקוף (לא
+     נטוי — לגופן אין נטוי אמיתי, נטוי-סינתטי נראה זול). fallback: serif אמיתי. */
+  .type-literary {
+    font-family: var(--font-literary), Georgia, "Times New Roman", serif;
   }
 
   /* קיקר עריכתי: תווית קטנה עם קו מוביל קצר */

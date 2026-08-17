@@ -52,7 +52,7 @@ export function ThesisSection() {
             </div>
 
             {/* העצירה והתובנה */}
-            <p className="type-quote mt-12 text-[clamp(1.75rem,3vw,2.5rem)] font-medium text-foreground/70">
+            <p className="type-literary mt-12 text-[clamp(1.75rem,3vw,2.5rem)] font-medium text-foreground/70">
               דייטינג הוא חיפוש.
             </p>
             {/* קו הבנייה — אנכי, מחבר בין החיפוש לבנייה */}

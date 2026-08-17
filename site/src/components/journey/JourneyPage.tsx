@@ -173,7 +173,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           >
             <p
               className={cn(
-                "border-brand pt-5 font-serif text-[clamp(1.375rem,2.1vw,1.9rem)] italic leading-[1.35] text-brand-hover [text-wrap:balance]",
+                "border-brand pt-5 type-literary text-[clamp(1.375rem,2.1vw,1.9rem)] leading-[1.35] text-brand-hover [text-wrap:balance]",
                 "border-t-2 lg:border-t-0",
                 v.moodSide === "start"
                   ? "lg:border-e-2 lg:pe-6"
@@ -193,7 +193,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           <p className="mx-auto mt-6 max-w-[42ch] text-[clamp(1.1rem,1.5vw,1.3125rem)] leading-relaxed text-foreground-muted [text-wrap:pretty]">
             {journey.intro}
           </p>
-          <p className="mx-auto mt-8 max-w-[34ch] font-serif text-[clamp(1.375rem,2.1vw,1.85rem)] italic leading-[1.35] text-brand-hover [text-wrap:balance]">
+          <p className="mx-auto mt-8 max-w-[34ch] type-literary text-[clamp(1.375rem,2.1vw,1.85rem)] leading-[1.35] text-brand-hover [text-wrap:balance]">
             {journey.moodLine}
           </p>
           {/* הסימן החתום „מחיפוש לבנייה” — עמוד-המסע הוא ביטוי-העל שלו. */}
@@ -282,7 +282,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             <span className="kicker">רגע של מראה</span>
             <p
               id="mirror-question"
-              className="mt-3 font-serif text-[clamp(1.375rem,2.4vw,2rem)] font-medium italic leading-[1.4] text-foreground [text-wrap:balance]"
+              className="mt-3 type-literary text-[clamp(1.375rem,2.4vw,2rem)] font-medium leading-[1.4] text-foreground [text-wrap:balance]"
             >
               {journey.mirrorQuestion}
             </p>
@@ -431,7 +431,7 @@ function PullQuote({ text, tone }: { text: string; tone: "band" | "rule" }) {
   if (tone === "band") {
     return (
       <figure className="reveal -mx-6 rounded-none bg-secondary-muted px-6 py-14 sm:mx-0 sm:rounded-3xl sm:px-10 sm:py-16 lg:py-20">
-        <blockquote className="mx-auto max-w-[24ch] text-center font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-bold leading-[1.2] tracking-[-0.01em] text-secondary [text-wrap:balance]">
+        <blockquote className="mx-auto max-w-[24ch] text-center type-literary text-[clamp(1.75rem,3.6vw,3rem)] font-bold leading-[1.2] tracking-[-0.01em] text-secondary [text-wrap:balance]">
           {text}
         </blockquote>
       </figure>
@@ -439,7 +439,7 @@ function PullQuote({ text, tone }: { text: string; tone: "band" | "rule" }) {
   }
   return (
     <figure className="reveal border-y border-border-strong py-12 sm:py-16 lg:py-20">
-      <blockquote className="mx-auto max-w-[26ch] text-center font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-[1.22] tracking-[-0.01em] text-foreground [text-wrap:balance]">
+      <blockquote className="mx-auto max-w-[26ch] text-center type-literary text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-[1.22] tracking-[-0.01em] text-foreground [text-wrap:balance]">
         <span aria-hidden="true" className="text-brand">
           „
         </span>

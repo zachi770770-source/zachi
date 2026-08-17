@@ -36,7 +36,7 @@ export function Footer() {
             {/* משפט-המותג + הסימן החתום נוכחים גם במובייל: הם „חתימת-הספר” שסוגרת
                 את החוויה. הסתרתם במובייל חסכה גובה זניח אך רוקנה את סגירת-המותג —
                 לכן הם מוצגים בכל רוחב. */}
-            <p className="font-quote text-[1.05rem] italic leading-relaxed text-secondary-foreground/85">
+            <p className="type-literary text-[1.05rem] leading-relaxed text-secondary-foreground/85">
               {siteConfig.tagline}
             </p>
             {/* הסימן החתום „מחיפוש לבנייה” — סוגר שקט מתחת למשפט-המותג. */}

@@ -61,7 +61,7 @@ export function CompassSignature() {
                 {signature.example.label}
               </span>
 
-              <p className="mt-4 font-quote text-[1.2rem] italic leading-snug text-foreground text-balance">
+              <p className="mt-4 type-literary text-[1.2rem] leading-snug text-foreground text-balance">
                 „{signature.example.question}”
               </p>
 

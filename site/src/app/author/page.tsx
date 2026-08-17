@@ -81,7 +81,7 @@ export default function AuthorPage() {
           <h1 className="mt-4 font-serif type-hero text-foreground">
             {authorContent.sectionTitle}
           </h1>
-          <p className="mt-5 font-serif text-[clamp(1.15rem,2vw,1.4rem)] italic text-brand-hover">
+          <p className="mt-5 type-literary text-[clamp(1.15rem,2vw,1.4rem)] text-brand-hover">
             {siteConfig.tagline}
           </p>
           {/* הסימן החתום „מחיפוש לבנייה” — מחבר את סיפור המחבר לתזת הספר. */}

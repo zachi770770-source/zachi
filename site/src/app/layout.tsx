@@ -28,7 +28,7 @@ const bodyFont = Heebo({
 // serif חלופי בינתיים) — כך שאינו על הנתיב הקריטי של ה-LCP (תווית ה-Heebo הגלויה
 // בירו). ביטול ה-preload שלו משחרר רוחב-פס לקבצי ה-Heebo הקריטיים ל-LCP.
 const quoteFont = Frank_Ruhl_Libre({
-  variable: "--font-quote",
+  variable: "--font-literary",
   subsets: ["hebrew", "latin"],
   weight: ["500", "700", "800", "900"],
   display: "swap",
