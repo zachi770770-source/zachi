@@ -41,9 +41,10 @@ export function SignatureMark({
       {/* מעבר — הקו מתחיל להיווצר, הנקודה מקבלת גוון מותג */}
       <span className={cn("route-line h-px w-4 shrink-0 sm:w-5", line)} />
       <span className="h-2 w-2 shrink-0 rounded-full bg-brand/45" />
-      {/* בנייה — קו טרקוטה מלא וצומת מעוגן */}
+      {/* בנייה — קו טרקוטה מלא וצומת מעוגן. הצומת הסוגר מודגש בגודל בלבד (ללא
+          טבעת), כדי שלא ייקרא כמחוון-תחנה במסעות. */}
       <span className="route-line h-[2px] w-9 shrink-0 rounded-full bg-brand sm:w-11" />
-      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-brand ring-4 ring-brand/15" />
+      <span className="h-3 w-3 shrink-0 rounded-full bg-brand" />
     </span>
   );
 }

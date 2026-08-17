@@ -6,6 +6,7 @@ import { TrustBand } from "@/components/sections/TrustBand";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { BuildSpine } from "@/components/shared/BuildSpine";
+import { SignatureMark } from "@/components/shared/SignatureMark";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
@@ -49,6 +50,11 @@ export default function HomePage() {
       <Hero />
       <HomePathSelector />
       <TrustBand />
+      {/* מעבר-חתימה „מחיפוש לבנייה”: סוגר את הקשת הרגשית של העמוד (חיפוש ⟶
+          זיהוי ⟶ הבנה ⟶ בנייה) ומוביל אל רגע-הבנייה הסוגר. רגע-מותג אחד. */}
+      <div className="flex justify-center pt-2 sm:pt-4" aria-hidden="true">
+        <SignatureMark />
+      </div>
       <NewsletterSection />
       <StickyCta />
     </>

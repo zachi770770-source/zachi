@@ -21,7 +21,8 @@ export function HomePathSelector() {
     <section id="path" className="scroll-mt-20 py-5 sm:py-10" aria-labelledby="path-heading">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
-          <h2 id="path-heading" className="type-h2">
+          <span className="kicker justify-center">{homePathUi.eyebrow}</span>
+          <h2 id="path-heading" className="type-h2 mt-2">
             {homePathUi.heading}
           </h2>
           <p className="type-lead mx-auto mt-2 max-w-[42ch] text-foreground-muted [text-wrap:pretty]">
