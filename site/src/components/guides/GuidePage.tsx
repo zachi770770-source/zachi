@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpLeft, Info } from "lucide-react";
 
 import { guidesUi, type Guide } from "@/content/guides";
+import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
@@ -85,7 +86,16 @@ export function GuidePage({ guide }: { guide: Guide }) {
         {/* פתיח */}
         <section className="reveal flex flex-col gap-4">
           {guide.intro.map((p, i) => (
-            <p key={i} className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]">
+            <p
+              key={i}
+              className={cn(
+                "text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]",
+                // הפסקה הפותחת של הגוף היא המסגור האנושי לפני ההסבר — משקל-lead
+                // חמים (כמו בעמודי-המסע), כדי שהמדריך „ידבר” לפני שהוא מסביר.
+                i === 0 &&
+                  "text-[clamp(1.2rem,1.7vw,1.4rem)] font-medium leading-[1.6] text-foreground sm:text-[clamp(1.2rem,1.7vw,1.4rem)]",
+              )}
+            >
               {p}
             </p>
           ))}

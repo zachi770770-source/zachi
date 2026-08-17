@@ -97,7 +97,13 @@ export default function AuthorPage() {
         {authorContent.fullBio.map((paragraph, index) => (
           <p
             key={index}
-            className="text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]"
+            className={
+              // הפסקה הפותחת נושאת את קול המחבר, ולכן מקבלת משקל-lead חמים
+              // (אותו טיפול כמו שיקוף-הפתיחה בעמודי-המסע) — נוכחות אישית, לא הבטחה.
+              index === 0
+                ? "text-[clamp(1.2rem,1.7vw,1.4rem)] font-medium leading-[1.6] text-foreground [text-wrap:pretty]"
+                : "text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]"
+            }
           >
             {paragraph}
           </p>
