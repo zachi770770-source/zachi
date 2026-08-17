@@ -88,13 +88,16 @@ export function Faq({ items }: { items: FaqItem[] }) {
   );
 
   return (
-    <div className="divide-y divide-border border-y border-border">
-      {ordered.map((item) => {
+    <div className="border-y border-border">
+      {ordered.map((item, index) => {
         const matched = !!personaId && item.persona === personaId;
+        // ספרור עריכתי לפי סדר-התצוגה (כמו שאלון ממוספר בספר). דקורטיבי בלבד
+        // ולכן aria-hidden — קורא-מסך מקבל את השאלה עצמה, בלי „אחת, שתיים”.
+        const num = String(index + 1).padStart(2, "0");
         return (
           <details
             key={item.id}
-            className="group"
+            className="faq-item group border-t border-border first:border-t-0"
             onToggle={(event) => {
               if (event.currentTarget.open) {
                 trackEvent("faq_open", { question_id: item.id });
@@ -103,24 +106,34 @@ export function Faq({ items }: { items: FaqItem[] }) {
           >
             <summary
               onClick={onSummaryClick}
-              className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-start text-[1.15rem] font-semibold text-foreground transition-colors [&::-webkit-details-marker]:hidden hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="grid cursor-pointer list-none grid-cols-[1.75rem_1fr_auto] items-baseline gap-x-3.5 py-6 text-start [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:grid-cols-[2.25rem_1fr_auto] sm:gap-x-4 sm:py-7"
             >
-              <span className="flex flex-col gap-1">
+              {/* ספרה תלויה — קו-מבנה עריכתי בשוליים, טרקוטה כשפתוח */}
+              <span
+                aria-hidden="true"
+                className="faq-num select-none font-serif text-[0.95rem] font-semibold tabular-nums leading-none text-foreground-muted transition-colors group-open:text-brand-hover"
+              >
+                {num}
+              </span>
+              <span className="flex flex-col gap-1.5">
                 {matched ? (
-                  <span className="text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
+                  <span className="text-[11.5px] font-semibold uppercase tracking-[0.12em] text-brand-hover">
                     מותאם למצב שלכם
                   </span>
                 ) : null}
-                {item.question}
+                <span className="font-serif text-[1.2rem] font-semibold leading-snug text-foreground transition-colors [text-wrap:pretty] group-hover:text-brand-hover group-open:text-brand-hover">
+                  {item.question}
+                </span>
               </span>
               <ChevronDown
-                className="h-5 w-5 shrink-0 text-brand transition-transform group-open:rotate-180"
+                className="h-5 w-5 shrink-0 self-center text-brand/70 transition-transform duration-200 group-open:rotate-180 group-open:text-brand group-hover:text-brand"
                 aria-hidden="true"
               />
             </summary>
-            {/* עטיפה עם overflow:hidden — עליה מונפשת אנימציית הגובה (WAA). */}
+            {/* עטיפה עם overflow:hidden — עליה מונפשת אנימציית הגובה (WAA).
+                התשובה מיושרת אל טקסט השאלה (מעבר לעמודת הספרה). */}
             <div className="faq-answer-wrap overflow-hidden">
-              <p className="faq-answer pb-6 pe-8 text-[1.05rem] leading-[1.75] text-foreground-muted">
+              <p className="faq-answer ps-[2.75rem] pe-1 pb-7 text-[1.05rem] leading-[1.8] text-foreground-muted [text-wrap:pretty] sm:ps-[3.25rem] sm:pe-8">
                 {item.answer}
               </p>
             </div>

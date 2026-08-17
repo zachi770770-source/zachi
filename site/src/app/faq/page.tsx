@@ -22,6 +22,8 @@ export default function FaqPage() {
           { name: "שאלות נפוצות", path: "/faq" },
         ]}
       />
+      {/* ה-Hero (מ-PR #45) נשמר כפי שאושר, בעמודת max-w-2xl. גוף השאלות מקבל
+          עמודה מעט רחבה יותר כדי לתת מקום לשוליים העריכתיים ולנשימה בין השאלות. */}
       <div className="mx-auto mt-6 max-w-2xl">
         <span className="kicker">על הספר</span>
         <h1 className="mt-4 font-serif type-hero text-foreground">
@@ -33,10 +35,10 @@ export default function FaqPage() {
         <p className="mt-2 text-[14px] italic text-foreground-muted">
           אין תשובה אחת שמתאימה לכולם.
         </p>
+      </div>
 
-        <div className="mt-8">
-          <Faq items={faqItems} />
-        </div>
+      <div className="mx-auto mt-10 max-w-[44rem] sm:mt-12">
+        <Faq items={faqItems} />
       </div>
     </Container>
   );
