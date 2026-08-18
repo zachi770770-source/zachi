@@ -12,6 +12,7 @@ const JOURNEY_TO_HOME: Record<JourneyId, string> = {
   "building-relationship": "building",
   "inside-relationship": "existing",
   "after-breakup": "breakup",
+  "starting-again": "breakup",
 };
 
 const STORAGE_KEY = "mdl_home_path";

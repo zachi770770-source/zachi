@@ -23,7 +23,8 @@ export type AmazonSource =
   | "journey_before"
   | "journey_building"
   | "journey_inside"
-  | "journey_after";
+  | "journey_after"
+  | "journey_starting";
 
 export function AmazonBuyLink({
   source,

@@ -52,6 +52,18 @@ const JOURNEYS = [
     ask: "after-breakup",
     others: ["/before-relationship", "/building-relationship", "/inside-relationship"],
   },
+  {
+    path: "/starting-again",
+    h1: "מתחילים מחדש: לחזור להיכרויות בלי לחזור לאותה דרך.",
+    introBit: "נושאים איתנו פנימה",
+    depthTitle: "ניסיון יכול להגן, ויכול לשריין",
+    sampleLabel: "קראו טעימה למי שחוזר להיכרויות",
+    tool: "boundary-ladder",
+    station: "starting-again",
+    ask: "dating",
+    // „מתחילים מחדש” מפנה ל„לפני קשר” כצעד המשך, ולכן הוא אינו ב-others.
+    others: ["/building-relationship", "/inside-relationship", "/after-breakup"],
+  },
 ] as const;
 
 for (const j of JOURNEYS) {

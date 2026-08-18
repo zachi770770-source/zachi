@@ -21,7 +21,7 @@ test("/book shows the self-recognition sections with the approved content", asyn
 
   // ריקוד ההיקשרות + משפט ההבטחה + שאלה סוגרת
   await expect(page.locator("#attachment")).toHaveCount(1);
-  await expect(page.getByText(/היא מרגישה כמו לחזור הביתה/)).toBeVisible();
+  await expect(page.getByText(/מקום בטוח לחזור אליו/)).toBeVisible();
   await expect(page.getByText("מאיזו עבודה פנימית אתם נמנעים?")).toBeVisible();
 
   // CTA יחיד בסוף הסקשן → טעימה (מונח אחיד)

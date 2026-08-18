@@ -43,6 +43,7 @@ const STATION_TO_ASK: Partial<Record<string, AskStationId>> = {
   "building-relationship": "building",
   "inside-relationship": "existing",
   "after-breakup": "after-breakup",
+  "starting-again": "dating",
 };
 
 export default async function PreviewPage({

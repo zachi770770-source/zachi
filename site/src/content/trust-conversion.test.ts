@@ -4,6 +4,7 @@ import { siteConfig } from "@/config/site";
 import { faqItems } from "@/content/faq";
 import { journeyPages } from "@/content/journeyPages";
 import { previewClosing } from "@/content/sample";
+import { attachment } from "@/content/book";
 
 /**
  * P0 Trust & Conversion regressions:
@@ -66,5 +67,36 @@ describe("psychological claims are curiosity, not diagnosis", () => {
     const divorced = faqItems.find((f) => f.question.includes("גרוש/ה עם ילדים"));
     expect(divorced).toBeTruthy();
     expect(divorced!.answer).not.toContain("שרגישים לא פעם יותר ממה שנדמה");
+  });
+});
+
+describe("/book attachment section is a lens, not destiny or a true-love absolute", () => {
+  it("drops the universal 'real love feels like coming home' claim", () => {
+    expect(attachment.promise).not.toContain("אהבה אמיתית לא מרגישה");
+    expect(attachment.promise).not.toContain("היא מרגישה כמו לחזור הביתה");
+  });
+
+  it("reframes attachment as a lens/model, not childhood software that determines attraction", () => {
+    expect(attachment.definition).not.toContain("תוכנה שנלמדת בילדות");
+    expect(attachment.definition).toContain("עדשה");
+  });
+});
+
+describe("/starting-again has full journey parity with its sibling stages", () => {
+  const sa = journeyPages["starting-again"];
+
+  it("uses the rich JourneyPage content model", () => {
+    expect(sa).toBeTruthy();
+    expect(sa.whatsHappening.length).toBeGreaterThanOrEqual(4);
+    expect(sa.depthPoints.length).toBe(3);
+    expect(sa.bookHelps.length).toBeGreaterThanOrEqual(3);
+    expect(sa.pullQuote.length).toBeGreaterThan(0);
+    expect(sa.mirrorQuestion.length).toBeGreaterThan(0);
+    expect(sa.sampleLead.length).toBeGreaterThan(0);
+  });
+
+  it("wires a real preview reading (valid tool + station)", () => {
+    expect(sa.sampleTool).toBe("boundary-ladder");
+    expect(sa.sampleStation).toBe("starting-again");
   });
 });

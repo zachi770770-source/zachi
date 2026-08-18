@@ -97,6 +97,7 @@ const AMAZON_SOURCE: Record<JourneyId, AmazonSource> = {
   "building-relationship": "journey_building",
   "inside-relationship": "journey_inside",
   "after-breakup": "journey_after",
+  "starting-again": "journey_starting",
 };
 
 export function JourneyPage({ journey }: { journey: JourneyPageData }) {
