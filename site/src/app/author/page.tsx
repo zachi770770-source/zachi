@@ -127,6 +127,14 @@ export default function AuthorPage() {
         <p className="mt-4 text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]">
           {authorContent.toolsBody}
         </p>
+        <p className="mt-5 text-[15px] leading-relaxed text-foreground-muted">
+          <Link
+            href="/love"
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            הרעיון המרכזי בעמוד אחד: איך אהבה נבנית
+          </Link>
+        </p>
       </section>
 
       {/* מה הספר אינו — גבולות ברורים + גילוי נאות שאין כאן טיפול/אבחון. */}

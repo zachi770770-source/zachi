@@ -8,6 +8,7 @@ export const navLinks = [
 
 export const footerLinks = {
   main: [
+    { href: "/love", label: "מהי אהבה" },
     { href: "/compass", label: "מה הספר אומר?" },
     { href: "/preview", label: "טעימה מהספר" },
     { href: "/author", label: "מאחורי הספר" },

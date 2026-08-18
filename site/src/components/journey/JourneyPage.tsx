@@ -368,6 +368,14 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
               <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
               מה עוד מחכה בספר
             </Link>
+            {/* מרכז-האשכול הרוחבי „אהבה” — התחנה היא שלב בתוך התמונה הרחבה. */}
+            <Link
+              href="/love"
+              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
+              מהי אהבה ואיך היא נבנית
+            </Link>
             <p className="max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
               {journey.nextStep.prompt}{" "}
               <Link

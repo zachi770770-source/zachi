@@ -15,6 +15,8 @@ type SitemapRoute = {
 const staticRoutes: SitemapRoute[] = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
   { path: "/book", priority: 0.9, changeFrequency: "monthly" },
+  // „אהבה” — עמוד-הסמכות הרוחבי (hub) של אשכול-התוכן על אהבה וזוגיות.
+  { path: "/love", priority: 0.9, changeFrequency: "monthly" },
   { path: "/before-relationship", priority: 0.8, changeFrequency: "monthly" },
   { path: "/building-relationship", priority: 0.8, changeFrequency: "monthly" },
   { path: "/inside-relationship", priority: 0.8, changeFrequency: "monthly" },
