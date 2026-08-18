@@ -51,17 +51,16 @@ describe("searchCompass", () => {
     const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.005)]), "שאלה");
     expect(res.matched).toBe(true);
     expect(res.results).toHaveLength(1);
-    expect(res.results.every((r) => r.score >= 0.3)).toBe(true);
+    expect(res.results.every((r) => r.score >= 0.25)).toBe(true);
   });
 
-  it("uses the calibrated 0.3 default floor (weak lexical noise is refused)", async () => {
-    // רעש-לקסיקלי אמיתי (למשל „מתכון לעוגת שוקולד”) הבקיע ~0.28 מול הספר האמיתי;
-    // הסף המכויל 0.3 מסרב אותו, בעוד קטע-ספר אמיתי (0.3+) נשמר.
-    const noise = await searchCompass(mockDb([row(1, 0.29), row(2, 0.17)]), "שאלה");
+  it("uses the calibrated 0.25 default floor (very weak lexical noise refused, book match kept)", async () => {
+    // סף מכויל מול holdout75: 0.25 שומר על recall מקסימלי ומסנן רעש חלש מאוד.
+    const noise = await searchCompass(mockDb([row(1, 0.2), row(2, 0.1)]), "שאלה");
     expect(noise.matched).toBe(false);
     expect(noise.results).toHaveLength(0);
 
-    const real = await searchCompass(mockDb([row(1, 0.3)]), "שאלה");
+    const real = await searchCompass(mockDb([row(1, 0.25)]), "שאלה");
     expect(real.matched).toBe(true);
     expect(real.results).toHaveLength(1);
   });
