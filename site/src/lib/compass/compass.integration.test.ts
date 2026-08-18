@@ -38,7 +38,10 @@ suite("compass knowledge layer (real Postgres)", () => {
   });
 
   it("1. clear source → returns relevant sections with a chapter name", async () => {
-    const r = await searchCompass(pool, "בדיקת השקט בקשר");
+    // הפיקסצ'ר דליל, כך שהתפלגות הציונים שלו נמוכה מזו של כתב-היד האמיתי;
+    // בדיקות המנגנון (matched=true) מעבירות סף מפורש נמוך, בעוד סף-הייצור
+    // המכויל (0.3) מאומת בנפרד מול הספר האמיתי.
+    const r = await searchCompass(pool, "בדיקת השקט בקשר", { minScore: 0.01 });
     expect(r.matched).toBe(true);
     expect(r.results.length).toBeGreaterThanOrEqual(1);
     expect(r.results.length).toBeLessThanOrEqual(5);
@@ -84,7 +87,8 @@ suite("compass knowledge layer (real Postgres)", () => {
     const v2 = { ...sampleBook, version: "fixture-v2" };
     await importVersion(client, v2);
     await activateVersion(client, "fixture-v2");
-    const r = await searchCompass(pool, "בדיקת השקט");
+    // סף מפורש נמוך — בודקים בידוד-גרסאות במנגנון, לא כיול-הייצור (ראו בדיקה 1).
+    const r = await searchCompass(pool, "בדיקת השקט", { minScore: 0.01 });
     expect(r.matched).toBe(true);
     expect(r.bookVersion).toBe("fixture-v2");
     const active = await client.query(

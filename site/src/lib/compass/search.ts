@@ -4,11 +4,25 @@ import type { CompassMatch, CompassSearchResponse, SqlClient } from "@/lib/compa
 
 /**
  * סף התאמה מינימלי (ציון מנורמל 0..1) — מתחתיו מסרבים להחזיר תוכן. מאחר
- * שהשאילתה בנויה כ-OR בין מונחי התוכן (ראו buildTsQuery), שאלה לא רלוונטית
- * פשוט לא תתאים לאף מונח ותחזיר 0 שורות; הסף הזה הוא רצפה נוספת נגד התאמות
- * חלשות. יש לכייל אותו מול התפלגות הציונים של כתב היד האמיתי.
+ * שהשאילתה בנויה כ-OR בין מונחי התוכן (ראו buildTsQuery), שאלה עלולה להתאים
+ * *בחולשה* לקטע דרך מילה נפוצה בודדת (למשל „אוויר”, „חלב”), ולכן הסף הזה הוא
+ * רצפה קריטית נגד התאמות-רעש כאלה.
+ *
+ * מכויל מול התפלגות הציונים של כתב-היד האמיתי (גרסה 888, 382 קטעים):
+ *   • שאלות מהספר: ציון-שיא ~0.375–0.77.
+ *   • שאלות מחוץ לספר: ציון-שיא ≤ ~0.29 (רעש לקסיקלי על מילה נפוצה בודדת).
+ * לכן סף 0.30 מסנן את הרעש הזה בעוד ששאלות-ספר אמיתיות נשמרות (המודל הוא
+ * שכבת-הגנה שנייה על מה שנותר). לפני הכיול הסף היה 0.01 — נמוך מדי, כך ששאלות
+ * לא-רלוונטיות (למשל „מתכון לעוגת שוקולד”) התאימו בחולשה במקום להיות מסורבות.
+ * ניתן לעקוף לכיול עתידי דרך COMPASS_MIN_SCORE (0..1).
  */
-const DEFAULT_MIN_SCORE = 0.01;
+const DEFAULT_MIN_SCORE = 0.3;
+
+/** הסף האפקטיבי: override תקין דרך COMPASS_MIN_SCORE, אחרת ברירת המחדל המכוילת. */
+function defaultMinScore(): number {
+  const raw = Number(process.env.COMPASS_MIN_SCORE);
+  return Number.isFinite(raw) && raw >= 0 && raw <= 1 ? raw : DEFAULT_MIN_SCORE;
+}
 /** מקסימום קטעים בתשובה — לעולם לא מחזירים יותר. */
 const MAX_RESULTS = 5;
 /** מקסימום קטעים מאותו פרק — כדי לא להחזיר בפועל פרק שלם. */
@@ -84,7 +98,7 @@ export async function searchCompass(
   opts: { minScore?: number } = {}
 ): Promise<CompassSearchResponse> {
   const q = (question ?? "").trim();
-  const minScore = opts.minScore ?? DEFAULT_MIN_SCORE;
+  const minScore = opts.minScore ?? defaultMinScore();
   if (!q) return { matched: false, bookVersion: null, results: [] };
 
   // גרסה פעילה יחידה — מונע ערבוב גרסאות בתשובה אחת.

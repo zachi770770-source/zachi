@@ -51,7 +51,32 @@ describe("searchCompass", () => {
     const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.005)]), "שאלה");
     expect(res.matched).toBe(true);
     expect(res.results).toHaveLength(1);
-    expect(res.results.every((r) => r.score >= 0.01)).toBe(true);
+    expect(res.results.every((r) => r.score >= 0.3)).toBe(true);
+  });
+
+  it("uses the calibrated 0.3 default floor (weak lexical noise is refused)", async () => {
+    // רעש-לקסיקלי אמיתי (למשל „מתכון לעוגת שוקולד”) הבקיע ~0.28 מול הספר האמיתי;
+    // הסף המכויל 0.3 מסרב אותו, בעוד קטע-ספר אמיתי (0.3+) נשמר.
+    const noise = await searchCompass(mockDb([row(1, 0.29), row(2, 0.17)]), "שאלה");
+    expect(noise.matched).toBe(false);
+    expect(noise.results).toHaveLength(0);
+
+    const real = await searchCompass(mockDb([row(1, 0.3)]), "שאלה");
+    expect(real.matched).toBe(true);
+    expect(real.results).toHaveLength(1);
+  });
+
+  it("honors COMPASS_MIN_SCORE as an override for future calibration", async () => {
+    const prev = process.env.COMPASS_MIN_SCORE;
+    process.env.COMPASS_MIN_SCORE = "0.6";
+    try {
+      const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.7)]), "שאלה");
+      expect(res.results).toHaveLength(1);
+      expect(res.results[0].score).toBe(0.7);
+    } finally {
+      if (prev === undefined) delete process.env.COMPASS_MIN_SCORE;
+      else process.env.COMPASS_MIN_SCORE = prev;
+    }
   });
 
   it("returns matched:false with no content when every match is weak", async () => {
