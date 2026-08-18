@@ -50,13 +50,13 @@ beforeEach(() => {
 async function renderReadyConsole() {
   render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
   // ממתינים שהטופס ייטען (GET הזמינות הסתיים).
-  await screen.findByLabelText("השאלה שלכם");
+  await screen.findByLabelText("כתבו כאן במילים שלכם");
 }
 
 describe("CompassConsole, motion states", () => {
   it("renders the ask form once availability resolves to ready", async () => {
     await renderReadyConsole();
-    expect(screen.getByRole("button", { name: /קבלו כיוון מהספר/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /שאל את הספר/ })).toBeInTheDocument();
   });
 
   it("shows a single restrained loading indicator while submitting", async () => {
@@ -74,9 +74,9 @@ describe("CompassConsole, motion states", () => {
     global.fetch = fn;
 
     render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
-    const textarea = await screen.findByLabelText("השאלה שלכם");
+    const textarea = await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "איך יודעים שזו התאמה?" } });
-    fireEvent.click(screen.getByRole("button", { name: /קבלו כיוון מהספר/ }));
+    fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));
 
     // מצב טעינה: role=status מופיע, ואייקון המצפן נושא את מחלקת התנועה.
     const status = await screen.findByRole("status");
@@ -90,9 +90,9 @@ describe("CompassConsole, motion states", () => {
 
   it("renders the answer inside the controlled result sequence (result-seq)", async () => {
     await renderReadyConsole();
-    const textarea = screen.getByLabelText("השאלה שלכם");
+    const textarea = screen.getByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "איך בונים אמון?" } });
-    fireEvent.click(screen.getByRole("button", { name: /קבלו כיוון מהספר/ }));
+    fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));
 
     const answer = await screen.findByText("בנו על יסודות.");
     const article = answer.closest("article");
@@ -112,9 +112,9 @@ describe("CompassConsole, motion states", () => {
     global.fetch = fn;
 
     render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
-    const textarea = await screen.findByLabelText("השאלה שלכם");
+    const textarea = await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "שאלה אמיתית?" } });
-    const button = screen.getByRole("button", { name: /קבלו כיוון מהספר/ });
+    const button = screen.getByRole("button", { name: /שאל את הספר/ });
     fireEvent.click(button);
 
     // אחרי הלחיצה: הכפתור מושבת והטקסטאריה מושבתת — אין שליחה כפולה.
@@ -138,9 +138,9 @@ describe("CompassConsole, motion states", () => {
     global.fetch = fn;
 
     render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
-    const textarea = await screen.findByLabelText("השאלה שלכם");
+    const textarea = await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "שאלה שתיכשל" } });
-    fireEvent.click(screen.getByRole("button", { name: /קבלו כיוון מהספר/ }));
+    fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("אירעה תקלה זמנית. נסו שוב בעוד רגע.");

@@ -86,6 +86,8 @@ export type AnalyticsEventName =
   | "stuck_to_sample"
   | "compass_ask"
   | "compass_answer_success"
+  | "compass_refused"
+  | "compass_limit"
   | "path_finder_start"
   | "path_finder_complete"
   | "compass_start"
