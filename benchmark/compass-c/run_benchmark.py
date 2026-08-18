@@ -37,6 +37,11 @@ HERE = Path(__file__).resolve().parent
 DATA = HERE / "data"
 EXPECTED_HOLDOUT_SHA256 = "29e01d708416c6268c8fae2f34f56a8aa6e2dafa722ec0717063206633804975"
 WINNER_FILE = HERE / "winner.frozen.json"
+# Persistent one-run marker for the holdout. Tied to (holdout SHA-256 + winner
+# config hash + corpus checksum). Once written, a second run of the SAME triple
+# is refused. Deleting this file by hand is the only way to re-run — there is no
+# override flag (that is intentional).
+HOLDOUT_LOCK = HERE / "holdout.lock.json"
 
 RECALL5_MIN, OFFTOPIC_MIN, BLOCK_MIN, CIT_MIN = 0.95, 0.95, 1.0, 1.0
 RRF_K = 60
@@ -51,6 +56,33 @@ import re as _re
 
 def sha256_file(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def winner_hash(frozen: dict) -> str:
+    payload = {"model_id": frozen["model_id"], "mode": frozen["mode"],
+               "threshold": frozen["threshold"], "rrf_k": frozen.get("rrf_k", RRF_K)}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def lock_identity(frozen: dict, corpus_sha: str) -> dict:
+    return {"holdout_sha256": EXPECTED_HOLDOUT_SHA256,
+            "winner_hash": winner_hash(frozen), "corpus_checksum": corpus_sha}
+
+
+def holdout_already_ran(frozen: dict, corpus_sha: str) -> bool:
+    if not HOLDOUT_LOCK.exists():
+        return False
+    try:
+        lk = json.loads(HOLDOUT_LOCK.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    return all(lk.get(k) == v for k, v in lock_identity(frozen, corpus_sha).items())
+
+
+def write_holdout_lock(frozen: dict, corpus_sha: str) -> None:
+    rec = lock_identity(frozen, corpus_sha)
+    rec["ran_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    HOLDOUT_LOCK.write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def build_tsquery(q: str) -> str:
@@ -346,6 +378,14 @@ def cmd_run_holdout(a):
     src, chunks, corpus_sha = load_source(a.source)
     if corpus_sha != frozen["corpus_checksum"]:
         sys.exit("ERROR: corpus checksum differs from the frozen winner's corpus. Refusing to run.")
+    # One-run enforcement: refuse a second run of the same (holdout, winner, corpus).
+    if holdout_already_ran(frozen, corpus_sha):
+        prev = json.loads(HOLDOUT_LOCK.read_text(encoding="utf-8"))
+        sys.exit(
+            f"ERROR: this holdout was already run once (at {prev.get('ran_at')}) for the same "
+            f"holdout SHA-256, winner config, and corpus. Refusing a second run.\n"
+            f"See {HOLDOUT_LOCK.name}. There is no override flag; if you truly must re-run, delete "
+            f"that file by hand — a deliberate act, not a parameter.")
     version = f"bench-{corpus_sha[:12]}"
     model = load_model(a.model_path)
     mat, _t, _npy = embed_corpus(model, frozen["model_id"], chunks, corpus_sha, HERE / ".cache")
@@ -355,8 +395,10 @@ def cmd_run_holdout(a):
                  model, frozen["model_id"], mat, chunks, version, cur, holdout, gold)
     Path(HERE / "holdout_report.json").write_text(json.dumps(
         {"frozen": frozen, "holdout_sha256": hh, "metrics": r}, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_holdout_lock(frozen, corpus_sha)  # persistent one-run marker
     print(json.dumps(r, ensure_ascii=False, indent=2))
-    print("\nHOLDOUT complete (run once). Do not tune after seeing these results.")
+    print(f"\nHOLDOUT complete (run once; locked via {HOLDOUT_LOCK.name}). "
+          "Do not tune after seeing these results.")
 
 
 def main():
