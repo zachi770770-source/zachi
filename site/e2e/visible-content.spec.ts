@@ -220,7 +220,7 @@ test.describe("עמודים מרכזיים, כותרת + תוכן גוף גלו�
     { path: "/building-relationship", body: "#whats-happening-heading" },
     { path: "/inside-relationship", body: "#whats-happening-heading" },
     { path: "/after-breakup", body: "#whats-happening-heading" },
-    { path: "/starting-again", body: "#difficulty-heading" },
+    { path: "/starting-again", body: "#whats-happening-heading" },
     { path: "/compass", body: '[role="radiogroup"]' },
     { path: "/faq", body: "main" },
     { path: "/contact", body: "form" },
