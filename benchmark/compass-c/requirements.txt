@@ -1,5 +1,7 @@
-# Local, offline benchmark deps. Install on a machine that already has the
-# model weights on disk. No model download happens at runtime.
+# Local, offline benchmark deps. Installed by setup-benchmark into ./.venv.
+# Model DOWNLOAD happens only in setup-benchmark (huggingface_hub); the
+# benchmark itself runs fully offline and never contacts an embedding API.
 sentence-transformers>=2.7,<6
 numpy>=1.24
 psycopg2-binary>=2.9
+huggingface_hub>=0.23

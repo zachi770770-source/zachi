@@ -21,11 +21,11 @@ Excluded (reported explicitly), never enters the Q&A corpus:
 Output: medaytim-laahava-888-final.source.json  (BookSource shape)
 Also writes exclusions.json with every excluded block.
 """
-import json, re, sys
+import argparse, json, re, sys, zipfile
+from pathlib import Path
 import xml.etree.ElementTree as ET
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
-DOC = "docx_extract/word/document.xml"
 VERSION = "medaytim-laahava-888-final"
 
 BODY_STYLES = {"BodyIndent","BodyFirst","SceneFirst","Dialogue","Bullet","NumberedStep","Anchor"}
@@ -58,8 +58,28 @@ def table_paragraphs(tbl):
                 if t: res.append(t)
     return res
 
+def load_document_xml(args) -> bytes:
+    """Read word/document.xml from a .docx (zip), an explicit XML path, or the
+    legacy extracted layout. The manuscript is read from a LOCAL path only."""
+    if args.docx:
+        with zipfile.ZipFile(args.docx) as z:
+            return z.read("word/document.xml")
+    if args.document_xml:
+        return Path(args.document_xml).read_bytes()
+    legacy = Path("docx_extract/word/document.xml")
+    if legacy.exists():
+        return legacy.read_bytes()
+    sys.exit("ERROR: provide --docx PATH.docx (or --document-xml PATH). Nothing to convert.")
+
+
 def main():
-    root = ET.parse(DOC).getroot()
+    ap = argparse.ArgumentParser(description="Deterministic DOCX -> BookSource (local only; no upload).")
+    ap.add_argument("--docx", help="path to the canonical .docx (read locally, never uploaded)")
+    ap.add_argument("--document-xml", help="path to an already-extracted word/document.xml")
+    ap.add_argument("--out", default=VERSION + ".source.json", help="output source.json path")
+    args = ap.parse_args()
+
+    root = ET.fromstring(load_document_xml(args))
     body = root.find(f"{W}body")
     blocks = [c for c in list(body) if c.tag.split("}")[-1] in ("p","tbl")]
 
@@ -179,15 +199,16 @@ def main():
     chapters = [c for c in chapters if c["sections"]]
 
     source = {"version": VERSION, "title": meta["title"] or "מדייטים לאהבה", "chapters": chapters}
-    with open(VERSION + ".source.json","w",encoding="utf-8") as f:
-        json.dump(source, f, ensure_ascii=False, indent=2)
-    with open("exclusions.json","w",encoding="utf-8") as f:
-        json.dump({"meta":meta,"excluded":excluded}, f, ensure_ascii=False, indent=2)
+    out_path = Path(args.out)
+    out_path.write_text(json.dumps(source, ensure_ascii=False, indent=2), encoding="utf-8")
+    excl_path = out_path.with_name("exclusions.json")
+    excl_path.write_text(json.dumps({"meta": meta, "excluded": excluded}, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print("meta:", json.dumps(meta, ensure_ascii=False))
-    print("chapters:", len(chapters))
-    print("excluded blocks:", len(excluded))
-    print("wrote", VERSION + ".source.json")
+    # chapter/section/paragraph counts only — never manuscript body text in logs.
+    nsec = sum(len(c["sections"]) for c in chapters)
+    npar = sum(len(s["paragraphs"]) for c in chapters for s in c["sections"])
+    print(f"chapters={len(chapters)} sections={nsec} paragraphs={npar} excluded_blocks={len(excluded)}")
+    print(f"wrote {out_path}")
 
 if __name__ == "__main__":
     main()

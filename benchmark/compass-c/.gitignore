@@ -1,10 +1,15 @@
-# NEVER commit manuscript text, its source.json, embeddings, or secrets.
+# NEVER commit manuscript text, its source.json, embeddings, models, or secrets.
 *.source.json
 *.docx
+.local/
+models/
 .cache/
 *.npy
+.venv/
 winner.frozen.json
 tune_report.json
 holdout_report.json
+exclusions.json
 .env
 *.env
+__pycache__/
