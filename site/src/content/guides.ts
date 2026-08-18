@@ -46,6 +46,13 @@ export interface Guide {
   lead: string;
   intro: string[];
   sections: GuideSection[];
+  /**
+   * „על מה שווה לשים לב עכשיו” — מסקנה עריכתית שקטה של משפט אחד בסוף המדריך
+   * (אופציונלי). *לא* מושג פסיכולוגי ו*לא* שיטה בשם: גיבוש של מה שכבר נאמר
+   * בגוף המדריך, שמפנה את תשומת הלב מאות בודד אל דפוס/עקביות לאורך זמן. משתמשים
+   * בו רק היכן שהוא באמת מוסיף (שלבי אי-ודאות/חזרה לאקס), לא בכל מדריך.
+   */
+  attention?: string;
   framework?: GuideFramework;
   /** שורת-הבהרה (למאמר הספקות) — כיוון, לא אבחון. */
   disclaimer?: string;
@@ -549,6 +556,8 @@ const datingRedFlags: Guide = {
 // —— חזרה לאקס (hub: אחרי פרידה) ——
 const gettingBackWithEx: Guide = {
   slug: "getting-back-with-ex",
+  attention:
+    "פחות עוצמת הגעגוע ברגע הזה, ויותר למה אתם מתגעגעים באמת, ומה מתוך מה שלא עבד השתנה מאז.",
   path: "/guide/getting-back-with-ex",
   metaTitle: "חזרה לאקס: איך יודעים אם זה נכון או רק געגוע",
   metaDescription:
@@ -981,6 +990,8 @@ const definingTheRelationship: Guide = {
 // —— חם-קר (hub: בניית קשר) ——
 const hotAndCold: Guide = {
   slug: "hot-and-cold",
+  attention:
+    "פחות מה קרה בהודעה אחת, ויותר אם יש כאן דפוס עקבי לאורך זמן, או אי-ודאות שנמשכת ופוגעת בכם.",
   path: "/guide/hot-and-cold",
   metaTitle: "חם-קר בקשר: כשמישהו מתקרב ומתרחק",
   metaDescription:

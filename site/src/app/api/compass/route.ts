@@ -205,6 +205,9 @@ export async function POST(request: Request) {
             status: "answered",
             answer: answer.text,
             citation: answer.citation,
+            // שורת „על מה שווה לשים לב עכשיו” — רק אם המודל הפיק אותה מהקטעים.
+            // מופיעה אך ורק בתשובה מוצלחת; לעולם לא בסירוב/מגבלה/שגיאה.
+            ...(answer.focus ? { focus: answer.focus } : {}),
             remaining: reserved.remaining, // השמורה נשמרת
             limits: LIMITS_PAYLOAD,
           }),

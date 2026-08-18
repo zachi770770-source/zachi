@@ -17,7 +17,7 @@ const STARTER_QUESTIONS = compass.freeText.starters;
 type Availability = "loading" | "ready" | "soon";
 
 type AnswerState =
-  | { kind: "answered"; text: string; citation?: string }
+  | { kind: "answered"; text: string; citation?: string; focus?: string }
   | { kind: "refused"; text: string }
   | { kind: "limit"; text: string }
   | { kind: "error"; text: string }
@@ -114,7 +114,12 @@ export function CompassConsole({
         if (!data || data.available === false) {
           setAvailability("soon");
         } else if (data.status === "answered") {
-          setAnswer({ kind: "answered", text: data.answer, citation: data.citation });
+          setAnswer({
+            kind: "answered",
+            text: data.answer,
+            citation: data.citation,
+            focus: typeof data.focus === "string" ? data.focus : undefined,
+          });
           setQuestion("");
           trackEvent("compass_answer_success"); // רק על תשובה מוצלחת אמיתית
         } else if (data.status === "refused") {
@@ -358,6 +363,18 @@ export function CompassConsole({
               text={answer.text}
               className="mt-4 text-[1.2rem] leading-[1.85] text-foreground [text-wrap:pretty]"
             />
+            {/* „על מה שווה לשים לב עכשיו” — מסקנה עריכתית שקטה, משפט אחד, מבוססת
+                על אותם קטעים כמו התשובה. מוצגת רק כשהשרת החזיר אותה (תשובה
+                מוצלחת בלבד); לעולם לא בסירוב/מגבלה/שגיאה/מצב בדיקות. לא כרטיס,
+                לא אייקון, לא חזק מהתשובה עצמה. */}
+            {answer.focus ? (
+              <div className="mt-6 border-t border-border pt-5">
+                <p className="kicker">על מה שווה לשים לב עכשיו</p>
+                <p className="mt-2 text-[1.05rem] leading-[1.7] text-foreground/90 [text-wrap:pretty]">
+                  {answer.focus}
+                </p>
+              </div>
+            ) : null}
             {answer.citation ? (
               <p className="mt-6 flex items-center gap-2.5 border-t border-border pt-5 text-[14px] font-medium text-foreground-muted">
                 <BookOpen className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
