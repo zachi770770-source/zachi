@@ -209,14 +209,22 @@ export function MethodPage({ method }: { method: Method }) {
           ))}
         </div>
 
-        {/* חזרה לעמוד הספר — המושג הוא חלק ממנו */}
-        <div className="mt-8">
+        {/* חזרה לעמוד הספר + הרחבה אל ה-hub הרוחבי „אהבה”: המושג הזה הוא חלק
+            אחד מהתמונה הגדולה של איך אהבה נבנית. קישור-הקשר יחיד ומגוון-עוגן. */}
+        <div className="mt-8 flex flex-col gap-3">
           <Link
             href="/book"
             className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             כל הכלים בעמוד הספר
+          </Link>
+          <Link
+            href="/love"
+            className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            על אהבה: מה זה אומר לבנות אותה
           </Link>
         </div>
       </section>
