@@ -13,6 +13,7 @@ import {
   buildCitation,
   enforceAnswerLimits,
   isModelRefusal,
+  extractFocus,
 } from "@/lib/compass/assistant/prompt";
 
 /** תקרת טוקנים לפלט — מספיקה ל-150 מילים + נוסח הסירוב, בלי בזבוז. */
@@ -61,7 +62,10 @@ export async function askCompass(
     maxTokens: MAX_OUTPUT_TOKENS,
   });
 
-  const answerText = enforceAnswerLimits(completion.text);
+  // מחלצים תחילה את שורת „על מה שווה לשים לב עכשיו” (אם קיימת) מהפלט הגולמי,
+  // כדי שתקרת-המילים של הגוף לא תבלע אותה. השורה מבוססת על אותם קטעים בלבד.
+  const { body, focus } = extractFocus(completion.text);
+  const answerText = enforceAnswerLimits(body);
   if (!answerText || isModelRefusal(answerText)) {
     return {
       answer: { status: "refused", text: COMPASS_INSUFFICIENT_ANSWER },
@@ -74,6 +78,7 @@ export async function askCompass(
       status: "answered",
       text: answerText,
       citation: buildCitation(search.results),
+      ...(focus ? { focus } : {}),
     },
     usage: completion.usage,
   };

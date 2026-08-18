@@ -191,6 +191,18 @@ export function GuidePage({ guide }: { guide: Guide }) {
           </p>
         ) : null}
 
+        {/* „על מה שווה לשים לב עכשיו” — מסקנה עריכתית שקטה של משפט אחד, רק
+            במדריכים שבהם היא באמת מוסיפה (אי-ודאות / חזרה לאקס). גיבוש של מה
+            שכבר נאמר בגוף המדריך; לא כרטיס, לא אייקון, לא חזק מהתוכן. */}
+        {guide.attention ? (
+          <div className="reveal border-t border-border pt-6">
+            <p className="kicker">על מה שווה לשים לב עכשיו</p>
+            <p className="mt-2 text-[1.05rem] leading-relaxed text-foreground/90 [text-wrap:pretty]">
+              {guide.attention}
+            </p>
+          </div>
+        ) : null}
+
         {/* הסימן החתום „מחיפוש לבנייה” כמעבר אל הפעולה, זהה לעמודי-המושג
             (/method/*), כדי שהתאומים העריכתיים יתנהגו אותו דבר וגם המדריך
             יורגש כחלק ממערכת-הספר ולא כמאמר גנרי. */}
