@@ -1,5 +1,8 @@
+import Link from "next/link";
+
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
+import { Container } from "@/components/shared/Container";
 import { Hero } from "@/components/sections/Hero";
 import { HomePathSelector } from "@/components/sections/HomePathSelector";
 import { TrustBand } from "@/components/sections/TrustBand";
@@ -50,6 +53,19 @@ export default function HomePage() {
       <Hero />
       <HomePathSelector />
       <TrustBand />
+      {/* מסלול-הקשר יחיד ומרוסן אל עמוד-הסמכות „אהבה” (לא ב-Hero, נמוך בעמוד).
+          מרחיב את תזת ה-Hero („אהבה בונים”) אל ההסבר המלא. לא בלוק ולא כרטיס. */}
+      <Container className="pt-2 sm:pt-4">
+        <p className="mx-auto max-w-2xl text-center text-[14px] leading-relaxed text-foreground-muted">
+          רוצים להתחיל מהבסיס?{" "}
+          <Link
+            href="/love"
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            מהי אהבה ואיך היא נבנית
+          </Link>
+        </p>
+      </Container>
       {/* מעבר-חתימה „מחיפוש לבנייה”: סוגר את הקשת הרגשית של העמוד (חיפוש ⟶
           זיהוי ⟶ הבנה ⟶ בנייה) ומוביל אל רגע-הבנייה הסוגר. רגע-מותג אחד. */}
       <div className="flex justify-center pt-2 sm:pt-4" aria-hidden="true">

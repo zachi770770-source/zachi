@@ -63,6 +63,18 @@ export default function LovePage() {
         <p className="mt-4 max-w-[62ch] text-[1.05rem] leading-relaxed text-foreground">
           {love.hero.intro}
         </p>
+        {/* ייחוס נראה: מחבר הספר, עם קישור לעמוד המחבר. בונה אמון (E-E-A-T) בלי
+            להמציא תארים. */}
+        <p className="mt-5 text-[14px] text-foreground-muted">
+          {love.byline.prefix}{" "}
+          <Link
+            href={love.byline.href}
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            {love.byline.name}
+          </Link>
+          , {love.byline.role}
+        </p>
       </Reveal>
 
       {/* בקצרה — תשובות קצרות שאפשר לחלץ */}
