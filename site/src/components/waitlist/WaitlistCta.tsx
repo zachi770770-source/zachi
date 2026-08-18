@@ -71,7 +71,7 @@ export function WaitlistCta({
             {CONVERSION_CTA_LABEL}
           </p>
           <p className="mt-1 text-[14px] leading-relaxed text-foreground-muted">
-            השאירו אימייל, ונעדכן אתכם כשהספר ייצא, ותוכלו לקרוא את הטעימה מיד.
+            השאירו אימייל, ונעדכן אתכם כשהמהדורה הישירה באתר תיפתח לרכישה. הספר עצמו כבר זמין עכשיו במהדורת Kindle באמזון, ואפשר לקרוא את הטעימה מיד.
           </p>
           <div className="mt-4">
             <WaitlistForm source={source} autoFocus />

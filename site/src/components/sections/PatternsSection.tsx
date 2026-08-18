@@ -59,7 +59,9 @@ export function PatternsSection() {
                     {r.pattern}
                   </p>
                   <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted sm:mt-0">
-                    <span className="font-semibold text-brand-hover sm:hidden">שורש: </span>
+                    <span className="font-semibold text-brand-hover sm:hidden">
+                      {patterns.columns[1]}:{" "}
+                    </span>
                     {r.root}
                   </p>
                   <p className="mt-2 text-[15px] leading-relaxed text-foreground sm:mt-0">
