@@ -11,6 +11,7 @@ import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 import { MotionRoot } from "@/components/shared/MotionRoot";
 import { PersonaProvider } from "@/components/persona/PersonaProvider";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
+import { resolveCompassSurface } from "@/lib/compass/assistant/config";
 
 /**
  * Heebo משמש לממשק, לגוף ולכותרות המרכזיות.
@@ -98,8 +99,10 @@ export default function RootLayout({
           <Footer />
           <StickyPurchaseBar />
           {/* בועת „מה הספר אומר על המצב שלי?” — מלווה את הקורא בכל האתר. מסתירה
-              את עצמה בתוך /compass (העמוד עצמו הוא המנוע). */}
-          <CompassLauncher />
+              את עצמה בתוך /compass (העמוד עצמו הוא המנוע). כשהשאלה-החופשית פעילה
+              (Preview/Staging או עוזר-פעיל) הבועה מנווטת אל /compass במקום לפתוח
+              את מגירת המנוע המודרך. בפרודקשן (guided) ההתנהגות נשמרת. */}
+          <CompassLauncher freeTextEnabled={resolveCompassSurface() !== "guided"} />
           <CookieConsent />
           <AnalyticsScripts />
         </PersonaProvider>

@@ -5,15 +5,14 @@ import Link from "next/link";
 import { Compass, Loader2, ArrowLeft, BookOpen, TriangleAlert } from "lucide-react";
 
 import { compass } from "@/content/compass";
-import { stations, stationOrder } from "@/content/stations";
 import { trackEvent } from "@/lib/analytics";
 import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
 import { CompassAnswer } from "@/components/compass/CompassAnswer";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 
-/** שאלות פתיחה אמיתיות — שאלת ההתלבטות של כל אחת משלוש התחנות הקיימות. */
-const STARTER_QUESTIONS = stationOrder.map((id) => stations[id].question);
+/** שאלות פתיחה שקטות — דוגמאות אנושיות שממחישות מה אפשר לשאול בשפה חופשית. */
+const STARTER_QUESTIONS = compass.freeText.starters;
 
 type Availability = "loading" | "ready" | "soon";
 
@@ -22,6 +21,7 @@ type AnswerState =
   | { kind: "refused"; text: string }
   | { kind: "limit"; text: string }
   | { kind: "error"; text: string }
+  | { kind: "preview"; text: string }
   | null;
 
 /** מעטפת כרטיס אחידה לכל מצבי התשובה — שומרת על שפת האתר (נייר, מסגרת, רדיוס). */
@@ -36,11 +36,19 @@ const CARD_SHELL =
 export function CompassConsole({
   salesOpen,
   maxQuestionChars,
+  uiPreview = false,
 }: {
   salesOpen: boolean;
   maxQuestionChars: number;
+  /**
+   * מצב בדיקות (Preview/Staging): הטופס נראה וניתן לבדיקה, אך השליחה נעצרת
+   * מקומית בהודעה מרוסנת — *ללא* קריאת רשת ו*ללא* המצאת תשובה. ברירת מחדל: כבוי.
+   */
+  uiPreview?: boolean;
 }) {
-  const [availability, setAvailability] = React.useState<Availability>("loading");
+  const [availability, setAvailability] = React.useState<Availability>(
+    uiPreview ? "ready" : "loading",
+  );
   const [remaining, setRemaining] = React.useState<number | null>(null);
   const [question, setQuestion] = React.useState("");
   const [company, setCompany] = React.useState(""); // honeypot
@@ -48,8 +56,10 @@ export function CompassConsole({
   const [submitting, setSubmitting] = React.useState(false);
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  // טעינת מצב זמינות + כמה שאלות נותרו (בלי לצרוך).
+  // טעינת מצב זמינות + כמה שאלות נותרו (בלי לצרוך). במצב בדיקות אין קריאת רשת
+  // כלל — הממשק נשאר „ready” לצורכי בדיקה ויזואלית, והשליחה תיחסם מקומית.
   React.useEffect(() => {
+    if (uiPreview) return;
     let alive = true;
     fetch("/api/compass", { method: "GET" })
       .then((r) => r.json())
@@ -68,7 +78,7 @@ export function CompassConsole({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [uiPreview]);
 
   const outOfQuestions = remaining !== null && remaining <= 0;
 
@@ -80,9 +90,16 @@ export function CompassConsole({
       if (q.length < 2 || submitting || outOfQuestions) return;
 
       setQuestion(q);
+      trackEvent("compass_ask"); // אנונימי, ללא תוכן
+
+      // מצב בדיקות: לא ניגשים לרשת ולא ממציאים תשובה — עוצרים בהודעה מרוסנת.
+      if (uiPreview) {
+        setAnswer({ kind: "preview", text: compass.freeText.preview.answer });
+        return;
+      }
+
       setSubmitting(true);
       setAnswer(null);
-      trackEvent("compass_ask"); // אנונימי, ללא תוכן
 
       try {
         const res = await fetch("/api/compass", {
@@ -102,8 +119,10 @@ export function CompassConsole({
           trackEvent("compass_answer_success"); // רק על תשובה מוצלחת אמיתית
         } else if (data.status === "refused") {
           setAnswer({ kind: "refused", text: data.answer });
+          trackEvent("compass_refused"); // אנונימי, ללא תוכן
         } else if (data.status === "limit") {
           setAnswer({ kind: "limit", text: data.answer });
+          trackEvent("compass_limit"); // אנונימי, ללא תוכן
         } else {
           setAnswer({ kind: "error", text: compass.ui.genericError });
         }
@@ -113,7 +132,7 @@ export function CompassConsole({
         setSubmitting(false);
       }
     },
-    [company, submitting, outOfQuestions]
+    [company, submitting, outOfQuestions, uiPreview]
   );
 
   const onSubmit = React.useCallback(
@@ -184,6 +203,20 @@ export function CompassConsole({
         onSubmit={onSubmit}
         className="rounded-lg border border-border bg-surface p-5 sm:p-7"
       >
+        {/* מצב בדיקות (Preview/Staging): שקוף למשתמש שאין כאן מענה חי. */}
+        {uiPreview ? (
+          <p
+            className="mb-5 flex items-start gap-2.5 rounded-lg border border-dashed border-border-strong bg-surface-muted px-4 py-3 text-[13.5px] leading-relaxed text-foreground-muted"
+            role="status"
+          >
+            <TriangleAlert
+              className="mt-0.5 h-4 w-4 shrink-0 text-brand"
+              aria-hidden="true"
+            />
+            {compass.freeText.preview.notice}
+          </p>
+        ) : null}
+
         {/* honeypot נסתר */}
         <div
           className="pointer-events-none absolute -start-[9999px] top-0 h-0 w-0 overflow-hidden"
@@ -228,16 +261,21 @@ export function CompassConsole({
         />
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <span
-            className="inline-flex items-center rounded-full bg-surface-muted px-3 py-1 text-[13px] font-medium text-foreground-muted"
-            aria-live="polite"
-          >
-            {remaining === null
-              ? " "
-              : outOfQuestions
-                ? compass.ui.remainingNone
-                : compass.ui.remaining(remaining)}
-          </span>
+          {/* מונה השאלות שנותרו — לא רלוונטי במצב בדיקות (אין מכסה חיה). */}
+          {uiPreview ? (
+            <span aria-hidden="true" />
+          ) : (
+            <span
+              className="inline-flex items-center rounded-full bg-surface-muted px-3 py-1 text-[13px] font-medium text-foreground-muted"
+              aria-live="polite"
+            >
+              {remaining === null
+                ? " "
+                : outOfQuestions
+                  ? compass.ui.remainingNone
+                  : compass.ui.remaining(remaining)}
+            </span>
+          )}
           <span className="text-[13px] tabular-nums text-foreground-muted">
             {compass.ui.charsLeft(charsLeft)}
           </span>
@@ -272,7 +310,7 @@ export function CompassConsole({
       {!answer && !submitting && !outOfQuestions ? (
         <div className="mt-5">
           <p className="text-[14px] font-medium text-foreground-muted">
-            לא בטוחים מה לשאול? התחילו מאחת מאלה:
+            {compass.freeText.startersLabel}
           </p>
           <ul className="mt-3 flex flex-col gap-2">
             {STARTER_QUESTIONS.map((q) => (
@@ -348,6 +386,15 @@ export function CompassConsole({
                 </Link>
               </div>
             </div>
+          </article>
+        ) : answer?.kind === "preview" ? (
+          // מצב בדיקות: אישור שקט שהשאלה התקבלה — אך אין מענה חי, ולא הומצא דבר.
+          <article className={CARD_SHELL} role="status">
+            <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
+              <TriangleAlert className="h-4 w-4" aria-hidden="true" />
+              מצב בדיקות
+            </p>
+            <p className="mt-3 text-[1.05rem] leading-[1.7] text-foreground">{answer.text}</p>
           </article>
         ) : answer?.kind === "refused" ? (
           <article className={CARD_SHELL}>

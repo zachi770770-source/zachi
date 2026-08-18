@@ -1,10 +1,16 @@
 import { Compass } from "lucide-react";
 
+import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
-import { compassQuiz } from "@/content/compass";
+import { compass, compassQuiz } from "@/content/compass";
 import { askStations, askUi, type AskStationId } from "@/content/askRoute";
+import {
+  COMPASS_LIMITS,
+  resolveCompassSurface,
+} from "@/lib/compass/assistant/config";
 import { Container } from "@/components/shared/Container";
 import { AskRoute } from "@/components/interactive/AskRoute";
+import { CompassExperience } from "@/components/compass/CompassExperience";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
@@ -19,13 +25,18 @@ export const metadata = pageMetadata({
 const POINTS = ["2-3 שאלות קצרות", "בחירה מתוך תשובות", "נקודת פתיחה, לא אבחון"];
 
 /**
- * עמוד „שאל את הספר” — מסלול אישי סגור ודטרמיניסטי שמכוון את הקורא/ת אל התחנה
- * והכלי המתאימים בספר, עם התאמת פרק ב' ושער „אחרי פרידה”. אינו צ׳אטבוט ואינו
- * AI: כל האפשרויות סגורות, המיפוי דטרמיניסטי בצד-הלקוח, ואין קריאה ל-API חיצוני.
+ * עמוד „שאל את הספר” (/compass) — דו-מצבי לפי מצב-התצוגה שנקבע בשרת
+ * (resolveCompassSurface):
  *
- * הקשר-מסע מהבית: `?station=<id>` (מגיע מתוצאת „איפה זה פוגש אותך עכשיו?”) —
- * כשהתחנה כבר ידועה, המנוע מדלג על שאלת „איפה אתם?” ומתחיל בדילמה. פרמטר לא תקין
- * או כניסה ישירה ל-/compass → ההתנהגות הרגילה (מתחילים מבחירת התחנה).
+ *   • "guided" (ברירת מחדל, וגם פרודקשן) — המצפן המודרך בלבד: מנוע הכוונה סגור
+ *     ודטרמיניסטי (AskRoute). זו ההתנהגות החיה הקיימת; הממשק החופשי אינו נחשף.
+ *   • "free-text-preview" — Preview/Staging: הממשק החופשי נראה וניתן לבדיקה
+ *     ויזואלית, אך אינו מפיק מענה (uiPreview). לבדיקה בלבד.
+ *   • "free-text-live" — העוזר הופעל: הממשק החופשי שולח דרך /api/compass האמיתי
+ *     (שעדיין מגודר במסד/ספק/גרסה). המצפן המודרך נשאר זמין כמצב משני.
+ *
+ * הקשר-מסע מהבית (`?station=<id>`) נשמר בשני המסלולים: כשהתחנה ידועה, המנוע
+ * המודרך מדלג על שאלת „איפה אתם?” ומתחיל בדילמה.
  */
 export default async function CompassPage({
   searchParams,
@@ -38,6 +49,32 @@ export default async function CompassPage({
       ? (station as AskStationId)
       : undefined;
 
+  const surface = resolveCompassSurface();
+
+  // ── מצב שאלה-חופשית (Preview/Staging או עוזר-פעיל) ──────────────────────────
+  // הממשק החופשי הוא הראשי; „המצפן המודרך” הוא מצב משני בתוך אותה חוויה.
+  if (surface !== "guided") {
+    return (
+      <Container className="pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-12 lg:pb-20">
+        <BreadcrumbSchema
+          items={[
+            { name: "בית", path: "/" },
+            { name: compass.freeText.label, path: "/compass" },
+          ]}
+        />
+        <div className="enter-stagger">
+          <CompassExperience
+            salesOpen={siteConfig.salesOpen}
+            maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
+            uiPreview={surface === "free-text-preview"}
+            initialStation={initialStation}
+          />
+        </div>
+      </Container>
+    );
+  }
+
+  // ── מצב מודרך (ברירת מחדל / פרודקשן) — ההתנהגות החיה הקיימת, ללא שינוי ──────
   return (
     <Container className="pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-12 lg:pb-20">
       <BreadcrumbSchema

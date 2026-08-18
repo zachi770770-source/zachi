@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
@@ -47,7 +48,17 @@ const STATION_PAGE_TO_ASK: Record<string, AskStationId> = {
  *   והפעולה הראשית ב-/book), היא מוסתרת מעל ה-Hero ונחשפת ברכות אחרי שהמשתמש גלל
  *   מעברו. הנגישות לעוזר בראש העמוד נשמרת דרך ה-CTA שב-Hero וקישור הניווט.
  */
-export function CompassLauncher() {
+export function CompassLauncher({
+  freeTextEnabled = false,
+}: {
+  /**
+   * מצב-תכונה (נקבע בשרת): כשהשאלה-החופשית פעילה (Preview/Staging או עוזר-פעיל),
+   * הבועה *מנווטת* אל /compass — החוויה החופשית „שאל את הספר” — במקום לפתוח את
+   * המגירה של המנוע המודרך. ברירת מחדל: כבוי → ההתנהגות הקיימת בפרודקשן (מגירת
+   * המנוע המודרך) נשמרת בדיוק. אינו מפעיל מענה ואינו נוגע ב-/api/compass.
+   */
+  freeTextEnabled?: boolean;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   // חשיפה תלוית-גלילה *במובייל בלבד*: שם ה-Hero נערם לרוחב-מלא ויכול להגיע עד
@@ -134,6 +145,34 @@ export function CompassLauncher() {
   // בתוך /compass עצמו העמוד *הוא* המנוע — אין טעם בבועה צפה שמובילה אליו.
   // (ההחזרה מוקדמת אך *אחרי* כל ה-hooks, כדי לא להפר את סדר ה-hooks.)
   if (pathname?.startsWith("/compass")) return null;
+
+  // מצב שאלה-חופשית פעיל: הבועה מנווטת אל /compass (החוויה החופשית) במקום לפתוח
+  // את מגירת המנוע המודרך. אותה גלולה ויזואלית ואותה לוגיקת-חשיפה, ללא Dialog.
+  // בתוך /compass מופיע קישור „לא בטוחים מה לשאול? המצפן המודרך”.
+  if (freeTextEnabled) {
+    return (
+      <Link
+        href="/compass"
+        aria-label="שאל את הספר, כתבו שאלה משלכם על הקשר וקבלו כיוון מבוסס-ספר"
+        title="שאל את הספר, כתבו שאלה משלכם"
+        aria-hidden={hiddenOnFold ? true : undefined}
+        tabIndex={hiddenOnFold ? -1 : undefined}
+        data-past-hero={pastHero ? "true" : "false"}
+        style={{ bottom: bubbleBottom }}
+        className={cn(
+          "compass-pill group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:pe-5 md:text-[15px]"
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand md:h-9 md:w-9"
+        >
+          <Compass className="h-[18px] w-[18px] md:h-5 md:w-5" />
+        </span>
+        <span className="whitespace-nowrap">שאל את הספר</span>
+      </Link>
+    );
+  }
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>

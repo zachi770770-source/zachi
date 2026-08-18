@@ -2,7 +2,6 @@ import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import { render, cleanup, screen, fireEvent } from "@testing-library/react";
 
 import { CompassConsole } from "@/components/compass/CompassConsole";
-import { stations, stationOrder } from "@/content/stations";
 import { compass } from "@/content/compass";
 
 /**
@@ -25,7 +24,7 @@ function mockFetch(impl: FetchImpl) {
   return fn;
 }
 
-const STARTERS = stationOrder.map((id) => stations[id].question);
+const STARTERS = compass.freeText.starters;
 
 afterEach(() => {
   cleanup();
@@ -44,7 +43,7 @@ beforeEach(() => {
 
 async function renderReadyConsole() {
   render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
-  await screen.findByLabelText("השאלה שלכם");
+  await screen.findByLabelText("כתבו כאן במילים שלכם");
 }
 
 /** פעולת ההמרה האחידה — הקישור לרכישת הספר באמזון. מופיע רק אחרי תשובה מוצלחת. */
@@ -53,7 +52,7 @@ function conversionCta() {
 }
 
 describe("CompassConsole, starters + unified conversion CTA", () => {
-  it("renders the three real station questions as starters before any answer", async () => {
+  it("renders the free-text starters before any answer", async () => {
     await renderReadyConsole();
     for (const q of STARTERS) {
       expect(screen.getByRole("button", { name: q })).toBeInTheDocument();
@@ -74,7 +73,7 @@ describe("CompassConsole, starters + unified conversion CTA", () => {
         return { available: true, status: "answered", answer: "בנו על יסודות.", remaining: 2 };
       });
       render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
-      await screen.findByLabelText("השאלה שלכם");
+      await screen.findByLabelText("כתבו כאן במילים שלכם");
       return f;
     })();
 
@@ -112,7 +111,7 @@ describe("CompassConsole, starters + unified conversion CTA", () => {
     global.fetch = fn;
 
     render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
-    await screen.findByLabelText("השאלה שלכם");
+    await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.click(screen.getByRole("button", { name: STARTERS[0] }));
 
     const alert = await screen.findByRole("alert");
