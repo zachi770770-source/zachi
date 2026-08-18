@@ -15,6 +15,7 @@ import {
   isModelRefusal,
   extractFocus,
 } from "@/lib/compass/assistant/prompt";
+import { assessCompassSafety, buildSafetyAnswer } from "@/lib/compass/assistant/safety";
 
 /** תקרת טוקנים לפלט — מספיקה ל-150 מילים + נוסח הסירוב, בלי בזבוז. */
 const MAX_OUTPUT_TOKENS = 512;
@@ -38,6 +39,14 @@ export async function askCompass(
   provider: CompassProvider | null = getCompassProvider()
 ): Promise<AskResult> {
   const q = (question ?? "").trim();
+
+  // שער-בטיחות דטרמיניסטי — ראשון, לפני הכול (הגנה בעומק; גם ה-route בודק לפני
+  // מכסה). גובר על חסימת-הגנת-הספר: גילוי-סכנה + בקשת-חילוץ באותה הודעה מקבל
+  // תמיד את מסר הבטיחות. אינו מגיע לחיפוש/מודל/ציטוט/שורת-פוקוס.
+  const safety = assessCompassSafety(q);
+  if (!safety.safe) {
+    return { answer: buildSafetyAnswer(safety) };
+  }
 
   if (isBlockedRequest(q)) {
     return { answer: { status: "refused", text: COMPASS_PROTECTION_REFUSAL } };

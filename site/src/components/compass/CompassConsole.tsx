@@ -22,6 +22,7 @@ type AnswerState =
   | { kind: "limit"; text: string }
   | { kind: "error"; text: string }
   | { kind: "preview"; text: string }
+  | { kind: "safety"; text: string; severity?: string }
   | null;
 
 /** מעטפת כרטיס אחידה לכל מצבי התשובה — שומרת על שפת האתר (נייר, מסגרת, רדיוס). */
@@ -122,6 +123,11 @@ export function CompassConsole({
           });
           setQuestion("");
           trackEvent("compass_answer_success"); // רק על תשובה מוצלחת אמיתית
+        } else if (data.status === "safety") {
+          // שער-בטיחות נורה בשרת: מסר-בטיחות בלבד. אין ציטוט, אין פוקוס, אין
+          // CTA, אין המשך „רגיל”. ללא אנליטיקה (פרטיות).
+          setAnswer({ kind: "safety", text: data.answer, severity: data.severity });
+          setQuestion("");
         } else if (data.status === "refused") {
           setAnswer({ kind: "refused", text: data.answer });
           trackEvent("compass_refused"); // אנונימי, ללא תוכן
@@ -353,6 +359,16 @@ export function CompassConsole({
               <div className="h-3.5 w-[64%] animate-pulse rounded bg-surface-muted" />
             </div>
           </div>
+        ) : answer?.kind === "safety" ? (
+          // מצב-בטיחות: מסר מרוסן ומכובד בלבד. חשיבות דרך היררכיה ומרווח, לא דרך
+          // עיצוב-אזעקה. אין ציטוט, אין „על מה שווה לשים לב עכשיו”, אין CTA, אין
+          // המשך „רגיל”, אין הצעות-פתיחה. שער-הבטיחות מחזיק את כל מצב-התוצאה.
+          <article className={`${CARD_SHELL} border-s-2 border-s-foreground/40`}>
+            <p className="kicker">הדבר החשוב עכשיו</p>
+            <p className="mt-4 text-[1.12rem] leading-[1.8] text-foreground [text-wrap:pretty]">
+              {answer.text}
+            </p>
+          </article>
         ) : answer?.kind === "answered" ? (
           <article
             key={answer.text}

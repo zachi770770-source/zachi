@@ -31,6 +31,19 @@ export interface CompassProvider {
   generate(input: CompassProviderInput): Promise<CompassCompletion>;
 }
 
+/** קטגוריות שער-הבטיחות הדטרמיניסטי (server-side). */
+export type CompassSafetyCategory =
+  | "violence"
+  | "coercive_control"
+  | "stalking"
+  | "self_harm"
+  | "immediate_danger"
+  | "medical"
+  | "crisis";
+
+/** דרגת דחיפות: „critical” = סכנה מיידית; „high” = חמור אך לא בהכרח מיידי. */
+export type CompassSafetySeverity = "high" | "critical";
+
 /** התוצאה הסופית שהעוזר מחזיר לראוט. */
 export type CompassAnswer =
   | {
@@ -57,4 +70,16 @@ export type CompassAnswer =
       /** העוזר אינו פעיל: אין ספק מודל, או אין גרסת ספר פעילה. */
       status: "unavailable";
       reason: "no-provider" | "no-active-book";
+    }
+  | {
+      /**
+       * שער-בטיחות דטרמיניסטי נורה: הקלט הכיל גילוי של סכנה/פגיעה/משבר. הבקשה
+       * *לעולם* אינה מגיעה לחיפוש/מודל/ציטוט/שורת-פוקוס. התשובה היא מסר בטיחות
+       * מרוסן בלבד.
+       */
+      status: "safety";
+      category: CompassSafetyCategory;
+      severity: CompassSafetySeverity;
+      /** מסר הבטיחות המרוסן (בלי אבחון, בלי עצה זוגית, בלי ציטוט, בלי פוקוס). */
+      text: string;
     };
