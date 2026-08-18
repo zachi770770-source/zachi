@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { BrandMark } from "@/components/shared/BrandMark";
@@ -67,6 +70,14 @@ export function ThesisSection() {
             <p className="mt-8 max-w-[54ch] text-[clamp(1.05rem,1.4vw,1.28rem)] leading-relaxed text-foreground-muted">
               {bigIdea.promise}
             </p>
+            {/* קישור-הקשר אל עמוד-הסמכות „אהבה” — הרחבה מושגית של התזה. */}
+            <Link
+              href="/love"
+              className="mt-6 inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              מהי אהבה ואיך היא נבנית
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </Reveal>
 
           {/* שלושה עקרונות בנייה + הסתייגות — חשיפה מקובצת אחת */}

@@ -326,6 +326,17 @@ export function GuidePage({ guide }: { guide: Guide }) {
             {guidesUi.hubTitle}: {guide.hub.label}
           </Link>
         </div>
+
+        {/* קישור אל מרכז-האשכול הרוחבי „אהבה” — התמונה המושגית הרחבה שמעל המדריך. */}
+        <div className="mt-3">
+          <Link
+            href="/love"
+            className="inline-flex items-center gap-2 text-[15px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            התמונה הרחבה: מהי אהבה ואיך היא נבנית
+          </Link>
+        </div>
       </section>
     </Container>
   );

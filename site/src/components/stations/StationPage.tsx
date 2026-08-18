@@ -87,6 +87,15 @@ export function StationPage({ station }: { station: Station }) {
         <p className="mt-6 text-[clamp(1.1rem,1.6vw,1.35rem)] leading-relaxed text-foreground-muted">
           {station.lead}
         </p>
+        {/* קישור-הקשר אל מרכז-האשכול „אהבה” — התחנה היא שלב בתוך התמונה הרחבה. */}
+        <p className="mt-4 text-[15px] leading-relaxed text-foreground-muted">
+          <Link
+            href="/love"
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            לבנות אהבה: איך אהבה נבנית לאורך המסלול
+          </Link>
+        </p>
         {/* מחוון מסע מרוסן — התחנה הנוכחית מתוך שלוש. דקורטיבי, לתחנות המרכזיות
             בלבד (לא לשער המעבר ולגשר החזרה). */}
         <div
