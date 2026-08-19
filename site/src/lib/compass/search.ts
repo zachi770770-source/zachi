@@ -4,11 +4,27 @@ import type { CompassMatch, CompassSearchResponse, SqlClient } from "@/lib/compa
 
 /**
  * סף התאמה מינימלי (ציון מנורמל 0..1) — מתחתיו מסרבים להחזיר תוכן. מאחר
- * שהשאילתה בנויה כ-OR בין מונחי התוכן (ראו buildTsQuery), שאלה לא רלוונטית
- * פשוט לא תתאים לאף מונח ותחזיר 0 שורות; הסף הזה הוא רצפה נוספת נגד התאמות
- * חלשות. יש לכייל אותו מול התפלגות הציונים של כתב היד האמיתי.
+ * שהשאילתה בנויה כ-OR בין מונחי התוכן (ראו buildTsQuery), שאלה עלולה להתאים
+ * *בחולשה* לקטע דרך מילה נפוצה בודדת (למשל „אוויר”, „חלב”), ולכן הסף הזה הוא
+ * רצפה קריטית נגד התאמות-רעש כאלה.
+ *
+ * מכויל מול מערך-הבדיקה המתויג של כתב-היד האמיתי (גרסה 888, 382 קטעים,
+ * holdout75 — 51 שאלות-ספר + 24 מחוץ-לספר). סריקת-סף על המערך:
+ *   • recall@5 מגיע לתקרה (61%) בכל סף ≤ 0.25, ויורד ל-55% ב-0.30.
+ *   • דחיית שאלות מחוץ-לספר עולה עם הסף (50%→58%→71%), אך המודל ושכבת-ההגנה
+ *     (isBlockedRequest) ממילא סוככים על מה שנותר.
+ * מכאן שהעדיפות היא recall (שאלה-אמיתית שנדחית = חוויית „לא עובד”, בלי גיבוי),
+ * בעוד false-positive מחוץ-לספר נתפס ע"י המודל. 0.25 הוא הערך הגבוה ביותר
+ * שאינו פוגע ב-recall (61%) ומשפר דחייה (58%). לפני הכיול הסף היה 0.01 —
+ * נמוך מדי. ניתן לעקוף דרך COMPASS_MIN_SCORE (0..1).
  */
-const DEFAULT_MIN_SCORE = 0.01;
+const DEFAULT_MIN_SCORE = 0.25;
+
+/** הסף האפקטיבי: override תקין דרך COMPASS_MIN_SCORE, אחרת ברירת המחדל המכוילת. */
+function defaultMinScore(): number {
+  const raw = Number(process.env.COMPASS_MIN_SCORE);
+  return Number.isFinite(raw) && raw >= 0 && raw <= 1 ? raw : DEFAULT_MIN_SCORE;
+}
 /** מקסימום קטעים בתשובה — לעולם לא מחזירים יותר. */
 const MAX_RESULTS = 5;
 /** מקסימום קטעים מאותו פרק — כדי לא להחזיר בפועל פרק שלם. */
@@ -84,7 +100,7 @@ export async function searchCompass(
   opts: { minScore?: number } = {}
 ): Promise<CompassSearchResponse> {
   const q = (question ?? "").trim();
-  const minScore = opts.minScore ?? DEFAULT_MIN_SCORE;
+  const minScore = opts.minScore ?? defaultMinScore();
   if (!q) return { matched: false, bookVersion: null, results: [] };
 
   // גרסה פעילה יחידה — מונע ערבוב גרסאות בתשובה אחת.
