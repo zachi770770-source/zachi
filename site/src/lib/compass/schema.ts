@@ -38,10 +38,16 @@ const CREATE_SECTIONS = `
     is_active      boolean not null default false,
     created_at     timestamptz not null default now(),
     updated_at     timestamptz not null default now(),
+    -- טקסט-חיפוש מנורמל-ומורחב (עברית): מחושב בזמן הייבוא (lib/compass/hebrew.ts)
+    -- ומוזן לכאן, כדי שאותו נרמול/הרחבה יחולו על האינדוקס ועל השאילתה. השדות
+    -- המקוריים נשמרים לתצוגה/ציטוט; ה-tsvector נבנה מהשדות המנורמלים בלבד.
+    chapter_name_s text,
+    section_name_s text,
+    content_s      text,
     search_tsv tsvector generated always as (
-      setweight(to_tsvector('simple', coalesce(chapter_name, '')), 'A') ||
-      setweight(to_tsvector('simple', coalesce(section_name, '')), 'B') ||
-      setweight(to_tsvector('simple', coalesce(content, '')), 'C')
+      setweight(to_tsvector('simple', coalesce(chapter_name_s, '')), 'A') ||
+      setweight(to_tsvector('simple', coalesce(section_name_s, '')), 'B') ||
+      setweight(to_tsvector('simple', coalesce(content_s, '')), 'C')
     ) stored,
     unique (book_version, section_order)
   )

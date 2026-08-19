@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import type { BookSource, SqlClient } from "@/lib/compass/types";
 import { chunkBook } from "@/lib/compass/chunker";
 import { ensureCompassSchema } from "@/lib/compass/schema";
+import { expandText } from "@/lib/compass/hebrew";
 
 /**
  * ייבוא/עדכון/ביטול/בנייה-מחדש של גרסאות הספר. מודול ניהול בצד השרת/CLI
@@ -61,8 +62,9 @@ export async function importVersion(
       await db.query(
         `insert into compass_book_sections
            (book_version, chapter_number, chapter_name, section_name,
-            section_order, content, checksum, is_active)
-         values ($1, $2, $3, $4, $5, $6, $7, false)`,
+            section_order, content, checksum, is_active,
+            chapter_name_s, section_name_s, content_s)
+         values ($1, $2, $3, $4, $5, $6, $7, false, $8, $9, $10)`,
         [
           c.bookVersion,
           c.chapterNumber,
@@ -71,6 +73,10 @@ export async function importVersion(
           c.sectionOrder,
           c.content,
           c.checksum,
+          // טקסט-חיפוש מנורמל-ומורחב (עברית) — אותו נרמול חל גם על השאילתה.
+          expandText(c.chapterName),
+          expandText(c.sectionName ?? ""),
+          expandText(c.content),
         ]
       );
     }

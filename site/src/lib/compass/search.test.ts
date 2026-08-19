@@ -47,25 +47,14 @@ describe("searchCompass", () => {
     expect(res.results).toHaveLength(0);
   });
 
-  it("drops low-score rows below the threshold (refuses weak matches)", async () => {
-    const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.005)]), "שאלה");
+  it("drops low-score rows below the calibrated 0.3 threshold (refuses weak matches)", async () => {
+    const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.2)]), "שאלה");
     expect(res.matched).toBe(true);
     expect(res.results).toHaveLength(1);
-    expect(res.results.every((r) => r.score >= 0.25)).toBe(true);
+    expect(res.results.every((r) => r.score >= 0.3)).toBe(true);
   });
 
-  it("uses the calibrated 0.25 default floor (very weak lexical noise refused, book match kept)", async () => {
-    // סף מכויל מול holdout75: 0.25 שומר על recall מקסימלי ומסנן רעש חלש מאוד.
-    const noise = await searchCompass(mockDb([row(1, 0.2), row(2, 0.1)]), "שאלה");
-    expect(noise.matched).toBe(false);
-    expect(noise.results).toHaveLength(0);
-
-    const real = await searchCompass(mockDb([row(1, 0.25)]), "שאלה");
-    expect(real.matched).toBe(true);
-    expect(real.results).toHaveLength(1);
-  });
-
-  it("honors COMPASS_MIN_SCORE as an override for future calibration", async () => {
+  it("honors COMPASS_MIN_SCORE as an override", async () => {
     const prev = process.env.COMPASS_MIN_SCORE;
     process.env.COMPASS_MIN_SCORE = "0.6";
     try {

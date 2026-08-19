@@ -1,24 +1,17 @@
 import "server-only";
 
 import type { CompassMatch, CompassSearchResponse, SqlClient } from "@/lib/compass/types";
+import { normWord, expandWord, tokenize } from "@/lib/compass/hebrew";
 
 /**
- * סף התאמה מינימלי (ציון מנורמל 0..1) — מתחתיו מסרבים להחזיר תוכן. מאחר
- * שהשאילתה בנויה כ-OR בין מונחי התוכן (ראו buildTsQuery), שאלה עלולה להתאים
- * *בחולשה* לקטע דרך מילה נפוצה בודדת (למשל „אוויר”, „חלב”), ולכן הסף הזה הוא
- * רצפה קריטית נגד התאמות-רעש כאלה.
- *
- * מכויל מול מערך-הבדיקה המתויג של כתב-היד האמיתי (גרסה 888, 382 קטעים,
- * holdout75 — 51 שאלות-ספר + 24 מחוץ-לספר). סריקת-סף על המערך:
- *   • recall@5 מגיע לתקרה (61%) בכל סף ≤ 0.25, ויורד ל-55% ב-0.30.
- *   • דחיית שאלות מחוץ-לספר עולה עם הסף (50%→58%→71%), אך המודל ושכבת-ההגנה
- *     (isBlockedRequest) ממילא סוככים על מה שנותר.
- * מכאן שהעדיפות היא recall (שאלה-אמיתית שנדחית = חוויית „לא עובד”, בלי גיבוי),
- * בעוד false-positive מחוץ-לספר נתפס ע"י המודל. 0.25 הוא הערך הגבוה ביותר
- * שאינו פוגע ב-recall (61%) ומשפר דחייה (58%). לפני הכיול הסף היה 0.01 —
- * נמוך מדי. ניתן לעקוף דרך COMPASS_MIN_SCORE (0..1).
+ * סף התאמה מינימלי (ציון מנורמל 0..1) — מתחתיו מסרבים להחזיר תוכן. מכויל מול
+ * מערך-הבדיקה המתויג holdout75 על כתב-היד האמיתי, *לאחר* נרמול-והרחבת העברית
+ * (ראו hebrew.ts): בסף 0.30 מתקבלים recall@5=76% ו-recall@1=45% (מול 61%/33%
+ * לפני הנרמול), עם דחיית ~58% משאלות מחוץ-לספר; המודל ו-isBlockedRequest סוככים
+ * על מה שנותר. העדיפות היא recall (שאלה אמיתית שנדחית = „לא עובד” בלי גיבוי).
+ * ניתן לעקוף דרך COMPASS_MIN_SCORE (0..1).
  */
-const DEFAULT_MIN_SCORE = 0.25;
+const DEFAULT_MIN_SCORE = 0.3;
 
 /** הסף האפקטיבי: override תקין דרך COMPASS_MIN_SCORE, אחרת ברירת המחדל המכוילת. */
 function defaultMinScore(): number {
@@ -45,26 +38,31 @@ const HEBREW_STOPWORDS = new Set([
   "עוד", "כבר", "איזה", "איזו", "כמה", "לי", "לך", "לו", "לה", "היה", "להיות",
 ]);
 
+/** מילות-הפונקציה בצורתן המנורמלת — כדי שההשוואה תעבוד אחרי נרמול הטוקן. */
+const HEBREW_STOPWORDS_N = new Set([...HEBREW_STOPWORDS].map(normWord));
+
 /**
  * בונה tsquery מסוג OR ממונחי התוכן של שאלה עברית:
- *   1. מפרק את השאלה לפי גבולות לא-אלפאנומריים (Unicode) — כל טוקן מכיל
- *      אותיות/ספרות בלבד, ולכן בטוח ל-to_tsquery (אין תווים מיוחדים).
- *   2. מסיר טוקנים קצרים (אות בודדת) ומילות פונקציה/שאלה.
- *   3. מחבר את הנותרים ב-`|` (OR) — קטע רלוונטי אם הוא מכיל *מונח אחד או
- *      יותר*, במקום לדרוש את כולם (AND). כך משתפר האחזור בעברית ('simple'
- *      ללא גזירת שורש) בלי לפגוע בהגנות (הדירוג + הסף + התקרות ממילא מגבילים).
+ *   1. מפרק את השאלה לטוקנים (אותיות/ספרות בלבד — בטוח ל-to_tsquery).
+ *   2. מסיר מילות-פונקציה/שאלה (בהשוואה מנורמלת).
+ *   3. מנרמל *ומרחיב* כל טוקן (lib/compass/hebrew.ts): הצורה המנורמלת + הצורה
+ *      ללא תחילית עברית נפוצה. אותו נרמול/הרחבה חלים על האינדוקס (בזמן הייבוא),
+ *      כך ש„בפגישות” בשאלה תואם „פגישות” בספר ולהפך.
+ *   4. מחבר את כל הווריאנטים ב-`|` (OR) — קטע רלוונטי אם הוא מכיל מונח אחד או
+ *      יותר. הדירוג + הסף + התקרות מגבילים דיוק.
  * מחזיר מחרוזת ריקה כשאין מונחי תוכן — אז החיפוש מחזיר `matched:false`.
  */
 export function buildTsQuery(question: string): string {
   const seen = new Set<string>();
   const terms: string[] = [];
-  for (const raw of (question ?? "").normalize("NFC").split(/[^\p{L}\p{N}]+/u)) {
-    const term = raw.trim();
-    if (term.length < 2) continue;
-    if (HEBREW_STOPWORDS.has(term)) continue;
-    if (seen.has(term)) continue;
-    seen.add(term);
-    terms.push(term);
+  for (const raw of tokenize(question)) {
+    const n = normWord(raw);
+    if (n.length < 2 || HEBREW_STOPWORDS_N.has(n)) continue;
+    for (const v of expandWord(raw)) {
+      if (v.length < 2 || HEBREW_STOPWORDS_N.has(v) || seen.has(v)) continue;
+      seen.add(v);
+      terms.push(v);
+    }
   }
   return terms.join(" | ");
 }
