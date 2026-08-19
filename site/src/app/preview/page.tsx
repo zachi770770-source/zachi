@@ -7,6 +7,7 @@ import type { PersonaId } from "@/content/personas";
 import type { AskStationId } from "@/content/askRoute";
 import { Container } from "@/components/shared/Container";
 import { SampleReader, type ToolSample } from "@/components/preview/SampleReader";
+import { CanonicalReading } from "@/components/preview/CanonicalReading";
 import { MarkSampleSeen } from "@/components/preview/MarkSampleSeen";
 import { PreviewClosing } from "@/components/preview/PreviewClosing";
 import { PreviewStickyCta } from "@/components/preview/PreviewStickyCta";
@@ -87,6 +88,11 @@ export default async function PreviewPage({
       <Container className="py-10 sm:py-14">
         <SampleReader toolSample={toolSample} />
       </Container>
+
+      {/* קריאה קנונית רציפה מתוך המבוא — התשובה הברורה ל„איך הספר מרגיש כשקוראים
+          אותו”. באה אחרי הטעימה המודרכת/מותאמת-הכלי (שנשמרת) ולפני המשך-הרכישה,
+          כך שהקורא מסיים קטע-ספר אמיתי ומיד פוגש את הבידול אתר-מול-ספר והרכישה. */}
+      <CanonicalReading />
 
       <PreviewClosing
         station={stationId ? STATION_TO_ASK[stationId] : undefined}

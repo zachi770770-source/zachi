@@ -20,6 +20,36 @@ test("/preview opens immediately (no email gate) with the reading experience", a
   await expect(lead).toHaveCSS("opacity", "1");
 });
 
+test("/preview renders the canonical book excerpt continuously (opening + closing visible, no CTA inside)", async ({
+  page,
+}) => {
+  await page.goto("/preview", { waitUntil: "networkidle" });
+
+  const reading = page.locator('section[aria-labelledby="canonical-reading-heading"]');
+  await expect(reading).toHaveCount(1);
+
+  // מסגור עריכתי: שם המקטע מהמבוא + זמן קריאה אמיתי (לא בלוק שיווקי).
+  await expect(reading.getByRole("heading", { name: "החלק השני של האהבה" })).toBeVisible();
+
+  // משפט-הפתיחה ומשפט-הסיום גלויים בפועל — הקטע רציף, בלי read-more/קיפול/קטיעה.
+  await expect(
+    reading.getByText(/מאוחר מדי, בכמה קשרים שכבר לא יכולתי להציל/),
+  ).toBeVisible();
+  await expect(
+    reading.getByText(/אלא כשבונים קשר שיש בו אמת ונוכחות\.$/),
+  ).toBeVisible();
+
+  // תשע פסקאות רצופות מרונדרות במלואן.
+  await expect(reading.locator("p.font-serif")).toHaveCount(9);
+
+  // אין שום CTA רכישה/אמזון בתוך חוויית הקריאה עצמה — הרכישה באה אחריה.
+  await expect(reading.locator('a[href*="amazon"]')).toHaveCount(0);
+  await expect(reading.locator("a")).toHaveCount(0);
+
+  // עדיין H1 יחיד בעמוד (הקריאה הקנונית היא h2).
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+});
+
 test("/preview has a clear transition to the compass and buys via Amazon (no local checkout)", async ({ page }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });
   await expect(page.locator('a[href="/compass"]').first()).toBeVisible();
