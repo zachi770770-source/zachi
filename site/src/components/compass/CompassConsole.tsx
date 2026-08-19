@@ -22,6 +22,7 @@ type AnswerState =
   | { kind: "limit"; text: string }
   | { kind: "error"; text: string }
   | { kind: "preview"; text: string }
+  | { kind: "unavailable"; text: string }
   | null;
 
 /** מעטפת כרטיס אחידה לכל מצבי התשובה — שומרת על שפת האתר (נייר, מסגרת, רדיוס). */
@@ -112,7 +113,10 @@ export function CompassConsole({
         if (data && typeof data.remaining === "number") setRemaining(data.remaining);
 
         if (!data || data.available === false) {
-          setAvailability("soon");
+          // העוזר אינו זמין ברגע השליחה (נסגר בין טעינת העמוד לשליחה, או תקלת
+          // שרת). מודיעים *בתוך* הממשק במקום להחליף אותו במסך „בקרוב”: השאלה
+          // שהמשתמש כתב נשארת בתיבה ואינה נמחקת מתחת לידיים שלו.
+          setAnswer({ kind: "unavailable", text: compass.soon.text });
         } else if (data.status === "answered") {
           setAnswer({
             kind: "answered",
@@ -164,6 +168,35 @@ export function CompassConsole({
   ) : (
     <AmazonBuyLink source="book">{compass.cta.closedLabel}</AmazonBuyLink>
   );
+
+  // מצב טעינה — כל עוד תשובת הזמינות לא חזרה *אין* טופס אינטראקטיבי, אלא שלד
+  // יציב בגודל הכרטיס. זו הנקודה הקריטית: קודם לכן הטופס רונדר כבר במצב
+  // „loading”, וכשתשובת הזמינות הגיעה (עוזר סגור/תקלת רשת) הוא הוחלף במסך
+  // „בקרוב” — כלומר תיבת הכתיבה נעלמה באמצע ההקלדה והטקסט שנכתב אבד. הטופס
+  // נחשף רק אחרי שהזמינות ידועה, ולכן המצב הזה אינו יכול לקרות.
+  if (availability === "loading") {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <div
+          className="rounded-lg border border-border bg-surface p-5 sm:p-7"
+          aria-busy="true"
+        >
+          <p
+            className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover"
+            role="status"
+          >
+            <Compass className="compass-loading h-4 w-4" aria-hidden="true" />
+            {compass.ui.loading}
+          </p>
+          <div className="mt-5 space-y-3" aria-hidden="true">
+            <div className="h-3.5 animate-pulse rounded bg-surface-muted" />
+            <div className="h-3.5 w-[92%] animate-pulse rounded bg-surface-muted" />
+            <div className="h-3.5 w-[70%] animate-pulse rounded bg-surface-muted" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // מצב „בקרוב” — כשהעוזר עדיין אינו פעיל.
   if (availability === "soon") {
@@ -412,6 +445,13 @@ export function CompassConsole({
               מצב בדיקות
             </p>
             <p className="mt-3 text-[1.05rem] leading-[1.7] text-foreground">{answer.text}</p>
+          </article>
+        ) : answer?.kind === "unavailable" ? (
+          // העוזר נסגר בין הטעינה לשליחה: הודעה בתוך הממשק, בלי לפרק אותו —
+          // הטופס והשאלה שנכתבה נשארים על המסך ואפשר לנסות שוב מאוחר יותר.
+          <article className={CARD_SHELL} role="status">
+            <p className="kicker">{compass.soon.title}</p>
+            <p className="mt-4 text-[1.08rem] leading-[1.75] text-foreground">{answer.text}</p>
           </article>
         ) : answer?.kind === "refused" ? (
           <article className={CARD_SHELL}>
