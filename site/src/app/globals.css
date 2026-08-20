@@ -2093,6 +2093,31 @@
     animation: compassSpin 1.6s linear infinite;
   }
 
+  /* PHASE MOTION 2 — „שאל את הספר”: המצפן שליד תיבת הכתיבה נע קלות בזמן
+     שהמשתמש מקליד. משוב-מיקרו בלבד: נדנוד עדין של ±6°, transform בלבד ⇒ אין
+     reflow ואין הזזת-פריסה. לא לולאה אגרסיבית — תנועה איטית שנקראת כ„מקשיב”.
+     מחוץ ל-no-preference הכלל אינו חל כלל (התנהגות reduced-motion = סטטי). */
+  .compass-seeking {
+    animation: compassSeek 2.4s var(--ease-standard) infinite;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  @keyframes compassSeek {
+    0%,
+    100% {
+      transform: rotate(-6deg);
+    }
+    50% {
+      transform: rotate(6deg);
+    }
+  }
+
+  /* כרטיס „מתוך הספר” — נכנס אחרי גוף התשובה, כדי שהמקור ייקרא כעיגון ולא
+     כהערת-שוליים. distance/duration מהטוקנים המשותפים. */
+  .book-citation {
+    animation: fadeInSoft var(--motion-panel) var(--ease-settle) 140ms both;
+  }
+
   /* פעימת-דגש אחת ומרוסנת לכפתור ההרשמה בשער — אחרי שכניסת ה-Hero מתייצבת.
      מחזור אחד בלבד (אף פעם לא אינסופי), ללא fill-mode כדי לא „לתקוע” טרנספורם
      ולשמור על אפקט הלחיצה/hover. אינה מעכבת שימושיות: הכפתור לחיץ מיד. */
