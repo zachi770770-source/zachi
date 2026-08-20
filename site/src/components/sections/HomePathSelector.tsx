@@ -33,16 +33,27 @@ export function HomePathSelector() {
           </p>
         </div>
 
-        <fieldset className="path-choose mx-auto mt-5 max-w-2xl border-0 p-0">
+        {/* מ-sm ומעלה השורה רחבה יותר מרוחב-הקריאה: ארבע תחנות זו לצד זו
+            צריכות מקום כדי שהכותרות לא תישברנה לשלוש שורות. פאנל-התוכן שמתחת
+            נשאר ברוחב קריאה נוח (max-w-2xl משלו). */}
+        <fieldset className="path-choose mx-auto mt-5 max-w-2xl border-0 p-0 sm:max-w-4xl">
           <legend className="sr-only">{homePathUi.heading}</legend>
 
-          {/* רשת 2×2 סורקת — כל מצב הוא radio-card נגיש (הכרטיס הוא label). */}
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
-            {homePaths.map((p) => (
+          {/* מסלול אחד, ארבע תחנות. הקו והצמתים נמשכים ב-CSS טהור מתוך אותו
+              radio שכבר קיים (‏`:has(:checked)`) — אין JS, אין state, ואין שינוי
+              בסמנטיקה: כל תחנה נשארת label עם radio נגיש. במובייל המסלול אנכי
+              (מרזב בצד-ההתחלה), בדסקטופ אופקי מעל השורה. ראו .path-stations. */}
+          <div className="path-stations relative grid grid-cols-1 gap-2.5 sm:grid-cols-4 sm:gap-4">
+            {homePaths.map((p, index) => (
               <label
                 key={p.id}
-                className="lift-hover flex cursor-pointer items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-surface-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:gap-3 sm:rounded-2xl sm:p-5"
+                data-index={index}
+                className="path-station lift-hover relative flex cursor-pointer items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:bg-surface-muted has-[:checked]:border-brand has-[:checked]:bg-surface-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand sm:flex-col sm:items-start sm:gap-3 sm:rounded-2xl sm:p-5"
               >
+                {/* צומת התחנה — יושב במרזב-המסלול (מחוץ לכרטיס), כדי שהקו לעולם
+                    לא ייחבא מאחורי רקע הכרטיס. דקורטיבי: המצב האמיתי מגיע
+                    מה-radio ומהמסגרת הנבחרת. */}
+                <span className="path-station__node" aria-hidden="true" />
                 <input type="radio" name="home-stage" value={p.id} className="sr-only" />
                 <span className="min-w-0">
                   <span className="flex flex-wrap items-center gap-1.5">
@@ -62,7 +73,7 @@ export function HomePathSelector() {
                 </span>
                 <span
                   aria-hidden="true"
-                  className="path-arrow inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-brand transition-colors sm:h-10 sm:w-10"
+                  className="path-arrow inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-brand transition-colors sm:h-10 sm:w-10 sm:self-end"
                 >
                   <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 </span>
@@ -71,7 +82,7 @@ export function HomePathSelector() {
           </div>
 
           {/* תגובה משותפת אחת, במקום יציב מתחת לרשת — מתחלפת לפי הבחירה. */}
-          <div className="path-panels mt-3 sm:mt-4" aria-live="polite">
+          <div className="path-panels mx-auto mt-3 max-w-2xl sm:mt-4" aria-live="polite">
             {homePaths.map((p) => {
               const micro = p.focuses[0];
               return (
