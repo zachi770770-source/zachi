@@ -14,17 +14,34 @@ type Row = {
   score: number;
 };
 
+/**
+ * Mock DB לבדיקות דירוג/סף/תקרות. שער-הביטחון (passesConfidenceGate) נבדק
+ * בנפרד — ביחידה ב-search.gate.test.ts ומקצה-לקצה מול קורפוס אמיתי
+ * ב-retrieval.bench.test.ts — ולכן כאן הוא מסופק כמסופק: לכל מונח יש DF>0,
+ * וטקסט-החיפוש של כל שורה מכיל את מונחי השאלה. אחרת כל בדיקה כאן הייתה
+ * נבלמת בשער במקום להגיע ללוגיקה שהיא באמת בודקת.
+ */
 function mockDb(rows: Row[], activeVersion: string | null = "fixture-v1"): SqlClient {
+  let terms: string[] = [];
   return {
-    async query(text: string) {
+    async query(text: string, params?: unknown[]) {
       if (/compass_book_versions\s+where status = 'active'/.test(text)) {
         return { rows: activeVersion ? [{ version: activeVersion }] : [] };
       }
-      if (/ts_rank_cd/.test(text)) return { rows };
+      if (/unnest/.test(text)) {
+        terms = (params?.[0] as string[]) ?? [];
+        return { rows: terms.map((t) => ({ t, df: 5, total: 100 })) };
+      }
+      if (/ts_rank_cd/.test(text)) {
+        return { rows: rows.map((r) => ({ ...r, search_text: terms.join(" ") })) };
+      }
       return { rows: [] };
     },
   };
 }
+
+/** שאלה עם שני מונחי-תוכן — המינימום שהשער דורש. */
+const Q = "איך בונים אמון";
 
 const row = (chapter: number, score: number): Row => ({
   chapter_number: chapter,
@@ -41,14 +58,14 @@ describe("searchCompass", () => {
   });
 
   it("refuses when there is no active version", async () => {
-    const res = await searchCompass(mockDb([row(1, 0.5)], null), "שאלה");
+    const res = await searchCompass(mockDb([row(1, 0.5)], null), Q);
     expect(res.matched).toBe(false);
     expect(res.bookVersion).toBeNull();
     expect(res.results).toHaveLength(0);
   });
 
   it("drops low-score rows below the calibrated 0.3 threshold (refuses weak matches)", async () => {
-    const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.2)]), "שאלה");
+    const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.2)]), Q);
     expect(res.matched).toBe(true);
     expect(res.results).toHaveLength(1);
     expect(res.results.every((r) => r.score >= 0.3)).toBe(true);
@@ -58,7 +75,7 @@ describe("searchCompass", () => {
     const prev = process.env.COMPASS_MIN_SCORE;
     process.env.COMPASS_MIN_SCORE = "0.6";
     try {
-      const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.7)]), "שאלה");
+      const res = await searchCompass(mockDb([row(1, 0.5), row(2, 0.7)]), Q);
       expect(res.results).toHaveLength(1);
       expect(res.results[0].score).toBe(0.7);
     } finally {
@@ -68,7 +85,7 @@ describe("searchCompass", () => {
   });
 
   it("returns matched:false with no content when every match is weak", async () => {
-    const res = await searchCompass(mockDb([row(1, 0.003), row(2, 0.005)]), "שאלה");
+    const res = await searchCompass(mockDb([row(1, 0.003), row(2, 0.005)]), Q);
     expect(res.matched).toBe(false);
     expect(res.results).toHaveLength(0);
   });
@@ -83,7 +100,7 @@ describe("searchCompass", () => {
       row(4, 0.4),
       row(5, 0.3),
     ];
-    const res = await searchCompass(mockDb(rows), "שאלה");
+    const res = await searchCompass(mockDb(rows), Q);
     expect(res.results.length).toBeLessThanOrEqual(5);
     const chapter1 = res.results.filter((r) => r.chapterNumber === 1);
     expect(chapter1.length).toBeLessThanOrEqual(2);
@@ -95,6 +112,6 @@ describe("searchCompass", () => {
         throw new Error("db down");
       },
     };
-    await expect(searchCompass(failing, "שאלה")).rejects.toThrow(/db down/);
+    await expect(searchCompass(failing, Q)).rejects.toThrow(/db down/);
   });
 });

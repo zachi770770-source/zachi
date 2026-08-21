@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { CompassMatch, CompassSearchResponse, SqlClient } from "@/lib/compass/types";
-import { normWord, expandWord, tokenize } from "@/lib/compass/hebrew";
+import { normWord, expandWord, expandText, tokenize } from "@/lib/compass/hebrew";
 
 /**
  * סף התאמה מינימלי (ציון מנורמל 0..1) — מתחתיו מסרבים להחזיר תוכן. מכויל מול
@@ -119,13 +119,92 @@ export function gateDerivedTerms(
   return derived.filter((t) => (df.get(t) ?? 0) <= cap);
 }
 
+/**
+ * שער-ביטחון לאחזור („I1”).
+ *
+ * הבעיה שנמדדה על מערך-חסימה עיוור (50 שאלות שהספר עונה עליהן, 25 שאלות
+ * מחוץ-לספר, נכתב אחרי הקפאת האינדקס): 14 מתוך 25 שאלות מחוץ-לספר החזירו
+ * קטעים ולכן הגיעו למודל. ניתוח המנגנונים הראה שלוש משפחות שניתן להפריד
+ * דטרמיניסטית:
+ *   A. „וו יחיד” — מילה נדירה מאוד שמופיעה במקרה פעם אחת בספר („משכנתה”,
+ *      „שמרים”, „גרון”, „אולם”) מספיקה לעבור את סף-הציון בלי שום חיזוק.
+ *   B. שאריות-תחילית — „כוכבים”→„וכבימ”, „הדרך”→„דרכ” — כשאין למעשה אף מילה
+ *      *שהמשתמש כתב* שמעוגנת בספר.
+ *   D. קלט חסר-תוכן — „אני לא יודע” — מונח תוכן יחיד.
+ *
+ * שני האותות שהפרידו בפועל (ממוצע: שאלות-אמת מול מחוץ-לספר):
+ *   agree 5.41 מול 2.57, ומספר מונחים *מקוריים* מעוגנים 4.76 מול 2.29.
+ * לעומתם, נדירות (maxIdf) כמעט אינה מפרידה — 5.15 מול 4.74 — ובכיוון ההפוך
+ * מהאינטואיציה: הקישור היחיד של שאלה מחוץ-לספר הוא בדרך כלל דווקא מילה נדירה.
+ *
+ * לכן הכלל אינו סף-ציון ואינו „לפחות שני מונחים”: „לפחות שני מונחים” הסיר
+ * שאלה אחת בלבד מתוך 14. הכלל הוא *חפיפה כפולה*:
+ *   1. לפחות שני מונחים מקוריים (לא נגזרים) מעוגנים בספר, וגם
+ *   2. לפחות שני מונחים מעוגנים מופיעים בפועל בקטעים שעומדים להישלח למודל.
+ *
+ * נמדד: 14/25 → 8/25 התאמות-שווא, בלי אף אובדן recall (49/50 לפני ואחרי,
+ * R@5 ללא שינוי), ושלוש שאלות-העוגן של PR #81 שורדות.
+ */
+export const CONFIDENCE_MIN_ORIGINAL_TERMS = 2;
+export const CONFIDENCE_MIN_AGREEING_TERMS = 2;
+
+/**
+ * מיישם את השער. `haystacks` הם הטקסטים המנורמלים-והמורחבים של הקטעים
+ * ש*עומדים להישלח למודל* (אחרי הדירוג-מחדש), לא של כל מה שנשלף — הראיה
+ * הרלוונטית היא מה שהמודל יראה בפועל.
+ *
+ * מוחזר גם `false` כשאין קטעים כלל, כדי שלקורא יהיה ערך אחד לבדוק.
+ */
+export function passesConfidenceGate(args: {
+  /** מונחים שהמשתמש כתב בפועל (אחרי נרמול), לפני גזירת תחיליות. */
+  original: string[];
+  /** כל המונחים שנשלחו לשאילתה: מקוריים + נגזרים ששרדו את gateDerivedTerms. */
+  terms: string[];
+  /** DF בקורפוס לכל מונח. מונח עם DF=0 אינו מעוגן. */
+  df: Map<string, number>;
+  /** הטקסט המנורמל-והמורחב של הקטעים הנבחרים (טוקנים מופרדי-רווח). */
+  haystacks: string[];
+}): boolean {
+  const { original, terms, df, haystacks } = args;
+  if (!haystacks.length) return false;
+
+  const attestedOriginal = new Set(original.filter((t) => (df.get(t) ?? 0) > 0));
+  if (attestedOriginal.size < CONFIDENCE_MIN_ORIGINAL_TERMS) return false;
+
+  // התאמת טוקן שלם, לא תת-מחרוזת: „בונימ” מכיל את „ונימ” כתת-מחרוזת, ולכן
+  // התאמה טקסטואלית הייתה סופרת מונח נגזר כראיה *נוספת* למונח שממנו נגזר.
+  // הטקסטים כאן הם פלט expandText — טוקנים מנורמלים מופרדי-רווח.
+  const present = new Set<string>();
+  for (const h of haystacks) for (const tok of h.split(/\s+/)) if (tok) present.add(tok);
+
+  const attested = [...new Set(terms.filter((t) => (df.get(t) ?? 0) > 0))];
+  let agreeing = 0;
+  for (const t of attested) {
+    if (present.has(t)) agreeing++;
+    if (agreeing >= CONFIDENCE_MIN_AGREEING_TERMS) return true;
+  }
+  return false;
+}
+
 type Row = {
   chapter_number: number;
   chapter_name: string;
   section_name: string | null;
   content: string;
+  /**
+   * הטקסט המנורמל-והמורחב של הקטע (כותרות + גוף) — בדיוק מה שנמצא ב-tsvector.
+   * פנימי בלבד: אינו חלק מ-CompassMatch ואינו נחשף לראוט/לדפדפן.
+   */
+  search_text?: string | null;
   score: number | string;
 };
+
+/** הטקסט שמולו נבדקת נוכחות מונח. נופל חזרה לנרמול ב-JS אם עמודות ה-`_s` ריקות. */
+function searchTextOf(r: Row): string {
+  const s = (r.search_text ?? "").trim();
+  if (s) return s;
+  return expandText(`${r.chapter_name} ${r.section_name ?? ""} ${r.content}`);
+}
 
 /**
  * חיפוש בצד השרת: מקבל שאלה ומחזיר 3–5 קטעים רלוונטיים בלבד, מהגרסה
@@ -185,12 +264,16 @@ export async function searchCompass(
     totalChunks = Number(row.total);
   }
 
-  const tsQuery = [...original, ...gateDerivedTerms(original, derived, df, totalChunks)].join(" | ");
+  const keptDerived = gateDerivedTerms(original, derived, df, totalChunks);
+  const terms = [...original, ...keptDerived];
+  const tsQuery = terms.join(" | ");
   if (!tsQuery) return { matched: false, bookVersion, results: [] };
 
   // דירוג ממושקל ומנורמל ל-0..1 (דגל 32 = rank/(rank+1)).
   const res = await db.query(
     `select chapter_number, chapter_name, section_name, content,
+            coalesce(chapter_name_s, '') || ' ' || coalesce(section_name_s, '') || ' '
+              || coalesce(content_s, '') as search_text,
             ts_rank_cd(search_tsv, query, 32) as score
        from compass_book_sections,
             to_tsquery('simple', $1) query
@@ -200,9 +283,21 @@ export async function searchCompass(
     [tsQuery, bookVersion, FETCH_LIMIT]
   );
 
-  const results = rerank(res.rows as Row[], q, minScore);
-  if (results.length === 0) return { matched: false, bookVersion, results: [] };
-  return { matched: true, bookVersion, results };
+  const rows = res.rows as Row[];
+  const picked = rerank(rows, q, minScore);
+  if (picked.length === 0) return { matched: false, bookVersion, results: [] };
+
+  // שער-הביטחון נבדק מול הקטעים הנבחרים בלבד — הראיה היא מה שהמודל יראה.
+  const byContent = new Map(rows.map((r) => [r.content, r]));
+  const haystacks = picked.map((m) => {
+    const row = byContent.get(m.content);
+    return row ? searchTextOf(row) : expandText(`${m.chapterName} ${m.sectionName ?? ""} ${m.content}`);
+  });
+  if (!passesConfidenceGate({ original, terms, df, haystacks })) {
+    return { matched: false, bookVersion, results: [] };
+  }
+
+  return { matched: true, bookVersion, results: picked };
 }
 
 /**

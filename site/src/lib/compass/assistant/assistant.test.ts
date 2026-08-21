@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { askCompass } from "@/lib/compass/assistant/assistant";
+import { COMPASS_INSUFFICIENT_ANSWER } from "@/lib/compass/assistant/config";
 import type { CompassProvider } from "@/lib/compass/assistant/types";
 import type { SqlClient } from "@/lib/compass/types";
 
@@ -16,13 +17,25 @@ type Row = {
 
 const REQUIRED = "medaytim-laahava-888-final";
 
+/**
+ * שער-הביטחון של האחזור מסופק כאן כמסופק (DF>0 לכל מונח, וטקסט-החיפוש מכיל
+ * את המונחים) — הוא נבדק בנפרד ב-search.gate.test.ts. הבדיקות כאן עוסקות
+ * בזרימת העוזר: סירוב, ייחוס, תקרות ופוקוס.
+ */
 function mockDb(rows: Row[], activeVersion: string | null = REQUIRED): SqlClient {
+  let terms: string[] = [];
   return {
-    async query(text: string) {
+    async query(text: string, params?: unknown[]) {
       if (/where status = 'active'/.test(text)) {
         return { rows: activeVersion ? [{ version: activeVersion }] : [] };
       }
-      if (/ts_rank_cd/.test(text)) return { rows };
+      if (/unnest/.test(text)) {
+        terms = (params?.[0] as string[]) ?? [];
+        return { rows: terms.map((t) => ({ t, df: 5, total: 100 })) };
+      }
+      if (/ts_rank_cd/.test(text)) {
+        return { rows: rows.map((r) => ({ ...r, search_text: terms.join(" ") })) };
+      }
       return { rows: [] };
     },
   };
@@ -97,7 +110,7 @@ describe("askCompass", () => {
   it("מסרב כשהמודל עצמו החזיר נוסח סירוב", async () => {
     const res = await askCompass(
       mockDb([row(0.6)]),
-      "שאלה כלשהי",
+      "איך בונים אמון",
       provider("לא מצאתי בספר בסיס מספיק לתשובה מדויקת על השאלה הזאת.")
     );
     expect(res.answer.status).toBe("refused");
@@ -105,10 +118,82 @@ describe("askCompass", () => {
 
   it("חותך תשובה ארוכה מ-150 מילים", async () => {
     const long = Array.from({ length: 300 }, (_, i) => `מ${i}`).join(" ");
-    const res = await askCompass(mockDb([row(0.6)]), "שאלה", provider(long));
+    const res = await askCompass(mockDb([row(0.6)]), "איך בונים אמון", provider(long));
     expect(res.answer.status).toBe("answered");
     if (res.answer.status === "answered") {
       expect(res.answer.text.split(/\s+/).length).toBeLessThanOrEqual(151);
     }
+  });
+});
+
+/**
+ * סירוב שנוסח אחרת מהנוסח המאושר.
+ *
+ * הפגם שנסגר כאן: הזיהוי הסתמך על תחילית-מחרוזת אחת בלבד, ולכן תשובה כמו
+ * „הקטעים שקיבלתי אינם עוסקים בכך” יצאה כ-`answered` — ואז buildCitation, שאינו
+ * מסתכל כלל בטקסט המודל, הצמיד לה „מבוסס על פרק N”. כלומר סירוב שהולבש כתשובה
+ * מצוטטת מהספר. הבדיקות רצות מול ספק מדומה בלבד; אין צורך במפתח Anthropic.
+ */
+describe("askCompass: סירוב בניסוח חופשי לעולם אינו מקבל ציטוט או שורת-פוקוס", () => {
+  const PHRASINGS = [
+    "לא מצאתי בספר בסיס מספיק לתשובה מדויקת על השאלה הזאת.",
+    "הקטעים שקיבלתי אינם עוסקים בכך.",
+    "הקטעים שסופקו לא מכילים התייחסות לשאלה הזאת.",
+    "המקורות שקיבלתי אינם מתייחסים לנושא.",
+    "הספר אינו עוסק בנושא הזה.",
+    "הספר לא מדבר על זה בכלל.",
+    "אין בקטעים בסיס לתשובה.",
+    "אין לי בסיס בקטעים כדי לענות על זה.",
+    "לא מצאתי מידע על כך במקורות שסופקו.",
+    "השאלה הזאת חורגת מתחום הספר.",
+    "The provided sources do not address this question.",
+  ];
+
+  for (const text of PHRASINGS) {
+    it(`מסווג כסירוב: „${text.slice(0, 42)}…”`, async () => {
+      const res = await askCompass(mockDb([row(0.6)]), "איך בונים אמון", provider(text));
+      expect(res.answer.status).toBe("refused");
+      // הנוסח שמוצג הוא תמיד הנוסח המאושר, לא נוסח המודל.
+      if (res.answer.status === "refused") {
+        expect(res.answer.text).toBe(COMPASS_INSUFFICIENT_ANSWER);
+      }
+      // הבטחה מבנית: אין ציטוט ואין שורת-פוקוס בסירוב.
+      expect(res.answer).not.toHaveProperty("citation");
+      expect(res.answer).not.toHaveProperty("focus");
+    });
+  }
+
+  it("סירוב שהמודל צירף לו שורת „על מה שווה לשים לב” עדיין מסורב, בלי פוקוס", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "איך בונים אמון",
+      provider("הספר אינו עוסק בנושא הזה.\nעל מה שווה לשים לב עכשיו: שווה לשים לב לדפוס לאורך זמן.")
+    );
+    expect(res.answer.status).toBe("refused");
+    expect(res.answer).not.toHaveProperty("focus");
+    expect(res.answer).not.toHaveProperty("citation");
+  });
+
+  it("תשובה אמיתית שפותחת בהסתייגות ואז עונה לגופו אינה מסורבת", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "איך בונים אמון",
+      provider(
+        "הספר אינו עוסק בשאלה הזאת ישירות, אבל העיקרון החוזר בקטעים הוא שאמון " +
+          "נבנה מהתנהגות עקבית לאורך זמן ולא מהצהרות, ושכדאי להסתכל על מה שקורה " +
+          "שוב ושוב ולא על רגע בודד שנראה מבטיח או מאכזב."
+      )
+    );
+    expect(res.answer.status).toBe("answered");
+  });
+
+  it("תשובה לגיטימית עם שלילה כללית אינה נתפסת כסירוב", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "איך בונים אמון",
+      provider("אין פה תשובה אחת נכונה. אמון נבנה לאט, מתוך התנהגות שחוזרת על עצמה.")
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") expect(res.answer.citation).toContain("פרק 4");
   });
 });

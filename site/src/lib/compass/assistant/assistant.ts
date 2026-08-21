@@ -76,7 +76,10 @@ export async function askCompass(
   // כדי שתקרת-המילים של הגוף לא תבלע אותה. השורה מבוססת על אותם קטעים בלבד.
   const { body, focus } = extractFocus(completion.text);
   const answerText = enforceAnswerLimits(body);
-  if (!answerText || isModelRefusal(answerText)) {
+  // סירוב לעולם אינו יוצא כ„תשובה”: אין ציטוט, אין שורת-פוקוס, ואין המשך
+  // „רגיל” בממשק. נבדק גם על הפלט הגולמי, למקרה שפיצול שורת-הפוקוס הותיר גוף
+  // שאינו נראה כסירוב בעוד שהתשובה כולה כן.
+  if (!answerText || isModelRefusal(answerText) || isModelRefusal(completion.text)) {
     return {
       answer: { status: "refused", text: COMPASS_INSUFFICIENT_ANSWER },
       usage: completion.usage,
