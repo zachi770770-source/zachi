@@ -92,10 +92,8 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     await page.goto("/", { waitUntil: "networkidle" });
     const closing = page.locator("#get-the-book");
     await closing.scrollIntoViewIfNeeded();
-    // סגירה פשוטה וברורה: „הספר המלא זמין עכשיו באמזון” → „לרכישה באמזון”.
-    await expect(
-      closing.getByRole("heading", { name: "הספר המלא זמין עכשיו באמזון" }),
-    ).toBeVisible();
+    // סגירה פשוטה וברורה: „זמין עכשיו במהדורת Kindle באמזון” → „לרכישה באמזון”.
+    await expect(closing.getByText("זמין עכשיו במהדורת Kindle באמזון")).toBeVisible();
     await expect(closing.getByRole("link", { name: "לרכישה באמזון" })).toHaveAttribute(
       "href",
       /amazon\.com\/dp\/B0GJ3SL9H2/,

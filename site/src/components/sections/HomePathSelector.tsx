@@ -65,9 +65,11 @@ export function HomePathSelector() {
                         </span>
                       ) : null}
                     </span>
-                    {/* שורת-הזיהוי הקצרה נשארת *בתוך* הכרטיס — זה הזיהוי שנשמר
-                        אחרי שהפאנל הנפרד הוסר. מוסתרת במובייל (כרטיס קצר). */}
-                    <span className="mt-1 hidden text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:block sm:text-[15px]">
+                    {/* שורת-הזיהוי היא *הסיבה* שהכרטיס אינו כפתור-ניווט: היא
+                        מתארת את התחושה, לא את היעד. לכן היא מוצגת גם במובייל —
+                        להסתיר אותה שם היה משאיר לרוב המבקרים בדיוק את התפריט
+                        שביקשנו לא להיות. */}
+                    <span className="mt-1 block text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[15px]">
                       {p.buttonSub}
                     </span>
                   </span>
