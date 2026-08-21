@@ -56,6 +56,13 @@ export function CompassConsole({
   const [answer, setAnswer] = React.useState<AnswerState>(null);
   const [submitting, setSubmitting] = React.useState(false);
   const formRef = React.useRef<HTMLFormElement>(null);
+  /**
+   * שלב-החיפוש המוצג בזמן ההמתנה. שלושת הניסוחים מתארים את מה שהשרת באמת עושה
+   * (אחזור קטעים → הצלבה → ניסוח כיוון מהספר) ואינם ממציאים שמות-פרקים או תוכן:
+   * התשובה והציטוט מגיעים רק בסוף, ולכן אין מה להציג מהם באמצע. מתקדם בטיימר
+   * ומתאפס בכל שליחה.
+   */
+  const [searchStage, setSearchStage] = React.useState(0);
 
   // טעינת מצב זמינות + כמה שאלות נותרו (בלי לצרוך). במצב בדיקות אין קריאת רשת
   // כלל — הממשק נשאר „ready” לצורכי בדיקה ויזואלית, והשליחה תיחסם מקומית.
@@ -83,6 +90,17 @@ export function CompassConsole({
 
   const outOfQuestions = remaining !== null && remaining <= 0;
 
+  // התקדמות שלב-החיפוש בזמן המתנה בלבד. עוצר בשלב האחרון (לא לולאה אינסופית),
+  // כדי שההמתנה תיקרא כתהליך שמתקדם ולא כאנימציה שרצה במקום.
+  React.useEffect(() => {
+    if (!submitting) return;
+    const last = compass.ui.searchStages.length - 1;
+    const timer = setInterval(() => {
+      setSearchStage((s) => (s < last ? s + 1 : s));
+    }, 1400);
+    return () => clearInterval(timer);
+  }, [submitting]);
+
   // זרימת השאילתה המשותפת — משמשת גם את שליחת הטופס וגם את שאלות הפתיחה.
   // זהה בכל השאר (מכסה, סירוב, מגבלה, שגיאה); התוכן והלוגיקה בשרת ללא שינוי.
   const runQuery = React.useCallback(
@@ -100,6 +118,7 @@ export function CompassConsole({
       }
 
       setSubmitting(true);
+      setSearchStage(0);
       setAnswer(null);
 
       try {
@@ -272,11 +291,16 @@ export function CompassConsole({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* המצפן „מחפש” בעדינות בזמן הקלדה — משוב מיקרו על כך שהשאלה נקלטת.
+              transform בלבד על שכבה נפרדת ⇒ אין הזזת-פריסה; מכובד reduced-motion
+              דרך .compass-seeking ב-globals. */}
           <span
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand"
             aria-hidden="true"
           >
-            <Compass className="h-4 w-4" />
+            <Compass
+              className={`h-4 w-4${question.length > 0 ? " compass-seeking" : ""}`}
+            />
           </span>
           <label
             htmlFor="compass-question"
@@ -328,7 +352,10 @@ export function CompassConsole({
           {submitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              {compass.ui.asking}
+              {/* רצף-החיפוש מסופר במקום אחד בלבד — באזור-הסטטוס שמתחת. הכפתור
+                  מראה ספינר ושומר את אותו טקסט לקוראי-מסך, כדי ששתי המחרוזות
+                  לא יופיעו זו לצד זו על אותו מסך (בעיקר במובייל). */}
+              <span className="sr-only">{compass.ui.asking}</span>
             </>
           ) : (
             <>
@@ -377,7 +404,7 @@ export function CompassConsole({
             <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
               {/* אינדיקציית טעינה יחידה ומרוסנת — אייקון המצפן מסתובב בעדינות */}
               <Compass className="compass-loading h-4 w-4" aria-hidden="true" />
-              {compass.ui.thinking}
+              {compass.ui.searchStages[searchStage]}
             </p>
             <div className="mt-5 space-y-3" aria-hidden="true">
               <div className="h-3.5 animate-pulse rounded bg-surface-muted" />
@@ -408,11 +435,27 @@ export function CompassConsole({
                 </p>
               </div>
             ) : null}
+            {/* המקור כ„כרטיס מהספר”: היררכיה משלו במקום שורת-כיתוב שקטה. זהו
+                הדבר שמבדיל „שאלתי את הספר” מ„קיבלתי תשובה” — ולכן הוא מקבל
+                משטח, מסגרת ועיגון-צבע משלו. הטקסט עצמו לא השתנה. */}
+            {/* בלי קצה-מותג נוסף: לכרטיס-התשובה כבר יש קו טרקוטה בהתחלה,
+                ושכפולו כאן היה יוצר דגש כפול. ההיררכיה מגיעה מהמשטח, מהאייקון
+                ומהכותרת הקטנה — מרוסן יותר, ולכן יוקרתי יותר. */}
             {answer.citation ? (
-              <p className="mt-6 flex items-center gap-2.5 border-t border-border pt-5 text-[14px] font-medium text-foreground-muted">
-                <BookOpen className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-                {formatCitation(answer.citation)}
-              </p>
+              <figure className="book-citation mt-6 flex items-start gap-3 rounded-lg border border-border bg-surface-muted px-4 py-3.5">
+                <BookOpen
+                  className="mt-0.5 h-4 w-4 shrink-0 text-brand"
+                  aria-hidden="true"
+                />
+                <figcaption className="min-w-0">
+                  <span className="block text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
+                    מתוך הספר
+                  </span>
+                  <span className="mt-1 block text-[14px] font-medium leading-snug text-foreground">
+                    {formatCitation(answer.citation)}
+                  </span>
+                </figcaption>
+              </figure>
             ) : null}
             {/* מסגור אחרי תשובה: „זו רק הצצה…” ואז ה-CTA האחיד — רכישת הספר באמזון
                 (הספר כבר זמין; אין רשימת המתנה), וקריאה לפרק הטעימה כפעולה משנית. */}

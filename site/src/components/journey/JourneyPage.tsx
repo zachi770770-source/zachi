@@ -11,7 +11,7 @@ import type {
 } from "@/content/journeyPages";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
-import { SignatureMark } from "@/components/shared/SignatureMark";
+import { JourneyPosition } from "@/components/journey/JourneyPosition";
 import { JourneyMirror } from "@/components/journey/JourneyMirror";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
@@ -164,7 +164,10 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
               {journey.intro}
             </p>
             {/* הסימן החתום „מחיפוש לבנייה” — עמוד-המסע הוא ביטוי-העל שלו. */}
-            <SignatureMark className="mt-7" />
+            {/* מחוון-המיקום מחליף כאן את SignatureMark: שני „נקודות על קו”
+                זה לצד זה נקראו כשתי מערכות-התקדמות שונות באותו מסך. הסימן
+                החתום נשאר בבית ובפוטר; כאן המשמעות היא מיקום במסע. */}
+            <JourneyPosition journeyId={journey.id} />
           </div>
           <div
             className={cn(
@@ -198,7 +201,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             {journey.moodLine}
           </p>
           {/* הסימן החתום „מחיפוש לבנייה” — עמוד-המסע הוא ביטוי-העל שלו. */}
-          <SignatureMark className="mt-8 justify-center" />
+          <JourneyPosition journeyId={journey.id} />
         </header>
       )}
 
