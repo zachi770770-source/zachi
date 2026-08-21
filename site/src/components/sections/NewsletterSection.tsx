@@ -1,14 +1,20 @@
+import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
+import { closing } from "@/content/homeStory";
 
 /**
  * סגירת עמוד הבית — נקודת ה-High Intent האחרונה. אמזון הוא ערוץ הרכישה היחיד:
- * מסר פשוט וברור („הספר המלא זמין עכשיו באמזון” → „לרכישה באמזון”). אין רשימת
- * המתנה, אין „מהדורה ישירה · בקרוב”, אין איסוף מיילים ואין checkout מקומי.
+ * אין רשימת המתנה, אין „מהדורה ישירה · בקרוב”, אין איסוף מיילים ואין checkout
+ * מקומי — וגם אין דחיפות, ספירה לאחור או „מלאי אחרון”.
+ *
+ * היררכיית הפעולה כאן היא שתי דרגות של מוכנות, לא CTA אחד: הכפתור הראשי לרכישה
+ * למי שכבר שוכנע, וקישור שקט לטעימה למי שלא — כדי שסוף העמוד לא יהיה קיר יחיד
+ * שמי שאינו מוכן פשוט נעצר בו.
  */
 export function NewsletterSection() {
   return (
@@ -18,21 +24,21 @@ export function NewsletterSection() {
       aria-labelledby="get-the-book-heading"
     >
       <Container>
-        <div className="mx-auto max-w-2xl rounded-lg bg-secondary-muted px-6 py-8 text-center sm:px-10 sm:py-10">
-          <span className="kicker justify-center">
-            {siteConfig.amazon.availableLabel}
-          </span>
+        <div className="reveal mx-auto max-w-3xl rounded-2xl bg-secondary-muted px-6 py-9 text-center sm:px-12 sm:py-12">
+          {/* הכותרת פותחת, לא הקיקר: קודם לכן תווית-מלאי באותיות רחבות הקדימה
+              את המשפט הרגשי, וההצמדה הזו הפכה את רגע-הפעולה למקטע נוסף במקום
+              למסקנה. עובדת הזמינות ירדה לשורת-המידע שמתחת, שם היא מידע. */}
           <h2
             id="get-the-book-heading"
-            className="mt-1.5 font-serif text-[clamp(1.6rem,2.8vw,2.25rem)] font-semibold leading-[1.15] text-foreground sm:mt-2"
+            className="mx-auto max-w-[24ch] font-serif text-[clamp(1.6rem,3vw,2.5rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
           >
-            הספר המלא זמין עכשיו באמזון
+            {closing.title}
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-[15px] leading-relaxed text-foreground-muted">
-            {siteConfig.amazon.editionLabel}: קריאה מיידית לאחר הרכישה,
+          <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-foreground-muted">
+            {siteConfig.amazon.availableLabel}. קריאה מיידית לאחר הרכישה,
             באפליקציית Kindle או בכל מכשיר תואם.
           </p>
-          <div className="mt-5 flex justify-center">
+          <div className="mt-6 flex justify-center">
             <Button asChild size="lg" className="w-full sm:w-auto">
               <AmazonBuyLink source="home">
                 {siteConfig.amazon.buyLabel}
@@ -40,6 +46,16 @@ export function NewsletterSection() {
               </AmazonBuyLink>
             </Button>
           </div>
+          {/* הדרגה השנייה — סיכון אפס, בלי להתחרות ויזואלית בכפתור הרכישה. */}
+          <p className="mt-4 text-[14px] leading-relaxed text-foreground-muted">
+            {closing.secondaryPrompt}{" "}
+            <Link
+              href="/preview"
+              className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              {closing.secondaryLabel}
+            </Link>
+          </p>
         </div>
       </Container>
     </section>

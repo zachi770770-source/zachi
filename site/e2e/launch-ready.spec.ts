@@ -31,9 +31,9 @@ test.describe("Launch-readiness", () => {
     const closing = page.locator("#get-the-book");
     await closing.scrollIntoViewIfNeeded();
     await expect(closing).toBeVisible();
-    await expect(
-      closing.getByRole("heading", { name: "הספר המלא זמין עכשיו באמזון" }),
-    ).toBeVisible();
+    // עובדת הזמינות נבדקת, לא הניסוח השיווקי של הכותרת: הכותרת היא קופי שמותר
+    // לשנות, בעוד „זמין עכשיו במהדורת Kindle באמזון” הוא המסר שחייב להופיע.
+    await expect(closing.getByText("זמין עכשיו במהדורת Kindle באמזון")).toBeVisible();
     await expect(closing.getByRole("link", { name: "לרכישה באמזון" })).toHaveAttribute(
       "href",
       /amazon\.com\/dp\/B0GJ3SL9H2/,

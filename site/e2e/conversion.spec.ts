@@ -21,7 +21,7 @@ test("home closing: Amazon is the only purchase channel, no waitlist, no email f
   // אין שום שדה אימייל בעמוד — רשימת ההמתנה הוסרה לחלוטין.
   await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
   const closing = page.locator("#get-the-book");
-  await expect(closing.getByRole("heading", { name: "הספר המלא זמין עכשיו באמזון" })).toBeVisible();
+  await expect(closing.getByText("זמין עכשיו במהדורת Kindle באמזון")).toBeVisible();
   await expect(closing.getByRole("link", { name: "לרכישה באמזון" })).toHaveAttribute(
     "href",
     /amazon\.com\/dp\/B0GJ3SL9H2/
