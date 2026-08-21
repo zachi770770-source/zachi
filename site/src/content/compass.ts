@@ -122,6 +122,9 @@ export const compass = {
     refusedEyebrow: "מהספר",
     limitEyebrow: "מכסת השאלות",
     errorEyebrow: "תקלה זמנית",
+    // מצב-בטיחות. לא „אזהרה” ולא „שגיאה” — הכותרת אומרת מה חשוב עכשיו, בלי
+    // להבהיל ובלי לאבחן. נוסח מסר-הבטיחות עצמו חי בשרת (assistant/safety.ts).
+    safetyEyebrow: "הדבר החשוב עכשיו",
     /** מונה שאלות שנותרו. */
     remaining: (n: number) => (n === 1 ? "נותרה שאלה אחת" : `נותרו ${n} שאלות`),
     remainingNone: "השתמשתם בכל השאלות",

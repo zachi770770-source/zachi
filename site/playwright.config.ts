@@ -1,7 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /** הבדיקות של המשטח החופשי — רצות רק מול השרת עם דגל העוזר (ראו projects). */
-const FREE_TEXT_SPEC = /compass-free-text-live\.spec\.ts/;
+// מפרטים שחייבים לרוץ מול השרת השני (3101) שבו דגל העוזר החופשי דלוק.
+const FREE_TEXT_SPEC = /compass-(free-text-live|safety)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./e2e",
