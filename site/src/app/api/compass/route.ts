@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { compassQuestionSchema } from "@/lib/validation/compass";
+import { assessCompassSafety, buildSafetyAnswer } from "@/lib/compass/assistant/safety";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { getCompassDb } from "@/lib/compass/assistant/db";
 import { getCompassProvider } from "@/lib/compass/assistant/provider";
@@ -150,6 +151,24 @@ export async function POST(request: Request) {
   // honeypot מולא → תגובה נייטרלית בלי לצרוך מכסה או לקרוא למודל.
   if (parsed.data.company && parsed.data.company.length > 0) {
     return NextResponse.json({ available: true, status: "refused", answer: "", limits: LIMITS_PAYLOAD });
+  }
+
+  // שער-בטיחות דטרמיניסטי — *לפני* זמינות, מכסה, מסד, אחזור ומודל. גילוי של
+  // סכנה/פגיעה/משבר מקבל מסר-בטיחות מיד: בלי לצרוך מכסה, בלי קריאה לספק, ובלי
+  // תלות ב-COMPASS_ASSISTANT_ENABLED או בקיום גרסת ספר פעילה — כלומר גם כאשר
+  // העוזר כבוי, אדם בסכנה מקבל תשובה אנושית ולא „לא זמין”.
+  // הטקסט אינו נשמר ואינו מדווח לאנליטיקה.
+  const safety = assessCompassSafety(parsed.data.question);
+  if (!safety.safe) {
+    const answer = buildSafetyAnswer(safety);
+    return NextResponse.json({
+      available: true,
+      status: "safety",
+      category: answer.category,
+      severity: answer.severity,
+      answer: answer.text,
+      limits: LIMITS_PAYLOAD,
+    });
   }
 
   const { id, isNew } = readSubject(request);

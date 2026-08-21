@@ -23,6 +23,8 @@ type AnswerState =
   | { kind: "error"; text: string }
   | { kind: "preview"; text: string }
   | { kind: "unavailable"; text: string }
+  /** שער-הבטיחות של השרת נורה: מסר-בטיחות בלבד, בלי ציטוט/פוקוס/CTA. */
+  | { kind: "safety"; text: string; severity?: string }
   | null;
 
 /** מעטפת כרטיס אחידה לכל מצבי התשובה — שומרת על שפת האתר (נייר, מסגרת, רדיוס). */
@@ -145,6 +147,12 @@ export function CompassConsole({
           });
           setQuestion("");
           trackEvent("compass_answer_success"); // רק על תשובה מוצלחת אמיתית
+        } else if (data.status === "safety") {
+          // שער-הבטיחות נורה בשרת: מסר-בטיחות בלבד. אין ציטוט, אין שורת-פוקוס,
+          // אין CTA ואין המשך „רגיל”. במכוון ללא trackEvent: לא מדווחים, ולו
+          // אנונימית, שאדם זה הגיע לרגע כזה.
+          setAnswer({ kind: "safety", text: data.answer, severity: data.severity });
+          setQuestion("");
         } else if (data.status === "refused") {
           setAnswer({ kind: "refused", text: data.answer });
           trackEvent("compass_refused"); // אנונימי, ללא תוכן
@@ -413,6 +421,22 @@ export function CompassConsole({
               <div className="h-3.5 w-[64%] animate-pulse rounded bg-surface-muted" />
             </div>
           </div>
+        ) : answer?.kind === "safety" ? (
+          // מצב-בטיחות: מסר מרוסן ומכובד בלבד. החשיבות נמסרת דרך היררכיה ומרווח,
+          // לא דרך עיצוב-אזעקה — אדם ברגע קשה לא צריך מסך אדום. אין ציטוט, אין
+          // „על מה שווה לשים לב עכשיו”, אין CTA לרכישה ואין המשך „רגיל”:
+          // שער-הבטיחות מחזיק את מצב-התוצאה כולו.
+          // role="alert" — קורא-מסך מכריז את המסר מיד, בלי שהמשתמש יצטרך לחפשו.
+          <article
+            className={`${CARD_SHELL} border-s-2 border-s-foreground/40`}
+            role="alert"
+            data-safety={answer.severity ?? "high"}
+          >
+            <p className="kicker">{compass.ui.safetyEyebrow}</p>
+            <p className="mt-4 text-[1.12rem] leading-[1.8] text-foreground [text-wrap:pretty]">
+              {answer.text}
+            </p>
+          </article>
         ) : answer?.kind === "answered" ? (
           <article
             key={answer.text}
@@ -516,6 +540,20 @@ export function CompassConsole({
               {compass.ui.errorEyebrow}
             </p>
             <p className="mt-3 text-[1.05rem] leading-[1.7] text-foreground">{answer.text}</p>
+          </article>
+        ) : answer ? (
+          // נפילה-בטוחה: יש מצב-תשובה, אך אף ענף לא תפס אותו — למשל סטטוס חדש
+          // שהשרת יתחיל להחזיר לפני שנוסף לו ענף ייעודי כאן. עד לתיקון הזה
+          // המקרה נפל ל-`null`, כלומר המשתמש לחץ „שלח” וקיבל *מסך ריק*. עדיף
+          // להראות שגיאה גנרית נראית מאשר כלום.
+          <article className={CARD_SHELL} role="alert">
+            <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-danger">
+              <TriangleAlert className="h-4 w-4" aria-hidden="true" />
+              {compass.ui.errorEyebrow}
+            </p>
+            <p className="mt-3 text-[1.05rem] leading-[1.7] text-foreground">
+              {compass.ui.genericError}
+            </p>
           </article>
         ) : null}
       </div>
