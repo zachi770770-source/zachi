@@ -60,7 +60,15 @@ export function Hero() {
               </span>
               <span className="hero-line hero-line--2">
                 <span className="hero-line__in">
-                  <span className="hero-build text-brand-hover">אהבה בונים.</span>
+                  {/* „אהבה בונים.” נושא את חתימת הכותרת. הקו הנמשך מתחתיו אינו
+                      קישוט חדש: הוא אותו מוטיב טרקוטה של hero-rule שפותח את
+                      הבלוק, ושל הקו המודפס מתחת ל„לאהבה” על הכריכה עצמה. לכן
+                      הוא מחליף את פעימת-ההתיישבות שהייתה כאן — קו נמשך הוא
+                      חתימה עריכתית, פעימת-scale על טקסט היא אנימציית-ווב. */}
+                  <span className="hero-build text-brand-hover">
+                    אהבה בונים.
+                    <span className="hero-build__stroke" aria-hidden="true" />
+                  </span>
                 </span>
               </span>
             </h1>
@@ -167,6 +175,7 @@ export function Hero() {
               {/* הכריכה נסחפת מעט כלפי מעלה בגלילה (פרלקסה מרוסנת) — עומק בלי
                   להפריע לטילט/למעבר-הכריכה (שיושבים על אלמנטים פנימיים). */}
               <div
+                data-tilt-scope
                 className="hero-depth-book relative w-[152px] sm:w-[264px] lg:w-[364px]"
                 style={{ transform: "translateY(calc(var(--hero-parallax, 0) * -50px))" }}
               >
@@ -177,7 +186,7 @@ export function Hero() {
                   className="hero-book__shadow absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
                   style={{
                     transform:
-                      "translateX(-50%) translateY(calc(var(--hero-parallax, 0) * 10px)) scaleX(calc(1 + var(--hero-parallax, 0) * 0.22)) scaleY(calc(1 + var(--hero-parallax, 0) * 0.35))",
+                      "translateX(calc(-50% + var(--tilt-shadow-x, 0px))) translateY(calc(var(--hero-parallax, 0) * 10px)) scaleX(calc(1 + var(--hero-parallax, 0) * 0.22)) scaleY(calc(1 + var(--hero-parallax, 0) * 0.35))",
                     opacity: "calc(1 + var(--hero-parallax, 0) * 0.5)",
                   }}
                 />

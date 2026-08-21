@@ -1136,8 +1136,17 @@
 .book-tilt .book-cover:hover .book-cover__inner {
   transform: rotateY(calc(9deg + var(--tilt-y, 0deg)))
     rotateX(calc(1.2deg + var(--tilt-x, 0deg))) scale(var(--tilt-lift, 1));
-  transition:
-    transform 220ms var(--ease-settle);
+  /* הריכוך כולו כאן: ה-JS קופץ ל-var החדש בכל rAF, וה-transition הוא שממיס
+     את הקפיצות לתנועה רצופה. 260ms ו-ease-settle ⇒ הכריכה *נגררת* אחרי הסמן
+     במקום להיצמד אליו, ובעזיבה חוזרת למנוחה באותה רכות בדיוק. */
+  transition: transform 260ms var(--ease-settle);
+}
+/* הצל מגיב להטיה — נגרר רך יותר מהכריכה עצמה, כך שהעומק „מדביק” את התנועה
+   ולא זז איתה בול. הצל אינו צאצא של .book-tilt (הוא אח שלו), ומשתני-CSS
+   יורשים כלפי מטה בלבד — לכן BookTilt כותב את --tilt-shadow-x גם על אב
+   מסומן [data-tilt-scope], וממנו הוא יורד אל הצל. transform בלבד. */
+[data-tilt-scope] .hero-book__shadow {
+  transition: transform 380ms var(--ease-settle);
 }
 
 /* PHASE MOTION 4 (B) — „מעבר דף” מרוסן ב-PeekInside. הדף היוצא מסתובב הצידה
@@ -1599,8 +1608,22 @@
   display: block;
 }
 .hero-build {
+  position: relative;
   display: inline-block;
   transform-origin: right bottom;
+}
+/* חתימת הכותרת — קו טרקוטה מתחת ל„אהבה בונים.”. מבנה קבוע וגלוי תמיד (גם
+ * ללא JS וגם ב-reduced-motion): זהו חלק מהעיצוב, לא מהתנועה. רק *המשיכה*
+ * מגודרת תחת no-preference. מוחלט ⇒ אינו משפיע על הפריסה (ללא CLS). */
+.hero-build__stroke {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.12em;
+  display: block;
+  block-size: 3px;
+  border-radius: 3px;
+  background: var(--color-brand);
+  transform-origin: right center;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1632,23 +1655,20 @@
       transform: translateY(0);
     }
   }
-  /* (3) „אהבה בונים” — פעימת התיישבות ברורה (overshoot נראה) אחרי שהשורה
-   * נחשפה, כרגע-חתימה של הכותרת (~0.76s→~1.5s). */
-  .hero-build {
-    animation: heroBuildSettle 760ms var(--ease-settle) 420ms both;
+  /* (3) חתימת הכותרת — הקו נמשך מתחת ל„אהבה בונים.”, מימין לשמאל, אחרי
+   * שהשורה השנייה כבר התיישבה (~0.96s) ובהשהיה של ~560ms אחריה. אותה משיכה
+   * בדיוק כמו hero-rule שפותח את הבלוק: הרצף נסגר באותו מוטיב שבו נפתח.
+   * זהו הביט האחרון בכניסה — אחריו ה-Hero במנוחה.
+   *
+   * (פעימת ה-scale שהייתה כאן הוסרה: היא הייתה קופצת על הטקסט עצמו, וזה
+   * נקרא כאנימציית-ווב ולא כחתימה עריכתית. שני האפקטים יחד היו הצטברות.) */
+  .hero-build__stroke {
+    transform: scaleX(0);
+    animation: heroBuildStroke 560ms var(--ease-settle) 1520ms both;
   }
-  @keyframes heroBuildSettle {
-    0% {
-      transform: scale(0.94) translateY(2px);
-    }
-    55% {
-      transform: scale(1.035) translateY(0);
-    }
-    78% {
-      transform: scale(0.992);
-    }
-    100% {
-      transform: scale(1) translateY(0);
+  @keyframes heroBuildStroke {
+    to {
+      transform: scaleX(1);
     }
   }
 
@@ -1675,18 +1695,21 @@
     }
   }
 
-  /* (4) כניסת הכריכה — נחיתה מוצרית (76px מלמטה, scale 0.82, סיבוב 3D) מתיישבת
-   * לאורך ~1.35s. ל-LCP: הכריכה גלויה (opacity 1) מיד — הנחיתה היא transform
-   * בלבד, כך שה-LCP נמדד בזמן ציור התמונה (מוקדם) ולא בסוף האנימציה. */
+  /* (4) כניסת הכריכה — התיישבות בעומק, לא נחיתה דרמטית. הריחוק צומצם
+   * (104px→60px, scale 0.78→0.90, rotateY 14°→7°, rotateX 4.5°→2°) והמשך
+   * קוצר ל-1.05s: הספר „מתמקם” במקומו במקום לעוף אליו. המרחק הגדול קודם
+   * משך את העין אל *התנועה*; המרחק הקטן משאיר את העין על *העצם*.
+   * ל-LCP: הכריכה גלויה (opacity 1) מיד — ההתיישבות היא transform בלבד, כך
+   * שה-LCP נמדד בזמן ציור התמונה (מוקדם) ולא בסוף האנימציה. */
   .hero-book {
     transform-origin: center 62%;
-    animation: heroBookEnter 1450ms var(--ease-settle) 120ms both;
+    animation: heroBookEnter 1050ms var(--ease-settle) 120ms both;
   }
   @keyframes heroBookEnter {
     0% {
       opacity: 1;
-      transform: perspective(1100px) translateY(104px) scale(0.78) rotateY(14deg)
-        rotateX(4.5deg);
+      transform: perspective(1100px) translateY(60px) scale(0.9) rotateY(7deg)
+        rotateX(2deg);
     }
     100% {
       opacity: 1;
@@ -1694,10 +1717,12 @@
         rotateX(0deg);
     }
   }
-  /* צל הכריכה מתרחב ומתיישב יחד עם הנחיתה. */
+  /* הצל נבנה *עם* התנועה ולא אחריה: מתחיל כשהכריכה כבר בדרך למטה (380ms)
+     ומסיים ממש לפני שהיא נחה (1080ms מול 1170ms). צל שמופיע אחרי שהעצם עצר
+     נקרא כשכבה שנוספה; צל שנפרש תוך כדי נקרא כמשקל. */
   .hero-book__shadow {
     transform-origin: center;
-    animation: heroShadowSettle 820ms var(--ease-settle) 560ms both;
+    animation: heroShadowSettle 700ms var(--ease-settle) 380ms both;
   }
   @keyframes heroShadowSettle {
     from {
@@ -2364,12 +2389,15 @@
   .hero-rise-soft,
   .hero-build,
   .hero-rule,
+  .hero-build__stroke,
   .hero-book__shadow {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  .hero-rule {
+  .hero-rule,
+  .hero-build__stroke {
+    /* הקווים נשארים *מצוירים* — הם חלק מהעיצוב, לא מהתנועה. רק המשיכה בוטלה. */
     transform: scaleX(1) !important;
   }
   .book-cover:hover .book-cover__inner {
