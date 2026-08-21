@@ -172,12 +172,11 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
     await page.keyboard.press("Escape");
 
-    // הבחירה ב-Home חושפת רגע-זיהוי, וההמשך הוא קישור אמיתי לעמוד-המסע.
+    // בחירת מצב ב-Home *היא* הניווט: כרטיס אחד, לחיצה אחת, עמוד-המסע.
     const path = page.locator("#path");
     await path.scrollIntoViewIfNeeded();
-    await path.getByRole("radio", { name: /אני מחפש/ }).check({ force: true });
     await path.locator('a[href="/before-relationship"]').click();
-    await expect(page).toHaveURL(/\/before-relationship$/);
+    await page.waitForURL("**/before-relationship");
 
     // עמוד-המסע: כותרת אישית, פירורי-לחם, וטעימה מותאמת (Primary → contextual preview).
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(

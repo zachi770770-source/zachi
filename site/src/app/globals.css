@@ -394,24 +394,6 @@
     text-wrap: balance;
   }
 
-  /* בלוק „איפה זה פוגש אותך עכשיו?” — הבלוק הנבחר נכנס בעדינות (opacity/translate).
-     מצב הבסיס גלוי לחלוטין (opacity:1); זו אנימציית-כניסה בלבד, לא תנאי-נראוּת:
-     ב-reduced-motion / כשל-JS הבלוק פשוט מוצג מיד. (לא חוזרים על באג /preview.) */
-  @media (prefers-reduced-motion: no-preference) {
-    .path-panel:not([hidden]) {
-      animation: pathPanelIn 240ms var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)) both;
-    }
-  }
-  @keyframes pathPanelIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
   .type-quote {
     font-family: var(--font-quote);
     font-weight: 500;
@@ -769,23 +751,6 @@
   /* „איפה זה פוגש אותך עכשיו?” — בחירה (radiogroup נטיבי) + תגובה משותפת אחת
      מתחת לרשת ה-2×2, המתחלפת לפי המצב הנבחר. ללא JS: ה-radio נבחר נטיבית ו-
      :has(:checked) חושף את הפאנל המתאים. ארבעת קישורי-היעד קיימים תמיד ב-DOM. */
-  .path-panel {
-    display: none;
-  }
-  .path-choose:has(input[value="dating"]:checked) [data-stage="dating"],
-  .path-choose:has(input[value="building"]:checked) [data-stage="building"],
-  .path-choose:has(input[value="existing"]:checked) [data-stage="existing"],
-  .path-choose:has(input[value="breakup"]:checked) [data-stage="breakup"] {
-    display: block;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .path-choose:has(input[value="dating"]:checked) [data-stage="dating"],
-    .path-choose:has(input[value="building"]:checked) [data-stage="building"],
-    .path-choose:has(input[value="existing"]:checked) [data-stage="existing"],
-    .path-choose:has(input[value="breakup"]:checked) [data-stage="breakup"] {
-      animation: toolAccBody 260ms var(--ease-settle) both;
-    }
-  }
   /* ===== PHASE MOTION 3 — „איפה זה פוגש אותך עכשיו?” כמסע אחד =====
      ארבע התחנות מחוברות בקו-מסלול יחיד. ההתקדמות נגזרת *רק* מה-radio הקיים
      דרך `:has(:checked)` — בלי JS, בלי state, בלי שינוי בסמנטיקה או בכתובות.
@@ -802,8 +767,7 @@
   /* מובייל — מסלול אנכי הבנוי ממקטעים בין תחנות (ולא קו אחד על המכל): כך הקו
      נגמר בדיוק בתחנה האחרונה, בלי „זנב” תלוי-גובה מתחתיה. ::before = קו-בסיס
      שקט, ::after = מקטע שהושלם שנמשך ב-scaleY מעליו (סדר-הציור טבעי). */
-  .path-station:not(:last-child)::before,
-  .path-station:not(:last-child)::after {
+  .path-station:not(:last-child)::before {
     content: "";
     position: absolute;
     pointer-events: none;
@@ -816,21 +780,6 @@
   .path-station:not(:last-child)::before {
     background: var(--color-border-strong);
     opacity: 0.5;
-  }
-  .path-station:not(:last-child)::after {
-    background: var(--color-brand);
-    transform: scaleY(0);
-    transform-origin: 50% 0;
-    transition: transform var(--motion-panel) var(--ease-settle);
-  }
-  /* מקטע מושלם = התחנה שנבחרה נמצאת אחריו. */
-  .path-choose:has(input[value="building"]:checked) .path-station[data-index="0"]::after,
-  .path-choose:has(input[value="existing"]:checked) .path-station[data-index="0"]::after,
-  .path-choose:has(input[value="existing"]:checked) .path-station[data-index="1"]::after,
-  .path-choose:has(input[value="breakup"]:checked) .path-station[data-index="0"]::after,
-  .path-choose:has(input[value="breakup"]:checked) .path-station[data-index="1"]::after,
-  .path-choose:has(input[value="breakup"]:checked) .path-station[data-index="2"]::after {
-    transform: scaleY(1);
   }
   /* צומת התחנה — במרזב, מיושר לקו. ברירת המחדל „שקטה”: טבעת בלבד. */
   .path-station__node {
@@ -885,71 +834,28 @@
       margin-inline-start: -0.375rem;
     }
   }
-  /* ההתקדמות לפי התחנה שנבחרה: 4 תחנות ⇒ 3 מקטעים. */
-  .path-choose:has(input[value="dating"]:checked) .path-stations {
-    --journey-progress: 0.02;
-  }
-  .path-choose:has(input[value="building"]:checked) .path-stations {
-    --journey-progress: 0.3333;
-  }
-  .path-choose:has(input[value="existing"]:checked) .path-stations {
-    --journey-progress: 0.6667;
-  }
-  .path-choose:has(input[value="breakup"]:checked) .path-stations {
-    --journey-progress: 1;
-  }
-  /* „מאחוריי” — תחנות שכבר עברנו מקבלות מילוי מלא; מה שלפנינו נשאר שקט.
-     נכתב במפורש לכל בחירה (כמו שאר `.path-choose`), כי CSS אינו יודע לבחור
-     „כל האחים שלפני האח הנבחר”. */
-  .path-choose:has(input[value="dating"]:checked) .path-station[data-index="0"] .path-station__node,
-  .path-choose:has(input[value="building"]:checked) .path-station[data-index="0"] .path-station__node,
-  .path-choose:has(input[value="building"]:checked) .path-station[data-index="1"] .path-station__node,
-  .path-choose:has(input[value="existing"]:checked) .path-station[data-index="0"] .path-station__node,
-  .path-choose:has(input[value="existing"]:checked) .path-station[data-index="1"] .path-station__node,
-  .path-choose:has(input[value="existing"]:checked) .path-station[data-index="2"] .path-station__node,
-  .path-choose:has(input[value="breakup"]:checked) .path-station__node {
-    border-color: var(--color-brand);
-    background: var(--color-brand);
-  }
-  /* התחנה שנבחרה = העוגן: הצומת גדל מעט ומקבל הילה רכה. */
-  .path-station:has(input:checked) .path-station__node {
-    transform: scale(1.35);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand) 18%, transparent);
-  }
   /* ריחוף/פוקוס — רמז מקדים בלבד, בלי לטעון שהתחנה נבחרה. */
+  /* ריחוף/פוקוס — תצוגה מקדימה של „לכאן אני נכנס”. אין כאן „נבחר”: בעמוד
+     הבית עוד לא הלכנו לשום מקום, וההתקדמות האמיתית חיה בעמוד-היעד. */
   @media (hover: hover) {
     .path-station:hover .path-station__node {
       border-color: var(--color-brand);
+      background: var(--color-brand);
     }
   }
-  .path-station:has(input:focus-visible) .path-station__node {
+  .path-station:focus-visible .path-station__node {
     border-color: var(--color-brand);
+    background: var(--color-brand);
   }
   /* reduced-motion: המסלול והצמתים מגיעים למצבם הסופי מיד — אותו מידע בדיוק,
      בלי המשיכה. הפרויקט אינו מאפס transitions גלובלית, ולכן זה נכתב במפורש. */
   @media (prefers-reduced-motion: reduce) {
     .path-stations::after,
-    .path-station:not(:last-child)::after,
     .path-station__node {
       transition: none;
     }
   }
 
-  /* „אחרי פרידה” הוא *שער מעבר*, לא תחנה רביעית (ראו stationOrder ב-
-     content/stations.ts). לכן בחירתו אינה „משלימה” את המסלול: הקו אינו נמשך,
-     והצומת שלה מסומן כטבעת-שער ולא כתחנה שעברנו. בלי זה עמוד הבית היה סותר את
-     מחוון-המיקום שבעמוד-היעד. */
-  .path-choose:has(input[value="breakup"]:checked) .path-stations {
-    --journey-progress: 0;
-  }
-  .path-choose:has(input[value="breakup"]:checked) .path-station__node {
-    border-color: var(--color-border-strong);
-    background: var(--color-background);
-  }
-  .path-choose:has(input[value="breakup"]:checked) .path-station[data-index="3"] .path-station__node {
-    border-color: var(--color-brand);
-    background: var(--color-background);
-  }
 
   /* ===== מחוון-מיקום בעמוד-התחנה (JourneyPosition) =====
      אותה שפה חזותית כמו מסלול-הבית — כי עכשיו היא אומרת את אותו הדבר: איפה אני
@@ -1006,7 +912,8 @@
 
   /* החץ של הכרטיס הנבחר — מודגש מעבר לצבע (מילוי מלא), כדי שהמצב הנבחר לא
      יסומן בצבע בלבד. */
-  .path-choose label:has(input:checked) .path-arrow {
+  .path-station:hover .path-arrow,
+  .path-station:focus-visible .path-arrow {
     background: var(--color-brand);
     color: var(--color-brand-foreground);
   }

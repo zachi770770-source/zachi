@@ -83,9 +83,8 @@ test("home: four real navigation cards linking to the four journey pages", async
   ]) {
     await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
-  // תגובה משותפת אחת מתחת לרשת — ארבעה פאנלים ב-DOM, מוסתרים עד בחירה.
-  await expect(page.locator(".path-panel")).toHaveCount(4);
-  await expect(page.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
+  // ארבעה כרטיסי-מצב, כל אחד קישור יחיד ליעד שלו — בלי שלב בחירה ביניים.
+  await expect(path.locator(".path-station")).toHaveCount(4);
   await ctx.close();
 });
 

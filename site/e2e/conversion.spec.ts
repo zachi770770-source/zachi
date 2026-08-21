@@ -53,9 +53,8 @@ test("home path selector: four real navigation cards to the journey pages (SEO)"
   ]) {
     await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
-  // תגובה משותפת אחת מתחת לרשת — ארבעה פאנלים ב-DOM, מוסתרים עד בחירה.
-  await expect(path.locator(".path-panel")).toHaveCount(4);
-  await expect(path.getByText("גם הדרך שבה בוחרים", { exact: false })).toBeHidden();
+  // ארבעה כרטיסי-מצב, כל אחד קישור יחיד ליעד שלו — בלי שלב בחירה ביניים.
+  await expect(path.locator(".path-station")).toHaveCount(4);
 });
 
 test("home: the repeated sample teaser was removed; /preview is reached from the hero action", async ({
