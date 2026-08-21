@@ -10,34 +10,27 @@ import { authorNote } from "@/content/homeStory";
  * רצועת-אמון שתוכנה העיקרי היה גילוי נאות — כלומר הדבר היחיד שנאמר על צחי חן
  * היה מה שהוא *אינו*. כאן הוא אומר בעצמו למה כתב את הספר.
  *
- * הטקסט הוא `authorContent.fullBio` כלשונו — נוסח מאושר ששמור מפני ייחוס
- * הכשרה/מקצוע טיפולי (ראו author.test.ts ו-`authorNote` ב-homeStory).
- * משפט-הגבול נשמר מרצועת-האמון שהוסרה, אך עכשיו הוא יושב במקום הנכון: לצד
- * האדם, לא במקומו.
+ * הביט נשאר קצר בכוונה: כותרת, שתי שורות, חתימה, קישור, גבול. ניסיון קודם
+ * העמיס כאן פסקה שמתארת מי הקוראים („רווקים חוששים…”) — זה קרא כניתוח-קהל,
+ * הזמין תחושה של אבחון, ותפס 599 פיקסלים כדי לומר פחות. הטקסט המאושר כלשונו
+ * ב-`authorNote` (ראו ההערה שם), ורק אחריו מגיע הטיעון על הספר.
  */
 export function AuthorNote() {
   return (
-    <section aria-labelledby="author-note-heading" className="py-8 sm:py-14">
+    <section aria-labelledby="author-note-heading" className="py-6 sm:py-10">
       <Container>
-        <div className="reveal mx-auto max-w-2xl rounded-2xl border border-border bg-surface p-6 sm:p-9">
-          {/* בלי קיקר: „מי כתב את זה” והכותרת „למה כתבתי את…” תייגו את אותו
-              דבר בדיוק, בזו אחר זו. הכותרת מספיקה. */}
+        <div className="reveal mx-auto max-w-2xl rounded-2xl border border-border bg-surface px-6 py-6 sm:px-9 sm:py-7">
           <h2
             id="author-note-heading"
-            className="font-serif text-[clamp(1.35rem,2.4vw,1.75rem)] font-bold leading-snug text-foreground [text-wrap:balance]"
+            className="font-serif text-[clamp(1.25rem,2.1vw,1.55rem)] font-bold leading-snug text-foreground [text-wrap:balance]"
           >
             {authorNote.title}
           </h2>
-          {authorNote.body.map((paragraph) => (
-            <p
-              key={paragraph}
-              className="mt-4 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.7] text-foreground/90 [text-wrap:pretty]"
-            >
-              {paragraph}
-            </p>
-          ))}
+          <p className="mt-3 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.7] text-foreground/90 [text-wrap:pretty]">
+            {authorNote.body}
+          </p>
 
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-border pt-5">
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border pt-4">
             <div className="flex items-center gap-3">
               <SignatureMark />
               <span className="font-serif text-[16px] font-semibold text-foreground">
@@ -57,7 +50,7 @@ export function AuthorNote() {
           </div>
 
           {/* הגבול נשאר מפורש — מה שהספר אינו, במקום שבו הוא רלוונטי. */}
-          <p className="mt-4 text-[13.5px] leading-snug text-foreground-muted">
+          <p className="mt-3 text-[13.5px] leading-snug text-foreground-muted">
             {authorNote.boundary}
           </p>
         </div>

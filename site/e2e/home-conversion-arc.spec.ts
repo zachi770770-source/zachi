@@ -60,15 +60,17 @@ test.describe("home conversion arc", () => {
     // שני הצדדים מוצגים זה מול זה — האתר כנקודות כניסה, הספר כמסע לפי סדר.
     await expect(why.getByText(whyTheBook.site.label, { exact: true })).toBeVisible();
     await expect(why.getByText(whyTheBook.book.label, { exact: true })).toBeVisible();
+    await expect(why.getByText(whyTheBook.site.line)).toBeVisible();
     await expect(why.locator("ol > li")).toHaveCount(whyTheBook.book.lines.length);
+    // הא-סימטריה היא הטיעון: האתר תופס שורה, הספר תופס רצף. אם צד-האתר יגדל
+    // חזרה לרשימה משלו, ההשוואה שוב תיראה כשני דברים שקולים.
+    await expect(why.locator("ul")).toHaveCount(0);
   });
 
   test("the author is a reason to trust, and the boundary line survives", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const note = page.locator("[aria-labelledby='author-note-heading']");
-    for (const paragraph of authorNote.body) {
-      await expect(note.getByText(paragraph)).toBeVisible();
-    }
+    await expect(note.getByText(authorNote.body)).toBeVisible();
     await expect(note.getByText(authorNote.signature, { exact: true })).toBeVisible();
     // הגבול לא נעלם עם רצועת-האמון שהוסרה — הוא עבר לצד האדם.
     await expect(note.getByText(authorNote.boundary)).toBeVisible();

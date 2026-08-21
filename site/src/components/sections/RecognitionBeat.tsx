@@ -15,7 +15,7 @@ import { recognition } from "@/content/homeStory";
  */
 export function RecognitionBeat() {
   return (
-    <section aria-labelledby="recognition-heading" className="py-8 sm:py-14">
+    <section aria-labelledby="recognition-heading" className="py-6 sm:py-10">
       <Container>
         <div className="reveal mx-auto max-w-2xl text-center">
           <h2
