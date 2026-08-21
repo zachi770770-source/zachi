@@ -1125,75 +1125,6 @@
   }
 }
 
-/* ---- מעבר-אור יחיד על פני הכריכה (opt-in דרך <BookCover sheen />) ----
- * הכוונה: לרגע אחד האור תופס כריכה מודפסת. *לא* נצנוץ, לא ברק, ולא „מוצר
- * מסתובב”. שלושה כללים מחזיקים את ההבדל:
- *   1. הפס רחב ורך (מחצית מרוחב הכריכה, מעברים הדרגתיים) — פס צר ובהיר הוא
- *      בדיוק מה שנקרא כנצנוץ.
- *   2. שיא האטימות 0.14 בלבן חמים (גוון הנייר), לא בלבן טהור.
- *   3. פעם אחת, בכניסה בלבד. אין לולאה, אין hover, אין חזרה בגלילה.
- * נחתך אל הכריכה (overflow) ויושב מעל התמונה, כך שהוא קורא כהשתקפות על
- * המשטח ולא כשכבה מרחפת. transform+opacity בלבד ⇒ מרוכב, ללא reflow. */
-.book-cover__sheen {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  overflow: hidden;
-  border-radius: 4px 10px 10px 4px;
-  pointer-events: none;
-  opacity: 0;
-}
-/* מאפיינים *פיזיים* במכוון (left/translateX ולא inset-inline-start): לאור אין
- * כיוון קריאה. בהקשר RTL הלוגי מתהפך, כך שפס שאמור לחצות את הכריכה משמאל
- * לימין היה מתחיל מחוץ לקצה הימני ונע ימינה — כלומר לא חוצה אותה כלל. */
-.book-cover__sheen-band {
-  position: absolute;
-  inset-block: -30%;
-  left: -60%;
-  width: 55%;
-  display: block;
-  transform: translateX(0) rotate(8deg);
-  /* מעברים הדרגתיים לכל האורך ⇒ הפס רך מעצמו, בלי filter: blur (שהוא ריכוך
-     יקר שמצייר מחדש בכל פריים). */
-  background: linear-gradient(
-    90deg,
-    rgba(255, 252, 246, 0) 0%,
-    rgba(255, 252, 246, 0.06) 24%,
-    rgba(255, 252, 246, 0.22) 50%,
-    rgba(255, 252, 246, 0.06) 76%,
-    rgba(255, 252, 246, 0) 100%
-  );
-}
-@media (prefers-reduced-motion: no-preference) {
-  /* מעטפת אטימות נפרדת מהתנועה: האור *נכנס ויוצא* במקום להופיע ולהיעלם
-     בקצוות הכריכה. 900ms→1600ms — תופס את הכריכה בדיוק כשהיא מתיישבת. */
-  .book-cover__sheen {
-    animation: coverSheenFade 700ms linear 900ms both;
-  }
-  .book-cover__sheen-band {
-    animation: coverSheenSweep 700ms cubic-bezier(0.4, 0, 0.5, 1) 900ms both;
-    will-change: transform;
-  }
-  @keyframes coverSheenFade {
-    0%,
-    100% {
-      opacity: 0;
-    }
-    22%,
-    72% {
-      opacity: 1;
-    }
-  }
-  @keyframes coverSheenSweep {
-    from {
-      transform: translateX(0) rotate(8deg);
-    }
-    to {
-      transform: translateX(320%) rotate(8deg);
-    }
-  }
-}
-
 /* PHASE MOTION 4 (C) — הטיה מונעת-סמן על הכריכה (±4° סביב זווית הבסיס).
  * ה-vars נקבעים ב-BookTilt (דסקטופ + תנועה בלבד); כאן רק הטרנספורם.
  * בתוך .book-tilt ההטיה מחליפה את יישור ה-hover הכללי (בלי „קפיצת” lift). */
@@ -2468,11 +2399,6 @@
   .hero-build__stroke {
     /* הקווים נשארים *מצוירים* — הם חלק מהעיצוב, לא מהתנועה. רק המשיכה בוטלה. */
     transform: scaleX(1) !important;
-  }
-  /* מעבר-האור הוא תנועה טהורה: בלי אנימציה אין לו מה למסור, ופס אור סטטי על
-     הכריכה הוא רק שאריות. לכן הוא לא מרונדר כלל. */
-  .book-cover__sheen {
-    display: none !important;
   }
   .book-cover:hover .book-cover__inner {
     transform: rotateY(9deg) rotateX(1.2deg);

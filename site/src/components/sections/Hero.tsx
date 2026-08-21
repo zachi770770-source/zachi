@@ -205,7 +205,7 @@ export function Hero() {
                       className="hero-book__link block w-full rounded-[6px] focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-brand"
                     >
                       <div data-vt-book-source className="w-full">
-                        <BookCover priority sheen className="w-full" />
+                        <BookCover priority className="w-full" />
                       </div>
                     </BookLink>
                   </BookTilt>
