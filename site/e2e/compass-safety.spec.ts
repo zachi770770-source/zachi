@@ -78,8 +78,11 @@ test.describe("Compass safety gate", () => {
       await ask(page, DANGER);
 
       // (5) נראה בפועל: מוכרז כ-alert, גלוי, ובתוך אזור-הצפייה.
-      const alert = page.getByRole("alert");
+      // ממוקד לכרטיס עצמו: ל-Next יש route-announcer משלו עם role="alert",
+      // ו-getByRole("alert") לבדו היה תופס גם אותו.
+      const alert = page.locator('.stuck-answer[role="alert"]');
       await expect(alert).toBeVisible();
+      await expect(alert).toHaveAttribute("data-safety", /critical|high/);
       await expect(alert).toContainText("הבטיחות שלכם");
       await expect(alert).toBeInViewport();
 
@@ -99,7 +102,7 @@ test.describe("Compass safety gate", () => {
   test("the typed question is cleared and no answer card is duplicated", async ({ page }) => {
     await availabilityOk(page);
     await ask(page, DANGER);
-    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.locator('.stuck-answer[role="alert"]')).toBeVisible();
     // תיבת השאלה מתרוקנת (כמו בתשובה רגילה) — אין „הקלד שוב על גבי” בטעות.
     await expect(page.locator(BOX)).toHaveValue("");
     // כרטיס-תוצאה יחיד בלבד.
