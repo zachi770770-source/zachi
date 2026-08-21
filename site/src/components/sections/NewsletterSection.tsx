@@ -25,17 +25,17 @@ export function NewsletterSection() {
     >
       <Container>
         <div className="reveal mx-auto max-w-3xl rounded-2xl bg-secondary-muted px-6 py-9 text-center sm:px-12 sm:py-12">
-          <span className="kicker justify-center">
-            {siteConfig.amazon.availableLabel}
-          </span>
+          {/* הכותרת פותחת, לא הקיקר: קודם לכן תווית-מלאי באותיות רחבות הקדימה
+              את המשפט הרגשי, וההצמדה הזו הפכה את רגע-הפעולה למקטע נוסף במקום
+              למסקנה. עובדת הזמינות ירדה לשורת-המידע שמתחת, שם היא מידע. */}
           <h2
             id="get-the-book-heading"
-            className="mx-auto mt-2 max-w-[24ch] font-serif text-[clamp(1.6rem,3vw,2.5rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+            className="mx-auto max-w-[24ch] font-serif text-[clamp(1.6rem,3vw,2.5rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
           >
             {closing.title}
           </h2>
           <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-foreground-muted">
-            {siteConfig.amazon.editionLabel}: קריאה מיידית לאחר הרכישה,
+            {siteConfig.amazon.availableLabel}. קריאה מיידית לאחר הרכישה,
             באפליקציית Kindle או בכל מכשיר תואם.
           </p>
           <div className="mt-6 flex justify-center">

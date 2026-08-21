@@ -10,25 +10,32 @@ import { authorNote } from "@/content/homeStory";
  * רצועת-אמון שתוכנה העיקרי היה גילוי נאות — כלומר הדבר היחיד שנאמר על צחי חן
  * היה מה שהוא *אינו*. כאן הוא אומר בעצמו למה כתב את הספר.
  *
- * הטקסט הוא `authorContent.homeTeaser` כלשונו — נוסח מאושר ששמור מפני ייחוס
- * הכשרה/מקצוע טיפולי (ראו author.test.ts). משפט-הגבול נשמר מרצועת-האמון
- * שהוסרה, אך עכשיו הוא יושב במקום הנכון: לצד האדם, לא במקומו.
+ * הטקסט הוא `authorContent.fullBio` כלשונו — נוסח מאושר ששמור מפני ייחוס
+ * הכשרה/מקצוע טיפולי (ראו author.test.ts ו-`authorNote` ב-homeStory).
+ * משפט-הגבול נשמר מרצועת-האמון שהוסרה, אך עכשיו הוא יושב במקום הנכון: לצד
+ * האדם, לא במקומו.
  */
 export function AuthorNote() {
   return (
     <section aria-labelledby="author-note-heading" className="py-8 sm:py-14">
       <Container>
         <div className="reveal mx-auto max-w-2xl rounded-2xl border border-border bg-surface p-6 sm:p-9">
-          <span className="kicker">{authorNote.eyebrow}</span>
+          {/* בלי קיקר: „מי כתב את זה” והכותרת „למה כתבתי את…” תייגו את אותו
+              דבר בדיוק, בזו אחר זו. הכותרת מספיקה. */}
           <h2
             id="author-note-heading"
-            className="mt-3 font-serif text-[clamp(1.35rem,2.4vw,1.75rem)] font-bold leading-snug text-foreground [text-wrap:balance]"
+            className="font-serif text-[clamp(1.35rem,2.4vw,1.75rem)] font-bold leading-snug text-foreground [text-wrap:balance]"
           >
             {authorNote.title}
           </h2>
-          <p className="mt-4 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.75] text-foreground/90 [text-wrap:pretty]">
-            {authorNote.body}
-          </p>
+          {authorNote.body.map((paragraph) => (
+            <p
+              key={paragraph}
+              className="mt-4 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.7] text-foreground/90 [text-wrap:pretty]"
+            >
+              {paragraph}
+            </p>
+          ))}
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-border pt-5">
             <div className="flex items-center gap-3">

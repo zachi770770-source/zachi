@@ -66,7 +66,9 @@ test.describe("home conversion arc", () => {
   test("the author is a reason to trust, and the boundary line survives", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const note = page.locator("[aria-labelledby='author-note-heading']");
-    await expect(note.getByText(authorNote.body)).toBeVisible();
+    for (const paragraph of authorNote.body) {
+      await expect(note.getByText(paragraph)).toBeVisible();
+    }
     await expect(note.getByText(authorNote.signature, { exact: true })).toBeVisible();
     // הגבול לא נעלם עם רצועת-האמון שהוסרה — הוא עבר לצד האדם.
     await expect(note.getByText(authorNote.boundary)).toBeVisible();

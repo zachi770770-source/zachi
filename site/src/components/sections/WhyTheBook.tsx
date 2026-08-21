@@ -10,6 +10,10 @@ import { whyTheBook } from "@/content/homeStory";
  * מוצגים זה מול זה כדי שההבדל יהיה נראה, לא מוסבר.
  *
  * הרשימה של „בספר” היא תוכן-העניינים המאושר — לא הבטחה ולא רשימת פיצ׳רים.
+ *
+ * אין כאן משפט-סגירה אחרי הכרטיסיות: הוא אמר בדיוק את מה שהכותרת אומרת, ושתי
+ * הכרטיסיות כבר מוכיחות אותו. שתי שורות-הסיכום שמתחת לרשימות הן הניגוד עצמו
+ * („נקודות כניסה” מול „אותו מסע לפי סדר”), ולכן מסקנה נוספת אחריהן מיותרת.
  */
 export function WhyTheBook() {
   return (
@@ -75,10 +79,6 @@ export function WhyTheBook() {
             </p>
           </div>
         </div>
-
-        <p className="reveal mx-auto mt-6 max-w-2xl text-center font-serif text-[clamp(1.05rem,1.7vw,1.3rem)] font-semibold leading-snug text-foreground [text-wrap:balance]">
-          {whyTheBook.closing}
-        </p>
       </Container>
     </section>
   );

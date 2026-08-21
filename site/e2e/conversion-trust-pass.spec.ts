@@ -65,11 +65,15 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     await ctx.close();
   });
 
-  test("#2 Trust: fact-based band exists with explicit boundaries and NO fake social proof", async ({
+  // רצועת-האמון (`trust-heading`) הוסרה: תוכנה העיקרי היה גילוי-נאות, ולכן
+  // הדבר היחיד שעמוד הבית אמר על המחבר היה מה שהוא *אינו*. ביט-המחבר החליף
+  // אותה. הדרישה לא השתנתה — גבול מפורש, קישור אמיתי, ואפס social-proof מזויף —
+  // רק המקום שבו היא מתקיימת.
+  test("#2 Trust: the author beat carries explicit boundaries and NO fake social proof", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
-    const trust = page.locator('[aria-labelledby="trust-heading"]');
+    const trust = page.locator('[aria-labelledby="author-note-heading"]');
     await expect(trust).toHaveCount(1);
     await trust.scrollIntoViewIfNeeded();
     await expect(trust).toBeVisible();
@@ -104,15 +108,17 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     await expect(page.locator("body")).not.toContainText("מהדורה ישירה · בקרוב");
   });
 
-  test("#7 Mobile: trust band is a compact section, not another full screen", async ({ browser }) => {
+  test("#7 Mobile: the trust beat never eats a whole screen", async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
-    const trust = page.locator('[aria-labelledby="trust-heading"]');
+    const trust = page.locator('[aria-labelledby="author-note-heading"]');
     await trust.scrollIntoViewIfNeeded();
     const box = await trust.boundingBox();
-    // רצועה דחוסה — שורה אחת נמוכה, לא section (יעד ≤180px; סף בדיקה מרווח קל).
-    expect(box!.height, "trust band should stay a slim strip on mobile").toBeLessThan(200);
+    // הדרישה הישנה („רצועה ≤180px”) נבעה מכך שהאמון היה גילוי-נאות בשורה אחת.
+    // עכשיו זה ביט אמיתי, ולכן הגבול הוא אחר — אבל עדיין גבול: היכרות עם המחבר
+    // לא מקבלת מסך מלא במובייל, אחרת היא דוחקת את הטיעון והרכישה מתחתיה.
+    expect(box!.height, "the author beat must stay under one mobile viewport").toBeLessThan(844);
     await ctx.close();
   });
 });

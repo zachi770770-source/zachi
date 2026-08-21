@@ -9,16 +9,18 @@ import { recognition } from "@/content/homeStory";
  *
  * הציטוט הוא טקסט אמיתי מתוך הספר (מילה במילה), ולא קופי שיווקי שנכתב עליו.
  * זה מה שהופך את הביט לאמין: המבקר פוגש את הכתיבה עצמה לפני שהוא מתבקש לקנות.
+ *
+ * בלי קיקר בכוונה — ראו את ההערה ב-`recognition`. המקטע ממשיך את ה-Hero במקום
+ * להכריז על עצמו, ומקטע-התחנות שאחריו הוא זה שנושא את „רגע של זיהוי”.
  */
 export function RecognitionBeat() {
   return (
     <section aria-labelledby="recognition-heading" className="py-8 sm:py-14">
       <Container>
         <div className="reveal mx-auto max-w-2xl text-center">
-          <span className="kicker justify-center">{recognition.eyebrow}</span>
           <h2
             id="recognition-heading"
-            className="mt-4 font-serif text-[clamp(1.6rem,3.4vw,2.5rem)] font-bold leading-[1.15] tracking-[-0.01em] text-foreground [text-wrap:balance]"
+            className="font-serif text-[clamp(1.6rem,3.4vw,2.5rem)] font-bold leading-[1.15] tracking-[-0.01em] text-foreground [text-wrap:balance]"
           >
             {recognition.line}
           </h2>
