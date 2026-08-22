@@ -8,7 +8,11 @@ type SitemapRoute = {
   path: string;
   priority: number;
   changeFrequency: "weekly" | "monthly" | "yearly";
-  /** ISO אמיתי כשקיים תאריך-תוכן; אחרת נופל לזמן ה-build (רעננות הפריסה). */
+  /**
+   * ISO של תאריך-התוכן האמיתי, כשקיים לו מקור אמת במאגר (מדריכים ועמודי-מושג
+   * נושאים `datePublished`). כשאין תאריך כזה — השדה נשאר undefined ו-`lastmod`
+   * *אינו* נפלט כלל. ראו את ההערה ב-`sitemap()`.
+   */
   lastModified?: string;
 };
 
@@ -49,13 +53,24 @@ const staticRoutes: SitemapRoute[] = [
   })),
 ];
 
+/**
+ * `lastmod` נפלט אך ורק כשיש לו מקור-אמת בתוכן.
+ *
+ * קודם לכן עמודים ללא תאריך-תוכן נפלו לזמן ה-build, כלומר ה-`lastmod` שלהם
+ * השתנה בכל פריסה גם כשהתוכן לא נגע. זהו אות-רעננות שקרי: הוא סותר את
+ * `changefreq` שהעמודים עצמם מצהירים (עמודי המדיניות מצהירים `yearly` בזמן
+ * שהתאריך התחלף מדי יום), ומנוע שמזהה תאריכים שמתחלפים ללא שינוי תוכן מפסיק
+ * לתת אמון ב-`lastmod` של האתר כולו.
+ *
+ * פרוטוקול ה-Sitemap מגדיר את `lastmod` כאופציונלי, וההנחיה המפורשת היא
+ * להשמיט אותו כשאין תאריך מדויק — לא לנחש. לכן: המדריכים ועמודי-המושג ממשיכים
+ * לשאת את `datePublished` האמיתי שלהם, ושאר העמודים אינם נושאים `lastmod` כלל.
+ * לא הומצא כאן שום תאריך, ולא נמחק שום תאריך אמיתי.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
-  // זמן ה-build משמש כברירת-מחדל לעמודים ללא תאריך-תוכן ייעודי (עמודי שיווק
-  // המתעדכנים בין פריסות). עמודי-תוכן מתוארכים (מדריכים) נושאים lastmod אמיתי.
-  const buildTime = new Date();
   return staticRoutes.map((route) => ({
     url: `${siteConfig.url}${route.path}`,
-    lastModified: route.lastModified ? new Date(route.lastModified) : buildTime,
+    ...(route.lastModified ? { lastModified: new Date(route.lastModified) } : {}),
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
