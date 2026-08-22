@@ -20,10 +20,18 @@ function defaultMinScore(): number {
 }
 /** מקסימום קטעים בתשובה — לעולם לא מחזירים יותר. */
 const MAX_RESULTS = 5;
-/** מקסימום קטעים מאותו פרק — כדי לא להחזיר בפועל פרק שלם. */
-const MAX_PER_CHAPTER = 2;
-/** כמה שורות למשוך לפני סינון/הגבלה. */
-const FETCH_LIMIT = 12;
+/**
+ * כמה שורות למשוך לפני הדירוג-מחדש. הורחב מ-12 ל-30 כדי שלמדרג יהיה ממה
+ * לבחור; מספר הקטעים שנשלחים למודל *לא* השתנה (MAX_RESULTS=5). זו הרחבה של
+ * הבחירה, לא הגדלת הרעש.
+ */
+const FETCH_LIMIT = 30;
+/**
+ * חיזוק כשמונח מהשאלה מופיע בשם הפרק/הסעיף. כותרת היא ראיה חזקה בהרבה
+ * ממופע מקרי בגוף הטקסט. מוגבל לשני מונחים כדי שלא יהפוך לדומיננטי.
+ */
+const TITLE_BOOST_PER_HIT = 0.25;
+const TITLE_BOOST_MAX_HITS = 2;
 
 /**
  * מילות פונקציה/שאלה עבריות שאינן נחשבות מונחי תוכן — מוסרות לפני בניית
@@ -53,18 +61,62 @@ const HEBREW_STOPWORDS_N = new Set([...HEBREW_STOPWORDS].map(normWord));
  * מחזיר מחרוזת ריקה כשאין מונחי תוכן — אז החיפוש מחזיר `matched:false`.
  */
 export function buildTsQuery(question: string): string {
+  const { original, derived } = splitQueryTerms(question);
+  return [...original, ...derived].join(" | ");
+}
+
+/**
+ * מפריד את מונחי השאלה לשתי קבוצות: מה שהמשתמש *כתב בפועל* (`original`), ומה
+ * שנגזר ממנו בהסרת תחילית (`derived`). ההפרדה נחוצה כי לשתי הקבוצות אין אותה
+ * מהימנות — ראו `gateDerivedTerms`.
+ */
+export function splitQueryTerms(question: string): { original: string[]; derived: string[] } {
   const seen = new Set<string>();
-  const terms: string[] = [];
+  const original: string[] = [];
+  const derived: string[] = [];
   for (const raw of tokenize(question)) {
     const n = normWord(raw);
     if (n.length < 2 || HEBREW_STOPWORDS_N.has(n)) continue;
     for (const v of expandWord(raw)) {
       if (v.length < 2 || HEBREW_STOPWORDS_N.has(v) || seen.has(v)) continue;
       seen.add(v);
-      terms.push(v);
+      (v === n ? original : derived).push(v);
     }
   }
-  return terms.join(" | ");
+  return { original, derived };
+}
+
+/**
+ * שיעור הקטעים שמעליו מונח *נגזר* נחשב גנרי מכדי להיות ראיה. נמדד מול מערך
+ * הבדיקה: ב-12%–25% התוצאה זהה (recall 74%, 3/8 התאמות-שווא), ולכן הבחירה
+ * אינה רגישה ו-20% הוא אמצע בטוח.
+ */
+const GENERIC_DERIVED_DF_RATIO = 0.2;
+
+/**
+ * מסנן מונחים נגזרים שהם „חברים כוזבים”.
+ *
+ * הבעיה שנמדדה: הסרת תחילית הופכת „בקשה” ל„קשה”. „בקשה” מופיע ב-15 קטעים,
+ * „קשה” ב-96 (25% מהספר) — ולכן השאלה „איך מגישים בקשה לויזה?” תפסה קטעים על
+ * קושי בזוגיות. הנגזרת קיבלה בדיוק אותו משקל כמו מילה שהמשתמש באמת כתב.
+ *
+ * הכלל כאן דטרמיניסטי ונגזר מהקורפוס עצמו — לא מילון ידני: מונח נגזר מושמט רק
+ * כאשר *שני* התנאים מתקיימים — הוא גנרי בספר (DF מעל הסף), **וגם** לפחות מונח
+ * מקורי אחד כבר מאומת בקורפוס. התנאי השני הוא הבטיחות: אם שום מילה שהמשתמש
+ * כתב אינה מופיעה בספר, הנגזרות הן כל מה שיש, והן נשמרות. כך הסינון לא יכול
+ * למחוק recall — הוא רק מסיר רעש כשכבר יש אות אמיתי.
+ */
+export function gateDerivedTerms(
+  original: string[],
+  derived: string[],
+  df: Map<string, number>,
+  totalChunks: number
+): string[] {
+  if (!derived.length) return [];
+  const anyOriginalAttested = original.some((t) => (df.get(t) ?? 0) > 0);
+  if (!anyOriginalAttested) return derived;
+  const cap = GENERIC_DERIVED_DF_RATIO * totalChunks;
+  return derived.filter((t) => (df.get(t) ?? 0) <= cap);
 }
 
 type Row = {
@@ -107,10 +159,33 @@ export async function searchCompass(
   );
   const bookVersion =
     (versionRes.rows[0] as { version?: string } | undefined)?.version ?? null;
-  if (!bookVersion) return { matched: false, bookVersion: null, results: [] };
+  if (!bookVersion) return { matched: false, bookVersion, results: [] };
 
-  // בונים tsquery מסוג OR ממונחי התוכן; ללא מונחים → אין התאמה.
-  const tsQuery = buildTsQuery(q);
+  const { original, derived } = splitQueryTerms(q);
+  if (!original.length && !derived.length) {
+    return { matched: false, bookVersion, results: [] };
+  }
+
+  // שאילתה זולה אחת שמחזירה גם את מספר הקטעים הפעילים וגם את ה-DF של כל מונח,
+  // כדי לסנן נגזרות-רעש (ראו gateDerivedTerms). סיבוב-הלוך-חזור אחד נוסף.
+  const stats = await db.query(
+    `select t,
+            (select count(*) from compass_book_sections s
+              where s.is_active and s.book_version = $2
+                and s.search_tsv @@ to_tsquery('simple', t)) as df,
+            (select count(*) from compass_book_sections s2
+              where s2.is_active and s2.book_version = $2) as total
+       from unnest($1::text[]) t`,
+    [[...new Set([...original, ...derived])], bookVersion]
+  );
+  const df = new Map<string, number>();
+  let totalChunks = 0;
+  for (const row of stats.rows as Array<{ t: string; df: number | string; total: number | string }>) {
+    df.set(row.t, Number(row.df));
+    totalChunks = Number(row.total);
+  }
+
+  const tsQuery = [...original, ...gateDerivedTerms(original, derived, df, totalChunks)].join(" | ");
   if (!tsQuery) return { matched: false, bookVersion, results: [] };
 
   // דירוג ממושקל ומנורמל ל-0..1 (דגל 32 = rank/(rank+1)).
@@ -125,24 +200,65 @@ export async function searchCompass(
     [tsQuery, bookVersion, FETCH_LIMIT]
   );
 
-  const perChapter = new Map<number, number>();
-  const results: CompassMatch[] = [];
-  for (const row of res.rows as Row[]) {
-    const score = Number(row.score);
-    if (!Number.isFinite(score) || score < minScore) continue;
-    const seen = perChapter.get(row.chapter_number) ?? 0;
-    if (seen >= MAX_PER_CHAPTER) continue;
-    perChapter.set(row.chapter_number, seen + 1);
-    results.push({
-      chapterNumber: row.chapter_number,
-      chapterName: row.chapter_name,
-      sectionName: row.section_name,
-      content: row.content,
-      score: Number(score.toFixed(4)),
-    });
-    if (results.length >= MAX_RESULTS) break;
-  }
-
+  const results = rerank(res.rows as Row[], q, minScore);
   if (results.length === 0) return { matched: false, bookVersion, results: [] };
   return { matched: true, bookVersion, results };
+}
+
+/**
+ * בוחר את הקטעים שיישלחו למודל.
+ *
+ * הכלל הקודם — „עד שניים לכל פרק” — נשמע כמו גיוון, אבל כשהציונים צפופים הוא
+ * הופך לשרירותי: לשאלה „איך נכון להתכונן לדייט?” שני קטעים כלליים מפרק 3 זכו
+ * בתיקו, והתקרה מחקה את הסעיף «האודישן ההפוך» — הסעיף היחיד שבו נמצאת התשובה
+ * בפועל („לפני הדייט, דבר אחד שאני לא מוחק…”).
+ *
+ * לכן הגיוון עובר לרמת ה*סעיף*: מעבר ראשון בוחר קטע אחד מכל סעיף נבדל, ורק
+ * אחריו מתמלאות שאר המשבצות. סעיף שבו התשובה נמצאת אינו יכול עוד להימחק ע"י
+ * שני קטעים מאותו פרק שקיבלו ציון זהה. הכותרות מקבלות חיזוק, כי התאמה בשם
+ * הסעיף היא ראיה חזקה יותר ממופע מקרי בגוף הטקסט.
+ */
+function rerank(rows: Row[], question: string, minScore: number): CompassMatch[] {
+  const terms = new Set<string>();
+  for (const raw of tokenize(question)) for (const v of expandWord(raw)) terms.add(v);
+
+  const scored = rows
+    .map((r) => ({ row: r, score: Number(r.score) }))
+    .filter((x) => Number.isFinite(x.score) && x.score >= minScore)
+    .map((x) => {
+      const title = `${normWord(x.row.chapter_name)} ${normWord(x.row.section_name ?? "")}`;
+      let hits = 0;
+      for (const t of terms) if (t.length >= 3 && title.includes(t)) hits++;
+      const boost = 1 + TITLE_BOOST_PER_HIT * Math.min(hits, TITLE_BOOST_MAX_HITS);
+      return { ...x, adjusted: x.score * boost };
+    })
+    .sort((a, b) => b.adjusted - a.adjusted);
+
+  const toMatch = (x: { row: Row; score: number }): CompassMatch => ({
+    chapterNumber: x.row.chapter_number,
+    chapterName: x.row.chapter_name,
+    sectionName: x.row.section_name,
+    content: x.row.content,
+    score: Number(x.score.toFixed(4)),
+  });
+
+  const sectionKey = (r: Row) => `${r.chapter_number}::${r.section_name ?? ""}`;
+  const seenSection = new Set<string>();
+  const picked: CompassMatch[] = [];
+  const used = new Set<(typeof scored)[number]>();
+
+  for (const x of scored) {
+    const k = sectionKey(x.row);
+    if (seenSection.has(k)) continue;
+    seenSection.add(k);
+    used.add(x);
+    picked.push(toMatch(x));
+    if (picked.length >= MAX_RESULTS) return picked;
+  }
+  for (const x of scored) {
+    if (used.has(x)) continue;
+    picked.push(toMatch(x));
+    if (picked.length >= MAX_RESULTS) break;
+  }
+  return picked;
 }
