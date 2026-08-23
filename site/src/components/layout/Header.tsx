@@ -45,7 +45,7 @@ export function Header() {
           className="group flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand sm:gap-2.5"
           aria-label={english ? `${edition.title}, home` : `${siteConfig.bookTitle}, לעמוד הבית`}
         >
-          <BrandMark withRing className="h-9 w-9 shrink-0 text-foreground" />
+          <BrandMark className="h-9 w-9 shrink-0 text-foreground" />
           {/* השם *לעולם* אינו מצטמצם ואינו נחתך: `shrink-0` על הקישור ו-nowrap
               כאן. שם מותג עם „…” הוא כשל שקט — ה-DOM ממשיך לדווח שהטקסט נכנס
               (Chrome מודד את התיבה *אחרי* הקיצור), ולכן רק פריסה שאינה מקצרת
