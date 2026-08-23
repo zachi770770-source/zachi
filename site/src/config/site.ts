@@ -302,6 +302,34 @@ export const siteConfig = {
 
   /** תווית זמינות אחת ואחידה ל-Hero/עמוד הספר, כשהספר זמין באמזון. */
   availabilityLabel: "מאת צחי חן · זמין עכשיו במהדורת Kindle באמזון",
+
+  /**
+   * המהדורה האנגלית — מקור אמת יחיד ל-/en. נפרדת לחלוטין מ-`amazon` שלמעלה:
+   * זו רשומת אמזון *אחרת*, עם ASIN אחר, שם אחר ואיות-מחבר אחר. אסור לקשר
+   * מ-/en אל ASIN המהדורה העברית — קורא אנגלי היה נוחת על ספר בעברית.
+   *
+   * מקורות (אין כאן שום שדה מומצא):
+   *   • asin/url — אושרו במפורש ע"י המחבר. הם הסמכות לקיום המהדורה וליעד.
+   *   • title/subtitle/author/format — מתוך כותרת עמוד המוצר של אותה כתובת
+   *     בדיוק, כפי שהיא מופיעה במנוע חיפוש ציבורי. תיאום *עקיף*: אמזון עצמה
+   *     חסומה מסביבת הבנייה, ולכן זהו אישוש ולא אימות ישיר.
+   *   • isbn — **לא מוגדר בכוונה.** ה-ISBN שנמצא בחיפוש (9798312146646)
+   *     שייך לספר אחר של אותו מחבר (B0DYP6PC12) ואינו של המהדורה הזו.
+   *   • cover — **לא מוגדר בכוונה.** אין קובץ עטיפה אנגלי במאגר, ו-CSP חוסם
+   *     תמונות חיצוניות. ה-Hero בנוי טיפוגרפית עד שתסופק עטיפה.
+   */
+  englishEdition: {
+    available: true,
+    asin: "B0DYP4DL1V",
+    /** היעד הקנוני היחיד לכל CTA ב-/en. */
+    url: "https://www.amazon.com/dp/B0DYP4DL1V",
+    title: "Dating to Love",
+    subtitle:
+      "A Practical Guide to Choosing the Right Partner, Avoiding Red Flags, and Building a Healthy Relationship",
+    author: "Zachi Hen",
+    format: "Kindle edition",
+    buyLabel: "Buy on Amazon",
+  },
 } as const;
 
 export type SiteConfig = typeof siteConfig;

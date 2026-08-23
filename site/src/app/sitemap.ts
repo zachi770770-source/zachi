@@ -19,6 +19,10 @@ type SitemapRoute = {
 const staticRoutes: SitemapRoute[] = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
   { path: "/book", priority: 0.9, changeFrequency: "monthly" },
+  // „/en” — עמוד הנחיתה של המהדורה האנגלית. כתובת עצמאית, canonical לעצמה,
+  // ובעלת יחס hreflang הדדי עם עמוד הבית העברי. בלי `lastModified`: אין לעמוד
+  // תאריך-תוכן אמיתי, ולא ממציאים אחד.
+  { path: "/en", priority: 0.9, changeFrequency: "monthly" },
   // „אהבה” — עמוד-הסמכות הרוחבי (hub) של אשכול-התוכן על אהבה וזוגיות.
   { path: "/love", priority: 0.9, changeFrequency: "monthly" },
   { path: "/before-relationship", priority: 0.8, changeFrequency: "monthly" },

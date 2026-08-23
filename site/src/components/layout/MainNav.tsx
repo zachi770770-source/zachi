@@ -7,6 +7,7 @@ import { Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navLinks } from "@/config/nav";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
 
 /**
  * ניווט הדסקטופ — קבוצה אחת מלוכדת: קישורים עם מצב active ברור (קו טרקוטה
@@ -66,6 +67,9 @@ export function MainNav() {
       </nav>
 
       <span aria-hidden="true" className="mx-3 h-5 w-px bg-border-strong" />
+
+      {/* מחליף-שפה לפני ה-CTA ובסגנון שקט, כדי שלא יתחרה בכפתור הרכישה. */}
+      <LanguageSwitch to="en" className="me-3" />
 
       <Button asChild size="sm" className="h-10 px-5 text-[15px]">
         <Link href={ctaHref}>{ctaLabel}</Link>

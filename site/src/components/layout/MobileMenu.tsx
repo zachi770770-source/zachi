@@ -9,6 +9,7 @@ import { Menu, X, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { navLinks } from "@/config/nav";
+import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/shared/BrandMark";
 
@@ -80,7 +81,11 @@ export function MobileMenu() {
             })}
           </nav>
 
-          <div className="mt-auto">
+          <div className="mt-auto space-y-4">
+            {/* מחליף-שפה מעל ה-CTA ובסגנון שקט — גלוי במובייל, אך לא מתחרה
+                בכפתור הרכישה שמתחתיו. */}
+            <LanguageSwitch to="en" onNavigate={() => setOpen(false)} />
+
             <Button asChild size="lg" className="w-full">
               <Link href="/book#purchase" onClick={() => setOpen(false)}>
                 לרכישת הספר

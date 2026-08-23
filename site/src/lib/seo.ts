@@ -19,6 +19,9 @@ export function pageMetadata({
   path,
   ogType = "website",
   absoluteTitle = false,
+  languages,
+  ogLocale = "he_IL",
+  siteName = siteConfig.bookTitle,
 }: {
   /** כותרת העמוד. ללא שם הספר — הוא מתווסף אוטומטית לפי התבנית. */
   title: string;
@@ -28,6 +31,16 @@ export function pageMetadata({
   ogType?: "website" | "article";
   /** true = הכותרת מוצגת כמות שהיא, בלי תבנית "| שם הספר". */
   absoluteTitle?: boolean;
+  /**
+   * יחסי-שפה הדדיים (hreflang). נמסר *רק* לשני עמודי-השפה — עמוד הבית העברי
+   * ו-/en — כי רק להם יש מקבילה בשפה אחרת. הוספת hreflang לעמוד שאין לו
+   * תרגום הייתה מצהירה על יחס שאינו קיים, ולכן שאר העמודים אינם מעבירים כלום.
+   */
+  languages?: Record<string, string>;
+  /** ברירת המחדל היא עברית; /en דורס ל-en_US. */
+  ogLocale?: string;
+  /** ברירת המחדל היא שם הספר בעברית; /en דורס לשם המהדורה האנגלית. */
+  siteName?: string;
 }): Metadata {
   // כותרת השיתוף כוללת תמיד את שם הספר, בהתאמה לתבנית ה-<title>.
   const socialTitle = absoluteTitle
@@ -49,12 +62,12 @@ export function pageMetadata({
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, ...(languages ? { languages } : {}) },
     openGraph: {
       type: ogType,
-      locale: "he_IL",
+      locale: ogLocale,
       url: path,
-      siteName: siteConfig.bookTitle,
+      siteName,
       title: socialTitle,
       description,
       ...(isHome ? {} : { images: [ogImage] }),
