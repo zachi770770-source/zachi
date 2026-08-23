@@ -1,7 +1,5 @@
 "use client";
 
-import * as React from "react";
-
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 
 /**
