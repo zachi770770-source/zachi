@@ -216,3 +216,5 @@ results = sender.send_from_csv(
 )
 print(results)  # {"success": [...], "failed": [...]}
 ```
+
+<!-- CI validation probe: non-site change, do not merge. -->
