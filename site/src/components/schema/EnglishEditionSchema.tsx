@@ -41,6 +41,9 @@ export function EnglishEditionSchema() {
               "A practical guide to choosing the right partner, recognising red flags, and building a healthy relationship.",
             inLanguage: "en",
             bookFormat: "https://schema.org/EBook",
+            // כתובת מוחלטת: צרכני schema מושכים את התמונה מחוץ להקשר העמוד.
+            // זו עטיפת המהדורה האנגלית בלבד — לעולם לא `siteConfig.images.cover`.
+            image: `${siteConfig.url}${edition.cover}`,
             url: `${siteConfig.url}/en`,
             mainEntityOfPage: `${siteConfig.url}/en`,
             about: [

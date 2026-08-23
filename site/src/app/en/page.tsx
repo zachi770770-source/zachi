@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -21,6 +22,14 @@ export const metadata = pageMetadata({
   ogType: "article",
   ogLocale: "en_US",
   siteName: edition.title,
+  // תמונת השיתוף של /en היא עטיפת המהדורה האנגלית — לא ה-OG העברי שנוצר
+  // ב-`/opengraph-image`, שנושא את שם הספר בעברית.
+  ogImage: {
+    url: edition.cover,
+    width: edition.coverWidth,
+    height: edition.coverHeight,
+    alt: edition.coverAlt,
+  },
   // הדדי מול עמוד הבית העברי. אותה מפה בדיוק מוצהרת גם שם.
   languages: { he: "/", en: "/en", "x-default": "/" },
 });
@@ -54,31 +63,51 @@ export default function EnglishPage() {
           <BrandMark className="h-9 w-9 text-foreground/80" />
           <span className="kicker mt-5">{en.hero.kicker}</span>
 
-          <h1 className="mt-4 font-serif type-hero text-foreground">{en.hero.title}</h1>
-          <p className="mt-3 max-w-[52ch] font-serif text-[1.25rem] leading-snug text-foreground-muted">
-            {en.hero.subtitle}
-          </p>
+          {/* העטיפה יושבת בעמודה משלה מ-sm ומעלה, ומעל הכותרת במובייל. הרוחב
+              נקבע ע"י הרשת/המחלקה ולא ע"י התמונה, ו-width/height נושאים את
+              יחס-הצדדים המקורי (1400×2069) — כך המקום נשמר מראש ואין CLS. */}
+          <div className="mt-4 grid items-start gap-8 sm:grid-cols-[minmax(0,1fr)_13rem] sm:gap-10 lg:grid-cols-[minmax(0,1fr)_16rem]">
+            <div className="order-2 sm:order-1">
+              <h1 className="font-serif type-hero text-foreground">{en.hero.title}</h1>
+              <p className="mt-3 max-w-[52ch] font-serif text-[1.25rem] leading-snug text-foreground-muted">
+                {en.hero.subtitle}
+              </p>
 
-          <p className="mt-4 text-[1.05rem] font-medium text-foreground">
-            {en.hero.byline}
-            <span aria-hidden="true" className="mx-2 text-border-strong">
-              ·
-            </span>
-            <span className="font-normal text-foreground-muted">{en.hero.availability}</span>
-          </p>
+              <p className="mt-4 text-[1.05rem] font-medium text-foreground">
+                {en.hero.byline}
+                <span aria-hidden="true" className="mx-2 text-border-strong">
+                  ·
+                </span>
+                <span className="font-normal text-foreground-muted">{en.hero.availability}</span>
+              </p>
 
-          <p className="type-lead mt-6 max-w-[60ch] text-foreground-muted">{en.hero.lead}</p>
-          <p className="mt-4 max-w-[62ch] text-[1.05rem] leading-relaxed text-foreground">
-            {en.hero.intro}
-          </p>
+              <p className="type-lead mt-6 max-w-[60ch] text-foreground-muted">{en.hero.lead}</p>
+              <p className="mt-4 max-w-[62ch] text-[1.05rem] leading-relaxed text-foreground">
+                {en.hero.intro}
+              </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button asChild size="lg">
-              <a href={edition.url} target="_blank" rel="noopener noreferrer">
-                {edition.buyLabel}
-              </a>
-            </Button>
-            <LanguageSwitch to="he" />
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Button asChild size="lg">
+                  <a href={edition.url} target="_blank" rel="noopener noreferrer">
+                    {edition.buyLabel}
+                  </a>
+                </Button>
+                <LanguageSwitch to="he" />
+              </div>
+            </div>
+
+            <div className="order-1 w-44 max-w-full sm:order-2 sm:w-full">
+              <Image
+                src={edition.cover}
+                alt={edition.coverAlt}
+                width={edition.coverWidth}
+                height={edition.coverHeight}
+                priority
+                // גדלי התצוגה בפועל: 176px במובייל, 208px בטאבלט, 256px בדסקטופ.
+                sizes="(max-width: 640px) 176px, (max-width: 1024px) 208px, 256px"
+                className="h-auto w-full rounded-s-[3px] rounded-e-[10px] shadow-[0_20px_44px_-22px_rgba(34,38,43,0.5)] ring-1 ring-black/5"
+              />
+            </div>
           </div>
         </Reveal>
 

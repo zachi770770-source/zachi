@@ -315,14 +315,20 @@ export const siteConfig = {
    *     חסומה מסביבת הבנייה, ולכן זהו אישוש ולא אימות ישיר.
    *   • isbn — **לא מוגדר בכוונה.** ה-ISBN שנמצא בחיפוש (9798312146646)
    *     שייך לספר אחר של אותו מחבר (B0DYP6PC12) ואינו של המהדורה הזו.
-   *   • cover — **לא מוגדר בכוונה.** אין קובץ עטיפה אנגלי במאגר, ו-CSP חוסם
-   *     תמונות חיצוניות. ה-Hero בנוי טיפוגרפית עד שתסופק עטיפה.
+   *   • cover — קובץ מקומי שסופק ואושר ע"י המחבר. **בכוונה בשם נפרד**
+   *     מהעטיפה העברית (`book-cover-final.webp`), כדי ששתי המהדורות לא
+   *     יוכלו להתחלף בטעות. אין hotlink לאמזון — CSP חוסם תמונות חיצוניות.
    */
   englishEdition: {
     available: true,
     asin: "B0DYP4DL1V",
     /** היעד הקנוני היחיד לכל CTA ב-/en. */
     url: "https://www.amazon.com/dp/B0DYP4DL1V",
+    /** עטיפת המהדורה האנגלית. 1400×2069, יחס-הצדדים המקורי נשמר. */
+    cover: "/images/book-cover-en.webp",
+    coverWidth: 1400,
+    coverHeight: 2069,
+    coverAlt: "Dating to Love by Zachi Hen — English edition cover",
     title: "Dating to Love",
     subtitle:
       "A Practical Guide to Choosing the Right Partner, Avoiding Red Flags, and Building a Healthy Relationship",
