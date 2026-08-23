@@ -164,15 +164,146 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://www.zachi.co.il
         run: npm run build
 
+  # ── E2E: הסוויטה הקיימת של Playwright (Chromium) ─────────────────────────
+  #
+  # job *נפרד* ובלתי-תלוי ב-`verify`. אין כאן `needs:` במכוון: `verify` הוא
+  # הבדיקה הנדרשת על `main`, ו-job נדרש שתלוי ב-job אחר מדולג/כושל אינו מדווח
+  # ומשאיר את ה-PR תקוע — בדיוק הכשל שהמבנה הנוכחי בא למנוע. שני ה-jobs רצים
+  # במקביל, כל אחד מדווח בעצמו, ואיטיות של אחד אינה מעכבת את השני.
+  #
+  # שם הבדיקה כאן חדש ואינו נוגע ב-`typecheck, lint, unit, build`.
+  #
+  # זיהוי-השינויים משוכפל בכוונה במקום להישאב מ-job משותף: איחוד היה מכניס
+  # `needs:` לשער הנדרש, וזה בדיוק מה שאסור. עדיף שכפול של צעד bash אחד על
+  # פני תלות שמסכנת את הבדיקה הנדרשת.
+  e2e:
+    name: e2e (playwright chromium)
+    runs-on: ubuntu-latest
+    # הסוויטה רצה כ-5 דקות; התקנה + בנייה מוסיפות כמה. 30 הוא חסם-בטיחות
+    # שמונע job תקוע, לא יעד.
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # אותה סמנטיקה בדיוק כמו ב-`verify`: three-dot מול merge-base, וכל כשל
+      # בזיהוי מפיל להרצה מלאה ולא לדילוג.
+      - name: Detect site-relevant changes
+        id: changes
+        working-directory: ${{ github.workspace }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "Push to ${{ github.ref_name }} — running the E2E suite unconditionally."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "${BASE_SHA:-}" ] || [ -z "${HEAD_SHA:-}" ]; then
+            echo "PR base/head SHA missing from the event payload — running the E2E suite (fail-safe)."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA" 2>/dev/null); then
+            echo "Could not compute merge-base for $BASE_SHA...$HEAD_SHA — running the E2E suite (fail-safe)."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! CHANGED=$(git diff --name-only "$MERGE_BASE" "$HEAD_SHA" 2>/dev/null); then
+            echo "git diff failed — running the E2E suite (fail-safe)."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Files changed by this PR:"
+          echo "$CHANGED" | sed 's/^/  /'
+
+          if printf '%s\n' "$CHANGED" \
+            | grep -qE '^(site/|\.github/workflows/site\.yml$)'; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            echo "==> site-relevant changes found; running the E2E suite."
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            echo "==> no site-relevant changes."
+          fi
+
+      - name: No site-related changes
+        if: steps.changes.outputs.relevant != 'true'
+        working-directory: ${{ github.workspace }}
+        run: echo "No site-related changes; E2E suite not required for this PR."
+
+      - uses: actions/setup-node@v4
+        if: steps.changes.outputs.relevant == 'true'
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies (npm ci, from site/package-lock.json)
+        if: steps.changes.outputs.relevant == 'true'
+        run: npm ci
+
+      # הבינארי של הדפדפן אינו ב-node_modules ולכן אינו מכוסה ע"י מטמון ה-npm.
+      # המפתח נגזר מגרסת @playwright/test שננעלה: שדרוג גרסה מחייב הורדה
+      # מחדש, וכל עוד הגרסה זהה ההורדה נחסכת.
+      - name: Resolve the locked Playwright version
+        if: steps.changes.outputs.relevant == 'true'
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        if: steps.changes.outputs.relevant == 'true'
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      # Chromium בלבד — הסוויטה מגדירה שני projects, ושניהם Chromium.
+      # `--with-deps` מתקין את ספריות המערכת שהדפדפן דורש; הוא נדרש גם כשהמטמון
+      # פגע, כי חבילות ה-apt אינן חלק מהמטמון.
+      - name: Install Chromium for Playwright
+        if: steps.changes.outputs.relevant == 'true'
+        run: npx playwright install --with-deps chromium
+
+      # ── הרצת הסוויטה ───────────────────────────────────────────────────────
+      # השרתים עולים דרך `webServer` שב-`playwright.config.ts`, לא מכאן:
+      # Playwright בונה, מפעיל, *ממתין למוכנות ה-URL*, נכשל בבירור אם השרת לא
+      # עלה, ומכבה את שני התהליכים בסוף הריצה. ב-CI `reuseExistingServer` הוא
+      # false, ולכן אין סיכון להרצה מול שרת ישן.
+      #
+      # במכוון *ללא* VERCEL_ENV: זו הסביבה שהסוויטה נכתבה מולה. הצבתו כאן
+      # הייתה בונה עמודים עם `index, follow` ומגישה אותם תחת ריצה שאינה
+      # פרודקשן, ו-`seo-metadata.spec.ts` בודק בדיוק את העקביות הזו — כלומר
+      # היינו מייצרים כשל-בדיקה מסביבת ה-CI עצמה. גם `npm run build` שבתוך
+      # ה-webServer רץ בלי המשתנה, בדיוק כמו מקומית.
+      - name: E2E (playwright test --project=chromium)
+        if: steps.changes.outputs.relevant == 'true'
+        run: npm run test:e2e -- --project=chromium
+
+      # רק בכישלון: ריצה ירוקה אינה מעלה דבר. ה-trace נוצר בניסיון החוזר
+      # (`trace: on-first-retry`), הצילום בכישלון, והדוח מסכם את שניהם.
+      - name: Upload Playwright diagnostics
+        if: failure() && steps.changes.outputs.relevant == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            site/playwright-report/
+            site/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
 # הערות על סודות ועל היקף:
 #
 # * אין כאן שום סוד ואין צורך באף אחד. `ANTHROPIC_API_KEY` חסר, ולכן
 #   ה-Compass נשאר כבוי (`config.ts` בודק את קיום המפתח); `COMPASS_PG_URL`
 #   חסר, ולכן בדיקות ה-PG מדלגות על עצמן; `DATABASE_URL` חסר, ולכן
-#   `getWaitlistRepository()` מחזיר null בלי לפתוח חיבור.
-#
-# * Playwright אינו חלק מהשער הזה. הסוויטה מונה 388 בדיקות ב-41 קבצים,
-#   דורשת שני שרתי `next start` נפרדים (3100/3101) שאחד מהם בונה מחדש, ו-
-#   `playwright.config.ts` מצביע על `executablePath: /opt/pw-browsers/chromium`
-#   — נתיב שאינו קיים על runner של GitHub. הפעלתה כאן הייתה מחייבת שינוי
-#   ארכיטקטורת ה-E2E, שאינו בהיקף של שער הבנייה הזה.
+#   `getWaitlistRepository()` מחזיר null בלי לפתוח חיבור. זה נכון גם ל-E2E:
+#   הבדיקות מיירטות את /api/compass ואינן קוראות לספק אמיתי.
