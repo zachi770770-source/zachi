@@ -22,6 +22,7 @@ import { RouteIllustration } from "@/components/shared/RouteIllustration";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { loadAsk, saveAsk, clearAsk } from "@/lib/ask/askStorage";
 import { trackEvent } from "@/lib/analytics";
+import { ViewEvent } from "@/components/analytics/ViewEvent";
 
 /**
  * „שאל את הספר” — מנוע הכוונה אישי, סגור ודטרמיניסטי, כשיחה מודרכת עם תוכן הספר
@@ -66,10 +67,6 @@ export function AskRoute({
     const ro = new ResizeObserver(apply);
     ro.observe(measure);
     return () => ro.disconnect();
-  }, []);
-
-  React.useEffect(() => {
-    trackEvent("ask_open");
   }, []);
 
   // מעבר ראשוני (אחרי הידרציה, ב-rAF — בלי אי-התאמה מול ה-SSR של מסך התחנות):
@@ -181,6 +178,10 @@ export function AskRoute({
 
   return (
     <div className="pathfinder mx-auto max-w-2xl">
+      {/* פתיחת „שאל את הספר”. עובר דרך `ViewEvent` ולא דרך `trackEvent` ישיר
+          באפקט ה-mount: קריאה ישירה נזרקת לריק כשההסכמה עדיין לא ניתנה או
+          כשספק ה-GA4/GTM טרם נטען — כלומר בדיוק אצל מבקר ראשון. */}
+      <ViewEvent event="ask_open" />
       {/* הכרזת-התקדמות נגישה (מוסתרת חזותית) — קורא-מסך שומע לאיזה שלב עברנו. */}
       <div className="sr-only" role="status" aria-live="polite">
         {stepAnnounce[step]}

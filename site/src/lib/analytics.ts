@@ -31,6 +31,9 @@ export type AnalyticsEventName =
   | "book_viewed"
   | "guide_viewed"
   | "journey_page_viewed"
+  // „אהבה” (/love) — עמוד-הסמכות הרוחבי של אשכול אהבה/זוגיות, priority 0.9
+  // כמו /book. עד כה לא נמדד כלל, ולכן לא היה אפשר לדעת אם הוא עובד.
+  | "love_viewed"
   // „שאל את הספר” — מנוע הכוונה סגור ודטרמיניסטי (תחנה→דילמה→הקשר→תוצאה):
   | "ask_open"
   | "ask_station"

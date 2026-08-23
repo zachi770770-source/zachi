@@ -6,6 +6,7 @@ import { ArrowRight, Minus, Plus, Sun, Moon, ArrowLeft } from "lucide-react";
 
 import { sampleReader } from "@/content/sample";
 import { trackEvent } from "@/lib/analytics";
+import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookCover } from "@/components/shared/BookCover";
@@ -97,12 +98,10 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
     }
   }, []);
 
-  // אירוע צפייה אנונימי + הדלקת מעברי הצבע רק אחרי ה-mount (דרך ה-DOM,
-  // ללא state) כדי שהחלת ההעדפה השמורה לא תיראה כהבזק מבהיר לכהה.
+  // הדלקת מעברי הצבע רק אחרי ה-mount (דרך ה-DOM, ללא state) כדי שהחלת
+  // ההעדפה השמורה לא תיראה כהבזק מבהיר לכהה.
   React.useEffect(() => {
     rootRef.current?.classList.add("is-ready");
-    trackEvent("view_sample");
-    trackEvent("preview_opened");
   }, []);
 
   // שמירת העדפות — מקומית בלבד.
@@ -175,6 +174,11 @@ export function SampleReader({ toolSample }: { toolSample?: ToolSample } = {}) {
       data-reader-theme={theme}
       style={{ ["--reader-fs" as string]: String(scale) }}
     >
+      {/* אירועי-הצפייה של הטעימה. עוברים דרך `ViewEvent` ולא דרך `trackEvent`
+          ישיר באפקט ה-mount: קריאה ישירה נזרקת לריק כשההסכמה עדיין לא ניתנה או
+          כשספק ה-GA4/GTM טרם נטען — כלומר בדיוק אצל מבקר ראשון. */}
+      <ViewEvent event="view_sample" />
+      <ViewEvent event="preview_opened" />
       <div className="reader-toolbar">
         <Link href="/" className="reader-back">
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
