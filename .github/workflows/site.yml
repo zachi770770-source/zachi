@@ -9,18 +9,23 @@ name: site
 # יחידה. הקובץ הזה סוגר את הפער.
 #
 # מריץ אך ורק את הפקודות שכבר מוגדרות ב-`site/package.json`.
+#
+# ── למה אין `paths:` באירוע ה-PR ─────────────────────────────────────────────
+# הבדיקה הזו מיועדת להיות *required* על `main`. סינון `paths:` ברמת הטריגר
+# אינו תואם לכך: PR שאינו נוגע בנתיבים המסוננים לא היה מפעיל את הריצה כלל,
+# הבדיקה הנדרשת לעולם לא הייתה מדווחת, ו-GitHub היה משאיר את ה-PR תקוע ב-
+# „Expected — waiting for status to be reported” בלי דרך למזג. לכן הטריגר
+# תופס *כל* PR ל-`main`, ה-job תמיד קיים ותמיד מדווח, וזיהוי-השינויים עבר
+# פנימה אל תוך ה-job: הצעדים היקרים רצים רק כשיש שינוי רלוונטי.
+#
+# ה-job אינו מדולג ברמת ה-job במכוון. job שמדולג אינו מתנהג כמו בדיקה נדרשת
+# שעברה, ולכן הדילוג נעשה ברמת ה*צעדים* בלבד.
 
 on:
   pull_request:
     branches: ["main"]
-    paths:
-      - "site/**"
-      - ".github/workflows/site.yml"
   push:
     branches: ["main"]
-    paths:
-      - "site/**"
-      - ".github/workflows/site.yml"
 
 # הרשאות מינימליות: השער רק קורא את הקוד. אינו כותב, אינו מגיב ואינו פורס.
 permissions:
@@ -38,14 +43,88 @@ defaults:
 
 jobs:
   verify:
+    # שם הבדיקה שמוגדרת (או תוגדר) כ-required על `main`. אין לשנות אותו:
+    # שינוי-שם שובר את ההגדרה בהגנת-הענף בשקט, וה-PR נתקע.
     name: typecheck, lint, unit, build
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # היסטוריה מלאה כדי ש-`git merge-base` יוכל להשוות בין בסיס ה-PR
+          # לראשו. המאגר קטן (7.7MB, ~100 commits) ולכן העלות זניחה, והחלופה
+          # — היסטוריה חלקית — הופכת את הזיהוי לשביר בדיוק במקרים שחשובים:
+          # ריבוי commits, rebase, וענפים שנדחפו מחדש.
+          fetch-depth: 0
 
+      # ── זיהוי שינויים רלוונטיים ────────────────────────────────────────────
+      # first-party בלבד: git + הקשר של GitHub, בלי Action צד-שלישי.
+      #
+      # ההשוואה היא three-dot מול נקודת ההסתעפות (`merge-base`) ולא מול קצה
+      # `main` הנוכחי, ולכן היא עונה על „מה ה-PR הזה שינה” גם אחרי rebase, גם
+      # כשיש כמה commits, וגם כשה-base התקדם מאז פתיחת ה-PR. אין כאן שימוש
+      # ב-`HEAD^`: על אירוע pull_request מה שנבדק הוא commit-מיזוג, ו-`HEAD^`
+      # היה תלוי בסדר ההורים שלו.
+      #
+      # כלל בטיחות: *כל* כשל בזיהוי מפיל אותנו להרצה מלאה, לא לדילוג. עדיף
+      # לשלם על ריצה מיותרת מאשר לאשר בשקט PR שלא נבדק.
+      - name: Detect site-relevant changes
+        id: changes
+        working-directory: ${{ github.workspace }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "Push to ${{ github.ref_name }} — running the full gate unconditionally."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "${BASE_SHA:-}" ] || [ -z "${HEAD_SHA:-}" ]; then
+            echo "PR base/head SHA missing from the event payload — running the full gate (fail-safe)."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA" 2>/dev/null); then
+            echo "Could not compute merge-base for $BASE_SHA...$HEAD_SHA — running the full gate (fail-safe)."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "merge-base: $MERGE_BASE"
+          if ! CHANGED=$(git diff --name-only "$MERGE_BASE" "$HEAD_SHA" 2>/dev/null); then
+            echo "git diff failed — running the full gate (fail-safe)."
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Files changed by this PR:"
+          echo "$CHANGED" | sed 's/^/  /'
+
+          if printf '%s\n' "$CHANGED" \
+            | grep -qE '^(site/|\.github/workflows/site\.yml$)'; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            echo "==> site-relevant changes found; running the full gate."
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            echo "==> no site-relevant changes."
+          fi
+
+      # ── המסלול הזול: אין שינוי רלוונטי ─────────────────────────────────────
+      # ה-job מסתיים ירוק בלי setup-node, בלי npm ci ובלי בנייה.
+      - name: No site-related changes
+        if: steps.changes.outputs.relevant != 'true'
+        working-directory: ${{ github.workspace }}
+        run: echo "No site-related changes; required site CI gate satisfied."
+
+      # ── המסלול המלא: יש שינוי רלוונטי ──────────────────────────────────────
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.relevant == 'true'
         with:
           # next@16 דורש >=20.9.0 ו-vitest@4 דורש ^20 || ^22 || >=24.
           node-version: "22"
@@ -53,21 +132,26 @@ jobs:
           cache-dependency-path: site/package-lock.json
 
       - name: Install dependencies (npm ci, from site/package-lock.json)
+        if: steps.changes.outputs.relevant == 'true'
         run: npm ci
 
       - name: Typecheck (tsc --noEmit)
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run typecheck
 
       - name: Lint (eslint)
+        if: steps.changes.outputs.relevant == 'true'
         run: npm run lint
 
       # בלי VERCEL_ENV במכוון: בדיקות היחידה מנהלות את המשתנה בעצמן
       # (`repositorySelection.test.ts` מוחק ומציב אותו ב-beforeEach/afterEach),
       # וקביעה גלובלית כאן רק הייתה מסתירה את מה שהן בודקות.
       - name: Unit tests (vitest run)
+        if: steps.changes.outputs.relevant == 'true'
         run: npm test
 
       - name: Production build (next build)
+        if: steps.changes.outputs.relevant == 'true'
         env:
           # ה-build של Vercel Production רץ עם VERCEL_ENV=production, ובאתר
           # הזה הערך הוא שקובע את מצב האינדוקס: `layout.tsx` פולט
