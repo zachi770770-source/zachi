@@ -13,6 +13,19 @@ const STORAGE_KEY = "zachi_lang";
 
 export type SupportedLanguage = "he" | "en";
 
+/**
+ * האם הנתיב הנוכחי שייך למהדורה האנגלית.
+ *
+ * ההדר יושב ב-root layout ולכן מרונדר גם מעל „/” וגם מעל „/en”. אין סגמנט
+ * שפה במסלול (ראו ההחלטה ב-`/en/page.tsx`), ולכן הנתיב הוא מקור-האמת היחיד
+ * לשאלה באיזו שפה ההדר צריך לדבר. נגזר מהנתיב *בלבד* — לא מההעדפה השמורה
+ * ולא משפת הדפדפן: ההדר חייב להתאים לתוכן שמתחתיו, ומבקר שהגיע ל„/” בקישור
+ * ישיר אמור לראות הדר עברי גם אם בחר אנגלית בעבר.
+ */
+export function isEnglishPath(pathname: string | null | undefined): boolean {
+  return pathname === "/en" || (pathname?.startsWith("/en/") ?? false);
+}
+
 /** ההעדפה המפורשת שנשמרה, או null כשהמשתמש עוד לא בחר. */
 export function getStoredLanguage(): SupportedLanguage | null {
   if (typeof window === "undefined") return null;
