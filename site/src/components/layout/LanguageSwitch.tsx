@@ -25,12 +25,19 @@ export function LanguageSwitch({
   to,
   className,
   onNavigate,
+  compact = false,
 }: {
   /** שפת *היעד* של המעבר. */
   to: "en" | "he";
   className?: string;
   /** נקרא אחרי שמירת ההעדפה — למשל לסגירת תפריט המובייל. */
   onNavigate?: () => void;
+  /**
+   * גרסה צרה לשורת ההדר במובייל, שבה הפקד מתחרה על רוחב מול הלוגו, ה-CTA
+   * וההמבורגר. התווית *נשארת מילה מלאה* („English” / „עברית”) — היא מה שהופך
+   * את הפקד לגלוי ומובן; מה שמצטמצם הוא הסמל והריפוד בלבד.
+   */
+  compact?: boolean;
 }) {
   const isToEnglish = to === "en";
 
@@ -44,15 +51,18 @@ export function LanguageSwitch({
       }}
       aria-label={isToEnglish ? "Switch to the English edition page" : "עבור לאתר בעברית"}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5",
-        "text-[13px] font-medium text-foreground-muted transition-colors",
+        "inline-flex shrink-0 items-center rounded-full border border-border",
+        "font-medium text-foreground-muted transition-colors",
         "hover:border-foreground/25 hover:text-foreground",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+        compact
+          ? "h-11 gap-1 px-2 text-[12.5px]"
+          : "gap-1.5 px-3 py-1.5 text-[13px]",
         className,
       )}
     >
-      <Languages className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-      <span lang={to} dir={isToEnglish ? "ltr" : "rtl"}>
+      {compact ? null : <Languages className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+      <span lang={to} dir={isToEnglish ? "ltr" : "rtl"} className="whitespace-nowrap">
         {isToEnglish ? "English" : "עברית"}
       </span>
     </Link>

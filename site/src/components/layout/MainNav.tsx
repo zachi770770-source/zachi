@@ -6,6 +6,8 @@ import { Compass } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { navLinks } from "@/config/nav";
+import { siteConfig } from "@/config/site";
+import { isEnglishPath } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
 
@@ -23,13 +25,19 @@ function isActivePath(pathname: string, href: string): boolean {
 
 export function MainNav() {
   const pathname = usePathname();
-  const ctaHref = "/book#purchase";
-  const ctaLabel = "לרכישת הספר";
+  const english = isEnglishPath(pathname);
+  const edition = siteConfig.englishEdition;
 
+  /**
+   * ב-„/en” הניווט מציג רק את שני הפקדים שיש להם משמעות באנגלית: מעבר-שפה
+   * ורכישה. קישורי הסקשנים מובילים לעמודים עבריים בלבד ואין להם מקבילה
+   * אנגלית — כותרת עברית בתוך ניווט של עמוד אנגלי היא בדיוק מה שגורם ל„/en”
+   * להרגיש כמו עמוד אנגלי בתוך אתר עברי.
+   */
   return (
-    <div className="hidden items-center gap-1 lg:flex">
-      <nav aria-label="ניווט ראשי" className="flex items-center">
-        {navLinks.map((link) => {
+    <div className="hidden items-center gap-1 lg:flex" {...(english ? { lang: "en", dir: "ltr" } : {})}>
+      <nav aria-label={english ? "Main" : "ניווט ראשי"} className="flex items-center">
+        {(english ? [] : navLinks).map((link) => {
           const active = isActivePath(pathname, link.href);
           const isCompass = link.href === "/compass";
           return (
@@ -66,13 +74,19 @@ export function MainNav() {
         })}
       </nav>
 
-      <span aria-hidden="true" className="mx-3 h-5 w-px bg-border-strong" />
+      {english ? null : <span aria-hidden="true" className="mx-3 h-5 w-px bg-border-strong" />}
 
       {/* מחליף-שפה לפני ה-CTA ובסגנון שקט, כדי שלא יתחרה בכפתור הרכישה. */}
-      <LanguageSwitch to="en" className="me-3" />
+      <LanguageSwitch to={english ? "he" : "en"} className="me-3" />
 
       <Button asChild size="sm" className="h-10 px-5 text-[15px]">
-        <Link href={ctaHref}>{ctaLabel}</Link>
+        {english ? (
+          <a href={edition.url} target="_blank" rel="noopener noreferrer">
+            {edition.buyLabel}
+          </a>
+        ) : (
+          <Link href="/book#purchase">לרכישת הספר</Link>
+        )}
       </Button>
     </div>
   );
