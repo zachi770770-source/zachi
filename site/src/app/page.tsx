@@ -9,6 +9,7 @@ import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { StickyCta } from "@/components/interactive/StickyCta";
 import { BuildSpine } from "@/components/shared/BuildSpine";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
+import { LanguageHint } from "@/components/layout/LanguageHint";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
@@ -18,6 +19,10 @@ export const metadata = pageMetadata({
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,
+  // יחס-שפה הדדי מול /en. `x-default` מצביע לעברית במכוון: זו שפת האתר
+  // הראשית ועמוד הבית העברי הוא הכתובת הקנונית ההיסטורית — כלומר זו באמת
+  // הגרסה שמוצגת כשאין התאמת-שפה, ולא הצהרה נוחה.
+  languages: { he: "/", en: "/en", "x-default": "/" },
 });
 
 /**
@@ -42,6 +47,9 @@ export default function HomePage() {
   return (
     <>
       <ViewEvent event="home_viewed" />
+      {/* רמיזה לא-הורסת לדוברי אנגלית. אינה מנתבת ואינה משנה תוכן — ראו
+          ההסבר ב-LanguageHint על למה לא הפניית Accept-Language. */}
+      <LanguageHint />
       <WebSiteSchema />
       <BookSchema />
       <ProductSchema />
