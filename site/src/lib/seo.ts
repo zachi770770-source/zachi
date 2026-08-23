@@ -22,6 +22,7 @@ export function pageMetadata({
   languages,
   ogLocale = "he_IL",
   siteName = siteConfig.bookTitle,
+  ogImage: ogImageOverride,
 }: {
   /** כותרת העמוד. ללא שם הספר — הוא מתווסף אוטומטית לפי התבנית. */
   title: string;
@@ -41,6 +42,13 @@ export function pageMetadata({
   ogLocale?: string;
   /** ברירת המחדל היא שם הספר בעברית; /en דורס לשם המהדורה האנגלית. */
   siteName?: string;
+  /**
+   * דריסת תמונת-השיתוף. נמסרת רק כשלעמוד יש תמונה משלו שאינה ה-OG העברי
+   * שנוצר ב-`/opengraph-image` — כרגע רק `/en`, שמשתף את עטיפת המהדורה
+   * האנגלית. כשנמסרת, היא דורסת גם את `og:image` וגם את `twitter:image`,
+   * כדי שלא ייווצר מצב שבו שיתוף אחד מציג עטיפה אנגלית והשני עברית.
+   */
+  ogImage?: { url: string; width: number; height: number; alt: string };
 }): Metadata {
   // כותרת השיתוף כוללת תמיד את שם הספר, בהתאמה לתבנית ה-<title>.
   const socialTitle = absoluteTitle
@@ -52,12 +60,17 @@ export function pageMetadata({
   // אובייקט openGraph משלהם. לכן מוסיפים אותה במפורש לכל עמוד שאינו הבית,
   // כדי שלכל קישור משותף (og:image + twitter:image) תהיה תצוגה מקדימה.
   const isHome = path === "/";
-  const ogImage = {
+  const ogImage = ogImageOverride ?? {
     url: "/opengraph-image",
     width: 1200,
     height: 630,
     alt: `${siteConfig.bookTitle}, ${siteConfig.tagline}`,
   };
+
+  // כרטיס „תמונה גדולה” מניח יחס-צדדים רחב וחותך כל מה שגבוה ממנו. עטיפת ספר
+  // היא לאורך, ולכן דווקא הכרטיס הקטן (`summary`) מציג אותה שלמה. ההחלטה
+  // נגזרת מהתמונה עצמה ולא מהמסלול, כך שהיא נשארת נכונה לכל עמוד עתידי.
+  const isPortraitOgImage = ogImage.height > ogImage.width;
 
   return {
     title: absoluteTitle ? { absolute: title } : title,
@@ -73,10 +86,10 @@ export function pageMetadata({
       ...(isHome ? {} : { images: [ogImage] }),
     },
     twitter: {
-      card: "summary_large_image",
+      card: isPortraitOgImage ? "summary" : "summary_large_image",
       title: socialTitle,
       description,
-      ...(isHome ? {} : { images: ["/opengraph-image"] }),
+      ...(isHome ? {} : { images: [ogImage.url] }),
     },
   };
 }

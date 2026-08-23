@@ -1,13 +1,18 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, cleanup, screen, fireEvent } from "@testing-library/react";
 
 vi.mock("server-only", () => ({}));
 
-import { metadata as enMetadata } from "@/app/en/page";
+import EnglishPage, { metadata as enMetadata } from "@/app/en/page";
 import { metadata as heMetadata } from "@/app/page";
 import sitemap from "@/app/sitemap";
 import { siteConfig } from "@/config/site";
 import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
+import { BookCover } from "@/components/shared/BookCover";
+import { EnglishEditionSchema } from "@/components/schema/EnglishEditionSchema";
 import { getStoredLanguage, storeLanguage, prefersEnglishOverHebrew } from "@/lib/language";
 
 /**
@@ -18,6 +23,10 @@ import { getStoredLanguage, storeLanguage, prefersEnglishOverHebrew } from "@/li
 
 const EN_ASIN = "B0DYP4DL1V";
 const HE_ASIN = "B0GJ3SL9H2";
+
+/** שני קבצי-עטיפה, שני קהלים. אסור שהם יתחלפו — בשום משטח. */
+const EN_COVER = "/images/book-cover-en.webp";
+const HE_COVER = "/images/book-cover-final.webp";
 
 describe("English edition config", () => {
   it("uses the owner-confirmed ASIN and canonical Amazon destination", () => {
@@ -186,5 +195,105 @@ describe("LanguageSwitch", () => {
     const link = screen.getByRole("link");
     expect(link.tagName).toBe("A");
     expect(link).toHaveAccessibleName();
+  });
+});
+
+/**
+ * בידוד העטיפות בין שתי המהדורות.
+ *
+ * הכשל שהבדיקות האלה קיימות בשבילו הוא שקט לחלוטין: אם מישהו יחליף בטעות
+ * `englishEdition.cover` ב-`images.cover` (או להפך), הדף עדיין ייבנה, עדיין
+ * ייראה סביר, ופשוט יציג לקורא האנגלי ספר בעברית — או לקורא העברי ספר
+ * שאינו למכירה אצלו. לכן כל משטח נבדק בנפרד: ה-hero, ה-schema, ה-OG,
+ * והעמודים העבריים שלא אמורים היו להשתנות בכלל.
+ */
+describe("edition cover isolation", () => {
+  afterEach(() => cleanup());
+
+  /** `next/image` עוטף את ה-src ב-`/_next/image?url=…`; מפענחים לפני השוואה. */
+  const srcOf = (img: HTMLElement) => decodeURIComponent(img.getAttribute("src") ?? "");
+
+  it("declares the English cover with its real intrinsic dimensions", () => {
+    const edition = siteConfig.englishEdition;
+    expect(edition.cover).toBe(EN_COVER);
+    expect(edition.coverWidth).toBe(1400);
+    expect(edition.coverHeight).toBe(2069);
+    expect(edition.coverAlt).toBe("Dating to Love by Zachi Hen — English edition cover");
+    // הקובץ נדרש להיות קיים בפועל: הגדרה שמצביעה על נכס חסר עוברת typecheck
+    // ונשברת רק אצל המשתמש.
+    expect(existsSync(resolve(process.cwd(), `public${EN_COVER}`))).toBe(true);
+  });
+
+  it("renders the English cover in the /en hero, and never the Hebrew one", () => {
+    render(<EnglishPage />);
+    const cover = screen.getByAltText(siteConfig.englishEdition.coverAlt);
+    expect(srcOf(cover)).toContain(EN_COVER);
+    expect(srcOf(cover)).not.toContain(HE_COVER);
+    // יחס-הצדדים מוצהר מראש ⇒ הדפדפן שומר מקום ואין הסטת-פריסה.
+    expect(cover).toHaveAttribute("width", "1400");
+    expect(cover).toHaveAttribute("height", "2069");
+  });
+
+  it("shows no Hebrew asset anywhere on /en", () => {
+    const { container } = render(<EnglishPage />);
+    for (const img of Array.from(container.querySelectorAll("img"))) {
+      expect(srcOf(img)).not.toContain(HE_COVER);
+    }
+  });
+
+  it("references only the English cover in the English Book schema", () => {
+    const { container } = render(<EnglishEditionSchema />);
+    const script = container.querySelector('script[type="application/ld+json"]');
+    const graph = JSON.parse(script?.textContent ?? "{}")["@graph"] as Record<string, unknown>[];
+    const book = graph.find((node) => node["@type"] === "Book");
+
+    expect(book?.image).toBe(`${siteConfig.url}${EN_COVER}`);
+    // כתובת מוחלטת: צרכני schema אינם יודעים את הקשר העמוד. (ה-origin נגזר
+    // מהסביבה — בפרודקשן https, בבדיקות localhost — ולכן נבדק כ-URL תקין.)
+    expect(() => new URL(String(book?.image))).not.toThrow();
+    expect(String(book?.image).startsWith("/")).toBe(false);
+    expect(JSON.stringify(graph)).not.toContain(HE_COVER);
+  });
+
+  it("shares the English cover — and only it — from /en", () => {
+    const images = enMetadata.openGraph?.images;
+    expect(images).toEqual([
+      {
+        url: EN_COVER,
+        width: 1400,
+        height: 2069,
+        alt: siteConfig.englishEdition.coverAlt,
+      },
+    ]);
+    // גם twitter:image, אחרת שיתוף אחד היה מציג עטיפה אנגלית והשני עברית.
+    expect(enMetadata.twitter?.images).toEqual([EN_COVER]);
+    expect(JSON.stringify(enMetadata.openGraph)).not.toContain(HE_COVER);
+    expect(JSON.stringify(enMetadata.twitter)).not.toContain("/opengraph-image");
+  });
+
+  it("keeps the Hebrew cover on the Hebrew surfaces", () => {
+    // `BookCover` הוא הרכיב שגם עמוד הבית (דרך Hero) וגם /book מרנדרים.
+    expect(siteConfig.images.cover).toBe(HE_COVER);
+    expect(siteConfig.images.mockup3d).toBe(HE_COVER);
+
+    const { container } = render(<BookCover />);
+    const img = container.querySelector("img");
+    expect(srcOf(img as HTMLElement)).toContain(HE_COVER);
+    expect(srcOf(img as HTMLElement)).not.toContain(EN_COVER);
+
+    const heroSrc = readFileSync(resolve(process.cwd(), "src/components/sections/Hero.tsx"), "utf8");
+    const bookSrc = readFileSync(resolve(process.cwd(), "src/app/book/page.tsx"), "utf8");
+    for (const [name, src] of [["Hero (/)", heroSrc], ["/book", bookSrc]] as const) {
+      expect(src, `${name} must keep rendering BookCover`).toContain("<BookCover");
+      expect(src, `${name} must not reach for the English cover`).not.toContain("englishEdition");
+    }
+  });
+
+  it("still points the English edition at its own ASIN", () => {
+    // אותה מהדורה, אותו מוצר: עטיפה חדשה אינה משנה זהות מוצר.
+    expect(siteConfig.englishEdition.asin).toBe(EN_ASIN);
+    expect(siteConfig.englishEdition.title).toBe("Dating to Love");
+    expect(siteConfig.englishEdition.author).toBe("Zachi Hen");
+    expect(JSON.stringify(enMetadata)).not.toContain(HE_ASIN);
   });
 });
