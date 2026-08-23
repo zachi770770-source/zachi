@@ -9,6 +9,7 @@ import { BrandMark } from "@/components/shared/BrandMark";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
+import { ViewEvent } from "@/components/analytics/ViewEvent";
 
 /**
  * /love — עמוד-הסמכות המרכזי של אשכול „אהבה”. מרכז סמנטי רוחבי (hub) שמקשר
@@ -42,6 +43,7 @@ function DeepLink({ href, label }: { href: string; label: string }) {
 export default function LovePage() {
   return (
     <Container className="pt-8 pb-16 sm:pt-10 sm:pb-20 lg:pt-12">
+      <ViewEvent event="love_viewed" />
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },

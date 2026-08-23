@@ -2,15 +2,15 @@
 
 import * as React from "react";
 
-import { trackEvent } from "@/lib/analytics";
+import { ViewEvent } from "@/components/analytics/ViewEvent";
 
 /**
- * מדידה אנונימית של פתיחת עמוד המחבר. אינו מרנדר דבר, אינו שומר תוכן אישי,
- * ומכבד את הסכמת העוגיות (הבדיקה מתבצעת בתוך trackEvent).
+ * מדידה אנונימית של פתיחת עמוד המחבר. אינו מרנדר דבר ואינו שומר תוכן אישי.
+ *
+ * עובר דרך `ViewEvent` ולא דרך `trackEvent` ישיר: קריאה ישירה ב-useEffect של
+ * ה-mount נזרקת לריק כשההסכמה עדיין לא ניתנה או כשספק ה-GA4/GTM טרם נטען —
+ * וזה בדיוק המצב של מבקר ראשון. `ViewEvent` ממתין להסכמה ולספק ומשגר פעם אחת.
  */
 export function AuthorPageView() {
-  React.useEffect(() => {
-    trackEvent("author_page_opened");
-  }, []);
-  return null;
+  return <ViewEvent event="author_page_opened" />;
 }
