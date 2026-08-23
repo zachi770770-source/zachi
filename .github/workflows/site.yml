@@ -1,0 +1,94 @@
+name: site
+
+# שער CI ראשוני (first-party) לאתר שתחת `site/`.
+#
+# עד כה לא הייתה לאתר שום בדיקה צד-GitHub: `medayitim-leahava.yml` מסונן
+# לנתיב `medayitim-leahava/**` (אפליקציית Next נפרדת), ו-`tests.yml` מריץ
+# pytest על קוד ה-Python שבשורש. כלומר הבדיקה היחידה שכיסתה את האתר הייתה
+# ה-build של Vercel — ספק חיצוני יחיד, בלי typecheck, בלי lint ובלי בדיקות
+# יחידה. הקובץ הזה סוגר את הפער.
+#
+# מריץ אך ורק את הפקודות שכבר מוגדרות ב-`site/package.json`.
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "site/**"
+      - ".github/workflows/site.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "site/**"
+      - ".github/workflows/site.yml"
+
+# הרשאות מינימליות: השער רק קורא את הקוד. אינו כותב, אינו מגיב ואינו פורס.
+permissions:
+  contents: read
+
+# דחיפה חדשה לאותו ענף מבטלת ריצה קודמת שעדיין רצה. `main` מוחרג כדי
+# שהריצה שאחרי המיזוג תמיד תושלם ותשאיר סטטוס.
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+defaults:
+  run:
+    working-directory: site
+
+jobs:
+  verify:
+    name: typecheck, lint, unit, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # next@16 דורש >=20.9.0 ו-vitest@4 דורש ^20 || ^22 || >=24.
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies (npm ci, from site/package-lock.json)
+        run: npm ci
+
+      - name: Typecheck (tsc --noEmit)
+        run: npm run typecheck
+
+      - name: Lint (eslint)
+        run: npm run lint
+
+      # בלי VERCEL_ENV במכוון: בדיקות היחידה מנהלות את המשתנה בעצמן
+      # (`repositorySelection.test.ts` מוחק ומציב אותו ב-beforeEach/afterEach),
+      # וקביעה גלובלית כאן רק הייתה מסתירה את מה שהן בודקות.
+      - name: Unit tests (vitest run)
+        run: npm test
+
+      - name: Production build (next build)
+        env:
+          # ה-build של Vercel Production רץ עם VERCEL_ENV=production, ובאתר
+          # הזה הערך הוא שקובע את מצב האינדוקס: `layout.tsx` פולט
+          # `index, follow` רק כשהוא שווה "production", אחרת `noindex, nofollow`.
+          # עמודים סטטיים מקבלים את ההחלטה בזמן ה-build, ולכן build בלי
+          # המשתנה היה מאמת נתיב-אינדוקס *שונה מהותית* מזה שרץ בפרודקשן.
+          VERCEL_ENV: production
+          # דומיין קנוני מפורש, כדי שה-build יאמת את אותם canonical/OG/sitemap
+          # שהפרודקשן פולט. `resolveSiteUrl()` היה נופל לכתובת הזו גם בלעדיו.
+          NEXT_PUBLIC_SITE_URL: https://www.zachi.co.il
+        run: npm run build
+
+# הערות על סודות ועל היקף:
+#
+# * אין כאן שום סוד ואין צורך באף אחד. `ANTHROPIC_API_KEY` חסר, ולכן
+#   ה-Compass נשאר כבוי (`config.ts` בודק את קיום המפתח); `COMPASS_PG_URL`
+#   חסר, ולכן בדיקות ה-PG מדלגות על עצמן; `DATABASE_URL` חסר, ולכן
+#   `getWaitlistRepository()` מחזיר null בלי לפתוח חיבור.
+#
+# * Playwright אינו חלק מהשער הזה. הסוויטה מונה 388 בדיקות ב-41 קבצים,
+#   דורשת שני שרתי `next start` נפרדים (3100/3101) שאחד מהם בונה מחדש, ו-
+#   `playwright.config.ts` מצביע על `executablePath: /opt/pw-browsers/chromium`
+#   — נתיב שאינו קיים על runner של GitHub. הפעלתה כאן הייתה מחייבת שינוי
+#   ארכיטקטורת ה-E2E, שאינו בהיקף של שער הבנייה הזה.
