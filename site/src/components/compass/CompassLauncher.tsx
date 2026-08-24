@@ -136,11 +136,12 @@ export function CompassLauncher({
   // Chromium אינו מתקף מחדש ערך `bottom` שמגיע מכלל-stylesheet כשמשתנה-CSS
   // *יורש* (כאן `--cookie-banner-height`, שה-CookieConsent קובע על ה-body בעת
   // פתיחת הבאנר) משתנה — אך *כן* מתקף inline style. לכן הגלולה מתרוממת מעל
-  // הבאנר מיידית, בלי פיגור ובלי חפיפה. הבסיס הרספונסיבי (`--bubble-bottom”)
-  // נקבע דרך class לפי breakpoint (מובייל 5.5rem / דסקטופ 2rem), וההיסט מעל
-  // הבאנר נצרך ישירות מהמשתנה היורש. ברירת-מחדל 0px כשאין באנר.
+  // הבאנר מיידית, בלי פיגור ובלי חפיפה. הבסיס הרספונסיבי (`--fab-bottom`)
+  // מוגדר ב-`globals.css` (מובייל 5.5rem / דסקטופ 2rem), ומאותו משתנה נגזר גם
+  // טווח-הנחיתה שהפוטר שומר — כך שמיקום הבועה והריווח שמתחתיה לא יכולים
+  // להיפרד. ההיסט מעל הבאנר נצרך ישירות מהמשתנה היורש; 0px כשאין באנר.
   const bubbleBottom =
-    "max(var(--bubble-bottom), calc(var(--cookie-banner-height, 0px) + 16px))";
+    "max(var(--fab-bottom), calc(var(--cookie-banner-height, 0px) + 16px))";
 
   // בתוך /compass עצמו העמוד *הוא* המנוע — אין טעם בבועה צפה שמובילה אליו.
   // (ההחזרה מוקדמת אך *אחרי* כל ה-hooks, כדי לא להפר את סדר ה-hooks.)
@@ -160,7 +161,7 @@ export function CompassLauncher({
         data-past-hero={pastHero ? "true" : "false"}
         style={{ bottom: bubbleBottom }}
         className={cn(
-          "compass-pill group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:pe-5 md:text-[15px]"
+          "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
         )}
       >
         <span
@@ -192,7 +193,8 @@ export function CompassLauncher({
           data-past-hero={pastHero ? "true" : "false"}
           // ה-bottom נקבע inline (ולא דרך class), אחרת Chromium לא מתקף אותו מחדש
           // כשמשתנה הבאנר היורש משתנה — ואז הגלולה חופפת לבאנר. הבסיס הרספונסיבי
-          // (`--bubble-bottom”) מגיע דרך class לפי breakpoint.
+          // (`--fab-bottom`) מוגדר ב-`globals.css`, ומשם גם נגזר טווח-הנחיתה
+          // שהפוטר שומר — כדי ששני הדברים לא יוכלו להיפרד זה מזה.
           style={{ bottom: bubbleBottom }}
           className={cn(
             // „מצפן הקשר” — לא בועת-צ׳אט. משטח חם (surface) עם מסגרת מרוסנת וצל
@@ -201,7 +203,7 @@ export function CompassLauncher({
             // מתחרה ב-CTA הכהה, לא כבד. הבסיס הרספונסיבי כמשתנה: מובייל 5.5rem
             // (מעל בר-הטעימה), דסקטופ 2rem. „bottom” אינו ב-transition —
             // ההרמה מעל הבאנר מיידית. RTL: end-*.
-            "compass-pill group fixed end-4 [--bubble-bottom:max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:[--bubble-bottom:2rem] md:pe-5 md:text-[15px]"
+            "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
           )}
         >
           {/* סמל-המצפן הטרקוטה — הזהות של „מה הספר אומר על המצב שלי”. */}
