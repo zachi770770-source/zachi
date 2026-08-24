@@ -43,21 +43,21 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     ).toHaveCount(0);
   });
 
-  test("#4 Ask-the-book entry point: the honest 'more complex' entry lives in the path section, still linking to /compass (no-JS)", async ({
+  test("#4 Ask-the-book entry point: the free-text composer lives in the path section, still linking to /compass (no-JS)", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const hero = page.locator("main section").first();
     // אינו עוד בשער — לא מתחרה בשתי הפעולות הראשיות.
     await expect(
-      hero.getByRole("link", { name: "המצב שלי קצת יותר מורכב" }),
+      hero.getByRole("link", { name: /ספרו לי מה קורה אצלכם/ }),
     ).toHaveCount(0);
-    // חי במקטע התחנות (#path), בהקשר „לא מזהה את עצמי באף מצב”. אין הבטחת שיחה
-    // חופשית: ללא JS זהו קישור אמיתי אל /compass (אותו מנוע מודרך).
+    // חי במקטע השיחה (#path) כתיבת-כתיבה חופשית ראשית. ללא JS זהו קישור אמיתי אל
+    // /compass (אותו מנוע); הכיתוב מזמין לכתוב במילים שלכם.
     const path = page.locator("#path");
-    const ask = path.getByRole("link", { name: "המצב שלי קצת יותר מורכב" });
+    const ask = path.getByRole("link", { name: /ספרו לי מה קורה אצלכם/ });
     await expect(ask).toHaveAttribute("href", "/compass");
-    await expect(path.getByText(/לא מוצאים את עצמכם/)).toBeVisible();
+    await expect(path.getByText(/ספרו לי מה קורה אצלכם/)).toBeVisible();
   });
 
   test("#4b Floating ask-the-book bubble carries an explanatory label (tooltip + aria)", async ({
@@ -66,8 +66,9 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
-    // במובייל הגלולה נחשפת מעבר לקיפול-הראשון — גוללים מעבר לסף החשיפה.
-    await page.evaluate(() => window.scrollTo(0, 700));
+    // גוללים אל מעבר למקטע-השיחה (לתחתית העמוד): שם הבועה נחשפת — היא מוסתרת רק
+    // כשמקטע-השיחה עצמו במסך, כדי לא להתחרות בו.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
     await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
     // תווית מסבירה (title) — לא רק אייקון/מילה בודדת.

@@ -128,7 +128,7 @@ test.describe("journey cards read as recognition, not navigation", () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/", { waitUntil: "networkidle" });
 
-      const cards = page.locator(".path-station");
+      const cards = page.locator(".situation-card");
       await expect(cards).toHaveCount(homePaths.length);
 
       for (const [index, path] of homePaths.entries()) {

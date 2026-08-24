@@ -70,8 +70,10 @@ test.describe("compass floating bubble", () => {
     await expect(pillCss).toHaveCSS("opacity", "0");
     await expect(pillCss).toHaveCSS("pointer-events", "none");
     await expect(compass(page)).toHaveCount(0); // aria-hidden ⇒ מחוץ לעץ-הנגישות
-    // נחשפת אחרי גלילה מעבר לקיפול — וחוזרת לעץ-הנגישות (getByRole מאתר).
-    await page.evaluate(() => window.scrollTo(0, 700));
+    // נחשפת אחרי גלילה מעבר לקיפול — וחוזרת לעץ-הנגישות (getByRole מאתר). גוללים
+    // אל מעבר למקטע-השיחה (#path): שם הגלולה מוסתרת בכוונה, ולכן בודקים את
+    // החשיפה במקום פנוי מ-#path (תחתית העמוד).
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
     // יעד מגע נגיש (≥44px).
     const box = await compass(page).boundingBox();
@@ -103,9 +105,10 @@ test.describe("compass floating bubble", () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/", { waitUntil: "networkidle" });
-    // במובייל הבאנר מזוין אחרי גלילה, והגלולה נחשפת מעבר לקיפול-הראשון — גוללים
-    // מעבר לסף החשיפה כדי לבדוק את הדו-קיום שלהם.
+    // הבאנר מזוין אחרי גלילה. גוללים אל מעבר למקטע-השיחה (#path) — שם הגלולה
+    // מוסתרת בכוונה — כדי לבדוק את הדו-קיום שלה עם הבאנר במקום פנוי מ-#path.
     await page.evaluate(() => window.scrollTo(0, 700));
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect(banner(page)).toBeVisible();
     await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
     const b = await compass(page).boundingBox();
@@ -127,6 +130,11 @@ test.describe("compass floating bubble", () => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto("/", { waitUntil: "networkidle" });
       if (vp.scroll) await page.evaluate((y) => window.scrollTo(0, y), vp.scroll);
+      // במובייל הגלולה מוסתרת בכוונה כל עוד מקטע-השיחה (#path) במסך — גוללים אל
+      // מעברו (תחתית העמוד) כדי לבדוק את הדו-קיום עם הבאנר במקום פנוי ממנו.
+      if (vp.label === "mobile") {
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      }
 
       // הבאנר פתוח (לא סוגרים אותו).
       await expect(banner(page)).toBeVisible();

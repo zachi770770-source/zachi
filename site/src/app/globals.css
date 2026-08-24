@@ -609,6 +609,35 @@
     }
   }
 
+  /* סמן-הכתיבה של תיבת-השיחה החופשית בבית — קו דק מהבהב בתחילת השורה (ימין
+     ב-RTL). האות הברור ביותר ש„אפשר להקליד כאן”. מכובד תחת reduced-motion:
+     נשאר קבוע ונוכח, בלי הבהוב. */
+  .home-composer__caret {
+    display: inline-block;
+    height: 1.35rem;
+    width: 2px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--color-brand);
+    animation: caretBlink 1.1s steps(1) infinite;
+  }
+  @keyframes caretBlink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home-composer__caret {
+      animation: none;
+      opacity: 0.9;
+    }
+  }
+
   /* FAQ (<details> נטיבי): פתיחה *וגם* סגירה חלקות מונפשות ב-JS (Web Animations
      API על `.faq-answer-wrap` — גובה+שקיפות) דרך רכיב Faq. תחת reduced-motion /
      ללא JS → התנהגות נטיבית מיידית. אין כאן אנימציית-CSS כדי לא לכפול. */
@@ -2120,6 +2149,19 @@
  * המשגר. בדסקטופ אין תחרות (הפריסה רחבה, הבועה בפינה) — ולכן הכלל מוגבל למובייל. */
 @media (max-width: 767px) {
   body:has([data-ask-inline-active]) .compass-pill {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
+}
+
+/* מקטע-השיחה בבית באמת בתוך המסך → מסתירים את הבועה הצפה *במובייל בלבד*: המקטע
+ * עצמו הוא כבר הזמנה בולטת לדבר עם הספר, ואסור שתי הזמנות מתחרות באותו מסך.
+ * הסמן `data-path-in-view` נוכח ב-DOM רק כל עוד ה-IntersectionObserver מדווח
+ * שהמקטע נראה (נראוּת בפועל, לא היסט-פיקסלים) — כשגוללים משם הוא מוסר והבועה
+ * חוזרת. בדסקטופ אין תחרות (הפריסה רחבה) ולכן הכלל מוגבל למובייל. */
+@media (max-width: 767px) {
+  body:has([data-path-in-view]) .compass-pill {
     opacity: 0;
     transform: translateY(8px);
     pointer-events: none;
