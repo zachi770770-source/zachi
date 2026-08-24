@@ -23,31 +23,41 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     await expect(page.locator('a[href="/checkout"]')).toHaveCount(0);
   });
 
-  test("#3 Product + price: hero states format (digital), status (launching) and price near the CTA", async ({
+  test("#3 Product + purchase: the hero pairs the sample CTA with a clear Amazon purchase action; the Kindle availability line is not duplicated in the hero", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const hero = page.locator("main section").first();
-    // תווית זמינות אחת ליד ה-CTA: הספר זמין עכשיו במהדורת Kindle באמזון.
-    const label = hero.getByText(/זמין עכשיו במהדורת Kindle באמזון/);
-    await expect(label).toBeVisible();
-    // הפעולה הראשית (טעימה) קרובה לתווית המחיר — היררכיה ברורה.
+    // שתי פעולות בהיררכיה ברורה: ראשית (טעימה) ומשנית (רכישה) — יחד ליד ה-CTA.
     await expect(
       hero.getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" }),
     ).toBeVisible();
+    await expect(
+      hero.getByRole("link", { name: /לרכישת הספר באמזון/ }),
+    ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
+    // תווית „זמין עכשיו במהדורת Kindle באמזון” הוסרה מהשער כדי לא לכפול את
+    // מסר-אמזון ליד הפעולה. עובדת הזמינות/פורמט עדיין נבדקת במקטע-הסגירה
+    // (ראו launch-ready / conversion) — כאן היא *אינה* מופיעה בשער.
+    await expect(
+      hero.getByText(/זמין עכשיו במהדורת Kindle באמזון/),
+    ).toHaveCount(0);
   });
 
-  test("#4 Ask-the-book micro-copy: one line near the hero CTA explains what happens on click", async ({
+  test("#4 Ask-the-book entry point: it moved out of the hero and lives in the path section, still linking to /compass", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const hero = page.locator("main section").first();
-    // קישור ה„מה הספר אומר על המצב שלי?” בשער → /compass (המנוע הדטרמיניסטי).
-    const ask = hero.getByRole("link", { name: "מה הספר אומר על המצב שלי?" });
+    // אינו עוד בשער — לא מתחרה בשתי הפעולות הראשיות.
+    await expect(
+      hero.getByRole("link", { name: "מה הספר אומר על המצב שלי?" }),
+    ).toHaveCount(0);
+    // עבר למקטע התחנות (#path), בהקשר „לאיזו תחנה אני שייך”, עם מסגור קצר.
+    // הפונקציונליות נשמרת: אותו קישור אל /compass (המנוע הדטרמיניסטי).
+    const path = page.locator("#path");
+    const ask = path.getByRole("link", { name: "מה הספר אומר על המצב שלי?" });
     await expect(ask).toHaveAttribute("href", "/compass");
-    // שורת-הסבר צמודה: „כמה שאלות קצרות … הקטע והכלי …” — לא ייעוץ/אבחון, לא AI.
-    await expect(hero.getByText(/שאלות קצרות/)).toBeVisible();
-    await expect(hero.getByText(/הקטע והכלי/)).toBeVisible();
+    await expect(path.getByText(/לא בטוחים לאן אתם שייכים/)).toBeVisible();
   });
 
   test("#4b Floating ask-the-book bubble carries an explanatory label (tooltip + aria)", async ({

@@ -6,7 +6,7 @@
 import type { PersonaId } from "@/content/personas";
 
 export const hero = {
-  eyebrow: "ספר מעשי לדייטינג, לבחירה ולזוגיות",
+  eyebrow: "ספר ומדריך מעשי לדייטינג, לבחירה ולזוגיות",
   headlineTop: "להפסיק לחפש.",
   headlineBottom: "להתחיל לבנות.",
   title: "מדייטים לאהבה",

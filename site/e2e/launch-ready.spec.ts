@@ -3,7 +3,7 @@ import { test, expect } from "./fixtures";
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
-  test("home Hero: one dominant sample action + one quiet secondary (ask the book)", async ({ page }) => {
+  test("home Hero: one dominant sample action + one quiet secondary purchase; ask-the-book lives in the path section", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     const heroSection = page.locator("main section").first();
@@ -15,14 +15,20 @@ test.describe("Launch-readiness", () => {
     await expect(dominant).toBeVisible();
     await expect(dominant).toHaveAttribute("href", "/preview");
 
-    // אין שדה אימייל בשער. פעולת רכישה משנית: „הספר זמין עכשיו באמזון” → Amazon.
+    // אין שדה אימייל בשער. פעולת רכישה משנית: „לרכישת הספר באמזון” → Amazon.
     await expect(heroSection.getByLabel("כתובת אימייל")).toHaveCount(0);
     await expect(
-      heroSection.getByRole("link", { name: /הספר זמין עכשיו באמזון/ }),
+      heroSection.getByRole("link", { name: /לרכישת הספר באמזון/ }),
     ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
-    // פעולה משנית יחידה ושקטה (קישור-טקסט): „מה הספר אומר על המצב שלי?” → /compass.
-    const ask = heroSection.getByRole("link", { name: "מה הספר אומר על המצב שלי?" });
+    // „מה הספר אומר על המצב שלי?” אינו עוד בשער — הוא עבר למקטע התחנות (#path)
+    // כדי לא להתחרות בשתי הפעולות הראשיות. הפונקציונליות נשמרת: קישור אל /compass.
+    await expect(
+      heroSection.getByRole("link", { name: "מה הספר אומר על המצב שלי?" }),
+    ).toHaveCount(0);
+    const ask = page.locator("#path").getByRole("link", {
+      name: "מה הספר אומר על המצב שלי?",
+    });
     await expect(ask).toHaveAttribute("href", "/compass");
   });
 

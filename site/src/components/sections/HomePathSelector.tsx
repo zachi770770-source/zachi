@@ -84,6 +84,24 @@ export function HomePathSelector() {
             ))}
           </ul>
         </div>
+
+        {/* כניסה קונטקסטואלית לכלי „מה הספר אומר על המצב שלי?” — עברה לכאן
+            מה-Hero. זהו ההקשר הנכון לה: מי שלא בטוח לאיזו תחנה הוא שייך. אותה
+            פונקציונליות (‎/compass), בלי להתחרות בשתי הפעולות הראשיות שב-Hero.
+            הבועה הצפה בתחתית המסך נשארת ערוץ-הגישה הגלובלי הנוסף — ללא שינוי. */}
+        <p className="mx-auto mt-5 max-w-2xl text-center text-[14px] leading-relaxed text-foreground-muted">
+          {homePathUi.compassPrompt}{" "}
+          <Link
+            href="/compass"
+            className="group inline-flex items-center gap-1.5 font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            {homePathUi.compassLabel}
+            <ArrowLeft
+              className="h-3.5 w-3.5 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+              aria-hidden="true"
+            />
+          </Link>
+        </p>
       </Container>
     </section>
   );
