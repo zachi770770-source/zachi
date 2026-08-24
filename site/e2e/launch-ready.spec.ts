@@ -21,13 +21,14 @@ test.describe("Launch-readiness", () => {
       heroSection.getByRole("link", { name: /לרכישת הספר באמזון/ }),
     ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
-    // „מה הספר אומר על המצב שלי?” אינו עוד בשער — הוא עבר למקטע התחנות (#path)
-    // כדי לא להתחרות בשתי הפעולות הראשיות. הפונקציונליות נשמרת: קישור אל /compass.
+    // הכניסה הכנה „המצב שלי קצת יותר מורכב” אינה בשער — היא חיה במקטע התחנות
+    // (#path), כדי לא להתחרות בשתי הפעולות הראשיות. הפונקציונליות נשמרת: ללא JS
+    // זהו קישור אמיתי אל /compass (אותו מנוע המודרך).
     await expect(
-      heroSection.getByRole("link", { name: "מה הספר אומר על המצב שלי?" }),
+      heroSection.getByRole("link", { name: "המצב שלי קצת יותר מורכב" }),
     ).toHaveCount(0);
     const ask = page.locator("#path").getByRole("link", {
-      name: "מה הספר אומר על המצב שלי?",
+      name: "המצב שלי קצת יותר מורכב",
     });
     await expect(ask).toHaveAttribute("href", "/compass");
   });
@@ -161,14 +162,14 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
   });
 
-  test("home selector navigates to the journey page; the page is a personal landing with a contextual sample; floating ask engine still opens", async ({
+  test("home: the floating ask engine still opens, and selecting a situation opens the listening conversation inline (no navigation)", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
-    // בבית: מנוע ההכוונה זמין כגלולה צפה — פותח את בורר התחנות.
+    // בבית: מנוע ההכוונה זמין כגלולה צפה — פותח את בורר התחנות. נשאר ללא שינוי.
     const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
     await page.mouse.wheel(0, 200);
     await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
@@ -178,13 +179,27 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
     await page.keyboard.press("Escape");
 
-    // בחירת מצב ב-Home *היא* הניווט: כרטיס אחד, לחיצה אחת, עמוד-המסע.
+    // בחירת מצב ב-Home פותחת את מנוע „שאל את הספר” *במקום*, מזוהה לתחנה (מדלג על
+    // „איפה אתם?” ומתחיל בדילמה), בלי לנווט לעמוד-המסע.
     const path = page.locator("#path");
     await path.scrollIntoViewIfNeeded();
     await path.locator('a[href="/before-relationship"]').click();
-    await page.waitForURL("**/before-relationship");
+    await expect(page).toHaveURL(/\/$/);
+    await expect(
+      path
+        .getByRole("region", { name: /שיחה קצרה עם הספר/ })
+        .getByRole("heading", { name: "מה הכי מעסיק אתכם כרגע?" }),
+    ).toBeVisible();
+  });
 
-    // עמוד-המסע: כותרת אישית, פירורי-לחם, וטעימה מותאמת (Primary → contextual preview).
+  test("journey page: personal landing with breadcrumb, contextual sample, and a quiet way back to the selector", async ({
+    page,
+  }) => {
+    // עמודי-המסע נשמרים כחוויה מלאה — נגישים ישירות ומ-‎<a> ללא-JS של הבורר —
+    // גם אחרי שבחירת-מצב בבית פותחת שיחה במקום במקום לנווט אליהם מיד.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/before-relationship", { waitUntil: "networkidle" });
+
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "לפני שבוחרים בן או בת זוג, כדאי להבין איך אתם בוחרים.",
     );

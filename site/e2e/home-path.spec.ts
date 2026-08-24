@@ -1,28 +1,39 @@
 import { test, expect } from "./fixtures";
 
+import { homePaths, homePathUi } from "../src/content/homePaths";
+import { askStations, askUi } from "../src/content/askRoute";
+
 /**
- * „איפה זה פוגש אותך עכשיו?” — שער אמיתי לארבע החוויות, בלחיצה אחת.
- * כל מצב הוא קישור יחיד אל עמוד-המסע שלו: אין שלב „בחירה ואז המשך”, אין radio
- * ואין פאנל-זיהוי נפרד. הקישורים קיימים תמיד ב-HTML (SEO / ללא-JS), הניווט
- * נטיבי (Tab + Enter), ובאותה לשונית.
+ * „איפה אתם נמצאים עכשיו?” — רגע ההקשבה של עמוד הבית.
+ *
+ * שכבת הבסיס (SSR / ללא-JS / SEO) לא השתנתה: ארבעה כרטיסי-`<a>` אמיתיים אל
+ * עמודי-המסע, וקישור כן „המצב שלי קצת יותר מורכב” אל /compass. מעליה שכבת
+ * שיפור-הדרגתי: *עם* JavaScript, בחירת מצב אינה מנווטת אלא פותחת את מנוע „שאל
+ * את הספר” (AskRoute) *במקום*, מזוהה לאותה תחנה (מדלג על „איפה אתם?” ומתחיל
+ * בדילמה). הכרטיסים מתקפלים והמנוע תופס את מקומם — קומפקטי, בלי ניווט החוצה.
  */
 
 const STAGES = [
-  { name: /אני מחפש/, href: "/before-relationship" },
-  { name: /אני בתחילת/, href: "/building-relationship" },
-  { name: /אני בתוך/, href: "/inside-relationship" },
-  { name: /אני אחרי/, href: "/after-breakup" },
+  { name: /אני מחפש/, href: "/before-relationship", ask: "dating" },
+  { name: /אני בתחילת/, href: "/building-relationship", ask: "building" },
+  { name: /אני בתוך/, href: "/inside-relationship", ask: "existing" },
+  { name: /אני אחרי/, href: "/after-breakup", ask: "after-breakup" },
 ] as const;
 
-test("#path: four stage links, one per destination, no selection step", async ({ page }) => {
+const stationName = (askId: string) =>
+  askStations.find((s) => s.id === askId)!.name;
+
+test("#path: four situation cards + honest complex entry — real links (SEO/no-JS)", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
   await expect(
-    path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" }),
+    path.getByRole("heading", { name: homePathUi.heading }),
   ).toBeVisible();
 
-  // ארבעה קישורים — ולא radio-ים. הבחירה *היא* הניווט.
+  // ארבעה קישורים אמיתיים — ולא radio-ים.
   await expect(path.getByRole("radio")).toHaveCount(0);
   await expect(path.locator(".path-station")).toHaveCount(4);
   for (const s of STAGES) {
@@ -31,33 +42,74 @@ test("#path: four stage links, one per destination, no selection step", async ({
     await expect(card).toBeVisible();
     await expect(card).toContainText(s.name);
   }
+
+  // הכניסה הכנה למי שלא מזהה את עצמו: קישור אמיתי אל /compass (אותו מנוע),
+  // בניסוח שאינו מבטיח שיחה חופשית.
+  const complex = path.getByRole("link", { name: homePathUi.complexLabel });
+  await expect(complex).toHaveAttribute("href", "/compass");
+  await expect(path.getByText(homePathUi.complexPrompt)).toBeVisible();
 });
 
 for (const s of STAGES) {
-  test(`clicking ${s.href} navigates straight to the station page`, async ({ page }) => {
+  test(`clicking ${s.href} opens the listening conversation inline, seeded to its station (no navigation)`, async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "networkidle" });
-    await page.locator(`#path a[href="${s.href}"]`).click();
-    // ניווט צד-לקוח: ממתינים ל-URL, לא ל-load event.
-    await page.waitForURL(`**${s.href}`);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    // המשכיות המסע: עמוד-היעד מציג את מחוון-המיקום.
-    await expect(page.locator(".journey-position").first()).toBeVisible();
+    const path = page.locator("#path");
+
+    await path.locator(`a[href="${s.href}"]`).click();
+
+    // אין ניווט — נשארים בעמוד הבית.
+    await expect(page).toHaveURL(/\/$/);
+    // המנוע נפתח *במקום*, מדלג על „איפה אתם?” ומתחיל בדילמה (⇒ התחנה נזרעה נכון):
+    const region = path.getByRole("region", { name: homePathUi.conversationLabel });
+    await expect(region).toBeVisible();
+    await expect(region.getByRole("heading", { name: askUi.dilemmaTitle })).toBeVisible();
+    // פירור-הדרך מאשר את התחנה הספציפית שנבחרה.
+    await expect(region.getByText(stationName(s.ask), { exact: true })).toBeVisible();
+    // הכרטיסים התקפלו (לא נערמו מתחת לשיחה).
+    await expect(path.locator(".path-station")).toHaveCount(0);
+
+    // „חזרה לבחירת המצב” מחזיר את הכרטיסים.
+    await path.getByRole("button", { name: homePathUi.backToPaths }).click();
+    await expect(path.locator(".path-station")).toHaveCount(4);
+    await expect(region).toHaveCount(0);
   });
 }
 
-test("keyboard: Tab reaches a stage card and Enter navigates", async ({ page }) => {
+test("the broad entry opens the guided engine from its start (station step), still no navigation", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+
+  await path.getByRole("link", { name: homePathUi.complexLabel }).click();
+  await expect(page).toHaveURL(/\/$/);
+  // המצב הרחב ביותר: המנוע נפתח בשלב בחירת-המצב, לא מדלג.
+  const region = path.getByRole("region", { name: homePathUi.conversationLabel });
+  await expect(region.getByRole("heading", { name: askUi.stationTitle })).toBeVisible();
+});
+
+test("keyboard: Tab reaches a card and Enter opens the inline conversation (no navigation)", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const card = page.locator('#path a[href="/building-relationship"]');
   await card.focus();
   await expect(card).toBeFocused();
   await page.keyboard.press("Enter");
-  await page.waitForURL("**/building-relationship");
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.locator("#path").getByRole("region", { name: homePathUi.conversationLabel }),
+  ).toBeVisible();
 });
 
-test("no-JS: the stage cards are plain links and still navigate", async ({ browser }) => {
+test("no-JS: the cards and the complex entry are plain links and still navigate", async ({
+  browser,
+}) => {
   const ctx = await browser.newContext({
     javaScriptEnabled: false,
     reducedMotion: "reduce",
@@ -68,6 +120,11 @@ test("no-JS: the stage cards are plain links and still navigate", async ({ brows
   for (const s of STAGES) {
     await expect(path.locator(`a[href="${s.href}"]`)).toHaveCount(1);
   }
+  // הכניסה הרחבה גם היא קישור אמיתי (ל-/compass) ללא JS.
+  await expect(path.getByRole("link", { name: homePathUi.complexLabel })).toHaveAttribute(
+    "href",
+    "/compass",
+  );
   await Promise.all([
     page.waitForURL(/\/after-breakup$/),
     path.locator('a[href="/after-breakup"]').click(),
@@ -75,7 +132,32 @@ test("no-JS: the stage cards are plain links and still navigate", async ({ brows
   await ctx.close();
 });
 
-test("mobile 390: a stage card is a large tap target and is not overlaid", async ({ browser }) => {
+test("mobile 390: opening the inline conversation hides the floating bubble (no two competing entries)", async ({
+  browser,
+}) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const path = page.locator("#path");
+
+  // גוללים מעבר לסף החשיפה של הבועה, ומוודאים שהיא נוכחת לפני הפתיחה.
+  await path.scrollIntoViewIfNeeded();
+  const bubble = page.locator(".compass-pill");
+  await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
+
+  // פתיחת השיחה במקום → הבועה נסוגה (אין שתי נקודות-כניסה שיחתיות במסך אחד).
+  await path.locator('a[href="/inside-relationship"]').click();
+  await expect(bubble).toHaveCSS("opacity", "0", { timeout: 4000 });
+  await expect(bubble).toHaveCSS("pointer-events", "none");
+
+  // חזרה → הבועה שבה.
+  await path.getByRole("button", { name: homePathUi.backToPaths }).click();
+  await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
+  await ctx.close();
+});
+
+test("mobile 390: a situation card is a large tap target and is not overlaid", async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await ctx.newPage();
   await page.emulateMedia({ reducedMotion: "reduce" });

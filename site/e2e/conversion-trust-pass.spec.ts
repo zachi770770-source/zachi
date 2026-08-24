@@ -43,21 +43,21 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     ).toHaveCount(0);
   });
 
-  test("#4 Ask-the-book entry point: it moved out of the hero and lives in the path section, still linking to /compass", async ({
+  test("#4 Ask-the-book entry point: the honest 'more complex' entry lives in the path section, still linking to /compass (no-JS)", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const hero = page.locator("main section").first();
     // אינו עוד בשער — לא מתחרה בשתי הפעולות הראשיות.
     await expect(
-      hero.getByRole("link", { name: "מה הספר אומר על המצב שלי?" }),
+      hero.getByRole("link", { name: "המצב שלי קצת יותר מורכב" }),
     ).toHaveCount(0);
-    // עבר למקטע התחנות (#path), בהקשר „לאיזו תחנה אני שייך”, עם מסגור קצר.
-    // הפונקציונליות נשמרת: אותו קישור אל /compass (המנוע הדטרמיניסטי).
+    // חי במקטע התחנות (#path), בהקשר „לא מזהה את עצמי באף מצב”. אין הבטחת שיחה
+    // חופשית: ללא JS זהו קישור אמיתי אל /compass (אותו מנוע מודרך).
     const path = page.locator("#path");
-    const ask = path.getByRole("link", { name: "מה הספר אומר על המצב שלי?" });
+    const ask = path.getByRole("link", { name: "המצב שלי קצת יותר מורכב" });
     await expect(ask).toHaveAttribute("href", "/compass");
-    await expect(path.getByText(/לא בטוחים לאן אתם שייכים/)).toBeVisible();
+    await expect(path.getByText(/לא מוצאים את עצמכם/)).toBeVisible();
   });
 
   test("#4b Floating ask-the-book bubble carries an explanatory label (tooltip + aria)", async ({

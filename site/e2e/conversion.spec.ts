@@ -37,12 +37,12 @@ test("/preview is publicly accessible directly, without any registration", async
 
 test("home path selector: four real navigation cards to the journey pages (SEO)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // הבית האישי: אזור „איפה זה פוגש אותך עכשיו?” (#path) — שער לארבע חוויות.
+  // הבית האישי: אזור „איפה אתם נמצאים עכשיו?” (#path) — שער לארבע חוויות.
   await expect(page.locator("#where")).toHaveCount(0);
   const path = page.locator("#path");
   await expect(path).toHaveCount(1);
   await expect(
-    path.getByRole("heading", { name: "איפה זה פוגש אותך עכשיו?" }),
+    path.getByRole("heading", { name: "איפה אתם נמצאים עכשיו?" }),
   ).toBeVisible();
   // ארבעה כרטיסי-קישור אמיתיים ליעדים (SSR, ל-SEO/נגישות) — ואין עוד result-panel.
   for (const href of [

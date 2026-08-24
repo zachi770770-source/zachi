@@ -99,7 +99,7 @@ test("reduced-motion: the path-selector area is fully visible", async ({ browser
   // תחת reduced-motion אין הסתרה — כותרת אזור הבחירה וכרטיסי-הניווט קריאים במלואם.
   const path = page.locator("#path");
   await path.scrollIntoViewIfNeeded();
-  await expect(path).toContainText("איפה זה פוגש אותך עכשיו?");
+  await expect(path).toContainText("איפה אתם נמצאים עכשיו?");
   await expect(path.getByText(/אני מחפש/).first()).toBeVisible();
   await ctx.close();
 });
