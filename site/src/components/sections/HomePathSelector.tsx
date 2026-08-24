@@ -1,27 +1,20 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { Container } from "@/components/shared/Container";
-import { homePaths, homePathUi } from "@/content/homePaths";
+import { homePathUi } from "@/content/homePaths";
+import { HomePathEntry } from "@/components/sections/HomePathEntry";
 
 /**
- * לב עמוד הבית: „איפה זה פוגש אותך עכשיו?” — שער אמיתי לארבע החוויות.
- * כל מצב הוא *קישור אחד* אל עמוד-המסע שלו: לחיצה או הקשה מנווטות מיד, בלי שלב
- * „בחירה ואז המשך”. הכרטיס כולו הוא שטח-הלחיצה (יעד-מגע גדול), והניווט הוא
- * ניווט-צד-לקוח רגיל, באותה לשונית.
+ * לב עמוד הבית: „איפה אתם נמצאים עכשיו?” — רגע ההקשבה של העמוד. הכותרת מפנה את
+ * תשומת-הלב אל המבקר עצמו, ובחירת מצב פותחת שיחה קצרה עם הספר *במקום*, בלי לנווט
+ * החוצה (ראו `HomePathEntry`).
  *
- * ארכיטקטורה: רכיב שרת בלבד (ללא "use client"), בלי state ובלי JS. ארבעת
- * הקישורים קיימים תמיד ב-HTML (SEO + עבודה מלאה ללא הידרציה), והם `<a>` נטיבי —
- * כלומר Tab מגיע אליהם ו-Enter מפעיל אותם בלי שורת קוד נוספת ובלי „חטיפת” קליק
- * מ-radio (שהיה מנווט גם בחיצי-מקלדת, ולכן נפסל).
+ * ארכיטקטורה: מעטפת-שרת (כותרת + תת-כותרת מרונדרות ב-SSR ל-SEO) עוטפת אי-לקוח
+ * יחיד (`HomePathEntry`) שנושא את ארבעת הכרטיסים ואת רגע-ההקשבה. הכרטיסים עצמם
+ * נשארים `<a>` אמיתיים ב-HTML (SEO + עבודה מלאה ללא הידרציה) — האינטראקציה היא
+ * שכבת שיפור-הדרגתי מעליהם, לא תחליף לקישור.
  *
- * מסלול-התחנות (.path-stations) נשמר כ*מפה* של המסע: קו אחד שמחבר את התחנות,
- * וצומת שמתעורר בריחוף/פוקוס כתצוגה-מקדימה של „לכאן אני נכנס”. ההתקדמות
- * האמיתית („תחנה N מתוך 3”) חיה בעמוד-היעד (JourneyPosition) — בעמוד הבית עוד
- * לא הלכנו לשום מקום, ולכן שום מקטע אינו מסומן כ„נעבר”.
- *
- * ה-IA נשמר: שלוש תחנות במחזור + „אחרי פרידה” כשער מעבר (מסומן בבאדג'), ולכן
- * גם כאן השער אינו נצבע כתחנה רביעית.
+ * מסלול-התחנות (.path-stations) נשמר כ*מפה* של המסע. ה-IA נשמר: שלוש תחנות
+ * במחזור + „אחרי פרידה” כשער מעבר (מסומן בבאדג'), ולכן השער אינו נצבע כתחנה
+ * רביעית.
  */
 export function HomePathSelector() {
   return (
@@ -40,68 +33,7 @@ export function HomePathSelector() {
           </p>
         </div>
 
-        <div className="path-choose mx-auto mt-5 max-w-2xl sm:max-w-4xl">
-          <ul className="path-stations relative grid grid-cols-1 gap-2.5 sm:grid-cols-4 sm:gap-4">
-            {homePaths.map((p, index) => (
-              // `contents` — הפריט אינו יוצר תיבה משלו, כך שהקישור עצמו הוא תא
-              // הרשת ומקבל את גובה השורה המלא (יעד-מגע גדול, מסלול מיושר).
-              <li key={p.id} className="contents">
-                <Link
-                  href={p.stationHref}
-                  data-index={index}
-                  className="path-station lift-hover relative flex items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:border-brand/50 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:flex-col sm:items-start sm:gap-3 sm:rounded-2xl sm:p-5"
-                >
-                  {/* צומת התחנה — במרזב-המסלול, מחוץ לגוף הכרטיס, כדי שהקו לא
-                      ייחבא מאחורי רקע הכרטיס. דקורטיבי בלבד. */}
-                  <span className="path-station__node" aria-hidden="true" />
-                  <span className="min-w-0">
-                    <span className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-serif text-[15px] font-bold leading-tight text-foreground sm:text-[1.3rem]">
-                        {p.buttonTitle}
-                      </span>
-                      {p.gate ? (
-                        <span className="inline-flex shrink-0 items-center rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-brand-foreground sm:text-[12px]">
-                          {homePathUi.gateBadge}
-                        </span>
-                      ) : null}
-                    </span>
-                    {/* שורת-הזיהוי היא *הסיבה* שהכרטיס אינו כפתור-ניווט: היא
-                        מתארת את התחושה, לא את היעד. לכן היא מוצגת גם במובייל —
-                        להסתיר אותה שם היה משאיר לרוב המבקרים בדיוק את התפריט
-                        שביקשנו לא להיות. */}
-                    <span className="mt-1 block text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[15px]">
-                      {p.buttonSub}
-                    </span>
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    className="path-arrow inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-brand transition-colors sm:h-10 sm:w-10 sm:self-end"
-                  >
-                    <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* כניסה קונטקסטואלית לכלי „מה הספר אומר על המצב שלי?” — עברה לכאן
-            מה-Hero. זהו ההקשר הנכון לה: מי שלא בטוח לאיזו תחנה הוא שייך. אותה
-            פונקציונליות (‎/compass), בלי להתחרות בשתי הפעולות הראשיות שב-Hero.
-            הבועה הצפה בתחתית המסך נשארת ערוץ-הגישה הגלובלי הנוסף — ללא שינוי. */}
-        <p className="mx-auto mt-5 max-w-2xl text-center text-[14px] leading-relaxed text-foreground-muted">
-          {homePathUi.compassPrompt}{" "}
-          <Link
-            href="/compass"
-            className="group inline-flex items-center gap-1.5 font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
-            {homePathUi.compassLabel}
-            <ArrowLeft
-              className="h-3.5 w-3.5 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
-              aria-hidden="true"
-            />
-          </Link>
-        </p>
+        <HomePathEntry />
       </Container>
     </section>
   );

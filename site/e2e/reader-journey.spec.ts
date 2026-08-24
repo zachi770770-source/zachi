@@ -91,13 +91,12 @@ test("compass ?station=<invalid> and direct /compass start normally at the stati
   await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
 });
 
-test("two actions from Home to real book content (state → journey page → sample)", async ({ page }) => {
+test("journey page → real book content (contextual sample lands on a real passage)", async ({ page }) => {
+  // בעבר בחירת-מצב בבית ניווטה ישירות לעמוד-המסע; מאז היא פותחת שיחה *במקום*
+  // (ראו home-path.spec). עמוד-המסע נשאר חוויה מלאה — נגיש ישירות ומ-‎<a> ללא-JS
+  // של הבורר — וכאן נבדקת שרשרת ההמשך שלו: הטעימה המותאמת → קטע אמיתי מהספר.
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/", { waitUntil: "networkidle" });
-  // פעולה 1: בחירת מצב = ניווט ישיר לעמוד-המסע (לחיצה אחת).
-  await page.locator('#path a[href="/before-relationship"]').click();
-  await page.waitForURL("**/before-relationship");
-  // פעולה 2: הטעימה המותאמת → נחיתה על קטע אמיתי מהספר.
+  await page.goto("/before-relationship", { waitUntil: "networkidle" });
   await page.getByRole("link", { name: "קראו את הקטע שמתאים לשלב הזה" }).click();
   await expect(page).toHaveURL(/\/preview\?tool=fact-story-action/);
   await expect(page.locator(".sample-reader")).toContainText("כשאתה מפסיק להאמין לכל סיפור");
