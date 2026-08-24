@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, MessageCircleQuestion, ShoppingCart } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { hero } from "@/content/book";
 import { siteConfig } from "@/config/site";
@@ -14,11 +14,12 @@ import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 
 /**
  * Hero — גריד אמיתי של שתי עמודות: תוכן (ימין ב-RTL) / ספר (שמאל), מיושר אנכית
- * למרכז. יחידת תוכן רציפה אחת, מקוצרת: כותרת, משפט הסבר אחד, מחיר, ושתי פעולות
- * בלבד — פעולה ראשית „קראו טעימה מהספר” אל /preview, ופעולה משנית
- * „מה הספר אומר על המצב שלי?” אל /compass. אין כאן בורר-פרסונה, פסקאות חוזרות
- * או CTA כפול — כל היתר חי
- * בהמשך העמוד ובדפים הייעודיים.
+ * למרכז. יחידת תוכן רציפה אחת, מקוצרת: מקטע-מידע („מה זה”), כותרת, משפט הסבר
+ * אחד, ושתי פעולות בלבד — פעולה ראשית „קראו טעימה מהספר” אל /preview, ופעולה
+ * משנית „לרכישת הספר באמזון” (קישור חיצוני). אין כאן בורר-פרסונה, פסקאות
+ * חוזרות, הצהרת-זמינות כפולה או CTA שלישי — כל היתר חי בהמשך העמוד ובדפים
+ * הייעודיים. הכניסה לכלי „מה הספר אומר על המצב שלי?” עברה אל מקטע התחנות
+ * (HomePathSelector), בהקשר שבו היא הגיונית, כדי לא להתחרות בשתי הפעולות כאן.
  *
  * מצב Pre-launch: אין כפתור רכישה חסום; כשה-salesOpen יהפוך ל-true הפעולה
  * הראשית הופכת אוטומטית ל„לרכישת הספר”.
@@ -45,8 +46,13 @@ export function Hero() {
             {/* (1) קו המסלול הפותח — טרקוטה דק שנמשך ראשון */}
             <span className="hero-rule mb-2 lg:mb-4" aria-hidden="true" />
 
+            {/* מקטע-המידע: „מה זה”. משתמש בטיפוגרפיה של `.kicker` (גודל, משקל,
+                ריווח-אותיות וצבע — ללא שינוי), אך `hero-eyebrow` מסיר את קו-
+                התווית הדקורטיבי (`::before`) *כאן בלבד*, כדי שהשורה תיקרא כמידע
+                על המוצר ולא כתגית עיצובית. שאר השימושים ב-`.kicker` באתר
+                נשארים כפי שהם. */}
             <span
-              className="kicker hero-fade"
+              className="kicker hero-eyebrow hero-fade"
               style={{ animationDelay: "180ms" }}
             >
               {hero.eyebrow}
@@ -90,17 +96,13 @@ export function Hero() {
               הבאה.
             </p>
 
-            {/* יחידת המרה אחת: מחיר, פעולה ראשית ופעולה משנית — מקובצים תחת קו
-                שיער עדין, כך שהמחיר נראה חלק מהגוש. */}
+            {/* יחידת ההמרה: שתי פעולות בלבד, בהיררכיה ברורה — טעימה (ראשית)
+                ורכישה (משנית) — תחת קו שיער עדין שמפריד אותן מהקופי שמעליהן.
+                שורת „זמין עכשיו במהדורת Kindle באמזון” הוסרה כאן: הפעולה
+                המשנית „לרכישת הספר באמזון” כבר מוסרת את אותה עובדה, ולא צריך
+                לומר אותה פעמיים בגוש-הפעולה. (הזמינות/פורמט נשמרים כפי שהם ב-
+                NewsletterSection וב-/book.) */}
             <div className="mt-3 flex w-full max-w-[46ch] flex-col items-start gap-2.5 border-t border-border pt-3 lg:mt-5 lg:gap-3.5 lg:pt-5">
-              {/* סטטוס זמינות: הספר כבר זמין לרכישה במהדורת Kindle באמזון. */}
-              <p
-                className="hero-fade text-[15px] font-semibold text-brand-hover lg:text-[16px]"
-                style={{ animationDelay: "620ms" }}
-              >
-                {siteConfig.amazon.availableLabel}
-              </p>
-
               <div
                 className="hero-rise-soft flex w-full flex-col items-start gap-3 lg:gap-4"
                 style={{ animationDelay: "160ms" }}
@@ -124,33 +126,15 @@ export function Hero() {
                   </Button>
                 )}
 
-                {/* פעולת רכישה משנית — הספר זמין עכשיו באמזון (קישור חיצוני).
-                    משנית לטעימה, אך ברורה: מי שכבר מוכן לקנות מגיע ישירות. */}
+                {/* פעולת רכישה משנית יחידה — פעולה ברורה (לא הצהרת-זמינות
+                    נוספת): מי שכבר מוכן לקנות מגיע ישירות לאמזון. */}
                 <AmazonBuyLink
                   source="home"
                   className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 >
-                  <ShoppingCart className="h-4 w-4 text-brand" aria-hidden="true" />
-                  הספר זמין עכשיו באמזון
+                  לרכישת הספר באמזון
                   <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
                 </AmazonBuyLink>
-
-                {/* פעולה קונטקסטואלית „מה הספר אומר על המצב שלי?” → /compass —
-                    כלי התאמה דטרמיניסטי (לא AI, לא ייעוץ), עם משפט-הסבר קצר שאומר
-                    מה יקרה בלחיצה. גלוי בשני המכשירים. */}
-                <div className="flex flex-col items-start gap-1">
-                  <Link
-                    href="/compass"
-                    className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                  >
-                    <MessageCircleQuestion className="h-4 w-4 text-brand" aria-hidden="true" />
-                    מה הספר אומר על המצב שלי?
-                    <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                  </Link>
-                  <p className="text-[13px] leading-snug text-foreground-muted">
-                    כמה שאלות קצרות, והקטע והכלי שמתאימים למה שעובר עליכם עכשיו.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
