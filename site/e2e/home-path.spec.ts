@@ -1,16 +1,16 @@
 import { test, expect } from "./fixtures";
 
-import { homePaths, homePathUi } from "../src/content/homePaths";
+import { homePathUi } from "../src/content/homePaths";
 import { askStations, askUi } from "../src/content/askRoute";
 
 /**
  * „איפה אתם נמצאים עכשיו?” — רגע ההקשבה של עמוד הבית.
  *
  * שכבת הבסיס (SSR / ללא-JS / SEO) לא השתנתה: ארבעה כרטיסי-`<a>` אמיתיים אל
- * עמודי-המסע, וקישור כן „המצב שלי קצת יותר מורכב” אל /compass. מעליה שכבת
- * שיפור-הדרגתי: *עם* JavaScript, בחירת מצב אינה מנווטת אלא פותחת את מנוע „שאל
- * את הספר” (AskRoute) *במקום*, מזוהה לאותה תחנה (מדלג על „איפה אתם?” ומתחיל
- * בדילמה). הכרטיסים מתקפלים והמנוע תופס את מקומם — קומפקטי, בלי ניווט החוצה.
+ * עמודי-המסע, והזמנה חופשית „ספרו במילים שלכם…” כקישור אמיתי אל /compass. מעליה
+ * שכבת שיפור-הדרגתי: *עם* JavaScript, בחירת מצב אינה מנווטת אלא פותחת את מנוע
+ * „שאל את הספר” (AskRoute) *במקום*, מזוהה לאותה תחנה (מדלג על „איפה אתם?”
+ * ומתחיל בדילמה). הכרטיסים מתקפלים והמנוע תופס את מקומם — קומפקטי, בלי ניווט.
  */
 
 const STAGES = [
@@ -23,7 +23,7 @@ const STAGES = [
 const stationName = (askId: string) =>
   askStations.find((s) => s.id === askId)!.name;
 
-test("#path: four situation cards + honest complex entry — real links (SEO/no-JS)", async ({
+test("#path: four situation cards + a free-text conversational invitation — real links (SEO/no-JS)", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -32,6 +32,8 @@ test("#path: four situation cards + honest complex entry — real links (SEO/no-
   await expect(
     path.getByRole("heading", { name: homePathUi.heading }),
   ).toBeVisible();
+  // הקיקר מכריז שזו נקודת-פתיחה של שיחה, לא תפריט.
+  await expect(path.getByText(homePathUi.eyebrow)).toBeVisible();
 
   // ארבעה קישורים אמיתיים — ולא radio-ים.
   await expect(path.getByRole("radio")).toHaveCount(0);
@@ -43,11 +45,11 @@ test("#path: four situation cards + honest complex entry — real links (SEO/no-
     await expect(card).toContainText(s.name);
   }
 
-  // הכניסה הכנה למי שלא מזהה את עצמו: קישור אמיתי אל /compass (אותו מנוע),
-  // בניסוח שאינו מבטיח שיחה חופשית.
-  const complex = path.getByRole("link", { name: homePathUi.complexLabel });
-  await expect(complex).toHaveAttribute("href", "/compass");
-  await expect(path.getByText(homePathUi.complexPrompt)).toBeVisible();
+  // ההזמנה החופשית — נקודת-הכניסה השיחתית הרחבה. ללא JS זהו קישור אמיתי אל
+  // /compass (אותו מנוע); הטקסט הנראה מזמין לכתוב במילים שלכם.
+  const invite = path.getByRole("link", { name: homePathUi.inviteAriaLabel });
+  await expect(invite).toHaveAttribute("href", "/compass");
+  await expect(path.getByText(homePathUi.invitePlaceholder)).toBeVisible();
 });
 
 for (const s of STAGES) {
@@ -85,7 +87,7 @@ test("the broad entry opens the guided engine from its start (station step), sti
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
 
-  await path.getByRole("link", { name: homePathUi.complexLabel }).click();
+  await path.getByRole("link", { name: homePathUi.inviteAriaLabel }).click();
   await expect(page).toHaveURL(/\/$/);
   // המצב הרחב ביותר: המנוע נפתח בשלב בחירת-המצב, לא מדלג.
   const region = path.getByRole("region", { name: homePathUi.conversationLabel });
@@ -107,7 +109,7 @@ test("keyboard: Tab reaches a card and Enter opens the inline conversation (no n
   ).toBeVisible();
 });
 
-test("no-JS: the cards and the complex entry are plain links and still navigate", async ({
+test("no-JS: the cards and the free-text invitation are plain links and still navigate", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
@@ -120,8 +122,8 @@ test("no-JS: the cards and the complex entry are plain links and still navigate"
   for (const s of STAGES) {
     await expect(path.locator(`a[href="${s.href}"]`)).toHaveCount(1);
   }
-  // הכניסה הרחבה גם היא קישור אמיתי (ל-/compass) ללא JS.
-  await expect(path.getByRole("link", { name: homePathUi.complexLabel })).toHaveAttribute(
+  // ההזמנה החופשית גם היא קישור אמיתי (ל-/compass) ללא JS.
+  await expect(path.getByRole("link", { name: homePathUi.inviteAriaLabel })).toHaveAttribute(
     "href",
     "/compass",
   );

@@ -21,14 +21,14 @@ test.describe("Launch-readiness", () => {
       heroSection.getByRole("link", { name: /לרכישת הספר באמזון/ }),
     ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
-    // הכניסה הכנה „המצב שלי קצת יותר מורכב” אינה בשער — היא חיה במקטע התחנות
+    // ההזמנה החופשית „ספרו במילים שלכם…” אינה בשער — היא חיה במקטע התחנות
     // (#path), כדי לא להתחרות בשתי הפעולות הראשיות. הפונקציונליות נשמרת: ללא JS
-    // זהו קישור אמיתי אל /compass (אותו מנוע המודרך).
+    // זהו קישור אמיתי אל /compass (אותו מנוע).
     await expect(
-      heroSection.getByRole("link", { name: "המצב שלי קצת יותר מורכב" }),
+      heroSection.getByRole("link", { name: /ספרו במילים שלכם מה קורה/ }),
     ).toHaveCount(0);
     const ask = page.locator("#path").getByRole("link", {
-      name: "המצב שלי קצת יותר מורכב",
+      name: /ספרו במילים שלכם מה קורה/,
     });
     await expect(ask).toHaveAttribute("href", "/compass");
   });

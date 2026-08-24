@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 
 import { homePaths, homePathUi } from "@/content/homePaths";
 import type { AskStationId } from "@/content/askRoute";
@@ -166,11 +166,13 @@ export function HomePathEntry() {
                     {p.buttonSub}
                   </span>
                 </span>
+                {/* אייקון-שיחה מרוסן (לא חץ-ניווט): בחירת המצב מתחילה שיחה, לא
+                    מובילה לעמוד אחר. המילוי המלא בריחוף/פוקוס מסמן „נבחר”. */}
                 <span
                   aria-hidden="true"
                   className="path-arrow inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-brand transition-colors sm:h-10 sm:w-10 sm:self-end"
                 >
-                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                 </span>
               </Link>
             </li>
@@ -178,27 +180,28 @@ export function HomePathEntry() {
         </ul>
       </div>
 
-      {/* כניסה כנה למי שלא מזהה את עצמו באף מצב. עם JS: פותח את המנוע המודרך
-          מתחילתו (בחירת-המצב הרחבה ביותר) במקום. בלי JS: קישור אמיתי אל
-          ‎/compass — אותו מנוע. לא „אספר בעצמי”: אין כאן שיחה חופשית ב-V1. */}
-      <p className="mx-auto mt-5 max-w-2xl text-center text-[14px] leading-relaxed text-foreground-muted">
-        {homePathUi.complexPrompt}{" "}
-        <Link
-          href="/compass"
-          onClick={(e) => {
-            if (!isPlainClick(e)) return;
-            e.preventDefault();
-            openBroad();
-          }}
-          className="group inline-flex items-center gap-1.5 font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+      {/* הזמנה חופשית ישירה — נראית ומרגישה כמו שדה-כתיבה (האות הברור ביותר
+          שאפשר לכתוב כאן במילים שלכם), אך אינה קלט מזויף: לחיצה/פוקוס פותחים את
+          השיחה הרחבה במקום (openBroad). בלי JS זהו קישור אמיתי אל ‎/compass —
+          אותו מנוע. „או” ממסגר אותה כחלופה לארבעת המצבים, לא כפעולה מתחרה. */}
+      <Link
+        href="/compass"
+        aria-label={homePathUi.inviteAriaLabel}
+        onClick={(e) => {
+          if (!isPlainClick(e)) return;
+          e.preventDefault();
+          openBroad();
+        }}
+        className="group mx-auto mt-4 flex w-full max-w-2xl items-center gap-3 rounded-2xl border border-border-strong bg-surface px-4 py-3.5 text-start text-[15px] leading-relaxed text-foreground-muted shadow-sm transition-colors hover:border-brand/50 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+      >
+        <span
+          aria-hidden="true"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground"
         >
-          {homePathUi.complexLabel}
-          <ArrowLeft
-            className="h-3.5 w-3.5 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
-            aria-hidden="true"
-          />
-        </Link>
-      </p>
+          <MessageCircle className="h-4 w-4" />
+        </span>
+        <span className="min-w-0 flex-1 [text-wrap:pretty]">{homePathUi.invitePlaceholder}</span>
+      </Link>
     </>
   );
 }

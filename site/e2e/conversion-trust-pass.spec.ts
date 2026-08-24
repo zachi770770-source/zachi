@@ -43,21 +43,21 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     ).toHaveCount(0);
   });
 
-  test("#4 Ask-the-book entry point: the honest 'more complex' entry lives in the path section, still linking to /compass (no-JS)", async ({
+  test("#4 Ask-the-book entry point: the free-text conversational invitation lives in the path section, still linking to /compass (no-JS)", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
     const hero = page.locator("main section").first();
     // אינו עוד בשער — לא מתחרה בשתי הפעולות הראשיות.
     await expect(
-      hero.getByRole("link", { name: "המצב שלי קצת יותר מורכב" }),
+      hero.getByRole("link", { name: /ספרו במילים שלכם מה קורה/ }),
     ).toHaveCount(0);
-    // חי במקטע התחנות (#path), בהקשר „לא מזהה את עצמי באף מצב”. אין הבטחת שיחה
-    // חופשית: ללא JS זהו קישור אמיתי אל /compass (אותו מנוע מודרך).
+    // חי במקטע התחנות (#path) כהזמנה חופשית לכתיבה. ללא JS זהו קישור אמיתי אל
+    // /compass (אותו מנוע); הטקסט הנראה מזמין לכתוב במילים שלכם.
     const path = page.locator("#path");
-    const ask = path.getByRole("link", { name: "המצב שלי קצת יותר מורכב" });
+    const ask = path.getByRole("link", { name: /ספרו במילים שלכם מה קורה/ });
     await expect(ask).toHaveAttribute("href", "/compass");
-    await expect(path.getByText(/לא מוצאים את עצמכם/)).toBeVisible();
+    await expect(path.getByText(/ספרו במילים שלכם מה קורה/)).toBeVisible();
   });
 
   test("#4b Floating ask-the-book bubble carries an explanatory label (tooltip + aria)", async ({
