@@ -53,6 +53,13 @@ export default function HomePage() {
       <WebSiteSchema />
       <BookSchema />
       <ProductSchema />
+      {/* מסמן-פריסה בלבד: מצהיר שבעמוד הזה יושבים פקדים צפים בתחתית, ולכן
+          הפוטר צריך לשמור להם מקום (ראו `--floating-ui-clearance` ב-globals).
+          `hidden` ⇒ display:none, אפס השפעה על הפריסה, ו-`:has()` עדיין מוצא
+          אותו. מוצהר במפורש ולא נגזר מ-`.s2b`/`.build-spine` — אלה תלויי-תנועה
+          ותלויי-breakpoint, והריווח חייב להתקיים גם כשהם לא. עמוד שיוסיף בעתיד
+          פקדים צפים משלו יוסיף את אותו מסמן. */}
+      <div data-floating-ui-page hidden />
       <BuildSpine />
       <Hero />
       {/* הקשת הרגשית: סקרנות (Hero) → זיהוי → בחירת תחנה → אמון → רצון → פעולה.
