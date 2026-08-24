@@ -8,11 +8,13 @@ import { homePaths, homePathUi } from "@/content/homePaths";
 import type { AskStationId } from "@/content/askRoute";
 import { trackEvent } from "@/lib/analytics";
 
-// טעינה עצלה של מנוע ההכוונה: הקוד והתוכן (askRoute.ts) נטענים כ-chunk נפרד רק
-// כשמבקר בוחר מצב ורגע-ההקשבה נפתח — לא בטעינת עמוד הבית עצמו. כך ה-Hero לא
-// משלם על ה-JS של השיחה, בדיוק כמו במשגר הצף (CompassLauncher).
-const AskRoute = React.lazy(() =>
-  import("@/components/interactive/AskRoute").then((m) => ({ default: m.AskRoute })),
+// טעינה עצלה של רגע-ההקשבה: הקוד (השיחה + המנוע הדטרמיניסטי + askRoute.ts) נטען
+// כ-chunk נפרד רק כשמבקר בוחר מצב — לא בטעינת עמוד הבית עצמו. כך ה-Hero לא משלם
+// על ה-JS של השיחה, בדיוק כמו במשגר הצף (CompassLauncher).
+const HomeConversation = React.lazy(() =>
+  import("@/components/sections/HomeConversation").then((m) => ({
+    default: m.HomeConversation,
+  })),
 );
 
 /**
@@ -115,7 +117,7 @@ export function HomePathEntry() {
               </p>
             }
           >
-            <AskRoute initialStation={active.mode === "station" ? active.station : undefined} />
+            <HomeConversation station={active.mode === "station" ? active.station : undefined} />
           </React.Suspense>
         </div>
       </div>

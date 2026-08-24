@@ -7,14 +7,19 @@ import { getCompassProvider } from "@/lib/compass/assistant/provider";
 import { COMPASS_INSUFFICIENT_ANSWER, requiredBookVersion } from "@/lib/compass/assistant/config";
 import {
   COMPASS_SYSTEM_PROMPT,
+  COMPASS_CONVERSATION_SYSTEM_PROMPT,
   COMPASS_PROTECTION_REFUSAL,
   isBlockedRequest,
   buildUserContent,
+  buildConversationContent,
   buildCitation,
   enforceAnswerLimits,
   isModelRefusal,
   extractFocus,
+  extractFollowup,
+  type ConversationTurn,
 } from "@/lib/compass/assistant/prompt";
+import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 import { assessCompassSafety, buildSafetyAnswer } from "@/lib/compass/assistant/safety";
 
 /** תקרת טוקנים לפלט — מספיקה ל-150 מילים + נוסח הסירוב, בלי בזבוז. */
@@ -24,6 +29,14 @@ export interface AskResult {
   answer: CompassAnswer;
   /** צריכת טוקנים בפועל (לחישוב עלות/תיעוד; לא נחשף למשתמש). */
   usage?: CompassCompletion["usage"];
+}
+
+/** אפשרויות מצב-שיחה (עמוד הבית). כשמסופק — הזרימה שיחתית עם שאלת-המשך. */
+export interface AskConversationOptions {
+  /** התורות הקודמים (נשמרים בלקוח בלבד; משמשים כהקשר, לא כמקור ידע). */
+  priorTurns?: ConversationTurn[];
+  /** האם זהו התור האחרון (אז אין שאלת המשך, אלא סגירה קצרה). */
+  isFinalTurn: boolean;
 }
 
 /**
@@ -37,13 +50,15 @@ export interface AskResult {
 export async function askCompass(
   db: SqlClient,
   question: string,
-  provider: CompassProvider | null = getCompassProvider()
+  provider: CompassProvider | null = getCompassProvider(),
+  opts: { conversation?: AskConversationOptions } = {}
 ): Promise<AskResult> {
   const q = (question ?? "").trim();
+  const conversation = opts.conversation;
 
   // שער-בטיחות דטרמיניסטי — ראשון, לפני הכול (הגנה בעומק; גם ה-route בודק לפני
   // מכסה). גובר על חסימת-הגנת-הספר: גילוי-סכנה + בקשת-חילוץ באותה הודעה מקבל
-  // תמיד את מסר הבטיחות. אינו מגיע לחיפוש/מודל/ציטוט/שורת-פוקוס.
+  // תמיד את מסר הבטיחות. אינו מגיע לחיפוש/מודל/ציטוט/שורת-פוקוס/שאלת-המשך.
   const safety = assessCompassSafety(q);
   if (!safety.safe) {
     return { answer: buildSafetyAnswer(safety) };
@@ -57,7 +72,13 @@ export async function askCompass(
     return { answer: { status: "unavailable", reason: "no-provider" } };
   }
 
-  const search = await searchCompass(db, q);
+  // עיגון האחזור: במצב-שיחה מצרפים את ההודעה הראשונה של המבקר (המצב שתיאר)
+  // להודעה הנוכחית, כדי שתשובת המשך קצרה („כן, גם ביטלה”) עדיין תיקשר לקטעים
+  // הנכונים. הגריעה נשארת מונחית-שאילתה בלבד; אין מעבר סדרתי על הספר.
+  const firstUser = conversation?.priorTurns?.find((t) => t.role === "user")?.text;
+  const searchText = conversation && firstUser ? `${firstUser} ${q}` : q;
+
+  const search = await searchCompass(db, searchText);
   // חייבת להיות גרסה פעילה, והיא חייבת להיות *בדיוק* הגרסה הנדרשת (888).
   if (search.bookVersion === null || search.bookVersion !== requiredBookVersion()) {
     return { answer: { status: "unavailable", reason: "no-active-book" } };
@@ -67,17 +88,36 @@ export async function askCompass(
   }
 
   const completion = await provider.generate({
-    system: COMPASS_SYSTEM_PROMPT,
-    userContent: buildUserContent(q, search.results),
+    system: conversation ? COMPASS_CONVERSATION_SYSTEM_PROMPT : COMPASS_SYSTEM_PROMPT,
+    userContent: conversation
+      ? buildConversationContent({
+          question: q,
+          matches: search.results,
+          priorTurns: conversation.priorTurns,
+          isFinalTurn: conversation.isFinalTurn,
+        })
+      : buildUserContent(q, search.results),
     maxTokens: MAX_OUTPUT_TOKENS,
   });
 
-  // מחלצים תחילה את שורת „על מה שווה לשים לב עכשיו” (אם קיימת) מהפלט הגולמי,
-  // כדי שתקרת-המילים של הגוף לא תבלע אותה. השורה מבוססת על אותם קטעים בלבד.
-  const { body, focus } = extractFocus(completion.text);
-  const answerText = enforceAnswerLimits(body);
-  // סירוב לעולם אינו יוצא כ„תשובה”: אין ציטוט, אין שורת-פוקוס, ואין המשך
-  // „רגיל” בממשק. נבדק גם על הפלט הגולמי, למקרה שפיצול שורת-הפוקוס הותיר גוף
+  // מחלצים תחילה את השורה הנגררת (שאלת-המשך במצב-שיחה, „על מה שווה לשים לב”
+  // בשאלה בודדת) מהפלט הגולמי, כדי שתקרת-המילים של הגוף לא תבלע אותה.
+  const extracted = conversation
+    ? extractFollowup(completion.text)
+    : extractFocus(completion.text);
+  const body = extracted.body;
+  const followup =
+    conversation && !conversation.isFinalTurn
+      ? (extracted as { followup?: string }).followup
+      : undefined;
+  const focus = conversation ? undefined : (extracted as { focus?: string }).focus;
+
+  const maxWords = conversation
+    ? COMPASS_LIMITS.maxConversationAnswerWords
+    : COMPASS_LIMITS.maxAnswerWords;
+  const answerText = enforceAnswerLimits(body, maxWords);
+  // סירוב לעולם אינו יוצא כ„תשובה”: אין ציטוט, אין שורה נגררת, ואין המשך
+  // „רגיל” בממשק. נבדק גם על הפלט הגולמי, למקרה שפיצול השורה הנגררת הותיר גוף
   // שאינו נראה כסירוב בעוד שהתשובה כולה כן.
   if (!answerText || isModelRefusal(answerText) || isModelRefusal(completion.text)) {
     return {
@@ -92,6 +132,7 @@ export async function askCompass(
       text: answerText,
       citation: buildCitation(search.results),
       ...(focus ? { focus } : {}),
+      ...(followup ? { followup } : {}),
     },
     usage: completion.usage,
   };
