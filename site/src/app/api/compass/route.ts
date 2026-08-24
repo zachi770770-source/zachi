@@ -22,6 +22,7 @@ import {
 import type { SqlClient } from "@/lib/compass/types";
 import {
   COMPASS_LIMITS,
+  COMPASS_MAX_USER_TURNS,
   isCompassFeatureEnabled,
   requiredBookVersion,
 } from "@/lib/compass/assistant/config";
@@ -175,6 +176,17 @@ export async function POST(request: Request) {
   const subjectHash = hashSubject(id);
   const question = parsed.data.question;
 
+  // מצב-שיחה (עמוד הבית): ההקשר נשלח מהלקוח ואינו נשמר. התור האחרון (לפי מספר
+  // תורות-המשתמש הקודמים) אינו מקבל שאלת המשך אלא סגירה קצרה. סכימת הוולידציה
+  // כבר חוסמת את אורך ההקשר, כך שמספר התור לעולם אינו חורג מ-maxUserTurns.
+  const isConversation = parsed.data.mode === "conversation";
+  const priorTurns = parsed.data.context ?? [];
+  const priorUserTurns = priorTurns.filter((t) => t.role === "user").length;
+  const isFinalTurn = priorUserTurns + 1 >= COMPASS_MAX_USER_TURNS;
+  const conversationOpts = isConversation
+    ? { conversation: { priorTurns, isFinalTurn } }
+    : {};
+
   const unavailable = () =>
     withSubjectCookie(
       NextResponse.json({ available: false, status: "unavailable", limits: LIMITS_PAYLOAD }),
@@ -215,7 +227,7 @@ export async function POST(request: Request) {
     };
 
     try {
-      const { answer } = await askCompass(db, question, provider);
+      const { answer } = await askCompass(db, question, provider, conversationOpts);
 
       if (answer.status === "answered") {
         return withSubjectCookie(
@@ -227,6 +239,11 @@ export async function POST(request: Request) {
             // שורת „על מה שווה לשים לב עכשיו” — רק אם המודל הפיק אותה מהקטעים.
             // מופיעה אך ורק בתשובה מוצלחת; לעולם לא בסירוב/מגבלה/שגיאה.
             ...(answer.focus ? { focus: answer.focus } : {}),
+            // שאלת-המשך שיחתית — רק במצב-שיחה, בתור שאינו האחרון, וכשהמודל הפיק
+            // אותה מהקטעים. הלקוח מציג אותה כהזמנה לתור הבא.
+            ...(answer.followup ? { followup: answer.followup } : {}),
+            // סימון סיום השיחה ללקוח (בלי מצב בשרת): אין תור נוסף אחרי האחרון.
+            done: isConversation ? isFinalTurn : undefined,
             remaining: reserved.remaining, // השמורה נשמרת
             limits: LIMITS_PAYLOAD,
           }),
