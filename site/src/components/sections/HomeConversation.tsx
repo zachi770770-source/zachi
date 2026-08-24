@@ -57,6 +57,7 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
 
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const followupRef = React.useRef<HTMLTextAreaElement>(null);
+  const completedRef = React.useRef(false);
 
   // זמינות: קריאה יחידה בעלייה. כישלון/לא-זמין → נופלים למסלול המודרך.
   React.useEffect(() => {
@@ -140,7 +141,9 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
               followup,
             },
           ]);
-          trackEvent("compass_answer_success");
+          // „תשובה מועילה התקבלה” — עם מספר-התור כדי להבחין את התשובה *הראשונה*
+          // (turn === 1) בהמשך במשפך-המדידה. מזהה בלבד, ללא תוכן.
+          trackEvent("compass_answer_success", { turn: userTurns + 1 });
           if (data.done || !followup || userTurns + 1 >= MAX_USER_TURNS) setDone(true);
         } else if (data.status === "safety") {
           setMessages((prev) => [
@@ -179,13 +182,34 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
     if (awaitingFollowup) followupRef.current?.focus({ preventScroll: true });
   }, [awaitingFollowup]);
 
+  // „שיחה הושלמה” — נורה פעם אחת כשמגיעים לסגירה. מזהה בלבד: מספר-תורות והתוצאה
+  // (answer/limit/safety/refused), בלי תוכן. משלים את המשפך: פתיחה (ask_open_home)
+  // → תשובה ראשונה (compass_answer_success turn=1) → השלמה → קליק-רכישה.
+  React.useEffect(() => {
+    if (done && !completedRef.current) {
+      completedRef.current = true;
+      trackEvent("compass_complete", {
+        turns: messages.filter((m) => m.role === "user").length,
+        outcome: lastAssistant?.kind ?? "answer",
+      });
+    }
+  }, [done, messages, lastAssistant]);
+
   const reset = () => {
     setMessages([]);
     setInput("");
     setError(null);
     setDone(false);
     setSubmitting(false);
+    completedRef.current = false;
   };
+
+  // גשר-הרכישה מוצג רק כשהשיחה באמת נתנה תובנה מהספר, ולעולם לא אחרי מענה-בטיחות:
+  // לא ממירים רגע רגיש, ולא מציעים לקנות בלי שנוצר ערך. אחרת — סגירה שקטה בלבד.
+  const gotUsefulAnswer = messages.some(
+    (m) => m.role === "assistant" && m.kind === "answer",
+  );
+  const showBookBridge = gotUsefulAnswer && lastAssistant?.kind !== "safety";
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -314,30 +338,55 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
             {ui.sendingStages[stage]}
           </p>
         </div>
-      ) : done ? (
-        // ── סגירה שקטה ──
-        <div className="rounded-2xl border border-border bg-surface-muted/60 p-5 text-start">
-          <p className="text-[15px] leading-relaxed text-foreground-muted">{ui.closing}</p>
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[14px] font-medium">
+      ) : done && showBookBridge ? (
+        // ── רגע-ההמרה: גשר עריכתי מהתשובה הספציפית אל עומק התהליך שבספר, ואז
+        //    פעולת-המשך ראשית וברורה. הגשר בא *אחרי* שהתקבל ערך — לא מפריע לשיתוף.
+        <div
+          className="rounded-2xl border border-border bg-surface-muted/60 p-5 text-start sm:p-6"
+          data-conversation-close="bridge"
+        >
+          <p className="text-[15.5px] leading-[1.7] text-foreground [text-wrap:pretty]">
+            {ui.closingBridge}
+          </p>
+          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
             <AmazonBuyLink
               source="home"
-              className="group inline-flex items-center gap-2 font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              sourceDetail="conversation_close"
+              aria-label={ui.closingCtaAria}
+              className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-foreground px-7 text-[15.5px] font-semibold text-surface shadow-sm transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              לרכישת הספר באמזון
+              {ui.closingCta}
               <ArrowLeft
-                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1"
+                className="h-4 w-4 transition-transform group-hover:-translate-x-1"
                 aria-hidden="true"
               />
             </AmazonBuyLink>
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex items-center gap-1.5 text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-              {ui.restart}
-            </button>
+            <span className="text-[13px] text-foreground-muted">{ui.closingCtaSub}</span>
           </div>
+          <button
+            type="button"
+            onClick={reset}
+            className="mt-4 inline-flex items-center gap-1.5 text-[13.5px] text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            {ui.restart}
+          </button>
+        </div>
+      ) : done ? (
+        // ── סגירה שקטה: אין תובנה שהבשילה, או מענה-בטיחות — בלי דחיפה לרכישה. ──
+        <div
+          className="rounded-2xl border border-border bg-surface-muted/60 p-5 text-start"
+          data-conversation-close="quiet"
+        >
+          <p className="text-[15px] leading-relaxed text-foreground-muted">{ui.closingQuiet}</p>
+          <button
+            type="button"
+            onClick={reset}
+            className="mt-4 inline-flex items-center gap-1.5 text-[14px] text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            {ui.restart}
+          </button>
         </div>
       ) : awaitingFollowup ? (
         // ── מענה לשאלת-ההמשך ──

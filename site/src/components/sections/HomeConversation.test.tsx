@@ -114,6 +114,50 @@ describe("HomeConversation", () => {
     ]);
   });
 
+  it("סגירה מועילה: גשר אל הספר + פעולת-רכישה ראשית וברורה", async () => {
+    mockFetch((_u, init) =>
+      !init || init.method === "GET"
+        ? { available: true, remaining: 8 }
+        : {
+            available: true,
+            status: "answered",
+            answer: "דפוס שחוזר אומר יותר מרגע בודד.",
+            citation: "פרק 4",
+            done: true,
+          },
+    );
+    render(<HomeConversation station="dating" />);
+    const box = await screen.findByLabelText(ui.invitePrompt);
+    fireEvent.change(box, { target: { value: "היא לא ענתה לי ארבע שעות" } });
+    fireEvent.click(screen.getByRole("button", { name: ui.send }));
+
+    expect(await screen.findByText(ui.closingBridge)).toBeInTheDocument();
+    const cta = screen.getByRole("link", { name: ui.closingCtaAria });
+    expect(cta).toHaveAttribute("href", expect.stringContaining("amazon."));
+    expect(screen.getByText(ui.closingCtaSub)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: ui.restart })).toBeInTheDocument();
+  });
+
+  it("מענה-בטיחות נסגר בשקט — בלי גשר-ספר ובלי קישור-רכישה", async () => {
+    mockFetch((_u, init) =>
+      !init || init.method === "GET"
+        ? { available: true, remaining: 8 }
+        : {
+            available: true,
+            status: "safety",
+            answer: "אם קשה עכשיו, שווה לדבר עם מישהו שסומכים עליו.",
+          },
+    );
+    render(<HomeConversation station="dating" />);
+    const box = await screen.findByLabelText(ui.invitePrompt);
+    fireEvent.change(box, { target: { value: "קשה לי מאוד" } });
+    fireEvent.click(screen.getByRole("button", { name: ui.send }));
+
+    expect(await screen.findByText(ui.closingQuiet)).toBeInTheDocument();
+    expect(screen.queryByText(ui.closingBridge)).toBeNull();
+    expect(screen.queryByRole("link", { name: ui.closingCtaAria })).toBeNull();
+  });
+
   it("אינו כותב את השיחה לאחסון מתמשך (פרטיות)", async () => {
     mockFetch((_u, init) =>
       !init || init.method === "GET"

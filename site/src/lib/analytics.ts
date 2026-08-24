@@ -87,6 +87,13 @@ export type AnalyticsEventName =
   | "stuck_open"
   | "stuck_select"
   | "stuck_to_sample"
+  // ── משפך השיחה החיה בעמוד הבית (HomeConversation) — פעיל, לא דורמנטי. מזהים
+  //    בלבד, ללא תוכן. ארבע נקודות-המדידה שמאפשרות לקשור שיחה → רכישת-ספר:
+  //      • „שיחה נפתחה”         → ask_open_home { via }        (HomePathEntry)
+  //      • „תשובה מועילה ראשונה” → compass_answer_success { turn }  (turn === 1)
+  //      • „שיחה הושלמה”         → compass_complete { turns, outcome }
+  //      • „קליק-רכישה אחרי שיחה” → amazon_purchase_clicked
+  //                                 { source:"home", source_detail:"conversation_close" }
   | "compass_ask"
   | "compass_answer_success"
   | "compass_refused"
