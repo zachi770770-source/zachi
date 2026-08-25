@@ -165,6 +165,52 @@ describe("askCompass — מצב שיחה", () => {
     expect(res.answer).not.toHaveProperty("citation");
   });
 
+  it("מרקר-ערך → valueDelivered=true + סיווג מצב + כלי ממופה (answered)", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "היא לא ענתה לי ארבע שעות, זה אומר שהיא לא מעוניינת?",
+      provider(
+        "ארבע שעות לבד עדיין לא אומרות דחייה. שווה להפריד בין מה שקרה למה שהמוח הוסיף.\n" +
+          "שאלת המשך: מה עוד גרם לך להרגיש שהיא התרחקה?\n[[VALUE]]",
+      ),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      expect(res.answer.valueDelivered).toBe(true);
+      expect(res.answer.text).not.toContain("[[VALUE]]");
+      expect(res.answer.followup).toContain("?");
+      // סיווג המצב הנוכחי (Journey) — לעולם לא Persona.
+      expect(res.answer.currentSituation).toBe("interpreting-signals");
+      expect(res.answer.toolSurfaced?.path).toBe("/method/fact-story");
+    }
+  });
+
+  it("בלי מרקר-ערך → valueDelivered=false (אמפתיה גנרית לא פותחת CTA)", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "רק רציתי לשתף שהיה לי יום ארוך בעבודה",
+      provider("אני שומע אותך, נשמע יום עמוס.\nשאלת המשך: מה הכי בלט בו?"),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      expect(res.answer.valueDelivered).toBe(false);
+    }
+  });
+
+  it("מרקר-ערך על סירוב אמיתי → נשאר refused, בלי valueDelivered/כלי", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "שאלה כלשהי",
+      provider("הספר אינו עוסק בנושא הזה.\n[[VALUE]]"),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("refused");
+    expect(res.answer).not.toHaveProperty("valueDelivered");
+    expect(res.answer).not.toHaveProperty("toolSurfaced");
+  });
+
   it("שיחה עם הקשר קודם: עדיין מגיבה (עיגון האחזור על ההודעה הפותחת + הנוכחית)", async () => {
     const res = await askCompass(
       mockDb([row(0.6)]),

@@ -3,6 +3,7 @@ import { test, expect, type Route } from "@playwright/test";
 import { homeConversationUi as ui } from "../src/content/homeConversation";
 import { homePathUi } from "../src/content/homePaths";
 import { askUi } from "../src/content/askRoute";
+import { JOURNEYS } from "../src/content/journeys";
 
 /**
  * רגע-ההקשבה השיחתי בעמוד הבית — החוזה המלא כשהעוזר זמין, מול /api/compass מדומה
@@ -28,6 +29,8 @@ async function mockCompass(route: Route) {
         status: "answered",
         answer: "דפוס שחוזר לאורך זמן אומר יותר מרגע בודד. שווה לבדוק אותו בשקט.",
         citation: "מבוסס על פרק 4: בחירה מפוכחת",
+        // „ערך נמסר” שרת-מחושב — פותח את גשר-הרכישה (בלי סיווג מסע → גשר גנרי).
+        valueDelivered: true,
         done: true,
         remaining: 6,
         limits: {},
@@ -43,6 +46,7 @@ async function mockCompass(route: Route) {
           ? "יכול להיות, אבל ארבע שעות לבדן עדיין לא אומרות את זה."
           : "אם זה חוזר, זה כבר לא רק רגע אחד.",
       citation: "מבוסס על פרק 4: בחירה מפוכחת",
+      valueDelivered: true,
       followup:
         turn === 1
           ? "יש עוד משהו שגרם לכם להרגיש שהיא התרחקה?"
@@ -108,6 +112,45 @@ test("full conversation: situation → free text → grounded answer → follow-
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
   expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test("journey-tailored close: surfaces the mapped tool as a secondary action, Amazon stays primary", async ({
+  page,
+}) => {
+  const journey = JOURNEYS["interpreting-signals"];
+  await page.route("**/api/compass", async (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ json: { available: true, remaining: 8, limits: {} } });
+    }
+    return route.fulfill({
+      json: {
+        available: true,
+        status: "answered",
+        answer: "שווה להפריד בין מה שקרה בפועל למה שהמוח מיהר לספר עליו.",
+        citation: "מבוסס על פרק 4: בחירה מפוכחת",
+        valueDelivered: true,
+        currentSituation: "interpreting-signals",
+        toolSurfaced: { slug: "fact-story", path: "/method/fact-story", term: "עובדה, סיפור, פעולה" },
+        done: true,
+        remaining: 7,
+        limits: {},
+      },
+    });
+  });
+  const path = await openSituation(page);
+  await path.getByLabel(ui.invitePrompt).fill("היא לא ענתה לי ארבע שעות, זה אומר שלא מעוניינת?");
+  await path.getByRole("button", { name: ui.send }).click();
+
+  // גשר מותאם-מסע (לא הגנרי).
+  await expect(path.getByText(journey.bridge)).toBeVisible();
+  await expect(path.getByText(ui.closingBridge)).toHaveCount(0);
+  // כלי ממופה כפעולה משנית — קישור לעמוד-המושג, בלי ניווט אוטומטי ל-/compass.
+  const toolLink = path.getByRole("link", { name: journey.toolLinkLabel });
+  await expect(toolLink).toHaveAttribute("href", "/method/fact-story");
+  // אמזון נשאר הפעולה הראשית.
+  const bookCta = path.getByRole("link", { name: ui.closingCtaAria });
+  await expect(bookCta).toBeVisible();
+  await expect(bookCta).toHaveAttribute("href", /amazon\./);
 });
 
 test("refusal keeps the conversation grounded (no answer without book basis)", async ({ page }) => {
