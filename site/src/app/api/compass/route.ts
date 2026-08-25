@@ -242,6 +242,14 @@ export async function POST(request: Request) {
             // שאלת-המשך שיחתית — רק במצב-שיחה, בתור שאינו האחרון, וכשהמודל הפיק
             // אותה מהקטעים. הלקוח מציג אותה כהזמנה לתור הבא.
             ...(answer.followup ? { followup: answer.followup } : {}),
+            // שכבת-המסע (מצב-שיחה): „ערך נמסר” (פותח את גשר-הרכישה), „המצב הנוכחי”
+            // שסווג, והכלי הממופה. `valueDelivered` מועבר תמיד במצב-שיחה (גם false),
+            // כדי שהלקוח יגדר את ה-CTA על ערך שרת-מחושב ולא על ספירת-הודעות.
+            ...(answer.valueDelivered !== undefined
+              ? { valueDelivered: answer.valueDelivered }
+              : {}),
+            ...(answer.currentSituation ? { currentSituation: answer.currentSituation } : {}),
+            ...(answer.toolSurfaced ? { toolSurfaced: answer.toolSurfaced } : {}),
             // סימון סיום השיחה ללקוח (בלי מצב בשרת): אין תור נוסף אחרי האחרון.
             done: isConversation ? isFinalTurn : undefined,
             remaining: reserved.remaining, // השמורה נשמרת
