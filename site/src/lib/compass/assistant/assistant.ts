@@ -15,6 +15,7 @@ import {
   buildCitation,
   enforceAnswerLimits,
   isModelRefusal,
+  parseNoBasisMarker,
   extractFocus,
   extractFollowup,
   type ConversationTurn,
@@ -99,6 +100,14 @@ export async function askCompass(
       : buildUserContent(q, search.results),
     maxTokens: MAX_OUTPUT_TOKENS,
   });
+
+  // סירוב אמיתי מפורש: המודל סימן שאין בקטעים חומר קרוב כלל. מקבל את משפט-הסירוב
+  // האנושי והספציפי שלו (או את הנוסח הקבוע), בלי ציטוט/פוקוס/שאלת-המשך. נבדק לפני
+  // חילוץ/מסגור כדי שמענה מעוגן-על-עיקרון-סמוך („הספר לא קובע… אבל…”) לא ייבלע.
+  const noBasis = parseNoBasisMarker(completion.text);
+  if (noBasis) {
+    return { answer: { status: "refused", text: noBasis.text }, usage: completion.usage };
+  }
 
   // מחלצים תחילה את השורה הנגררת (שאלת-המשך במצב-שיחה, „על מה שווה לשים לב”
   // בשאלה בודדת) מהפלט הגולמי, כדי שתקרת-המילים של הגוף לא תבלע אותה.

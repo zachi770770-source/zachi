@@ -112,6 +112,59 @@ describe("askCompass — מצב שיחה", () => {
     }
   });
 
+  it("„מי צריך לשלם בדייט ראשון” (שיחה): מסגור מעוגן + שאלת המשך, לא סירוב גנרי", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "מי צריך לשלם בדייט ראשון",
+      provider(
+        "הספר לא קובע כלל שלפיו דווקא צד אחד צריך לשלם בדייט ראשון. אבל הספר כן " +
+          "מזמין להסתכל על הציפיות שכל אחד מביא, ועל מה שאנחנו מפרשים מההתנהגות של " +
+          "הצד השני.\nשאלת המשך: מה יותר מעסיק אותך כאן — מי משלם בפועל, או מה זה אומר אם הצד השני לא מציע?",
+      ),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      expect(res.answer.text).not.toContain("לא מצאתי");
+      expect(res.answer.text).toContain("לא קובע");
+      expect(res.answer.text).not.toMatch(/הספר\s+קובע\s+ש/);
+      expect(res.answer.followup).toBeDefined();
+      expect(res.answer.followup).toContain("?");
+      expect(res.answer.citation).toContain("פרק 4");
+    }
+  });
+
+  it("שיחה: שאלה קרובה-אך-חלשה → מסגור מעוגן (answered) עם המשך", async () => {
+    const res = await askCompass(
+      mockDb([row(0.55)]),
+      "זה מוזר שאני עדיין חושב עליו כל הזמן?",
+      provider(
+        "הספר לא נותן לוח-זמנים למה „תקין”. מה שכן עולה מהקטעים הוא שמחשבות חוזרות " +
+          "מספרות לרוב על משהו שלא נסגר, לא על כישלון שלך.\nשאלת המשך: מה הכי חוזר לך כשאתה חושב עליו?",
+      ),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      expect(res.answer.followup).toContain("?");
+      expect(res.answer.text).not.toContain("לא מצאתי");
+    }
+  });
+
+  it("שיחה: סימון NO_BOOK_BASIS → סירוב ספציפי, בלי שאלת-המשך וללא ציטוט", async () => {
+    const specific = "זאת שאלה טכנית על מכוניות, וזה לא משהו שהספר נכנס אליו.";
+    const res = await askCompass(
+      mockDb([row(0.4)]),
+      "כמה שמן צריך במנוע של מאזדה",
+      provider(`NO_BOOK_BASIS\n${specific}`),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("refused");
+    if (res.answer.status === "refused") expect(res.answer.text).toBe(specific);
+    expect(res.answer).not.toHaveProperty("followup");
+    expect(res.answer).not.toHaveProperty("citation");
+  });
+
   it("שיחה עם הקשר קודם: עדיין מגיבה (עיגון האחזור על ההודעה הפותחת + הנוכחית)", async () => {
     const res = await askCompass(
       mockDb([row(0.6)]),

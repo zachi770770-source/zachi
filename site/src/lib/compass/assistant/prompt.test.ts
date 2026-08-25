@@ -7,7 +7,11 @@ import {
   buildCitation,
   enforceAnswerLimits,
   isModelRefusal,
+  parseNoBasisMarker,
   COMPASS_INSUFFICIENT_ANSWER,
+  COMPASS_NO_BASIS_SENTINEL,
+  COMPASS_SYSTEM_PROMPT,
+  COMPASS_CONVERSATION_SYSTEM_PROMPT,
 } from "@/lib/compass/assistant/prompt";
 import type { CompassMatch } from "@/lib/compass/types";
 
@@ -170,5 +174,61 @@ describe("isModelRefusal", () => {
   it("מחרוזת ריקה אינה סירוב", () => {
     expect(isModelRefusal("")).toBe(false);
     expect(isModelRefusal("   ")).toBe(false);
+  });
+
+  // מסגור מעוגן על עיקרון סמוך: פותח ב„הספר לא עוסק/קובע…” אך ממשיך במפנה מהותי.
+  it("מסגור מעוגן עם מפנה-ניגוד („אבל…”) אינו סירוב", () => {
+    const t =
+      "הספר לא עוסק ישירות בשאלה מי משלם, אבל הוא מזמין להסתכל על הציפיות שכל אחד " +
+      "מביא ועל מה שאנחנו מפרשים מההתנהגות של הצד השני, ולא להפוך מחווה קטנה למבחן.";
+    expect(isModelRefusal(t)).toBe(false);
+  });
+
+  it("מסגור מעוגן עם מפנה-חיוב („הספר כן…”) בלי „אבל” אינו סירוב", () => {
+    const t =
+      "הספר לא עוסק בשאלה מי משלם. הספר כן מזמין להסתכל על מה שקורה סביב הרגע הזה, " +
+      "על הציפיות ועל הפרשנות שאנחנו נותנים להתנהגות של הצד השני לאורך זמן.";
+    expect(isModelRefusal(t)).toBe(false);
+  });
+
+  it("„הספר לא קובע כלל…” (בלי מילת-מפתח של סירוב) אינו נתפס כסירוב", () => {
+    expect(isModelRefusal("הספר לא קובע כלל שצד אחד משלם. הוא מזמין להסתכל על הציפיות.")).toBe(false);
+  });
+});
+
+describe("parseNoBasisMarker, סימון „אין בסיס כלל”", () => {
+  it("סימון + משפט ספציפי → מחזיר את המשפט האנושי", () => {
+    const s = "זאת שאלה על מיסים, וזה לא משהו שהספר נכנס אליו.";
+    expect(parseNoBasisMarker(`${COMPASS_NO_BASIS_SENTINEL}\n${s}`)).toEqual({ text: s });
+    expect(parseNoBasisMarker(`${COMPASS_NO_BASIS_SENTINEL}: ${s}`)).toEqual({ text: s });
+  });
+
+  it("סימון לבדו (בלי משפט) → נוסף הנוסח האנושי הקבוע", () => {
+    expect(parseNoBasisMarker(COMPASS_NO_BASIS_SENTINEL)).toEqual({
+      text: COMPASS_INSUFFICIENT_ANSWER,
+    });
+  });
+
+  it("בלי סימון → null (יש תשובה/מסגור רגילים)", () => {
+    expect(parseNoBasisMarker("הספר לא קובע כלל, אבל הוא כן מזמין להסתכל על הציפיות.")).toBeNull();
+    expect(parseNoBasisMarker("תשובה רגילה מהספר.")).toBeNull();
+  });
+
+  it("חותך משפט ארוך מדי ל-40 מילים", () => {
+    const long = Array.from({ length: 60 }, (_, i) => `מ${i}`).join(" ");
+    const out = parseNoBasisMarker(`${COMPASS_NO_BASIS_SENTINEL} ${long}`);
+    expect(out?.text.split(/\s+/).length).toBeLessThanOrEqual(40);
+  });
+});
+
+describe("הנחיות המערכת: מסגור-מעוגן במקום סירוב-חיפוש", () => {
+  it("שתי ההנחיות מכילות את הסימון ואת הנחיית „מה הספר אינו קובע” + מסגור-מחדש", () => {
+    for (const prompt of [COMPASS_SYSTEM_PROMPT, COMPASS_CONVERSATION_SYSTEM_PROMPT]) {
+      expect(prompt).toContain(COMPASS_NO_BASIS_SENTINEL);
+      expect(prompt).toContain("אינו* קובע");
+      expect(prompt).toContain("מסגר מחדש");
+      // כבר לא מורות למודל להחזיר את הנוסח הקבוע מילה-במילה.
+      expect(prompt).not.toContain("החזר בדיוק את המשפט הבא");
+    }
   });
 });
