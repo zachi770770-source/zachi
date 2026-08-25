@@ -2,15 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle, PenLine } from "lucide-react";
 
 import { homePaths, homePathUi } from "@/content/homePaths";
 import type { AskStationId } from "@/content/askRoute";
 import { trackEvent } from "@/lib/analytics";
 
-// טעינה עצלה של רגע-ההקשבה: הקוד (השיחה + המנוע הדטרמיניסטי + askRoute.ts) נטען
-// כ-chunk נפרד רק כשמבקר בוחר מצב — לא בטעינת עמוד הבית עצמו. כך ה-Hero לא משלם
-// על ה-JS של השיחה, בדיוק כמו במשגר הצף (CompassLauncher).
+// טעינה עצלה של רגע-ההקשבה: קוד השיחה (+ askRoute.ts) נטען כ-chunk נפרד רק כשמבקר
+// מתחיל שיחה — לא בטעינת עמוד הבית עצמו, כדי שה-Hero לא ישלם על ה-JS של השיחה.
 const HomeConversation = React.lazy(() =>
   import("@/components/sections/HomeConversation").then((m) => ({
     default: m.HomeConversation,
@@ -20,21 +19,19 @@ const HomeConversation = React.lazy(() =>
 /**
  * רגע-ההקשבה של „איפה אתם נמצאים עכשיו?” — האי-אינטראקטיבי של HomePathSelector.
  *
- * ברירת-המחדל (וגם ה-HTML של ה-SSR / חוויית ללא-JS) היא בדיוק מה שהיה: ארבעה
- * כרטיסי-`<a>` אמיתיים אל עמודי-המסע, וקישור כן „המצב שלי קצת יותר מורכב” אל
- * ‎/compass. זו שכבת ה-SEO והנגישות — Tab מגיע לקישורים, Enter מפעיל אותם, וללא
- * JavaScript הם פשוט מנווטים.
+ * המקטע מורכב מחדש כשיחה, לא כשאלון: קודם *תיבת-כתיבה חופשית* גדולה ורגועה
+ * („ספרו לי מה קורה אצלכם…”) כנקודת-הכניסה הראשית, ורק מתחתיה — כחלופה שקטה —
+ * ארבעה מצבים מוכרים כפותחי-שיחה (בלי חיצי-ניווט, בלי „מסלול/צמתים”, בלי בקרות
+ * שנראות כמו טופס).
  *
- * מעל השכבה הזו — *שיפור-הדרגתי* בלבד: כשיש JS, לחיצה על מצב אינה מנווטת אלא
- * פותחת את מנוע „שאל את הספר” (AskRoute) *במקום*, מזוהה לאותה תחנה (מדלג על „איפה
- * אתם?” ומתחיל בדילמה). „המצב שלי קצת יותר מורכב” פותח את אותו מנוע מתחילתו —
- * בחירת-המצב הרחבה ביותר. אין כאן AI, אין תיבת-טקסט חופשית ואין ארכיטקטורה חדשה:
- * זהו אותו מנוע דטרמיניסטי שכבר חי ב-‎/compass ובבועה הצפה.
+ * שכבת בסיס (SSR / ללא-JS / SEO): התיבה החופשית והכרטיסים נשארים `<a>` אמיתיים
+ * — התיבה אל ‎/compass, הכרטיסים אל עמודי-המסע. עם JS זהו שיפור-הדרגתי: לחיצה
+ * פותחת את מנוע „שאל את הספר” *במקום*, בלי לנווט. אין כאן ארכיטקטורה חדשה —
+ * אותו מנוע דטרמיניסטי + השיחה החיה (HomeConversation).
  *
- * כשהשיחה פעילה, הכרטיסים מתקפלים (לא נערמים מתחתיה) והמנוע תופס את מקומם —
- * החוויה נשארת קומפקטית במובייל. סימון `data-ask-inline-active` מאפשר לכלל-CSS
- * להסתיר את הבועה הצפה במובייל בזמן שהשיחה פתוחה, כדי שלא יהיו שתי נקודות-כניסה
- * שיחתיות מתחרות באותו מסך.
+ * הבועה הצפה: כל עוד המקטע נמצא באמת בתוך המסך (IntersectionObserver → הסמן
+ * `data-path-in-view`), הבועה „שאל את הספר” מוסתרת במובייל — כדי שלא יהיו שתי
+ * הזמנות מתחרות לדבר עם הספר באותו מסך. כשגוללים משם, היא חוזרת כרגיל.
  */
 
 type Active =
@@ -42,8 +39,7 @@ type Active =
   | { mode: "open" }
   | null;
 
-/** לחיצה „רגילה” בלבד נחטפת; Cmd/Ctrl/Shift/Alt או לחצן-אמצע ממשיכים כרגיל
- *  (פתיחת-לשונית וכו') — כדי לא לשבור התנהגות-דפדפן צפויה. */
+/** לחיצה „רגילה” בלבד נחטפת; Cmd/Ctrl/Shift/Alt או לחצן-אמצע ממשיכים כרגיל. */
 function isPlainClick(e: React.MouseEvent): boolean {
   return (
     e.button === 0 &&
@@ -57,13 +53,12 @@ function isPlainClick(e: React.MouseEvent): boolean {
 
 export function HomePathEntry() {
   const [active, setActive] = React.useState<Active>(null);
+  const [inView, setInView] = React.useState(false);
   const regionRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLUListElement>(null);
-  // מבחין בין הרינדור הראשון (ברירת מחדל, ללא פוקוס) לבין פתיחה/סגירה יזומה.
   const wasActive = React.useRef(false);
 
-  // ניהול פוקוס נגיש: בפתיחה מעבירים פוקוס לאזור-השיחה (קורא-מסך „נוחת” על
-  // רגע-ההקשבה, לא נשאר על כרטיס שנעלם); בחזרה מחזירים פוקוס לכרטיס הראשון.
+  // ניהול פוקוס נגיש: בפתיחה מעבירים פוקוס לאזור-השיחה; בחזרה — לכרטיס הראשון.
   React.useEffect(() => {
     if (active) {
       const el = regionRef.current;
@@ -74,24 +69,43 @@ export function HomePathEntry() {
       wasActive.current = true;
     } else if (wasActive.current) {
       wasActive.current = false;
-      const firstCard = gridRef.current?.querySelector<HTMLAnchorElement>("a.path-station");
-      firstCard?.focus();
+      gridRef.current?.querySelector<HTMLAnchorElement>("a.situation-card")?.focus();
     }
   }, [active]);
+
+  // נוכחות-המקטע-במסך: מסמן `data-path-in-view` כל עוד `#path` באמת בתוך המסך,
+  // כדי שכלל-CSS יסתיר את הבועה הצפה במובייל (אין שתי הזמנות מתחרות). מבוסס
+  // נראוּת בפועל (IntersectionObserver) ולא היסט-פיקסלים קשיח.
+  React.useEffect(() => {
+    const section = document.getElementById("path");
+    if (!section || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => setInView(entries[0]?.isIntersecting ?? false),
+      { rootMargin: "-15% 0px -20% 0px", threshold: 0 },
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, []);
 
   const openStation = (station: AskStationId) => {
     trackEvent("ask_open_home", { via: "card", station });
     setActive({ mode: "station", station });
   };
   const openBroad = () => {
-    trackEvent("ask_open_home", { via: "complex" });
+    trackEvent("ask_open_home", { via: "composer" });
     setActive({ mode: "open" });
   };
 
+  // כל עוד המקטע במסך — הבועה הצפה מוסתרת (מובייל). קיים גם `data-ask-inline-active`
+  // לזמן שיחה פעילה, כגיבוי מפורש למצב שבו המקטע נגלל אך השיחה עדיין פתוחה.
+  const inViewMarker = inView ? (
+    <span data-path-in-view hidden aria-hidden="true" />
+  ) : null;
+
   if (active) {
     return (
-      <div className="home-ask mx-auto mt-5 max-w-2xl">
-        {/* סמן לכלל-ה-CSS: כל עוד הוא ב-DOM, הבועה הצפה מוסתרת במובייל. */}
+      <div className="home-ask mx-auto mt-6 max-w-2xl">
+        {inViewMarker}
         <span data-ask-inline-active hidden aria-hidden="true" />
         <div className="mb-3 flex justify-center sm:justify-start">
           <button
@@ -126,79 +140,81 @@ export function HomePathEntry() {
 
   return (
     <>
-      <div className="path-choose mx-auto mt-5 max-w-2xl sm:max-w-4xl">
-        <ul
-          ref={gridRef}
-          className="path-stations relative grid grid-cols-1 gap-2.5 sm:grid-cols-4 sm:gap-4"
-        >
-          {homePaths.map((p, index) => (
-            // `contents` — הפריט אינו יוצר תיבה משלו, כך שהקישור עצמו הוא תא
-            // הרשת ומקבל את גובה השורה המלא (יעד-מגע גדול, מסלול מיושר).
-            <li key={p.id} className="contents">
-              <Link
-                href={p.stationHref}
-                data-index={index}
-                onClick={(e) => {
-                  // שיפור-הדרגתי: עם JS פותחים שיחה במקום; בלי JS זהו קישור רגיל.
-                  if (!isPlainClick(e)) return;
-                  e.preventDefault();
-                  openStation(p.askStation);
-                }}
-                className="path-station lift-hover relative flex items-center justify-between gap-2 rounded-xl border-2 border-border bg-surface p-3 text-start transition-colors hover:border-brand/50 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:flex-col sm:items-start sm:gap-3 sm:rounded-2xl sm:p-5"
-              >
-                {/* צומת התחנה — במרזב-המסלול, מחוץ לגוף הכרטיס, כדי שהקו לא
-                    ייחבא מאחורי רקע הכרטיס. דקורטיבי בלבד. */}
-                <span className="path-station__node" aria-hidden="true" />
-                <span className="min-w-0">
-                  <span className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-serif text-[15px] font-bold leading-tight text-foreground sm:text-[1.3rem]">
-                      {p.buttonTitle}
-                    </span>
-                    {p.gate ? (
-                      <span className="inline-flex shrink-0 items-center rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-brand-foreground sm:text-[12px]">
-                        {homePathUi.gateBadge}
-                      </span>
-                    ) : null}
-                  </span>
-                  {/* שורת-הזיהוי היא *הסיבה* שהכרטיס אינו כפתור-ניווט: היא
-                      מתארת את התחושה, לא את היעד. לכן היא מוצגת גם במובייל. */}
-                  <span className="mt-1 block text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[15px]">
-                    {p.buttonSub}
-                  </span>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="path-arrow inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-brand transition-colors sm:h-10 sm:w-10 sm:self-end"
-                >
-                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {inViewMarker}
 
-      {/* כניסה כנה למי שלא מזהה את עצמו באף מצב. עם JS: פותח את המנוע המודרך
-          מתחילתו (בחירת-המצב הרחבה ביותר) במקום. בלי JS: קישור אמיתי אל
-          ‎/compass — אותו מנוע. לא „אספר בעצמי”: אין כאן שיחה חופשית ב-V1. */}
-      <p className="mx-auto mt-5 max-w-2xl text-center text-[14px] leading-relaxed text-foreground-muted">
-        {homePathUi.complexPrompt}{" "}
+      {/* ── נקודת-הכניסה הראשית: תיבת-כתיבה חופשית ── גדולה, רגועה, וברור שאפשר
+          להקליד בה (סמן מהבהב + כיתוב-placeholder + אייקון עֵט). אפורדנס אמיתי:
+          לחיצה/פוקוס פותחים את השיחה הרחבה במקום; בלי JS — קישור אל ‎/compass.
+          לא כפתור-CTA כהה: זו האינטראקציה החזקה במקטע, אך שקטה. */}
+      <div className="mx-auto mt-6 max-w-2xl">
         <Link
           href="/compass"
+          aria-label={homePathUi.composerAriaLabel}
           onClick={(e) => {
             if (!isPlainClick(e)) return;
             e.preventDefault();
             openBroad();
           }}
-          className="group inline-flex items-center gap-1.5 font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          className="home-composer group flex w-full items-center gap-3 rounded-2xl border border-border-strong bg-surface px-5 py-4 text-start shadow-sm transition-[border-color,box-shadow] hover:border-brand/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-6 sm:py-5"
         >
-          {homePathUi.complexLabel}
-          <ArrowLeft
-            className="h-3.5 w-3.5 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+          <span aria-hidden="true" className="home-composer__caret" />
+          <span className="min-w-0 flex-1 text-[16.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[18px]">
+            {homePathUi.composerLead}
+          </span>
+          <span
             aria-hidden="true"
-          />
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground sm:h-10 sm:w-10"
+          >
+            <PenLine className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+          </span>
         </Link>
-      </p>
+        <p className="mt-2 px-1 text-[13px] leading-relaxed text-foreground-muted">
+          {homePathUi.composerHint}
+        </p>
+      </div>
+
+      {/* ── מפריד שקט אל המצבים המוכרים ── */}
+      <div className="mx-auto mt-7 flex max-w-2xl items-center gap-3 sm:mt-9">
+        <span className="h-px flex-1 bg-border" aria-hidden="true" />
+        <span className="text-[13px] text-foreground-muted">{homePathUi.startersLabel}</span>
+        <span className="h-px flex-1 bg-border" aria-hidden="true" />
+      </div>
+
+      {/* ── פותחי-שיחה משניים: המצבים המוכרים ── לא כרטיסי-ניווט ולא שאלון: אין
+          חיצים, אין צמתים/מסלול, אין באדג'ים. אייקון-שיחה מרוסן, כותרת רגועה,
+          ושורת-תחושה אחת. הכרטיסים נשארים `<a>` אמיתיים (SEO/ללא-JS). */}
+      <ul
+        ref={gridRef}
+        className="mx-auto mt-5 grid max-w-2xl grid-cols-1 gap-3 sm:max-w-4xl sm:grid-cols-2 lg:grid-cols-4"
+      >
+        {homePaths.map((p, index) => (
+          <li key={p.id} className="contents">
+            <Link
+              href={p.stationHref}
+              data-index={index}
+              onClick={(e) => {
+                if (!isPlainClick(e)) return;
+                e.preventDefault();
+                openStation(p.askStation);
+              }}
+              className="situation-card group flex h-full flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 text-start shadow-sm transition-[border-color,background-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-brand/40 hover:bg-surface-muted/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0 sm:p-5"
+            >
+              <span
+                aria-hidden="true"
+                className="mb-0.5 text-brand/70 opacity-80 transition-opacity group-hover:opacity-100"
+              >
+                <MessageCircle className="h-[18px] w-[18px]" />
+              </span>
+              <span className="font-serif text-[17px] font-semibold leading-snug text-foreground sm:text-[19px]">
+                {p.buttonTitle}
+              </span>
+              <span className="text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[14px]">
+                {p.buttonSub}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

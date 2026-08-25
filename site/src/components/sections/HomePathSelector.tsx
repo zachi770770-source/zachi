@@ -25,11 +25,8 @@ export function HomePathSelector() {
           <h2 id="path-heading" className="type-h2 mt-2">
             {homePathUi.heading}
           </h2>
-          <p className="type-lead mx-auto mt-2 max-w-[42ch] text-foreground-muted [text-wrap:pretty]">
+          <p className="type-lead mx-auto mt-3 max-w-[46ch] text-foreground-muted [text-wrap:pretty]">
             {homePathUi.sub}
-          </p>
-          <p className="mx-auto mt-2 max-w-xl text-[14px] italic text-foreground-muted">
-            לא צריך לדעת הכול כדי להתחיל נכון.
           </p>
         </div>
 

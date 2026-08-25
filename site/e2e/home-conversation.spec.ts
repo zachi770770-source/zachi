@@ -95,11 +95,13 @@ test("full conversation: situation → free text → grounded answer → follow-
   await followup2.fill("מרגיש שאני לא באמת נבחר");
   await path.getByRole("button", { name: ui.followupSend }).click();
   await expect(path.getByText(/דפוס שחוזר לאורך זמן/)).toBeVisible();
-  await expect(path.getByText(ui.closing)).toBeVisible();
-  await expect(path.getByRole("link", { name: /לרכישת הספר באמזון/ })).toHaveAttribute(
-    "href",
-    /amazon\.com\/dp\/B0GJ3SL9H2/,
-  );
+  // סגירה = גשר עריכתי מהתשובה אל עומק התהליך שבספר, ואז פעולת-המשך ברורה.
+  await expect(path.getByText(ui.closingBridge)).toBeVisible();
+  const bookCta = path.getByRole("link", { name: ui.closingCtaAria });
+  await expect(bookCta).toBeVisible();
+  await expect(bookCta).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
+  // עדיין ניתן לחזור לחקור — פעולה משנית שקטה, לא מסך חסום.
+  await expect(path.getByRole("button", { name: ui.restart })).toBeVisible();
 
   // אין גלישה אופקית לאורך כל השיחה.
   const overflow = await page.evaluate(
@@ -129,6 +131,35 @@ test("refusal keeps the conversation grounded (no answer without book basis)", a
   await input.fill("מה מזג האוויר מחר בתל אביב");
   await path.getByRole("button", { name: ui.send }).click();
   await expect(path.getByText(/לא מצאתי בספר בסיס מספיק/)).toBeVisible();
+});
+
+test("a safety response closes gently — no purchase CTA on a sensitive moment", async ({
+  page,
+}) => {
+  await page.route("**/api/compass", async (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ json: { available: true, remaining: 8, limits: {} } });
+    }
+    return route.fulfill({
+      json: {
+        available: true,
+        status: "safety",
+        answer: "אם קשה עכשיו, שווה לדבר עם מישהו שסומכים עליו או עם גורם מקצועי.",
+        remaining: 8,
+        limits: {},
+      },
+    });
+  });
+  const path = await openSituation(page);
+  await path.getByLabel(ui.invitePrompt).fill("אני מרגיש שאני לא רוצה להמשיך יותר");
+  await path.getByRole("button", { name: ui.send }).click();
+  await expect(path.getByText(/שווה לדבר עם מישהו/)).toBeVisible();
+  // סגירה שקטה, בלי המרה: אין גשר-ספר ואין קישור-רכישה ברגע רגיש.
+  await expect(path.getByText(ui.closingQuiet)).toBeVisible();
+  await expect(path.getByText(ui.closingBridge)).toHaveCount(0);
+  await expect(path.getByRole("link", { name: ui.closingCtaAria })).toHaveCount(0);
+  // עדיין אפשר להתחיל מחדש.
+  await expect(path.getByRole("button", { name: ui.restart })).toBeVisible();
 });
 
 test("graceful unavailable: falls back to the deterministic guided engine, no dead chat box", async ({
