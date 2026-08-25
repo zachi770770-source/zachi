@@ -185,3 +185,86 @@ describe("askCompass: סירוב בניסוח חופשי לעולם אינו מ�
     if (res.answer.status === "answered") expect(res.answer.citation).toContain("פרק 4");
   });
 });
+
+/**
+ * רגרסיה ל„סירוב-חיפוש” גנרי: כשאין כלל ישיר בספר אבל *יש* חומר קרוב, המענה חייב
+ * למסגר מחדש דרך העיקרון הסמוך — לא ליפול ל„לא מצאתי בספר בסיס מספיק…”. שני
+ * המשטחים (‏/compass ועמוד-הבית) חולקים את `askCompass`, ולכן נבדקים כאן ובמצב-שיחה.
+ * מול ספק מדומה: הבדיקה מאמתת את *הטיפול* בפלט-המודל, לא את המודל עצמו.
+ */
+describe("askCompass — מענה מעוגן על עיקרון סמוך (במקום סירוב-חיפוש)", () => {
+  // הדוגמה המדווחת. פלט-מודל שמתנהג כרצוי: אומר מה הספר *לא* קובע, ואז ממסגר
+  // מחדש דרך העקרונות הקרובים, ומסיים בשאלה — בלי להמציא כלל תשלום.
+  const GROUNDED_PAYMENT =
+    "הספר לא קובע כלל שלפיו דווקא צד אחד צריך לשלם בדייט ראשון. אבל הספר כן מזמין " +
+    "להסתכל על מה שקורה סביב הרגע הזה: אילו ציפיות כל אחד מביא, מה אנחנו מפרשים " +
+    "מההתנהגות של הצד השני, והאם אנחנו הופכים מחווה קטנה למבחן התאמה. מה יותר מעסיק " +
+    "אותך כאן, מי משלם בפועל או מה זה אומר בעיניך אם הצד השני לא מציע?";
+
+  it("„מי צריך לשלם בדייט ראשון” → מסגור מעוגן, לא הסירוב הגנרי", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "מי צריך לשלם בדייט ראשון",
+      provider(GROUNDED_PAYMENT)
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      // לא הדד-אנד הגנרי, ולא נוסח „מנוע-חיפוש שנכשל”.
+      expect(res.answer.text).not.toBe(COMPASS_INSUFFICIENT_ANSWER);
+      expect(res.answer.text.startsWith("לא מצאתי")).toBe(false);
+      // אומר במפורש שהספר אינו קובע כלל — כלומר לא הומצא כלל תשלום.
+      expect(res.answer.text).toContain("לא קובע");
+      expect(res.answer.text).not.toMatch(/הספר\s+קובע\s+ש/); // בלי כלל מומצא
+      // מסגור מחדש דרך החומר הקרוב, ושאלה שממשיכה את השיחה.
+      expect(res.answer.text).toContain("ציפיות");
+      expect(res.answer.text).toContain("?");
+      // ייחוס לפרק אמיתי שנשלף (לא מומצא) — buildCitation נבנה מהקטעים בלבד.
+      expect(res.answer.citation).toContain("פרק 4");
+    }
+  });
+
+  it("שאלה קרובה-אך-חלשה → מסגור מעוגן (answered), לא סירוב", async () => {
+    const res = await askCompass(
+      mockDb([row(0.55)]),
+      "כדאי לחכות שלושה ימים לפני שכותבים אחרי דייט?",
+      provider(
+        "הספר לא קובע חוק של „שלושה ימים”. מה שכן עולה מהקטעים הוא שהקצב פחות חשוב " +
+          "מהכנות שמאחוריו, ושכדאי לשים לב אם ההמתנה משרתת אתכם או רק את הפחד. איך " +
+          "מרגיש לך הרצון לכתוב, כשאתה עוצר לרגע?"
+      )
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      expect(res.answer.text).not.toBe(COMPASS_INSUFFICIENT_ANSWER);
+      expect(res.answer.citation).toContain("פרק 4");
+    }
+  });
+
+  it("סימון NO_BOOK_BASIS מפורש → סירוב אנושי וספציפי (בלי ציטוט/פוקוס)", async () => {
+    const specific = "זאת שאלה על מיסים, וזה פשוט לא משהו שהספר הזה נכנס אליו.";
+    const res = await askCompass(
+      mockDb([row(0.4)]),
+      "כמה מס משלמים על שכר דירה",
+      provider(`NO_BOOK_BASIS\n${specific}`)
+    );
+    expect(res.answer.status).toBe("refused");
+    if (res.answer.status === "refused") {
+      expect(res.answer.text).toBe(specific); // ספציפי לשאלה, לא רשימת נושאים
+      expect(res.answer.text).not.toContain("NO_BOOK_BASIS");
+    }
+    expect(res.answer).not.toHaveProperty("citation");
+    expect(res.answer).not.toHaveProperty("focus");
+  });
+
+  it("שאלה זרה לחלוטין (אפס אחזור) → סירוב אנושי, בלי רשימת נושאים ובלי „לנסח מחדש”", async () => {
+    const res = await askCompass(mockDb([]), "מה מזג האוויר מחר בתל אביב", provider("x"));
+    expect(res.answer.status).toBe("refused");
+    if (res.answer.status === "refused") {
+      expect(res.answer.text).toBe(COMPASS_INSUFFICIENT_ANSWER);
+      // לא נוסח „מנוע-חיפוש”: אין רשימת קטגוריות ואין „לנסות לנסח אותה אחרת”.
+      expect(res.answer.text).not.toContain("לנסות לנסח");
+      expect(res.answer.text).not.toContain("דייטינג, התאמה");
+      expect(res.answer.text).not.toContain("לשאול על");
+    }
+  });
+});
