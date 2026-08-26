@@ -15,18 +15,28 @@ export function JourneyInteraction({ id }: { id: JourneyId }) {
   const data = journeyInteractions[id];
 
   return (
+    // „תרגול קצר” editorial — *ללא* card: מחובר ויזואלית ל„מה הכי קרוב אליי”
+    // שקדם לו (אותו beat של עבודה), כדי שלא ייקרא כשאלון שני. הכותרת בדרגת
+    // תת-כותרת (לא section-heading), וההכלה משתמעת מ-whitespace וטיפוגרפיה בלבד.
     <section
       aria-labelledby="journey-interaction-heading"
-      className="reveal rounded-3xl border border-border bg-surface p-6 sm:p-8"
+      className="reveal"
     >
-      <span className="kicker">{data.eyebrow}</span>
+      {/* framing של „יישום” — הרכיב המשותף קובע את המסגור (לא ה-data): הכותרת-
+          העל אומרת שזהו שלב היישום, וה-lead גושר במפורש מהבחירה ב„מה הכי קרוב
+          אליי” (זיהוי-עצמי) אל תרגול על מצב/אדם ממשי. תוכן ומשמעות כל האינטראקציות
+          נשמרים — זהו microcopy framing בלבד. */}
+      <span className="kicker">עכשיו ליישום</span>
       <h2
         id="journey-interaction-heading"
-        className="mt-3 font-serif text-[clamp(1.4rem,2.4vw,1.9rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+        className="mt-3 font-serif text-[clamp(1.2rem,1.9vw,1.5rem)] font-bold leading-[1.2] text-foreground [text-wrap:balance]"
       >
         {data.title}
       </h2>
       <p className="mt-3 max-w-[54ch] text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+        <span className="font-semibold text-foreground">
+          כבר זיהיתם מה הכי קרוב אליכם — עכשיו נסו את אותה הבחנה על מצב או אדם ממשי.
+        </span>{" "}
         {data.intro}
       </p>
       {data.note ? (

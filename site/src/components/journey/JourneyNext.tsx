@@ -46,7 +46,7 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
         <div className="mt-3">
           <h2
             id="journey-next-heading"
-            className="font-serif text-[clamp(1.5rem,2.6vw,2.1rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+            className="font-serif text-[clamp(1.5rem,2.4vw,2.05rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
           >
             התחנה הבאה: {flow.next.label}
           </h2>
@@ -76,7 +76,7 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
         <div className="mt-3">
           <h2
             id="journey-next-heading"
-            className="font-serif text-[clamp(1.5rem,2.6vw,2.1rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+            className="font-serif text-[clamp(1.5rem,2.4vw,2.05rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
           >
             הגעתם לסוף המסלול באתר
           </h2>
@@ -114,7 +114,7 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
         <div className="mt-3">
           <h2
             id="journey-next-heading"
-            className="font-serif text-[clamp(1.5rem,2.6vw,2.1rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+            className="font-serif text-[clamp(1.5rem,2.4vw,2.05rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
           >
             אין כאן כיוון אחד נכון
           </h2>
@@ -151,7 +151,7 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
         <div className="mt-3">
           <h2
             id="journey-next-heading"
-            className="font-serif text-[clamp(1.5rem,2.6vw,2.1rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
+            className="font-serif text-[clamp(1.5rem,2.4vw,2.05rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
           >
             חזרה למסלול: {flow.bridge.label}
           </h2>
