@@ -132,6 +132,28 @@ test.describe("Reader Bonus — full activation flow (code → session cookie �
     expect(serialized).not.toMatch(/token/i);
   });
 
+  test("the real activation form (email + code) submits, sets the cookie, and redirects to the kit", async ({ page, context }) => {
+    await withAnalytics(page);
+    await page.goto("/reader", { waitUntil: "domcontentloaded" });
+
+    await page.getByLabel("אימייל", { exact: true }).fill(`form+${Date.now()}@example.com`);
+    await page.getByLabel("קוד הפעלה מהספר", { exact: true }).fill(ACCESS_CODE);
+    await page.getByLabel(/אני מאשר/).check();
+    await page.getByRole("button", { name: "הפעילו את ערכת הקורא" }).click();
+
+    // הטופס האמיתי → עוגיית-סשן HttpOnly → ניווט ל-/reader/kit, ללא token ב-URL.
+    await page.waitForURL(/\/reader\/kit$/, { timeout: 8000 });
+    expect(page.url()).not.toContain("token");
+    await expect(page.getByRole("heading", { name: "ערכת הכלים שלכם" })).toBeVisible();
+
+    const session = (await context.cookies()).find((c) => c.name === "reader_session");
+    expect(session?.httpOnly).toBe(true);
+
+    // האירוע שנצפה אחרי הניווט (dataLayer מתאפס בכל טעינה) — כניסה לערכה.
+    const accessed = await eventsNamed(page, "reader_kit_accessed");
+    expect(accessed.length).toBeGreaterThanOrEqual(1);
+  });
+
   test("an invalid code is rejected (401) and grants no access", async ({ page, context }) => {
     const res = await page.request.post("/api/reader/activate", {
       data: { email: `x+${Date.now()}@example.com`, code: "NOPE-NOPE", consent: true },
