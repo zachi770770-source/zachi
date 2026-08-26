@@ -54,13 +54,14 @@ export function StationGuides({
       </p>
 
       {secondary ? (
-        // אשכול שקט — קישורי-רשימה מופרדים בקו, בלי „קופסאות” שמתחרות בהמשך-המסע.
-        <ul className="mt-4 flex flex-col divide-y divide-border">
+        // אשכול שקט — קישורי-רשימה קומפקטיים, בלי „קופסאות” שמתחרות בהמשך-המסע.
+        // דסקטופ: שני טורים; מובייל: טור אחד. כל שורה מופרדת בקו-שׂיא דק בלבד.
+        <ul className="mt-4 grid gap-x-10 sm:grid-cols-2">
           {stationGuides.map((g) => (
-            <li key={g.slug}>
+            <li key={g.slug} className="border-t border-border">
               <Link
                 href={g.path}
-                className="group flex items-center justify-between gap-3 py-3 text-[15px] font-medium leading-tight text-foreground/90 underline-offset-4 hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="group flex items-center justify-between gap-3 py-2.5 text-[15px] font-medium leading-tight text-foreground/90 underline-offset-4 hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
                 <span>{g.metaTitle}</span>
                 <ArrowLeft

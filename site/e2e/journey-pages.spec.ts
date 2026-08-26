@@ -140,16 +140,16 @@ test("building-relationship: the contextual concept link leads to fact-story (in
   ).toHaveAttribute("href", "/preview?tool=gate-questions&station=building-relationship");
 });
 
-test("after-breakup gently offers 'starting again' as a next step (not a primary CTA)", async ({ page }) => {
+test("after-breakup gently offers 'starting again' as a calm option (not a primary CTA)", async ({ page }) => {
   await page.goto("/after-breakup", { waitUntil: "networkidle" });
-  await expect(page.getByText(/סקרנות לחזור לעולם ההיכרויות/)).toBeVisible();
-  // הקישור הרך ב„מה כדאי לקרוא מכאן” (בדיוק „מתחילים מחדש”), להבדיל מקישור
-  // הגשר המפורש שב„המשך המסע” („להעיף מבט אל …”).
-  await expect(page.getByRole("link", { name: "מתחילים מחדש", exact: true })).toHaveAttribute(
+  // ההצעה הרכה ל„מתחילים מחדש” חיה ב„המשך המסע” (gateway) — אפשרות שקטה,
+  // לא band ולא כפתור-דיו. (הכפילות ב„מה כדאי לקרוא מכאן” הוסרה.)
+  const next = page.locator('section[aria-labelledby="journey-next-heading"]');
+  await expect(next.getByRole("link", { name: /להעיף מבט אל .מתחילים מחדש/ })).toHaveAttribute(
     "href",
     "/starting-again",
   );
-  // הפעולה הראשית נשארת הטעימה — לא „מתחילים מחדש”.
+  // הטעימה קיימת כפעולה משנית (מתאר), לא כ-CTA ראשי כפוי.
   await expect(
     page.getByRole("link", { name: "קראו טעימה שמתאימה למה שאתם עוברים עכשיו" }),
   ).toBeVisible();

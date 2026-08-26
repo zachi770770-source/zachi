@@ -22,7 +22,6 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { JourneyView } from "@/components/journey/JourneyView";
 import { AskBookLink } from "@/components/journey/AskBookLink";
-import { askBook } from "@/content/compass";
 
 /**
  * עמוד-מסע אישי (Landing) לאחת מארבע הבחירות ב-Home — נכתב לשפת-המצב של הקורא,
@@ -116,6 +115,12 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
 
   const quote = <PullQuote text={journey.pullQuote} tone={v.quoteTone} />;
 
+  // מערכת-כותרות אחת ומצומצמת: Hero (H1) · section-heading (הכותרות המרכזיות) ·
+  // תת-כותרת/kicker. אותו גודל לכל כותרות-הפרק המרכזיות, כדי שלא לכל module יהיה
+  // גודל-כותרת ייחודי משלו (ציטוט-העצירה הוא החריג הטיפוגרפי).
+  const sectionHeading =
+    "font-serif text-[clamp(1.5rem,2.4vw,2.05rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]";
+
   return (
     <Container className="py-10 sm:py-14 lg:py-16">
       <BreadcrumbSchema
@@ -207,241 +212,197 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         </header>
       )}
 
-      <div className={cn("mt-16 lg:mt-24", v.rhythm)}>
-        {/* B. „מה באמת קורה בשלב הזה” — שיקוף (לא עצות). כותרת ברֵיל צדדי + טקסט. */}
-        <section
-          aria-labelledby="whats-happening-heading"
-          className="reveal lg:grid lg:grid-cols-12 lg:gap-x-12"
-        >
-          <div className="lg:col-span-4">
-            <span className="kicker">שיקוף</span>
-            <h2
-              id="whats-happening-heading"
-              className="mt-4 font-serif text-[clamp(1.6rem,2.6vw,2.25rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
-            >
-              {journey.whatsHappeningHeading}
-            </h2>
-          </div>
-          <div className="mt-6 flex max-w-[60ch] flex-col gap-5 lg:col-span-8 lg:mt-0">
-            {journey.whatsHappening.map((para, i) => (
-              <p
-                key={i}
-                className={cn(
-                  "text-[1.125rem] leading-[1.75] text-foreground/90 [text-wrap:pretty]",
-                  i === 0 &&
-                    "text-[clamp(1.2rem,1.7vw,1.4rem)] font-medium leading-[1.6] text-foreground",
-                )}
-              >
-                {para}
-              </p>
-            ))}
-          </div>
-        </section>
-
-        {/* Early Reading Entry — נקודת כניסה מוקדמת ושקטה לטעימה, מיד אחרי
-            ה-reflection הראשון: לקורא שכבר זיהה את עצמו ורוצה להיכנס לספר בלי
-            לעבור עוד שלושה מסכים. קישור editorial (לא band/כפתור מלא), אל אותה
-            טעימה מותאמת של הפעולה הראשית. ה-Primary block המלא נשאר בסוף הקשת. */}
-        <div className="reveal border-t border-border pt-6">
-          <BookLink
-            href={previewHref}
-            morphCover
-            className="group inline-flex items-center gap-2.5 text-[1.0625rem] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand [text-wrap:pretty]"
+      {/* שלוש מערכות: התמצאות → עבודה → תנועה. הקצב האנכי אינו אחיד — מרווח הדוק
+          בתוך אותה מערכה, ומרווח גדול רק במעברים בין המערכות — כדי שהעמוד ייקרא
+          כמסע editorial אחד ולא כרצף מודולים. */}
+      <div className="mt-16 space-y-16 sm:mt-20 sm:space-y-20 lg:mt-24 lg:space-y-24">
+        {/* ═══ מערכה 1 — התמצאות: איפה אני, ומה באמת קורה כאן ═══ */}
+        <div className="space-y-8 sm:space-y-10">
+          {/* B. שיקוף — „מה באמת קורה בשלב הזה”. */}
+          <section
+            aria-labelledby="whats-happening-heading"
+            className="reveal lg:grid lg:grid-cols-12 lg:gap-x-12"
           >
-            {journey.earlyCtaLabel}
-            <ArrowLeft
-              className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
-              aria-hidden="true"
-            />
-          </BookLink>
+            <div className="lg:col-span-4">
+              <span className="kicker">שיקוף</span>
+              <h2 id="whats-happening-heading" className={cn("mt-4", sectionHeading)}>
+                {journey.whatsHappeningHeading}
+              </h2>
+            </div>
+            <div className="mt-6 flex max-w-[60ch] flex-col gap-5 lg:col-span-8 lg:mt-0">
+              {journey.whatsHappening.map((para, i) => (
+                <p
+                  key={i}
+                  className={cn(
+                    "text-[1.125rem] leading-[1.75] text-foreground/90 [text-wrap:pretty]",
+                    i === 0 &&
+                      "text-[clamp(1.2rem,1.7vw,1.4rem)] font-medium leading-[1.6] text-foreground",
+                  )}
+                >
+                  {para}
+                </p>
+              ))}
+            </div>
+          </section>
+
+          {/* ציטוט-העצירה כפסק שקט (variant בהירות/מרחב) — חותם את ההתמצאות. */}
+          {v.quoteAfter === "reflection" && quote}
         </div>
 
-        {/* ציטוט-העצירה כפסק שקט (variant בהירות/מרחב). */}
-        {v.quoteAfter === "reflection" && quote}
-
-        {/* C. „רגע של מראה” אינטראקטיבי — שלוש נקודות-העומק הופכות לרגע זיהוי-עצמי
-            on-page: הקורא בוחר את מה שהכי קרוב אליו, נחשפת הפסקה שמעמיקה בה, ומוצע
-            המשך (המושג מהספר). מערכת אחת החוזרת בכל ארבעת המסלולים, מוזנת מתוכן
-            העמוד הקיים בלבד. הכותרת (depthHeading) נשמרת כעוגן-הסקשן (SEO). */}
-        <section aria-labelledby="depth-heading" className="reveal">
-          <h2 id="depth-heading" className="kicker">
-            {journey.depthHeading}
-          </h2>
-          {/* כל אחת משלוש הבחירות נושאת outcome משלה (שיקוף/שאלה/צעד ראשי);
-              הכלי המלווה נגזר בתוך המראה מ-outcome.methodSlug, לא מכלי-תחנה יחיד. */}
-          <JourneyMirror id={journey.id} points={journey.depthPoints} />
-        </section>
-
-        {/* ציטוט-העצירה כשיא-מומנטום/עומק (variant תנועה/עומק). */}
-        {v.quoteAfter === "points" && quote}
-
-        {/* „שאלת מראה” — שאלה אחת לעצור עליה. אלמנט editorial (לא form/input/כפתור):
-            בולט טיפוגרפית, אישי, עם קו-רייל צדדי — נבדל מציטוט-העצירה הממורכז. */}
-        <section aria-labelledby="mirror-question" className="reveal">
-          <div className="mx-auto max-w-[52ch] border-s-2 border-brand ps-5 sm:ps-8">
-            <span className="kicker">רגע של מראה</span>
-            <p
-              id="mirror-question"
-              className="mt-3 type-literary text-[clamp(1.375rem,2.4vw,2rem)] font-medium leading-[1.4] text-foreground [text-wrap:balance]"
-            >
-              {journey.mirrorQuestion}
-            </p>
-            {/* מיד אחרי „רגע של מראה” — כניסה לעוזר, בהקשר-המצב של המסלול. */}
-            <AskBookLink
-              station={journey.compassStation}
-              prompt={askBook.inlinePrompt}
-              className="mt-6 border-t border-border pt-5"
-            />
-          </div>
-        </section>
-
-        {/* „פעולה קטנה אחת” — אחרי שהמבקר/ת כבר קיבל/ה הקשר ותוכן (שיקוף, מראה,
-            שאלת-מראה), ולפני אזורי-ההעמקה הכבדים (טעימה/מדריכים/אמזון): רגע קצר
-            שבו *עושים* משהו קטן שמתאים לשלב. רכיב אחד, מונחה-data לכל תחנה,
-            CSS-only ו-ephemeral. אינו נוגע ב-JourneyMirror ואינו מזיז את
-            ה-next-station של JourneyNext. */}
-        <JourneyInteraction id={journey.id} />
-
-        {/* E. „מה הספר יעזור לכם לראות” — תובנות ממוקדות (בלי הבטחת תוצאה). */}
-        <section
-          aria-labelledby="book-helps-heading"
-          className="reveal lg:grid lg:grid-cols-12 lg:gap-x-12"
-        >
-          <div className="lg:col-span-4">
-            <span className="kicker">מהספר</span>
-            <h2
-              id="book-helps-heading"
-              className="mt-4 font-serif text-[clamp(1.6rem,2.6vw,2.25rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
-            >
-              {journey.bookHelpsHeading}
+        {/* ═══ מערכה 2 — עבודה: מה קרוב אליי → נסו ליישם → מה הספר מראה ═══ */}
+        <div className="space-y-8 sm:space-y-10">
+          {/* C. „רגע של מראה” — בחירת מה שקרוב, וה-outcome הייחודי שלה. */}
+          <section aria-labelledby="depth-heading" className="reveal">
+            <h2 id="depth-heading" className="kicker">
+              {journey.depthHeading}
             </h2>
-          </div>
-          <ul className="mt-6 flex max-w-[58ch] flex-col divide-y divide-border lg:col-span-8 lg:mt-0">
-            {journey.bookHelps.map((help) => (
-              <li
-                key={help}
-                className="flex items-start gap-4 py-4 first:pt-0"
+            <JourneyMirror id={journey.id} points={journey.depthPoints} />
+          </section>
+
+          {/* ציטוט-העצירה כשיא-מומנטום/עומק (variant תנועה/עומק) — בתוך מערכת העבודה. */}
+          {v.quoteAfter === "points" && quote}
+
+          {/* „שאלת מראה” — שאלה editorial אחת לעצור עליה. כניסת-Compass הוסרה כאן
+              (הכפילות בוטלה); „בדקו מה הספר אומר” נשאר פעם אחת, באזור הטעימה. */}
+          <section aria-labelledby="mirror-question" className="reveal">
+            <div className="mx-auto max-w-[52ch] border-s-2 border-brand ps-5 sm:ps-8">
+              <span className="kicker">רגע של מראה</span>
+              <p
+                id="mirror-question"
+                className="mt-3 type-literary text-[clamp(1.375rem,2.4vw,2rem)] font-medium leading-[1.4] text-foreground [text-wrap:balance]"
               >
-                <span
-                  aria-hidden="true"
-                  className="mt-[0.6rem] h-1.5 w-6 shrink-0 rounded-full bg-brand"
-                />
-                <span className="text-[1.0625rem] leading-relaxed text-foreground/90 [text-wrap:pretty]">
-                  {help}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+                {journey.mirrorQuestion}
+              </p>
+            </div>
+          </section>
 
-        {/* F+G+H. משפט-מעבר → טעימה מותאמת (פעולה ראשית) → „שאל את הספר” (משני). */}
-        <section
-          aria-label="להמשך הקריאה"
-          className="reveal overflow-hidden rounded-3xl border border-border bg-surface-muted/60 px-6 py-10 sm:px-10 sm:py-12 lg:grid lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:px-12"
-        >
-          <div className="lg:col-span-7">
-            <span className="kicker">טעימה מהספר</span>
-            <p className="mt-4 max-w-[46ch] font-serif text-[clamp(1.3rem,1.9vw,1.6rem)] leading-[1.5] text-foreground [text-wrap:pretty]">
-              {journey.sampleLead}
-            </p>
-          </div>
-          <div className="mt-7 flex flex-col items-start gap-4 lg:col-span-5 lg:mt-0 lg:items-end">
-            {/* הטעימה היא *טעימה*, לא רכישה: כפתור משני (מתאר), כדי שלא יתחרה
-                ב„המשך המסע” ובפעולת-הרכישה (אמזון) שהם הפעולות הראשיות. */}
-            <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-              <BookLink href={previewHref} morphCover>
-                {journey.samplePrimaryLabel}
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </BookLink>
-            </Button>
-            <AskBookLink station={journey.compassStation} />
-          </div>
-        </section>
+          {/* „תרגול קצר” — flat, מחובר למראה (אותו beat): „עכשיו נסו ליישם”. */}
+          <JourneyInteraction id={journey.id} />
 
-        {/* המשך-המסע — הצעד קדימה במסלול הראשי, *לפני* אזורי-ההעמקה (מדריכים/
-            מושגים/אמזון), כדי שייקרא כהמשך המסע ולא כקישור צדדי. נגזר ממקור-אמת
-            אחד (journeyFlow): advance / complete / gateway / bridge. */}
-        <JourneyNext journey={journey} />
-
-        {/* I. Next step — רך, שונה לפי מסלול: הספר המלא + תחנת-המשך ייעודית. J בסוף. */}
-        <section
-          aria-labelledby="next-heading"
-          className="reveal border-t border-border pt-10"
-        >
-          <h2
-            id="next-heading"
-            className="font-serif text-[1.25rem] font-bold text-foreground"
+          {/* E. „מה הספר יעזור לכם לראות” — שיא-התובנה של מערכת העבודה. */}
+          <section
+            aria-labelledby="book-helps-heading"
+            className="reveal lg:grid lg:grid-cols-12 lg:gap-x-12"
           >
-            מה כדאי לקרוא מכאן
-          </h2>
-          <div className="mt-4 flex flex-col gap-3">
-            <Link
-              href="/book"
-              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
-              מה עוד מחכה בספר
-            </Link>
-            {/* מרכז-האשכול הרוחבי „אהבה” — התחנה היא שלב בתוך התמונה הרחבה. */}
-            <Link
-              href="/love"
-              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
-              מהי אהבה ואיך היא נבנית
-            </Link>
-            <p className="max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-              {journey.nextStep.prompt}{" "}
-              <Link
-                href={journey.nextStep.href}
-                className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                {journey.nextStep.label}
-              </Link>
+            <div className="lg:col-span-4">
+              <span className="kicker">מהספר</span>
+              <h2 id="book-helps-heading" className={cn("mt-4", sectionHeading)}>
+                {journey.bookHelpsHeading}
+              </h2>
+            </div>
+            <ul className="mt-6 flex max-w-[58ch] flex-col divide-y divide-border lg:col-span-8 lg:mt-0">
+              {journey.bookHelps.map((help) => (
+                <li key={help} className="flex items-start gap-4 py-4 first:pt-0">
+                  <span
+                    aria-hidden="true"
+                    className="mt-[0.6rem] h-1.5 w-6 shrink-0 rounded-full bg-brand"
+                  />
+                  <span className="text-[1.0625rem] leading-relaxed text-foreground/90 [text-wrap:pretty]">
+                    {help}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        {/* ═══ מערכה 3 — תנועה: הצעד הבא → טעימה → הספר ═══ */}
+        <div className="space-y-8 sm:space-y-10">
+          {/* המשך-המסע — ה-primary של המסע, מיד אחרי „מה הספר יעזור לראות”,
+              לפני הטעימה/העמקה. */}
+          <JourneyNext journey={journey} />
+
+          {/* טעימה מהספר — קטע editorial *שטוח* (containment משתמע: קו-שׂיא דק +
+              whitespace + טיפוגרפיה, בלי card). CTA משני (מתאר, לעולם לא filled),
+              ו„בדקו מה הספר אומר” כקישור-טקסט שקט. שם-הנגישות „להמשך הקריאה” נשמר. */}
+          <section
+            aria-label="להמשך הקריאה"
+            className="reveal border-t border-border pt-8 lg:grid lg:grid-cols-12 lg:items-center lg:gap-x-12"
+          >
+            <div className="lg:col-span-7">
+              <span className="kicker">טעימה מהספר</span>
+              <p className="mt-4 max-w-[46ch] font-serif text-[clamp(1.25rem,1.8vw,1.55rem)] leading-[1.5] text-foreground [text-wrap:pretty]">
+                {journey.sampleLead}
+              </p>
+            </div>
+            <div className="mt-6 flex flex-col items-start gap-4 lg:col-span-5 lg:mt-0 lg:items-end">
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
+                <BookLink href={previewHref} morphCover>
+                  {journey.samplePrimaryLabel}
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                </BookLink>
+              </Button>
+              <AskBookLink station={journey.compassStation} />
+            </div>
+          </section>
+
+          {/* Purchase — culmination: הספר המלא, לפני ה-tail של קריאה-קשורה/מדריכים.
+              CTA הרכישה הראשי היחיד (filled). */}
+          <div className="rounded-2xl border border-border bg-surface-muted/60 px-6 py-8 text-center sm:px-10 sm:py-9">
+            <p className="mx-auto max-w-[42ch] font-serif text-[clamp(1.15rem,1.7vw,1.4rem)] leading-[1.5] text-foreground [text-wrap:pretty]">
+              רוצים את הספר המלא? זמין עכשיו במהדורת Kindle באמזון.
             </p>
-            {stationMethod ? (
+            <div className="mt-5">
+              <Button asChild size="lg" className="w-full sm:w-auto">
+                <AmazonBuyLink source={AMAZON_SOURCE[journey.id]}>
+                  לרכישה באמזון
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                </AmazonBuyLink>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ tail — להעמקה נוספת (משני, crawlable) ═══ */}
+        <div className="space-y-8">
+          {/* קריאה קשורה — אשכול שקט של יעדים ייחודיים (ספר/אהבה/מושג). הוסרה
+              הכפילות: „מה עוד מחכה בספר” אינו חוזר, ותחנת-ההמשך כבר חיה ב„המשך המסע”. */}
+          <section aria-labelledby="next-heading" className="reveal border-t border-border pt-8">
+            <h2 id="next-heading" className="kicker">
+              מה כדאי לקרוא מכאן
+            </h2>
+            <div className="mt-4 flex flex-col gap-3">
               <Link
-                href={stationMethod.path}
+                href="/book"
                 className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
                 <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
-                המושג מהספר: „{stationMethod.term}”
+                מה עוד מחכה בספר
               </Link>
-            ) : null}
+              {/* מרכז-האשכול הרוחבי „אהבה” — התחנה היא שלב בתוך התמונה הרחבה. */}
+              <Link
+                href="/love"
+                className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
+                מהי אהבה ואיך היא נבנית
+              </Link>
+              {stationMethod ? (
+                <Link
+                  href={stationMethod.path}
+                  className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
+                  המושג מהספר: „{stationMethod.term}”
+                </Link>
+              ) : null}
+            </div>
+          </section>
+
+          {/* אשכול המדריכים — אזור העמקה *נוסף* (secondary): נשמר לגמרי (SEO/קישורים). */}
+          <StationGuides stationPath={`/${journey.id}`} tone="secondary" />
+
+          {/* J. „זה לא המקום שלי” — קישור שקט חזרה לבורר, לא בורר מלא בעמוד. */}
+          <div className="border-t border-border pt-6">
+            <Link
+              href="/#path"
+              className="inline-flex items-center gap-2 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              זה לא המקום שלי, בחרו מסלול אחר
+            </Link>
           </div>
-        </section>
-
-        {/* אשכול המדריכים — כל תחנה היא ה-hub של המדריכים ששויכו אליה (רכיב
-            משותף עם StationPage, מסונן לפי guide.hub.href). בעמוד-המסע זהו אזור
-            העמקה *נוסף* (secondary): נשמר לגמרי (SEO/קישורים), אך במשקל ויזואלי
-            נמוך מ„המשך המסע” ומהספר. */}
-        <StationGuides stationPath={`/${journey.id}`} tone="secondary" />
-      </div>
-
-      {/* Purchase exit — פעם אחת בלבד, אחרי הקשת: הספר המלא זמין עכשיו באמזון. */}
-      <div className="mt-14 rounded-2xl border border-border bg-surface-muted/60 px-6 py-7 text-center sm:px-10">
-        <p className="mx-auto max-w-[42ch] font-serif text-[clamp(1.15rem,1.7vw,1.4rem)] leading-[1.5] text-foreground [text-wrap:pretty]">
-          רוצים את הספר המלא? זמין עכשיו במהדורת Kindle באמזון.
-        </p>
-        <div className="mt-5">
-          <Button asChild size="lg" className="w-full sm:w-auto">
-            <AmazonBuyLink source={AMAZON_SOURCE[journey.id]}>
-              לרכישה באמזון
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </AmazonBuyLink>
-          </Button>
         </div>
-      </div>
-
-      {/* J. „זה לא המקום שלי” — קישור שקט חזרה לבורר, לא בורר מלא בעמוד. */}
-      <div className="mt-12">
-        <Link
-          href="/#path"
-          className="inline-flex items-center gap-2 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          זה לא המקום שלי, בחרו מסלול אחר
-        </Link>
       </div>
     </Container>
   );
