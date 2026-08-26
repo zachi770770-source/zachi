@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { getJourneyFlow } from "@/content/journeyFlow";
 import type { JourneyPage as JourneyPageData } from "@/content/journeyPages";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * בלוק המשך-המסע — הצעד קדימה במסלול הראשי, מוצג *לפני* אזורי-ההעמקה (מדריכים,
@@ -22,12 +23,24 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
   const flow = getJourneyFlow(journey.id);
   const previewHref = `/preview?tool=${journey.sampleTool}&station=${journey.sampleStation}`;
 
+  // „complete” הוא *סיום* המסלול, לא צעד: מוצג כאמירה שקטה בין קווי-שׂיא (בלי
+  // קופסה/כפתור), כדי שלא ייקרא כעוד card ברשימה. שאר התפקידים נשארים card של
+  // המשך-מסע, עם „המשך המסע” ככותרת-על.
+  const isComplete = flow.role === "complete";
+
   return (
     <section
       aria-labelledby="journey-next-heading"
-      className="reveal rounded-3xl border border-border bg-surface-muted/40 px-6 py-9 sm:px-10 sm:py-11"
+      className={cn(
+        "reveal",
+        isComplete
+          ? "border-y border-border-strong py-12 text-center sm:py-14"
+          : "rounded-3xl border border-border bg-surface-muted/40 px-6 py-9 sm:px-10 sm:py-11",
+      )}
     >
-      <span className="kicker">המשך המסע</span>
+      <span className={cn("kicker", isComplete && "justify-center")}>
+        {isComplete ? "סוף המסלול" : "המשך המסע"}
+      </span>
 
       {flow.role === "advance" && flow.next ? (
         <div className="mt-3">
@@ -67,7 +80,7 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
           >
             הגעתם לסוף המסלול באתר
           </h2>
-          <div className="mt-4 flex max-w-[54ch] flex-col gap-3 text-[1.0625rem] leading-relaxed text-foreground/90 [text-wrap:pretty]">
+          <div className="mx-auto mt-4 flex max-w-[54ch] flex-col gap-3 text-[1.0625rem] leading-relaxed text-foreground/90 [text-wrap:pretty]">
             <p>
               זו התחנה השלישית, וזה סוף המסלול שאפשר ללכת כאן, באתר. אין תחנה
               רביעית שממתינה — לא כי „סיימתם”, אלא כי מכאן העבודה עוברת אל הקשר
