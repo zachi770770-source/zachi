@@ -123,6 +123,40 @@ describe("POST /api/compass — מצב שיחה", () => {
     expect(m.askCompass).not.toHaveBeenCalled();
   });
 
+  it("מעביר valueDelivered + currentSituation + toolSurfaced ללקוח (שכבת-מסע)", async () => {
+    m.askCompass.mockResolvedValue({
+      answer: {
+        status: "answered",
+        text: "כיוון מהספר.",
+        citation: "מבוסס על פרק 4: בחירה מפוכחת",
+        valueDelivered: true,
+        currentSituation: "interpreting-signals",
+        toolSurfaced: { slug: "fact-story", path: "/method/fact-story", term: "עובדה, סיפור, פעולה" },
+      },
+    });
+
+    const res = await POST(
+      post({ mode: "conversation", station: "dating", question: "היא לא ענתה, לא מעוניינת?", context: [] }),
+    );
+    const body = await res.json();
+
+    expect(body.status).toBe("answered");
+    expect(body.valueDelivered).toBe(true);
+    expect(body.currentSituation).toBe("interpreting-signals");
+    expect(body.toolSurfaced).toMatchObject({ path: "/method/fact-story" });
+  });
+
+  it("answered בלי מרקר → valueDelivered=false מועבר במפורש (גישור-CTA שרת-מחושב)", async () => {
+    m.askCompass.mockResolvedValue({
+      answer: { status: "answered", text: "אמפתיה בלבד.", citation: "פרק 4", valueDelivered: false },
+    });
+    const res = await POST(post({ mode: "conversation", question: "רק שיתוף", context: [] }));
+    const body = await res.json();
+    expect(body.valueDelivered).toBe(false);
+    expect(body.currentSituation).toBeUndefined();
+    expect(body.toolSurfaced).toBeUndefined();
+  });
+
   it("שאלה בודדת (ללא mode) אינה מעבירה אופציות-שיחה", async () => {
     m.askCompass.mockResolvedValue({
       answer: { status: "answered", text: "כיוון קצר.", citation: "מבוסס על פרק 4" },

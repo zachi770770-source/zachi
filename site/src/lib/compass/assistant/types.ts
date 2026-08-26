@@ -44,6 +44,8 @@ export type CompassSafetyCategory =
 /** דרגת דחיפות: „critical” = סכנה מיידית; „high” = חמור אך לא בהכרח מיידי. */
 export type CompassSafetySeverity = "high" | "critical";
 
+import type { JourneyId, SurfacedTool } from "@/content/journeys";
+
 /** התוצאה הסופית שהעוזר מחזיר לראוט. */
 export type CompassAnswer =
   | {
@@ -52,6 +54,26 @@ export type CompassAnswer =
       text: string;
       /** „מבוסס על: פרק X — שם הפרק” (עד שני מקורות). */
       citation: string;
+      /**
+       * „ערך נמסר” — נכון *רק* כשהמודל סימן מפורשות שהתור הזה מסר תובנה
+       * אמיתית ומבוססת-ספר שאפשר לעשות איתה משהו (מרקר `[[VALUE]]`), *וגם*
+       * זו תשובה מ-status "answered" (כלומר עברה אחזור-מוצלח + ציטוט אמיתי).
+       * אמפתיה גנרית, הרגעה, סירוב, בטיחות או מגבלה לעולם אינם מדליקים אותו,
+       * והוא אינו תלוי במספר התורות. זה, ורק זה, פותח את גשר-הרכישה בבית.
+       * ברירת מחדל undefined (= לא נמסר ערך) → אין CTA.
+       */
+      valueDelivered?: boolean;
+      /**
+       * „המצב הנוכחי” (Journey) של המבקר כפי שסווג דטרמיניסטית ממה שכתב.
+       * זה *אינו* Persona ואינו נגזר ממנה. אופציונלי: undefined כשהסיווג לא
+       * ודאי (ואז הממשק נופל לגשר גנרי-מעוגן).
+       */
+      currentSituation?: JourneyId;
+      /**
+       * הכלי מ-`/method/*` שממופה למצב הנוכחי — פעולה *משנית* בגשר. נגזר
+       * מ-`methods` דרך המסע; קיים רק כאשר currentSituation ודאי.
+       */
+      toolSurfaced?: SurfacedTool;
       /**
        * שורת „על מה שווה לשים לב עכשיו” — משפט עריכתי קצר אחד, *אופציונלי*,
        * שהמודל מפיק מתוך אותם קטעים בלבד (לא ידע כללי). נחלץ דטרמיניסטית

@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { ArrowLeft, Compass, RotateCcw } from "lucide-react";
 
 import { dilemmasFor, askUi, type AskStationId } from "@/content/askRoute";
 import { homeConversationUi as ui } from "@/content/homeConversation";
+import { JOURNEYS, isJourneyId, type JourneyId, type SurfacedTool } from "@/content/journeys";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { trackEvent } from "@/lib/analytics";
 
@@ -41,8 +43,19 @@ type Msg =
       text: string;
       citation?: string;
       followup?: string;
+      /**
+       * שכבת-המסע, שרת-מחושבת בלבד. `valueDelivered` הוא היחיד שפותח את גשר-
+       * הרכישה (אינו מבוסס על מספר-הודעות). `currentSituation`/`toolSurfaced`
+       * מתאימים את הגשר למסע ולכלי שבאמת עלה — לעולם אינם Persona.
+       */
+      valueDelivered?: boolean;
+      currentSituation?: JourneyId;
+      toolSurfaced?: SurfacedTool;
     }
   | { role: "assistant"; kind: "refused" | "safety" | "limit"; text: string };
+
+/** שלב-השיחה: פתיחה → התקדמות → סגירה. נגזר, לא-מאוחסן. */
+type Phase = "begin" | "progress" | "conclude";
 
 export function HomeConversation({ station }: { station?: AskStationId }) {
   const [availability, setAvailability] = React.useState<Availability>("loading");
@@ -131,6 +144,16 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
           setError(ui.error);
         } else if (data.status === "answered") {
           const followup = typeof data.followup === "string" ? data.followup : undefined;
+          // שכבת-המסע: נקראת אך ורק מהשרת. `valueDelivered` הוא boolean שרת-מחושב
+          // (ברירת מחדל false). המסע/הכלי נכנסים רק כשהשרת סיווג בוודאות.
+          const currentSituation =
+            typeof data.currentSituation === "string" && isJourneyId(data.currentSituation)
+              ? data.currentSituation
+              : undefined;
+          const toolSurfaced =
+            data.toolSurfaced && typeof data.toolSurfaced.path === "string"
+              ? (data.toolSurfaced as SurfacedTool)
+              : undefined;
           setMessages((prev) => [
             ...prev,
             {
@@ -139,6 +162,9 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
               text: data.answer,
               citation: typeof data.citation === "string" ? data.citation : undefined,
               followup,
+              valueDelivered: data.valueDelivered === true,
+              currentSituation,
+              toolSurfaced,
             },
           ]);
           // „תשובה מועילה התקבלה” — עם מספר-התור כדי להבחין את התשובה *הראשונה*
@@ -204,12 +230,28 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
     completedRef.current = false;
   };
 
-  // גשר-הרכישה מוצג רק כשהשיחה באמת נתנה תובנה מהספר, ולעולם לא אחרי מענה-בטיחות:
-  // לא ממירים רגע רגיש, ולא מציעים לקנות בלי שנוצר ערך. אחרת — סגירה שקטה בלבד.
-  const gotUsefulAnswer = messages.some(
-    (m) => m.role === "assistant" && m.kind === "answer",
-  );
-  const showBookBridge = gotUsefulAnswer && lastAssistant?.kind !== "safety";
+  // גשר-הרכישה מוצג רק כשהשרת קבע „ערך נמסר” (valueDelivered) — תובנה אמיתית
+  // ומבוססת-ספר, לא סתם קבלת-תשובה ולא ספירת-הודעות. אמפתיה/הרגעה/סירוב/מגבלה,
+  // וכמובן מענה-בטיחות, לעולם אינם פותחים אותו. אחרת — סגירה שקטה בלבד.
+  const valueTurn = [...messages]
+    .reverse()
+    .find(
+      (m): m is Extract<Msg, { role: "assistant"; kind: "answer" }> =>
+        m.role === "assistant" && m.kind === "answer" && m.valueDelivered === true,
+    );
+  const showBookBridge = !!valueTurn && lastAssistant?.kind !== "safety";
+  // המסע והכלי נלקחים מהתור שמסר את הערך — כדי שהגשר יתאים למה שבאמת עלה. שניהם
+  // אופציונליים: אם הסיווג לא היה ודאי, נופלים לגשר גנרי-מעוגן, בלי לכפות מסע.
+  const journey = valueTurn?.currentSituation;
+  const surfacedTool = valueTurn?.toolSurfaced;
+  const journeyBridge = journey ? JOURNEYS[journey] : undefined;
+
+  // שלב-השיחה — נגזר בלבד (לא מאוחסן): פתיחה → התקדמות → סגירה.
+  const phase: Phase = done
+    ? "conclude"
+    : messages.some((m) => m.role === "assistant" && m.kind === "answer")
+      ? "progress"
+      : "begin";
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -272,7 +314,7 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
   const canSend = !submitting && input.trim().length >= 2 && !done;
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-2xl" data-conversation-phase={phase}>
       {/* honeypot נסתר */}
       <div
         className="pointer-events-none absolute -start-[9999px] top-0 h-0 w-0 overflow-hidden"
@@ -344,10 +386,14 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
         <div
           className="rounded-2xl border border-border bg-surface-muted/60 p-5 text-start sm:p-6"
           data-conversation-close="bridge"
+          data-journey={journey ?? "generic"}
         >
+          {/* גשר מותאם-מסע כשהסיווג ודאי; אחרת גשר גנרי-מעוגן. שניהם מדברים על
+              „תהליך שבספר” בשפה כללית, בלי לטעון שהספר קובע דבר ספציפי. */}
           <p className="text-[15.5px] leading-[1.7] text-foreground [text-wrap:pretty]">
-            {ui.closingBridge}
+            {journeyBridge?.bridge ?? ui.closingBridge}
           </p>
+          {/* אמזון נשאר הפעולה הראשית — תמיד, בכל מסע. */}
           <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
             <AmazonBuyLink
               source="home"
@@ -363,10 +409,23 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
             </AmazonBuyLink>
             <span className="text-[13px] text-foreground-muted">{ui.closingCtaSub}</span>
           </div>
+          {/* פעולה *משנית* בלבד: עמוד-המושג של הכלי שבאמת *עלה מהאחזור* (לא
+              מה-journey). התווית נגזרת משם-הכלי שהשרת עיגן, לעולם לא מומצאת.
+              לא מנווט אוטומטית ל-/compass ואינו מתחרה באמזון. */}
+          {surfacedTool ? (
+            <Link
+              href={surfacedTool.path}
+              data-journey-tool={surfacedTool.slug}
+              className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              {`${ui.toolLinkPrefix} ${surfacedTool.term}`}
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          ) : null}
           <button
             type="button"
             onClick={reset}
-            className="mt-4 inline-flex items-center gap-1.5 text-[13.5px] text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            className="mt-4 flex items-center gap-1.5 text-[13.5px] text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
             {ui.restart}

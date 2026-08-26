@@ -37,6 +37,15 @@ const row = (score: number): Row => ({
   score,
 });
 
+/** שורת-אחזור עם תוכן מותאם — לבדיקות שכבת העיגון (dilemma → כלי). */
+const crow = (content: string, section: string, score = 0.6): Row => ({
+  chapter_number: 4,
+  chapter_name: "בחירה מפוכחת",
+  section_name: section,
+  content,
+  score,
+});
+
 function provider(text: string): CompassProvider {
   return {
     model: "test-model",
@@ -163,6 +172,88 @@ describe("askCompass — מצב שיחה", () => {
     if (res.answer.status === "refused") expect(res.answer.text).toBe(specific);
     expect(res.answer).not.toHaveProperty("followup");
     expect(res.answer).not.toHaveProperty("citation");
+  });
+
+  // תוכן-אחזור שמעגן את d-words-actions (interpreting-signals → fact-story).
+  const groundedRows = [
+    crow(
+      "יש פער בין המילים למעשים. מה שנאמר לא תמיד תואם למה שנעשה בפועל, והמעשים מספרים יותר מהמילים.",
+      "מילים מול מעשים",
+    ),
+  ];
+
+  it("מעוגן + כלי + מרקר → valueDelivered=true (+ מצב וכלי מהאחזור, לא מהמסע)", async () => {
+    const res = await askCompass(
+      mockDb(groundedRows),
+      "יש פער בין מה שהוא אומר למה שהוא עושה",
+      provider(
+        "המילים והמעשים לא תואמים, ושווה להסתכל על מה שנעשה בפועל.\n" +
+          "שאלת המשך: איזה מעשה אחד סתר את מה שנאמר?\n[[VALUE]]",
+      ),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      expect(res.answer.valueDelivered).toBe(true);
+      expect(res.answer.text).not.toContain("[[VALUE]]");
+      expect(res.answer.followup).toContain("?");
+      // מצב + כלי מגיעים מהעיגון (dilemma d-words-actions), לא מה-journey.
+      expect(res.answer.currentSituation).toBe("interpreting-signals");
+      expect(res.answer.toolSurfaced?.path).toBe("/method/fact-story");
+    }
+  });
+
+  it("מעוגן + כלי אבל בלי מרקר → valueDelivered=false (אמפתיה/רפלקציה לא פותחת CTA)", async () => {
+    const res = await askCompass(
+      mockDb(groundedRows),
+      "יש פער בין מה שהוא אומר למה שהוא עושה",
+      provider("המילים והמעשים לא תואמים.\nשאלת המשך: מה עוד קורה שם?"),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      // הכלי עדיין מעוגן, אבל בלי מרקר אין ערך.
+      expect(res.answer.toolSurfaced?.path).toBe("/method/fact-story");
+      expect(res.answer.valueDelivered).toBe(false);
+    }
+  });
+
+  it("מרקר בלי עיגון-כלי → valueDelivered=false (מרקר לבדו אינו מספיק)", async () => {
+    const res = await askCompass(
+      mockDb([crow("כמה שמן צריך במנוע של מכונית מאזדה ואיזה צמיגים.", "טכני")]),
+      "רק רציתי לשתף משהו",
+      provider("מחשבה כללית קצרה.\nשאלת המשך: מה עוד?\n[[VALUE]]"),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("answered");
+    if (res.answer.status === "answered") {
+      expect(res.answer.toolSurfaced).toBeUndefined();
+      expect(res.answer.valueDelivered).toBe(false);
+    }
+  });
+
+  it("מרקר-ערך על סירוב אמיתי → נשאר refused, בלי valueDelivered/כלי", async () => {
+    const res = await askCompass(
+      mockDb([row(0.6)]),
+      "שאלה כלשהי",
+      provider("הספר אינו עוסק בנושא הזה.\n[[VALUE]]"),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("refused");
+    expect(res.answer).not.toHaveProperty("valueDelivered");
+    expect(res.answer).not.toHaveProperty("toolSurfaced");
+  });
+
+  it("שיחה: שער-בטיחות → אין valueDelivered ואין כלי (לא נפתח CTA)", async () => {
+    const res = await askCompass(
+      mockDb(groundedRows),
+      "הוא מאיים עליי ואני מפחד לחזור הביתה",
+      provider("לא אמור להיקרא\n[[VALUE]]"),
+      { conversation: { isFinalTurn: false } },
+    );
+    expect(res.answer.status).toBe("safety");
+    expect(res.answer).not.toHaveProperty("valueDelivered");
+    expect(res.answer).not.toHaveProperty("toolSurfaced");
   });
 
   it("שיחה עם הקשר קודם: עדיין מגיבה (עיגון האחזור על ההודעה הפותחת + הנוכחית)", async () => {

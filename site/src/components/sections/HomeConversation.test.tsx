@@ -3,6 +3,7 @@ import { render, cleanup, screen, waitFor, fireEvent } from "@testing-library/re
 
 import { HomeConversation } from "@/components/sections/HomeConversation";
 import { homeConversationUi as ui } from "@/content/homeConversation";
+import { JOURNEYS } from "@/content/journeys";
 
 /**
  * החוזה השיחתי בצד הלקוח: שלב-פתיחה → תשובה מעוגנת → שאלת-המשך → תור המשך;
@@ -114,7 +115,7 @@ describe("HomeConversation", () => {
     ]);
   });
 
-  it("סגירה מועילה: גשר אל הספר + פעולת-רכישה ראשית וברורה", async () => {
+  it("סגירה מועילה (valueDelivered, בלי סיווג): גשר גנרי + רכישה ראשית", async () => {
     mockFetch((_u, init) =>
       !init || init.method === "GET"
         ? { available: true, remaining: 8 }
@@ -123,6 +124,7 @@ describe("HomeConversation", () => {
             status: "answered",
             answer: "דפוס שחוזר אומר יותר מרגע בודד.",
             citation: "פרק 4",
+            valueDelivered: true,
             done: true,
           },
     );
@@ -136,6 +138,64 @@ describe("HomeConversation", () => {
     expect(cta).toHaveAttribute("href", expect.stringContaining("amazon."));
     expect(screen.getByText(ui.closingCtaSub)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: ui.restart })).toBeInTheDocument();
+  });
+
+  it("סגירה מותאמת-מסע: גשר-מסע + קישור-כלי משני, ואמזון נשאר ראשי", async () => {
+    mockFetch((_u, init) =>
+      !init || init.method === "GET"
+        ? { available: true, remaining: 8 }
+        : {
+            available: true,
+            status: "answered",
+            answer: "שווה להפריד בין מה שקרה למה שהמוח סיפר.",
+            citation: "פרק 4",
+            valueDelivered: true,
+            currentSituation: "interpreting-signals",
+            toolSurfaced: {
+              slug: "fact-story",
+              path: "/method/fact-story",
+              term: "עובדה, סיפור, פעולה",
+            },
+            done: true,
+          },
+    );
+    render(<HomeConversation station="dating" />);
+    const box = await screen.findByLabelText(ui.invitePrompt);
+    fireEvent.change(box, { target: { value: "היא לא ענתה, זה אומר שלא מעוניינת?" } });
+    fireEvent.click(screen.getByRole("button", { name: ui.send }));
+
+    // גשר מותאם-מסע (לא הגנרי), קישור-כלי משני אל /method/fact-story, ואמזון ראשי.
+    expect(await screen.findByText(JOURNEYS["interpreting-signals"].bridge)).toBeInTheDocument();
+    expect(screen.queryByText(ui.closingBridge)).toBeNull();
+    const toolLink = screen.getByRole("link", {
+      name: `${ui.toolLinkPrefix} עובדה, סיפור, פעולה`,
+    });
+    expect(toolLink).toHaveAttribute("href", "/method/fact-story");
+    const cta = screen.getByRole("link", { name: ui.closingCtaAria });
+    expect(cta).toHaveAttribute("href", expect.stringContaining("amazon."));
+  });
+
+  it("answered בלי valueDelivered → סגירה שקטה, בלי גשר וללא CTA (אמפתיה לא מוכרת)", async () => {
+    mockFetch((_u, init) =>
+      !init || init.method === "GET"
+        ? { available: true, remaining: 8 }
+        : {
+            available: true,
+            status: "answered",
+            answer: "אני שומע אותך.",
+            citation: "פרק 4",
+            valueDelivered: false,
+            done: true,
+          },
+    );
+    render(<HomeConversation station="dating" />);
+    const box = await screen.findByLabelText(ui.invitePrompt);
+    fireEvent.change(box, { target: { value: "רק רציתי לשתף" } });
+    fireEvent.click(screen.getByRole("button", { name: ui.send }));
+
+    expect(await screen.findByText(ui.closingQuiet)).toBeInTheDocument();
+    expect(screen.queryByText(ui.closingBridge)).toBeNull();
+    expect(screen.queryByRole("link", { name: ui.closingCtaAria })).toBeNull();
   });
 
   it("מענה-בטיחות נסגר בשקט — בלי גשר-ספר ובלי קישור-רכישה", async () => {

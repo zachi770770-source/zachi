@@ -18,8 +18,11 @@ import {
   parseNoBasisMarker,
   extractFocus,
   extractFollowup,
+  extractValueMarker,
   type ConversationTurn,
 } from "@/lib/compass/assistant/prompt";
+import { groundSituation } from "@/lib/journey/ground";
+import type { AskStationId } from "@/content/askRoute";
 import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 import { assessCompassSafety, buildSafetyAnswer } from "@/lib/compass/assistant/safety";
 
@@ -38,6 +41,8 @@ export interface AskConversationOptions {
   priorTurns?: ConversationTurn[];
   /** האם זהו התור האחרון (אז אין שאלת המשך, אלא סגירה קצרה). */
   isFinalTurn: boolean;
+  /** התחנה שנבחרה בבית — prior *חלש* בלבד לעיגון המצב/הכלי. */
+  station?: AskStationId;
 }
 
 /**
@@ -101,19 +106,25 @@ export async function askCompass(
     maxTokens: MAX_OUTPUT_TOKENS,
   });
 
+  // מרקר-הערך (מצב-שיחה בלבד) נחלץ *ראשון*, כדי שלא ייבלע כחלק מהגוף או מהשורה
+  // הנגררת. הנוכחות נשמרת; הטקסט הנקי משמש לכל הפירוק שאחריו. נוכחות המרקר לבדה
+  // אינה מספיקה — `valueDelivered` נקבע רק יחד עם status "answered" בהמשך.
+  const valueMarker = conversation
+    ? extractValueMarker(completion.text)
+    : { body: completion.text, valueDelivered: false };
+  const rawText = valueMarker.body;
+
   // סירוב אמיתי מפורש: המודל סימן שאין בקטעים חומר קרוב כלל. מקבל את משפט-הסירוב
   // האנושי והספציפי שלו (או את הנוסח הקבוע), בלי ציטוט/פוקוס/שאלת-המשך. נבדק לפני
   // חילוץ/מסגור כדי שמענה מעוגן-על-עיקרון-סמוך („הספר לא קובע… אבל…”) לא ייבלע.
-  const noBasis = parseNoBasisMarker(completion.text);
+  const noBasis = parseNoBasisMarker(rawText);
   if (noBasis) {
     return { answer: { status: "refused", text: noBasis.text }, usage: completion.usage };
   }
 
   // מחלצים תחילה את השורה הנגררת (שאלת-המשך במצב-שיחה, „על מה שווה לשים לב”
-  // בשאלה בודדת) מהפלט הגולמי, כדי שתקרת-המילים של הגוף לא תבלע אותה.
-  const extracted = conversation
-    ? extractFollowup(completion.text)
-    : extractFocus(completion.text);
+  // בשאלה בודדת) מהפלט הנקי, כדי שתקרת-המילים של הגוף לא תבלע אותה.
+  const extracted = conversation ? extractFollowup(rawText) : extractFocus(rawText);
   const body = extracted.body;
   const followup =
     conversation && !conversation.isFinalTurn
@@ -126,14 +137,40 @@ export async function askCompass(
     : COMPASS_LIMITS.maxAnswerWords;
   const answerText = enforceAnswerLimits(body, maxWords);
   // סירוב לעולם אינו יוצא כ„תשובה”: אין ציטוט, אין שורה נגררת, ואין המשך
-  // „רגיל” בממשק. נבדק גם על הפלט הגולמי, למקרה שפיצול השורה הנגררת הותיר גוף
+  // „רגיל” בממשק. נבדק גם על הפלט הנקי, למקרה שפיצול השורה הנגררת הותיר גוף
   // שאינו נראה כסירוב בעוד שהתשובה כולה כן.
-  if (!answerText || isModelRefusal(answerText) || isModelRefusal(completion.text)) {
+  if (!answerText || isModelRefusal(answerText) || isModelRefusal(rawText)) {
     return {
       answer: { status: "refused", text: COMPASS_INSUFFICIENT_ANSWER },
       usage: completion.usage,
     };
   }
+
+  // ── שכבת המסע (מצב-שיחה בלבד) ──────────────────────────────────────────────
+  // עיגון „המצב הנוכחי” והכלי מהחומר שהאחזור *באמת* עיגן (+ ה-dilemma), לא
+  // מה-journey ולא מהטקסט לבדו. `toolSurfaced` עובר שער-אחזור קשיח ומוחזר null
+  // כשאין התאמה בטוחה — לא מנחשים כלי. זה *אינו* Persona ואינו נגזר ממנה.
+  const grounded = conversation
+    ? groundSituation({
+        text: q,
+        firstUserText: firstUser,
+        matches: search.results,
+        station: conversation.station,
+      })
+    : null;
+  const currentSituation = grounded?.currentSituation ?? undefined;
+  const toolSurfaced = grounded?.toolSurfaced ?? undefined;
+
+  // נוסחת `valueDelivered` (server-side, conservative bias): המרקר הוא תנאי
+  // הכרחי אך *לא מספיק*. נדרשים כולם יחד:
+  //   status "answered" (אנחנו כאן) + עיגון-אחזור תקף + toolSurfaced != null +
+  //   מרקר-ערך מאומת + אין דריסת-בטיחות (שער-הבטיחות כבר חזר מוקדם).
+  // כך מודל לא יכול לפתוח את ה-CTA רק בכך שהדפיס מרקר, ואמפתיה/רפלקציה/סירוב/
+  // מגבלה/תשובה לא-מעוגנת-מספיק אינם מחזירים value.
+  const grounding = search.matched && search.results.length > 0;
+  const valueDelivered = conversation
+    ? valueMarker.valueDelivered && grounding && toolSurfaced != null
+    : undefined;
 
   return {
     answer: {
@@ -142,6 +179,9 @@ export async function askCompass(
       citation: buildCitation(search.results),
       ...(focus ? { focus } : {}),
       ...(followup ? { followup } : {}),
+      ...(conversation ? { valueDelivered: valueDelivered === true } : {}),
+      ...(currentSituation ? { currentSituation } : {}),
+      ...(toolSurfaced ? { toolSurfaced } : {}),
     },
     usage: completion.usage,
   };
