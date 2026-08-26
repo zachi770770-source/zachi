@@ -21,7 +21,6 @@ import { AmazonBuyLink, type AmazonSource } from "@/components/purchase/AmazonBu
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { JourneyView } from "@/components/journey/JourneyView";
-import { AskBookLink } from "@/components/journey/AskBookLink";
 
 /**
  * עמוד-מסע אישי (Landing) לאחת מארבע הבחירות ב-Home — נכתב לשפת-המצב של הקורא,
@@ -325,6 +324,9 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
                 {journey.sampleLead}
               </p>
             </div>
+            {/* פעולה משנית *אחת* בלבד באזור הטעימה — קריאת הקטע. „בדקו מה הספר
+                אומר” האינ-ליין הוסר; המצפן הגלובלי/הצף נשאר ללא שינוי, כך שהיכולת
+                אינה נעלמת. */}
             <div className="mt-6 flex flex-col items-start gap-4 lg:col-span-5 lg:mt-0 lg:items-end">
               <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
                 <BookLink href={previewHref} morphCover>
@@ -332,7 +334,6 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
                   <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 </BookLink>
               </Button>
-              <AskBookLink station={journey.compassStation} />
             </div>
           </section>
 

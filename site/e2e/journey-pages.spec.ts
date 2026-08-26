@@ -90,15 +90,13 @@ for (const j of JOURNEYS) {
     // אזור הפעולות (region עם שם נגיש „להמשך הקריאה”) — כדי לא להתנגש בקישורי
     // ה„שאל את הספר” של הניווט/הפוטר.
     const cta = page.getByRole("region", { name: "להמשך הקריאה" });
-    // Primary: טעימה מותאמת → הכלי+התחנה הנכונים, עם תווית ייחודית למסלול.
+    // פעולה משנית *אחת* בלבד באזור הטעימה: קריאת הקטע המותאם (הכלי+התחנה).
     await expect(
       cta.getByRole("link", { name: j.sampleLabel }),
     ).toHaveAttribute("href", `/preview?tool=${j.tool}&station=${j.station}`);
-    // Secondary: „בדקו מה הספר אומר” עם הקשר-המצב.
-    await expect(cta.getByRole("link", { name: "בדקו מה הספר אומר" })).toHaveAttribute(
-      "href",
-      `/compass?station=${j.ask}`,
-    );
+    // „בדקו מה הספר אומר” האינ-ליין הוסר מאזור הטעימה — אין כאן פעולה שנייה
+    // שמתחרה. (המצפן הצף/הגלובלי נשאר, ונבדק בספקי ה-compass.)
+    await expect(cta.getByRole("link", { name: "בדקו מה הספר אומר" })).toHaveCount(0);
 
     // „בחרו מסלול אחר” → חזרה לבורר בבית (לא בורר מלא בעמוד).
     await expect(page.getByRole("link", { name: /בחרו מסלול אחר/ })).toHaveAttribute(
