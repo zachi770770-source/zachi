@@ -295,6 +295,8 @@ export const siteConfig = {
     /** קישור המוצר הקנוני (external). */
     url: "https://www.amazon.com/dp/B0GJ3SL9H2",
     editionLabel: "מהדורת Kindle",
+    /** מזהה-פורמט מכונה לאנליטיקה (book_format) — לא PII. תואם ל-editionLabel. */
+    format: "kindle",
     /** מיסגור זמינות אחיד לכל האתר. */
     availableLabel: "זמין עכשיו במהדורת Kindle באמזון",
     buyLabel: "לרכישה באמזון",

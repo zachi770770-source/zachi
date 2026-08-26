@@ -12,8 +12,12 @@ import { trackEvent } from "@/lib/analytics";
  * עקרונות:
  * - קישור נטיבי (`<a href>`) עם `target="_blank"` + `rel="noopener noreferrer"`.
  *   הניווט לעולם אינו תלוי ב-JS: אין `preventDefault`, אין `router.push`.
- * - אירוע אנונימי `amazon_purchase_clicked` עם *מקור בלבד* (home/book/preview/
- *   journey_*), fire-and-forget ולא-חוסם — לעולם לא אימייל/תוכן אישי.
+ * - אירוע אנונימי `amazon_purchase_clicked` (ההמרה העסקית המרכזית: קליק-כוונה
+ *   יוצא, לא מכירה מאושרת), fire-and-forget ולא-חוסם — לעולם לא אימייל/תוכן אישי.
+ *   נושא מימדי-שיוך בלבד: `source`/`cta_location` (היכן נלחץ), `source_detail`
+ *   (שיוך משני, למשל slug מדריך), `page_path` (העמוד ממנו יצא הקליק),
+ *   `destination_url` (יעד אמזון), ו-`book_format` (kindle). כך אפשר למדוד
+ *   traffic → landing → engagement → Amazon click לפי עמוד ומיקום-CTA.
  */
 export type AmazonSource =
   | "home"
@@ -51,8 +55,15 @@ export function AmazonBuyLink({
         // לא-חוסם: לעולם לא לעצור/להפריע לטאפ; שגיאה באנליטיקה לא תבטל ניווט.
         try {
           trackEvent("amazon_purchase_clicked", {
+            // מיקום ה-CTA — `source` נשמר לתאימות, `cta_location` הוא השם המפורש.
             source,
+            cta_location: source,
             ...(sourceDetail ? { source_detail: sourceDetail } : {}),
+            // מימדי-שיוך נוספים (ללא PII): העמוד, היעד, והפורמט.
+            page_path:
+              typeof window !== "undefined" ? window.location.pathname : "",
+            destination_url: siteConfig.amazon.url,
+            book_format: siteConfig.amazon.format,
           });
         } catch {
           /* analytics לא קריטי */

@@ -110,9 +110,22 @@ test.describe("Phase A analytics funnel", () => {
     expect(evs.length).toBeGreaterThanOrEqual(1);
     const e = evs[0];
     expect(e.source).toBe("guide");
+    expect(e.cta_location).toBe("guide");
     expect(e.source_detail).toBe("finding-a-relationship");
-    // אין PII — רק מזהים.
-    expect(Object.keys(e).sort()).toEqual(["event", "source", "source_detail"]);
+    // מימדי-השיוך שנוספו — כולם מזהים, ללא PII.
+    expect(e.page_path).toBe("/guide/finding-a-relationship");
+    expect(String(e.destination_url)).toContain("amazon.com/dp/B0GJ3SL9H2");
+    expect(e.book_format).toBe("kindle");
+    // אין PII — רק מזהים/מימדי-שיוך.
+    expect(Object.keys(e).sort()).toEqual([
+      "book_format",
+      "cta_location",
+      "destination_url",
+      "event",
+      "page_path",
+      "source",
+      "source_detail",
+    ]);
   });
 
   test("existing analytics intact: journey_page_viewed, preview events, ask_open", async ({
