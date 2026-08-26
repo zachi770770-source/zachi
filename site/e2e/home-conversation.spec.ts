@@ -144,8 +144,8 @@ test("journey-tailored close: surfaces the mapped tool as a secondary action, Am
   // גשר מותאם-מסע (לא הגנרי).
   await expect(path.getByText(journey.bridge)).toBeVisible();
   await expect(path.getByText(ui.closingBridge)).toHaveCount(0);
-  // כלי ממופה כפעולה משנית — קישור לעמוד-המושג, בלי ניווט אוטומטי ל-/compass.
-  const toolLink = path.getByRole("link", { name: journey.toolLinkLabel });
+  // כלי (מהאחזור) כפעולה משנית — קישור לעמוד-המושג, בלי ניווט אוטומטי ל-/compass.
+  const toolLink = path.getByRole("link", { name: `${ui.toolLinkPrefix} עובדה, סיפור, פעולה` });
   await expect(toolLink).toHaveAttribute("href", "/method/fact-story");
   // אמזון נשאר הפעולה הראשית.
   const bookCta = path.getByRole("link", { name: ui.closingCtaAria });

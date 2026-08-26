@@ -168,7 +168,7 @@ describe("HomeConversation", () => {
     expect(await screen.findByText(JOURNEYS["interpreting-signals"].bridge)).toBeInTheDocument();
     expect(screen.queryByText(ui.closingBridge)).toBeNull();
     const toolLink = screen.getByRole("link", {
-      name: JOURNEYS["interpreting-signals"].toolLinkLabel,
+      name: `${ui.toolLinkPrefix} עובדה, סיפור, פעולה`,
     });
     expect(toolLink).toHaveAttribute("href", "/method/fact-story");
     const cta = screen.getByRole("link", { name: ui.closingCtaAria });

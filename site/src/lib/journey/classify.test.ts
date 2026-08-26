@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { classifyCurrentSituation } from "@/lib/journey/classify";
-import { JOURNEY_IDS, JOURNEYS, journeyTool } from "@/content/journeys";
+import { JOURNEY_IDS, JOURNEYS } from "@/content/journeys";
 import { PERSONA_IDS } from "@/content/personas";
 
 /**
@@ -86,15 +86,11 @@ describe("הפרדה מוחלטת בין Journey ל-Persona (מחייב)", () =>
   });
 });
 
-describe("journeyTool — כל מסע ממופה לכלי /method/* אמיתי", () => {
-  it("לכל מסע יש כלי קיים עם נתיב /method/<slug> ותווית", () => {
+describe("JOURNEYS — גשר וכלי-ציפייה לכל מסע (הכלי בפועל מגיע מהאחזור)", () => {
+  it("לכל מסע יש גשר עריכתי ו-expectedToolSlug מתועד", () => {
     for (const id of JOURNEY_IDS) {
-      const tool = journeyTool(id);
-      expect(tool, `journey ${id} tool`).toBeDefined();
-      expect(tool!.path).toBe(`/method/${tool!.slug}`);
-      expect(tool!.term.length).toBeGreaterThan(0);
       expect(JOURNEYS[id].bridge.length).toBeGreaterThan(0);
-      expect(JOURNEYS[id].toolLinkLabel.length).toBeGreaterThan(0);
+      expect(JOURNEYS[id].expectedToolSlug.length).toBeGreaterThan(0);
     }
   });
 });
