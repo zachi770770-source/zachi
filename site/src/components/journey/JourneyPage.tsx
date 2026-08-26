@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { JourneyWayfinder } from "@/components/journey/JourneyWayfinder";
 import { JourneyNext } from "@/components/journey/JourneyNext";
+import { JourneyInteraction } from "@/components/journey/JourneyInteraction";
 import { JourneyMirror } from "@/components/journey/JourneyMirror";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
@@ -293,6 +294,13 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             />
           </div>
         </section>
+
+        {/* „פעולה קטנה אחת” — אחרי שהמבקר/ת כבר קיבל/ה הקשר ותוכן (שיקוף, מראה,
+            שאלת-מראה), ולפני אזורי-ההעמקה הכבדים (טעימה/מדריכים/אמזון): רגע קצר
+            שבו *עושים* משהו קטן שמתאים לשלב. רכיב אחד, מונחה-data לכל תחנה,
+            CSS-only ו-ephemeral. אינו נוגע ב-JourneyMirror ואינו מזיז את
+            ה-next-station של JourneyNext. */}
+        <JourneyInteraction id={journey.id} />
 
         {/* E. „מה הספר יעזור לכם לראות” — תובנות ממוקדות (בלי הבטחת תוצאה). */}
         <section
