@@ -1,19 +1,16 @@
 /**
  * שכבת „המסע" של עמוד הבית — חמשת המצבים שבהם מבקר יכול להיות *עכשיו*.
  *
- * עיקרון-על (מחייב): Journey = מה שקורה למבקר עכשיו, כפי שהוא תיאר במילים שלו.
- * זה איננו Persona. אסור להסיק, לקבוע או לשמור Persona מתוך המסע או מתוך מה
- * שהמבקר כתב. הקובץ הזה לא מייבא את personas.ts ולא נוגע ב-PersonaProvider,
- * ב-localStorage של הפרסונה או ב-CTA הדינמי של הפרסונה. הפרסונה נשארת background
- * tint אופציונלי בלבד, בלתי-תלוי לחלוטין בשכבה הזו.
+ * עיקרון-על (מחייב): Journey = מה שקורה למבקר עכשיו, כפי שהוא תיאר במילים שלו
+ * ומה שהאחזור באמת עיגן. זה איננו Persona. אסור להסיק, לקבוע או לשמור Persona
+ * מתוך המסע או מתוך מה שהמבקר כתב. הקובץ הזה לא מייבא את personas.ts. הפרסונה
+ * נשארת background tint אופציונלי ובלתי-תלוי לחלוטין בשכבה הזו.
  *
- * כל מסע ממופה ל*כלי מקורי אחד* מ-`/method/*` — כלי שכבר קיים ומאומת בספר
- * (`methods.ts`). אין המצאת כלים, פרקים או שמות: הכלי הממופה נגזר מ-`methods`
- * דרך ה-slug בלבד, והגשר העריכתי מדבר על „תהליך שבספר" בשפה כללית, בלי לטעון
- * שהספר קובע דבר-מה ספציפי שלא נשלף בפועל.
+ * חשוב על הכלי (`toolSurfaced`): הוא *אינו* נגזר מה-journey. הכלי מגיע מהחומר
+ * שהאחזור באמת עיגן ומה-dilemma המתאים (ראו `lib/journey/ground.ts`), ומוחזר
+ * `null` כשאין התאמה בטוחה. המפה `expectedToolSlug` כאן היא *ציפייה/גיבוי*
+ * מתועד בלבד — לא מקור-אמת ולא ניחוש כלי.
  */
-
-import { methods } from "@/content/methods";
 
 /** מקור-אמת יחיד למזהי המסעות (טאפל — לוולידציה ולטיפוסים). */
 export const JOURNEY_IDS = [
@@ -27,8 +24,9 @@ export const JOURNEY_IDS = [
 export type JourneyId = (typeof JOURNEY_IDS)[number];
 
 /**
- * כלי מ-`/method/*` כפי שהוא מוצג למבקר כפעולה *משנית* בגשר. נגזר מ-`methods`
- * (מקור-אמת יחיד) ולכן ה-path וה-term תמיד תואמים לעמוד-המושג הקיים.
+ * כלי מ-`/method/*` כפי שהוא מוצג למבקר כפעולה *משנית* בגשר. נגזר מהחומר
+ * שהאחזור עיגן (דרך ה-dilemma → `methodByToolId`), ולכן ה-path/term תמיד
+ * תואמים לעמוד-מושג קיים. לעולם אינו מומצא ולעולם אינו נגזר ישירות מה-journey.
  */
 export interface SurfacedTool {
   /** ה-slug של עמוד-המושג ב-methods (מפתח יציב). */
@@ -40,9 +38,9 @@ export interface SurfacedTool {
 }
 
 /**
- * אותות-סיווג עברית. חזקים = ייחודיים למסע (מזהים אותו לבדם); חלשים = תומכים
- * אך משותפים בין מסעות (אינם מכריעים לבדם). הסיווג דטרמיניסטי לחלוטין ומבוסס
- * על מה שהמבקר כתב — ראו `classify.ts`.
+ * אותות-סיווג עברית לזיהוי המסע מתוך *הטקסט* של המבקר. זהו אות משני (ראו
+ * `ground.ts`): הסיווג deterministic-first ומעדיף עיגון-אחזור/dilemma. חזקים =
+ * ייחודיים למסע; חלשים = תומכים אך משותפים.
  */
 export interface JourneySignals {
   strong: RegExp[];
@@ -53,33 +51,31 @@ export interface Journey {
   id: JourneyId;
   /** תווית פנימית קצרה (לא מוצגת למשתמש; לתיעוד וכלי-פיתוח). */
   label: string;
-  /** אותות הסיווג של המסע. */
+  /** אותות הסיווג הטקסטואליים של המסע (אות משני). */
   signals: JourneySignals;
-  /** ה-slug של הכלי הממופה ב-`methods` (מאומת בבנייה על-ידי הבדיקות). */
-  toolSlug: string;
+  /**
+   * ה-slug של הכלי ה*צפוי* למסע — ציפייה/גיבוי מתועד בלבד. אינו קובע את
+   * `toolSurfaced` (שנגזר מהאחזור), ומשמש לתיעוד ולבדיקות-עקביות.
+   */
+  expectedToolSlug: string;
   /**
    * גשר עריכתי מותאם-מסע: מהתובנה הספציפית אל התהליך שבספר. שפה כללית וזהירה,
    * בלי לטעון שהספר קובע דבר ספציפי שלא נשלף. אין המלצות-דמה ואין המצאת תוכן.
    */
   bridge: string;
-  /** תווית הקישור המשני אל עמוד-המושג של הכלי (RTL, בלי מקף ארוך). */
-  toolLinkLabel: string;
 }
 
 /**
- * המיפוי המלא. הכלי הממופה נבחר לפי הקרבה התוכנית לכלי המקורי בספר:
- *  • recurring-pattern    → „קו אדום מול גמישות" (זיהוי דפוס וגבולות אישיים)
- *  • interpreting-signals → „עובדה, סיפור, פעולה" (הפרדת מה שקרה ממה שסיפרנו)
- *  • deciding-continue    → „בדיקת הקצב" (שאלות-שער: להמשיך או לא)
- *  • conflict-distance    → „שיחה בגובה העיניים" (ריב חוזר וריחוק)
- *  • ending-letting-go    → „יציאה נקייה" (סיום ושחרור)
+ * המסעות + הציפייה המאושרת לכלי (expectation/fallback בלבד). הכלי בפועל תלוי
+ * במה שהאחזור עיגן, ולכן מסע יכול להוביל ליותר מכלי אחד (למשל recurring-pattern
+ * → „בדיקת השקט" כשעלה חומר של שקט/משיכה, או „קו אדום מול גמישות" כשעלה חומר
+ * של פסילה/גבולות). זה בדיוק העיקרון: הכלי אינו hard-coded מה-journey.
  */
 export const JOURNEYS: Record<JourneyId, Journey> = {
   "recurring-pattern": {
     id: "recurring-pattern",
     label: "דפוס חוזר",
-    toolSlug: "core-values",
-    toolLinkLabel: "הכלי מהספר: קו אדום מול גמישות",
+    expectedToolSlug: "quiet-check",
     bridge:
       "מה שתיארתם כאן חוזר אצלכם ביותר ממקום אחד. בספר מפרקים את הדפוס הזה לעומק, למה הוא נדלק שוב ושוב ואיך מתחילים לבחור אחרת, עם הכלים והדוגמאות המלאים.",
     signals: {
@@ -98,8 +94,7 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
   "interpreting-signals": {
     id: "interpreting-signals",
     label: "פענוח סימנים",
-    toolSlug: "fact-story",
-    toolLinkLabel: "הכלי מהספר: עובדה, סיפור, פעולה",
+    expectedToolSlug: "fact-story",
     bridge:
       "עצרתם על סימן אחד ושאלתם מה הוא אומר, וזה בדיוק הרגע שהספר עובד בו. הוא מראה איך להפריד בין מה שקרה בפועל למה שהמוח מיהר לספר עליו, עם התהליך המלא והדוגמאות.",
     signals: {
@@ -117,8 +112,7 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
   "deciding-continue": {
     id: "deciding-continue",
     label: "החלטה אם להמשיך",
-    toolSlug: "pace-check",
-    toolLinkLabel: "הכלי מהספר: בדיקת הקצב",
+    expectedToolSlug: "core-values",
     bridge:
       "אתם עומדים בצומת של להמשיך או לא, וזו לא החלטה שמכריעים בראש. בספר יש שאלות-שער שעוזרות לבדוק לאן הקשר הזה באמת הולך, בקצב שלכם, עם הכלים המלאים.",
     signals: {
@@ -136,8 +130,7 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
   "conflict-distance": {
     id: "conflict-distance",
     label: "קונפליקט וריחוק",
-    toolSlug: "eye-level-talk",
-    toolLinkLabel: "הכלי מהספר: שיחה בגובה העיניים",
+    expectedToolSlug: "eye-level-talk",
     bridge:
       "אותה מריבה שחוזרת היא לרוב לא על מה שרבים עליו. בספר יש דרך לנהל את השיחה בגובה העיניים, לצאת מהלולאה שחוזרת ולהתקרב בחזרה, עם התהליך והדוגמאות המלאים.",
     signals: {
@@ -156,8 +149,7 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
   "ending-letting-go": {
     id: "ending-letting-go",
     label: "סיום ושחרור",
-    toolSlug: "clean-exit",
-    toolLinkLabel: "הכלי מהספר: יציאה נקייה",
+    expectedToolSlug: "clean-exit",
     bridge:
       "אתם כבר יודעים שהקשר הזה לא היה טוב לכם, והגעגוע עדיין כאן, ושני הדברים יכולים לחיות יחד. בספר יש דרך לצאת נקי ולשחרר בלי לשחזר, עם התהליך המלא.",
     signals: {
@@ -181,15 +173,4 @@ export const journeyOrder: readonly JourneyId[] = JOURNEY_IDS;
 
 export function isJourneyId(v: unknown): v is JourneyId {
   return typeof v === "string" && (JOURNEY_IDS as readonly string[]).includes(v);
-}
-
-/**
- * הכלי הממופה למסע, נגזר מ-`methods` דרך ה-slug. מחזיר undefined אם ה-slug לא
- * קיים ב-methods (מצב שהבדיקות חוסמות) — כך אף פעם לא מציגים נתיב מומצא.
- */
-export function journeyTool(id: JourneyId): SurfacedTool | undefined {
-  const slug = JOURNEYS[id].toolSlug;
-  const method = methods[slug];
-  if (!method) return undefined;
-  return { slug: method.slug, path: method.path, term: method.term };
 }

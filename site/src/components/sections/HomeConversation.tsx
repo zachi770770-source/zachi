@@ -409,15 +409,16 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
             </AmazonBuyLink>
             <span className="text-[13px] text-foreground-muted">{ui.closingCtaSub}</span>
           </div>
-          {/* פעולה *משנית* בלבד: עמוד-המושג של הכלי שבאמת עלה במסע. לא מנווט
-              אוטומטית ל-/compass ואינו מתחרה באמזון. מופיע רק כשיש כלי ממופה. */}
-          {journeyBridge && surfacedTool ? (
+          {/* פעולה *משנית* בלבד: עמוד-המושג של הכלי שבאמת *עלה מהאחזור* (לא
+              מה-journey). התווית נגזרת משם-הכלי שהשרת עיגן, לעולם לא מומצאת.
+              לא מנווט אוטומטית ל-/compass ואינו מתחרה באמזון. */}
+          {surfacedTool ? (
             <Link
               href={surfacedTool.path}
               data-journey-tool={surfacedTool.slug}
               className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
             >
-              {journeyBridge.toolLinkLabel}
+              {`${ui.toolLinkPrefix} ${surfacedTool.term}`}
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             </Link>
           ) : null}

@@ -184,7 +184,7 @@ export async function POST(request: Request) {
   const priorUserTurns = priorTurns.filter((t) => t.role === "user").length;
   const isFinalTurn = priorUserTurns + 1 >= COMPASS_MAX_USER_TURNS;
   const conversationOpts = isConversation
-    ? { conversation: { priorTurns, isFinalTurn } }
+    ? { conversation: { priorTurns, isFinalTurn, station: parsed.data.station } }
     : {};
 
   const unavailable = () =>

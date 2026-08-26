@@ -21,8 +21,8 @@ import {
   extractValueMarker,
   type ConversationTurn,
 } from "@/lib/compass/assistant/prompt";
-import { classifyCurrentSituation } from "@/lib/journey/classify";
-import { journeyTool } from "@/content/journeys";
+import { groundSituation } from "@/lib/journey/ground";
+import type { AskStationId } from "@/content/askRoute";
 import { COMPASS_LIMITS } from "@/lib/compass/assistant/config";
 import { assessCompassSafety, buildSafetyAnswer } from "@/lib/compass/assistant/safety";
 
@@ -41,6 +41,8 @@ export interface AskConversationOptions {
   priorTurns?: ConversationTurn[];
   /** האם זהו התור האחרון (אז אין שאלת המשך, אלא סגירה קצרה). */
   isFinalTurn: boolean;
+  /** התחנה שנבחרה בבית — prior *חלש* בלבד לעיגון המצב/הכלי. */
+  station?: AskStationId;
 }
 
 /**
@@ -145,16 +147,30 @@ export async function askCompass(
   }
 
   // ── שכבת המסע (מצב-שיחה בלבד) ──────────────────────────────────────────────
-  // סיווג „המצב הנוכחי” דטרמיניסטית ממה שהמבקר כתב (עיגון על ההודעה הפותחת +
-  // הנוכחית, כמו האחזור). זה *אינו* Persona ואינו נגזר ממנה. הכלי הממופה נשלף
-  // מ-`journeyTool` רק כשהסיווג ודאי. `valueDelivered` נכון רק כאן, במסלול
-  // ה-answered, ורק אם המודל סימן מרקר-ערך — כך אמפתיה/הרגעה/סירוב לעולם לא
-  // פותחים CTA.
-  const currentSituation = conversation
-    ? classifyCurrentSituation(q, { firstUserText: firstUser, matches: search.results }) ??
-      undefined
+  // עיגון „המצב הנוכחי” והכלי מהחומר שהאחזור *באמת* עיגן (+ ה-dilemma), לא
+  // מה-journey ולא מהטקסט לבדו. `toolSurfaced` עובר שער-אחזור קשיח ומוחזר null
+  // כשאין התאמה בטוחה — לא מנחשים כלי. זה *אינו* Persona ואינו נגזר ממנה.
+  const grounded = conversation
+    ? groundSituation({
+        text: q,
+        firstUserText: firstUser,
+        matches: search.results,
+        station: conversation.station,
+      })
+    : null;
+  const currentSituation = grounded?.currentSituation ?? undefined;
+  const toolSurfaced = grounded?.toolSurfaced ?? undefined;
+
+  // נוסחת `valueDelivered` (server-side, conservative bias): המרקר הוא תנאי
+  // הכרחי אך *לא מספיק*. נדרשים כולם יחד:
+  //   status "answered" (אנחנו כאן) + עיגון-אחזור תקף + toolSurfaced != null +
+  //   מרקר-ערך מאומת + אין דריסת-בטיחות (שער-הבטיחות כבר חזר מוקדם).
+  // כך מודל לא יכול לפתוח את ה-CTA רק בכך שהדפיס מרקר, ואמפתיה/רפלקציה/סירוב/
+  // מגבלה/תשובה לא-מעוגנת-מספיק אינם מחזירים value.
+  const grounding = search.matched && search.results.length > 0;
+  const valueDelivered = conversation
+    ? valueMarker.valueDelivered && grounding && toolSurfaced != null
     : undefined;
-  const toolSurfaced = currentSituation ? journeyTool(currentSituation) : undefined;
 
   return {
     answer: {
@@ -163,7 +179,7 @@ export async function askCompass(
       citation: buildCitation(search.results),
       ...(focus ? { focus } : {}),
       ...(followup ? { followup } : {}),
-      ...(conversation ? { valueDelivered: valueMarker.valueDelivered } : {}),
+      ...(conversation ? { valueDelivered: valueDelivered === true } : {}),
       ...(currentSituation ? { currentSituation } : {}),
       ...(toolSurfaced ? { toolSurfaced } : {}),
     },

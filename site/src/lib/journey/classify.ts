@@ -1,19 +1,17 @@
 /**
- * סיווג „המצב הנוכחי" (Journey) של המבקר — דטרמיניסטי, מבוסס אך ורק על מה
- * שהמבקר כתב במילים שלו.
+ * סיווג „המצב הנוכחי" (Journey) מתוך *הטקסט* של המבקר — דטרמיניסטי לחלוטין.
  *
- * מה זה *לא*: זה לא מסווג Persona ולא נוגע בפרסונה בשום צורה. הפונקציה מחזירה
- * JourneyId או null בלבד. אין כאן, ולעולם לא יהיה, ערוץ שממנו נגזרת, נקבעת או
- * נשמרת פרסונה. Journey = מה שקורה עכשיו; Persona = tint רקע נפרד ובלתי-תלוי.
+ * זהו אות *משני* בשכבת העיגון: `ground.ts` מעדיף עיגון-אחזור/dilemma
+ * (deterministic-first, retrieval-grounded), ונופל לסיווג-הטקסט הזה רק כשאין
+ * מנצח בטוח מהאחזור. הטקסט לבדו אינו מעגן כלי — `toolSurfaced` מגיע אך ורק
+ * מהאחזור.
  *
- * מדוע דטרמיניסטי ולא מבוסס-מודל: הסיווג חייב להיות יציב, בר-בדיקה בלי מסד/סוד
- * (CI), ולא „להמציא" מצב. אותות עברית ייחודיים (strong) מזהים מסע לבדם; אותות
- * תומכים (weak) מוסיפים משקל אך אינם מכריעים. כשאין מוביל ברור — מחזירים null,
- * והממשק נופל לגשר גנרי-מעוגן, בלי לכפות סיווג.
+ * מה זה *לא*: זה לא מסווג Persona ולא נוגע בפרסונה בשום צורה. מחזיר JourneyId
+ * או null בלבד. אין כאן, ולעולם לא יהיה, ערוץ שממנו נגזרת, נקבעת או נשמרת
+ * פרסונה. Journey = מה שקורה עכשיו; Persona = tint רקע נפרד ובלתי-תלוי.
  */
 
 import { JOURNEYS, JOURNEY_IDS, type JourneyId } from "@/content/journeys";
-import type { CompassMatch } from "@/lib/compass/types";
 
 const STRONG_WEIGHT = 2;
 const WEAK_WEIGHT = 1;
@@ -26,12 +24,6 @@ export interface ClassifyOptions {
    * קצרה עדיין תיקשר למצב שתואר בתחילה, בדיוק כמו עיגון-האחזור ב-assistant.
    */
   firstUserText?: string;
-  /**
-   * הקטעים שנשלפו (אופציונלי) — עיגון-אחזור *משני* בלבד. אינו יכול לשנות מסע
-   * שכבר הוכרע לפי מה שהמבקר כתב, ואינו יכול להכריע לבדו; הוא רק שובר-שוויון
-   * עדין כשהטקסט לבדו לא הכריע. כך הסיווג נשאר יציב ב-CI (בלי מסד).
-   */
-  matches?: CompassMatch[];
 }
 
 function scoreText(text: string): Map<JourneyId, number> {
@@ -67,7 +59,7 @@ function leader(scores: Map<JourneyId, number>): JourneyId | null {
 }
 
 /**
- * מסווג את המצב הנוכחי. מחזיר JourneyId כשיש מוביל ברור, אחרת null.
+ * מסווג את המצב הנוכחי מהטקסט. מחזיר JourneyId כשיש מוביל ברור, אחרת null.
  * דטרמיניסטי לחלוטין. לעולם אינו מחזיר, קובע או נוגע בפרסונה.
  */
 export function classifyCurrentSituation(
@@ -75,28 +67,5 @@ export function classifyCurrentSituation(
   opts: ClassifyOptions = {},
 ): JourneyId | null {
   const combined = opts.firstUserText ? `${opts.firstUserText} ${text}` : text;
-  const scores = scoreText(combined);
-  const primary = leader(scores);
-  if (primary) return primary;
-
-  // עיגון-אחזור משני: רק כשהטקסט לבדו לא הכריע. שם-הפרק/הקטע יכול לחזק מסע
-  // שכבר יש לו נקודה אחת לפחות, אך לא ליצור מסע יש-מאין. שובר-שוויון עדין,
-  // אופציונלי, ואינו נדרש לבדיקות הקבלה (הן מסתמכות על הטקסט בלבד).
-  if (opts.matches?.length) {
-    const hay = opts.matches
-      .map((m) => `${m.chapterName ?? ""} ${m.sectionName ?? ""}`)
-      .join(" ")
-      .normalize("NFC");
-    const grounded = scoreText(hay);
-    const merged = new Map<JourneyId, number>();
-    for (const id of JOURNEY_IDS) {
-      const base = scores.get(id) ?? 0;
-      // הקטעים תורמים רק למסעות שכבר קיבלו רמז מהטקסט (base > 0).
-      const bonus = base > 0 ? Math.min(grounded.get(id) ?? 0, WEAK_WEIGHT) : 0;
-      merged.set(id, base + bonus);
-    }
-    return leader(merged);
-  }
-
-  return null;
+  return leader(scoreText(combined));
 }
