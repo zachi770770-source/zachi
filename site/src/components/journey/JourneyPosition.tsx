@@ -1,17 +1,20 @@
-import { stationOrder, stations } from "@/content/stations";
+import { getJourneyFlow } from "@/content/journeyFlow";
 import type { JourneyId } from "@/content/journeyPages";
 
 /**
  * מחוון-מיקום במסע — ממשיך את מסלול-הבחירה מעמוד הבית אל עמוד-היעד, כך שמי
  * שבחר תחנה בבית ממשיך לראות *איפה הוא נמצא* גם אחרי הניווט.
  *
- * הסמנטיקה נלקחת מ-`stationOrder` ומההערה שכבר מלווה אותו: שלוש תחנות במחזור
- * אחד („תחנה N מתוך 3”), בעוד „אחרי פרידה” (שער מעבר) ו„מתחילים מחדש” (גשר
- * חזרה) *אינם* חלק מהמחזור. לכן הם לעולם אינם מקבלים מספר-תחנה — הצגתם כתחנה
- * רביעית הייתה סותרת את ה-IA המתועד. הם מקבלים סימון-שער נפרד.
+ * המסלול הראשי מוצג במפורש עם שמות שלוש התחנות — „לפני קשר → מתחילים קשר →
+ * בתוך קשר” — וכל צעד נושא מצב (done / current / ahead) הן בצבע והן בטקסט
+ * (data-state + תווית-מצב ל-sr-only), כדי שהמידע לא יימסר בצבע בלבד.
+ *
+ * הסמנטיקה נלקחת ממקור-האמת המשותף (`getJourneyFlow` מעל `stationOrder`): שלוש
+ * תחנות במחזור אחד, בעוד „אחרי פרידה” (שער מעבר) ו„מתחילים מחדש” (גשר חזרה)
+ * *אינם* חלק מהמחזור. לכן הם לעולם אינם מקבלים מספר-תחנה — הצגתם כתחנה רביעית
+ * הייתה סותרת את ה-IA המתועד. הם מקבלים סימון-שער נפרד.
  *
  * רכיב שרת בלבד: המיקום ידוע מנתוני העמוד, ולכן אין state, אין JS ואין hook.
- * המידע קיים גם כטקסט (sr-only / תווית גלויה) — לא רק כצבע או כתנועה.
  */
 
 const GATE_LABEL: Partial<Record<JourneyId, string>> = {
@@ -19,12 +22,19 @@ const GATE_LABEL: Partial<Record<JourneyId, string>> = {
   "starting-again": "גשר חזרה אל המסע",
 };
 
+/** תווית-מצב נגישה לכל צעד — כדי שהמצב לא ייקרא בצבע בלבד. */
+const STATE_LABEL = {
+  done: "הושלם",
+  current: "כאן עכשיו",
+  ahead: "עוד לפנינו",
+} as const;
+
 export function JourneyPosition({ journeyId }: { journeyId: JourneyId }) {
+  const flow = getJourneyFlow(journeyId);
   const gateLabel = GATE_LABEL[journeyId];
-  const index = stationOrder.indexOf(journeyId as (typeof stationOrder)[number]);
 
   // שער/גשר — מחוץ למחזור שלוש התחנות: סימון יחיד, בלי מספר ובלי מסלול.
-  if (gateLabel || index < 0) {
+  if (flow.station === null) {
     return (
       <p className="journey-position journey-position--gate" data-gate="true">
         <span className="journey-position__gate-dot" aria-hidden="true" />
@@ -33,22 +43,33 @@ export function JourneyPosition({ journeyId }: { journeyId: JourneyId }) {
     );
   }
 
-  const total = stationOrder.length;
   return (
-    <div className="journey-position">
-      {/* המסלול עצמו דקורטיבי; המשמעות נמסרת בטקסט שלצידו. */}
-      <span className="journey-position__route" aria-hidden="true">
-        {stationOrder.map((id, i) => (
-          <span
-            key={id}
-            className="journey-position__node"
-            data-state={i < index ? "done" : i === index ? "current" : "ahead"}
-          />
+    <div
+      className="journey-progress"
+      role="group"
+      aria-label={`מיקום במסע: תחנה ${flow.station} מתוך ${flow.total}`}
+    >
+      <ol className="journey-progress__track">
+        {flow.steps.map((step, i) => (
+          <li
+            key={step.id}
+            className="journey-progress__step"
+            data-state={step.state}
+            aria-current={step.state === "current" ? "step" : undefined}
+          >
+            <span className="journey-progress__dot" aria-hidden="true" />
+            <span className="journey-progress__step-label">{step.label}</span>
+            <span className="sr-only"> ({STATE_LABEL[step.state]})</span>
+            {i < flow.steps.length - 1 ? (
+              <span className="journey-progress__arrow" aria-hidden="true">
+                ←
+              </span>
+            ) : null}
+          </li>
         ))}
-      </span>
-      <span className="journey-position__label">
-        תחנה {index + 1} מתוך {total}
-        <span className="sr-only">: {stations[journeyId].navLabel}</span>
+      </ol>
+      <span className="journey-progress__caption">
+        תחנה {flow.station} מתוך {flow.total}
       </span>
     </div>
   );

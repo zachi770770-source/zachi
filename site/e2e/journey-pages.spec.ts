@@ -18,7 +18,9 @@ const JOURNEYS = [
     tool: "fact-story-action",
     station: "before-relationship",
     ask: "dating",
-    others: ["/building-relationship", "/inside-relationship", "/after-breakup"],
+    // „לפני קשר” מקשר קדימה אל „מתחילים קשר” (התחנה הבאה) — ולכן הוא אינו
+    // ב-others; שאר התחנות עדיין אינן מוצגות (אין בורר-מלא בעמוד).
+    others: ["/inside-relationship", "/after-breakup", "/starting-again"],
   },
   {
     path: "/building-relationship",
@@ -29,7 +31,9 @@ const JOURNEYS = [
     tool: "gate-questions",
     station: "building-relationship",
     ask: "building",
-    others: ["/before-relationship", "/inside-relationship", "/after-breakup"],
+    // „מתחילים קשר” מקשר קדימה אל „בתוך קשר” ואחורה (שקט) אל „לפני קשר” —
+    // ולכן שניהם אינם ב-others; שאר התחנות עדיין אינן מוצגות.
+    others: ["/after-breakup", "/starting-again"],
   },
   {
     path: "/inside-relationship",
@@ -40,7 +44,9 @@ const JOURNEYS = [
     tool: "twenty-maintenance",
     station: "inside-relationship",
     ask: "existing",
-    others: ["/before-relationship", "/inside-relationship", "/after-breakup"],
+    // „בתוך קשר” היא תחנה 3 (סוף המסלול): אין „תחנה הבאה”, יש רק קישור-קודם
+    // שקט אל „מתחילים קשר” — ולכן הוא אינו ב-others; אין קישור לשאר התחנות.
+    others: ["/before-relationship", "/after-breakup", "/starting-again"],
   },
   {
     path: "/after-breakup",
@@ -136,7 +142,9 @@ test("building-relationship: the contextual concept link leads to fact-story (in
 test("after-breakup gently offers 'starting again' as a next step (not a primary CTA)", async ({ page }) => {
   await page.goto("/after-breakup", { waitUntil: "networkidle" });
   await expect(page.getByText(/סקרנות לחזור לעולם ההיכרויות/)).toBeVisible();
-  await expect(page.getByRole("link", { name: "מתחילים מחדש" })).toHaveAttribute(
+  // הקישור הרך ב„מה כדאי לקרוא מכאן” (בדיוק „מתחילים מחדש”), להבדיל מקישור
+  // הגשר המפורש שב„המשך המסע” („להעיף מבט אל …”).
+  await expect(page.getByRole("link", { name: "מתחילים מחדש", exact: true })).toHaveAttribute(
     "href",
     "/starting-again",
   );
@@ -207,6 +215,99 @@ test("journey mirror is keyboard-operable (native radio group)", async ({ page }
   await page.keyboard.press("ArrowDown");
   await expect(mirror.getByText(pts[1].outcome.question)).toBeVisible();
   await expect(mirror.getByText(pts[0].outcome.question)).toBeHidden();
+});
+
+// ── PR2: חיזוק תחושת המסע — התקדמות, „התחנה הבאה”, סיום וגשרים ──────────────
+// מוכיח את המעברים המרכזיים בלבד (before→building→inside→complete, ושני הגשרים),
+// את מחוון-ההתקדמות המתויג, ואת קישור-הכניסה הישיר בכל חמשת העמודים — בלי audit.
+const NEXT = 'section[aria-labelledby="journey-next-heading"]';
+
+test("main track shows labeled progress with the current station clearly marked", async ({
+  page,
+}) => {
+  await page.goto("/building-relationship", { waitUntil: "networkidle" });
+  const track = page.locator(".journey-progress").first();
+  await expect(track).toBeVisible();
+  // שלוש התחנות בשמן.
+  for (const label of ["לפני קשר", "מתחילים קשר", "בתוך קשר"]) {
+    await expect(track).toContainText(label);
+  }
+  // המצב נמסר בטקסט/סמנטיקה, לא בצבע בלבד: הנוכחית aria-current, הקודמת done.
+  await expect(track.locator('[data-state="current"][aria-current="step"]')).toContainText(
+    "מתחילים קשר",
+  );
+  await expect(track.locator('[data-state="done"]')).toContainText("לפני קשר");
+});
+
+test("before → building: primary next-station CTA", async ({ page }) => {
+  await page.goto("/before-relationship", { waitUntil: "networkidle" });
+  const next = page.locator(NEXT);
+  await expect(next.getByRole("heading", { name: /התחנה הבאה: מתחילים קשר/ })).toBeVisible();
+  await expect(next.getByRole("link", { name: /להמשיך אל .מתחילים קשר/ })).toHaveAttribute(
+    "href",
+    "/building-relationship",
+  );
+});
+
+test("building → inside: primary next-station CTA + quiet previous link", async ({ page }) => {
+  await page.goto("/building-relationship", { waitUntil: "networkidle" });
+  const next = page.locator(NEXT);
+  await expect(next.getByRole("heading", { name: /התחנה הבאה: בתוך קשר/ })).toBeVisible();
+  await expect(next.getByRole("link", { name: /להמשיך אל .בתוך קשר/ })).toHaveAttribute(
+    "href",
+    "/inside-relationship",
+  );
+  // הקודם — קישור משני ושקט בלבד.
+  await expect(next.getByRole("link", { name: /חזרה אל .לפני קשר/ })).toHaveAttribute(
+    "href",
+    "/before-relationship",
+  );
+});
+
+test("inside is station 3/3: no next-station CTA, has a real completion block", async ({
+  page,
+}) => {
+  await page.goto("/inside-relationship", { waitUntil: "networkidle" });
+  const next = page.locator(NEXT);
+  await expect(next.getByRole("heading", { name: /סוף המסלול באתר/ })).toBeVisible();
+  await expect(next).toContainText("זה לא סוף העבודה הזוגית");
+  // אין „התחנה הבאה” ואין תחנה רביעית.
+  await expect(next.getByText(/התחנה הבאה/)).toHaveCount(0);
+});
+
+test("after-breakup stays a gateway: stay/deepen, and an *optional* move to starting-again", async ({
+  page,
+}) => {
+  await page.goto("/after-breakup", { waitUntil: "networkidle" });
+  const next = page.locator(NEXT);
+  await expect(next.getByRole("link", { name: /להישאר כאן ולהעמיק/ })).toBeVisible();
+  await expect(next.getByRole("link", { name: /להעיף מבט אל .מתחילים מחדש/ })).toHaveAttribute(
+    "href",
+    "/starting-again",
+  );
+});
+
+test("starting-again → before-relationship: a bridge back, with experience (not from scratch)", async ({
+  page,
+}) => {
+  await page.goto("/starting-again", { waitUntil: "networkidle" });
+  const next = page.locator(NEXT);
+  await expect(next.getByRole("heading", { name: /חזרה למסלול: לפני קשר/ })).toBeVisible();
+  await expect(next).toContainText("אינה התחלה מאפס");
+  await expect(next.getByRole("link", { name: /להמשיך אל .לפני קשר/ })).toHaveAttribute(
+    "href",
+    "/before-relationship",
+  );
+});
+
+test("all five journey pages carry the quiet direct-entry link to /#path", async ({ page }) => {
+  for (const j of JOURNEYS) {
+    await page.goto(j.path, { waitUntil: "networkidle" });
+    await expect(
+      page.getByRole("link", { name: /מצאו את המקום שלכם במסע/ }),
+      `${j.path} direct-entry link`,
+    ).toHaveAttribute("href", "/#path");
+  }
 });
 
 test("no horizontal overflow on the journey pages (mobile 390)", async ({ browser }) => {

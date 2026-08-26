@@ -11,7 +11,8 @@ import type {
 } from "@/content/journeyPages";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
-import { JourneyPosition } from "@/components/journey/JourneyPosition";
+import { JourneyWayfinder } from "@/components/journey/JourneyWayfinder";
+import { JourneyNext } from "@/components/journey/JourneyNext";
 import { JourneyMirror } from "@/components/journey/JourneyMirror";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
@@ -167,7 +168,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             {/* מחוון-המיקום מחליף כאן את SignatureMark: שני „נקודות על קו”
                 זה לצד זה נקראו כשתי מערכות-התקדמות שונות באותו מסך. הסימן
                 החתום נשאר בבית ובפוטר; כאן המשמעות היא מיקום במסע. */}
-            <JourneyPosition journeyId={journey.id} />
+            <JourneyWayfinder journeyId={journey.id} />
           </div>
           <div
             className={cn(
@@ -201,7 +202,7 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             {journey.moodLine}
           </p>
           {/* הסימן החתום „מחיפוש לבנייה” — עמוד-המסע הוא ביטוי-העל שלו. */}
-          <JourneyPosition journeyId={journey.id} />
+          <JourneyWayfinder journeyId={journey.id} align="center" />
         </header>
       )}
 
@@ -346,6 +347,11 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             <AskBookLink station={journey.compassStation} />
           </div>
         </section>
+
+        {/* המשך-המסע — הצעד קדימה במסלול הראשי, *לפני* אזורי-ההעמקה (מדריכים/
+            מושגים/אמזון), כדי שייקרא כהמשך המסע ולא כקישור צדדי. נגזר ממקור-אמת
+            אחד (journeyFlow): advance / complete / gateway / bridge. */}
+        <JourneyNext journey={journey} />
 
         {/* I. Next step — רך, שונה לפי מסלול: הספר המלא + תחנת-המשך ייעודית. J בסוף. */}
         <section
