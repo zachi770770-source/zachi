@@ -265,15 +265,9 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           <h2 id="depth-heading" className="kicker">
             {journey.depthHeading}
           </h2>
-          <JourneyMirror
-            id={journey.id}
-            points={journey.depthPoints}
-            method={
-              stationMethod
-                ? { path: stationMethod.path, term: stationMethod.term }
-                : null
-            }
-          />
+          {/* כל אחת משלוש הבחירות נושאת outcome משלה (שיקוף/שאלה/צעד ראשי);
+              הכלי המלווה נגזר בתוך המראה מ-outcome.methodSlug, לא מכלי-תחנה יחיד. */}
+          <JourneyMirror id={journey.id} points={journey.depthPoints} />
         </section>
 
         {/* ציטוט-העצירה כשיא-מומנטום/עומק (variant תנועה/עומק). */}

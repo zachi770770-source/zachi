@@ -1,36 +1,37 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 
-interface MirrorPoint {
-  title: string;
-  line: string;
-}
+import { methods } from "@/content/methods";
+import type { JourneyDepthPoint } from "@/content/journeyPages";
 
 /**
- * „רגע של מראה” אינטראקטיבי — מערכת אחת החוזרת בכל ארבעת עמודי-המסע, מוזנת
- * מתוכן העמוד הקיים בלבד (שלוש נקודות-העומק). הקורא עוצר, בוחר את האמירה שהכי
- * קרובה אליו כרגע, ומיד נחשפת הפסקה שמעמיקה בדיוק בה — „זה מה שקורה לי עכשיו” —
- * ואז מוצע המשך: המושג מהספר שממסגר את הבחירה (הכניסה לעוזר נשארת בסקשן שאחרי).
+ * „רגע של מראה” אינטראקטיבי — מערכת אחת החוזרת בכל חמשת עמודי-המסע, מוזנת מתוכן
+ * העמוד הקיים בלבד. הקורא עוצר, בוחר את האמירה שהכי קרובה אליו כרגע, ומיד נחשף
+ * ה-outcome *הייחודי לבחירה שלו* — „זה מה שקורה לי עכשיו”:
+ *   1. שיקוף קצר — מה הבחירה מזמינה לבדוק עכשיו.
+ *   2. שאלה אחת להמשך מחשבה.
+ *   3. צעד ראשי אחד מכאן (כלי/מדריך קיים), + מושג-ספר קנוני מלווה (אופציונלי).
  *
- * זה אינו העוזר („שאל את הספר”): העוזר מסתעף לכלי שונה לפי תשובה; כאן אין הסתעפות,
- * אין אבחון ואין נכון/לא-נכון — רק זיהוי-עצמי עריכתי שמכוון להמשך של השלב.
+ * הבחירה משנה בפועל את מה שמתקבל: לכל אחת משלוש האפשרויות outcome משלה. שתי
+ * אפשרויות רשאיות לחלוק אותו מושג-ספר כשהוא נכון תוכנית, אך השיקוף/השאלה/היעד
+ * שונים. זה אינו העוזר („שאל את הספר”): אין אבחון, אין נכון/לא-נכון, אין הסתעפות
+ * למנוע — רק זיהוי-עצמי עריכתי שמכוון להמשך המדויק של הבחירה.
  *
  * מימוש CSS טהור מבוסס-רדיו (ללא JS, ללא state, ללא רשת, ללא אחסון): נגיש
  * במקלדת ובקורא-מסך (radiogroup נייטיב), עובד גם ללא JS, וללא סיכון-הידרציה.
- * הבחירה אינה נשמרת — רענון מאפס. אין אנימציה: החשיפה מיידית ורגועה.
+ * מוצג outcome אחד בלבד בכל רגע — של האפשרות הנבחרת; בחירה אחרת מחליפה אותו ואינה
+ * מוסיפה עליו (אין stacking). הבחירה אינה נשמרת — רענון מאפס.
  */
 export function JourneyMirror({
   id,
   points,
-  method,
 }: {
   id: string;
-  points: readonly MirrorPoint[];
-  method?: { path: string; term: string } | null;
+  points: readonly JourneyDepthPoint[];
 }) {
   const name = `journey-mirror-${id}`;
   return (
-    <div className="group/mirror mt-7">
+    <div className="mt-7">
       <p className="type-literary text-[clamp(1.2rem,2vw,1.45rem)] font-semibold text-foreground">
         מה הכי קרוב אליי כרגע?
       </p>
@@ -43,6 +44,8 @@ export function JourneyMirror({
         <div className="flex flex-col">
           {points.map((p, i) => {
             const inputId = `${name}-${i}`;
+            const { outcome } = p;
+            const method = outcome.methodSlug ? methods[outcome.methodSlug] : undefined;
             return (
               <div
                 key={p.title}
@@ -68,32 +71,57 @@ export function JourneyMirror({
                     {p.title}
                   </span>
                 </label>
-                {/* הפסקה המעמיקה — נחשפת רק כשהאמירה נבחרה (הרגע של „זה אני”). */}
-                <p className="mt-2.5 hidden ps-11 text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty] peer-checked:block sm:ps-12">
-                  {p.line}
-                </p>
+
+                {/* ה-outcome — נחשף רק כשהאמירה נבחרה (הרגע של „זה אני”). CSS
+                    טהור: מוצג רק לאפשרות הנבחרת, ומתחלף מיד בבחירה אחרת. */}
+                <div className="mt-2.5 hidden ps-11 peer-checked:block sm:ps-12">
+                  {/* משפט-הזיהוי הקצר + השיקוף למה שכדאי לבדוק עכשיו. */}
+                  <p className="text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+                    {p.line}
+                  </p>
+                  <p className="mt-2 text-[1.0625rem] leading-relaxed text-foreground [text-wrap:pretty]">
+                    {outcome.reflection}
+                  </p>
+
+                  {/* שאלה אחת להמשך מחשבה. */}
+                  <p className="mt-4 type-literary text-[1.05rem] font-medium leading-snug text-brand-hover [text-wrap:pretty]">
+                    {outcome.question}
+                  </p>
+
+                  {/* צעד ראשי אחד מכאן. */}
+                  <div className="mt-4">
+                    <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-brand-hover">
+                      מכאן אפשר להמשיך
+                    </p>
+                    <Link
+                      href={outcome.primaryAction.href}
+                      className="mt-2 inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                    >
+                      {outcome.primaryAction.label}
+                      <ArrowLeft
+                        className="h-4 w-4 shrink-0 text-brand"
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  </div>
+
+                  {/* מושג-ספר קנוני מלווה (אופציונלי) — לא מוצג כשהפעולה הראשית
+                      עצמה היא עמוד-מושג. */}
+                  {method ? (
+                    <Link
+                      href={method.path}
+                      className="mt-3 inline-flex items-center gap-2 text-[15px] font-medium text-foreground-muted underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                    >
+                      <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
+                      המושג מהספר: „{method.term}”
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             );
           })}
         </div>
       </fieldset>
-
-      {/* המשך — מופיע רק אחרי בחירה. המושג מהספר שממסגר את השלב. הכניסה לעוזר
-          („שאל את הספר”) נשמרת בסקשן „רגע של מראה” שמיד אחרי זה. */}
-      {method ? (
-        <div className="mt-6 hidden border-t border-border pt-5 group-has-[:checked]/mirror:block">
-          <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-brand-hover">
-            מכאן אפשר להמשיך
-          </p>
-          <Link
-            href={method.path}
-            className="mt-2 inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
-            <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
-            המושג מהספר: „{method.term}”
-          </Link>
-        </div>
-      ) : null}
     </div>
   );
 }

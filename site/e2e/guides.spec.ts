@@ -187,9 +187,13 @@ test.describe("guide cluster, each article", () => {
     const hubs = Array.from(new Set(GUIDES.map((g) => g.hub)));
     for (const hub of hubs) {
       await page.goto(hub, { waitUntil: "domcontentloaded" });
+      // מצומצם לאשכול-המדריכים (StationGuides) — לא לכל העמוד: „רגע של מראה”
+      // מוסיף כעת קישורי /guide/* משלו, שמוסתרים ב-CSS עד בחירה, ואין לבלבל
+      // אותם עם הקישור הגלוי של אשכול ה-hub→spoke.
+      const cluster = page.locator('section[aria-labelledby="guides-heading"]');
       for (const g of GUIDES.filter((x) => x.hub === hub)) {
         await expect(
-          page.locator(`a[href="${g.path}"]`).first(),
+          cluster.locator(`a[href="${g.path}"]`).first(),
           `${hub} links to ${g.path}`,
         ).toBeVisible();
       }

@@ -1,4 +1,5 @@
 import { test, expect } from "./fixtures";
+import { journeyPages, type JourneyId } from "../src/content/journeyPages";
 
 /**
  * ארבעת עמודי-המסע = ארבע חוויות נפרדות. כל עמוד: H1 ייחודי, intro, נקודות-עומק,
@@ -143,6 +144,69 @@ test("after-breakup gently offers 'starting again' as a next step (not a primary
   await expect(
     page.getByRole("link", { name: "קראו טעימה שמתאימה למה שאתם עוברים עכשיו" }),
   ).toBeVisible();
+});
+
+// ── „מה הכי קרוב אליי כרגע?” — כל בחירה מובילה ל-outcome משלה ──────────────────
+// לכל אחת מחמש התחנות: אין outcome לפני בחירה; כל אפשרות חושפת שיקוף+שאלה+CTA
+// ייחודיים; מעבר בין אפשרויות מחליף את ה-outcome ואינו מוסיף עליו (אין stacking).
+for (const id of Object.keys(journeyPages) as JourneyId[]) {
+  test(`${id}: each choice reveals its own outcome; switching swaps, never stacks`, async ({
+    page,
+  }) => {
+    const pts = journeyPages[id].depthPoints;
+    await page.goto(`/${id}`, { waitUntil: "networkidle" });
+    const mirror = page.locator('section[aria-labelledby="depth-heading"]');
+    await expect(mirror.getByRole("radio")).toHaveCount(3);
+
+    // 1. אין outcome לפני בחירה — אף CTA של בחירה אינו גלוי.
+    for (const p of pts) {
+      await expect(
+        mirror.getByRole("link", { name: p.outcome.primaryAction.label }),
+      ).toBeHidden();
+    }
+
+    // 2. בחירת אפשרות 1 → ה-outcome שלה בלבד נחשף, וה-CTA תואם לבחירה.
+    await mirror.getByText(pts[0].title, { exact: true }).click();
+    await expect(mirror.getByText(pts[0].outcome.question)).toBeVisible();
+    const cta1 = mirror.getByRole("link", { name: pts[0].outcome.primaryAction.label });
+    await expect(cta1).toBeVisible();
+    await expect(cta1).toHaveAttribute("href", pts[0].outcome.primaryAction.href);
+    // אין stacking — ה-CTAs של האחרות עדיין מוסתרים.
+    await expect(
+      mirror.getByRole("link", { name: pts[1].outcome.primaryAction.label }),
+    ).toBeHidden();
+    await expect(
+      mirror.getByRole("link", { name: pts[2].outcome.primaryAction.label }),
+    ).toBeHidden();
+
+    // 3. מעבר לאפשרות 2 → ה-reflection/CTA מתחלפים; אפשרות 1 נסגרת (לא מצטבר).
+    await mirror.getByText(pts[1].title, { exact: true }).click();
+    await expect(
+      mirror.getByRole("link", { name: pts[1].outcome.primaryAction.label }),
+    ).toBeVisible();
+    await expect(mirror.getByText(pts[1].outcome.question)).toBeVisible();
+    await expect(cta1).toBeHidden();
+    await expect(mirror.getByText(pts[0].outcome.question)).toBeHidden();
+    // אפשרות 3 עדיין מוסתרת — בכל רגע גלוי outcome אחד בלבד.
+    await expect(
+      mirror.getByRole("link", { name: pts[2].outcome.primaryAction.label }),
+    ).toBeHidden();
+  });
+}
+
+test("journey mirror is keyboard-operable (native radio group)", async ({ page }) => {
+  const pts = journeyPages["before-relationship"].depthPoints;
+  await page.goto("/before-relationship", { waitUntil: "networkidle" });
+  const mirror = page.locator('section[aria-labelledby="depth-heading"]');
+  // מיקוד הרדיו הראשון ובחירתו במקלדת → ה-outcome הראשון נחשף.
+  const radios = mirror.getByRole("radio");
+  await radios.first().focus();
+  await page.keyboard.press("Space");
+  await expect(mirror.getByText(pts[0].outcome.question)).toBeVisible();
+  // חץ מטה בקבוצת-רדיו נייטיב מעביר בחירה לאפשרות הבאה.
+  await page.keyboard.press("ArrowDown");
+  await expect(mirror.getByText(pts[1].outcome.question)).toBeVisible();
+  await expect(mirror.getByText(pts[0].outcome.question)).toBeHidden();
 });
 
 test("no horizontal overflow on the journey pages (mobile 390)", async ({ browser }) => {
