@@ -346,7 +346,9 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             </p>
           </div>
           <div className="mt-7 flex flex-col items-start gap-4 lg:col-span-5 lg:mt-0 lg:items-end">
-            <Button asChild size="lg" className="w-full sm:w-auto">
+            {/* הטעימה היא *טעימה*, לא רכישה: כפתור משני (מתאר), כדי שלא יתחרה
+                ב„המשך המסע” ובפעולת-הרכישה (אמזון) שהם הפעולות הראשיות. */}
+            <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
               <BookLink href={previewHref} morphCover>
                 {journey.samplePrimaryLabel}
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -410,8 +412,10 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
         </section>
 
         {/* אשכול המדריכים — כל תחנה היא ה-hub של המדריכים ששויכו אליה (רכיב
-            משותף עם StationPage, מסונן לפי guide.hub.href). */}
-        <StationGuides stationPath={`/${journey.id}`} />
+            משותף עם StationPage, מסונן לפי guide.hub.href). בעמוד-המסע זהו אזור
+            העמקה *נוסף* (secondary): נשמר לגמרי (SEO/קישורים), אך במשקל ויזואלי
+            נמוך מ„המשך המסע” ומהספר. */}
+        <StationGuides stationPath={`/${journey.id}`} tone="secondary" />
       </div>
 
       {/* Purchase exit — פעם אחת בלבד, אחרי הקשת: הספר המלא זמין עכשיו באמזון. */}
