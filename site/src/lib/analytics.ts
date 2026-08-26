@@ -62,7 +62,9 @@ export type AnalyticsEventName =
   | "video_play"
   // ── ערכת-הקורא (Reader Bonus) — הרחבת המשפך אחרי הרכישה ──────────────
   //   reader_bonus_view → reader_bonus_claim_started → reader_bonus_claim_submitted
-  //     → reader_bonus_approved → reader_kit_accessed → reader_resource_opened
+  //     → reader_kit_accessed → reader_resource_opened
+  // ‏(ההפעלה מיידית מול קוד-הספר; אין שלב אישור. `reader_bonus_approved` נשמר
+  //  בטיפוס לתאימות אך *אינו נורה* עוד — אין approval בזרימה.)
   | "reader_bonus_view"
   | "reader_bonus_claim_started"
   | "reader_bonus_claim_submitted"

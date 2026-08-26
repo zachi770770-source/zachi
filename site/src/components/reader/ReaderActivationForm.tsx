@@ -6,12 +6,13 @@ import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 
 /**
- * הפעלת ערכת-הקורא למי שכבר רכש — טופס נגיש: שם, אימייל, מזהה-הזמנה מאמזון,
- * והסכמה. מבקש רק מידע נחוץ; אין העלאת קבצים. שולח ל-/api/reader/claim ומציג
- * מצב-המתנה (pending) — לעולם לא „מאומת” לפני approval אמיתי.
+ * הפעלת ערכת-הקורא — טופס נגיש: אימייל, קוד-הפעלה מהספר, והסכמה. מבקש מינימום
+ * PII (אין שם, אין מזהה-הזמנה, אין העלאת קבצים). הקוד הוא proof-of-possession של
+ * הספר — לא „אימות רכישה מאמזון”. הפעלה מוצלחת פותחת גישה *מיד* דרך עוגיית-סשן
+ * (HttpOnly), והלקוח מנווט ל-/reader/kit — ללא אסימון ב-URL.
  *
  * אנליטיקה: `reader_bonus_claim_started` בפעם הראשונה שנוגעים בטופס,
- * ו-`reader_bonus_claim_submitted` בהגשה מוצלחת.
+ * ו-`reader_bonus_claim_submitted` בהפעלה מוצלחת. אף אירוע אינו נושא אסימון/PII.
  */
 type State =
   | { kind: "idle" }
@@ -19,7 +20,7 @@ type State =
   | { kind: "success" }
   | { kind: "error"; message: string };
 
-export function ReaderClaimForm() {
+export function ReaderActivationForm() {
   const [state, setState] = React.useState<State>({ kind: "idle" });
   const startedRef = React.useRef(false);
 
@@ -40,15 +41,13 @@ export function ReaderClaimForm() {
     const data = new FormData(form);
     setState({ kind: "submitting" });
     try {
-      const res = await fetch("/api/reader/claim", {
+      const res = await fetch("/api/reader/activate", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          name: String(data.get("name") ?? ""),
           email: String(data.get("email") ?? ""),
-          orderRef: String(data.get("orderRef") ?? ""),
+          code: String(data.get("code") ?? ""),
           consent: data.get("consent") === "on",
-          source: "reader",
           company: String(data.get("company") ?? ""),
         }),
       });
@@ -58,15 +57,17 @@ export function ReaderClaimForm() {
         } catch {
           /* לא-קריטי */
         }
-        form.reset();
+        // הגישה כבר פעילה דרך עוגיית-הסשן — מנווטים לערכה, בלי אסימון ב-URL.
         setState({ kind: "success" });
+        window.location.assign("/reader/kit");
         return;
       }
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      setState({
-        kind: "error",
-        message: body.error ?? "אירעה תקלה. נסו שוב בעוד רגע.",
-      });
+      const fallback =
+        res.status === 401
+          ? "קוד ההפעלה אינו תקין. בדקו את הקוד שבספר ונסו שוב."
+          : "אירעה תקלה. נסו שוב בעוד רגע.";
+      setState({ kind: "error", message: body.error ?? fallback });
     } catch {
       setState({ kind: "error", message: "אירעה תקלה ברשת. נסו שוב." });
     }
@@ -78,11 +79,7 @@ export function ReaderClaimForm() {
         role="status"
         className="rounded-2xl border border-border bg-surface p-5 text-[15px] leading-relaxed text-foreground [text-wrap:pretty]"
       >
-        <p className="font-semibold">קיבלנו את הבקשה.</p>
-        <p className="mt-1 text-foreground-muted">
-          נעבור על הפרטים ונשלח לכם קישור גישה לערכת הקורא לאחר האישור. (הבקשה
-          במצב בדיקה — עדיין לא אושרה.)
-        </p>
+        <p className="font-semibold">ההפעלה הצליחה — פותחים את הערכה…</p>
       </div>
     );
   }
@@ -93,24 +90,18 @@ export function ReaderClaimForm() {
   return (
     <form onSubmit={onSubmit} onFocusCapture={markStarted} className="flex flex-col gap-4" noValidate>
       <div>
-        <label htmlFor="reader-name" className="text-[14px] font-semibold text-foreground">
-          שם
-        </label>
-        <input id="reader-name" name="name" type="text" required maxLength={80} autoComplete="name" className={fieldClass} />
-      </div>
-      <div>
         <label htmlFor="reader-email" className="text-[14px] font-semibold text-foreground">
           אימייל
         </label>
         <input id="reader-email" name="email" type="email" required maxLength={254} autoComplete="email" className={fieldClass} />
       </div>
       <div>
-        <label htmlFor="reader-order" className="text-[14px] font-semibold text-foreground">
-          מזהה הזמנה מאמזון
+        <label htmlFor="reader-code" className="text-[14px] font-semibold text-foreground">
+          קוד הפעלה מהספר
         </label>
-        <input id="reader-order" name="orderRef" type="text" required minLength={6} maxLength={60} className={fieldClass} />
+        <input id="reader-code" name="code" type="text" required minLength={4} maxLength={40} autoComplete="off" className={fieldClass} />
         <p className="mt-1 text-[13px] text-foreground-muted [text-wrap:pretty]">
-          מספר ההזמנה מאישור הרכישה של אמזון — כדי שנוכל לוודא ולשלוח לכם גישה.
+          הקוד מופיע בתוך הספר — הוא שמאשר שהערכה נפתחת למי שיש לו את הספר.
         </p>
       </div>
       {/* honeypot — נסתר מהעין ומקוראי-מסך. */}
@@ -131,7 +122,7 @@ export function ReaderClaimForm() {
 
       <div>
         <Button type="submit" size="lg" disabled={state.kind === "submitting"}>
-          {state.kind === "submitting" ? "שולח…" : "הפעילו את ערכת הקורא"}
+          {state.kind === "submitting" ? "מפעיל…" : "הפעילו את ערכת הקורא"}
         </Button>
       </div>
     </form>

@@ -6,7 +6,8 @@
  * - CONTACT_FROM_EMAIL — כתובת שולח מאומתת (משותפת עם „צור קשר”).
  *
  * עקרונות: לעולם לא מדווחים הצלחה אלא אם הספק אישר (2xx). לא רושמים ללוג
- * שם/אימייל/אסימון — רק קוד סטטוס לא-רגיש בכשל.
+ * אימייל/אסימון — רק קוד סטטוס לא-רגיש בכשל. המייל אינו נושא אסימון-סשן
+ * (הגישה דרך העוגייה במכשיר; קישור המייל אינו כולל token).
  */
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
@@ -47,39 +48,28 @@ async function send(to: string, subject: string, text: string): Promise<ReaderEm
   }
 }
 
-/** אישור קבלת בקשה (best-effort) — לא מצהיר על אימות, רק שקיבלנו את הבקשה. */
-export function sendReaderClaimReceivedEmail(input: {
+/**
+ * אישור הפעלה (best-effort) — הגישה כבר נפתחה במכשיר דרך העוגייה. המייל מאשר
+ * את ההפעלה ומאפשר חזרה מאוחר יותר; אם פותחים במכשיר אחר, מפעילים שוב עם הקוד.
+ * `kitUrl` אינו נושא אסימון — הגישה נשענת על העוגייה, לא על ה-URL.
+ */
+export function sendReaderKitWelcomeEmail(input: {
   to: string;
-  name: string;
-}): Promise<ReaderEmailResult> {
-  const text = [
-    `שלום ${input.name},`,
-    "",
-    "קיבלנו את הבקשה להפעיל את ערכת הכלים הדיגיטלית לקורא של „מדייטים לאהבה”.",
-    "נעבור על הפרטים ונשלח לכם קישור גישה לאחר האישור.",
-    "",
-    "תודה,",
-    "צוות מדייטים לאהבה",
-  ].join("\n");
-  return send(input.to, "קיבלנו את בקשת ההפעלה — ערכת הקורא", text);
-}
-
-/** מייל גישה לערכה — נשלח *רק* לאחר approval אמיתי, עם קישור-האסימון. */
-export function sendReaderKitAccessEmail(input: {
-  to: string;
-  name: string;
   kitUrl: string;
+  activateUrl: string;
 }): Promise<ReaderEmailResult> {
   const text = [
-    `שלום ${input.name},`,
+    "שלום,",
     "",
-    "אישרנו את הרכישה — ערכת הכלים הדיגיטלית לקורא פתוחה עבורכם:",
+    "ערכת הכלים הדיגיטלית לקורא של „מדייטים לאהבה” הופעלה עבורכם.",
+    "לפתיחת הערכה במכשיר שבו הפעלתם:",
     input.kitUrl,
     "",
-    "הקישור אישי; אין לשתף אותו.",
+    "פותחים במכשיר אחר? הזינו שוב את הקוד מהספר כאן:",
+    input.activateUrl,
     "",
     "תודה,",
     "צוות מדייטים לאהבה",
   ].join("\n");
-  return send(input.to, "ערכת הקורא פתוחה עבורכם", text);
+  return send(input.to, "ערכת הקורא הופעלה", text);
 }

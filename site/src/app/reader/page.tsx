@@ -5,7 +5,7 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
-import { ReaderClaimForm } from "@/components/reader/ReaderClaimForm";
+import { ReaderActivationForm } from "@/components/reader/ReaderActivationForm";
 import { readerKitOffer, readerKitGroups } from "@/content/readerKit";
 import { pageMetadata } from "@/lib/seo";
 
@@ -123,11 +123,11 @@ export default function ReaderPage() {
             כבר רכשתם? הפעילו את ערכת הקורא
           </h2>
           <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-            השאירו פרטים ומזהה הזמנה מאמזון. נאשר ונשלח לכם קישור גישה במייל. הבקשה
-            נשמרת במצב בדיקה עד לאישור — לא מוצג „מאומת” לפני כן.
+            הזינו את הקוד שמופיע בתוך הספר ואת האימייל שלכם — הגישה נפתחת מיד.
+            הקוד הוא שמאשר שהערכה מיועדת למי שיש לו את הספר.
           </p>
           <div className="mt-6 max-w-[34rem]">
-            <ReaderClaimForm />
+            <ReaderActivationForm />
           </div>
         </section>
       </div>

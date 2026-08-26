@@ -1,59 +1,56 @@
 import type {
-  ReaderClaim,
-  ReaderClaimAddInput,
-  ReaderClaimRepository,
-  ReaderClaimStatus,
+  ReaderAccessRepository,
+  ReaderActivationInput,
+  ReaderSession,
 } from "@/lib/reader/types";
 
-type Row = ReaderClaimAddInput & {
-  status: ReaderClaimStatus;
-  accessToken: string | null;
+type Row = {
+  emailNormalized: string;
+  consentVersion: string;
+  consentAt: Date;
+  sessionTokenHash: string | null;
+  sessionExpiresAt: Date | null;
+  sessionRevokedAt: Date | null;
 };
 
 /**
  * מימוש בזיכרון — לבדיקות/פיתוח בלבד (מופעל רק כאשר READER_ALLOW_MEMORY=true,
  * לעולם לא ב-Vercel Preview/Production). אינו מתמיד.
  */
-export class InMemoryReaderClaimRepository implements ReaderClaimRepository {
+export class InMemoryReaderAccessRepository implements ReaderAccessRepository {
   readonly rows = new Map<string, Row>();
 
-  async createPending(input: ReaderClaimAddInput): Promise<void> {
+  async activate(input: ReaderActivationInput): Promise<void> {
     this.rows.set(input.emailNormalized, {
-      ...input,
-      status: "pending",
-      accessToken: null,
+      emailNormalized: input.emailNormalized,
+      consentVersion: input.consentVersion,
+      consentAt: new Date(),
+      sessionTokenHash: input.sessionTokenHash,
+      sessionExpiresAt: input.sessionExpiresAt,
+      sessionRevokedAt: null,
     });
   }
 
-  async approve(
-    emailNormalized: string,
-    accessToken: string,
-  ): Promise<ReaderClaim | null> {
-    const row = this.rows.get(emailNormalized);
-    if (!row) return null;
-    row.status = "approved";
-    row.accessToken = row.accessToken ?? accessToken;
-    return {
-      emailNormalized,
-      status: row.status,
-      accessToken: row.accessToken,
-    };
-  }
-
-  async reject(emailNormalized: string): Promise<void> {
-    const row = this.rows.get(emailNormalized);
-    if (row) {
-      row.status = "rejected";
-      row.accessToken = null;
-    }
-  }
-
-  async findByAccessToken(accessToken: string): Promise<ReaderClaim | null> {
-    for (const [emailNormalized, row] of this.rows) {
-      if (row.status === "approved" && row.accessToken === accessToken) {
-        return { emailNormalized, status: row.status, accessToken: row.accessToken };
+  async findValidSession(sessionTokenHash: string): Promise<ReaderSession | null> {
+    const now = Date.now();
+    for (const row of this.rows.values()) {
+      if (
+        row.sessionTokenHash === sessionTokenHash &&
+        row.sessionRevokedAt === null &&
+        row.sessionExpiresAt !== null &&
+        row.sessionExpiresAt.getTime() > now
+      ) {
+        return { emailNormalized: row.emailNormalized };
       }
     }
     return null;
+  }
+
+  async revokeSession(sessionTokenHash: string): Promise<void> {
+    for (const row of this.rows.values()) {
+      if (row.sessionTokenHash === sessionTokenHash) {
+        row.sessionRevokedAt = new Date();
+      }
+    }
   }
 }

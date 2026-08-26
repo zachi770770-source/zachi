@@ -1,42 +1,34 @@
-import type { ReaderClaimSource } from "@/lib/validation/readerClaim";
+/**
+ * מודל-הנתונים של הפעלת ערכת-הקורא. ההפעלה מיידית (קוד תקף → גישה), אין
+ * pending/approval. שומרים מינימום PII: אימייל + גרסת-הסכמה בלבד. הגישה עצמה
+ * מנוהלת כסשן: במסד נשמר *רק* ה-hash של אסימון-הסשן, לצד תפוגה/ביטול.
+ */
 
-/** מצב ההפעלה — לעולם לא מוצג „מאומת” לפני approval אמיתי. */
-export type ReaderClaimStatus = "pending" | "approved" | "rejected";
-
-export type ReaderClaimAddInput = {
-  name: string;
+export type ReaderActivationInput = {
   emailNormalized: string;
-  emailOriginal: string;
-  orderRef: string;
-  source: ReaderClaimSource;
   consentVersion: string;
+  /** hash (SHA-256) של אסימון-הסשן — לעולם לא האסימון הגולמי. */
+  sessionTokenHash: string;
+  sessionExpiresAt: Date;
 };
 
-/** רשומת-הפעלה כפי שהיא מוחזרת מהמאגר (ללא חשיפת מידע מיותר). */
-export type ReaderClaim = {
+/** סשן תקף כפי שהוא מוחזר מהמאגר — חושף רק את המינימום הדרוש לאישור גישה. */
+export type ReaderSession = {
   emailNormalized: string;
-  status: ReaderClaimStatus;
-  /** אסימון-גישה לערכה — קיים רק לאחר approval. */
-  accessToken: string | null;
 };
 
 /**
- * מאגר הפעלות ערכת-הקורא. אחסון מתמשך (Postgres) בפרודקשן; מימוש-זיכרון
- * לבדיקות בלבד. הוכחת-הרכישה (מזהה הזמנה) אינה נכס ציבורי — נשמרת שרת-בלבד.
+ * מאגר גישת ערכת-הקורא. אחסון מתמשך (Postgres) בפרודקשן; מימוש-זיכרון לבדיקות
+ * בלבד. אין כאן „הוכחת-רכישה” ואין מזהי-הזמנה — רק אימייל, הסכמה, ו-hash של סשן.
  */
-export interface ReaderClaimRepository {
+export interface ReaderAccessRepository {
   /**
-   * יצירת הפעלה חדשה במצב `pending` (אידמפוטנטי לפי email_normalized: הגשה
-   * חוזרת מעדכנת את הפרטים ומחזירה ל-pending, בלי ליצור כפילות).
+   * הפעלה: upsert לפי email_normalized (רענון הסכמה) והחלפת הסשן הפעיל בסשן
+   * חדש (hash + תפוגה, מבטל ביטול קודם). אידמפוטנטי — הגשה חוזרת מפעילה מחדש.
    */
-  createPending(input: ReaderClaimAddInput): Promise<void>;
-  /**
-   * אישור ידני: מסמן `approved`, מייצר `accessToken` (אם אין), ומחזיר את
-   * הרשומה המעודכנת — או null אם אין הפעלה כזו.
-   */
-  approve(emailNormalized: string, accessToken: string): Promise<ReaderClaim | null>;
-  /** דחייה ידנית. */
-  reject(emailNormalized: string): Promise<void>;
-  /** איתור הפעלה מאושרת לפי אסימון-גישה (לשער-הכניסה לערכה). */
-  findByAccessToken(accessToken: string): Promise<ReaderClaim | null>;
+  activate(input: ReaderActivationInput): Promise<void>;
+  /** איתור סשן תקף (לא פג ולא בוטל) לפי hash של האסימון — לשער-הכניסה לערכה. */
+  findValidSession(sessionTokenHash: string): Promise<ReaderSession | null>;
+  /** ביטול סשן לפי hash (logout/אכיפה עתידית). */
+  revokeSession(sessionTokenHash: string): Promise<void>;
 }

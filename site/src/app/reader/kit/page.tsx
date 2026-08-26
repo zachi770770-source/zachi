@@ -1,45 +1,47 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowLeft } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { ReaderResourceLink } from "@/components/reader/ReaderResourceLink";
 import { readerKitGroups, readerSeriesDays, readerKitOffer } from "@/content/readerKit";
-import { getReaderClaimRepository } from "@/lib/reader";
-import { isValidAccessTokenShape } from "@/lib/reader/token";
+import { getReaderAccessRepository } from "@/lib/reader";
+import { hashSessionToken, isValidSessionTokenShape } from "@/lib/reader/token";
 
-// שער-כניסה מוגן + קורא DB → תמיד דינמי, ולעולם לא נאינדקס (פרטי).
+// שער-כניסה מוגן + קורא עוגייה/DB → תמיד דינמי, ולעולם לא נאינדקס (פרטי).
 export const dynamic = "force-dynamic";
+
+const SESSION_COOKIE = "reader_session";
 
 export const metadata: Metadata = {
   title: "ערכת הקורא | מדייטים לאהבה",
   robots: { index: false, follow: false },
 };
 
-/** אימות אסימון-הגישה מול הפעלה מאושרת. תשובה אחידה בכשל — ללא enumeration. */
-async function hasAccess(token: string | undefined): Promise<boolean> {
-  if (!isValidAccessTokenShape(token)) return false;
-  const repo = getReaderClaimRepository();
+/**
+ * אימות סשן מול העוגייה בלבד — אין אסימון ב-URL. מגבבים את ערך-העוגייה ומחפשים
+ * סשן תקף (לא פג ולא בוטל). תשובה אחידה בכשל — ללא enumeration.
+ */
+async function hasAccess(): Promise<boolean> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!isValidSessionTokenShape(token)) return false;
+  const repo = getReaderAccessRepository();
   if (!repo) return false;
   try {
-    const claim = await repo.findByAccessToken(token);
-    return Boolean(claim && claim.status === "approved");
+    const session = await repo.findValidSession(hashSessionToken(token));
+    return Boolean(session);
   } catch {
     return false;
   }
 }
 
-export default async function ReaderKitPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ token?: string }>;
-}) {
-  const { token } = await searchParams;
-  const allowed = await hasAccess(token);
+export default async function ReaderKitPage() {
+  const allowed = await hasAccess();
 
   if (!allowed) {
-    // מצב „אין גישה” אחיד — לא חושף אם האסימון קיים/פג. אין תוכן-ערכה.
+    // מצב „אין גישה” אחיד — לא חושף אם קיים סשן/פג. אין תוכן-ערכה.
     return (
       <Container className="py-16 sm:py-20">
         <div className="mx-auto max-w-[46ch] text-center">
@@ -48,8 +50,8 @@ export default async function ReaderKitPage({
             הגישה לערכה אישית
           </h1>
           <p className="mt-4 text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-            הקישור לערכת הקורא נשלח במייל לאחר אישור הרכישה. אם כבר רכשתם ועדיין
-            אין לכם גישה, אפשר להפעיל את הערכה כאן.
+            הערכה נפתחת לאחר הפעלה עם הקוד שבספר. אם כבר הפעלתם במכשיר אחר, או
+            שההפעלה פגה, אפשר להפעיל שוב כאן.
           </p>
           <div className="mt-6">
             <Link
@@ -68,7 +70,6 @@ export default async function ReaderKitPage({
   return (
     <Container className="py-10 sm:py-14 lg:py-16">
       {/* קורא מאושר הגיע לערכה — סמן במשפך. */}
-      <ViewEvent event="reader_bonus_approved" />
       <ViewEvent event="reader_kit_accessed" />
 
       <header className="max-w-[52ch]">
@@ -105,13 +106,15 @@ export default async function ReaderKitPage({
           </section>
         ))}
 
-        {/* 7 ימים לבהירות */}
+        {/* מסלול 7 ימים — לקריאה עצמית על העמוד, בקצב שלכם. אין כאן סדרת
+            אימיילים אוטומטית (עוד אין scheduler) — התוכן זמין לקריאה כאן. */}
         <section id="seven-days" aria-labelledby="kit-seven-days" className="reveal border-t border-border pt-10 scroll-mt-24">
           <h2 id="kit-seven-days" className="font-serif text-[clamp(1.35rem,2.2vw,1.85rem)] font-bold leading-[1.2] text-foreground">
-            7 ימים לבהירות
+            מסלול 7 ימים לבהירות
           </h2>
           <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-            כל יום כלי אחד מהספר ופעולה קטנה אחת. אפשר לעבור יום-יום, בקצב שלכם.
+            מסלול לקריאה עצמית: כל יום כלי אחד מהספר ופעולה קטנה אחת. עוברים בקצב
+            שלכם, כאן על העמוד.
           </p>
           <ol className="mt-5 flex flex-col divide-y divide-border">
             {readerSeriesDays.map((d) => (

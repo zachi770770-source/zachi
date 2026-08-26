@@ -75,12 +75,12 @@ export default defineConfig({
       // יותר. מרווח רחב עדיף על כשל-זמן מזדמן שאינו מעיד על שום תקלה אמיתית.
       timeout: 300_000,
       // מאגרים בזיכרון לבדיקות בלבד (לא DB אמיתי): רשימת המתנה + הפעלות ערכת
-      // הקורא. READER_ADMIN_TOKEN הוא סוד-בדיקה בלבד לשרת הארעי (מפעיל את נתיב
-      // ה-approve בזרימת ה-E2E מקצה-לקצה). SALES_ENABLED נשאר כבוי (Pre-launch).
+      // הקורא. READER_ACCESS_CODES הוא קוד-בדיקה בלבד לשרת הארעי (מפעיל את זרימת
+      // ה-E2E מקצה-לקצה). SALES_ENABLED נשאר כבוי (Pre-launch).
       env: {
         WAITLIST_ALLOW_MEMORY: "true",
         READER_ALLOW_MEMORY: "true",
-        READER_ADMIN_TOKEN: "e2e-reader-admin-token",
+        READER_ACCESS_CODES: "MEETINGS-2026",
       },
     },
     {

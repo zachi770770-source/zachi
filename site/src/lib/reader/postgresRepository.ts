@@ -3,10 +3,9 @@ import {
   formatWaitlistDbErrorLog,
 } from "@/lib/waitlist/diagnostics";
 import type {
-  ReaderClaim,
-  ReaderClaimAddInput,
-  ReaderClaimRepository,
-  ReaderClaimStatus,
+  ReaderAccessRepository,
+  ReaderActivationInput,
+  ReaderSession,
 } from "@/lib/reader/types";
 
 /** קליינט SQL גנרי (מסופק ע"י Pool של pg) — שומר על בדיקוּת והפרדה. */
@@ -16,50 +15,40 @@ export interface SqlClient {
 
 /**
  * יצירת הסכימה באופן אידמפוטנטי — זהה ל-migration הקנוני
- * (src/lib/reader/migrations/001_create_reader_claims.sql). המשפט הראשון
+ * (src/lib/reader/migrations/001_create_reader_activations.sql). המשפט הראשון
  * (create table) קריטי; ההקשחה (index / RLS / revoke) היא best-effort.
  */
 const CREATE_TABLE_SQL = `
-  create table if not exists reader_claims (
-    id                bigint generated always as identity primary key,
-    name              text        not null,
-    email_normalized  text        not null unique,
-    email_original    text        not null,
-    order_ref         text        not null,
-    source            text        not null,
-    consent_version   text        not null,
-    consent_at        timestamptz not null default now(),
-    created_at        timestamptz not null default now(),
-    updated_at        timestamptz not null default now(),
-    status            text        not null default 'pending'
-                         check (status in ('pending', 'approved', 'rejected')),
-    access_token      text        unique,
-    approved_at       timestamptz
+  create table if not exists reader_activations (
+    id                  bigint generated always as identity primary key,
+    email_normalized    text        not null unique,
+    consent_version     text        not null,
+    consent_at          timestamptz not null default now(),
+    created_at          timestamptz not null default now(),
+    updated_at          timestamptz not null default now(),
+    session_token_hash  text        unique,
+    session_expires_at  timestamptz,
+    session_revoked_at  timestamptz
   )
 `;
 
 const HARDENING_SQL = [
-  `create index if not exists reader_claims_status_idx on reader_claims (status)`,
-  `create index if not exists reader_claims_token_idx on reader_claims (access_token)`,
-  `alter table reader_claims enable row level security`,
-  `revoke all on table reader_claims from public, anon, authenticated`,
+  `create index if not exists reader_activations_session_idx on reader_activations (session_token_hash)`,
+  `alter table reader_activations enable row level security`,
+  `revoke all on table reader_activations from public, anon, authenticated`,
 ];
 
-function rowToClaim(row: unknown): ReaderClaim | null {
+function rowToSession(row: unknown): ReaderSession | null {
   if (!row || typeof row !== "object") return null;
   const r = row as Record<string, unknown>;
-  return {
-    emailNormalized: String(r.email_normalized),
-    status: String(r.status) as ReaderClaimStatus,
-    accessToken: r.access_token == null ? null : String(r.access_token),
-  };
+  return { emailNormalized: String(r.email_normalized) };
 }
 
 /**
- * מימוש Postgres להפעלות ערכת-הקורא. upsert לפי `email_normalized` מונע
- * כפילויות; הגשה חוזרת מחזירה ל-pending (מבלי לחשוף אם ההפעלה כבר קיימת).
+ * מימוש Postgres לגישת ערכת-הקורא. upsert לפי `email_normalized`; הגשה חוזרת
+ * מרעננת הסכמה ומחליפה את הסשן הפעיל. במסד נשמר רק hash של אסימון-הסשן.
  */
-export class PostgresReaderClaimRepository implements ReaderClaimRepository {
+export class PostgresReaderAccessRepository implements ReaderAccessRepository {
   private schemaReady: Promise<void> | null = null;
 
   constructor(private readonly db: SqlClient) {}
@@ -83,70 +72,51 @@ export class PostgresReaderClaimRepository implements ReaderClaimRepository {
     return this.schemaReady;
   }
 
-  async createPending(input: ReaderClaimAddInput): Promise<void> {
+  async activate(input: ReaderActivationInput): Promise<void> {
     await this.ensureSchema();
     await this.db.query(
-      `insert into reader_claims
-         (name, email_normalized, email_original, order_ref, source, consent_version)
-       values ($1, $2, $3, $4, $5, $6)
+      `insert into reader_activations
+         (email_normalized, consent_version, consent_at,
+          session_token_hash, session_expires_at, session_revoked_at)
+       values ($1, $2, now(), $3, $4, null)
        on conflict (email_normalized) do update set
-         name = excluded.name,
-         email_original = excluded.email_original,
-         order_ref = excluded.order_ref,
-         source = excluded.source,
-         consent_version = excluded.consent_version,
-         status = 'pending',
-         access_token = null,
-         approved_at = null,
-         updated_at = now()`,
+         consent_version    = excluded.consent_version,
+         consent_at         = now(),
+         session_token_hash = excluded.session_token_hash,
+         session_expires_at = excluded.session_expires_at,
+         session_revoked_at = null,
+         updated_at         = now()`,
       [
-        input.name,
         input.emailNormalized,
-        input.emailOriginal,
-        input.orderRef,
-        input.source,
         input.consentVersion,
+        input.sessionTokenHash,
+        input.sessionExpiresAt.toISOString(),
       ],
     );
   }
 
-  async approve(
-    emailNormalized: string,
-    accessToken: string,
-  ): Promise<ReaderClaim | null> {
+  async findValidSession(sessionTokenHash: string): Promise<ReaderSession | null> {
     await this.ensureSchema();
     const { rows } = await this.db.query(
-      `update reader_claims set
-         status = 'approved',
-         access_token = coalesce(access_token, $2),
-         approved_at = coalesce(approved_at, now()),
-         updated_at = now()
-       where email_normalized = $1
-       returning email_normalized, status, access_token`,
-      [emailNormalized, accessToken],
+      `select email_normalized
+         from reader_activations
+        where session_token_hash = $1
+          and session_revoked_at is null
+          and session_expires_at is not null
+          and session_expires_at > now()
+        limit 1`,
+      [sessionTokenHash],
     );
-    return rows.length ? rowToClaim(rows[0]) : null;
+    return rows.length ? rowToSession(rows[0]) : null;
   }
 
-  async reject(emailNormalized: string): Promise<void> {
+  async revokeSession(sessionTokenHash: string): Promise<void> {
     await this.ensureSchema();
     await this.db.query(
-      `update reader_claims set
-         status = 'rejected', access_token = null, approved_at = null, updated_at = now()
-       where email_normalized = $1`,
-      [emailNormalized],
+      `update reader_activations set
+         session_revoked_at = now(), updated_at = now()
+       where session_token_hash = $1`,
+      [sessionTokenHash],
     );
-  }
-
-  async findByAccessToken(accessToken: string): Promise<ReaderClaim | null> {
-    await this.ensureSchema();
-    const { rows } = await this.db.query(
-      `select email_normalized, status, access_token
-         from reader_claims
-        where access_token = $1 and status = 'approved'
-        limit 1`,
-      [accessToken],
-    );
-    return rows.length ? rowToClaim(rows[0]) : null;
   }
 }
