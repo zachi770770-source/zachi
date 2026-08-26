@@ -60,6 +60,15 @@ export type AnalyticsEventName =
   | "persona_select"
   | "audio_play"
   | "video_play"
+  // ── ערכת-הקורא (Reader Bonus) — הרחבת המשפך אחרי הרכישה ──────────────
+  //   reader_bonus_view → reader_bonus_claim_started → reader_bonus_claim_submitted
+  //     → reader_bonus_approved → reader_kit_accessed → reader_resource_opened
+  | "reader_bonus_view"
+  | "reader_bonus_claim_started"
+  | "reader_bonus_claim_submitted"
+  | "reader_bonus_approved"
+  | "reader_kit_accessed"
+  | "reader_resource_opened"
   //
   // ═══ DORMANT — נשמרים לתאימות callers, אך *אינם נורים* בזרימה החיה ═══
   // (רשימת המתנה / סליקה מקומית סגורה / קונסולת Compass ישנה / קדם-Phase A /

@@ -24,6 +24,7 @@ export type AmazonSource =
   | "book"
   | "preview"
   | "guide"
+  | "reader"
   | "journey_before"
   | "journey_building"
   | "journey_inside"

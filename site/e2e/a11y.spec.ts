@@ -5,7 +5,7 @@ import AxeBuilder from "@axe-core/playwright";
  * בדיקות נגישות אוטומטיות (axe-core) על העמודים המרכזיים, במחשב ובמובייל.
  * תקן: WCAG 2.0/2.1 A + AA. נכשל על הפרות serious/critical.
  */
-const ROUTES = ["/", "/book", "/before-relationship", "/preview", "/faq", "/compass", "/author", "/contact"];
+const ROUTES = ["/", "/book", "/before-relationship", "/preview", "/faq", "/compass", "/author", "/contact", "/reader"];
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
