@@ -1,5 +1,6 @@
 import { test, expect } from "./fixtures";
 import { journeyPages, type JourneyId } from "../src/content/journeyPages";
+import { journeyInteractions } from "../src/content/journeyInteractions";
 
 /**
  * ארבעת עמודי-המסע = ארבע חוויות נפרדות. כל עמוד: H1 ייחודי, intro, נקודות-עומק,
@@ -308,6 +309,77 @@ test("all five journey pages carry the quiet direct-entry link to /#path", async
       `${j.path} direct-entry link`,
     ).toHaveAttribute("href", "/#path");
   }
+});
+
+// ── PR3: פעולה קטנה אחת לכל תחנה — ייחודית, מגיבה, ephemeral, נגישה ──────────
+const JI = 'section[aria-labelledby="journey-interaction-heading"]';
+
+for (const id of Object.keys(journeyInteractions) as JourneyId[]) {
+  test(`${id}: has its own interaction that responds to the choice and never stacks`, async ({
+    page,
+  }) => {
+    await page.goto(`/${id}`, { waitUntil: "networkidle" });
+    const section = page.locator(JI);
+    // 1. אינטראקציה ייחודית לתחנה — הכותרת של התחנה עצמה.
+    await expect(section.getByRole("heading", { level: 2 })).toHaveText(
+      journeyInteractions[id].title,
+    );
+
+    const firstItem = section.locator("fieldset.ji-item").first();
+    const choices = firstItem.locator(".ji-choice");
+    const c0 = choices.nth(0).locator(".ji-reflect");
+    const c1 = choices.nth(1).locator(".ji-reflect");
+
+    // 2. אין שיקוף לפני בחירה.
+    await expect(c0).toBeHidden();
+    await expect(c1).toBeHidden();
+
+    // 3. הפעולה מגיבה לבחירה — סימון חושף את השיקוף של אותה בחירה בלבד.
+    await choices.nth(0).locator("label.ji-chip").click();
+    await expect(c0).toBeVisible();
+    await expect(c1).toBeHidden();
+
+    // מעבר לבחירה אחרת מחליף — לא מצטבר (radio נטיבי).
+    await choices.nth(1).locator("label.ji-chip").click();
+    await expect(c1).toBeVisible();
+    await expect(c0).toBeHidden();
+
+    // 4. אין persistence אחרי reload — ה-state ephemeral (אין localStorage).
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(page.locator(JI).locator(".ji-reflect").first()).toBeHidden();
+  });
+}
+
+test("journey interaction is keyboard-operable (native radiogroup)", async ({ page }) => {
+  await page.goto("/before-relationship", { waitUntil: "networkidle" });
+  const section = page.locator(JI);
+  const firstItem = section.locator("fieldset.ji-item").first();
+  const choices = firstItem.locator(".ji-choice");
+  const radios = firstItem.getByRole("radio");
+
+  // מיקוד הרדיו הראשון ובחירתו במקלדת → השיקוף הראשון נחשף.
+  await radios.first().focus();
+  await page.keyboard.press("Space");
+  await expect(choices.nth(0).locator(".ji-reflect")).toBeVisible();
+  // חץ מטה בקבוצת-רדיו נטיב מעביר בחירה לבחירה הבאה (מחליף, לא מצטבר).
+  await page.keyboard.press("ArrowDown");
+  await expect(choices.nth(1).locator(".ji-reflect")).toBeVisible();
+  await expect(choices.nth(0).locator(".ji-reflect")).toBeHidden();
+});
+
+test("interaction does not disturb JourneyMirror or the next-station navigation", async ({
+  page,
+}) => {
+  await page.goto("/before-relationship", { waitUntil: "networkidle" });
+  // JourneyMirror ממשיך לעבוד — שלוש בחירות בקבוצת-רדיו נפרדת.
+  const mirror = page.locator('section[aria-labelledby="depth-heading"]');
+  await expect(mirror.getByRole("radio")).toHaveCount(3);
+  // ה-next-station של PR #110 עדיין קיים ומצביע לתחנה הבאה.
+  await expect(
+    page.locator('section[aria-labelledby="journey-next-heading"]').getByRole("link", {
+      name: /להמשיך אל .מתחילים קשר/,
+    }),
+  ).toHaveAttribute("href", "/building-relationship");
 });
 
 test("no horizontal overflow on the journey pages (mobile 390)", async ({ browser }) => {

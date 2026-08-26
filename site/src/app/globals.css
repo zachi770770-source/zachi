@@ -1165,6 +1165,77 @@
     }
   }
 
+  /* ===== „פעולה קטנה אחת” בעמוד-המסע (JourneyInteraction) =====
+     צ׳יפ-בחירה נטיבי (radio חבוי) עם סימן-בחירה לא-צבעוני (✓), והשיקוף של אותה
+     בחירה נחשף דרך :has(input:checked) — ללא JS, ephemeral, מקלדת/קורא-מסך. */
+  .ji-chip {
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    border: 1.5px solid var(--color-border-strong);
+    background: var(--color-surface);
+    padding: 0.55rem 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  @media (hover: hover) {
+    .ji-chip:hover {
+      background: var(--color-surface-muted);
+    }
+  }
+  /* הבחירה של המשתמש/ת — הדגשה ניטרלית (לא „נכון”). */
+  .ji-chip:has(input:checked) {
+    border-color: var(--color-brand);
+    background: var(--color-brand-muted);
+    color: var(--color-brand-hover);
+  }
+  .ji-chip:has(input:focus-visible) {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  /* סימן-בחירה שאינו צבע בלבד: עיגול-מתאר שמתמלא ומקבל ✓ כשמסומן. */
+  .ji-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.05rem;
+    width: 1.05rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1.5px solid var(--color-border-strong);
+    background: var(--color-surface);
+  }
+  .ji-chip:has(input:checked) .ji-mark {
+    border-color: var(--color-brand);
+    background: var(--color-brand);
+  }
+  .ji-chip:has(input:checked) .ji-mark::after {
+    content: "✓";
+    font-size: 0.7rem;
+    line-height: 1;
+    font-weight: 900;
+    color: var(--color-brand-foreground);
+  }
+  .ji-reflect {
+    display: none;
+  }
+  .ji-choice:has(input:checked) .ji-reflect {
+    display: block;
+  }
+  .ji-tag {
+    background: var(--color-brand-muted);
+    color: var(--color-brand-hover);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ji-choice:has(input:checked) .ji-reflect {
+      animation: toolAccBody 240ms var(--ease-settle) both;
+    }
+  }
+
   /* „רגע אחד — שלוש שכבות” (/method/fact-story) — צ׳יפ-בחירה נטיבי (radio חבוי),
      הדגשה ניטרלית כשנבחר, ושכבות שנחשפות בהדרגה. אי-לקוח: המצב ephemeral, אבל
      ההדגשה עצמה נשענת על :has(:checked) — עובד עם מקלדת וקורא-מסך. */
