@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import { authorContent } from "@/content/author";
 import { preview } from "@/content/book";
+import { canonicalExcerpt } from "@/content/sample";
 import { authorNote, recognition, whyTheBook } from "@/content/homeStory";
 
 /**
@@ -11,7 +12,8 @@ import { authorNote, recognition, whyTheBook } from "@/content/homeStory";
  */
 describe("home story is source-backed, not authored marketing copy", () => {
   it("quotes the book verbatim, not a paraphrase of it", () => {
-    expect(recognition.quote).toBe(preview.homeTeaser);
+    // פסקת המבוא המאושרת שפונה לכל ארבע התחנות (מוגנת ב-canonicalExcerpt.test.ts).
+    expect(recognition.quote).toBe(canonicalExcerpt.paragraphs[2]);
   });
 
   it("lists the approved table of contents, not invented chapters", () => {
@@ -49,12 +51,14 @@ describe("home story is source-backed, not authored marketing copy", () => {
     // „חיפוש מול בנייה” הוא משפט ה-H1. הוא נוחת פעם אחת בעמוד — בציטוט מהספר.
     const authored = [
       recognition.line,
-      recognition.support,
       whyTheBook.title,
       whyTheBook.site.line,
       whyTheBook.book.note,
       authorNote.body,
     ].join(" ");
     expect(authored).not.toMatch(/לחפש|מחפשים|מוצאים/);
+    // שורת-המשנה מונה את ארבע התחנות ולכן רשאית לנקוב ב„מחפשים קשר” כשלב-חיים —
+    // אך עדיין אסור לה לשחזר את צד ה„מציאה” של תזת ה-H1.
+    expect(recognition.support).not.toMatch(/מוצאים|למצוא/);
   });
 });
