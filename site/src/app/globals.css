@@ -4661,3 +4661,432 @@ body:has([data-fm-active]) {
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* ===================================================================
+ * PHASE NARRATIVE — עמוד-בית כרצף אחד: Hero→Recognition, Point→Path,
+ * התעוררות-המסלול, וכוריאוגרפיית-הסגירה. כל התנועה opacity/transform/
+ * clip-path בלבד (ללא CLS), מגודרת ב-`.motion-js`, ונפתחת כשהמקטע נכנס
+ * לתצוגה (`.reveal`→`.is-visible`, אותו בקר גלובלי של MotionRoot). תחת
+ * prefers-reduced-motion / ללא-JS — אין `.motion-js`, המצב הסופי גלוי מיד.
+ * =================================================================== */
+
+/* ── A · Hero → Recognition: החוט ממשיך, והביט „נבנה” במקום fade ──
+   ה-fade הכללי של `.reveal` מנוטרל; הילדים נושאים את הכוריאוגרפיה. */
+.recog {
+  position: relative;
+}
+/* חוט-ההמשכיות — ממשיך את `sig-hero__thread` (אותו מיקום) אל תוך הכותרת. */
+.recog__thread {
+  position: absolute;
+  z-index: 0;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  width: 2px;
+  height: clamp(1.75rem, 5vh, 3rem);
+  transform: translateX(-50%);
+  transform-origin: top center;
+  background: linear-gradient(
+    to bottom,
+    var(--color-brand),
+    color-mix(in oklab, var(--color-brand) 12%, transparent)
+  );
+  opacity: 0.7;
+}
+@media (min-width: 1024px) {
+  .recog__thread {
+    inset-inline-start: 30%; /* ממשיך את מיקום חוט-ה-Hero בדסקטופ */
+    transform: none;
+  }
+}
+
+.motion-js .recog.reveal {
+  opacity: 1;
+  transform: none;
+}
+/* החוט נמשך למטה ראשון — „הקו מגיע אל הפרק הבא”. */
+.motion-js .recog .recog__thread {
+  transform: translateX(-50%) scaleY(0);
+  transition: transform 620ms var(--ease-emphasized);
+}
+.motion-js .recog.is-visible .recog__thread {
+  transform: translateX(-50%) scaleY(1);
+}
+@media (min-width: 1024px) {
+  .motion-js .recog .recog__thread {
+    transform: scaleY(0);
+  }
+  .motion-js .recog.is-visible .recog__thread {
+    transform: scaleY(1);
+  }
+}
+/* הכותרת „תלויה” מהחוט: עולה מעט אחרי שהחוט מגיע. */
+.motion-js .recog .recog__line {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 620ms var(--ease-settle) 260ms,
+    transform 620ms var(--ease-settle) 260ms;
+}
+.motion-js .recog.is-visible .recog__line {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .recog .recog__support {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 560ms var(--ease-standard) 420ms,
+    transform 560ms var(--ease-settle) 420ms;
+}
+.motion-js .recog.is-visible .recog__support {
+  opacity: 1;
+  transform: none;
+}
+/* הציטוט — רגע עריכתי: הגבול נמשך (scaleY) והטקסט נחשף בחשיפת-מסכה מכיוון
+   הקריאה (RTL: מימין לשמאל), כמו „דיו שנכתב”. קריאוּת מלאה בסוף. */
+.recog__quote {
+  position: relative;
+}
+.motion-js .recog .recog__quote {
+  border-inline-start-color: transparent;
+  transition: border-color 500ms var(--ease-standard) 560ms;
+}
+.motion-js .recog.is-visible .recog__quote {
+  border-inline-start-color: var(--color-brand);
+}
+.motion-js .recog .recog__quote-text {
+  clip-path: inset(0 0 0 100%);
+}
+.motion-js .recog.is-visible .recog__quote-text {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 720ms var(--ease-settle) 480ms;
+}
+.motion-js .recog .recog__quote-src {
+  opacity: 0;
+  transition: opacity 260ms var(--ease-standard) 1050ms;
+}
+.motion-js .recog.is-visible .recog__quote-src {
+  opacity: 1;
+}
+.motion-js .recog .recog__love {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 360ms var(--ease-standard) 820ms,
+    transform 360ms var(--ease-settle) 820ms;
+}
+.motion-js .recog.is-visible .recog__love {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── B · POINT → PATH: „האתר עונה על שאלה. הספר מלווה תהליך.” ──
+   צד-האתר = נקודה אחת; צד-הספר = אותה נקודה שנפתחת לציר אנכי שהתחנות נבנות
+   עליו. הצורה טוענת את הטענה לפני הטקסט. */
+.s2p__dot {
+  margin-top: 0.15rem;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--color-foreground-muted);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-foreground-muted) 14%, transparent);
+}
+.s2p__axis {
+  position: absolute;
+  z-index: 0;
+  /* מיושר עם מרכז הצמתים (h-5 = 20px) של הרשימה למטה. */
+  inset-inline-start: calc(1.25rem + 10px);
+  inset-block: 3.4rem 2.6rem;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-brand),
+    color-mix(in oklab, var(--color-brand) 30%, transparent)
+  );
+  transform-origin: top center;
+}
+@media (min-width: 640px) {
+  .s2p__axis {
+    inset-inline-start: calc(1.75rem + 10px);
+  }
+}
+.s2p__station {
+  position: relative;
+  z-index: 1;
+}
+
+.motion-js .s2p.reveal {
+  opacity: 1;
+  transform: none;
+}
+/* הכותרת + הפאנל נכנסים, ואז הנקודה „נפתחת” לציר והתחנות נבנות. */
+.motion-js .s2p .s2p__head {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 560ms var(--ease-settle),
+    transform 560ms var(--ease-settle);
+}
+.motion-js .s2p.is-visible .s2p__head {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .s2p .s2p__panel {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 620ms var(--ease-settle) 200ms,
+    transform 620ms var(--ease-settle) 200ms;
+}
+.motion-js .s2p.is-visible .s2p__panel {
+  opacity: 1;
+  transform: none;
+}
+/* הנקודה פועמת פעם אחת כשהיא „משגרת” את הציר. */
+.motion-js .s2p .s2p__dot {
+  transform: scale(0);
+  transition: transform 380ms var(--ease-emphasized) 260ms;
+}
+.motion-js .s2p.is-visible .s2p__dot {
+  transform: scale(1);
+}
+/* הציר נמשך מהנקודה כלפי מטה — „נקודה → מסלול”. */
+.motion-js .s2p .s2p__axis {
+  transform: scaleY(0);
+  transition: transform 560ms var(--ease-emphasized) 400ms;
+}
+.motion-js .s2p.is-visible .s2p__axis {
+  transform: scaleY(1);
+}
+.motion-js .s2p .s2p__book-label {
+  opacity: 0;
+  transition: opacity 400ms var(--ease-standard) 450ms;
+}
+.motion-js .s2p.is-visible .s2p__book-label {
+  opacity: 1;
+}
+/* התחנות נבנות בזו-אחר-זו כשהציר „מגיע” אליהן. */
+.motion-js .s2p .s2p__station {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 380ms var(--ease-settle),
+    transform 380ms var(--ease-settle);
+  transition-delay: calc(560ms + var(--i, 0) * 80ms);
+}
+.motion-js .s2p.is-visible .s2p__station {
+  opacity: 1;
+  transform: none;
+}
+/* הצומת נדלק כשהתחנה נבנית. */
+.motion-js .s2p .s2p__node {
+  transform: scale(0.4);
+  transition: transform 380ms var(--ease-emphasized);
+  transition-delay: calc(560ms + var(--i, 0) * 80ms);
+}
+.motion-js .s2p.is-visible .s2p__node {
+  transform: none;
+}
+.motion-js .s2p .s2p__note {
+  opacity: 0;
+  transition: opacity 260ms var(--ease-standard) 900ms;
+}
+.motion-js .s2p.is-visible .s2p__note {
+  opacity: 1;
+}
+
+/* ── C · התעוררות-המסלול (#path): החוט ממשיך, והתחנות „מופיעות” כצמתים ──
+   בלי כרומת-טופס חדשה: הכרטיסים עצמם הם הצמתים; הם עולים ברצף כשהמקטע נכנס,
+   כאילו החוט „מגיע” אל כל אחד. */
+.path-awaken {
+  position: relative;
+}
+.path-awaken__thread {
+  position: absolute;
+  z-index: 0;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  width: 2px;
+  height: clamp(1.5rem, 4vh, 2.5rem);
+  transform: translateX(-50%);
+  transform-origin: top center;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-brand) 55%, transparent),
+    color-mix(in oklab, var(--color-brand) 10%, transparent)
+  );
+}
+.motion-js .path-awaken .path-awaken__thread {
+  transform: translateX(-50%) scaleY(0);
+  transition: transform 560ms var(--ease-emphasized);
+}
+.motion-js .path-awaken.is-visible .path-awaken__thread {
+  transform: translateX(-50%) scaleY(1);
+}
+/* הכרטיסים כצמתים: עולים ברצף כשרשת-הבחירה נכנסת לתצוגה. */
+.motion-js .path-nodes.reveal {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .path-nodes .situation-card {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 480ms var(--ease-settle),
+    transform 480ms var(--ease-settle),
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+.motion-js .path-nodes.is-visible .situation-card {
+  opacity: 1;
+  transform: none;
+}
+/* התיבה-החופשית (נקודת-הכניסה הראשית) עולה ראשונה, לפני הצמתים. */
+.motion-js .path-composer.reveal {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .path-composer .home-composer {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 520ms var(--ease-settle),
+    transform 520ms var(--ease-settle),
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+.motion-js .path-composer.is-visible .home-composer {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── D · כוריאוגרפיית-הסגירה (sig-close): closing shot, לא reveal אחד ──
+   הרקע כבר יציב; הכריכה חוזרת, הכותרת, פרטי-הזמינות, ואז — אחרונה — הפעולה. */
+.motion-js .sig-close__inner.reveal {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .sig-close__inner .sig-close__cover {
+  opacity: 0;
+  transform: translateY(22px) scale(0.96);
+  transition:
+    opacity 720ms var(--ease-settle),
+    transform 820ms var(--ease-settle);
+}
+.motion-js .sig-close__inner.is-visible .sig-close__cover {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .sig-close__inner .sig-close__title {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 620ms var(--ease-settle) 260ms,
+    transform 620ms var(--ease-settle) 260ms;
+}
+.motion-js .sig-close__inner.is-visible .sig-close__title {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .sig-close__inner .sig-close__avail {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 560ms var(--ease-standard) 440ms,
+    transform 560ms var(--ease-settle) 440ms;
+}
+.motion-js .sig-close__inner.is-visible .sig-close__avail {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .sig-close__inner .sig-close__cta {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 460ms var(--ease-settle) 520ms,
+    transform 460ms var(--ease-settle) 520ms;
+}
+.motion-js .sig-close__inner.is-visible .sig-close__cta {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .sig-close__inner .sig-close__secondary {
+  opacity: 0;
+  transition: opacity 300ms var(--ease-standard) 700ms;
+}
+.motion-js .sig-close__inner.is-visible .sig-close__secondary {
+  opacity: 1;
+}
+
+/* ── E · Book opening (Hero): הספר „מדפדף” פעם אחת ואז מתייצב ──
+   דפים דקים נפתחים מקצה-הפתיחה (fore-edge) ונהפכים סביב השדרה (שמאל פיזי, לפי
+   border-radius של `.book-cover__img`), פעם אחת, אחרי שכניסת ה-Hero נחה. שכבות
+   aria-hidden בתוך אותו הקשר-3D של הכריכה. reduced-motion / ללא-JS ⇒ אינן
+   מוצגות כלל (display:none), הכריכה נשארת סטטית. transform/opacity בלבד. */
+.book-cover__riffle {
+  display: none;
+}
+.motion-js .book-cover--riffle .book-cover__riffle {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.book-cover__leaf {
+  position: absolute;
+  inset: 1.5% 1.5% 1.5% 2%;
+  transform-origin: left center;
+  transform: rotateY(0deg);
+  opacity: 0;
+  border-radius: 2px 8px 8px 2px;
+  background:
+    linear-gradient(
+      100deg,
+      #efe9dc 0%,
+      #f6f2e9 22%,
+      #efe9dc 100%
+    );
+  box-shadow:
+    inset 3px 0 5px -2px rgba(43, 36, 31, 0.28),
+    6px 8px 16px -8px rgba(34, 38, 43, 0.4);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  animation: book-leaf-turn 920ms var(--ease-settle) both;
+  animation-delay: calc(2500ms + var(--i, 0) * 250ms);
+}
+/* קו-דיו עדין על הדף, כדי שייקרא „עמוד” ולא לוח ריק — לא פוטוריאליסטי. */
+.book-cover__leaf::after {
+  content: "";
+  position: absolute;
+  inset: 16% 14% 16% 22%;
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-ink) 20%, transparent) 0,
+    color-mix(in oklab, var(--color-ink) 20%, transparent) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+  opacity: 0.5;
+}
+@keyframes book-leaf-turn {
+  0% {
+    opacity: 0;
+    transform: rotateY(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotateY(-166deg);
+  }
+}

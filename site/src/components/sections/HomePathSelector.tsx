@@ -24,7 +24,14 @@ export function HomePathSelector() {
   // עקבי עם `CompassLauncher` שכבר מסתעף לפי אותו מצב.
   const freeTextEnabled = resolveCompassSurface() !== "guided";
   return (
-    <section id="path" className="scroll-mt-20 py-5 sm:py-10" aria-labelledby="path-heading">
+    <section
+      id="path"
+      className="path-awaken scroll-mt-20 py-5 sm:py-10"
+      aria-labelledby="path-heading"
+    >
+      {/* חוט-ההמשכיות ממשיך אל בחירת-המצב: המסלול „מגיע” אל הצמתים (הכרטיסים),
+          שעולים ברצף כשהמקטע נכנס לתצוגה. דקורטיבי בלבד. */}
+      <span className="path-awaken__thread" aria-hidden="true" />
       <Container>
         {/* `path-intro` — כותרת-המקטע מתכווצת כש-Focus Mode פעיל (ראו הכלל
             `#path:has([data-fm-active]) .path-intro` ב-globals.css), כדי שהבמה

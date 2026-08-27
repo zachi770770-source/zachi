@@ -49,7 +49,7 @@ export function Hero() {
                   className="sig-hero__cover-link"
                 >
                   <div data-vt-book-source className="sig-hero__cover-src">
-                    <BookCover priority className="w-full" />
+                    <BookCover priority riffle className="w-full" />
                   </div>
                 </BookLink>
               </BookTilt>
