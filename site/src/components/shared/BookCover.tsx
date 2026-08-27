@@ -41,7 +41,7 @@ export function BookCover({
             {[2, 1, 0].map((i) => (
               <span
                 key={i}
-                className="book-open__page book-open__face"
+                className={`book-open__page book-open__face book-open__page--p${i}`}
                 style={{ ["--i" as string]: String(i), zIndex: 10 - i }}
               />
             ))}
