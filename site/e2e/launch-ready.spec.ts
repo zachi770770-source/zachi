@@ -189,7 +189,9 @@ test.describe("Launch-readiness", () => {
     await path.locator('a[href="/before-relationship"]').click();
     await expect(page).toHaveURL(/\/$/);
     const focus = path.getByRole("region", { name: focusUi.regionLabel });
+    await focus.getByRole("button", { name: focusUi.enterCta }).click();
     await focus.getByRole("button", { name: focusUi.separateLabel }).click();
+    await focus.getByRole("button", { name: focusUi.ahaCta }).click();
     await focus.getByRole("button", { name: focusUi.continueLabel }).click();
     await expect(
       path

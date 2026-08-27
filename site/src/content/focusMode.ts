@@ -109,10 +109,18 @@ export const focusUi = {
   storyPrompt: lab.storyPrompt, // „ומה הראש כבר סיפר על זה?”
   /** ה-Aha: משפט-ההפרדה (מתוך ה-lab). */
   separationLine: lab.separationLine,
+  /** מסגור שלב-הפעולה (מתוך ה-lab) — כותרת ולֶד. */
+  actionEyebrow: lab.actionEyebrow, // „פעולה”
+  actionIntro: lab.actionIntro, // „עכשיו, כשהעובדה עומדת לבדה…”
   /** הכפתור שמפעיל את ה-Aha — הפרדה יזומה של הקורא. */
   separateLabel: "הפרידו: מה מזה באמת קרה?",
   /** ה-CTA הראשי שנחשף אחרי ההבנה — ממשיך לשיחה עם הספר. */
   continueLabel: "המשיכו עם הספר",
   /** חזרה לבחירת-המצב. */
   backLabel: "חזרה למצבים",
+  // ── תוויות-ממשק לפעימות (chrome, לא תוכן מהספר) ──
+  /** כניסה→פיצול: מזמין להביט ברגע אחד ולהפריד אותו. */
+  enterCta: "נפריד רגע אחד",
+  /** Aha→פעולה: מעבר שקט אל שלב-הפעולה הנקי. */
+  ahaCta: "המשך",
 } as const;

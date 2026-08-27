@@ -12,28 +12,30 @@ import { withViewTransition } from "@/lib/motion/viewTransition";
 /**
  * Focus Mode — חוויית „איפה זה פוגש אותך עכשיו?”.
  *
- * לא שאלון עם כרטיסים שמתחלפים: זו במה שמפעילה את כלי „עובדה, סיפור, פעולה” על
- * המצב שנבחר, בשלושה שלבים ברורים ובשלוש שכבות-תנועה שנועדו להיות הבסיס לשפת-
+ * לא שאלון עם כרטיסים שמתחלפים: כניסה למצב היא *השתלטות* אימרסיבית — משטח כהה
+ * ועמוק שבו הסביבה נסוגה — והחוויה מתקדמת כרצף של ארבע פעימות, שלכל אחת
+ * composition שונה בהתאם למשמעותה, ובשלוש שכבות-תנועה שנועדו להיות הבסיס לשפת-
  * התנועה של האתר (ראו `.fm-*` ב-globals.css):
  *
- *   1. Ambient — נשימת-רקע עדינה על הבמה (`.fm-ambient`), חיים שקטים ולא-מסיחים.
- *   2. Narrative — הרגע נפרד לשני נתיבים: „מה שקרה” (עובדה) מול „מה שהוספתם”
- *      (סיפור). ההפרדה מובנת *ויזואלית* — צבע, מיקום ותווית — לא רק טקסט.
- *   3. Moment (Aha) — כשהקורא/ת מפריד/ה ביוזמתו, ה-composition, ה-typography,
- *      ה-color וה-motion משתנים *יחד*: הסיפור נסוג, העובדה עולה למרכז, מוגדלת
- *      ומאושרת, ומשפט-ההפרדה נכנס. רק *אחרי* ההבנה נחשפים משפט-הגשר וה-CTA.
+ *   1. Enter   — המצב שנבחר עולה גדול ודומיננטי (ממשיך/morph מהכרטיס).
+ *   2. Split   — הרגע נפרד לשני צדדים שמתחילים קרובים ואז *נפתחים* זה מזה;
+ *                הפער מורגש גם בלי לקרוא (עובדה = Sage, סיפור = Terracotta).
+ *   3. Aha     — הרגע המרכזי: משפט-ההפרדה בטיפוגרפיה גדולה, ניגודיות-רקע
+ *                משתנה ו-whitespace. הסיפור נסוג לגמרי; העובדה מאושרת.
+ *   4. Action  — שלב חדש ונקי (משטח בהיר), מסגור-הפעולה מהספר וה-CTA.
  *
- * המשכיות-אלמנט (shared-element): בשלב ה-Aha, פסקת-העובדה נושאת
- * `view-transition-name` ומתמזגת מהנתיב אל המרכז דרך View Transitions API
- * (feature-detected, מגודר ב-`.motion-js` בלבד). ללא תמיכה / reduced-motion /
- * ללא-JS — אותה זרימה בדיוק, במעברי-מצב מיידיים (המצב הסופי תמיד קריא ונגיש).
+ * המשכיות-אלמנט (shared-element) דרך View Transitions API (feature-detected,
+ * מגודר ב-`.motion-js`): כותרת-המצב נושאת `view-transition-name: fm-title`
+ * ומתמזגת מהכרטיס דרך כל הפעימות; פסקת-העובדה נושאת `fm-fact` ומתמזגת מהנתיב
+ * אל אישור ה-Aha. ללא תמיכה / reduced-motion / ללא-JS — אותה זרימה בדיוק,
+ * במעברי-מצב מיידיים (המצב הסופי תמיד קריא ונגיש).
  *
- * שכבת-בסיס: הרכיב עולה רק כשיפור-הדרגתי (JS). כרטיסי-המצב עצמם נשארים `<a>`
- * אמיתיים ב-`HomePathEntry` — ניווט מלא ללא-JS. כאן, ה-CTA „המשיכו עם הספר”
- * ממשיך אל אותה שיחה דטרמיניסטית (`HomeConversation`) דרך `onContinue`.
+ * שכבת-בסיס: הרכיב עולה רק כשיפור-הדרגתי (JS). כרטיסי-המצב נשארים `<a>` אמיתיים
+ * ב-`HomePathEntry`. ה-CTA „המשיכו עם הספר” ממשיך אל השיחה (`HomeConversation`).
  */
 
-type Stage = "split" | "aha";
+const STAGE_ORDER = ["enter", "split", "aha", "action"] as const;
+type Stage = (typeof STAGE_ORDER)[number];
 
 export function FocusMode({
   situationId,
@@ -41,119 +43,122 @@ export function FocusMode({
   onBack,
 }: {
   situationId: HomePathId;
-  /** ממשיך אל השיחה הדטרמיניסטית של המצב (נחשף רק אחרי ה-Aha). */
+  /** ממשיך אל השיחה הדטרמיניסטית של המצב (נחשף בשלב הפעולה). */
   onContinue: () => void;
   /** חזרה לבחירת-המצב. */
   onBack: () => void;
 }) {
   const s = getFocusSituation(situationId);
-  const [stage, setStage] = React.useState<Stage>("split");
-  const revealed = stage === "aha";
+  const [stage, setStage] = React.useState<Stage>("enter");
   const stageRef = React.useRef<HTMLDivElement>(null);
-  const ahaRef = React.useRef<HTMLDivElement>(null);
+  const stepIndex = STAGE_ORDER.indexOf(stage);
 
-  // בטעינה: מעבירים פוקוס אל הבמה כדי שקורא/ת-מסך תגיע לתוכן החדש (במקביל
-  // להתנהגות של אזור-השיחה). הרכיב נטען מחדש לכל בחירת-מצב, ולכן מתחיל תמיד
-  // מ„split” דרך מצב-ההתחלה של useState — אין צורך לאפס כאן.
-  React.useEffect(() => {
-    stageRef.current?.focus({ preventScroll: true });
-  }, []);
-
-  const separate = () => {
-    // flushSync כדי שה-DOM של שלב ה-Aha ייצולם בתוך המעבר (המשכיות-אלמנט).
-    withViewTransition(() => flushSync(() => setStage("aha")));
+  // מעבר-פעימה בתוך View Transition; flushSync כדי שה-DOM החדש ייצולם למיזוג.
+  const go = (next: Stage) => {
+    withViewTransition(() => flushSync(() => setStage(next)));
   };
 
+  // בטעינה ובכל החלפת-פעימה: פוקוס אל הבמה, כדי שקורא/ת-מסך תגיע לתוכן החדש.
   React.useEffect(() => {
-    if (revealed) ahaRef.current?.focus({ preventScroll: true });
-  }, [revealed]);
+    stageRef.current?.focus({ preventScroll: true });
+  }, [stage]);
 
   return (
     <div
       ref={stageRef}
       tabIndex={-1}
-      className="home-focus fm-stage mx-auto mt-6 max-w-2xl focus:outline-none"
+      className="home-focus fm-stage"
       role="region"
       aria-label={focusUi.regionLabel}
       data-stage={stage}
     >
-      {/* Ambient — נשימת-רקע עדינה מאחורי הבמה (שכבה 1). דקורטיבי בלבד. */}
+      {/* עומק-רקע (controlled gradients) + נשימת-Ambient — דקורטיביים בלבד. */}
+      <span className="fm-bg" aria-hidden="true" />
       <span className="fm-ambient" aria-hidden="true" />
 
-      <div className="fm-stage__inner">
-        <div className="mb-4 flex justify-center sm:justify-start">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
+      <div className="fm-shell">
+        <div className="fm-topbar">
+          <button type="button" onClick={onBack} className="fm-back">
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             {focusUi.backLabel}
           </button>
+          {/* מחוון-פעימות (רצף של ארבעה מסכים) — דקורטיבי. */}
+          <span className="fm-steps" aria-hidden="true">
+            {STAGE_ORDER.map((st, i) => (
+              <span
+                key={st}
+                className="fm-steps__dot"
+                data-on={i <= stepIndex ? "true" : undefined}
+              />
+            ))}
+          </span>
         </div>
 
-        <p className="kicker">{focusUi.eyebrow}</p>
-        <h3 className="fm-hero mt-2 font-serif text-[1.4rem] font-bold leading-tight text-foreground sm:text-[1.6rem]">
-          {s.title}
-        </h3>
-        <p className="mt-2 max-w-[54ch] text-[14.5px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-          {focusUi.intro}
-        </p>
-
-        {/* Narrative — הרגע נפרד לשני נתיבים (שכבה 2). ההפרדה ויזואלית: צבע,
-            מיקום ותווית. שני הנתיבים נשארים ב-DOM; ה-Aha מקפל את נתיב-הסיפור
-            ומעלה את נתיב-העובדה למרכז. */}
-        <div className="fm-split mt-5" data-revealed={revealed}>
-          <div className="fm-lane fm-lane--fact">
-            <span className="fm-lane__tag">{focusUi.factTag}</span>
-            <p className="fm-fact">{s.fact}</p>
-          </div>
-          <div className="fm-lane fm-lane--story" aria-hidden={revealed}>
-            <span className="fm-lane__tag">{focusUi.storyTag}</span>
-            <p className="fm-story-text">{s.story}</p>
-          </div>
-        </div>
-
-        {!revealed ? (
-          <div className="fm-controls mt-6">
-            <p className="text-[13.5px] leading-relaxed text-foreground-muted">
-              {focusUi.storyPrompt}
-            </p>
-            <button
-              type="button"
-              onClick={separate}
-              className="fm-separate mt-3 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-2.5 text-[15px] font-semibold text-foreground shadow-sm transition-[transform,border-color,box-shadow] hover:-translate-y-0.5 hover:border-brand/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0"
-            >
-              {focusUi.separateLabel}
-            </button>
-          </div>
-        ) : (
-          <div
-            ref={ahaRef}
-            tabIndex={-1}
-            className="fm-aha mt-6 focus:outline-none"
-          >
-            <p className="fm-aha__line font-serif text-[1.15rem] font-semibold leading-snug text-foreground [text-wrap:pretty] sm:text-[1.3rem]">
-              {focusUi.separationLine}
-            </p>
-            <p className="fm-bridge fm-rise mt-4 max-w-[52ch] font-quote text-[1.02rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-              {s.bridge}
-            </p>
-            <div className="fm-actions fm-rise mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={onContinue}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-[15.5px] font-semibold text-brand-foreground shadow-sm transition-[transform,background-color,box-shadow] hover:-translate-y-0.5 hover:bg-brand-hover hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0"
-              >
-                {focusUi.continueLabel}
+        {stage === "enter" && (
+          <div className="fm-scene fm-scene--enter">
+            <p className="fm-eyebrow">{focusUi.eyebrow}</p>
+            <h3 className="fm-title fm-title--hero">{s.title}</h3>
+            <p className="fm-lede">{focusUi.intro}</p>
+            <div className="fm-cta-row">
+              <button type="button" onClick={() => go("split")} className="fm-cta fm-cta--ghost">
+                {focusUi.enterCta}
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               </button>
-              <Link
-                href={s.stationHref}
-                className="inline-flex items-center justify-center gap-1.5 text-[14.5px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                {s.stationLabel}
-              </Link>
+            </div>
+          </div>
+        )}
+
+        {stage === "split" && (
+          <div className="fm-scene fm-scene--split">
+            <h3 className="fm-title fm-title--mini">{s.title}</h3>
+            <div className="fm-duo">
+              <div className="fm-side fm-side--fact">
+                <span className="fm-side__tag">{focusUi.factTag}</span>
+                <p className="fm-fact">{s.fact}</p>
+              </div>
+              <span className="fm-gap" aria-hidden="true" />
+              <div className="fm-side fm-side--story">
+                <span className="fm-side__tag">{focusUi.storyTag}</span>
+                <p className="fm-story-text">{s.story}</p>
+              </div>
+            </div>
+            <p className="fm-prompt">{focusUi.storyPrompt}</p>
+            <div className="fm-cta-row">
+              <button type="button" onClick={() => go("aha")} className="fm-cta fm-cta--solid">
+                {focusUi.separateLabel}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === "aha" && (
+          <div className="fm-scene fm-scene--aha">
+            <p className="fm-fact fm-fact--echo">{s.fact}</p>
+            <p className="fm-aha__line">{focusUi.separationLine}</p>
+            <div className="fm-cta-row">
+              <button type="button" onClick={() => go("action")} className="fm-cta fm-cta--quiet">
+                {focusUi.ahaCta}
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === "action" && (
+          <div className="fm-scene fm-scene--action">
+            <div className="fm-panel">
+              <p className="fm-eyebrow fm-eyebrow--brand">{focusUi.actionEyebrow}</p>
+              <p className="fm-lede fm-lede--ink">{focusUi.actionIntro}</p>
+              <p className="fm-bridge">{s.bridge}</p>
+              <div className="fm-actions">
+                <button type="button" onClick={onContinue} className="fm-cta fm-cta--brand">
+                  {focusUi.continueLabel}
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <Link href={s.stationHref} className="fm-cta fm-cta--link">
+                  {s.stationLabel}
+                </Link>
+              </div>
             </div>
           </div>
         )}

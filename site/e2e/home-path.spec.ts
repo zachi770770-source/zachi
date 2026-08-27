@@ -71,24 +71,28 @@ for (const s of STAGES) {
     await path.locator(`a.situation-card[href="${s.href}"]`).click();
     await expect(page).toHaveURL(/\/$/);
 
-    // Focus Mode: אזור-הבמה, והעובדה והסיפור *שניהם* גלויים (הפרדה ויזואלית),
-    // עם התוויות. הכרטיסים התקפלו.
+    // פעימה 1 — enter: אזור-הבמה עולה עם כותרת-המצב; הכרטיסים התקפלו.
     const focus = path.getByRole("region", { name: focusUi.regionLabel });
     await expect(focus).toBeVisible();
-    await expect(focus.getByText(sit.fact)).toBeVisible();
-    await expect(focus.getByText(sit.story)).toBeVisible();
-    // exact: התוויות הן מחרוזות קצרות שעלולות להיות מוכלות במשפט-המסגור (למשל
-    // „מה שקרה” בתוך „...בין מה שקרה באמת...”) — מצמידים להתאמה מלאה.
-    await expect(focus.getByText(focusUi.factTag, { exact: true })).toBeVisible();
-    await expect(focus.getByText(focusUi.storyTag, { exact: true })).toBeVisible();
+    await expect(focus.getByRole("heading", { name: sit.title })).toBeVisible();
     await expect(path.locator(".situation-card")).toHaveCount(0);
 
-    // הפעולה/CTA נחשפים רק אחרי ההבנה: לפני ההפרדה אין CTA-המשך.
+    // enter → split: עובדה וסיפור *שניהם* גלויים (הפרדה ויזואלית), עם התוויות.
+    await focus.getByRole("button", { name: focusUi.enterCta }).click();
+    await expect(focus.getByText(sit.fact)).toBeVisible();
+    await expect(focus.getByText(sit.story)).toBeVisible();
+    await expect(focus.getByText(focusUi.factTag, { exact: true })).toBeVisible();
+    await expect(focus.getByText(focusUi.storyTag, { exact: true })).toBeVisible();
+
+    // split → aha: משפט-ההפרדה מופיע; הפעולה/CTA עדיין לא.
     await expect(focus.getByRole("button", { name: focusUi.continueLabel })).toHaveCount(0);
     await focus.getByRole("button", { name: focusUi.separateLabel }).click();
     await expect(focus.getByText(focusUi.separationLine)).toBeVisible();
+    await expect(focus.getByRole("button", { name: focusUi.continueLabel })).toHaveCount(0);
 
-    // „המשיכו עם הספר” → השיחה הדטרמיניסטית, seeded לתחנה.
+    // aha → action: שלב נקי; „המשיכו עם הספר” → השיחה הדטרמיניסטית, seeded לתחנה.
+    await focus.getByRole("button", { name: focusUi.ahaCta }).click();
+    await expect(focus.getByText(sit.bridge)).toBeVisible();
     await focus.getByRole("button", { name: focusUi.continueLabel }).click();
     const region = path.getByRole("region", { name: homePathUi.conversationLabel });
     await expect(region).toBeVisible();
@@ -208,7 +212,7 @@ test("mobile 390: a situation starter is a large tap target and is not overlaid"
   await ctx.close();
 });
 
-test("Focus Mode Aha: after separating, the story recedes (aria-hidden) and only the fact + separation line remain", async ({
+test("Focus Mode Aha: the story recedes (gone), the fact is affirmed, the separation line is the centerpiece, and the conversation CTA appears only at the clean action stage", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -219,17 +223,21 @@ test("Focus Mode Aha: after separating, the story recedes (aria-hidden) and only
   await path.locator('a.situation-card[href="/inside-relationship"]').click();
   const focus = path.getByRole("region", { name: focusUi.regionLabel });
   await expect(focus).toBeVisible();
-
+  await focus.getByRole("button", { name: focusUi.enterCta }).click();
   await focus.getByRole("button", { name: focusUi.separateLabel }).click();
+
+  // Aha: משפט-ההפרדה מרכזי, העובדה נשארת מאושרת, הסיפור נעלם, ועדיין אין CTA.
   await expect(focus.getByText(focusUi.separationLine)).toBeVisible();
-  // העובדה נשארת; נתיב-הסיפור נסוג ומסומן aria-hidden (יצא מזרם-הקריאה).
   await expect(focus.getByText(sit.fact)).toBeVisible();
-  await expect(focus.locator('.fm-lane--story[aria-hidden="true"]')).toHaveCount(1);
-  // הפעולה נחשפת רק עכשיו.
+  await expect(focus.getByText(sit.story)).toHaveCount(0);
+  await expect(focus.getByRole("button", { name: focusUi.continueLabel })).toHaveCount(0);
+
+  // הפעולה נחשפת רק בשלב-הפעולה הנקי הבא.
+  await focus.getByRole("button", { name: focusUi.ahaCta }).click();
   await expect(focus.getByRole("button", { name: focusUi.continueLabel })).toBeVisible();
 });
 
-test("mobile 390: the Focus Mode stage never causes horizontal overflow, through the Aha", async ({
+test("mobile 390: the immersive Focus Mode stage never causes horizontal overflow, across every beat", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -246,10 +254,16 @@ test("mobile 390: the Focus Mode stage never causes horizontal overflow, through
     page.evaluate(
       () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
     );
-  expect(await noOverflow(), "horizontal overflow at the split stage").toBe(true);
+  expect(await noOverflow(), "horizontal overflow at enter").toBe(true);
+
+  await focus.getByRole("button", { name: focusUi.enterCta }).click();
+  expect(await noOverflow(), "horizontal overflow at split").toBe(true);
 
   await focus.getByRole("button", { name: focusUi.separateLabel }).click();
   await expect(focus.getByText(focusUi.separationLine)).toBeVisible();
-  expect(await noOverflow(), "horizontal overflow after the Aha").toBe(true);
+  expect(await noOverflow(), "horizontal overflow at aha").toBe(true);
+
+  await focus.getByRole("button", { name: focusUi.ahaCta }).click();
+  expect(await noOverflow(), "horizontal overflow at action").toBe(true);
   await ctx.close();
 });

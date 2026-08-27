@@ -75,6 +75,9 @@ export function HomePathEntry({
 }) {
   const [active, setActive] = React.useState<Active>(null);
   const [inView, setInView] = React.useState(false);
+  // המצב שנלחץ — כותרתו נושאת `view-transition-name: fm-title` כדי שתתמזג
+  // (morph) מהכרטיס אל כותרת-הבמה של Focus Mode, במקום „להיעלם”.
+  const [morphId, setMorphId] = React.useState<HomePathId | null>(null);
   const regionRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLUListElement>(null);
   const wasActive = React.useRef(false);
@@ -112,6 +115,8 @@ export function HomePathEntry({
   // השיחה עצמה. אירוע „שיחה נפתחה” (`ask_open_home`) נשמר למעבר לשיחה בפועל
   // (`openStation` מתוך ה-CTA של Focus Mode), כדי שמשמעות המדד לא תשתנה.
   const openFocus = (situation: HomePathId, station: AskStationId) => {
+    // מסמנים את הכרטיס הנלחץ לפני צילום-ה-VT, כדי שכותרתו תתמזג אל הבמה.
+    flushSync(() => setMorphId(situation));
     withViewTransition(() =>
       flushSync(() => setActive({ mode: "focus", situation, station })),
     );
@@ -273,7 +278,14 @@ export function HomePathEntry({
               >
                 <MessageCircle className="h-[18px] w-[18px]" />
               </span>
-              <span className="font-serif text-[17px] font-semibold leading-snug text-foreground sm:text-[19px]">
+              <span
+                className="font-serif text-[17px] font-semibold leading-snug text-foreground sm:text-[19px]"
+                style={
+                  morphId === p.id
+                    ? ({ viewTransitionName: "fm-title" } as React.CSSProperties)
+                    : undefined
+                }
+              >
                 {p.buttonTitle}
               </span>
               <span className="text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[14px]">
