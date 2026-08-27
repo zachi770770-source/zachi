@@ -149,8 +149,12 @@ export function MethodFactStory({ lab }: { lab: FactStoryLab }) {
       {/* ההפרדה + הפעולה (נחשף אחרי שנבחרו רגע וסיפור) */}
       {factChosen && storyChosen ? (
         <div className="fslab-reveal mt-6 border-t border-border pt-6">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-secondary/30 bg-secondary-muted/50 p-4">
+          {/* חתימת-התנועה של „עובדה, סיפור, פעולה”: שני הצדדים מתחילים מכונסים
+              אל המרכז ואז *נפרדים* (דסקטופ), במיחזור שפת ה-split של Focus Mode;
+              משפט-ההפרדה נכנס אחריהם. במובייל (טור יחיד) — חשיפה בסטגר בלבד, כדי
+              שלא תיווצר גלישה אופקית. */}
+          <div className="fslab-split grid gap-3 sm:grid-cols-2">
+            <div className="fslab-split__fact rounded-xl border border-secondary/30 bg-secondary-muted/50 p-4">
               <span className="text-[12px] font-bold uppercase tracking-wide text-secondary">
                 {lab.factTag}
               </span>
@@ -158,7 +162,7 @@ export function MethodFactStory({ lab }: { lab: FactStoryLab }) {
                 {factText}
               </p>
             </div>
-            <div className="rounded-xl border border-brand/25 bg-brand-muted p-4">
+            <div className="fslab-split__story rounded-xl border border-brand/25 bg-brand-muted p-4">
               <span className="text-[12px] font-bold uppercase tracking-wide text-brand-hover">
                 {lab.storyTag}
               </span>
@@ -167,7 +171,7 @@ export function MethodFactStory({ lab }: { lab: FactStoryLab }) {
               </p>
             </div>
           </div>
-          <p className="mt-3 font-serif text-[1.05rem] italic leading-relaxed text-foreground [text-wrap:pretty]">
+          <p className="fslab-sepline mt-3 font-serif text-[1.05rem] italic leading-relaxed text-foreground [text-wrap:pretty]">
             {lab.separationLine}
           </p>
 

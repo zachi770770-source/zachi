@@ -1709,151 +1709,6 @@
  * רצה (CSS טהור). תחת prefers-reduced-motion — הכלל הגלובלי מכווץ משך והשהיה,
  * והמצב הסופי מוצג מיד (ראו הבלוק למטה: animation-delay:0).
  * ==================================================================== */
-/* ====================================================================
- * PHASE MOTION 3 — סצנת „חיפוש → בנייה” (SearchToBuildScene).
- * מצב-הבסיס = ההרכב הסופי הבנוי והקריא (קו מצויר, טקסט מלא, קו-המשך) כדי
- * שללא JS/GSAP/תמיכה או תחת reduced-motion הכל גלוי. GSAP קובע מצב-התחלה
- * ומריץ את הכוריאוגרפיה. הפיזור מוסתר כברירת מחדל (inline opacity:0).
- * ==================================================================== */
-.s2b__line {
-  stroke-dasharray: 1; /* עם pathLength=1: dashoffset 1=מוסתר, 0=מצויר (בסיס) */
-}
-/* „אהבה היא בנייה” — חשיפת גרפמות אות-אחר-אות, מבוססת-זמן. בסיס גלוי לחלוטין
- * (SSR / no-JS / reduced-motion). תחת motion-js האותיות מזוינות (opacity 0,
- * עלייה קלה), ומתגלות כש-.is-building נוסף (טריגר GSAP בנקודת „הבנייה” או
- * גיבוי), עם transition-delay פר-אות (‎--char-delay). transform/opacity בלבד ⇒
- * אין CLS, מרוכב ב-compositor. אין blur. */
-.s2b__char {
-  display: inline-block;
-  will-change: opacity, transform;
-  transform-origin: center;
-}
-/* המילים אטומיות — לעולם לא נשברת אות באמצע מילה. השורות שומרות מבנה קבוע:
- * inline בבסיס (דסקטופ ⇒ שורה אחת), block בטאבלט/מובייל (שתי שורות קבועות). */
-.s2b__build-vis {
-  display: block;
-}
-.s2b__build-word {
-  display: inline-block;
-}
-.s2b__build-line {
-  display: inline;
-}
-/* חשיפת האותיות: opacity + scale-במקום בלבד (transform-origin מרכז). האות
- * לעולם אינה מופיעה נמוך/בצד/בשורה אחרת ואז „קופצת” — היא מתמלאת בדיוק
- * במיקומה הסופי. הרוחב והמבנה שמורים מראש (inline-block, opacity:0) ⇒ אין
- * reflow ואין קפיצת-שורה בזמן האנימציה. */
-.motion-js .s2b__build .s2b__char {
-  opacity: 0;
-  transform: scale(0.8);
-}
-.motion-js .s2b__build.is-building .s2b__char {
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 440ms var(--ease-settle),
-    transform 440ms var(--ease-settle);
-  transition-delay: var(--char-delay, 0ms);
-}
-/* הצלת-תוכן (rescue) — פועל *רק* כש-GSAP נכשל/לא נטען. הצגה מסודרת של המצב
- * הסופי: (א) „דייטינג הוא חיפוש” נעלם לחלוטין; (ב) „אהבה היא בנייה” מוצג *ללא*
- * stagger מתוזמן (transition-delay:0) — לא אנימציית-אותיות שמתחרה ב-GSAP. */
-.motion-js .s2b__search.s2b__search--gone {
-  opacity: 0;
-  transition: opacity 240ms var(--ease-settle);
-}
-.motion-js .s2b__build.s2b__build--shown .s2b__char {
-  opacity: 1;
-  transform: none;
-  transition: opacity 320ms var(--ease-settle);
-  transition-delay: 0ms;
-}
-/* טקסט ההסבר המשני — מוסתר תחת motion-js, ומופיע ב-fade-up קצר רק אחרי
- * שהכותרת הושלמה (המחלקה .is-in נוספת מ-JS). בסיס (no-JS / reduced-motion /
- * ללא motion-js) = גלוי לחלוטין ובמקום, ללא CLS (opacity + transform בלבד). */
-.motion-js .s2b__intro {
-  opacity: 0;
-  transform: translateY(16px);
-  will-change: opacity, transform;
-}
-.motion-js .s2b__intro.is-in {
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 400ms var(--ease-settle),
-    transform 400ms var(--ease-settle);
-}
-/* עם תנועה — הבמה ממלאת מסך לרצף ה-pinned, בכל הרוחבים (כולל מובייל) כדי
- * שהמשפט יתמרכז אנכית וייעצר. תחת reduced-motion הבאנד בגובה תוכן רגיל
- * (בלי מסך ריק). 100svh = גובה-מסך יציב במובייל (ללא קפיצות סרגל-הכתובת). */
-@media (prefers-reduced-motion: no-preference) {
-  .s2b__stage {
-    min-height: 100vh;
-    min-height: 100svh;
-    display: flex;
-    align-items: center;
-  }
-}
-/* דסקטופ (≥1024): „אהבה היא בנייה.” בשורה אחת, ללא wrap אוטומטי; והקו מעט
- * חזק יותר (stroke-opacity מלא) לאיזון מול הכותרת. */
-@media (min-width: 1024px) {
-  .s2b__build-vis {
-    white-space: nowrap;
-  }
-  .s2b__line {
-    stroke-opacity: 1;
-  }
-}
-/* טאבלט + מובייל (≤1023): שתי שורות קבועות מראש — „אהבה היא” / „בנייה.” —
- * ‎.s2b__build-line‎ הופך ל-block. אין wrap אוטומטי שמשתנה תוך כדי האנימציה. */
-@media (max-width: 1023px) {
-  .s2b__build-line {
-    display: block;
-  }
-}
-/* טאבלט (600–1023): גודל מכוון, max-width לכותרת ומרווח בטוח מצד-ההתחלה
- * (ימין ב-RTL), ומרווח 24–32px אל הטקסט המשני (‎mt-6‎ = 24px, מוגדל כאן). */
-@media (min-width: 600px) and (max-width: 1023px) {
-  .s2b__build {
-    font-size: clamp(40px, 6.4vw, 56px);
-    line-height: 1.1;
-  }
-  .s2b__text {
-    max-width: 34rem;
-    padding-inline-start: 32px;
-  }
-  .s2b__intro {
-    margin-top: 32px;
-  }
-}
-/* מובייל (≤599): „אהבה היא בנייה” בגודל בולט clamp(38,12vw,52), ≥24px מכל צד
- * (ריפוד ה-Container ‎+‎ ריפוד נוסף), ושבירה רק בגבול-מילה. */
-@media (max-width: 599px) {
-  .s2b__build {
-    font-size: clamp(38px, 12vw, 52px);
-    line-height: 1.08;
-  }
-  .s2b__text {
-    padding-inline: 12px;
-  }
-}
-/* מובייל + תנועה: בזמן הרצף הנעוץ, המוטיב (קו+נקודות) יוצא מהזרימה וממוקם
- * באזור התחתון כדקורציה, כדי שגוש-הכותרת יתמרכז אנכית וה„אהבה היא בנייה”
- * יישב במרכז אזור הצפייה (לא נדחף מעלה ע"י המוטיב/ההסבר). תחת reduced-motion
- * הכל נשאר בזרימה רגילה (הבמה בגובה-תוכן). */
-@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
-  .s2b__grid {
-    position: relative;
-  }
-  .s2b__motif {
-    position: absolute;
-    inset-inline: 0;
-    bottom: 4%;
-    margin-inline: auto;
-    width: min(56vw, 220px);
-  }
-}
-
 /* מבנה קבוע (חל בכל מצב, גם reduced-motion / ללא JS) — כדי שהאלמנטים קיימים
  * וגלויים במצבם הסופי גם כשאין תנועה. רק ה-transform ההתחלתי והאנימציה
  * מגודרים תחת no-preference. */
@@ -3961,5 +3816,234 @@ html.vt-book-nav::view-transition-group(book-cover) {
   /* אין נשימת-רקע, אין מיזוג-VT; ה-composition הדרמטית נשארת (מצב, לא תנועה). */
   .fm-ambient {
     animation: none !important;
+  }
+}
+
+/* ===================================================================
+ * PHASE WOW — רגעי-שיא נבחרים בשפת-תנועה אחת (מרחיב את שפת ה-fm-*).
+ *
+ * לא אנימציה לכל האתר: ארבעה רגעים בלבד (Thesis / Compass answer / Preview /
+ * Method fact-story), הבנויים מ-primitives משותפים ל-reuse:
+ *   • build/draw       — ציר/קו שנמשך, מבנה שנבנה (Thesis, Method)
+ *   • focus-takeover   — מעטפת נסוגה ואלמנט משתלט (Compass, Preview)
+ *   • converge/settle  — רעש שמתכנס/נרגע (Thesis)
+ * כל התנועה opacity/transform בלבד (ללא CLS), מגודרת ב-.motion-js, ומתכבדת
+ * תחת prefers-reduced-motion (הבלוק הגלובלי מאפס משך → מצב סופי מיידי).
+ * =================================================================== */
+
+/* ── A · Thesis: „חיפוש → בנייה” (search → build) ──
+   הסצנה נשארת גלויה (מנטרלים את fade ברירת-המחדל של .reveal); הכוריאוגרפיה
+   כולה בילדים המסומנים, ונפתחת כשהסצנה נכנסת למסך (.is-visible). */
+.thesis-build {
+  position: relative;
+}
+.thesis-build__stroke {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.26em;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-brand);
+  transform: scaleX(1); /* בסיס (ללא-JS) = קו משורטט */
+  transform-origin: right center; /* RTL: נמשך מימין */
+}
+.thesis-axis {
+  transform-origin: top center;
+}
+
+.motion-js .thesis-scene.reveal,
+.motion-js .thesis-structure.reveal {
+  /* מנטרלים את ה-fade הכללי — הילדים נושאים את הכוריאוגרפיה. */
+  opacity: 1;
+  transform: none;
+}
+
+/* רעש-החיפוש: נכנס מפוזר ומתעמעם, ואז נרגע למקום-המנוחה. */
+.thesis-noise__word {
+  transform: translateY(var(--rest-y, 0));
+}
+.motion-js .thesis-scene .thesis-noise__word {
+  opacity: 0;
+  transform: translate(var(--scatter-x, 0), var(--scatter-y, 0));
+  transition:
+    opacity 0.6s var(--ease-standard),
+    transform 0.75s var(--ease-settle);
+  transition-delay: calc(var(--i, 0) * 55ms);
+}
+.motion-js .thesis-scene.is-visible .thesis-noise__word {
+  opacity: 0.62;
+  transform: translateY(var(--rest-y, 0));
+}
+
+/* ציר-הבנייה נמשך מלמעלה למטה (scaleY) — הציר שסביבו נבנה הצד השני. */
+.motion-js .thesis-scene .thesis-axis {
+  transform: scaleY(0);
+  opacity: 0.3;
+  transition:
+    transform 0.7s var(--ease-emphasized) 0.35s,
+    opacity 0.5s var(--ease-standard) 0.35s;
+}
+.motion-js .thesis-scene.is-visible .thesis-axis {
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+/* כותרת-הבנייה עולה, וקו-החתימה נמשך תחתיה. */
+.motion-js .thesis-scene .thesis-build {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.6s var(--ease-settle) 0.6s,
+    transform 0.6s var(--ease-settle) 0.6s;
+}
+.motion-js .thesis-scene.is-visible .thesis-build {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .thesis-scene .thesis-build__stroke {
+  transform: scaleX(0);
+  transition: transform 0.6s var(--ease-emphasized) 1s;
+}
+.motion-js .thesis-scene.is-visible .thesis-build__stroke {
+  transform: scaleX(1);
+}
+
+/* ההבטחה והקישור — נכנסים אחרונים, אחרי שההבנה התיישבה. */
+.motion-js .thesis-scene .thesis-promise {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.6s var(--ease-standard) 0.95s,
+    transform 0.6s var(--ease-settle) 0.95s;
+}
+.motion-js .thesis-scene.is-visible .thesis-promise {
+  opacity: 1;
+  transform: none;
+}
+
+/* שלושת העקרונות „נבנים” בזה-אחר-זה (structure assembling). */
+.motion-js .thesis-structure .thesis-principle {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.55s var(--ease-settle),
+    transform 0.55s var(--ease-settle);
+  transition-delay: calc(var(--i, 0) * 150ms);
+}
+.motion-js .thesis-structure.is-visible .thesis-principle {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── B · Compass „שאלה → תשובה”: focus-takeover ──
+   כשמתקבלת תשובה, קליפת-הפתיח מתקפלת (GuidanceIntro, מיידי ונקי) ואזור-התשובה
+   „משתלט” על המרחב: עולה ונכנס עם scale מרוסן מלמעלה, ואז תוכן-התשובה מתרכב
+   בסטגר (result-seq הקיים). primitive: `.takeover-in` — מעטפת נכנסת כבעלת-מקום.
+   מגודר ב-.motion-js; reduced-motion / ללא-JS ⇒ מיידי. transform/opacity בלבד. */
+.answer-view {
+  position: relative;
+}
+.motion-js .answer-view {
+  animation: takeover-in 520ms var(--ease-emphasized) both;
+  transform-origin: top center;
+}
+@keyframes takeover-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── C · Preview „נכנסתי לתוך הספר”: chapter-open ──
+   בנוסף למעבר-הכריכה הקיים (Hero → reader, book-cover morph) ולמעבר-ה-VT של
+   מצב-קריאה, כניסת הקורא מרגישה כפתיחת-פרק: הכרטיס עולה לפוקוס-קריאה, וכותרת-
+   הפרק (כריכה → כותרת → פתיח) נחשפת בזה-אחר-זה. גוף-הטקסט אינו מונפש (קריאה
+   קודמת לכול). מגודר ב-.motion-js; reduced-motion / ללא-JS ⇒ מיידי. */
+.motion-js .sample-reader {
+  animation: reader-enter 620ms var(--ease-settle) both;
+}
+@keyframes reader-enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.motion-js .reader-cover {
+  animation: chapter-line 600ms var(--ease-settle) 120ms both;
+}
+.motion-js .reader-title {
+  animation: chapter-line 600ms var(--ease-settle) 240ms both;
+}
+.motion-js .reader-intro {
+  animation: chapter-line 600ms var(--ease-settle) 340ms both;
+}
+@keyframes chapter-line {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── E · Method fact-story signature: separation/recombine ──
+   מיחזור ישיר של שפת ה-split מ-Focus Mode: כששלב-ההפרדה נחשף, שני הצדדים
+   מתחילים מכונסים אל המרכז (inward) ואז נפרדים אל מקומם — הפער נוצר לנגד העין,
+   ואז משפט-ההפרדה נכנס. ההתחלה תמיד *פנימית* למקום-המנוחה ⇒ אין גלישה מעבר
+   לפריסה. הפרדה אופקית רק ב-sm+ (בטור-יחיד היא הייתה יוצרת גלישה). מגודר
+   ב-.motion-js; reduced-motion / ללא-JS ⇒ מיידי. */
+.motion-js .fslab-split__fact,
+.motion-js .fslab-split__story {
+  animation: takeover-in 460ms var(--ease-settle) both;
+}
+@media (min-width: 640px) {
+  .motion-js .fslab-split__fact {
+    animation: fslab-sep-fact 560ms var(--ease-emphasized) both;
+  }
+  .motion-js .fslab-split__story {
+    animation: fslab-sep-story 560ms var(--ease-emphasized) both;
+  }
+}
+@keyframes fslab-sep-fact {
+  from {
+    opacity: 0.35;
+    transform: translateX(-34%) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fslab-sep-story {
+  from {
+    opacity: 0.35;
+    transform: translateX(34%) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.motion-js .fslab-sepline {
+  animation: fslab-strike 520ms var(--ease-emphasized) 440ms both;
+}
+@keyframes fslab-strike {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
