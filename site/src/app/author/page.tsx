@@ -26,10 +26,8 @@ const PHOTO_ALT = "צחי חן, מחבר הספר מדייטים לאהבה";
 const PHOTO_SIZES = "(min-width: 1024px) 380px, (min-width: 640px) 360px, 78vw";
 
 export default function AuthorPage() {
-  // פעולה מרכזית אחת בעמוד המחבר: לקרוא טעימה. ההרשמה לרשימת ההמתנה
-  // מרוכזת בסוף הטעימה. כשהמכירה נפתחת — הפעולה המרכזית הופכת לרכישה.
-  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/preview";
-  const primaryLabel = siteConfig.salesOpen ? "לרכישת הספר" : "לקריאת טעימה מהספר";
+  // פעולה מרכזית אחת בעמוד המחבר: לקרוא טעימה. הרכישה עצמה מתבצעת באמזון.
+  const primaryLabel = "לקריאת טעימה מהספר";
 
   return (
     <Container className="py-12 sm:py-16 lg:py-20">
@@ -166,37 +164,16 @@ export default function AuthorPage() {
       {/* קריאה לפעולה — עטיפה אמיתית לצד הפעולה, שהיא גם מקור המעבר המשותף
           אל עמוד ההצצה. אין כאן מכירה: הפעולה מובילה לטעימה החינמית. */}
       <div className="mx-auto mt-14 flex max-w-[64ch] flex-col items-start gap-x-8 gap-y-6 border-t border-border pt-10 sm:flex-row sm:items-center">
-        {!siteConfig.salesOpen ? (
-          <div data-vt-book-source className="w-[100px] shrink-0 sm:w-[116px]">
-            <BookCover />
-          </div>
-        ) : null}
+        <div data-vt-book-source className="w-[100px] shrink-0 sm:w-[116px]">
+          <BookCover />
+        </div>
         <div className="flex flex-col items-start gap-3">
-          {siteConfig.salesOpen ? (
-            <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">
-              <Link href={primaryHref}>{primaryLabel}</Link>
-            </Button>
-          ) : (
-            <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">
-              <BookLink href="/preview" morphCover>
-                {primaryLabel}
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </BookLink>
-            </Button>
-          )}
-          {/* לאחר פתיחת המכירה, הטעימה נשארת פעולה משנית לצד הרכישה. */}
-          {siteConfig.salesOpen ? (
-            <Link
-              href="/preview"
-              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              לקריאת טעימה מהספר
-              <ArrowLeft
-                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                aria-hidden="true"
-              />
-            </Link>
-          ) : null}
+          <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">
+            <BookLink href="/preview" morphCover>
+              {primaryLabel}
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </BookLink>
+          </Button>
           {/* כניסה שקטה לעוזר — למי שרוצה לדעת מה הספר אומר על המצב שלו. */}
           <AskBookLink
             prompt="רוצים לדעת מה הספר אומר על המצב שלכם?"

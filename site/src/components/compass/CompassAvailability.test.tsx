@@ -62,7 +62,7 @@ describe("CompassConsole, availability gating", () => {
     const gate = deferred<FakeResponse>();
     installFetch({ get: () => gate.promise });
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
 
     // אין תיבת כתיבה, אין טופס ואין כפתור שליחה — רק מצב טעינה מוצהר.
     expect(screen.queryByLabelText(INPUT_LABEL)).toBeNull();
@@ -74,7 +74,7 @@ describe("CompassConsole, availability gating", () => {
     const gate = deferred<FakeResponse>();
     installFetch({ get: () => gate.promise });
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     expect(screen.queryByLabelText(INPUT_LABEL)).toBeNull();
 
     await act(async () => {
@@ -90,7 +90,7 @@ describe("CompassConsole, availability gating", () => {
     const gate = deferred<FakeResponse>();
     installFetch({ get: () => gate.promise });
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     expect(screen.queryByLabelText(INPUT_LABEL)).toBeNull();
 
     await act(async () => {
@@ -105,7 +105,7 @@ describe("CompassConsole, availability gating", () => {
     const gate = deferred<FakeResponse>();
     installFetch({ get: () => gate.promise });
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     expect(screen.queryByLabelText(INPUT_LABEL)).toBeNull();
 
     await act(async () => {
@@ -120,7 +120,7 @@ describe("CompassConsole, availability gating", () => {
     const gate = deferred<FakeResponse>();
     installFetch({ get: () => gate.promise });
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     expect(screen.queryByLabelText(INPUT_LABEL)).toBeNull();
 
     await act(async () => {
@@ -140,7 +140,7 @@ describe("CompassConsole, availability gating", () => {
       post: () => postGate.promise,
     });
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     const box = await screen.findByLabelText(INPUT_LABEL);
     fireEvent.change(box, { target: { value: QUESTION } });
     fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));

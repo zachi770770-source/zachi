@@ -24,7 +24,6 @@ const STATIC_ROUTES = [
   "/terms",
   "/privacy",
   "/shipping-returns",
-  "/checkout",
 ];
 
 for (const route of STATIC_ROUTES) {
@@ -155,17 +154,14 @@ test("home closing: Amazon is the only purchase channel (no waitlist form)", asy
   await expect(page.getByLabel("כתובת אימייל")).toHaveCount(0);
 });
 
-test("checkout is closed during pre-launch (no form, no payment)", async ({
+test("the local checkout flow is fully removed (Amazon-only)", async ({
   page,
 }) => {
-  await page.goto("/checkout?format=digital", { waitUntil: "networkidle" });
-
-  await expect(
-    page.getByRole("heading", { name: "הרכישה הישירה באתר עדיין לא נפתחה" })
-  ).toBeVisible();
-  // אין טופס וללא הדגמת תשלום.
-  await expect(page.getByLabel("שם מלא")).toHaveCount(0);
-  await expect(page.getByLabel(/אימייל/)).toHaveCount(0);
+  // אין באתר מכירה ישירה: מסלול ה-checkout וה-API שלו הוסרו לחלוטין.
+  const res = await page.goto("/checkout?format=digital", {
+    waitUntil: "networkidle",
+  });
+  expect(res?.status()).toBe(404);
 });
 
 test("legacy URLs: explicit per-target mapping (301 semantic, 410 for gone article subpaths)", async ({

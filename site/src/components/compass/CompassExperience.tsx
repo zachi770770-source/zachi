@@ -27,12 +27,10 @@ type Mode = "free-text" | "guided";
  * החופשית — אין מענה חי, והשאלה נעצרת בהודעה מרוסנת. AskRoute אינו משתנה.
  */
 export function CompassExperience({
-  salesOpen,
   maxQuestionChars,
   uiPreview = false,
   initialStation,
 }: {
-  salesOpen: boolean;
   maxQuestionChars: number;
   uiPreview?: boolean;
   initialStation?: AskStationId;
@@ -80,7 +78,6 @@ export function CompassExperience({
       {isFreeText ? (
         <div className="mt-8 sm:mt-10">
           <CompassConsole
-            salesOpen={salesOpen}
             maxQuestionChars={maxQuestionChars}
             uiPreview={uiPreview}
           />

@@ -228,7 +228,6 @@ test.describe("Launch-readiness", () => {
       "/author",
       "/faq",
       "/accessibility",
-      "/checkout",
     ]) {
       await page.goto(path, { waitUntil: "networkidle" });
       await expect(page.locator("html")).toHaveAttribute("dir", "rtl");

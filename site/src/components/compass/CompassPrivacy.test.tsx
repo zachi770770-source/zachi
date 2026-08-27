@@ -39,7 +39,7 @@ afterEach(() => {
 
 describe("CompassConsole, analytics privacy", () => {
   it("fires anonymous events but never puts the question text into any analytics call", async () => {
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     const textarea = await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: SECRET } });
     fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));

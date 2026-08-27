@@ -4,7 +4,6 @@ import "./globals.css";
 import { siteConfig } from "@/config/site";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { StickyPurchaseBar } from "@/components/layout/StickyPurchaseBar";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
@@ -102,7 +101,6 @@ export default function RootLayout({
           </main>
           <SiteChrome>
             <Footer />
-            <StickyPurchaseBar />
             {/* בועת „מה הספר אומר על המצב שלי?” — מלווה את הקורא בכל האתר. מסתירה
                 את עצמה בתוך /compass (העמוד עצמו הוא המנוע). כשהשאלה-החופשית פעילה
                 (Preview/Staging או עוזר-פעיל) הבועה מנווטת אל /compass במקום לפתוח

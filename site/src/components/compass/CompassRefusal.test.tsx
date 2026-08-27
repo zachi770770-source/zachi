@@ -52,7 +52,7 @@ describe("CompassConsole, refusal response", () => {
       answer: COMPASS_INSUFFICIENT_ANSWER,
       remaining: 2,
     });
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     await ask("מה הריבית על משכנתה היום?");
 
     expect(await screen.findByText(COMPASS_INSUFFICIENT_ANSWER)).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe("CompassConsole, refusal response", () => {
       focus: "שווה לשים לב לדפוס לאורך זמן.",
       remaining: 2,
     });
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     await ask("איך מכינים חומוס ביתי?");
 
     expect(await screen.findByText(COMPASS_INSUFFICIENT_ANSWER)).toBeInTheDocument();
