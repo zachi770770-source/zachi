@@ -12,6 +12,15 @@ export type WaitlistAddInput = {
   personaSource?: PersonaSource | null;
 };
 
+/** אגרגט אנליטי של הרשמות (ל-Dashboard) — ספירות בלבד, ללא כתובות. */
+export type WaitlistStats = {
+  /** נרשמים פעילים שנוצרו בטווח (לפי created_at). */
+  total: number;
+  byDay: { day: string; count: number }[];
+};
+
+export type WaitlistStatsRange = { from: Date; to: Date };
+
 /**
  * מאגר רשימת ההמתנה. אחסון מתמשך בלבד (Postgres). אין לשמור כתובות
  * בזיכרון/קובץ/לקוח בפרודקשן.
@@ -24,4 +33,6 @@ export interface WaitlistRepository {
   add(input: WaitlistAddInput): Promise<void>;
   /** סימון נרשם כ-unsubscribed (שרתי בלבד). */
   unsubscribe(emailNormalized: string): Promise<void>;
+  /** אגרגט אנליטי בטווח-זמן (ל-Dashboard). ספירות בלבד — ללא חשיפת כתובות. */
+  signupStats(range: WaitlistStatsRange): Promise<WaitlistStats>;
 }
