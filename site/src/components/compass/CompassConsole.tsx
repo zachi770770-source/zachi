@@ -10,6 +10,8 @@ import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
 import { CompassAnswer } from "@/components/compass/CompassAnswer";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
+import { useReportAnswered } from "@/components/guidance/GuidanceFocus";
+import { AnswerView } from "@/components/guidance/AnswerView";
 
 /** שאלות פתיחה שקטות — דוגמאות אנושיות שממחישות מה אפשר לשאול בשפה חופשית. */
 const STARTER_QUESTIONS = compass.freeText.starters;
@@ -65,6 +67,11 @@ export function CompassConsole({
    * ומתאפס בכל שליחה.
    */
   const [searchStage, setSearchStage] = React.useState(0);
+
+  // „מצב-תגובה” משותף: ברגע שיש תשובה (או בזמן שליחה, כדי שלא יהבהב פתיח בין
+  // השאלות) — קליפת-הפתיח של העמוד מתקפלת והתשובה הופכת למוקד. איפוס אוטומטי
+  // כשחוזרים למצב-שאלה (שאלה חדשה מתחילה בכיבוי `answer`).
+  useReportAnswered(answer !== null || submitting);
 
   // טעינת מצב זמינות + כמה שאלות נותרו (בלי לצרוך). במצב בדיקות אין קריאת רשת
   // כלל — הממשק נשאר „ready” לצורכי בדיקה ויזואלית, והשליחה תיחסם מקומית.
@@ -405,8 +412,10 @@ export function CompassConsole({
         </div>
       ) : null}
 
-      {/* אזור התשובה — נקרא ע"י קורא מסך */}
+      {/* אזור התשובה — נקרא ע"י קורא מסך. במצב-תגובה עטוף ב-AnswerView (מוקד + h1). */}
       <div aria-live="polite">
+        {submitting || answer ? (
+        <AnswerView title="התשובה שלך מהספר">
         {submitting ? (
           <div className={CARD_SHELL} role="status">
             <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
@@ -555,6 +564,8 @@ export function CompassConsole({
               {compass.ui.genericError}
             </p>
           </article>
+        ) : null}
+        </AnswerView>
         ) : null}
       </div>
 

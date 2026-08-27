@@ -23,6 +23,8 @@ import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { loadAsk, saveAsk, clearAsk } from "@/lib/ask/askStorage";
 import { trackEvent } from "@/lib/analytics";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
+import { useReportAnswered } from "@/components/guidance/GuidanceFocus";
+import { AnswerView } from "@/components/guidance/AnswerView";
 
 /**
  * „שאל את הספר” — מנוע הכוונה אישי, סגור ודטרמיניסטי, כשיחה מודרכת עם תוכן הספר
@@ -167,6 +169,10 @@ export function AskRoute({
 
   const station = stationId ? askStations.find((s) => s.id === stationId) ?? null : null;
 
+  // „מצב-תגובה” משותף: כשמגיעים לתוצאה/בטיחות, קליפת-הפתיח של עמוד-ההכוונה
+  // מתקפלת והתשובה הופכת למוקד. איפוס אוטומטי בכל שלב-בחירה (שאלה חדשה/החלפה).
+  useReportAnswered(step === "result" || step === "safety");
+
   // הכרזת-התקדמות לקורא-מסך (aria-live) בכל מעבר-שלב — בלי תלות בפוקוס.
   const stepAnnounce: Record<Step, string> = {
     station: "שלב ראשון: איפה אתם עכשיו?",
@@ -249,23 +255,27 @@ export function AskRoute({
       ) : null}
 
       {step === "result" && dilemma ? (
-        <Result
-          dilemma={dilemma}
-          stationId={stationId}
-          ctxId={ctxId}
-          headingRef={headingRef}
-          onChangeDilemma={changeDilemma}
-          onChangeStation={changeStation}
-          onRestart={restart}
-          onSafety={() => {
-            trackEvent("ask_safety", { dilemma: dilemma.id, from: "result" });
-            setStep("safety");
-          }}
-        />
+        <AnswerView title="ההכוונה שלך מתוך הספר">
+          <Result
+            dilemma={dilemma}
+            stationId={stationId}
+            ctxId={ctxId}
+            headingRef={headingRef}
+            onChangeDilemma={changeDilemma}
+            onChangeStation={changeStation}
+            onRestart={restart}
+            onSafety={() => {
+              trackEvent("ask_safety", { dilemma: dilemma.id, from: "result" });
+              setStep("safety");
+            }}
+          />
+        </AnswerView>
       ) : null}
 
       {step === "safety" ? (
-        <Safety headingRef={headingRef} onBack={() => setStep(dilemma ? "result" : "station")} onRestart={restart} />
+        <AnswerView title="מידע חשוב לפני שממשיכים">
+          <Safety headingRef={headingRef} onBack={() => setStep(dilemma ? "result" : "station")} onRestart={restart} />
+        </AnswerView>
       ) : null}
       </div>
       </div>

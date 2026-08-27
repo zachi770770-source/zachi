@@ -2255,6 +2255,12 @@
 .stuck-answer {
   animation: stuckAnswerIn 340ms var(--ease-settle) both;
 }
+/* „מצב-תגובה” משותף להכוונה אישית: ברגע שמתקבלת תשובה, קליפת-הפתיח השיווקית של
+   העמוד (כותרות/הסברים/צ'יפים) מתקפלת והתשובה הופכת למוקד. הקיפול מיידי; התנועה
+   נישאת ע"י כניסת-התשובה עצמה (.stuck-answer / .result-seq). */
+.guidance-intro--focused {
+  display: none;
+}
 /* מגלה-המסלול — כל שאלה נכנסת עם החלקה עדינה מכיוון הקריאה (RTL). */
 @media (prefers-reduced-motion: no-preference) {
   .pathfinder__q {
