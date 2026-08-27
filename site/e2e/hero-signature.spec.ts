@@ -10,7 +10,7 @@ import { test, expect } from "./fixtures";
  *   3. במגע אין הטיה, ובמקלדת קישור הכריכה נשאר בר-מיקוד.
  */
 
-const STROKE = ".hero-build__stroke";
+const STROKE = ".sig-hero__stroke";
 
 test.describe("Hero signature", () => {
   test("reduced-motion: the stroke is drawn and nothing animates", async ({ browser }) => {
@@ -25,7 +25,7 @@ test.describe("Hero signature", () => {
           return el ? getComputedStyle(el) : null;
         };
         const s = cs(stroke);
-        const entrance = [".hero-line__in", ".hero-rule", ".hero-build", ".hero-book"].map((sel) => ({
+        const entrance = [".sig-hero__eyebrow", ".sig-hero__build", ".sig-hero__cover"].map((sel) => ({
           sel,
           anim: cs(sel)?.animationName ?? "missing",
           opacity: cs(sel)?.opacity ?? "missing",
@@ -98,7 +98,7 @@ test.describe("Hero signature", () => {
   test("the cover link stays reachable and focusable by keyboard", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const link = page.locator(".hero-book__link");
+    const link = page.locator(".sig-hero__cover-link");
     await expect(link).toHaveCount(1);
     await link.focus();
     await expect(link).toBeFocused();

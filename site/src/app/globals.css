@@ -4070,3 +4070,594 @@ body:has([data-fm-active]) {
     transform: none;
   }
 }
+
+/* ===================================================================
+ * PHASE SIGNATURE — Hero opening scene של המותג (סצנת-Ink מאוחדת).
+ *
+ * לא „כריכה בצד + טקסט בצד”: סצנה עריכתית *אחת* על שדה-Ink חמים ורציף (המשכיות
+ * ישירה לשפת Focus Mode). הכריכה = אובייקט דומיננטי חתוך; הטיפוגרפיה הגדולה
+ * מנוגדת בלובן על אותו שדה — בלי תפר בין „טקסט” ל„כריכה”. התזה „מחיפוש לבנייה”
+ * גלויה: שורה מפוזרת (חיפוש) → שורה מתכנסת עם קו-חתימה (בנייה) → חוט שיורד אל
+ * המשך העמוד. כל התנועה opacity/transform בלבד, מגודרת ב-.motion-js; ללא-JS /
+ * reduced-motion — מצב סופי מיידי.
+ * =================================================================== */
+.sig-hero {
+  --sig-ivory: #f4f2ee;
+  --sig-ivory-muted: color-mix(in oklab, #f4f2ee 60%, transparent);
+  --sig-warm: color-mix(in oklab, var(--color-brand) 46%, #f4f2ee);
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+  color: var(--sig-ivory);
+  background: #16181c;
+}
+
+/* שדה-ה-Ink החמים + זוהר + גרעין. */
+.sig-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: clip;
+  background:
+    radial-gradient(
+      90% 70% at 82% 8%,
+      color-mix(in oklab, var(--color-secondary) 26%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      95% 80% at 12% 100%,
+      color-mix(in oklab, var(--color-brand) 24%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(158deg, #232931, #14161a);
+}
+.sig-hero__field {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(90px);
+}
+.sig-hero__field--sage {
+  inset-block-start: -16%;
+  inset-inline-start: 4%; /* RTL: ימין */
+  width: min(44vw, 38rem);
+  height: min(44vw, 38rem);
+  background: color-mix(in oklab, var(--color-secondary) 22%, transparent);
+}
+.sig-hero__field--terra {
+  inset-block-end: -20%;
+  inset-inline-end: 6%; /* RTL: שמאל */
+  width: min(40vw, 34rem);
+  height: min(40vw, 34rem);
+  background: color-mix(in oklab, var(--color-brand) 18%, transparent);
+}
+.sig-hero__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-image: radial-gradient(
+    color-mix(in oklab, #ffffff 4%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+.sig-hero__container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── מובייל: סצנה אנכית, אובייקט דומיננטי למעלה ── */
+.sig-hero__scene {
+  position: relative;
+  display: grid;
+  gap: clamp(1.5rem, 5vw, 2.25rem);
+  padding-block: clamp(1.5rem, 5vw, 2.5rem) clamp(2.25rem, 8vw, 3.5rem);
+}
+.sig-hero__object {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 44svh;
+}
+.sig-hero__stage {
+  display: none; /* בסצנה המאוחדת אין „במה” נפרדת — כל ה-Hero הוא השדה. */
+}
+.sig-hero__glow {
+  position: absolute;
+  z-index: 0;
+  width: 78%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-secondary) 26%, transparent),
+    transparent 66%
+  );
+  filter: blur(26px);
+}
+.sig-hero__cover {
+  position: relative;
+  z-index: 1;
+  width: clamp(10rem, 44vw, 15rem);
+  filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.55));
+}
+.sig-hero__cover-shadow {
+  display: none;
+}
+.sig-hero__cover-link {
+  display: block;
+  border-radius: 6px;
+}
+.sig-hero__cover-link:focus-visible {
+  outline: 2px solid var(--sig-ivory);
+  outline-offset: 8px;
+}
+
+/* טיפוגרפיה — לובן על ה-Ink. */
+.sig-hero__copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.sig-hero__eyebrow {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: color-mix(in oklab, var(--color-brand) 40%, var(--sig-ivory));
+}
+.sig-hero__title {
+  margin-top: 0.85rem;
+  font-family: var(--font-serif);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+.sig-hero__search {
+  display: block;
+  font-size: clamp(1.55rem, 7.5vw, 2.15rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--sig-ivory-muted);
+}
+.sig-hero__word {
+  display: inline-block;
+}
+.sig-hero__build {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.12em;
+  font-size: clamp(3.1rem, 16vw, 4.6rem);
+  font-weight: 700;
+  color: var(--sig-warm);
+}
+.sig-hero__stroke {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.12em;
+  height: 3px;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--color-brand) 70%, var(--sig-ivory));
+  transform-origin: right center;
+}
+.sig-hero__sub {
+  margin-top: 1.1rem;
+  max-width: 42ch;
+  font-size: clamp(1rem, 4vw, 1.12rem);
+  line-height: 1.55;
+  color: var(--sig-ivory-muted);
+}
+.sig-hero__sub--desktop {
+  display: none;
+}
+.sig-hero__cta {
+  margin-top: clamp(1.4rem, 4vw, 1.9rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.sig-hero__cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: center;
+  padding: 0.95rem 1.75rem;
+  border-radius: 999px;
+  background: var(--sig-ivory);
+  color: var(--color-ink);
+  font-size: 16.5px;
+  font-weight: 700;
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+.sig-hero__cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.6);
+}
+.sig-hero__cta-primary:focus-visible {
+  outline: 2px solid var(--sig-ivory);
+  outline-offset: 3px;
+}
+@media (min-width: 480px) {
+  .sig-hero__cta-primary {
+    width: auto;
+  }
+}
+.sig-hero__cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 15px;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--color-brand) 42%, var(--sig-ivory));
+  text-underline-offset: 4px;
+}
+.sig-hero__cta-secondary:hover {
+  text-decoration: underline;
+}
+.sig-hero__cta-secondary:focus-visible {
+  outline: 2px solid var(--sig-ivory);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* חוט-המשכיות אל #path (יורד אל השדה הבהיר שמתחת). */
+.sig-hero__thread {
+  position: absolute;
+  z-index: 1;
+  inset-block-end: 0;
+  inset-inline-start: 50%;
+  width: 2px;
+  height: clamp(2rem, 6vh, 3.5rem);
+  transform: translateX(-50%);
+  transform-origin: top center;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-brand) 20%, transparent),
+    var(--color-brand)
+  );
+}
+
+/* ── דסקטופ: סצנה אחת, כריכה דומיננטית חתוכה + טיפוגרפיה חוצה ── */
+@media (min-width: 1024px) {
+  .sig-hero {
+    min-height: min(90svh, 56rem);
+    display: flex;
+    align-items: center;
+  }
+  .sig-hero__container {
+    width: 100%;
+  }
+  .sig-hero__scene {
+    min-height: min(78svh, 46rem);
+    padding-block: 0;
+    align-content: center;
+  }
+  /* הכריכה: אובייקט ענק בצד-ההתחלה (RTL=ימין), חתוך בקצה, עולה מהתחתית. */
+  .sig-hero__object {
+    position: absolute;
+    inset-block: 2% -14%;
+    inset-inline-start: -4%; /* RTL: הקצה הימני */
+    width: min(48%, 36rem);
+    min-height: 0;
+    place-items: end center;
+    z-index: 1;
+  }
+  .sig-hero__glow {
+    width: 108%;
+    inset-block-start: 6%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-secondary) 30%, transparent),
+      transparent 62%
+    );
+    filter: blur(40px);
+  }
+  .sig-hero__cover {
+    width: clamp(18rem, 30vw, 26rem);
+    margin-bottom: -12%;
+    filter: drop-shadow(0 56px 74px rgba(0, 0, 0, 0.6));
+  }
+  /* הטיפוגרפיה חוצה בשטח-השלילי (RTL=שמאל), על אותו שדה — בלי תפר. */
+  .sig-hero__copy {
+    position: relative;
+    z-index: 2;
+    max-width: 34rem;
+    margin-inline-start: auto; /* RTL: נדחף אל צד-הסיום (שמאל), הרחק מהכריכה */
+    padding-block: 2rem;
+  }
+  .sig-hero__eyebrow {
+    font-size: 14px;
+  }
+  .sig-hero__search {
+    font-size: clamp(1.9rem, 2.5vw, 2.6rem);
+  }
+  .sig-hero__build {
+    font-size: clamp(3.8rem, 5.6vw, 5.6rem);
+  }
+  .sig-hero__sub--mobile {
+    display: none;
+  }
+  .sig-hero__sub--desktop {
+    display: block;
+  }
+  .sig-hero__cta {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .sig-hero__cta-primary {
+    width: auto;
+  }
+  .sig-hero__thread {
+    inset-inline-start: 30%;
+    transform: none;
+    height: clamp(3rem, 9vh, 5.5rem);
+  }
+}
+
+/* ── כוריאוגרפיית on-load (motion-js בלבד) ── */
+.motion-js .sig-hero__bg {
+  animation: sig-fade-in 1000ms var(--ease-standard) both;
+}
+.motion-js .sig-hero__field {
+  animation: sig-field-in 1200ms var(--ease-settle) both;
+}
+.motion-js .sig-hero__glow {
+  animation: sig-fade-in 1000ms var(--ease-standard) 240ms both;
+}
+.motion-js .sig-hero__cover {
+  animation: sig-cover-rise 1050ms var(--ease-settle) 220ms both;
+}
+.motion-js .sig-hero__eyebrow {
+  animation: sig-rise 700ms var(--ease-settle) 340ms both;
+}
+.motion-js .sig-hero__word {
+  display: inline-block;
+  animation: sig-word-settle 720ms var(--ease-settle) both;
+  animation-delay: calc(440ms + var(--i, 0) * 90ms);
+}
+.motion-js .sig-hero__build {
+  animation: sig-rise 780ms var(--ease-settle) 840ms both;
+}
+.motion-js .sig-hero__stroke {
+  transform: scaleX(0);
+  animation: sig-stroke 660ms var(--ease-emphasized) 1200ms both;
+}
+.motion-js .sig-hero__sub {
+  animation: sig-fade-in 700ms var(--ease-standard) 1120ms both;
+}
+.motion-js .sig-hero__cta {
+  animation: sig-rise 700ms var(--ease-settle) 1260ms both;
+}
+.motion-js .sig-hero__thread {
+  transform-origin: top center;
+  animation: sig-thread 700ms var(--ease-settle) 1380ms both;
+}
+@media (min-width: 1024px) {
+  .motion-js .sig-hero__thread {
+    animation: sig-thread-v 700ms var(--ease-settle) 1380ms both;
+  }
+}
+
+@keyframes sig-field-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sig-cover-rise {
+  from {
+    opacity: 0;
+    transform: translateY(52px) scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sig-word-settle {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) translateX(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sig-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sig-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sig-stroke {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes sig-thread {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
+}
+@keyframes sig-thread-v {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sig-hero__stroke {
+    transform: scaleX(1) !important;
+  }
+  .sig-hero__thread {
+    transform: translateX(-50%) scaleY(1) !important;
+  }
+  @media (min-width: 1024px) {
+    .sig-hero__thread {
+      transform: scaleY(1) !important;
+    }
+  }
+}
+
+/* ===================================================================
+ * PHASE SIGNATURE — סגירת עמוד-הבית (climax, bookend מול ה-Hero).
+ * שדה-Ink חמים, הכריכה *חוזרת* כאובייקט, כותרת גדולה, whitespace נדיב, ופעולה
+ * בהירה. לא „כרטיס CTA ירוק”. הקופי/קישורים לא השתנו.
+ * =================================================================== */
+.sig-close {
+  --sig-ivory: #f4f2ee;
+  --sig-ivory-muted: color-mix(in oklab, #f4f2ee 62%, transparent);
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  color: var(--sig-ivory);
+}
+.sig-close__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      80% 70% at 84% 6%,
+      color-mix(in oklab, var(--color-secondary) 22%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 80% at 10% 100%,
+      color-mix(in oklab, var(--color-brand) 22%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(158deg, #232931, #14161a);
+}
+.sig-close__container {
+  position: relative;
+  z-index: 1;
+}
+.sig-close__inner {
+  display: grid;
+  justify-items: center;
+  gap: clamp(1.75rem, 5vw, 3rem);
+  max-width: 56rem;
+  margin-inline: auto;
+  padding-block: clamp(3rem, 9vw, 6rem);
+  text-align: center;
+}
+.sig-close__cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(8rem, 30vw, 12rem);
+  filter: drop-shadow(0 34px 46px rgba(0, 0, 0, 0.55));
+}
+.sig-close__glow {
+  position: absolute;
+  z-index: -1;
+  width: 150%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-secondary) 26%, transparent),
+    transparent 66%
+  );
+  filter: blur(30px);
+}
+.sig-close__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+.sig-close__title {
+  max-width: 20ch;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 5vw, 3.1rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--sig-ivory);
+}
+.sig-close__avail {
+  max-width: 44ch;
+  font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+  line-height: 1.6;
+  color: var(--sig-ivory-muted);
+}
+.sig-close__cta {
+  margin-top: 0.6rem;
+}
+.sig-close__buy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-radius: 999px;
+  background: var(--sig-ivory);
+  color: var(--color-ink);
+  font-size: 16.5px;
+  font-weight: 700;
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+.sig-close__buy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px -16px rgba(0, 0, 0, 0.6);
+}
+.sig-close__buy:focus-visible {
+  outline: 2px solid var(--sig-ivory);
+  outline-offset: 3px;
+}
+.sig-close__secondary {
+  margin-top: 0.3rem;
+  font-size: 14.5px;
+  color: var(--sig-ivory-muted);
+}
+.sig-close__secondary-link {
+  font-weight: 600;
+  color: color-mix(in oklab, var(--color-brand) 42%, var(--sig-ivory));
+  text-underline-offset: 4px;
+}
+.sig-close__secondary-link:hover {
+  text-decoration: underline;
+}
+.sig-close__secondary-link:focus-visible {
+  outline: 2px solid var(--sig-ivory);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
