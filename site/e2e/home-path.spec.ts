@@ -226,7 +226,9 @@ test("Focus Mode Aha: the story recedes (gone), the fact is affirmed, the separa
   await focus.getByRole("button", { name: focusUi.enterCta }).click();
   await focus.getByRole("button", { name: focusUi.separateLabel }).click();
 
-  // Aha: משפט-ההפרדה מרכזי, העובדה נשארת מאושרת, הסיפור נעלם, ועדיין אין CTA.
+  // Aha: כותרת-ה-Aha הקצרה + ההסבר הקנוני מתחתיה, העובדה מאושרת, הסיפור נעלם,
+  // ועדיין אין CTA.
+  await expect(focus.getByText(focusUi.ahaHeadline)).toBeVisible();
   await expect(focus.getByText(focusUi.separationLine)).toBeVisible();
   await expect(focus.getByText(sit.fact)).toBeVisible();
   await expect(focus.getByText(sit.story)).toHaveCount(0);

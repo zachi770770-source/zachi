@@ -33,8 +33,10 @@ describe("FocusMode — enter → split → aha → action sequence", () => {
     expect(screen.getByText(focusUi.factTag)).toBeTruthy();
     expect(screen.getByText(focusUi.storyTag)).toBeTruthy();
 
-    // split → aha: משפט-ההפרדה מופיע, הסיפור נסוג (יצא מה-DOM), אין עדיין CTA.
+    // split → aha: כותרת-ה-Aha הקצרה + ההסבר הקנוני מתחתיה; הסיפור נסוג (יצא
+    // מה-DOM), ואין עדיין CTA.
     fireEvent.click(screen.getByText(focusUi.separateLabel));
+    expect(screen.getByText(focusUi.ahaHeadline)).toBeTruthy();
     expect(screen.getByText(focusUi.separationLine)).toBeTruthy();
     expect(screen.queryByText(s.story)).toBeNull();
     expect(screen.queryByText(focusUi.continueLabel)).toBeNull();

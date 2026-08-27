@@ -134,7 +134,10 @@ export function FocusMode({
         {stage === "aha" && (
           <div className="fm-scene fm-scene--aha">
             <p className="fm-fact fm-fact--echo">{s.fact}</p>
-            <p className="fm-aha__line">{focusUi.separationLine}</p>
+            <div className="fm-aha__block">
+              <p className="fm-aha__line">{focusUi.ahaHeadline}</p>
+              <p className="fm-aha__note">{focusUi.separationLine}</p>
+            </div>
             <div className="fm-cta-row">
               <button type="button" onClick={() => go("action")} className="fm-cta fm-cta--quiet">
                 {focusUi.ahaCta}

@@ -107,7 +107,9 @@ export const focusUi = {
   storyTag: lab.storyTag, // „מה שהוספתם”
   /** שאלת-הסיפור מעל נתיב-הסיפור (מתוך ה-lab). */
   storyPrompt: lab.storyPrompt, // „ומה הראש כבר סיפר על זה?”
-  /** ה-Aha: משפט-ההפרדה (מתוך ה-lab). */
+  /** ה-Aha: כותרת-הממשק הקצרה (headline, לא ציטוט מהספר ולא כלי חדש). */
+  ahaHeadline: "אלה לא אותו דבר.",
+  /** ה-Aha: ההסבר הקנוני מתחת לכותרת — משפט-ההפרדה (מתוך ה-lab). */
   separationLine: lab.separationLine,
   /** מסגור שלב-הפעולה (מתוך ה-lab) — כותרת ולֶד. */
   actionEyebrow: lab.actionEyebrow, // „פעולה”
@@ -120,7 +122,7 @@ export const focusUi = {
   backLabel: "חזרה למצבים",
   // ── תוויות-ממשק לפעימות (chrome, לא תוכן מהספר) ──
   /** כניסה→פיצול: מזמין להביט ברגע אחד ולהפריד אותו. */
-  enterCta: "נפריד רגע אחד",
+  enterCta: "נפריד רגע",
   /** Aha→פעולה: מעבר שקט אל שלב-הפעולה הנקי. */
   ahaCta: "המשך",
 } as const;

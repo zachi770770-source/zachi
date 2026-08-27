@@ -3818,6 +3818,22 @@ html.vt-book-nav::view-transition-group(book-cover) {
     letter-spacing: -0.012em;
   }
 }
+/* כותרת-הממשק הקצרה (fm-aha__line) + ההסבר הקנוני מתחתיה (fm-aha__note). */
+.fm-aha__block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 2.5vw, 1.15rem);
+}
+.fm-aha__note {
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 2.8vw, 1.35rem);
+  line-height: 1.4;
+  color: var(--fm-ivory-muted);
+  max-width: 28ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
 
 /* ── פעימת Action — משטח בהיר ונקי, שלב חדש ── */
 .fm-scene--action {
