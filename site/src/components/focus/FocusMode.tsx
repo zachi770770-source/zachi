@@ -63,8 +63,8 @@ export function FocusMode({
   // מתחת לכותרת הדביקה (scroll-margin-top ב-CSS). פעם אחת, בכניסה למצב.
   React.useEffect(() => {
     const el = stageRef.current;
-    if (!el) return;
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (!el || typeof el.scrollIntoView !== "function") return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
   }, []);
 
@@ -76,6 +76,7 @@ export function FocusMode({
     const el = stageRef.current;
     if (!el) return;
     el.focus({ preventScroll: true });
+    if (typeof el.scrollIntoView !== "function") return;
     const keepFramed = () => {
       const top = el.getBoundingClientRect().top;
       const headerH =
