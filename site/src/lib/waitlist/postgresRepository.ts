@@ -1,4 +1,9 @@
-import type { WaitlistAddInput, WaitlistRepository } from "@/lib/waitlist/types";
+import type {
+  WaitlistAddInput,
+  WaitlistRepository,
+  WaitlistStats,
+  WaitlistStatsRange,
+} from "@/lib/waitlist/types";
 import {
   classifyWaitlistDbError,
   formatWaitlistDbErrorLog,
@@ -122,5 +127,39 @@ export class PostgresWaitlistRepository implements WaitlistRepository {
        where email_normalized = $1`,
       [emailNormalized]
     );
+  }
+
+  async signupStats(range: WaitlistStatsRange): Promise<WaitlistStats> {
+    try {
+      await this.ensureSchema();
+    } catch {
+      /* נמשיך לשאילתה בכל מקרה. */
+    }
+    const from = range.from.toISOString();
+    const to = range.to.toISOString();
+    const [{ rows: totals }, { rows: byDay }] = await Promise.all([
+      this.db.query(
+        `select count(*) filter (where status = 'active')::int as total
+           from waitlist_subscribers
+          where created_at >= $1 and created_at < $2`,
+        [from, to],
+      ),
+      this.db.query(
+        `select to_char(date_trunc('day', created_at at time zone 'UTC'), 'YYYY-MM-DD') as day,
+                count(*) filter (where status = 'active')::int as count
+           from waitlist_subscribers
+          where created_at >= $1 and created_at < $2
+          group by 1 order by 1`,
+        [from, to],
+      ),
+    ]);
+    const num = (v: unknown) => (v == null ? 0 : Number(v));
+    return {
+      total: num((totals[0] as Record<string, unknown> | undefined)?.total),
+      byDay: byDay.map((r) => {
+        const rr = r as Record<string, unknown>;
+        return { day: String(rr.day), count: num(rr.count) };
+      }),
+    };
   }
 }

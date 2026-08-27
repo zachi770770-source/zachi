@@ -81,4 +81,33 @@ describe("InMemoryReaderClaimRepository", () => {
     expect(await repo.listPending(10)).toHaveLength(1);
     expect(repo.rows.size).toBe(1);
   });
+
+  it("stats() aggregates by status within the range (counts only, no PII)", async () => {
+    await repo.createPending(pending("a@example.com"));
+    await repo.createPending(pending("b@example.com"));
+    await repo.createPending(pending("c@example.com"));
+    const token = generateAccessToken();
+    await repo.approve("a@example.com", hashAccessToken(token), new Date(Date.now() + 60_000));
+    await repo.reject("b@example.com");
+    // c stays pending
+
+    const wide = { from: new Date(Date.now() - 60_000), to: new Date(Date.now() + 60_000) };
+    const s = await repo.stats(wide);
+    expect(s.total).toBe(3);
+    expect(s.approved).toBe(1);
+    expect(s.rejected).toBe(1);
+    expect(s.pending).toBe(1);
+    expect(s.approvedWithAccess).toBe(1);
+    expect(s.byDay.reduce((n, d) => n + d.submitted, 0)).toBe(3);
+    // stats carry no email/PII
+    expect(JSON.stringify(s)).not.toContain("@example.com");
+  });
+
+  it("stats() excludes rows outside the range", async () => {
+    await repo.createPending(pending());
+    const past = { from: new Date("2000-01-01"), to: new Date("2000-02-01") };
+    const s = await repo.stats(past);
+    expect(s.total).toBe(0);
+    expect(s.byDay).toEqual([]);
+  });
 });

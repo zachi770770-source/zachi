@@ -8,9 +8,11 @@ import type {
   ReaderApprovedClaim,
   ReaderClaimCreateInput,
   ReaderClaimRepository,
+  ReaderClaimStats,
   ReaderClaimStatus,
   ReaderPendingClaim,
   ReaderProofBlob,
+  StatsRange,
 } from "@/lib/reader/types";
 
 /** קליינט SQL גנרי (מסופק ע"י Pool של pg) — שומר על בדיקוּת והפרדה. */
@@ -206,5 +208,47 @@ export class PostgresReaderClaimRepository implements ReaderClaimRepository {
     return rows.length
       ? { emailNormalized: String((rows[0] as Record<string, unknown>).email_normalized) }
       : null;
+  }
+
+  async stats(range: StatsRange): Promise<ReaderClaimStats> {
+    await this.ensureSchema();
+    const from = range.from.toISOString();
+    const to = range.to.toISOString();
+    const totalsQ = this.db.query(
+      `select
+         count(*)::int as total,
+         count(*) filter (where status = 'pending')::int as pending,
+         count(*) filter (where status = 'approved')::int as approved,
+         count(*) filter (where status = 'rejected')::int as rejected,
+         count(*) filter (
+           where status = 'approved' and access_token_hash is not null
+             and access_token_expires_at is not null and access_token_expires_at > now()
+         )::int as approved_with_access
+       from reader_claims
+       where created_at >= $1 and created_at < $2`,
+      [from, to],
+    );
+    const byDayQ = this.db.query(
+      `select to_char(date_trunc('day', created_at at time zone 'UTC'), 'YYYY-MM-DD') as day,
+              count(*)::int as submitted
+         from reader_claims
+        where created_at >= $1 and created_at < $2
+        group by 1 order by 1`,
+      [from, to],
+    );
+    const [{ rows: totals }, { rows: byDay }] = await Promise.all([totalsQ, byDayQ]);
+    const t = (totals[0] ?? {}) as Record<string, unknown>;
+    const num = (v: unknown) => (v == null ? 0 : Number(v));
+    return {
+      total: num(t.total),
+      pending: num(t.pending),
+      approved: num(t.approved),
+      rejected: num(t.rejected),
+      approvedWithAccess: num(t.approved_with_access),
+      byDay: byDay.map((r) => {
+        const rr = r as Record<string, unknown>;
+        return { day: String(rr.day), submitted: num(rr.submitted) };
+      }),
+    };
   }
 }

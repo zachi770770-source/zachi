@@ -3,9 +3,11 @@ import type {
   ReaderApprovedClaim,
   ReaderClaimCreateInput,
   ReaderClaimRepository,
+  ReaderClaimStats,
   ReaderClaimStatus,
   ReaderPendingClaim,
   ReaderProofBlob,
+  StatsRange,
 } from "@/lib/reader/types";
 
 type Row = {
@@ -102,5 +104,33 @@ export class InMemoryReaderClaimRepository implements ReaderClaimRepository {
       }
     }
     return null;
+  }
+
+  async stats(range: StatsRange): Promise<ReaderClaimStats> {
+    const now = Date.now();
+    const inRange = [...this.rows.values()].filter(
+      (r) => r.createdAt >= range.from && r.createdAt < range.to,
+    );
+    const byDayMap = new Map<string, number>();
+    let pending = 0, approved = 0, rejected = 0, approvedWithAccess = 0;
+    for (const r of inRange) {
+      if (r.status === "pending") pending++;
+      else if (r.status === "approved") {
+        approved++;
+        if (r.accessTokenHash && r.accessTokenExpiresAt && r.accessTokenExpiresAt.getTime() > now) {
+          approvedWithAccess++;
+        }
+      } else if (r.status === "rejected") rejected++;
+      const day = r.createdAt.toISOString().slice(0, 10);
+      byDayMap.set(day, (byDayMap.get(day) ?? 0) + 1);
+    }
+    return {
+      total: inRange.length,
+      pending,
+      approved,
+      rejected,
+      approvedWithAccess,
+      byDay: [...byDayMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([day, submitted]) => ({ day, submitted })),
+    };
   }
 }
