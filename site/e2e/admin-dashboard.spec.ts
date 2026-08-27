@@ -86,6 +86,35 @@ test.describe("admin dashboard — data integrity", () => {
     void context;
   });
 
+  test("the admin tool drops the marketing chrome (no site header/footer)", async ({ page }) => {
+    await loginViaApi(page);
+    await page.goto("/admin", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "מדדים מרכזיים" })).toBeVisible();
+    // the marketing footer ("כל הזכויות שמורות") and header nav ("שאלות נפוצות") are hidden.
+    await expect(page.getByText(/כל הזכויות שמורות/)).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "שאלות נפוצות" })).toHaveCount(0);
+  });
+
+  test("renders clean on mobile — no console errors, no horizontal overflow, GA4 states shown", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (m) => {
+      if (m.type() === "error") errors.push(m.text());
+    });
+    page.on("pageerror", (e) => errors.push(String(e)));
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await loginViaApi(page);
+    await page.goto("/admin?range=30d", { waitUntil: "networkidle" });
+
+    await expect(page.getByRole("heading", { name: "מדדים מרכזיים" })).toBeVisible();
+    await expect(page.getByText("מקור הנתונים (GA4) אינו מחובר.").first()).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, "horizontal overflow (px)").toBeLessThanOrEqual(2);
+    expect(errors, `console/page errors:\n${errors.join("\n")}`).toEqual([]);
+  });
+
   test("range picker updates the query and logout returns to the login form", async ({ page }) => {
     await loginViaApi(page);
     await page.goto("/admin", { waitUntil: "domcontentloaded" });

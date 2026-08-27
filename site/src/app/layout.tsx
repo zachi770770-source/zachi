@@ -11,6 +11,7 @@ import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 import { MotionRoot } from "@/components/shared/MotionRoot";
 import { PersonaProvider } from "@/components/persona/PersonaProvider";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { resolveCompassSurface } from "@/lib/compass/assistant/config";
 
 /**
@@ -92,18 +93,23 @@ export default function RootLayout({
         <PersonaProvider>
           <MotionRoot />
           <SkipToContent />
-          <Header />
+          {/* הקליפה השיווקית מוסתרת בלוח-הבקרה הניהולי (/admin). */}
+          <SiteChrome>
+            <Header />
+          </SiteChrome>
           <main id="main-content" className="flex-1">
             {children}
           </main>
-          <Footer />
-          <StickyPurchaseBar />
-          {/* בועת „מה הספר אומר על המצב שלי?” — מלווה את הקורא בכל האתר. מסתירה
-              את עצמה בתוך /compass (העמוד עצמו הוא המנוע). כשהשאלה-החופשית פעילה
-              (Preview/Staging או עוזר-פעיל) הבועה מנווטת אל /compass במקום לפתוח
-              את מגירת המנוע המודרך. בפרודקשן (guided) ההתנהגות נשמרת. */}
-          <CompassLauncher freeTextEnabled={resolveCompassSurface() !== "guided"} />
-          <CookieConsent />
+          <SiteChrome>
+            <Footer />
+            <StickyPurchaseBar />
+            {/* בועת „מה הספר אומר על המצב שלי?” — מלווה את הקורא בכל האתר. מסתירה
+                את עצמה בתוך /compass (העמוד עצמו הוא המנוע). כשהשאלה-החופשית פעילה
+                (Preview/Staging או עוזר-פעיל) הבועה מנווטת אל /compass במקום לפתוח
+                את מגירת המנוע המודרך. בפרודקשן (guided) ההתנהגות נשמרת. */}
+            <CompassLauncher freeTextEnabled={resolveCompassSurface() !== "guided"} />
+            <CookieConsent />
+          </SiteChrome>
           <AnalyticsScripts />
         </PersonaProvider>
       </body>
