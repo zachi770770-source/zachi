@@ -6,6 +6,7 @@ import { Compass, ArrowRight } from "lucide-react";
 import { compass } from "@/content/compass";
 import type { AskStationId } from "@/content/askRoute";
 import { CompassConsole } from "@/components/compass/CompassConsole";
+import { GuidanceFocusProvider, GuidanceIntro } from "@/components/guidance/GuidanceFocus";
 
 // טעינה עצלה של המנוע המודרך: הקוד והנתונים (askRoute.ts) נטענים רק כאשר
 // המשתמש פותח בפועל את „המצפן המודרך”, לא בטעינת עמוד השאלה-החופשית.
@@ -54,8 +55,11 @@ export function CompassExperience({
   const isFreeText = mode === "free-text";
 
   return (
+    <GuidanceFocusProvider>
     <div className="mx-auto max-w-2xl">
-      {/* כותרת-אזור יחידה שמתאימה את עצמה למצב — h1 אחד לעמוד בכל מצב. */}
+      {/* כותרת-אזור יחידה שמתאימה את עצמה למצב — h1 אחד לעמוד. במצב-תגובה היא
+          מתקפלת (GuidanceIntro) וה-h1 עובר ל-AnswerView, כך שהתשובה היא המוקד. */}
+      <GuidanceIntro>
       <header className="text-center">
         <span className="kicker justify-center">
           {isFreeText ? compass.freeText.label : compass.guided.eyebrow}
@@ -71,6 +75,7 @@ export function CompassExperience({
           {isFreeText ? compass.freeText.support : compass.guided.lead}
         </p>
       </header>
+      </GuidanceIntro>
 
       {isFreeText ? (
         <div className="mt-8 sm:mt-10">
@@ -118,5 +123,6 @@ export function CompassExperience({
         </div>
       )}
     </div>
+    </GuidanceFocusProvider>
   );
 }
