@@ -146,6 +146,10 @@ export function HomePathEntry({
       <>
         {inViewMarker}
         <span data-ask-inline-active hidden aria-hidden="true" />
+        {/* סמן ייעודי ל-Focus Mode (בנפרד מ-`data-ask-inline-active`, שמשמש גם
+            את השיחה): כל עוד הוא ב-DOM, כללי-CSS מכווצים את כותרת-המקטע ומסתירים
+            פקדים צפים כדי שהחוויה האימרסיבית לא תתחרה בשום שכבה. */}
+        <span data-fm-active hidden aria-hidden="true" />
         <React.Suspense
           fallback={
             <p className="mt-6 py-10 text-center text-[15px] text-foreground-muted" role="status">

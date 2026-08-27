@@ -3323,7 +3323,12 @@ html.vt-book-nav::view-transition-group(book-cover) {
   margin-top: 1.5rem;
   margin-inline: -1.5rem; /* full-bleed בתוך ריפוד-הקונטיינר (מובייל) */
   padding: clamp(1.75rem, 6vw, 3.25rem) clamp(1.25rem, 5vw, 3rem);
-  min-height: 82svh; /* מובייל: כמעט מסך מלא */
+  /* ממלא את המסך מתחת לכותרת הדביקה — כמעט-viewport בכל רוחב, כדי שהחוויה
+     תחזיק את המסך לבדה (הסקשנים שמתחת יוצאים מהתצוגה). מוגבל ב-54rem למסכים
+     גבוהים מאוד, שלא ייווצר חלל-ריק מוגזם. */
+  min-height: min(calc(100svh - var(--header-height, 4rem) - 1rem), 54rem);
+  /* בגלילה-לתוך-תצוגה: משאיר מקום לכותרת הדביקה כדי שראש-הבמה לא ייחתך. */
+  scroll-margin-top: calc(var(--header-height, 4rem) + 0.75rem);
   color: var(--fm-ivory);
   overflow: hidden;
   outline: none;
@@ -3331,12 +3336,30 @@ html.vt-book-nav::view-transition-group(book-cover) {
 @media (min-width: 640px) {
   .fm-stage {
     margin-inline: -2rem;
-    min-height: 32rem;
     border-radius: var(--radius-xl);
     box-shadow:
       0 34px 90px -46px rgba(0, 0, 0, 0.6),
       0 10px 34px -22px rgba(0, 0, 0, 0.45);
   }
+}
+
+/* ── Focus Mode integrity: הבמה מחזיקה את המסך לבדה ──
+   כל עוד `data-fm-active` ב-DOM (רק בזמן Focus Mode, לא בשיחה): כותרת-המקטע
+   מתכווצת, והפקדים הצפים (בועת-המצפן + בר-הטעימה) מוסתרים — בכל רוחב, לא רק
+   מובייל — כדי שלא יתחרו/יכסו את החוויה. `:has()` בשימוש כבר במקומות אחרים. */
+#path:has([data-fm-active]) .path-intro {
+  display: none;
+}
+body:has([data-fm-active]) .compass-pill,
+body:has([data-fm-active]) aside[aria-label="בר הטעימה"] {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+/* מונע סחיפת-גלילה: כשגובה-תוכן הבמה משתנה בין הפעימות, עיגון-הגלילה של הדפדפן
+   עלול להזיז את הדף ולהוציא את הבמה מהמסגרת. מבטלים אותו כל עוד Focus Mode פעיל. */
+body:has([data-fm-active]) {
+  overflow-anchor: none;
 }
 
 /* עומק-רקע (שכבה: controlled gradients). משתנה לפי הפעימה. */
