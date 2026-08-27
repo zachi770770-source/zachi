@@ -1,34 +1,54 @@
-/**
- * מודל-הנתונים של הפעלת ערכת-הקורא. ההפעלה מיידית (קוד תקף → גישה), אין
- * pending/approval. שומרים מינימום PII: אימייל + גרסת-הסכמה בלבד. הגישה עצמה
- * מנוהלת כסשן: במסד נשמר *רק* ה-hash של אסימון-הסשן, לצד תפוגה/ביטול.
- */
+import type { ReaderProofMime } from "@/lib/reader/proof";
 
-export type ReaderActivationInput = {
+/** מצב ההפעלה — לעולם לא מוצג „מאומת” לפני approval אמיתי. */
+export type ReaderClaimStatus = "pending" | "approved" | "rejected";
+
+/** יצירת הפעלה חדשה במצב pending, כולל הוכחת-הרכישה (bytes פרטיים בשרת). */
+export type ReaderClaimCreateInput = {
   emailNormalized: string;
   consentVersion: string;
-  /** hash (SHA-256) של אסימון-הסשן — לעולם לא האסימון הגולמי. */
-  sessionTokenHash: string;
-  sessionExpiresAt: Date;
+  proof: { mime: ReaderProofMime; bytes: Buffer };
 };
 
-/** סשן תקף כפי שהוא מוחזר מהמאגר — חושף רק את המינימום הדרוש לאישור גישה. */
-export type ReaderSession = {
+/** רשומת-הפעלה מאושרת (לאחר approval + החלפת-אסימון) — לשער-הכניסה לערכה. */
+export type ReaderApprovedClaim = {
   emailNormalized: string;
 };
 
+/** פריט בתור-הבדיקה הידני (ללא bytes — רק מטא-דאטה). */
+export type ReaderPendingClaim = {
+  emailNormalized: string;
+  status: ReaderClaimStatus;
+  proofMime: ReaderProofMime | null;
+  proofSize: number | null;
+  createdAt: Date;
+};
+
+/** הוכחת-רכישה לצפייה בבדיקה הידנית (מוגן server-side, לעולם לא URL ציבורי). */
+export type ReaderProofBlob = {
+  mime: ReaderProofMime;
+  bytes: Buffer;
+};
+
 /**
- * מאגר גישת ערכת-הקורא. אחסון מתמשך (Postgres) בפרודקשן; מימוש-זיכרון לבדיקות
- * בלבד. אין כאן „הוכחת-רכישה” ואין מזהי-הזמנה — רק אימייל, הסכמה, ו-hash של סשן.
+ * מאגר הפעלות ערכת-הקורא. אחסון מתמשך (Postgres) בפרודקשן; מימוש-זיכרון
+ * לבדיקות בלבד. הוכחת-הרכישה אינה נכס ציבורי — נשמרת שרת-בלבד ונמחקת לאחר
+ * ההכרעה (מינימום PII).
  */
-export interface ReaderAccessRepository {
+export interface ReaderClaimRepository {
+  /** יצירת/עדכון הפעלה ל-pending עם הוכחה חדשה (idempotent לפי email). */
+  createPending(input: ReaderClaimCreateInput): Promise<void>;
+  /** רשימת הפעלות ממתינות לבדיקה (מטא-דאטה בלבד). */
+  listPending(limit: number): Promise<ReaderPendingClaim[]>;
+  /** שליפת הוכחת-הרכישה לצפייה בבדיקה (או null אם אין/נמחקה). */
+  getProof(emailNormalized: string): Promise<ReaderProofBlob | null>;
   /**
-   * הפעלה: upsert לפי email_normalized (רענון הסכמה) והחלפת הסשן הפעיל בסשן
-   * חדש (hash + תפוגה, מבטל ביטול קודם). אידמפוטנטי — הגשה חוזרת מפעילה מחדש.
+   * אישור ידני: מסמן approved, שומר את ה-hash של אסימון-הגישה + תפוגה, מוחק את
+   * ה-bytes של ההוכחה (כבר לא נחוצים), ומחזיר את הרשומה — או null אם אין הפעלה.
    */
-  activate(input: ReaderActivationInput): Promise<void>;
-  /** איתור סשן תקף (לא פג ולא בוטל) לפי hash של האסימון — לשער-הכניסה לערכה. */
-  findValidSession(sessionTokenHash: string): Promise<ReaderSession | null>;
-  /** ביטול סשן לפי hash (logout/אכיפה עתידית). */
-  revokeSession(sessionTokenHash: string): Promise<void>;
+  approve(emailNormalized: string, accessTokenHash: string, expiresAt: Date): Promise<ReaderApprovedClaim | null>;
+  /** דחייה ידנית: מסמן rejected, מוחק הוכחה ואסימון. */
+  reject(emailNormalized: string): Promise<void>;
+  /** איתור הפעלה מאושרת לפי hash של אסימון-הגישה (סשן העוגייה) — לא פג. */
+  findApprovedByAccessTokenHash(accessTokenHash: string): Promise<ReaderApprovedClaim | null>;
 }

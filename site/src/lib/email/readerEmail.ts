@@ -6,8 +6,7 @@
  * - CONTACT_FROM_EMAIL — כתובת שולח מאומתת (משותפת עם „צור קשר”).
  *
  * עקרונות: לעולם לא מדווחים הצלחה אלא אם הספק אישר (2xx). לא רושמים ללוג
- * אימייל/אסימון — רק קוד סטטוס לא-רגיש בכשל. המייל אינו נושא אסימון-סשן
- * (הגישה דרך העוגייה במכשיר; קישור המייל אינו כולל token).
+ * אימייל/אסימון — רק קוד סטטוס לא-רגיש בכשל.
  */
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
@@ -48,28 +47,38 @@ async function send(to: string, subject: string, text: string): Promise<ReaderEm
   }
 }
 
-/**
- * אישור הפעלה (best-effort) — הגישה כבר נפתחה במכשיר דרך העוגייה. המייל מאשר
- * את ההפעלה ומאפשר חזרה מאוחר יותר; אם פותחים במכשיר אחר, מפעילים שוב עם הקוד.
- * `kitUrl` אינו נושא אסימון — הגישה נשענת על העוגייה, לא על ה-URL.
- */
-export function sendReaderKitWelcomeEmail(input: {
-  to: string;
-  kitUrl: string;
-  activateUrl: string;
-}): Promise<ReaderEmailResult> {
+/** אישור קבלת בקשה (best-effort) — לא מצהיר על אימות, רק שקיבלנו את הבקשה לבדיקה. */
+export function sendReaderClaimReceivedEmail(input: { to: string }): Promise<ReaderEmailResult> {
   const text = [
     "שלום,",
     "",
-    "ערכת הכלים הדיגיטלית לקורא של „מדייטים לאהבה” הופעלה עבורכם.",
-    "לפתיחת הערכה במכשיר שבו הפעלתם:",
-    input.kitUrl,
-    "",
-    "פותחים במכשיר אחר? הזינו שוב את הקוד מהספר כאן:",
-    input.activateUrl,
+    "קיבלנו את הבקשה להפעיל את ערכת הכלים הדיגיטלית לקורא של „מדייטים לאהבה”,",
+    "יחד עם הוכחת הרכישה. נעבור עליה ונשלח לכם קישור גישה לאחר האישור.",
     "",
     "תודה,",
     "צוות מדייטים לאהבה",
   ].join("\n");
-  return send(input.to, "ערכת הקורא הופעלה", text);
+  return send(input.to, "קיבלנו את בקשת ההפעלה — ערכת הקורא", text);
+}
+
+/**
+ * מייל גישה — נשלח *רק* לאחר approval אמיתי. הקישור מוביל ל-/api/reader/enter
+ * עם אסימון חד-פעמי שמוחלף לעוגיית-סשן HttpOnly, כך שה-URL של הערכה עצמה נשאר
+ * נקי מאסימון.
+ */
+export function sendReaderKitAccessEmail(input: {
+  to: string;
+  enterUrl: string;
+}): Promise<ReaderEmailResult> {
+  const text = [
+    "שלום,",
+    "",
+    "אישרנו את הרכישה — ערכת הכלים הדיגיטלית לקורא פתוחה עבורכם.",
+    "לפתיחת הגישה (הקישור אישי; אין לשתף אותו):",
+    input.enterUrl,
+    "",
+    "תודה,",
+    "צוות מדייטים לאהבה",
+  ].join("\n");
+  return send(input.to, "ערכת הקורא פתוחה עבורכם", text);
 }

@@ -7,8 +7,8 @@ import { Container } from "@/components/shared/Container";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { ReaderResourceLink } from "@/components/reader/ReaderResourceLink";
 import { readerKitGroups, readerSeriesDays, readerKitOffer } from "@/content/readerKit";
-import { getReaderAccessRepository } from "@/lib/reader";
-import { hashSessionToken, isValidSessionTokenShape } from "@/lib/reader/token";
+import { getReaderClaimRepository } from "@/lib/reader";
+import { hashAccessToken, isValidAccessTokenShape } from "@/lib/reader/token";
 
 // שער-כניסה מוגן + קורא עוגייה/DB → תמיד דינמי, ולעולם לא נאינדקס (פרטי).
 export const dynamic = "force-dynamic";
@@ -22,16 +22,16 @@ export const metadata: Metadata = {
 
 /**
  * אימות סשן מול העוגייה בלבד — אין אסימון ב-URL. מגבבים את ערך-העוגייה ומחפשים
- * סשן תקף (לא פג ולא בוטל). תשובה אחידה בכשל — ללא enumeration.
+ * הפעלה *מאושרת* שאסימונה תקף. תשובה אחידה בכשל — ללא enumeration.
  */
 async function hasAccess(): Promise<boolean> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  if (!isValidSessionTokenShape(token)) return false;
-  const repo = getReaderAccessRepository();
+  if (!isValidAccessTokenShape(token)) return false;
+  const repo = getReaderClaimRepository();
   if (!repo) return false;
   try {
-    const session = await repo.findValidSession(hashSessionToken(token));
-    return Boolean(session);
+    const claim = await repo.findApprovedByAccessTokenHash(hashAccessToken(token));
+    return Boolean(claim);
   } catch {
     return false;
   }
@@ -50,8 +50,8 @@ export default async function ReaderKitPage() {
             הגישה לערכה אישית
           </h1>
           <p className="mt-4 text-[1.0625rem] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-            הערכה נפתחת לאחר הפעלה עם הקוד שבספר. אם כבר הפעלתם במכשיר אחר, או
-            שההפעלה פגה, אפשר להפעיל שוב כאן.
+            הקישור לערכה נשלח במייל לאחר אישור הרכישה. אם עדיין לא אישרנו, או
+            שהקישור פג, אפשר להגיש שוב את הבקשה כאן.
           </p>
           <div className="mt-6">
             <Link
@@ -70,6 +70,7 @@ export default async function ReaderKitPage() {
   return (
     <Container className="py-10 sm:py-14 lg:py-16">
       {/* קורא מאושר הגיע לערכה — סמן במשפך. */}
+      <ViewEvent event="reader_bonus_approved" />
       <ViewEvent event="reader_kit_accessed" />
 
       <header className="max-w-[52ch]">

@@ -6,13 +6,12 @@ import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 
 /**
- * הפעלת ערכת-הקורא — טופס נגיש: אימייל, קוד-הפעלה מהספר, והסכמה. מבקש מינימום
- * PII (אין שם, אין מזהה-הזמנה, אין העלאת קבצים). הקוד הוא proof-of-possession של
- * הספר — לא „אימות רכישה מאמזון”. הפעלה מוצלחת פותחת גישה *מיד* דרך עוגיית-סשן
- * (HttpOnly), והלקוח מנווט ל-/reader/kit — ללא אסימון ב-URL.
+ * הפעלת ערכת-הקורא — טופס נגיש: אימייל, העלאת הוכחת-רכישה (צילום-מסך/תמונה/PDF),
+ * והסכמה. מבקש מינימום PII (אין שם). שולח multipart ל-/api/reader/claim ומציג
+ * מצב-המתנה (pending) — לעולם לא „מאומת” לפני בדיקה ידנית. הקובץ נשמר פרטי בשרת.
  *
  * אנליטיקה: `reader_bonus_claim_started` בפעם הראשונה שנוגעים בטופס,
- * ו-`reader_bonus_claim_submitted` בהפעלה מוצלחת. אף אירוע אינו נושא אסימון/PII.
+ * ו-`reader_bonus_claim_submitted` בהגשה מוצלחת. אף אירוע אינו נושא PII/קובץ.
  */
 type State =
   | { kind: "idle" }
@@ -20,7 +19,11 @@ type State =
   | { kind: "success" }
   | { kind: "error"; message: string };
 
-export function ReaderActivationForm() {
+/** תקרת-גודל לצד-הלקוח (5MB) — אימות אמיתי נעשה גם בשרת. */
+const MAX_BYTES = 5 * 1024 * 1024;
+const ACCEPT = "image/png,image/jpeg,image/webp,application/pdf";
+
+export function ReaderClaimForm() {
   const [state, setState] = React.useState<State>({ kind: "idle" });
   const startedRef = React.useRef(false);
 
@@ -39,35 +42,35 @@ export function ReaderActivationForm() {
     if (state.kind === "submitting") return;
     const form = e.currentTarget;
     const data = new FormData(form);
+
+    const file = data.get("proof");
+    if (!(file instanceof File) || file.size === 0) {
+      setState({ kind: "error", message: "יש לצרף הוכחת רכישה (צילום-מסך או PDF)." });
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setState({ kind: "error", message: "הקובץ גדול מדי (עד 5MB)." });
+      return;
+    }
+    // consent כ-checkbox → נשלח כ-"true" מפורש (ה-API מקבל גם "on").
+    data.set("consent", data.get("consent") === "on" ? "true" : "false");
+
     setState({ kind: "submitting" });
     try {
-      const res = await fetch("/api/reader/activate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          email: String(data.get("email") ?? ""),
-          code: String(data.get("code") ?? ""),
-          consent: data.get("consent") === "on",
-          company: String(data.get("company") ?? ""),
-        }),
-      });
+      // אין לקבוע content-type ידנית — הדפדפן מוסיף boundary ל-multipart.
+      const res = await fetch("/api/reader/claim", { method: "POST", body: data });
       if (res.ok) {
         try {
           trackEvent("reader_bonus_claim_submitted");
         } catch {
           /* לא-קריטי */
         }
-        // הגישה כבר פעילה דרך עוגיית-הסשן — מנווטים לערכה, בלי אסימון ב-URL.
+        form.reset();
         setState({ kind: "success" });
-        window.location.assign("/reader/kit");
         return;
       }
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      const fallback =
-        res.status === 401
-          ? "קוד ההפעלה אינו תקין. בדקו את הקוד שבספר ונסו שוב."
-          : "אירעה תקלה. נסו שוב בעוד רגע.";
-      setState({ kind: "error", message: body.error ?? fallback });
+      setState({ kind: "error", message: body.error ?? "אירעה תקלה. נסו שוב בעוד רגע." });
     } catch {
       setState({ kind: "error", message: "אירעה תקלה ברשת. נסו שוב." });
     }
@@ -79,7 +82,11 @@ export function ReaderActivationForm() {
         role="status"
         className="rounded-2xl border border-border bg-surface p-5 text-[15px] leading-relaxed text-foreground [text-wrap:pretty]"
       >
-        <p className="font-semibold">ההפעלה הצליחה — פותחים את הערכה…</p>
+        <p className="font-semibold">קיבלנו את הבקשה ואת הוכחת הרכישה.</p>
+        <p className="mt-1 text-foreground-muted">
+          נעבור עליה ונשלח לכם קישור גישה לערכת הקורא לאחר האישור. (הבקשה במצב
+          בדיקה — עדיין לא אושרה.)
+        </p>
       </div>
     );
   }
@@ -96,12 +103,20 @@ export function ReaderActivationForm() {
         <input id="reader-email" name="email" type="email" required maxLength={254} autoComplete="email" className={fieldClass} />
       </div>
       <div>
-        <label htmlFor="reader-code" className="text-[14px] font-semibold text-foreground">
-          קוד הפעלה מהספר
+        <label htmlFor="reader-proof" className="text-[14px] font-semibold text-foreground">
+          הוכחת רכישה
         </label>
-        <input id="reader-code" name="code" type="text" required minLength={4} maxLength={40} autoComplete="off" className={fieldClass} />
+        <input
+          id="reader-proof"
+          name="proof"
+          type="file"
+          required
+          accept={ACCEPT}
+          className="mt-1 w-full rounded-lg border border-border-strong bg-surface px-3 py-2.5 text-[14px] text-foreground file:me-3 file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-[14px] file:font-semibold file:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        />
         <p className="mt-1 text-[13px] text-foreground-muted [text-wrap:pretty]">
-          הקוד מופיע בתוך הספר — הוא שמאשר שהערכה נפתחת למי שיש לו את הספר.
+          צילום-מסך או PDF של אישור הרכישה מאמזון (תמונה או PDF, עד 5MB). הקובץ
+          נשמר פרטית ומשמש לאימות בלבד.
         </p>
       </div>
       {/* honeypot — נסתר מהעין ומקוראי-מסך. */}
@@ -122,7 +137,7 @@ export function ReaderActivationForm() {
 
       <div>
         <Button type="submit" size="lg" disabled={state.kind === "submitting"}>
-          {state.kind === "submitting" ? "מפעיל…" : "הפעילו את ערכת הקורא"}
+          {state.kind === "submitting" ? "שולח…" : "שלחו לאישור"}
         </Button>
       </div>
     </form>

@@ -5,7 +5,7 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
-import { ReaderActivationForm } from "@/components/reader/ReaderActivationForm";
+import { ReaderClaimForm } from "@/components/reader/ReaderClaimForm";
 import { readerKitOffer, readerKitGroups } from "@/content/readerKit";
 import { pageMetadata } from "@/lib/seo";
 
@@ -123,11 +123,12 @@ export default function ReaderPage() {
             כבר רכשתם? הפעילו את ערכת הקורא
           </h2>
           <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
-            הזינו את הקוד שמופיע בתוך הספר ואת האימייל שלכם — הגישה נפתחת מיד.
-            הקוד הוא שמאשר שהערכה מיועדת למי שיש לו את הספר.
+            השאירו אימייל וצרפו הוכחת רכישה (צילום-מסך או PDF של אישור הרכישה
+            מאמזון). נעבור על הבקשה ידנית ונשלח קישור גישה במייל לאחר האישור.
+            הבקשה נשמרת במצב בדיקה עד לאישור — לא מוצג „מאומת” לפני כן.
           </p>
           <div className="mt-6 max-w-[34rem]">
-            <ReaderActivationForm />
+            <ReaderClaimForm />
           </div>
         </section>
       </div>

@@ -1,17 +1,17 @@
 import { Pool } from "pg";
 
-import type { ReaderAccessRepository } from "@/lib/reader/types";
-import { PostgresReaderAccessRepository } from "@/lib/reader/postgresRepository";
-import { InMemoryReaderAccessRepository } from "@/lib/reader/memoryRepository";
+import type { ReaderClaimRepository } from "@/lib/reader/types";
+import { PostgresReaderClaimRepository } from "@/lib/reader/postgresRepository";
+import { InMemoryReaderClaimRepository } from "@/lib/reader/memoryRepository";
 
 const globalForReader = globalThis as unknown as {
   readerPool?: Pool;
-  readerRepo?: ReaderAccessRepository;
-  readerMemoryRepo?: InMemoryReaderAccessRepository;
+  readerRepo?: ReaderClaimRepository;
+  readerMemoryRepo?: InMemoryReaderClaimRepository;
 };
 
 /**
- * מחזיר את מאגר גישת ערכת-הקורא, או null כשאין אחסון מתמשך מחובר.
+ * מחזיר את מאגר הפעלות ערכת-הקורא, או null כשאין אחסון מתמשך מחובר.
  *
  * - `DATABASE_URL` מוגדר → Postgres מתמשך (מקור-האמת בפרודקשן; מאגר משותף
  *   עם רשימת ההמתנה, טבלה נפרדת).
@@ -21,7 +21,7 @@ const globalForReader = globalThis as unknown as {
  *
  * ערך DATABASE_URL אינו מודפס לעולם.
  */
-export function getReaderAccessRepository(): ReaderAccessRepository | null {
+export function getReaderClaimRepository(): ReaderClaimRepository | null {
   const isVercelDeployment =
     process.env.VERCEL_ENV === "preview" || process.env.VERCEL_ENV === "production";
 
@@ -34,7 +34,7 @@ export function getReaderAccessRepository(): ReaderAccessRepository | null {
         });
       }
       const pool = globalForReader.readerPool;
-      globalForReader.readerRepo = new PostgresReaderAccessRepository({
+      globalForReader.readerRepo = new PostgresReaderClaimRepository({
         query: (text, params) => pool.query(text, params),
       });
     }
@@ -43,7 +43,7 @@ export function getReaderAccessRepository(): ReaderAccessRepository | null {
 
   if (!isVercelDeployment && process.env.READER_ALLOW_MEMORY === "true") {
     if (!globalForReader.readerMemoryRepo) {
-      globalForReader.readerMemoryRepo = new InMemoryReaderAccessRepository();
+      globalForReader.readerMemoryRepo = new InMemoryReaderClaimRepository();
     }
     return globalForReader.readerMemoryRepo;
   }

@@ -1,85 +1,84 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { InMemoryReaderAccessRepository } from "@/lib/reader/memoryRepository";
-import { generateSessionToken, hashSessionToken } from "@/lib/reader/token";
-import type { ReaderActivationInput } from "@/lib/reader/types";
+import { InMemoryReaderClaimRepository } from "@/lib/reader/memoryRepository";
+import { generateAccessToken, hashAccessToken } from "@/lib/reader/token";
+import type { ReaderClaimCreateInput } from "@/lib/reader/types";
 
 const EMAIL = "dana@example.com";
 
-function activation(overrides: Partial<ReaderActivationInput> = {}): ReaderActivationInput {
-  const token = generateSessionToken();
+function pending(email = EMAIL): ReaderClaimCreateInput {
   return {
-    emailNormalized: EMAIL,
+    emailNormalized: email,
     consentVersion: "2026-08-v1",
-    sessionTokenHash: hashSessionToken(token),
-    sessionExpiresAt: new Date(Date.now() + 60_000),
-    ...overrides,
+    proof: { mime: "image/png", bytes: Buffer.from([0x89, 0x50, 0x4e, 0x47]) },
   };
 }
 
-let repo: InMemoryReaderAccessRepository;
-
+let repo: InMemoryReaderClaimRepository;
 beforeEach(() => {
-  repo = new InMemoryReaderAccessRepository();
+  repo = new InMemoryReaderClaimRepository();
 });
 
-describe("InMemoryReaderAccessRepository", () => {
-  it("activates and finds a valid session by token hash", async () => {
-    const token = generateSessionToken();
-    const hash = hashSessionToken(token);
-    await repo.activate(activation({ sessionTokenHash: hash }));
-    const session = await repo.findValidSession(hash);
-    expect(session?.emailNormalized).toBe(EMAIL);
+describe("InMemoryReaderClaimRepository", () => {
+  it("creates a pending claim holding the proof, listable for review", async () => {
+    await repo.createPending(pending());
+    const list = await repo.listPending(10);
+    expect(list).toHaveLength(1);
+    expect(list[0].emailNormalized).toBe(EMAIL);
+    expect(list[0].status).toBe("pending");
+    expect(list[0].proofMime).toBe("image/png");
+    const proof = await repo.getProof(EMAIL);
+    expect(proof?.mime).toBe("image/png");
+    expect(proof?.bytes.length).toBeGreaterThan(0);
   });
 
-  it("returns null for an unknown token hash (no access, no enumeration)", async () => {
-    await repo.activate(activation());
-    expect(await repo.findValidSession(hashSessionToken(generateSessionToken()))).toBeNull();
+  it("grants no access while pending (only approved opens the kit)", async () => {
+    await repo.createPending(pending());
+    const token = generateAccessToken();
+    expect(await repo.findApprovedByAccessTokenHash(hashAccessToken(token))).toBeNull();
   });
 
-  it("does not honor an expired session", async () => {
-    const token = generateSessionToken();
-    const hash = hashSessionToken(token);
-    await repo.activate(activation({ sessionTokenHash: hash, sessionExpiresAt: new Date(Date.now() - 1000) }));
-    expect(await repo.findValidSession(hash)).toBeNull();
+  it("approve() sets approved, stores the token hash, and deletes the proof (minimum PII)", async () => {
+    await repo.createPending(pending());
+    const token = generateAccessToken();
+    const expiresAt = new Date(Date.now() + 60_000);
+    const claim = await repo.approve(EMAIL, hashAccessToken(token), expiresAt);
+    expect(claim?.emailNormalized).toBe(EMAIL);
+    // proof purged after decision
+    expect(await repo.getProof(EMAIL)).toBeNull();
+    // approved claim resolvable by the token hash
+    expect((await repo.findApprovedByAccessTokenHash(hashAccessToken(token)))?.emailNormalized).toBe(EMAIL);
+    // no longer pending
+    expect(await repo.listPending(10)).toHaveLength(0);
   });
 
-  it("does not honor a revoked session", async () => {
-    const token = generateSessionToken();
-    const hash = hashSessionToken(token);
-    await repo.activate(activation({ sessionTokenHash: hash }));
-    await repo.revokeSession(hash);
-    expect(await repo.findValidSession(hash)).toBeNull();
+  it("approve() returns null for an unknown email (no phantom approval)", async () => {
+    expect(await repo.approve("ghost@example.com", hashAccessToken(generateAccessToken()), new Date(Date.now() + 1000))).toBeNull();
   });
 
-  it("re-activation replaces the session and keeps one row (idempotent by email)", async () => {
-    const first = generateSessionToken();
-    const firstHash = hashSessionToken(first);
-    await repo.activate(activation({ sessionTokenHash: firstHash }));
+  it("does not honor an expired access token", async () => {
+    await repo.createPending(pending());
+    const token = generateAccessToken();
+    await repo.approve(EMAIL, hashAccessToken(token), new Date(Date.now() - 1000));
+    expect(await repo.findApprovedByAccessTokenHash(hashAccessToken(token))).toBeNull();
+  });
 
-    const second = generateSessionToken();
-    const secondHash = hashSessionToken(second);
-    await repo.activate(activation({ sessionTokenHash: secondHash }));
+  it("reject() blocks access and purges the proof", async () => {
+    await repo.createPending(pending());
+    const token = generateAccessToken();
+    await repo.approve(EMAIL, hashAccessToken(token), new Date(Date.now() + 60_000));
+    await repo.reject(EMAIL);
+    expect(await repo.findApprovedByAccessTokenHash(hashAccessToken(token))).toBeNull();
+    expect(await repo.getProof(EMAIL)).toBeNull();
+  });
 
-    expect(await repo.findValidSession(firstHash)).toBeNull(); // old session gone
-    expect((await repo.findValidSession(secondHash))?.emailNormalized).toBe(EMAIL);
+  it("re-submission returns an approved claim to pending with a fresh proof (idempotent by email)", async () => {
+    await repo.createPending(pending());
+    const token = generateAccessToken();
+    await repo.approve(EMAIL, hashAccessToken(token), new Date(Date.now() + 60_000));
+    await repo.createPending(pending());
+    expect(await repo.findApprovedByAccessTokenHash(hashAccessToken(token))).toBeNull();
+    expect(await repo.listPending(10)).toHaveLength(1);
     expect(repo.rows.size).toBe(1);
-  });
-
-  it("stores only minimal fields — no name, no order reference", async () => {
-    await repo.activate(activation());
-    const row = repo.rows.get(EMAIL)!;
-    expect(row).not.toHaveProperty("name");
-    expect(row).not.toHaveProperty("orderRef");
-    expect(Object.keys(row).sort()).toEqual(
-      [
-        "consentAt",
-        "consentVersion",
-        "emailNormalized",
-        "sessionExpiresAt",
-        "sessionRevokedAt",
-        "sessionTokenHash",
-      ].sort(),
-    );
   });
 });
