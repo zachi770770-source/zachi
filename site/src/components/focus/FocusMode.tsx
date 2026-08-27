@@ -58,9 +58,42 @@ export function FocusMode({
     withViewTransition(() => flushSync(() => setStage(next)));
   };
 
-  // בטעינה ובכל החלפת-פעימה: פוקוס אל הבמה, כדי שקורא/ת-מסך תגיע לתוכן החדש.
+  // בטעינה: ממסגרים את הבמה. הבמה האימרסיבית גבוהה ומחליפה כרטיסים נמוכים, ולכן
+  // מול מיקום-הגלילה הקודם תוכנהּ עלול לצאת מהמסך — גוללים אותה לראש התצוגה,
+  // מתחת לכותרת הדביקה (scroll-margin-top ב-CSS). פעם אחת, בכניסה למצב.
   React.useEffect(() => {
-    stageRef.current?.focus({ preventScroll: true });
+    const el = stageRef.current;
+    if (!el || typeof el.scrollIntoView !== "function") return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+  }, []);
+
+  // בכל החלפת-פעימה: פוקוס אל הבמה (קורא/ת-מסך), ורשת-ביטחון נגד סחיפת-גלילה —
+  // אם גובה-התוכן בין הפעימות הזיז את הבמה מחוץ למסגרת, מחזירים אותה. `overflow-
+  // anchor: none` ב-CSS אמור למנוע זאת, אך הסחיפה יכולה לקרות גם *אחרי* שה-View
+  // Transition מתיישב, ולכן בודקים בכמה נקודות-זמן (כולל מעבר לאורך ה-VT).
+  React.useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    if (typeof el.scrollIntoView !== "function") return;
+    const keepFramed = () => {
+      const top = el.getBoundingClientRect().top;
+      const headerH =
+        parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue("--header-height"),
+          10,
+        ) || 64;
+      if (top < 0 || top > headerH + 150) {
+        el.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+    };
+    const raf = requestAnimationFrame(keepFramed);
+    const timers = [120, 380, 760].map((t) => window.setTimeout(keepFramed, t));
+    return () => {
+      cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+    };
   }, [stage]);
 
   return (

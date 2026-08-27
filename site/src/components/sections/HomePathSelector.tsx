@@ -26,7 +26,10 @@ export function HomePathSelector() {
   return (
     <section id="path" className="scroll-mt-20 py-5 sm:py-10" aria-labelledby="path-heading">
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
+        {/* `path-intro` — כותרת-המקטע מתכווצת כש-Focus Mode פעיל (ראו הכלל
+            `#path:has([data-fm-active]) .path-intro` ב-globals.css), כדי שהבמה
+            האימרסיבית תחזיק את המסך לבדה ולא תתחרה בכותרת שיווקית מעליה. */}
+        <div className="path-intro mx-auto max-w-2xl text-center">
           <span className="kicker justify-center">{homePathUi.eyebrow}</span>
           <h2 id="path-heading" className="type-h2 mt-2">
             {homePathUi.heading}
