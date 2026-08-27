@@ -3428,3 +3428,538 @@ html.vt-book-nav::view-transition-group(book-cover) {
   }
 }
 
+
+/* ===================================================================
+ * Focus Mode — שפת-התנועה של האתר (reusable), בגרסה אימרסיבית.
+ *
+ * כניסה למצב היא השתלטות: משטח כהה ועמוק (controlled gradients) שממלא כמעט
+ * viewport במובייל, כך שהסביבה נסוגה. הרצף הוא ארבע פעימות (enter/split/aha/
+ * action), לכל אחת composition שונה בהתאם למשמעותה.
+ *
+ * לשימוש-חוזר: motion tokens (--fm-*), scene entrance (.fm-scene-in),
+ * emphasis surfaces (.fm-side--fact/--story), focus treatment (data-stage),
+ * shared-element convention (view-transition-name: fm-title / fm-fact),
+ * ו-CTA language (.fm-cta--*). primitive: withViewTransition().
+ *
+ * כל התנועה opacity/transform/color/filter בלבד. התוכן קריא כברירת-מחדל; שכבת-
+ * התנועה נכנסת רק תחת html.motion-js. reduced-motion / ללא-JS ⇒ אותה זרימה
+ * וה-composition הדרמטית (כהות, טיפוגרפיה ענקית) *נשארים* — הם מצב, לא אנימציה;
+ * רק התנועה מתאפסת (הבלוק הגלובלי של prefers-reduced-motion).
+ * =================================================================== */
+:root {
+  --fm-beat: 640ms; /* פעימת מעבר (recomposition) */
+  --fm-narrative: 480ms; /* כניסת-סצנה / פתיחת-נתיבים */
+  --fm-ambient-dur: 16s; /* נשימת-רקע איטית (Ambient) */
+  --fm-ease: var(--ease-settle);
+  --fm-ease-emphasis: var(--ease-emphasized);
+  /* פלטת המצב האימרסיבי: Ink עמוק + Ivory, על בסיס זהות המותג. */
+  --fm-ink: #16181c;
+  --fm-ink-2: #232931;
+  --fm-ivory: #f4f2ee;
+  --fm-ivory-muted: color-mix(in oklab, var(--fm-ivory) 64%, transparent);
+  --fm-hairline: color-mix(in oklab, var(--fm-ivory) 22%, transparent);
+}
+
+/* ── המשטח האימרסיבי ── */
+.fm-stage {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  margin-top: 1.5rem;
+  margin-inline: -1.5rem; /* full-bleed בתוך ריפוד-הקונטיינר (מובייל) */
+  padding: clamp(1.75rem, 6vw, 3.25rem) clamp(1.25rem, 5vw, 3rem);
+  min-height: 82svh; /* מובייל: כמעט מסך מלא */
+  color: var(--fm-ivory);
+  overflow: hidden;
+  outline: none;
+}
+@media (min-width: 640px) {
+  .fm-stage {
+    margin-inline: -2rem;
+    min-height: 32rem;
+    border-radius: var(--radius-xl);
+    box-shadow:
+      0 34px 90px -46px rgba(0, 0, 0, 0.6),
+      0 10px 34px -22px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* עומק-רקע (שכבה: controlled gradients). משתנה לפי הפעימה. */
+.fm-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 88% at 12% 0%,
+      color-mix(in oklab, var(--color-secondary) 30%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      120% 100% at 100% 100%,
+      color-mix(in oklab, var(--color-brand) 24%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(158deg, var(--fm-ink-2), var(--fm-ink));
+  transition:
+    background var(--fm-beat) var(--fm-ease),
+    opacity var(--fm-beat) var(--fm-ease);
+}
+/* Aha — ניגודיות עולה: כהה יותר, זוהר-מותג ממורכז מאחורי המשפט הענק. */
+.fm-stage[data-stage="aha"] .fm-bg {
+  background:
+    radial-gradient(
+      82% 62% at 50% 34%,
+      color-mix(in oklab, var(--color-brand) 32%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(158deg, #14161a, #0e1013);
+}
+
+/* Ambient — נשימת-זוהר עדינה מעל הרקע. */
+.fm-ambient {
+  position: absolute;
+  inset: -12% -8% auto -8%;
+  z-index: 0;
+  height: 56%;
+  pointer-events: none;
+  border-radius: 999px;
+  background: radial-gradient(
+    60% 80% at 50% 0%,
+    color-mix(in oklab, var(--color-secondary) 22%, transparent),
+    transparent 72%
+  );
+  opacity: 0.5;
+}
+.motion-js .fm-ambient {
+  animation: fm-breathe var(--fm-ambient-dur) var(--ease-standard) infinite;
+}
+@keyframes fm-breathe {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate3d(0, -3%, 0) scale(1.08);
+    opacity: 0.62;
+  }
+}
+
+.fm-shell {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 3vw, 1.5rem);
+  width: 100%;
+}
+.fm-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.fm-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fm-ivory-muted);
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+.fm-back:hover {
+  color: var(--fm-ivory);
+}
+.fm-back:focus-visible {
+  outline: 2px solid var(--fm-ivory);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+/* מחוון-פעימות — רצף של ארבעה מסכים. */
+.fm-steps {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.fm-steps__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--fm-ivory) 22%, transparent);
+  transition:
+    width var(--motion-panel) var(--fm-ease),
+    background-color var(--motion-panel) var(--fm-ease);
+}
+.fm-steps__dot[data-on="true"] {
+  background: color-mix(in oklab, var(--color-brand) 45%, var(--fm-ivory));
+}
+
+/* ── סצנה: מעטפת משותפת, כניסה רכה ── */
+.fm-scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1rem, 3.5vw, 1.75rem);
+}
+.motion-js .fm-scene {
+  animation: fm-scene-in var(--fm-narrative) var(--fm-ease) both;
+}
+@keyframes fm-scene-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fm-eyebrow {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--fm-ivory-muted);
+}
+.fm-eyebrow--brand {
+  color: var(--color-brand);
+}
+.fm-lede {
+  max-width: 46ch;
+  color: var(--fm-ivory-muted);
+  font-size: clamp(1rem, 2.6vw, 1.16rem);
+  line-height: 1.55;
+}
+.fm-lede--ink {
+  color: var(--color-foreground);
+  font-family: var(--font-serif);
+  max-width: 48ch;
+  margin-inline: auto;
+}
+
+/* כותרת-המצב — האלמנט הנמשך (morph) מהכרטיס דרך הפעימות. */
+.motion-js .fm-title {
+  view-transition-name: fm-title;
+}
+.fm-title--hero {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 8.5vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--fm-ivory);
+}
+.fm-title--mini {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: var(--fm-ivory-muted);
+  text-align: center;
+}
+
+/* ── פעימת enter — מצב דומיננטי, ממורכז ── */
+.fm-scene--enter {
+  text-align: center;
+  align-items: center;
+}
+.fm-scene--enter .fm-lede {
+  margin-inline: auto;
+}
+
+/* ── פעימת split — שני צדדים שנפתחים זה מזה ── */
+.fm-duo {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: clamp(0.5rem, 2.5vw, 1.4rem);
+}
+@media (max-width: 560px) {
+  .fm-duo {
+    grid-template-columns: 1fr;
+  }
+  .fm-gap {
+    display: none;
+  }
+}
+.fm-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: clamp(1rem, 3.5vw, 1.6rem);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in oklab, var(--fm-ivory) 12%, transparent);
+  background: color-mix(in oklab, var(--fm-ivory) 6%, transparent);
+  backdrop-filter: blur(3px);
+}
+.fm-side--fact {
+  border-color: color-mix(in oklab, var(--color-secondary) 58%, transparent);
+  background: color-mix(in oklab, var(--color-secondary) 16%, transparent);
+}
+.fm-side--story {
+  border-color: color-mix(in oklab, var(--color-brand) 52%, transparent);
+  background: color-mix(in oklab, var(--color-brand) 13%, transparent);
+}
+.fm-side__tag {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.fm-side--fact .fm-side__tag {
+  color: color-mix(in oklab, var(--color-secondary) 45%, var(--fm-ivory));
+}
+.fm-side--story .fm-side__tag {
+  color: color-mix(in oklab, var(--color-brand) 50%, var(--fm-ivory));
+}
+.fm-fact,
+.fm-story-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 3.6vw, 1.4rem);
+  line-height: 1.32;
+  color: var(--fm-ivory);
+}
+.motion-js .fm-fact {
+  view-transition-name: fm-fact;
+}
+/* הפער שנפתח בין הצדדים. */
+.fm-gap {
+  align-self: center;
+  width: 1px;
+  height: 66%;
+  background: color-mix(in oklab, var(--fm-ivory) 24%, transparent);
+}
+.fm-prompt {
+  text-align: center;
+  color: var(--fm-ivory-muted);
+  font-size: clamp(0.95rem, 2.6vw, 1.05rem);
+}
+/* פתיחה: הצדדים מתחילים קרובים למרכז ואז נפרדים; הפער „נפתח”. */
+.motion-js .fm-scene--split .fm-side--fact {
+  animation: fm-open-fact var(--fm-beat) var(--fm-ease-emphasis) backwards;
+}
+.motion-js .fm-scene--split .fm-side--story {
+  animation: fm-open-story var(--fm-beat) var(--fm-ease-emphasis) backwards;
+}
+.motion-js .fm-scene--split .fm-gap {
+  animation: fm-gap-open var(--fm-beat) var(--fm-ease-emphasis) backwards;
+  transform-origin: center;
+}
+@keyframes fm-open-fact {
+  from {
+    transform: translateX(-42%);
+    opacity: 0.35;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes fm-open-story {
+  from {
+    transform: translateX(42%);
+    opacity: 0.35;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes fm-gap-open {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* ── פעימת Aha — הרגע המרכזי ── */
+.fm-scene--aha {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.25rem, 4.5vw, 2.25rem);
+}
+.fm-fact--echo {
+  font-size: clamp(1rem, 3vw, 1.28rem);
+  color: color-mix(in oklab, var(--color-secondary) 42%, var(--fm-ivory));
+  opacity: 0.92;
+}
+.fm-aha__line {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 9vw, 4.4rem);
+  line-height: 1.07;
+  letter-spacing: -0.012em;
+  color: var(--fm-ivory);
+  max-width: 20ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
+.motion-js .fm-scene--aha .fm-aha__line {
+  animation: fm-strike var(--fm-beat) var(--fm-ease-emphasis) backwards;
+}
+@keyframes fm-strike {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.965);
+    letter-spacing: 0.02em;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    letter-spacing: -0.012em;
+  }
+}
+/* כותרת-הממשק הקצרה (fm-aha__line) + ההסבר הקנוני מתחתיה (fm-aha__note). */
+.fm-aha__block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 2.5vw, 1.15rem);
+}
+.fm-aha__note {
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 2.8vw, 1.35rem);
+  line-height: 1.4;
+  color: var(--fm-ivory-muted);
+  max-width: 28ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
+
+/* ── פעימת Action — משטח בהיר ונקי, שלב חדש ── */
+.fm-scene--action {
+  align-items: center;
+  justify-content: center;
+}
+.fm-panel {
+  width: 100%;
+  max-width: 40rem;
+  padding: clamp(1.6rem, 5vw, 2.6rem);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  text-align: center;
+  box-shadow: 0 24px 60px -34px rgba(0, 0, 0, 0.55);
+}
+.fm-bridge {
+  margin-top: 0.75rem;
+  font-family: var(--font-quote);
+  font-size: clamp(1rem, 2.6vw, 1.12rem);
+  line-height: 1.55;
+  color: var(--color-foreground-muted);
+  text-wrap: pretty;
+}
+.fm-actions {
+  margin-top: clamp(1.25rem, 4vw, 1.85rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+@media (min-width: 560px) {
+  .fm-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+/* ── שפת ה-CTA (reusable) ── */
+.fm-cta-row {
+  display: flex;
+  justify-content: center;
+}
+.fm-scene--split .fm-cta-row,
+.fm-scene--aha .fm-cta-row {
+  margin-top: 0.25rem;
+}
+.fm-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.8rem 1.6rem;
+  font-weight: 600;
+  font-size: clamp(0.95rem, 2.4vw, 1.05rem);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+}
+.fm-cta:focus-visible {
+  outline: 2px solid var(--fm-ivory);
+  outline-offset: 3px;
+}
+.fm-cta--ghost {
+  color: var(--fm-ivory);
+  border-color: color-mix(in oklab, var(--fm-ivory) 34%, transparent);
+  background: color-mix(in oklab, var(--fm-ivory) 8%, transparent);
+}
+.fm-cta--ghost:hover {
+  background: color-mix(in oklab, var(--fm-ivory) 16%, transparent);
+  transform: translateY(-2px);
+}
+.fm-cta--solid {
+  color: var(--color-ink);
+  background: var(--fm-ivory);
+}
+.fm-cta--solid:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.5);
+}
+.fm-cta--quiet {
+  color: var(--fm-ivory-muted);
+  background: transparent;
+}
+.fm-cta--quiet:hover {
+  color: var(--fm-ivory);
+  border-color: var(--fm-hairline);
+}
+.fm-cta--brand {
+  color: var(--color-brand-foreground);
+  background: var(--color-brand);
+}
+.fm-cta--brand:hover {
+  background: var(--color-brand-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -14px color-mix(in oklab, var(--color-brand) 60%, transparent);
+}
+.fm-cta--link {
+  color: var(--color-foreground-muted);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 0.5rem 0.75rem;
+}
+.fm-cta--link:hover {
+  color: var(--color-foreground);
+}
+.fm-cta--link:focus-visible {
+  outline-color: var(--color-brand);
+}
+
+/* מיזוג shared-element — כיוונון משך. */
+::view-transition-group(fm-title),
+::view-transition-group(fm-fact) {
+  animation-duration: var(--fm-beat);
+  animation-timing-function: var(--fm-ease-emphasis);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* אין נשימת-רקע, אין מיזוג-VT; ה-composition הדרמטית נשארת (מצב, לא תנועה). */
+  .fm-ambient {
+    animation: none !important;
+  }
+}
