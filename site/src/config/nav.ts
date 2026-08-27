@@ -11,6 +11,7 @@ export const footerLinks = {
     { href: "/love", label: "מהי אהבה" },
     { href: "/compass", label: "מה הספר אומר?" },
     { href: "/preview", label: "טעימה מהספר" },
+    { href: "/reader", label: "ערכת הקורא" },
     { href: "/author", label: "מאחורי הספר" },
     { href: "/faq", label: "שאלות נפוצות" },
     { href: "/contact", label: "יצירת קשר" },

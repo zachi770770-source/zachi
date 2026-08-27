@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Smartphone, BookOpen, ArrowLeft } from "lucide-react";
+import { Smartphone, BookOpen, ArrowLeft, Sparkles } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import type { ProductFormat } from "@/lib/pricing";
@@ -58,6 +58,21 @@ export function PurchaseCard() {
               <li className="flex items-center gap-2.5">
                 <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
                 קריאה באפליקציית Kindle או בכל מכשיר תואם
+              </li>
+              {/* נקודת-ערך ברכישה: הספר + ערכת הכלים הדיגיטלית לקורא, ללא תשלום
+                  נוסף. מפנה ל-/reader (בלי CTA-אמזון שני שמתחרה בכפתור למטה). */}
+              <li className="flex items-start gap-2.5">
+                <Sparkles className="mt-0.5 h-[18px] w-[18px] shrink-0 text-brand" aria-hidden="true" />
+                <span>
+                  כולל{" "}
+                  <Link
+                    href="/reader"
+                    className="font-semibold text-brand-hover underline underline-offset-2 hover:text-foreground"
+                  >
+                    ערכת הכלים הדיגיטלית לקורא
+                  </Link>{" "}
+                  — ללא תשלום נוסף
+                </span>
               </li>
             </ul>
           )}

@@ -17,6 +17,7 @@ import { ToolsBento } from "@/components/sections/ToolsBento";
 import { InsideBookSection } from "@/components/sections/InsideBookSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
+import { ReaderKitOffer } from "@/components/reader/ReaderKitOffer";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
@@ -139,6 +140,12 @@ export default function BookPage() {
       <ToolsBento />
       <InsideBookSection />
       <OutcomesSection />
+      {/* ערכת הקורא — נקודת-ערך לפני הרכישה: „קונים את הספר ומקבלים גם את
+          הכלים”. וריאנט „link” בלבד — מפנה ל-/reader בלי CTA-אמזון שני שמתחרה
+          בכרטיס הרכישה שמתחת. */}
+      <Container className="pb-4">
+        <ReaderKitOffer variant="link" />
+      </Container>
       <PurchaseSection />
     </>
   );

@@ -37,6 +37,9 @@ const KNOWN_ROUTES = new Set<string>([
   "/love",
   "/preview",
   "/privacy",
+  // ערכת הכלים הדיגיטלית לקורא (app/reader/page.tsx). מקושר מהפוטר בכל עמוד,
+  // מכרטיס-הרכישה ב-/book ומ-/preview.
+  "/reader",
   "/shipping-returns",
   "/starting-again",
   "/terms",

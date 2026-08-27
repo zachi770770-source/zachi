@@ -1,0 +1,52 @@
+import { Pool } from "pg";
+
+import type { ReaderClaimRepository } from "@/lib/reader/types";
+import { PostgresReaderClaimRepository } from "@/lib/reader/postgresRepository";
+import { InMemoryReaderClaimRepository } from "@/lib/reader/memoryRepository";
+
+const globalForReader = globalThis as unknown as {
+  readerPool?: Pool;
+  readerRepo?: ReaderClaimRepository;
+  readerMemoryRepo?: InMemoryReaderClaimRepository;
+};
+
+/**
+ * מחזיר את מאגר הפעלות ערכת-הקורא, או null כשאין אחסון מתמשך מחובר.
+ *
+ * - `DATABASE_URL` מוגדר → Postgres מתמשך (מקור-האמת בפרודקשן; מאגר משותף
+ *   עם רשימת ההמתנה, טבלה נפרדת).
+ * - `READER_ALLOW_MEMORY=true` → זיכרון, לפיתוח/בדיקות בלבד; מתעלמים ממנו
+ *   ב-Vercel Preview/Production כדי לא לאבד הפעלות בשקט (→ null → 503 ברור).
+ * - אחרת → null.
+ *
+ * ערך DATABASE_URL אינו מודפס לעולם.
+ */
+export function getReaderClaimRepository(): ReaderClaimRepository | null {
+  const isVercelDeployment =
+    process.env.VERCEL_ENV === "preview" || process.env.VERCEL_ENV === "production";
+
+  if (process.env.DATABASE_URL) {
+    if (!globalForReader.readerRepo) {
+      if (!globalForReader.readerPool) {
+        globalForReader.readerPool = new Pool({
+          connectionString: process.env.DATABASE_URL,
+          max: 3,
+        });
+      }
+      const pool = globalForReader.readerPool;
+      globalForReader.readerRepo = new PostgresReaderClaimRepository({
+        query: (text, params) => pool.query(text, params),
+      });
+    }
+    return globalForReader.readerRepo;
+  }
+
+  if (!isVercelDeployment && process.env.READER_ALLOW_MEMORY === "true") {
+    if (!globalForReader.readerMemoryRepo) {
+      globalForReader.readerMemoryRepo = new InMemoryReaderClaimRepository();
+    }
+    return globalForReader.readerMemoryRepo;
+  }
+
+  return null;
+}

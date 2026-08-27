@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { previewClosing } from "@/content/sample";
+import { readerKitOffer } from "@/content/readerKit";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
@@ -50,6 +52,17 @@ export function PreviewClosing({ station }: { station?: AskStationId }) {
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               </AmazonBuyLink>
             </Button>
+            {/* נקודת-ערך שקטה מתחת ל-CTA היחיד: הערכה כלולה. לא פעולה ראשית שנייה
+                — כיתוב + קישור-טקסט בלבד ל-/reader. */}
+            <p className="text-[14px] text-foreground-muted [text-wrap:pretty]">
+              {readerKitOffer.ctaSubline}{" "}
+              <Link
+                href="/reader"
+                className="font-medium text-brand-hover underline underline-offset-2 hover:text-foreground"
+              >
+                מה כלול בערכת הקורא
+              </Link>
+            </p>
           </div>
 
           <div className="mt-8 flex flex-col items-center gap-4 border-t border-border pt-6 text-center">

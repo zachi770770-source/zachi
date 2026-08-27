@@ -74,9 +74,14 @@ export default defineConfig({
       // מטמון `.next`, ועל מעבד איטי יותר — 59 עמודים סטטיים לוקחים שם הרבה
       // יותר. מרווח רחב עדיף על כשל-זמן מזדמן שאינו מעיד על שום תקלה אמיתית.
       timeout: 300_000,
-      // מאגר רשימת המתנה בזיכרון לבדיקות בלבד (לא DB אמיתי). SALES_ENABLED נשאר
-      // כבוי כדי לבדוק את מצב ה-Pre-launch.
-      env: { WAITLIST_ALLOW_MEMORY: "true" },
+      // מאגרים בזיכרון לבדיקות בלבד (לא DB אמיתי): רשימת המתנה + הפעלות ערכת
+      // הקורא. READER_ADMIN_TOKEN הוא סוד-בדיקה בלבד לשרת הארעי (מפעיל את נתיב
+      // הבדיקה הידנית בזרימת ה-E2E מקצה-לקצה). SALES_ENABLED נשאר כבוי (Pre-launch).
+      env: {
+        WAITLIST_ALLOW_MEMORY: "true",
+        READER_ALLOW_MEMORY: "true",
+        READER_ADMIN_TOKEN: "e2e-reader-admin-token",
+      },
     },
     {
       // אותו build, עם דגל התצוגה של העוזר בלבד — כדי שהממשק החופשי יהיה קיים
