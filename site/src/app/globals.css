@@ -3428,3 +3428,226 @@ html.vt-book-nav::view-transition-group(book-cover) {
   }
 }
 
+
+/* ===================================================================
+ * Focus Mode — שפת-התנועה הבסיסית של האתר (reusable).
+ *
+ * נבנה כתשתית לשימוש-חוזר, לא כאפקט מקומי:
+ *   • motion tokens      → --fm-*
+ *   • reveal behavior    → .fm-rise (חשיפה-אחרי-הבנה, staggerable)
+ *   • emphasis states    → .fm-lane--fact / .fm-lane--story (הפרדה ויזואלית)
+ *   • focus treatment    → .fm-split[data-revealed] (recomposition ל-focus יחיד)
+ *   • transition pattern → .fm-ambient (Ambient) + View Transitions על .fm-fact
+ *
+ * כל התנועה opacity/transform/color בלבד. התוכן גלוי וקריא כברירת-מחדל; שכבת-
+ * התנועה נכנסת רק תחת html.motion-js (JS חי, IO נתמך, ואין reduced-motion —
+ * ראו MotionRoot). reduced-motion / ללא-JS ⇒ המצב הסופי מיידי (הבלוק הגלובלי
+ * של prefers-reduced-motion מאפס משך תנועה), אך ה-recomposition של ה-Aha
+ * (composition/typography/color) עדיין מתרחש — הוא מצב, לא אנימציה.
+ * =================================================================== */
+:root {
+  --fm-beat: 620ms; /* פעימת ה-Aha (recomposition) */
+  --fm-narrative: 460ms; /* פיצול הנתיבים / חשיפה */
+  --fm-rise-dist: 14px; /* מרחק חשיפה */
+  --fm-ambient-dur: 15s; /* נשימת-רקע איטית (Ambient) */
+  --fm-ease: var(--ease-settle);
+  --fm-ease-emphasis: var(--ease-emphasized);
+}
+
+.fm-stage {
+  position: relative;
+  isolation: isolate;
+}
+.fm-stage__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── שכבה 1: Ambient — נשימת-רקע עדינה, דקורטיבית בלבד ── */
+.fm-ambient {
+  position: absolute;
+  inset: -10% -8% auto -8%;
+  z-index: 0;
+  height: 62%;
+  pointer-events: none;
+  border-radius: 999px;
+  background: radial-gradient(
+    62% 82% at 50% 0%,
+    color-mix(in oklab, var(--color-secondary) 14%, transparent),
+    transparent 72%
+  );
+  opacity: 0.5;
+}
+.motion-js .fm-ambient {
+  animation: fm-breathe var(--fm-ambient-dur) var(--ease-standard) infinite;
+}
+@keyframes fm-breathe {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.42;
+  }
+  50% {
+    transform: translate3d(0, -2%, 0) scale(1.06);
+    opacity: 0.6;
+  }
+}
+
+/* ── שכבה 2: Narrative — הרגע נפרד לשני נתיבים ──
+   הפרדה ויזואלית: עובדה (sage, מקורקעת) מול סיפור (terracotta מרוסן = הדגש
+   שכדאי לשים לב אליו). מיקום, צבע ותווית — לא רק טקסט. */
+.fm-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  transition: grid-template-columns var(--fm-beat) var(--fm-ease-emphasis);
+}
+@media (max-width: 640px) {
+  .fm-split {
+    grid-template-columns: 1fr;
+  }
+}
+.fm-lane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  max-height: 40rem; /* בסיס לקיפול חלק ב-Aha */
+  transition:
+    opacity var(--fm-beat) var(--fm-ease),
+    transform var(--fm-beat) var(--fm-ease-emphasis),
+    max-height var(--fm-beat) var(--fm-ease-emphasis),
+    padding var(--fm-beat) var(--fm-ease),
+    margin var(--fm-beat) var(--fm-ease),
+    border-color var(--fm-beat) var(--fm-ease),
+    background-color var(--fm-beat) var(--fm-ease);
+}
+.fm-lane__tag {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.fm-lane--fact {
+  border-color: color-mix(in oklab, var(--color-secondary) 30%, transparent);
+}
+.fm-lane--fact .fm-lane__tag {
+  color: var(--color-secondary);
+}
+.fm-lane--story {
+  border-color: color-mix(in oklab, var(--color-brand) 26%, transparent);
+  background: color-mix(in oklab, var(--color-brand) 5%, var(--color-surface));
+}
+.fm-lane--story .fm-lane__tag {
+  color: var(--color-brand);
+}
+.fm-fact {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--color-foreground);
+  transition:
+    font-size var(--fm-beat) var(--fm-ease-emphasis),
+    color var(--fm-beat) var(--fm-ease);
+}
+.fm-story-text {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--color-foreground-muted);
+}
+/* המשכיות-אלמנט: פסקת-העובדה מתמזגת מהנתיב אל המרכז (מגודר ב-motion-js). */
+.motion-js .fm-fact {
+  view-transition-name: fm-fact;
+}
+::view-transition-old(fm-fact),
+::view-transition-new(fm-fact) {
+  animation-duration: var(--fm-beat);
+  animation-timing-function: var(--fm-ease-emphasis);
+}
+
+/* כניסת-הבמה (Narrative build): הנתיבים עולים בזה-אחר-זה — קודם העובדה, ואז
+   „מתווסף” הסיפור. fill=backwards כדי שהמעברים של ה-Aha יישארו חופשיים. */
+.motion-js .home-focus .fm-lane--fact {
+  animation: fm-rise-in var(--fm-narrative) var(--fm-ease) backwards;
+}
+.motion-js .home-focus .fm-lane--story {
+  animation: fm-rise-in var(--fm-narrative) var(--fm-ease) 140ms backwards;
+}
+@keyframes fm-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--fm-rise-dist));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── שכבה 3: Moment (Aha) — recomposition ──
+   הסיפור נסוג (מתקפל), העובדה עולה למרכז, מוגדלת ומאושרת (sage), ומשפט-ההפרדה
+   נכנס. composition (טור יחיד) + typography (הגדלה) + color (אישור) + motion,
+   יחד. זהו מצב (data-revealed) ולכן מתרחש גם ללא-תנועה. */
+.fm-split[data-revealed="true"] {
+  grid-template-columns: 1fr;
+}
+.fm-split[data-revealed="true"] .fm-lane--story {
+  max-height: 0;
+  margin: 0;
+  padding-block: 0;
+  border-color: transparent;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
+  overflow: hidden;
+  pointer-events: none;
+}
+.fm-split[data-revealed="true"] .fm-lane--fact {
+  text-align: center;
+  align-items: center;
+  border-color: color-mix(in oklab, var(--color-secondary) 42%, transparent);
+  background: color-mix(in oklab, var(--color-secondary) 9%, var(--color-surface));
+}
+.fm-split[data-revealed="true"] .fm-fact {
+  font-size: 1.5rem;
+}
+@media (min-width: 640px) {
+  .fm-split[data-revealed="true"] .fm-fact {
+    font-size: 1.85rem;
+  }
+}
+
+/* חשיפה-אחרי-הבנה: משפט-ההפרדה נכנס כפעימה, ואז הגשר וה-CTA (reveal behavior
+   לשימוש-חוזר: .fm-rise). fill=backwards — אין הבהוב טרם-השהיה, והמצב הסופי
+   נשאר קריא. */
+.motion-js .fm-aha__line {
+  animation: fm-strike var(--fm-beat) var(--fm-ease-emphasis) backwards;
+}
+@keyframes fm-strike {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.motion-js .fm-rise {
+  animation: fm-rise-in var(--fm-narrative) var(--fm-ease) backwards;
+}
+.motion-js .fm-bridge.fm-rise {
+  animation-delay: 110ms;
+}
+.motion-js .fm-actions.fm-rise {
+  animation-delay: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* גיבוי מפורש: אין נשימת-רקע ואין מיזוג-VT; ה-recomposition נשאר מיידי. */
+  .fm-ambient {
+    animation: none !important;
+  }
+}

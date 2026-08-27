@@ -1,5 +1,7 @@
 import { test, expect } from "./fixtures";
 
+import { focusUi } from "../src/content/focusMode";
+
 const MOBILE = { width: 390, height: 844 };
 
 test.describe("Launch-readiness", () => {
@@ -179,12 +181,16 @@ test.describe("Launch-readiness", () => {
     ).toBeVisible();
     await page.keyboard.press("Escape");
 
-    // בחירת מצב ב-Home פותחת את מנוע „שאל את הספר” *במקום*, מזוהה לתחנה (מדלג על
-    // „איפה אתם?” ומתחיל בדילמה), בלי לנווט לעמוד-המסע.
+    // בחירת מצב ב-Home פותחת קודם את Focus Mode (עובדה מול סיפור) *במקום* לנווט;
+    // מפרידים, וה-CTA „המשיכו עם הספר” ממשיך אל מנוע „שאל את הספר”, מזוהה לתחנה
+    // (מדלג על „איפה אתם?” ומתחיל בדילמה).
     const path = page.locator("#path");
     await path.scrollIntoViewIfNeeded();
     await path.locator('a[href="/before-relationship"]').click();
     await expect(page).toHaveURL(/\/$/);
+    const focus = path.getByRole("region", { name: focusUi.regionLabel });
+    await focus.getByRole("button", { name: focusUi.separateLabel }).click();
+    await focus.getByRole("button", { name: focusUi.continueLabel }).click();
     await expect(
       path
         .getByRole("region", { name: /שיחה קצרה עם הספר/ })

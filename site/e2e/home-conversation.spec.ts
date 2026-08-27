@@ -2,6 +2,7 @@ import { test, expect, type Route } from "@playwright/test";
 
 import { homeConversationUi as ui } from "../src/content/homeConversation";
 import { homePathUi } from "../src/content/homePaths";
+import { focusUi } from "../src/content/focusMode";
 import { askUi } from "../src/content/askRoute";
 import { JOURNEYS } from "../src/content/journeys";
 
@@ -65,6 +66,11 @@ async function openSituation(page: import("@playwright/test").Page) {
   const path = page.locator("#path");
   await path.scrollIntoViewIfNeeded();
   await path.locator('a[href="/before-relationship"]').click();
+  // בחירת-מצב פותחת קודם את Focus Mode (עובדה מול סיפור). מפרידים, ואז ה-CTA
+  // „המשיכו עם הספר” ממשיך אל השיחה עצמה — שאר הבדיקה עוסקת בשיחה.
+  const focus = path.getByRole("region", { name: focusUi.regionLabel });
+  await focus.getByRole("button", { name: focusUi.separateLabel }).click();
+  await focus.getByRole("button", { name: focusUi.continueLabel }).click();
   return path;
 }
 

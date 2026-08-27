@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 import Link from "next/link";
 import { ArrowRight, Compass, MessageCircle, PenLine } from "lucide-react";
 
-import { homePaths, homePathUi } from "@/content/homePaths";
+import { homePaths, homePathUi, type HomePathId } from "@/content/homePaths";
 import type { AskStationId } from "@/content/askRoute";
 import { trackEvent } from "@/lib/analytics";
+import { withViewTransition } from "@/lib/motion/viewTransition";
 
 // טעינה עצלה של רגע-ההקשבה: קוד השיחה (+ askRoute.ts) נטען כ-chunk נפרד רק כשמבקר
 // מתחיל שיחה — לא בטעינת עמוד הבית עצמו, כדי שה-Hero לא ישלם על ה-JS של השיחה.
@@ -14,6 +16,12 @@ const HomeConversation = React.lazy(() =>
   import("@/components/sections/HomeConversation").then((m) => ({
     default: m.HomeConversation,
   })),
+);
+
+// Focus Mode — חוויית „איפה זה פוגש אותך עכשיו?”. גם היא chunk נפרד: התוכן
+// (focusMode.ts, ודרכו methods.ts) נטען רק כשמצב-מוכר נבחר, לא בטעינת העמוד.
+const FocusMode = React.lazy(() =>
+  import("@/components/focus/FocusMode").then((m) => ({ default: m.FocusMode })),
 );
 
 /**
@@ -35,6 +43,7 @@ const HomeConversation = React.lazy(() =>
  */
 
 type Active =
+  | { mode: "focus"; situation: HomePathId; station: AskStationId }
   | { mode: "station"; station: AskStationId }
   | { mode: "open" }
   | null;
@@ -99,13 +108,24 @@ export function HomePathEntry({
     return () => io.disconnect();
   }, []);
 
+  // בחירת מצב-מוכר פותחת קודם את Focus Mode (הבמה של „עובדה מול סיפור”), לא את
+  // השיחה עצמה. אירוע „שיחה נפתחה” (`ask_open_home`) נשמר למעבר לשיחה בפועל
+  // (`openStation` מתוך ה-CTA של Focus Mode), כדי שמשמעות המדד לא תשתנה.
+  const openFocus = (situation: HomePathId, station: AskStationId) => {
+    withViewTransition(() =>
+      flushSync(() => setActive({ mode: "focus", situation, station })),
+    );
+  };
   const openStation = (station: AskStationId) => {
     trackEvent("ask_open_home", { via: "card", station });
-    setActive({ mode: "station", station });
+    withViewTransition(() => flushSync(() => setActive({ mode: "station", station })));
   };
   const openBroad = () => {
     trackEvent("ask_open_home", { via: "composer" });
-    setActive({ mode: "open" });
+    withViewTransition(() => flushSync(() => setActive({ mode: "open" })));
+  };
+  const closeActive = () => {
+    withViewTransition(() => flushSync(() => setActive(null)));
   };
 
   // כל עוד המקטע במסך — הבועה הצפה מוסתרת (מובייל). קיים גם `data-ask-inline-active`
@@ -113,6 +133,31 @@ export function HomePathEntry({
   const inViewMarker = inView ? (
     <span data-path-in-view hidden aria-hidden="true" />
   ) : null;
+
+  // Focus Mode — הבמה של „עובדה מול סיפור” למצב שנבחר. הרכיב נושא בעצמו את
+  // כפתור-החזרה ואת אזור-ה-region; ה-CTA „המשיכו עם הספר” ממשיך אל השיחה.
+  if (active?.mode === "focus") {
+    return (
+      <>
+        {inViewMarker}
+        <span data-ask-inline-active hidden aria-hidden="true" />
+        <React.Suspense
+          fallback={
+            <p className="mt-6 py-10 text-center text-[15px] text-foreground-muted" role="status">
+              טוען…
+            </p>
+          }
+        >
+          <FocusMode
+            key={active.situation}
+            situationId={active.situation}
+            onContinue={() => openStation(active.station)}
+            onBack={closeActive}
+          />
+        </React.Suspense>
+      </>
+    );
+  }
 
   if (active) {
     return (
@@ -122,7 +167,7 @@ export function HomePathEntry({
         <div className="mb-3 flex justify-center sm:justify-start">
           <button
             type="button"
-            onClick={() => setActive(null)}
+            onClick={closeActive}
             className="inline-flex items-center gap-1.5 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -218,7 +263,7 @@ export function HomePathEntry({
               onClick={(e) => {
                 if (!isPlainClick(e)) return;
                 e.preventDefault();
-                openStation(p.askStation);
+                openFocus(p.id, p.askStation);
               }}
               className="situation-card group flex h-full flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 text-start shadow-sm transition-[border-color,background-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-brand/40 hover:bg-surface-muted/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0 sm:p-5"
             >
