@@ -212,7 +212,7 @@ export function HomePathEntry({
           להקליד בה (סמן מהבהב + כיתוב-placeholder + אייקון עֵט). אפורדנס אמיתי:
           לחיצה/פוקוס פותחים את השיחה הרחבה במקום; בלי JS — קישור אל ‎/compass.
           לא כפתור-CTA כהה: זו האינטראקציה החזקה במקטע, אך שקטה. */}
-      <div className="mx-auto mt-6 max-w-2xl">
+      <div className="path-composer reveal mx-auto mt-6 max-w-2xl">
         <Link
           href="/compass"
           aria-label={homePathUi.composerAriaLabel}
@@ -262,13 +262,14 @@ export function HomePathEntry({
           ושורת-תחושה אחת. הכרטיסים נשארים `<a>` אמיתיים (SEO/ללא-JS). */}
       <ul
         ref={gridRef}
-        className="mx-auto mt-5 grid max-w-2xl grid-cols-1 gap-3 sm:max-w-4xl sm:grid-cols-2 lg:grid-cols-4"
+        className="path-nodes reveal mx-auto mt-5 grid max-w-2xl grid-cols-1 gap-3 sm:max-w-4xl sm:grid-cols-2 lg:grid-cols-4"
       >
         {homePaths.map((p, index) => (
           <li key={p.id} className="contents">
             <Link
               href={p.stationHref}
               data-index={index}
+              style={{ ["--i" as string]: String(index) }}
               onClick={(e) => {
                 if (!isPlainClick(e)) return;
                 e.preventDefault();
