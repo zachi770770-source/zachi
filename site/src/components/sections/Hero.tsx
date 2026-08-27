@@ -1,198 +1,113 @@
+import * as React from "react";
 import { ArrowLeft } from "lucide-react";
 
 import { hero } from "@/content/book";
-import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
-import { SignatureMark } from "@/components/shared/SignatureMark";
-import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 
 /**
- * Hero — גריד אמיתי של שתי עמודות: תוכן (ימין ב-RTL) / ספר (שמאל), מיושר אנכית
- * למרכז. יחידת תוכן רציפה אחת, מקוצרת: מקטע-מידע („מה זה”), כותרת, משפט הסבר
- * אחד, ושתי פעולות בלבד — פעולה ראשית „קראו טעימה מהספר” אל /preview, ופעולה
- * משנית „לרכישת הספר באמזון” (קישור חיצוני). אין כאן בורר-פרסונה, פסקאות
- * חוזרות, הצהרת-זמינות כפולה או CTA שלישי — כל היתר חי בהמשך העמוד ובדפים
- * הייעודיים. הכניסה לכלי „מה הספר אומר על המצב שלי?” עברה אל מקטע התחנות
- * (HomePathSelector), בהקשר שבו היא הגיונית, כדי לא להתחרות בשתי הפעולות כאן.
+ * Hero — „opening scene של מותג” (PHASE SIGNATURE). לא „כריכה ליד טקסט וכפתור”:
+ * סצנה עריכתית שכבתית שבה הכריכה היא *אובייקט דומיננטי* היושב על „במה” של שדה-
+ * צבע כהה (Ink), חתוכה בקצה, עם עומק וזוהר; והטיפוגרפיה הגדולה חוצה מעליה
+ * בשטח-שלילי דרמטי. התזה „מחיפוש לבנייה” גלויה: השורה הראשונה („למצוא זה רק
+ * ההתחלה”) *מפוזרת* ורכה (חיפוש), והשנייה („אהבה בונים”) *מתכנסת*, מודגשת, עם
+ * קו-חתימה נמשך וחוט מבני שיורד אל האובייקט ואל המשך העמוד.
  *
- * הפעולה הראשית היא טעימה חינמית (סיכון-אפס); הרכישה עצמה מתבצעת באמזון
- * דרך הפעולה המשנית.
+ * הקופי המאושר לא משתנה, וה-h1 נושא את אותו טקסט. הכריכה נשארת מקור מעבר-הכריכה
+ * (`data-vt-book-source` → /preview). הכוריאוגרפיה (on-load) והתנועה מגודרות
+ * ב-`.motion-js`; ללא-JS / reduced-motion — המצב הסופי גלוי ויציב מיד.
+ *
+ * ה-choreography: הרקע/עומק נכנסים ראשונים → הבמה נפרשת → הכריכה מקבלת נוכחות
+ * → הכותרת נבנית („חיפוש” מתיישב, „בנייה” מקבל רגע וקו) → ה-CTA אחרון.
  */
 export function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      {/* רקע קולנועי — שכבה ראשונה בכניסה המדורגת (hero-bg-enter): הגראדיינט
-          וההילות עולים ומתרחבים ראשונים, לפני הקו/הכותרת/הספר. דקורטיבי בלבד. */}
-      <div
-        aria-hidden="true"
-        className="hero-bg-enter pointer-events-none absolute inset-0 -z-10"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-surface-muted/60 via-background to-background" />
-        <div className="absolute -top-40 start-[8%] h-[560px] w-[560px] rounded-full bg-secondary/[0.09] blur-[130px]" />
-        <div className="absolute top-[22%] end-[4%] h-[360px] w-[360px] rounded-full bg-brand/[0.05] blur-[120px]" />
+    <section className="sig-hero" aria-label={hero.title}>
+      {/* עומק-רקע: שדות-צבע גדולים ומטושטשים + גרעין עדין. דקורטיבי בלבד. */}
+      <div className="sig-hero__bg" aria-hidden="true">
+        <span className="sig-hero__field sig-hero__field--sage" />
+        <span className="sig-hero__field sig-hero__field--terra" />
+        <span className="sig-hero__grain" />
       </div>
 
-      <Container className="flex items-center py-3 lg:py-6">
-        <div className="grid w-full items-center gap-y-2 lg:grid-cols-[1fr_1fr] lg:gap-y-0 lg:gap-x-14">
-          {/* תוכן — יחידה רציפה אחת. במובייל ראשון (הצעה + CTA לפני הכריכה);
-              בדסקטופ בעמודה הימנית (order-1). */}
-          <div className="order-1 flex flex-col items-start">
-            {/* (1) קו המסלול הפותח — טרקוטה דק שנמשך ראשון */}
-            <span className="hero-rule mb-2 lg:mb-4" aria-hidden="true" />
-
-            {/* מקטע-המידע: „מה זה”. משתמש בטיפוגרפיה של `.kicker` (גודל, משקל,
-                ריווח-אותיות וצבע — ללא שינוי), אך `hero-eyebrow` מסיר את קו-
-                התווית הדקורטיבי (`::before`) *כאן בלבד*, כדי שהשורה תיקרא כמידע
-                על המוצר ולא כתגית עיצובית. שאר השימושים ב-`.kicker` באתר
-                נשארים כפי שהם. */}
-            <span
-              className="kicker hero-eyebrow hero-fade"
-              style={{ animationDelay: "180ms" }}
-            >
-              {hero.eyebrow}
-            </span>
-
-            {/* חשיפת כותרת שורה-אחר-שורה דרך מסכה. במובייל הכותרת ברוחב מלא
-                (אין כריכה בתוך ה-Hero); הכריכה מוצגת רק בדסקטופ (hero-stage). */}
-            <h1 className="type-display mt-2 text-foreground lg:mt-4">
-              <span className="hero-line hero-line--1">
-                <span className="hero-line__in">למצוא זה רק ההתחלה.</span>
-              </span>
-              <span className="hero-line hero-line--2">
-                <span className="hero-line__in">
-                  {/* „אהבה בונים.” נושא את חתימת הכותרת. הקו הנמשך מתחתיו אינו
-                      קישוט חדש: הוא אותו מוטיב טרקוטה של hero-rule שפותח את
-                      הבלוק, ושל הקו המודפס מתחת ל„לאהבה” על הכריכה עצמה. לכן
-                      הוא מחליף את פעימת-ההתיישבות שהייתה כאן — קו נמשך הוא
-                      חתימה עריכתית, פעימת-scale על טקסט היא אנימציית-ווב. */}
-                  <span className="hero-build text-brand-hover">
-                    אהבה בונים.
-                    <span className="hero-build__stroke" aria-hidden="true" />
-                  </span>
-                </span>
-              </span>
-            </h1>
-
-            {/* שורת-המשנה אינה חוזרת על ה-H1. הכותרת כבר אמרה „חיפוש מול
-                בנייה”; אם השורה שמתחתיה אומרת „…במקום רק לחפש אותו”, הרווח
-                היחיד שהמבקר מקבל מהמשפט השני הוא חזרה. לכן היא נושאת עכשיו
-                סיבה *חדשה* לעניין: הדפוס שחוזר, והבחירה שאפשר לשנות.
-                שתי הטענות מגובות בתוכן קיים ומאושר — „לזהות דפוסים” ו„לבחור
-                אחרת” הם שניים משלושת המוקדים של תחנת „לפני קשר”. */}
-            <p className="hero-fade mt-3 text-[17px] leading-[1.5] text-foreground/80 lg:hidden">
-              לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
-            </p>
-            <p
-              className="hero-fade mt-3 hidden max-w-[48ch] text-[17.5px] leading-[1.5] text-foreground/80 lg:mt-4 lg:block lg:text-[20px] lg:leading-[1.6]"
-              style={{ animationDelay: "380ms" }}
-            >
-              הספר עוזר לזהות מה חוזר אצלכם שוב ושוב בקשרים, ולבחור אחרת בפעם
-              הבאה.
-            </p>
-
-            {/* יחידת ההמרה: שתי פעולות בלבד, בהיררכיה ברורה — טעימה (ראשית)
-                ורכישה (משנית) — תחת קו שיער עדין שמפריד אותן מהקופי שמעליהן.
-                שורת „זמין עכשיו במהדורת Kindle באמזון” הוסרה כאן: הפעולה
-                המשנית „לרכישת הספר באמזון” כבר מוסרת את אותה עובדה, ולא צריך
-                לומר אותה פעמיים בגוש-הפעולה. (הזמינות/פורמט נשמרים כפי שהם ב-
-                NewsletterSection וב-/book.) */}
-            <div className="mt-3 flex w-full max-w-[46ch] flex-col items-start gap-2.5 border-t border-border pt-3 lg:mt-5 lg:gap-3.5 lg:pt-5">
-              <div
-                className="hero-rise-soft flex w-full flex-col items-start gap-3 lg:gap-4"
-                style={{ animationDelay: "160ms" }}
-              >
-                {/* פעולה ראשית: קריאת טעימה מיד וללא הרשמה (עם מעבר-כריכה
-                    morphCover). הרכישה עצמה מתבצעת באמזון (הפעולה המשנית). */}
-                <Button
-                  asChild
-                  size="lg"
-                  className="hero-cta-pulse h-14 w-full px-7 text-[17px] sm:w-auto"
+      <Container className="sig-hero__container">
+        <div className="sig-hero__scene">
+          {/* האובייקט: במת-צבע כהה + כריכה גדולה, חתוכה, עם עומק וזוהר. */}
+          <div className="sig-hero__object">
+            <span className="sig-hero__stage" aria-hidden="true" />
+            <span className="sig-hero__glow" aria-hidden="true" />
+            <div data-tilt-scope className="sig-hero__cover">
+              <span className="sig-hero__cover-shadow" aria-hidden="true" />
+              <BookTilt className="sig-hero__tilt">
+                <BookLink
+                  href="/preview"
+                  morphCover
+                  aria-label="הציצו בספר, לקריאת טעימה"
+                  className="sig-hero__cover-link"
                 >
-                  <BookLink href="/preview" morphCover>
-                    קראו טעימה מהספר · 2 דקות
-                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  </BookLink>
-                </Button>
-
-                {/* פעולת רכישה משנית יחידה — פעולה ברורה (לא הצהרת-זמינות
-                    נוספת): מי שכבר מוכן לקנות מגיע ישירות לאמזון. */}
-                <AmazonBuyLink
-                  source="home"
-                  className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                >
-                  לרכישת הספר באמזון
-                  <ArrowLeft className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" aria-hidden="true" />
-                </AmazonBuyLink>
-              </div>
+                  <div data-vt-book-source className="sig-hero__cover-src">
+                    <BookCover priority className="w-full" />
+                  </div>
+                </BookLink>
+              </BookTilt>
             </div>
           </div>
 
-          {/* ספר — הכריכה במרכז במה נקייה: הילת Sage רכה מאחוריה מפרידה אותה
-              מהרקע הבהיר (הפרדה טונאלית), ללא פתקים מרחפים, ללא מסגרת וללא
-              רקע כהה. */}
-          <ParallaxScroll className="hero-stage order-2 hidden items-center justify-center lg:flex lg:self-stretch">
-            {/* במת המוצר: הילת Sage רכה + נגיעת אור חמה עדינה מאחורי הכריכה,
-                להפרדה טונאלית ולנפח (גוונים קיימים בלבד). ההילה נעה מעט עם
-                הגלילה (עומק) בקצב הפוך לכריכה. */}
-            <div
-              aria-hidden="true"
-              className="hero-depth-halo pointer-events-none absolute inset-0 flex items-center justify-center"
-              style={{ transform: "translateY(calc(var(--hero-parallax, 0) * 30px))" }}
-            >
-              <div className="aspect-square w-[78%] rounded-full bg-secondary/[0.18] blur-[70px]" />
-              <div className="absolute aspect-square w-[52%] translate-y-[8%] rounded-full bg-brand/[0.06] blur-[60px]" />
-            </div>
+          {/* הטיפוגרפיה: חוצה מעל הבמה בשטח-שלילי. */}
+          <div className="sig-hero__copy">
+            <span className="sig-hero__eyebrow">{hero.eyebrow}</span>
 
-            <figure className="hero-book relative flex flex-col items-center gap-3 lg:gap-5">
-              {/* הכריכה נסחפת מעט כלפי מעלה בגלילה (פרלקסה מרוסנת) — עומק בלי
-                  להפריע לטילט/למעבר-הכריכה (שיושבים על אלמנטים פנימיים). */}
-              <div
-                data-tilt-scope
-                className="hero-depth-book relative w-[152px] sm:w-[264px] lg:w-[364px]"
-                style={{ transform: "translateY(calc(var(--hero-parallax, 0) * -50px))" }}
-              >
-                {/* צל משתנה: מעמיק ונפרש עם הגלילה (פרלקסה) — עומק „חי” בזמן
-                    שהכריכה נסחפת. transform/opacity בלבד (מרוכב, ללא reflow). */}
-                <div
+            <h1 className="sig-hero__title">
+              {/* „חיפוש” — מפוזר ורך; כל מילה מתיישבת בכניסה. המילים הן טקסט
+                  קריא רגיל (רווחים אמיתיים בין spans), כך שה-h1 נקרא במלואו. */}
+              <span className="sig-hero__search">
+                {["למצוא", "זה", "רק", "ההתחלה."].map((w, i, arr) => (
+                  <React.Fragment key={w}>
+                    <span className="sig-hero__word" style={{ ["--i" as string]: String(i) }}>
+                      {w}
+                    </span>
+                    {i < arr.length - 1 ? " " : null}
+                  </React.Fragment>
+                ))}
+              </span>{" "}
+              {/* „בנייה” — מתכנס, מודגש, עם קו-חתימה נמשך. */}
+              <span className="sig-hero__build">
+                אהבה בונים.
+                <span className="sig-hero__stroke" aria-hidden="true" />
+              </span>
+            </h1>
+
+            {/* שורת-משנה — הקופי המאושר, לפי breakpoint (זהה למקור). */}
+            <p className="sig-hero__sub sig-hero__sub--mobile">
+              לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
+            </p>
+            <p className="sig-hero__sub sig-hero__sub--desktop">
+              הספר עוזר לזהות מה חוזר אצלכם שוב ושוב בקשרים, ולבחור אחרת בפעם הבאה.
+            </p>
+
+            <div className="sig-hero__cta">
+              <BookLink href="/preview" morphCover className="sig-hero__cta-primary">
+                קראו טעימה מהספר · 2 דקות
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </BookLink>
+              <AmazonBuyLink source="home" className="sig-hero__cta-secondary group">
+                לרכישת הספר באמזון
+                <ArrowLeft
+                  className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                   aria-hidden="true"
-                  className="hero-book__shadow absolute -bottom-5 start-1/2 h-10 w-[80%] -translate-x-1/2 rounded-[50%] bg-[color:var(--color-ink)]/25 blur-2xl"
-                  style={{
-                    transform:
-                      "translateX(calc(-50% + var(--tilt-shadow-x, 0px))) translateY(calc(var(--hero-parallax, 0) * 10px)) scaleX(calc(1 + var(--hero-parallax, 0) * 0.22)) scaleY(calc(1 + var(--hero-parallax, 0) * 0.35))",
-                    opacity: "calc(1 + var(--hero-parallax, 0) * 0.5)",
-                  }}
                 />
-                {/* ריחוף/נשימה מתמשכים — הכריכה „חיה” גם ללא סמן (מובייל כלול).
-                    שכבה ייעודית לתנועה בלבד, כדי לא להתנגש בפרלקסה (הורה),
-                    בכניסה (figure) או בטילט (צאצא). מכבד reduced-motion. */}
-                <div className="hero-float w-full">
-                  <BookTilt className="w-full">
-                    {/* הכריכה עצמה לחיצה ומובילה ל-/preview (כמו „קראו טעימה”),
-                        עם אותו מעבר-כריכה רציף (morphCover). מקור המעבר
-                        ([data-vt-book-source]) עוטף צמוד את הכריכה בלבד. */}
-                    <BookLink
-                      href="/preview"
-                      morphCover
-                      aria-label="הציצו בספר, לקריאת טעימה"
-                      className="hero-book__link block w-full rounded-[6px] focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-brand"
-                    >
-                      <div data-vt-book-source className="w-full">
-                        <BookCover priority className="w-full" />
-                      </div>
-                    </BookLink>
-                  </BookTilt>
-                </div>
-              </div>
-              {/* הסימן החתום „מחיפוש לבנייה” — מתחת לכריכה, כרגע-מותג מרכזי. */}
-              <SignatureMark />
-            </figure>
-          </ParallaxScroll>
+              </AmazonBuyLink>
+            </div>
+          </div>
         </div>
       </Container>
+
+      {/* חוט-המשכיות: קו מבני שיורד אל מקטע „איפה אתם נמצאים עכשיו?” — הכניסה
+          מובילה לתוך האינטראקציה (המשכיות מרחבית ל-Focus Mode). */}
+      <span className="sig-hero__thread" aria-hidden="true" />
     </section>
   );
 }

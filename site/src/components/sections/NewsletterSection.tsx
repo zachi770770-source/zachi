@@ -3,59 +3,56 @@ import { ArrowLeft } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
-import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
+import { BookCover } from "@/components/shared/BookCover";
 import { closing } from "@/content/homeStory";
 
 /**
- * סגירת עמוד הבית — נקודת ה-High Intent האחרונה. אמזון הוא ערוץ הרכישה היחיד:
- * אין רשימת המתנה, אין „מהדורה ישירה · בקרוב”, אין איסוף מיילים ואין checkout
- * מקומי — וגם אין דחיפות, ספירה לאחור או „מלאי אחרון”.
+ * סגירת עמוד הבית — ה-climax, לא „כרטיס CTA ירוק”. הבמה חוזרת: שדה-Ink חמים
+ * (bookend מול ה-Hero), הכריכה *חוזרת* כאובייקט, וכותרת גדולה מזמינה את הצעד
+ * הטבעי — הספר. אמזון הוא ערוץ הרכישה היחיד: אין רשימת המתנה, אין checkout
+ * מקומי, אין דחיפות/ספירה/„מלאי אחרון”.
  *
- * היררכיית הפעולה כאן היא שתי דרגות של מוכנות, לא CTA אחד: הכפתור הראשי לרכישה
- * למי שכבר שוכנע, וקישור שקט לטעימה למי שלא — כדי שסוף העמוד לא יהיה קיר יחיד
- * שמי שאינו מוכן פשוט נעצר בו.
+ * שתי דרגות-מוכנות (לא CTA יחיד): כפתור-רכישה למי שכבר שוכנע, וקישור-טעימה שקט
+ * למי שלא. הקופי והקישורים (כולל source האנליטיקה) לא השתנו.
  */
 export function NewsletterSection() {
   return (
     <section
       id="get-the-book"
-      className="scroll-mt-24 py-6 sm:py-12"
+      className="sig-close scroll-mt-24"
       aria-labelledby="get-the-book-heading"
     >
-      <Container>
-        <div className="reveal mx-auto max-w-3xl rounded-2xl bg-secondary-muted px-6 py-9 text-center sm:px-12 sm:py-12">
-          {/* הכותרת פותחת, לא הקיקר: קודם לכן תווית-מלאי באותיות רחבות הקדימה
-              את המשפט הרגשי, וההצמדה הזו הפכה את רגע-הפעולה למקטע נוסף במקום
-              למסקנה. עובדת הזמינות ירדה לשורת-המידע שמתחת, שם היא מידע. */}
-          <h2
-            id="get-the-book-heading"
-            className="mx-auto max-w-[24ch] font-serif text-[clamp(1.6rem,3vw,2.5rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]"
-          >
-            {closing.title}
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-foreground-muted">
-            {siteConfig.amazon.availableLabel}. קריאה מיידית לאחר הרכישה,
-            באפליקציית Kindle או בכל מכשיר תואם.
-          </p>
-          <div className="mt-6 flex justify-center">
-            <Button asChild size="lg" className="w-full sm:w-auto">
-              <AmazonBuyLink source="home">
+      <div className="sig-close__bg" aria-hidden="true" />
+      <Container className="sig-close__container">
+        <div className="sig-close__inner reveal">
+          {/* הכריכה חוזרת — אובייקט-סיום, עם זוהר ועומק. דקורטיבי. */}
+          <div className="sig-close__cover" aria-hidden="true">
+            <span className="sig-close__glow" />
+            <BookCover className="w-full" />
+          </div>
+
+          <div className="sig-close__copy">
+            <h2 id="get-the-book-heading" className="sig-close__title">
+              {closing.title}
+            </h2>
+            <p className="sig-close__avail">
+              {siteConfig.amazon.availableLabel}. קריאה מיידית לאחר הרכישה,
+              באפליקציית Kindle או בכל מכשיר תואם.
+            </p>
+            <div className="sig-close__cta">
+              <AmazonBuyLink source="home" className="sig-close__buy">
                 {siteConfig.amazon.buyLabel}
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               </AmazonBuyLink>
-            </Button>
+            </div>
+            <p className="sig-close__secondary">
+              {closing.secondaryPrompt}{" "}
+              <Link href="/preview" className="sig-close__secondary-link">
+                {closing.secondaryLabel}
+              </Link>
+            </p>
           </div>
-          {/* הדרגה השנייה — סיכון אפס, בלי להתחרות ויזואלית בכפתור הרכישה. */}
-          <p className="mt-4 text-[14px] leading-relaxed text-foreground-muted">
-            {closing.secondaryPrompt}{" "}
-            <Link
-              href="/preview"
-              className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              {closing.secondaryLabel}
-            </Link>
-          </p>
         </div>
       </Container>
     </section>
