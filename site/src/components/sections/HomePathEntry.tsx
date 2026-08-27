@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, MessageCircle, PenLine } from "lucide-react";
+import { ArrowRight, Compass, MessageCircle, PenLine } from "lucide-react";
 
 import { homePaths, homePathUi } from "@/content/homePaths";
 import type { AskStationId } from "@/content/askRoute";
@@ -51,7 +51,19 @@ function isPlainClick(e: React.MouseEvent): boolean {
   );
 }
 
-export function HomePathEntry() {
+export function HomePathEntry({
+  freeTextEnabled = false,
+}: {
+  /**
+   * מצב-התצוגה (נקבע בשרת ב-`HomePathSelector`): כשהכתיבה-החופשית חיה, התיבה
+   * הראשית היא באמת שדה-כתיבה — סמן מהבהב, אייקון עֵט, ורמז „אפשר לכתוב…”.
+   * כשברירת המחדל פעילה (המצפן המודרך בלבד), לחיצה פותחת שיחה מודרכת קצרה ולא
+   * שדה-כתיבה, ולכן האפורדנס הופך כן: אייקון מצפן (זהות „שאל את הספר”), בלי סמן-
+   * כתיבה, ורמז שמתאר את המהלך המודרך — כדי לא להבטיח הקלדה שאינה מתקיימת עדיין.
+   * ברירת מחדל `false` = ההתנהגות בפרודקשן.
+   */
+  freeTextEnabled?: boolean;
+}) {
   const [active, setActive] = React.useState<Active>(null);
   const [inView, setInView] = React.useState(false);
   const regionRef = React.useRef<HTMLDivElement>(null);
@@ -157,19 +169,30 @@ export function HomePathEntry() {
           }}
           className="home-composer group flex w-full items-center gap-3 rounded-2xl border border-border-strong bg-surface px-5 py-4 text-start shadow-sm transition-[border-color,box-shadow] hover:border-brand/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-6 sm:py-5"
         >
-          <span aria-hidden="true" className="home-composer__caret" />
+          {/* סמן-הכתיבה המהבהב הוא „אפשר להקליד כאן” — נכון רק כשהכתיבה-החופשית
+              חיה. במצב המודרך התיבה פותחת שיחה מודרכת, ולכן הסמן אינו מוצג כדי
+              לא להבטיח הקלדה. */}
+          {freeTextEnabled ? (
+            <span aria-hidden="true" className="home-composer__caret" />
+          ) : null}
           <span className="min-w-0 flex-1 text-[16.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[18px]">
             {homePathUi.composerLead}
           </span>
+          {/* אייקון: עֵט (כתיבה) כשהכתיבה-החופשית חיה; אחרת מצפן — זהות „שאל את
+              הספר” העקבית עם ה-CompassLauncher ועם מקטע התחנות. */}
           <span
             aria-hidden="true"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground sm:h-10 sm:w-10"
           >
-            <PenLine className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+            {freeTextEnabled ? (
+              <PenLine className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+            ) : (
+              <Compass className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+            )}
           </span>
         </Link>
         <p className="mt-2 px-1 text-[13px] leading-relaxed text-foreground-muted">
-          {homePathUi.composerHint}
+          {freeTextEnabled ? homePathUi.composerHint : homePathUi.composerHintGuided}
         </p>
       </div>
 

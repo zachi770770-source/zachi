@@ -1,6 +1,7 @@
 import { Container } from "@/components/shared/Container";
 import { homePathUi } from "@/content/homePaths";
 import { HomePathEntry } from "@/components/sections/HomePathEntry";
+import { resolveCompassSurface } from "@/lib/compass/assistant/config";
 
 /**
  * לב עמוד הבית: „איפה אתם נמצאים עכשיו?” — רגע ההקשבה של העמוד. הכותרת מפנה את
@@ -17,6 +18,11 @@ import { HomePathEntry } from "@/components/sections/HomePathEntry";
  * רביעית.
  */
 export function HomePathSelector() {
+  // מצב-התצוגה של „שאל את הספר” נקבע בשרת: כשהכתיבה-החופשית חיה (עוזר פעיל או
+  // תצוגת-Preview) התיבה היא באמת שדה-כתיבה; בברירת המחדל (המצפן המודרך בלבד)
+  // היא פותחת שיחה מודרכת — ולכן האפורדנס שלה מותאם בהתאם (ראו `HomePathEntry`),
+  // עקבי עם `CompassLauncher` שכבר מסתעף לפי אותו מצב.
+  const freeTextEnabled = resolveCompassSurface() !== "guided";
   return (
     <section id="path" className="scroll-mt-20 py-5 sm:py-10" aria-labelledby="path-heading">
       <Container>
@@ -30,7 +36,7 @@ export function HomePathSelector() {
           </p>
         </div>
 
-        <HomePathEntry />
+        <HomePathEntry freeTextEnabled={freeTextEnabled} />
       </Container>
     </section>
   );

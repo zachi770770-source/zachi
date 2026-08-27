@@ -24,7 +24,7 @@ const STAGES = [
 const stationName = (askId: string) =>
   askStations.find((s) => s.id === askId)!.name;
 
-test("#path: a free-text composer (primary) + four situation starters — real links (SEO/no-JS)", async ({
+test("#path: the primary composer entry (guided affordance by default) + four situation starters — real links (SEO/no-JS)", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -33,12 +33,15 @@ test("#path: a free-text composer (primary) + four situation starters — real l
   await expect(path.getByRole("heading", { name: homePathUi.heading })).toBeVisible();
   await expect(path.getByText(homePathUi.eyebrow)).toBeVisible();
 
-  // נקודת-הכניסה הראשית: תיבת-כתיבה חופשית — קישור אמיתי אל /compass (ללא JS),
-  // עם כיתוב שמזמין לכתוב במילים שלכם.
+  // נקודת-הכניסה הראשית: קישור אמיתי אל /compass (ללא JS), עם כיתוב מזמין.
   const composer = path.getByRole("link", { name: homePathUi.composerAriaLabel });
   await expect(composer).toHaveAttribute("href", "/compass");
   await expect(path.getByText(homePathUi.composerLead)).toBeVisible();
-  await expect(path.getByText(homePathUi.composerHint)).toBeVisible();
+  // בברירת המחדל (המצפן המודרך בלבד — סביבת הבדיקה) האפורדנס כן: אין סמן-כתיבה
+  // מהבהב שמבטיח הקלדה, והרמז מתאר את המהלך המודרך. סמן-הכתיבה שמור למצב שבו
+  // הכתיבה-החופשית באמת חיה.
+  await expect(path.getByText(homePathUi.composerHintGuided)).toBeVisible();
+  await expect(path.locator(".home-composer__caret")).toHaveCount(0);
 
   // מפריד אל המצבים המשניים.
   await expect(path.getByText(homePathUi.startersLabel)).toBeVisible();
