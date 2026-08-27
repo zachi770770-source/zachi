@@ -22,7 +22,7 @@ afterEach(() => {
 function renderExperience() {
   // uiPreview כדי שהקונסולה לא תיגש לרשת בזמן הבדיקה.
   render(
-    <CompassExperience salesOpen={false} maxQuestionChars={300} uiPreview />,
+    <CompassExperience maxQuestionChars={300} uiPreview />,
   );
 }
 

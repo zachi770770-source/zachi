@@ -48,7 +48,7 @@ beforeEach(() => {
 });
 
 async function renderReadyConsole() {
-  render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
+  render(<CompassConsole maxQuestionChars={300} />);
   // ממתינים שהטופס ייטען (GET הזמינות הסתיים).
   await screen.findByLabelText("כתבו כאן במילים שלכם");
 }
@@ -73,7 +73,7 @@ describe("CompassConsole, motion states", () => {
     // @ts-expect-error - מדמים fetch
     global.fetch = fn;
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
+    render(<CompassConsole maxQuestionChars={300} />);
     const textarea = await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "איך יודעים שזו התאמה?" } });
     fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));
@@ -111,7 +111,7 @@ describe("CompassConsole, motion states", () => {
     // @ts-expect-error - מדמים fetch
     global.fetch = fn;
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
+    render(<CompassConsole maxQuestionChars={300} />);
     const textarea = await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "שאלה אמיתית?" } });
     const button = screen.getByRole("button", { name: /שאל את הספר/ });
@@ -137,7 +137,7 @@ describe("CompassConsole, motion states", () => {
     // @ts-expect-error - מדמים fetch
     global.fetch = fn;
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
+    render(<CompassConsole maxQuestionChars={300} />);
     const textarea = await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "שאלה שתיכשל" } });
     fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));

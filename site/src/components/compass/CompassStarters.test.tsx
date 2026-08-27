@@ -42,7 +42,7 @@ beforeEach(() => {
 });
 
 async function renderReadyConsole() {
-  render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
+  render(<CompassConsole maxQuestionChars={300} />);
   await screen.findByLabelText("כתבו כאן במילים שלכם");
 }
 
@@ -72,7 +72,7 @@ describe("CompassConsole, starters + unified conversion CTA", () => {
         }
         return { available: true, status: "answered", answer: "בנו על יסודות.", remaining: 2 };
       });
-      render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
+      render(<CompassConsole maxQuestionChars={300} />);
       await screen.findByLabelText("כתבו כאן במילים שלכם");
       return f;
     })();
@@ -110,7 +110,7 @@ describe("CompassConsole, starters + unified conversion CTA", () => {
     // @ts-expect-error - מדמים fetch
     global.fetch = fn;
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={300} />);
+    render(<CompassConsole maxQuestionChars={300} />);
     await screen.findByLabelText("כתבו כאן במילים שלכם");
     fireEvent.click(screen.getByRole("button", { name: STARTERS[0] }));
 

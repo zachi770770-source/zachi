@@ -43,7 +43,6 @@ const KNOWN_ROUTES = new Set<string>([
   "/shipping-returns",
   "/starting-again",
   "/terms",
-  "/thank-you",
 ]);
 
 async function dismissCookies(page: Page) {

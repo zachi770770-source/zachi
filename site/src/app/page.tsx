@@ -11,7 +11,6 @@ import { BuildSpine } from "@/components/shared/BuildSpine";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { LanguageHint } from "@/components/layout/LanguageHint";
 import { BookSchema } from "@/components/schema/BookSchema";
-import { ProductSchema } from "@/components/schema/ProductSchema";
 import { WebSiteSchema } from "@/components/schema/WebSiteSchema";
 
 export const metadata = pageMetadata({
@@ -52,7 +51,6 @@ export default function HomePage() {
       <LanguageHint />
       <WebSiteSchema />
       <BookSchema />
-      <ProductSchema />
       {/* מסמן-פריסה בלבד: מצהיר שבעמוד הזה יושבים פקדים צפים בתחתית, ולכן
           הפוטר צריך לשמור להם מקום (ראו `--floating-ui-clearance` ב-globals).
           `hidden` ⇒ display:none, אפס השפעה על הפריסה, ו-`:has()` עדיין מוצא

@@ -1,4 +1,3 @@
-import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { compass, compassQuiz } from "@/content/compass";
 import { askStations, askUi, type AskStationId } from "@/content/askRoute";
@@ -60,7 +59,6 @@ export default async function CompassPage({
         />
         <div className="enter-stagger">
           <CompassExperience
-            salesOpen={siteConfig.salesOpen}
             maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
             uiPreview={surface === "free-text-preview"}
             initialStation={initialStation}

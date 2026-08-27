@@ -55,7 +55,7 @@ describe("CompassConsole, safety response", () => {
       severity: "critical",
       answer: SAFETY_TEXT,
     });
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     await ask("הוא מאיים עליי עם סכין");
 
     expect(await screen.findByText(SAFETY_TEXT)).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe("CompassConsole, safety response", () => {
       severity: "high",
       answer: SAFETY_TEXT,
     });
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     await ask("אני רוצה למות");
     // role="alert" — המסר מוכרז מיד ואינו דורש חיפוש בעמוד.
     const alert = await screen.findByRole("alert");
@@ -95,7 +95,7 @@ describe("CompassConsole, safety response", () => {
       focus: "פחות סימן בודד, ויותר דפוס לאורך זמן.",
       remaining: 2,
     });
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     await ask("איך יודעים אם זו התאמה");
     expect(await screen.findByText("תשובה מהספר.")).toBeInTheDocument();
     expect(screen.getByText(FOCUS_LABEL)).toBeInTheDocument();
@@ -105,7 +105,7 @@ describe("CompassConsole, safety response", () => {
   it("never renders an empty result for an unknown future status", async () => {
     // רגרסיה על הנפילה-הבטוחה: לפניה, סטטוס לא-מוכר נתן מסך ריק אחרי „שלח”.
     mockFetch({ available: true, status: "some-future-status", answer: "…" });
-    render(<CompassConsole salesOpen={false} maxQuestionChars={400} />);
+    render(<CompassConsole maxQuestionChars={400} />);
     await ask("שאלה רגילה על זוגיות");
     expect(await screen.findByText(compass.ui.genericError)).toBeInTheDocument();
   });

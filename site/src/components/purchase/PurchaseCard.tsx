@@ -1,29 +1,18 @@
-"use client";
-
-import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Smartphone, BookOpen, ArrowLeft, Sparkles } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
-import type { ProductFormat } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
-import { FormatSelector } from "@/components/purchase/FormatSelector";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 
 /**
  * אזור הרכישה של עמוד הספר. הספר זמין *עכשיו* במהדורת Kindle באמזון —
  * הפעולה הראשית היא רכישה חיצונית באמזון, והמשנית היא טעימה. אין checkout
- * מקומי ואין תשלום באתר. הזרימה הישנה של סליקה מקומית (`salesOpen=true`)
- * נשמרת דורמנטית למהדורה הישירה/מודפסת העתידית באתר.
+ * מקומי ואין תשלום באתר: אמזון הוא ערוץ הרכישה היחיד.
  */
 export function PurchaseCard() {
-  const [format, setFormat] = React.useState<ProductFormat>(
-    siteConfig.products.defaultFormat
-  );
-  const salesOpen = siteConfig.salesOpen;
-
   return (
     <div
       id="purchase"
@@ -36,56 +25,39 @@ export function PurchaseCard() {
               {siteConfig.bookTitle}
             </h3>
             <p className="mt-1 text-[15px] text-foreground-muted">
-              מאת צחי חן · {salesOpen ? "המהדורה הדיגיטלית" : siteConfig.amazon.availableLabel}
+              מאת צחי חן · {siteConfig.amazon.availableLabel}
             </p>
           </div>
 
-          {/* בורר מהדורות רלוונטי רק לזרימת הרכישה הישירה באתר (עתידית). */}
-          {salesOpen ? <FormatSelector value={format} onChange={setFormat} /> : null}
+          <ul className="flex flex-col gap-2.5 border-t border-foreground/12 pt-5 text-[15px] text-foreground-muted">
+            <li className="flex items-center gap-2.5">
+              <BookOpen className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              {siteConfig.amazon.editionLabel}: קריאה מיידית אחרי הרכישה
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
+              קריאה באפליקציית Kindle או בכל מכשיר תואם
+            </li>
+            {/* נקודת-ערך ברכישה: הספר + ערכת הכלים הדיגיטלית לקורא, ללא תשלום
+                נוסף. מפנה ל-/reader (בלי CTA-אמזון שני שמתחרה בכפתור למטה). */}
+            <li className="flex items-start gap-2.5">
+              <Sparkles className="mt-0.5 h-[18px] w-[18px] shrink-0 text-brand" aria-hidden="true" />
+              <span>
+                כולל{" "}
+                <Link
+                  href="/reader"
+                  className="font-semibold text-brand-hover underline underline-offset-2 hover:text-foreground"
+                >
+                  ערכת הכלים הדיגיטלית לקורא
+                </Link>{" "}
+                — ללא תשלום נוסף
+              </span>
+            </li>
+          </ul>
 
-          {salesOpen ? (
-            <div className="border-t border-foreground/12 pt-5">
-              <p className="type-quote text-[26px] font-bold text-brand-hover">
-                {siteConfig.commerce.price} ₪
-              </p>
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-2.5 border-t border-foreground/12 pt-5 text-[15px] text-foreground-muted">
-              <li className="flex items-center gap-2.5">
-                <BookOpen className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                {siteConfig.amazon.editionLabel}: קריאה מיידית אחרי הרכישה
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Smartphone className="h-[18px] w-[18px] text-brand" aria-hidden="true" />
-                קריאה באפליקציית Kindle או בכל מכשיר תואם
-              </li>
-              {/* נקודת-ערך ברכישה: הספר + ערכת הכלים הדיגיטלית לקורא, ללא תשלום
-                  נוסף. מפנה ל-/reader (בלי CTA-אמזון שני שמתחרה בכפתור למטה). */}
-              <li className="flex items-start gap-2.5">
-                <Sparkles className="mt-0.5 h-[18px] w-[18px] shrink-0 text-brand" aria-hidden="true" />
-                <span>
-                  כולל{" "}
-                  <Link
-                    href="/reader"
-                    className="font-semibold text-brand-hover underline underline-offset-2 hover:text-foreground"
-                  >
-                    ערכת הכלים הדיגיטלית לקורא
-                  </Link>{" "}
-                  — ללא תשלום נוסף
-                </span>
-              </li>
-            </ul>
-          )}
-
-          {salesOpen ? (
-            <Button asChild size="lg" className="h-14 w-full text-[17px]">
-              <Link href="/checkout">לרכישת הספר</Link>
-            </Button>
-          ) : (
-            <Button asChild size="lg" className="h-14 w-full text-[17px]">
-              <AmazonBuyLink source="book">{siteConfig.amazon.buyLabel}</AmazonBuyLink>
-            </Button>
-          )}
+          <Button asChild size="lg" className="h-14 w-full text-[17px]">
+            <AmazonBuyLink source="book">{siteConfig.amazon.buyLabel}</AmazonBuyLink>
+          </Button>
 
           {/* פעולה משנית שקטה: טעימה מהספר (אותו מונח אחיד לכל האתר). */}
           <BookLink

@@ -2,10 +2,11 @@ import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
 
-// נתיבים שאינם-תוכן ולעולם אין לסרוק/לאנדקס: API, סליקה ותודה-על-הזמנה.
-// משותף לכל קבוצת user-agent מותרת (בקבוצה בעלת-שם ב-robots.txt אין ירושה
-// מ-`*`, ולכן ה-Disallow הזה חוזר במפורש בכל קבוצה מותרת).
-const NON_CONTENT_DISALLOW = ["/api/", "/checkout", "/checkout/pay/", "/thank-you"];
+// נתיבים שאינם-תוכן ולעולם אין לסרוק/לאנדקס: כרגע ה-API בלבד (הרכישה מתבצעת
+// באמזון — אין באתר סליקה/הזמנות/תודה-על-הזמנה). משותף לכל קבוצת user-agent
+// מותרת (בקבוצה בעלת-שם ב-robots.txt אין ירושה מ-`*`, ולכן ה-Disallow הזה חוזר
+// במפורש בכל קבוצה מותרת).
+const NON_CONTENT_DISALLOW = ["/api/"];
 
 /**
  * זחלני חיפוש/אחזור (Search & Retrieval) של מנועי-תשובות מבוססי-AI. אלה

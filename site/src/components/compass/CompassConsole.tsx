@@ -39,11 +39,9 @@ const CARD_SHELL =
  * מעבר למספר שנותר. אין שמירה מקומית של תוכן, ואין שליחת מזהה אישי.
  */
 export function CompassConsole({
-  salesOpen,
   maxQuestionChars,
   uiPreview = false,
 }: {
-  salesOpen: boolean;
   maxQuestionChars: number;
   /**
    * מצב בדיקות (Preview/Staging): הטופס נראה וניתן לבדיקה, אך השליחה נעצרת
@@ -194,12 +192,9 @@ export function CompassConsole({
     }
   }, []);
 
-  // ה-CTA הראשי מתחת לתשובה/במצב „בקרוב”: כשיש רכישה ישירה באתר — לעמוד הספר;
-  // אחרת (המצב הנוכחי) — רכישה חיצונית באמזון, ה-CTA האחיד של האתר. אין רשימת
-  // המתנה ואין הבטחת „כשהספר יוצא” — הספר כבר זמין.
-  const primaryCta = salesOpen ? (
-    <Link href={compass.cta.openHref}>{compass.cta.openLabel}</Link>
-  ) : (
+  // ה-CTA הראשי מתחת לתשובה/במצב „בקרוב”: רכישה חיצונית באמזון, ה-CTA האחיד של
+  // האתר. אין רשימת המתנה ואין הבטחת „כשהספר יוצא” — הספר כבר זמין.
+  const primaryCta = (
     <AmazonBuyLink source="book">{compass.cta.closedLabel}</AmazonBuyLink>
   );
 

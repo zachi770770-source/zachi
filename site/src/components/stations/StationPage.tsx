@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowUpLeft } from "lucide-react";
 
-import { siteConfig } from "@/config/site";
 import {
   stations,
   stationOrder,
@@ -24,12 +23,10 @@ import { stationPageIllustration } from "@/content/routeIllustrations";
  * כל שלושת הדפים חולקים את אותה שפה חזותית ואת אותו רכיב — ללא כפילות קוד.
  */
 export function StationPage({ station }: { station: Station }) {
-  // פעולה מרכזית אחת לדף התחנה: לקרוא את הטעימה שמתאימה לקורא. בקשת ההרשמה
-  // לרשימת ההמתנה מרוכזת בסוף עמוד הטעימה, לא כאן. כשהמכירה נפתחת — רכישה.
-  const primaryHref = siteConfig.salesOpen ? "/book#purchase" : "/preview";
-  const primaryLabel = siteConfig.salesOpen
-    ? "לרכישת הספר"
-    : "לקריאת הטעימה שמתאימה לי";
+  // פעולה מרכזית אחת לדף התחנה: לקרוא את הטעימה שמתאימה לקורא. הרכישה עצמה
+  // מתבצעת באמזון.
+  const primaryHref = "/preview";
+  const primaryLabel = "לקריאת הטעימה שמתאימה לי";
 
   // תחנה מרכזית = אחת משלוש התחנות במחזור. „אחרי פרידה” (שער) ו„מתחילים מחדש”
   // (גשר) אינם במחזור — הם מציגים kicker משלהם, בלי מחוון-המסע, ומקשרים דרך
@@ -238,19 +235,6 @@ export function StationPage({ station }: { station: Station }) {
           <Button asChild size="lg" className="w-full px-7 sm:w-auto">
             <Link href={primaryHref}>{primaryLabel}</Link>
           </Button>
-          {/* לאחר פתיחת המכירה, הטעימה נשארת כפעולה משנית לצד הרכישה. */}
-          {siteConfig.salesOpen ? (
-            <Link
-              href="/preview"
-              className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              {stationsUi.sampleCta}
-              <ArrowLeft
-                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                aria-hidden="true"
-              />
-            </Link>
-          ) : null}
           {/* כניסה שקטה לעוזר — למי שרוצה כיוון לפני שהוא בוחר מאיפה להתחיל. */}
           <AskBookLink prompt="לא בטוחים מאיפה להתחיל?" />
           {/* קישור הקשרי אחד לעמוד-המושג שהתחנה נשענת עליו (/method/*). */}

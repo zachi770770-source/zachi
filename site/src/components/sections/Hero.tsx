@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { hero } from "@/content/book";
-import { siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { Container } from "@/components/shared/Container";
@@ -21,8 +19,8 @@ import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
  * הייעודיים. הכניסה לכלי „מה הספר אומר על המצב שלי?” עברה אל מקטע התחנות
  * (HomePathSelector), בהקשר שבו היא הגיונית, כדי לא להתחרות בשתי הפעולות כאן.
  *
- * מצב Pre-launch: אין כפתור רכישה חסום; כשה-salesOpen יהפוך ל-true הפעולה
- * הראשית הופכת אוטומטית ל„לרכישת הספר”.
+ * הפעולה הראשית היא טעימה חינמית (סיכון-אפס); הרכישה עצמה מתבצעת באמזון
+ * דרך הפעולה המשנית.
  */
 export function Hero() {
   return (
@@ -108,23 +106,17 @@ export function Hero() {
                 style={{ animationDelay: "160ms" }}
               >
                 {/* פעולה ראשית: קריאת טעימה מיד וללא הרשמה (עם מעבר-כריכה
-                    morphCover). אחרי פתיחת המכירה — הופכת לכפתור הרכישה. */}
-                {siteConfig.salesOpen ? (
-                  <Button asChild size="lg" className="h-14 w-full px-7 text-[17px] sm:w-auto">
-                    <Link href="/book#purchase">לרכישת הספר</Link>
-                  </Button>
-                ) : (
-                  <Button
-                    asChild
-                    size="lg"
-                    className="hero-cta-pulse h-14 w-full px-7 text-[17px] sm:w-auto"
-                  >
-                    <BookLink href="/preview" morphCover>
-                      קראו טעימה מהספר · 2 דקות
-                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                    </BookLink>
-                  </Button>
-                )}
+                    morphCover). הרכישה עצמה מתבצעת באמזון (הפעולה המשנית). */}
+                <Button
+                  asChild
+                  size="lg"
+                  className="hero-cta-pulse h-14 w-full px-7 text-[17px] sm:w-auto"
+                >
+                  <BookLink href="/preview" morphCover>
+                    קראו טעימה מהספר · 2 דקות
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  </BookLink>
+                </Button>
 
                 {/* פעולת רכישה משנית יחידה — פעולה ברורה (לא הצהרת-זמינות
                     נוספת): מי שכבר מוכן לקנות מגיע ישירות לאמזון. */}

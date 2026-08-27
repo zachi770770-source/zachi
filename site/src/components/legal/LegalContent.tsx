@@ -28,14 +28,12 @@ export function LegalContent({
         </h1>
         <p className="mt-2 text-sm text-foreground-muted">{updatedAt}</p>
 
-        {!siteConfig.salesOpen ? (
-          <p className="mt-6 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm leading-relaxed text-foreground-muted">
-            הספר זמין לרכישה במהדורת Kindle באמזון; רכישה זו מתבצעת בפלטפורמת
-            Amazon וכפופה לתנאי הרכישה, התשלום והאספקה שלה. אין מכירה ישירה של
-            הספר דרך האתר, ולכן הסעיפים העוסקים ברכישה, בתשלום, במסירה, במשלוח
-            ובביטול דרך האתר אינם חלים כרגע.
-          </p>
-        ) : null}
+        <p className="mt-6 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm leading-relaxed text-foreground-muted">
+          הספר זמין לרכישה במהדורת Kindle באמזון; רכישה זו מתבצעת בפלטפורמת
+          Amazon וכפופה לתנאי הרכישה, התשלום והאספקה שלה. אין מכירה ישירה של
+          הספר דרך האתר, ולכן הסעיפים העוסקים ברכישה, בתשלום, במסירה, במשלוח
+          ובביטול דרך האתר אינם חלים.
+        </p>
 
         {legalDetailsPending ? (
           <p className="mt-4 rounded-lg border border-border border-s-2 border-s-brand bg-surface-muted px-4 py-3 text-sm leading-relaxed text-foreground">

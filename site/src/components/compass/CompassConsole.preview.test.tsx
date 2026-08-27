@@ -21,7 +21,7 @@ describe("CompassConsole, UI-preview (staging) mode", () => {
     const fetchSpy = vi.fn();
     global.fetch = fetchSpy as unknown as typeof fetch;
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={300} uiPreview />);
+    render(<CompassConsole maxQuestionChars={300} uiPreview />);
 
     // הטופס זמין מיד (בלי GET), והודעת מצב-הבדיקות מוצגת.
     expect(screen.getByLabelText("כתבו כאן במילים שלכם")).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe("CompassConsole, UI-preview (staging) mode", () => {
     const fetchSpy = vi.fn();
     global.fetch = fetchSpy as unknown as typeof fetch;
 
-    render(<CompassConsole salesOpen={false} maxQuestionChars={300} uiPreview />);
+    render(<CompassConsole maxQuestionChars={300} uiPreview />);
     const textarea = screen.getByLabelText("כתבו כאן במילים שלכם");
     fireEvent.change(textarea, { target: { value: "האם כדאי להמשיך את הקשר?" } });
     fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));

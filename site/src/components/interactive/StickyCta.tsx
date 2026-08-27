@@ -140,24 +140,11 @@ export function StickyCta() {
   // כשבאנר העוגיות פתוח — מוסתר אף הוא (אין תחרות על שטח התחתית).
   if (dismissed || !visible || formInView || sceneInView || bannerOpen) return null;
 
-  // טרום-השקה: אם נבחרה פרסונה — ה-CTA הרגשי שלה (אל רשימת ההמתנה); אחרת הטעימה
-  // החינמית ללא הרשמה. אחרי פתיחת המכירה — רכישה.
-  const preLaunch = !siteConfig.salesOpen;
-  const href = !preLaunch
-    ? "/book#purchase"
-    : persona
-      ? persona.ctaHref
-      : "/preview";
-  const label = !preLaunch
-    ? "לרכישת הספר"
-    : persona
-      ? persona.ctaLabel
-      : "קראו טעימה מהספר · 2 דקות";
-  const subline = preLaunch
-    ? persona
-      ? "מותאם למצב שלכם"
-      : "טעימה מהספר · בלי הרשמה"
-    : null;
+  // אם נבחרה פרסונה — ה-CTA הרגשי שלה; אחרת הטעימה החינמית ללא הרשמה. הרכישה
+  // עצמה מתבצעת באמזון (בגוף העמוד), לא דרך הבר הזה.
+  const href = persona ? persona.ctaHref : "/preview";
+  const label = persona ? persona.ctaLabel : "קראו טעימה מהספר · 2 דקות";
+  const subline = persona ? "מותאם למצב שלכם" : "טעימה מהספר · בלי הרשמה";
 
   return (
     <aside
@@ -181,7 +168,7 @@ export function StickyCta() {
       />
       <Link
         href={href}
-        onClick={() => preLaunch && trackEvent("sticky_sample_click")}
+        onClick={() => trackEvent("sticky_sample_click")}
         className="inline-flex min-h-[44px] flex-1 items-center justify-between gap-2 rounded-full ps-1 text-[15px] font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:flex-none sm:justify-start"
       >
         <span className="flex flex-col items-start leading-tight">
