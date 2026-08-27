@@ -28,6 +28,9 @@ export function StationGuides({
   if (stationGuides.length === 0) return null;
 
   const secondary = tone === "secondary";
+  // התאמת יחיד/רבים: חלק מהתחנות נושאות מדריך *אחד* בלבד (למשל „מתחילים מחדש”),
+  // ואז „מדריכים” הרבים והכיתוב „לכל שאלה” אינם נכונים.
+  const single = stationGuides.length === 1;
 
   return (
     <section
@@ -42,7 +45,7 @@ export function StationGuides({
             : "font-serif text-[1.25rem] font-bold text-foreground",
         )}
       >
-        מדריכים להעמקה בשאלות ספציפיות
+        {single ? "מדריך להעמקה בשאלה ספציפית" : "מדריכים להעמקה בשאלות ספציפיות"}
       </h2>
       <p
         className={cn(
@@ -50,7 +53,9 @@ export function StationGuides({
           secondary ? "mt-3 text-[14px]" : "mt-2 text-[15px]",
         )}
       >
-        עמוד זה הוא נקודת-המוצא; לכל שאלה יש מדריך ייעודי מתוך הגישה של הספר.
+        {single
+          ? "עמוד זה הוא נקודת-המוצא; יש כאן מדריך ייעודי מתוך הגישה של הספר."
+          : "עמוד זה הוא נקודת-המוצא; לכל שאלה יש מדריך ייעודי מתוך הגישה של הספר."}
       </p>
 
       {secondary ? (
