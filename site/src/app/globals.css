@@ -5121,9 +5121,11 @@ body:has([data-fm-active]) {
    (הדף flat ⇒ הילדים משתטחים אל מישור-הדף, כך שהאותיות מתקצרות עם הזווית).
    הגודל נמדד ב-cqw (יחסית לרוחב-הספר) כדי להיקרא בזמן ההיפוך; overflow:hidden
    על הדף מבטיח ששום מילה לא יוצאת מהמשטח. */
+/* שוליים אחידים לכל ארבעת המשטחים — שוליים עליונים נדיבים (13%) כדי ששום שורה
+   עליונה לא תיגע/תיחתך בקצה, וגם התחתון/צדדי אחיד. שום טקסט אינו נוגע בקצוות. */
 .book-open__sheet {
   position: absolute;
-  inset: 9% 11% 9% 11%;
+  inset: 13% 12% 12% 12%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -5142,39 +5144,36 @@ body:has([data-fm-active]) {
   color: color-mix(in oklab, var(--color-ink) 55%, #6b5334);
   margin-bottom: 0.4em;
 }
-/* כותרת מודגשת; גוף-הטקסט קטן ממנה ומהודק לפסקה קריאה. הגדלים גדלו ~30%
-   והתוכן התרחב (8–9 שורות לעמוד) כדי למלא ~45–55% מהמשטח — „עמוד ספר”, לא
-   כמה משפטים מרחפים. */
+/* כותרת מודגשת; גוף-הטקסט קטן ממנה ומהודק לפסקה קריאה. גוף-הטקסט הוקטן ~12%
+   כדי שהעמוד ייראה יותר כמו עמוד ספר אמיתי, תוך שמירה על קריאות בזמן התנועה. */
 .book-open__h {
-  font-size: 8.8cqw;
+  font-size: 8cqw;
   line-height: 1.12;
   font-weight: 800;
   color: color-mix(in oklab, var(--color-ink) 96%, #3a2f20);
-  margin-bottom: 0.48em;
+  margin-bottom: 0.5em;
 }
 .book-open__p {
-  font-size: 5.5cqw;
+  font-size: 4.8cqw;
   line-height: 1.5;
   font-weight: 500;
-  margin: 0 0 0.28em;
+  margin: 0 0 0.3em;
 }
 .book-open__q {
-  font-size: 10.2cqw;
+  font-size: 8.9cqw;
   line-height: 1.2;
   font-weight: 800;
   color: color-mix(in oklab, var(--color-ink) 95%, #3a2f20);
-  margin-bottom: 0.5em;
+  margin-bottom: 0.52em;
   text-indent: -0.08em;
 }
 .book-open__sub {
-  font-size: 6cqw;
+  font-size: 5.2cqw;
   font-weight: 800;
   color: color-mix(in oklab, var(--color-ink) 95%, #4a3d2e);
-  margin: 0.55em 0 0.22em;
+  margin: 0.55em 0 0.24em;
 }
 .book-open__sub:first-child { margin-top: 0; }
-/* p1 — הציטוט הגדול פותח, ואז שורות-גוף; מרווח מעט פנימה כמו עמוד-ציטוט. */
-.book-open__page--p1 .book-open__sheet { inset: 11% 12% 10% 12%; }
 /* השדרה — פס-כריכה כהה בקו-הקיפול (ימין ב-RTL), נותן „ספר” ולא ערימת דפים. */
 .book-open__spine {
   position: absolute;
