@@ -1,3 +1,4 @@
+import * as React from "react";
 import Image from "next/image";
 
 import { siteConfig } from "@/config/site";
@@ -17,6 +18,54 @@ import { cn } from "@/lib/utils";
  * המדויקת. מונפש פעם אחת בלבד תחת `.motion-js` (globals.css). reduced-motion /
  * ללא-JS ⇒ הדפים אינם מרונדרים והכריכה סטטית לגמרי. transform/opacity בלבד.
  */
+/**
+ * תוכן-הדפים המודפס (טקסט אמיתי, לא placeholders). שלושה עמודים שונים, כל אחד
+ * עם פריסה אחרת: עמוד-כותרת+פסקה, עמוד-ציטוט, ועמוד דו-מקטעי. המשפטים הם
+ * ניסוחי-התֵּמה המאושרים של האתר („דייטינג הוא חיפוש / אהבה היא בנייה” וכו’) —
+ * לא ציטוטים מהספר ולא המצאות. aria-hidden (דקורטיבי; מסתובב עם הדף ב-3D).
+ */
+const bookOpenPages: Record<number, React.ReactNode> = {
+  // עמוד 1 — פסקה: כותרת מודגשת + גוף-טקסט רציף.
+  0: (
+    <span className="book-open__sheet">
+      <span className="book-open__h">דייטינג הוא חיפוש</span>
+      <span className="book-open__p">למצוא זה רק ההתחלה.</span>
+      <span className="book-open__p">דייטינג הוא חיפוש.</span>
+      <span className="book-open__p">אהבה היא בנייה.</span>
+      <span className="book-open__p">עובדה היא מה שקרה.</span>
+      <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
+      <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
+      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.</span>
+      <span className="book-open__p">הספר עוזר לזהות מה חוזר אצלכם, ולבחור אחרת בפעם הבאה.</span>
+    </span>
+  ),
+  // עמוד 2 — ציטוט: ציטוט גדול פותח + שורות-גוף תומכות.
+  1: (
+    <span className="book-open__sheet">
+      <span className="book-open__q">„אהבה היא בנייה.”</span>
+      <span className="book-open__p">למצוא זה רק ההתחלה.</span>
+      <span className="book-open__p">דייטינג הוא חיפוש.</span>
+      <span className="book-open__p">עובדה היא מה שקרה.</span>
+      <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
+      <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
+      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.</span>
+    </span>
+  ),
+  // עמוד 3 — שתי פסקאות: תת-כותרת + שורות, פעמיים.
+  2: (
+    <span className="book-open__sheet">
+      <span className="book-open__sub">עובדה</span>
+      <span className="book-open__p">עובדה היא מה שקרה.</span>
+      <span className="book-open__p">למצוא זה רק ההתחלה.</span>
+      <span className="book-open__p">דייטינג הוא חיפוש.</span>
+      <span className="book-open__sub">סיפור</span>
+      <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
+      <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
+      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.</span>
+    </span>
+  ),
+};
+
 export function BookCover({
   className,
   priority = false,
@@ -37,13 +86,25 @@ export function BookCover({
           // יורד עם סדר-ההיפוך כך שכל דף חושף את שמתחתיו.
           <span className="book-open" aria-hidden="true">
             <span className="book-open__spine" />
-            <span className="book-open__spread book-open__face" />
+            <span className="book-open__spread book-open__face">
+              <span className="book-open__sheet">
+                <span className="book-open__h">לראות אחרת</span>
+                <span className="book-open__p">למצוא זה רק ההתחלה.</span>
+                <span className="book-open__p">דייטינג הוא חיפוש.</span>
+                <span className="book-open__p">אהבה היא בנייה.</span>
+                <span className="book-open__p">עובדה היא מה שקרה.</span>
+                <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
+                <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
+              </span>
+            </span>
             {[2, 1, 0].map((i) => (
               <span
                 key={i}
                 className={`book-open__page book-open__face book-open__page--p${i}`}
                 style={{ ["--i" as string]: String(i), zIndex: 10 - i }}
-              />
+              >
+                {bookOpenPages[i]}
+              </span>
             ))}
           </span>
         ) : null}
