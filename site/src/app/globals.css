@@ -5046,6 +5046,9 @@ body:has([data-fm-active]) {
   transform-style: preserve-3d;
   pointer-events: none;
   opacity: 0;
+  /* מכל-מדידה: הטיפוגרפיה על הדפים נמדדת ביחס לרוחב-הספר (cqw), כך שהיא נשארת
+     פרופורציונלית בכל breakpoint (392/264/196px). */
+  container-type: inline-size;
   animation: bo-fade var(--book-open-total) linear var(--book-open-delay) both;
 }
 /* הכריכה עצמה = הדף-הקדמי שנפתח (סביב השדרה בצד ימין; הדפים מתהפכים ימין→שמאל
@@ -5073,32 +5076,12 @@ body:has([data-fm-active]) {
     inset -7px 0 12px -6px rgba(58, 46, 32, 0.5), /* צל-שדרה (ימין) */
     inset 4px 0 6px -4px rgba(255, 255, 255, 0.6), /* אור בקצה-הפתיחה (שמאל) */
     2px 10px 22px -10px rgba(34, 30, 24, 0.45); /* צל-קצה */
+  /* התוכן המודפס נחתך בגבול-הדף — שום מילה לא יוצאת מתחת/מחוץ למשטח. */
+  overflow: hidden;
   backface-visibility: visible;
 }
-/* תוכן-עמוד מופשט: כותרת קטנה + בלוקי-פסקה, עם margin rhythm — „עמוד ספר”
-   גם בלי לקרוא. שורות דיו עדינות; ה-heading מעט כהה יותר. דקורטיבי בלבד. */
-.book-open__face::before {
-  content: "";
-  position: absolute;
-  inset: 13% 17% 15% 15%;
-  background-repeat: no-repeat;
-  /* כותרת קצרה (חום דיו חמים, לא מלבן אפור) + שורות-פסקה עדינות. */
-  background-image:
-    linear-gradient(color-mix(in oklab, #6b5334 68%, transparent), color-mix(in oklab, #6b5334 68%, transparent)),
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--color-ink) 17%, transparent) 0,
-      color-mix(in oklab, var(--color-ink) 17%, transparent) 1.5px,
-      transparent 1.5px,
-      transparent 11px
-    );
-  background-size:
-    38% 3.4%,
-    100% 100%;
-  background-position:
-    100% 0,
-    0 26%;
-}
+/* כל המשטחים (spread + שלושת הדפים) נושאים טקסט-עברית אמיתי דרך .book-open__sheet —
+   כך ששום עלה גלוי (כולל הבסיס בסוף הרצף) לעולם אינו „רק קווים אפורים”. */
 /* דף-הבסיס — טאופ כהה יחסית, כדי שהדף הבהיר האחרון (p2) שמתהפך מעליו יבלוט. */
 .book-open__spread {
   z-index: 0;
@@ -5109,10 +5092,13 @@ body:has([data-fm-active]) {
 .book-open__page {
   transform-origin: 100% 50%;
   transform: translateZ(calc((10 - var(--i, 0)) * 0.2px)) rotateY(0deg);
-  /* גוון-משטח ייחודי לכל דף (--pg-*): שלושה משטחים שונים בבירור — כל היפוך
-     חושף עמוד בצבע *אחר*, לא הבדל-גוון. */
+  /* התוכן (::before) יושב על פני-הדף וסובב איתו ב-3D. הדף *חד-צדדי*: מעבר ל-90°
+     ה-backface נגזר, כך שלא רואים טקסט-מראה הפוך — הטקסט נראה רק כשהפנים מול הצופה. */
+  backface-visibility: hidden;
+  /* גוון-משטח ייחודי לכל דף (--pg-*): שלושה משטחים שונים בבירור. ההיילייט הלבן
+     מרוסן, כדי לא להלבין את הטקסט המודפס. */
   background:
-    radial-gradient(120% 100% at 100% 50%, rgba(255, 255, 255, 0.34), transparent 46%),
+    radial-gradient(120% 100% at 100% 50%, rgba(255, 255, 255, 0.16), transparent 50%),
     linear-gradient(105deg, var(--pg-b), var(--pg-a) 40%, var(--pg-b));
   /* צל-הרמה חזק: הדף המתהפך מטיל צל עמוק על העמוד שמתחתיו — קריאה חד-משמעית
      של „דף פיזי מורם”, לא הבהוב. */
@@ -5130,46 +5116,64 @@ body:has([data-fm-active]) {
 .book-open__page--p1 { --pg-a: #edf0e9; --pg-b: #d9ddcf; animation-name: bo-p1; } /* מרווה-אפרפר קריר */
 .book-open__page--p2 { --pg-a: #f5ecd6; --pg-b: #e7d6b2; animation-name: bo-p2; } /* חול חמים, אחרון */
 
-/* ── פריסת-תוכן שונה לכל עמוד (דקורטיבי) ──
-   p0: כותרת + פסקאות צפופות. p1: ציטוט — בלי כותרת, שורות עבות ומרווחות
-   ומוזחות. p2: שתי מקטעות — כותרת+שורות, רווח, תת-כותרת+שורות. */
-.book-open__page--p1::before {
-  inset: 24% 26% 30% 24%;
-  background-image:
-    linear-gradient(color-mix(in oklab, #7c6b53 70%, transparent), color-mix(in oklab, #7c6b53 70%, transparent)),
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--color-ink) 22%, transparent) 0,
-      color-mix(in oklab, var(--color-ink) 22%, transparent) 2.5px,
-      transparent 2.5px,
-      transparent 20px
-    );
-  background-size:
-    16% 4.6%,
-    100% 100%;
-  background-position:
-    100% 0,
-    0 34%;
+/* ── טקסט-עברית אמיתי מודפס על פני-הדף ──
+   כל דף נושא „גיליון” (.book-open__sheet) עם טקסט אמיתי הסובב עם הדף ב-3D
+   (הדף flat ⇒ הילדים משתטחים אל מישור-הדף, כך שהאותיות מתקצרות עם הזווית).
+   הגודל נמדד ב-cqw (יחסית לרוחב-הספר) כדי להיקרא בזמן ההיפוך; overflow:hidden
+   על הדף מבטיח ששום מילה לא יוצאת מהמשטח. */
+/* שוליים אחידים לכל ארבעת המשטחים — שוליים עליונים נדיבים (13%) כדי ששום שורה
+   עליונה לא תיגע/תיחתך בקצה, וגם התחתון/צדדי אחיד. שום טקסט אינו נוגע בקצוות. */
+.book-open__sheet {
+  position: absolute;
+  inset: 13% 12% 12% 12%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  direction: rtl;
+  text-align: right;
+  color: color-mix(in oklab, var(--color-ink) 90%, #3a2f20);
+  font-family: var(--font-literary), var(--font-quote), Georgia, "Times New Roman", serif;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }
-.book-open__page--p2::before {
-  inset: 12% 16% 13% 15%;
-  background-image:
-    linear-gradient(color-mix(in oklab, #6b5334 68%, transparent), color-mix(in oklab, #6b5334 68%, transparent)),
-    repeating-linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 17%, transparent) 0, color-mix(in oklab, var(--color-ink) 17%, transparent) 1.5px, transparent 1.5px, transparent 11px),
-    linear-gradient(color-mix(in oklab, #6b5334 60%, transparent), color-mix(in oklab, #6b5334 60%, transparent)),
-    repeating-linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 17%, transparent) 0, color-mix(in oklab, var(--color-ink) 17%, transparent) 1.5px, transparent 1.5px, transparent 11px);
-  background-repeat: no-repeat;
-  background-size:
-    34% 3%,
-    100% 30%,
-    26% 2.6%,
-    100% 26%;
-  background-position:
-    100% 0,
-    0 12%,
-    100% 56%,
-    0 70%;
+.book-open__kicker {
+  font-size: 4cqw;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: color-mix(in oklab, var(--color-ink) 55%, #6b5334);
+  margin-bottom: 0.4em;
 }
+/* כותרת מודגשת; גוף-הטקסט קטן ממנה ומהודק לפסקה קריאה. גוף-הטקסט הוקטן ~12%
+   כדי שהעמוד ייראה יותר כמו עמוד ספר אמיתי, תוך שמירה על קריאות בזמן התנועה. */
+.book-open__h {
+  font-size: 8cqw;
+  line-height: 1.12;
+  font-weight: 800;
+  color: color-mix(in oklab, var(--color-ink) 96%, #3a2f20);
+  margin-bottom: 0.5em;
+}
+.book-open__p {
+  font-size: 4.8cqw;
+  line-height: 1.5;
+  font-weight: 500;
+  margin: 0 0 0.3em;
+}
+.book-open__q {
+  font-size: 8.9cqw;
+  line-height: 1.2;
+  font-weight: 800;
+  color: color-mix(in oklab, var(--color-ink) 95%, #3a2f20);
+  margin-bottom: 0.52em;
+  text-indent: -0.08em;
+}
+.book-open__sub {
+  font-size: 5.2cqw;
+  font-weight: 800;
+  color: color-mix(in oklab, var(--color-ink) 95%, #4a3d2e);
+  margin: 0.55em 0 0.24em;
+}
+.book-open__sub:first-child { margin-top: 0; }
 /* השדרה — פס-כריכה כהה בקו-הקיפול (ימין ב-RTL), נותן „ספר” ולא ערימת דפים. */
 .book-open__spine {
   position: absolute;
