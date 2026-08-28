@@ -5022,71 +5022,217 @@ body:has([data-fm-active]) {
   opacity: 1;
 }
 
-/* ── E · Book opening (Hero): הספר „מדפדף” פעם אחת ואז מתייצב ──
-   דפים דקים נפתחים מקצה-הפתיחה (fore-edge) ונהפכים סביב השדרה (שמאל פיזי, לפי
-   border-radius של `.book-cover__img`), פעם אחת, אחרי שכניסת ה-Hero נחה. שכבות
-   aria-hidden בתוך אותו הקשר-3D של הכריכה. reduced-motion / ללא-JS ⇒ אינן
-   מוצגות כלל (display:none), הכריכה נשארת סטטית. transform/opacity בלבד. */
-.book-cover__riffle {
+/* ── E · פתיחת-הספר (Hero): כריכה → נפתחת → שלושה דפים מתהפכים אחד-אחרי-השני
+   → הספר מתייצב פתוח → נסגר בחזרה. לא riffle מהיר: turn מלא וברור לכל דף (סביב
+   השדרה), עם משטח-נייר אמיתי (חום, שורות, צל-שדרה, צל-קצה) ורגע שבו הדף „עומד”
+   מול הצופה (translateZ קדימה ב-mid-turn). ה-<img> של הכריכה עצמה היא הדף-הקדמי
+   שנפתח — זהות הכריכה נשמרת, ואין כפילות. מונפש פעם אחת תחת `.motion-js`.
+   reduced-motion / ללא-JS ⇒ `.book-open` לא מרונדר והכריכה סטטית לגמרי.
+   transform/opacity בלבד (ללא CLS). --book-open-total ≈ 4.4ש, אחרי delay. */
+.book-cover--open {
+  --paper-a: #f7f2e9;
+  --paper-b: #f0e8d9;
+  --paper-edge: #e7ddca;
+  --book-open-delay: 2200ms;
+  --book-open-total: 5000ms;
+}
+.book-open {
   display: none;
 }
-.motion-js .book-cover--riffle .book-cover__riffle {
+.motion-js .book-cover--open .book-open {
   display: block;
   position: absolute;
   inset: 0;
-  z-index: 3;
   transform-style: preserve-3d;
   pointer-events: none;
-}
-.book-cover__leaf {
-  position: absolute;
-  inset: 1.5% 1.5% 1.5% 2%;
-  transform-origin: left center;
-  transform: rotateY(0deg);
   opacity: 0;
-  border-radius: 2px 8px 8px 2px;
-  background:
-    linear-gradient(
-      100deg,
-      #efe9dc 0%,
-      #f6f2e9 22%,
-      #efe9dc 100%
-    );
-  box-shadow:
-    inset 3px 0 5px -2px rgba(43, 36, 31, 0.28),
-    6px 8px 16px -8px rgba(34, 38, 43, 0.4);
+  animation: bo-fade var(--book-open-total) linear var(--book-open-delay) both;
+}
+/* הכריכה עצמה = הדף-הקדמי שנפתח (סביב השדרה בצד ימין; הדפים מתהפכים ימין→שמאל
+   *בתוך* טווח-הספר, מעל שדה-ה-Ink, כך שהתנועה נראית ולא בורחת אל הקופי). */
+.motion-js .book-cover--open .book-cover__img {
+  transform-origin: 100% 50%;
   backface-visibility: hidden;
   will-change: transform, opacity;
-  animation: book-leaf-turn 920ms var(--ease-settle) both;
-  animation-delay: calc(2500ms + var(--i, 0) * 250ms);
+  animation: bo-cover var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
 }
-/* קו-דיו עדין על הדף, כדי שייקרא „עמוד” ולא לוח ריק — לא פוטוריאליסטי. */
-.book-cover__leaf::after {
+/* בזמן הרצף הספר *מוטה* מעט לאחור, כדי שפני-הדף העומד ייראו לצופה (ולא edge-on).
+   fill: backwards ⇒ במנוחה (וב-delay) חוזר לטרנספורם הבסיס והטילט-בריחוף שב לעבוד. */
+.motion-js .book-cover--open .book-cover__inner {
+  animation: bo-tilt var(--book-open-total) var(--ease-settle) var(--book-open-delay) backwards;
+}
+/* משטח-נייר משותף (spread + דפים): חום, כריכה רכה, ותוכן עמוד מופשט. */
+.book-open__face {
+  position: absolute;
+  inset: 1% 1% 1% 1.5%;
+  border-radius: 8px 3px 3px 8px; /* פינה מעוגלת בקצה-הפתיחה (שמאל; השדרה מימין) */
+  background:
+    radial-gradient(120% 100% at 100% 50%, rgba(255, 255, 255, 0.5), transparent 40%),
+    linear-gradient(105deg, var(--paper-b), var(--paper-a) 32%, var(--paper-a) 78%, var(--paper-edge));
+  box-shadow:
+    inset -7px 0 12px -6px rgba(58, 46, 32, 0.5), /* צל-שדרה (ימין) */
+    inset 4px 0 6px -4px rgba(255, 255, 255, 0.6), /* אור בקצה-הפתיחה (שמאל) */
+    2px 10px 22px -10px rgba(34, 30, 24, 0.45); /* צל-קצה */
+  backface-visibility: visible;
+}
+/* תוכן-עמוד מופשט: כותרת קטנה + בלוקי-פסקה, עם margin rhythm — „עמוד ספר”
+   גם בלי לקרוא. שורות דיו עדינות; ה-heading מעט כהה יותר. דקורטיבי בלבד. */
+.book-open__face::before {
   content: "";
   position: absolute;
-  inset: 16% 14% 16% 22%;
-  background: repeating-linear-gradient(
-    to bottom,
-    color-mix(in oklab, var(--color-ink) 20%, transparent) 0,
-    color-mix(in oklab, var(--color-ink) 20%, transparent) 1px,
-    transparent 1px,
-    transparent 9px
-  );
-  opacity: 0.5;
+  inset: 13% 17% 15% 15%;
+  background-repeat: no-repeat;
+  /* כותרת קצרה (חום דיו חמים, לא מלבן אפור) + שורות-פסקה עדינות. */
+  background-image:
+    linear-gradient(color-mix(in oklab, #6b5334 68%, transparent), color-mix(in oklab, #6b5334 68%, transparent)),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-ink) 17%, transparent) 0,
+      color-mix(in oklab, var(--color-ink) 17%, transparent) 1.5px,
+      transparent 1.5px,
+      transparent 11px
+    );
+  background-size:
+    38% 3.4%,
+    100% 100%;
+  background-position:
+    100% 0,
+    0 26%;
 }
-@keyframes book-leaf-turn {
-  0% {
-    opacity: 0;
-    transform: rotateY(0deg);
-  }
-  10% {
-    opacity: 1;
-  }
-  82% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: rotateY(-166deg);
-  }
+/* דף-הבסיס — טאופ כהה יחסית, כדי שהדף הבהיר האחרון (p2) שמתהפך מעליו יבלוט. */
+.book-open__spread {
+  z-index: 0;
+  background:
+    radial-gradient(120% 100% at 100% 50%, rgba(255, 255, 255, 0.26), transparent 45%),
+    linear-gradient(105deg, #cfc4ac, #dbd0b8 40%, #d2c6ac);
+}
+.book-open__page {
+  transform-origin: 100% 50%;
+  transform: translateZ(calc((10 - var(--i, 0)) * 0.2px)) rotateY(0deg);
+  /* גוון-משטח ייחודי לכל דף (--pg-*): שלושה משטחים שונים בבירור — כל היפוך
+     חושף עמוד בצבע *אחר*, לא הבדל-גוון. */
+  background:
+    radial-gradient(120% 100% at 100% 50%, rgba(255, 255, 255, 0.34), transparent 46%),
+    linear-gradient(105deg, var(--pg-b), var(--pg-a) 40%, var(--pg-b));
+  /* צל-הרמה חזק: הדף המתהפך מטיל צל עמוק על העמוד שמתחתיו — קריאה חד-משמעית
+     של „דף פיזי מורם”, לא הבהוב. */
+  filter: drop-shadow(-16px 20px 18px rgba(16, 12, 6, 0.6));
+  will-change: transform;
+  animation-duration: var(--book-open-total);
+  animation-timing-function: var(--ease-settle);
+  animation-delay: var(--book-open-delay);
+  animation-fill-mode: both;
+}
+/* שלושה עמודים שונים בבירור — צבע-נייר שונה, פריסת-תוכן שונה, ואנימציה משלו
+   לכל אחד. (הקצאת ה-animation לפי מחלקה, לא לפי nth-of-type — ה-spine וה-spread
+   הם גם spans, ולכן nth-of-type היה מקצה אנימציה לעמוד אחד בלבד.) */
+.book-open__page--p0 { --pg-a: #f8f3ea; --pg-b: #ece1cd; animation-name: bo-p0; } /* שנהב חם, מתהפך ראשון */
+.book-open__page--p1 { --pg-a: #edf0e9; --pg-b: #d9ddcf; animation-name: bo-p1; } /* מרווה-אפרפר קריר */
+.book-open__page--p2 { --pg-a: #f5ecd6; --pg-b: #e7d6b2; animation-name: bo-p2; } /* חול חמים, אחרון */
+
+/* ── פריסת-תוכן שונה לכל עמוד (דקורטיבי) ──
+   p0: כותרת + פסקאות צפופות. p1: ציטוט — בלי כותרת, שורות עבות ומרווחות
+   ומוזחות. p2: שתי מקטעות — כותרת+שורות, רווח, תת-כותרת+שורות. */
+.book-open__page--p1::before {
+  inset: 24% 26% 30% 24%;
+  background-image:
+    linear-gradient(color-mix(in oklab, #7c6b53 70%, transparent), color-mix(in oklab, #7c6b53 70%, transparent)),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-ink) 22%, transparent) 0,
+      color-mix(in oklab, var(--color-ink) 22%, transparent) 2.5px,
+      transparent 2.5px,
+      transparent 20px
+    );
+  background-size:
+    16% 4.6%,
+    100% 100%;
+  background-position:
+    100% 0,
+    0 34%;
+}
+.book-open__page--p2::before {
+  inset: 12% 16% 13% 15%;
+  background-image:
+    linear-gradient(color-mix(in oklab, #6b5334 68%, transparent), color-mix(in oklab, #6b5334 68%, transparent)),
+    repeating-linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 17%, transparent) 0, color-mix(in oklab, var(--color-ink) 17%, transparent) 1.5px, transparent 1.5px, transparent 11px),
+    linear-gradient(color-mix(in oklab, #6b5334 60%, transparent), color-mix(in oklab, #6b5334 60%, transparent)),
+    repeating-linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 17%, transparent) 0, color-mix(in oklab, var(--color-ink) 17%, transparent) 1.5px, transparent 1.5px, transparent 11px);
+  background-repeat: no-repeat;
+  background-size:
+    34% 3%,
+    100% 30%,
+    26% 2.6%,
+    100% 26%;
+  background-position:
+    100% 0,
+    0 12%,
+    100% 56%,
+    0 70%;
+}
+/* השדרה — פס-כריכה כהה בקו-הקיפול (ימין ב-RTL), נותן „ספר” ולא ערימת דפים. */
+.book-open__spine {
+  position: absolute;
+  top: 1.5%;
+  bottom: 1.5%;
+  inset-inline-start: 1.5%; /* השדרה בצד ימין (RTL start) */
+  width: 9px;
+  z-index: 6;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--color-ink) 55%, #4a3d2e),
+    color-mix(in oklab, var(--color-ink) 30%, #6b5a44)
+  );
+  box-shadow: 2px 0 8px -3px rgba(34, 30, 24, 0.5);
+}
+
+@keyframes bo-fade {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* הטיית-הצפייה: בזמן הרצף הספר עובר לתצוגת 3/4 — השדרה (ימין) נסוגה לאחור
+   והקצה-החופשי (שמאל) מתקרב, כך שפני-הדף המתהפך *סוחפים אל הצופה* (ולא edge-on
+   ולא נעלמים לאחור). rotateY חזק + rotateX מתון. */
+@keyframes bo-tilt {
+  0% { transform: rotateY(9deg) rotateX(1.2deg); }
+  13% { transform: rotateY(34deg) rotateX(15deg); }
+  85% { transform: rotateY(34deg) rotateX(15deg); }
+  100% { transform: rotateY(9deg) rotateX(1.2deg); }
+}
+/* הכריכה: נפתחת (עד ~102°, אז נמוגה), פתוחה לאורך הדפדוף, ונסגרת בחזרה בסוף. */
+@keyframes bo-cover {
+  0% { transform: rotateY(0deg); opacity: 1; }
+  4% { transform: rotateY(-8deg); opacity: 1; }
+  11% { transform: rotateY(-76deg); opacity: 1; }
+  15% { transform: rotateY(-102deg); opacity: 0; }
+  85% { transform: rotateY(-102deg); opacity: 0; }
+  100% { transform: rotateY(0deg); opacity: 1; }
+}
+/* כל דף: rest → lift (translateZ גדול קדימה, פנים גלויות) → עומד מול הצופה →
+   חוצה את השדרה, ורק *אחרי* שפניו כבר לא נראות — נמוג. פני כל דף גלויים ~750ms
+   (rest→past-vertical), עם overlap קטן בין ההיפוכים. הדף אטום כל זמן הצפייה,
+   כך שזה „דף פיזי שמתהפך” ולא dissolve. */
+@keyframes bo-p0 {
+  0%, 13% { transform: translateZ(3px) rotateY(0deg); opacity: 1; }
+  18% { transform: translateZ(50px) rotateY(-34deg); opacity: 1; }
+  23% { transform: translateZ(58px) rotateY(-72deg); opacity: 1; }
+  28% { transform: translateZ(34px) rotateY(-110deg); opacity: 1; }
+  32%, 100% { transform: translateZ(16px) rotateY(-140deg); opacity: 0; }
+}
+@keyframes bo-p1 {
+  0%, 30% { transform: translateZ(2.5px) rotateY(0deg); opacity: 1; }
+  35% { transform: translateZ(50px) rotateY(-34deg); opacity: 1; }
+  40% { transform: translateZ(58px) rotateY(-72deg); opacity: 1; }
+  45% { transform: translateZ(34px) rotateY(-110deg); opacity: 1; }
+  49%, 100% { transform: translateZ(16px) rotateY(-140deg); opacity: 0; }
+}
+@keyframes bo-p2 {
+  0%, 47% { transform: translateZ(2px) rotateY(0deg); opacity: 1; }
+  52% { transform: translateZ(50px) rotateY(-34deg); opacity: 1; }
+  57% { transform: translateZ(58px) rotateY(-72deg); opacity: 1; }
+  62% { transform: translateZ(34px) rotateY(-110deg); opacity: 1; }
+  66%, 100% { transform: translateZ(16px) rotateY(-140deg); opacity: 0; }
 }
