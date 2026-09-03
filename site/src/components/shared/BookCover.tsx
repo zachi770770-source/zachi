@@ -125,10 +125,15 @@ export function BookCover({
               <span className="book-open__gutter" />
 
               {/* שכבת-הכריכה הקדמית: אותה תמונת-כריכה, נפתחת סביב השדרה ונשארת
-                  פתוחה כלוח-שמאל. ה-face הוא הכריכה; ה-inner הוא הצד הפנימי. */}
+                  פתוחה כלוח-שמאל. ה-face הוא הכריכה; ה-liner הוא הצד הפנימי —
+                  והוא הלוח העליון בצד-שמאל, ולכן הוא נושא את טקסט עמוד-השמאל
+                  (הדפים שנחתו יושבים מאחוריו). הכריכה נפתחת שטוח (‎-180°) כך
+                  שהטקסט נקרא ישר ולא-מהופך, סימטרי לעמוד-ימין. */}
               <span className="book-open__cover">
                 <span className="book-open__cover-face" />
-                <span className="book-open__cover-liner" />
+                <span className="book-open__cover-liner">
+                  <SheetSections />
+                </span>
               </span>
             </span>
           </span>

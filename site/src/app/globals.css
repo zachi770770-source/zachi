@@ -4363,11 +4363,8 @@ body:has([data-fm-active]) {
     filter: drop-shadow(0 56px 74px rgba(0, 0, 0, 0.6));
   }
   /* דסקטופ: יש מרחב — ה-SPREAD רחב יותר (~1.86×) ומתכווץ פחות. */
-  .book-cover--open {
-    --leaf-w: 0.62;
-    --open-scale: 0.66;
-    --open-shift: 0%;
-  }
+  /* (הגדרות ה-SPREAD הרספונסיביות ל-1024/1280/1440 יושבות ליד בלוק ה-book,
+      *אחרי* הגדרת-הבסיס — אחרת הבסיס (מובייל) גובר עליהן לפי סדר-המקור.) */
   /* הטיפוגרפיה חוצה בשטח-השלילי (RTL=שמאל), על אותו שדה — בלי תפר. */
   .sig-hero__copy {
     position: relative;
@@ -5048,8 +5045,8 @@ body:has([data-fm-active]) {
   --paper-ink: color-mix(in oklab, var(--color-ink) 92%, #2a2a28);
   /* גיאומטריית ה-SPREAD (מובייל): רוחב עמוד-שמאל כשבר מרוחב הכריכה, וקנה-מידה
      והסטה שמחזיקים את הספר הפתוח בתוך ה-viewport ורחוק מהטקסט. דסקטופ דורס. */
-  --leaf-w: 0.7;
-  --open-scale: 0.9;
+  --leaf-w: 0.74;
+  --open-scale: 0.92;
   --open-shift: 0%;
 }
 .book-open { display: none; }
@@ -5072,11 +5069,28 @@ body:has([data-fm-active]) {
   transform-origin: 50% 50%;
   animation: bo-fit var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
 }
+/* ה-SPREAD גדל עם המרחב הפנוי (מימין ל-H1). ערכים לפי breakpoint (responsive,
+   לא scale אחד קבוע): רחב ומרשים ב-1440/1280, מצומצם רק כנדרש ב-1024. */
+@media (min-width: 1024px) {
+  .book-cover--open { --leaf-w: 0.92; --open-scale: 0.68; --open-shift: 13%; }
+}
+@media (min-width: 1280px) {
+  .book-cover--open { --leaf-w: 0.94; --open-scale: 0.84; --open-shift: 15%; }
+}
+@media (min-width: 1440px) {
+  .book-cover--open { --leaf-w: 0.96; --open-scale: 0.86; --open-shift: 25%; }
+}
 /* ה-<img> האמיתי נמוג ברגע ששכבת-הכריכה משתלטת (crossfade בלתי-נראה — אותה
    תמונה, אותו מקום). לא מסתובב יותר; הסיבוב על שכבת-הכריכה בתוך ה-3D. */
 .motion-js .book-cover--open .book-cover__img {
   backface-visibility: hidden;
   will-change: opacity;
+  animation: bo-imgfade var(--book-open-total) linear var(--book-open-delay) forwards;
+}
+/* עובי-הדפים של הכריכה הסגורה (`__pages`) מחזיק את נפח-הספר במהלך רגע-הנוכחות
+   ואז נמוג יחד עם ה-<img> — כך שאינו „מבצבץ” כפס בהיר מעל הספר הפתוח (הספר הפתוח
+   מגדל עובי-דפים משלו בקצוות). נשאר גלוי לגמרי במצב סטטי (ללא-JS/reduced-motion). */
+.motion-js .book-cover--open .book-cover__pages {
   animation: bo-imgfade var(--book-open-total) linear var(--book-open-delay) forwards;
 }
 /* „מצלמה”: מתחילה בזווית ¾ עדינה ומתיישרת אל הצופה כשהספר פתוח, ומסתיימת בדיוק
@@ -5106,17 +5120,19 @@ body:has([data-fm-active]) {
   border-radius: 1px 7px 7px 1px; /* פינה מעוגלת בקצה-החופשי (ימין) */
   /* צל-מרזב פנימי (בצד השדרה = שמאל) + הבזק-אור בקצה-החופשי. */
   box-shadow:
-    inset 12px 0 20px -14px rgba(28, 28, 32, 0.45),
+    inset 10px 0 24px -16px rgba(24, 24, 28, 0.2),
     inset -5px 0 8px -6px rgba(255, 255, 255, 0.4);
 }
 .book-open__leaf--left {
   right: 100%; /* יושב משמאל לשדרה: [-leaf-w·W, 0] */
   width: calc(var(--leaf-w) * 100%);
   transform-origin: 100% 50%;
-  transform: translateZ(8px);
+  /* בסיס-נייר לבן לעמוד-שמאל, מתחת ל-liner (שנושא את הטקסט הסופי). מוצג בזמן
+     „טאטוא” הכריכה לפני שה-liner נוחת שטוח. translateZ נמוך = מאחורי ה-liner. */
+  transform: translateZ(0.3px);
   border-radius: 7px 1px 1px 7px; /* קצה-חופשי בשמאל */
   box-shadow:
-    inset -12px 0 20px -14px rgba(28, 28, 32, 0.42),
+    inset -10px 0 24px -16px rgba(24, 24, 28, 0.19),
     inset 5px 0 8px -6px rgba(255, 255, 255, 0.36);
   /* מופיע כשהכריכה נפתחת (Beat 2→3). */
   opacity: 0;
@@ -5126,31 +5142,28 @@ body:has([data-fm-active]) {
 /* עובי-דפים בקצוות-החופשיים (fore-edges) — „גוש עם הרבה דפים” בלי DOM כבד. */
 .book-open__stack {
   position: absolute;
-  top: 1.5%;
-  bottom: 1.5%;
-  width: 10px;
+  top: 4%;
+  bottom: 4%;
+  width: 7px;
   opacity: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    #ffffff 0, #ffffff 1.5px, #e7e7e9 1.5px, #e7e7e9 3px
-  );
+  background:
+    repeating-linear-gradient(to bottom, rgba(20, 20, 24, 0.05) 0 1px, transparent 1px 2.6px),
+    linear-gradient(#f4f4f5, #e9e9ea);
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
 }
 .book-open__stack--right {
-  right: -6px; /* בקצה-הימני של עמוד-ימין */
-  transform-origin: 0 50%;
-  transform: translateZ(-1px) rotateY(20deg);
-  border-radius: 0 3px 3px 0;
-  box-shadow: 3px 6px 12px -7px rgba(34, 30, 24, 0.5);
+  right: -5px; /* בקצה-הימני של עמוד-ימין */
+  transform: translateZ(0.4px);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 2px 5px 9px -6px rgba(0, 0, 0, 0.26);
 }
 .book-open__stack--left {
   right: 100%;
   margin-right: calc(var(--leaf-w) * -100%);
   left: auto;
-  transform-origin: 100% 50%;
-  transform: translateZ(-1px) rotateY(-20deg);
-  border-radius: 3px 0 0 3px;
-  box-shadow: -3px 6px 12px -7px rgba(34, 30, 24, 0.46);
+  transform: translateZ(1px);
+  border-radius: 2px 0 0 2px;
+  box-shadow: -2px 5px 9px -6px rgba(0, 0, 0, 0.24);
 }
 
 /* השדרה — קפל מרכזי אמיתי: צל-מרזב עמוק + עקמומיות-נייר סמוכה + הבזק דק. */
@@ -5159,18 +5172,18 @@ body:has([data-fm-active]) {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 9%;
-  transform: translateX(-50%) translateZ(9px);
+  width: 5%;
+  transform: translateX(-50%) translateZ(10px);
   z-index: 30;
   pointer-events: none;
   opacity: 0;
   background: linear-gradient(
     90deg,
-    rgba(30, 22, 10, 0) 0%,
-    rgba(30, 22, 10, 0.32) 32%,
-    rgba(20, 14, 5, 0.55) 50%,
-    rgba(30, 22, 10, 0.32) 68%,
-    rgba(30, 22, 10, 0) 100%
+    rgba(22, 22, 26, 0) 0%,
+    rgba(22, 22, 26, 0.05) 36%,
+    rgba(22, 22, 26, 0.12) 50%,
+    rgba(22, 22, 26, 0.05) 64%,
+    rgba(22, 22, 26, 0) 100%
   );
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
 }
@@ -5182,7 +5195,7 @@ body:has([data-fm-active]) {
   left: 50%;
   width: 1.5px;
   transform: translateX(-50%);
-  background: linear-gradient(to bottom, transparent, rgba(255, 252, 244, 0.5) 20%, rgba(255, 252, 244, 0.5) 80%, transparent);
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3) 22%, rgba(255, 255, 255, 0.3) 78%, transparent);
 }
 
 /* שכבת-הכריכה הקדמית — אותה תמונת-כריכה, נפתחת סביב השדרה (x=0) ונשארת פתוחה
@@ -5274,7 +5287,7 @@ body:has([data-fm-active]) {
    overflow:hidden + שוליים כמו ספר; RTL; backface מוסתר (אין טקסט-מראה). */
 .book-open__sheet {
   position: absolute;
-  inset: 12% 11% 11% 11%;
+  inset: 9% 9% 9% 9%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -5287,20 +5300,20 @@ body:has([data-fm-active]) {
   -webkit-font-smoothing: antialiased;
 }
 .book-open__h {
-  font-size: 7cqw;
+  font-size: 8.6cqw;
   line-height: 1.14;
   font-weight: 800;
   color: color-mix(in oklab, var(--color-ink) 96%, #3a2f20);
   margin-bottom: 0.5em;
 }
 .book-open__p {
-  font-size: 4.3cqw;
+  font-size: 5.4cqw;
   line-height: 1.5;
   font-weight: 500;
   margin: 0 0 0.32em;
 }
 .book-open__q {
-  font-size: 7.8cqw;
+  font-size: 9.6cqw;
   line-height: 1.2;
   font-weight: 800;
   color: color-mix(in oklab, var(--color-ink) 95%, #3a2f20);
@@ -5308,7 +5321,7 @@ body:has([data-fm-active]) {
   text-indent: -0.08em;
 }
 .book-open__sub {
-  font-size: 4.6cqw;
+  font-size: 5.7cqw;
   font-weight: 800;
   color: color-mix(in oklab, var(--color-ink) 95%, #4a3d2e);
   margin: 0.55em 0 0.24em;
@@ -5348,9 +5361,9 @@ body:has([data-fm-active]) {
   0% { transform: translateZ(8px) rotateY(0deg); }
   5% { transform: translateZ(8px) rotateY(-7deg); }
   12% { transform: translateZ(7px) rotateY(-52deg); }
-  24% { transform: translateZ(4px) rotateY(-140deg); }
-  32% { transform: translateZ(1.5px) rotateY(-164deg); }
-  100% { transform: translateZ(1.5px) rotateY(-164deg); }
+  24% { transform: translateZ(4px) rotateY(-146deg); }
+  32% { transform: translateZ(1.5px) rotateY(-180deg); }
+  100% { transform: translateZ(1.5px) rotateY(-180deg); }
 }
 /* הפיכת-דף: rest → הקצה החופשי מתרומם אל הצופה (translateZ) → אנכי → חוצה את
    השדרה → נוחת בצד-שמאל ונשאר (forwards). translateZ בסיס לפי --i (עובי-גוש). */
@@ -5359,21 +5372,21 @@ body:has([data-fm-active]) {
   32% { transform: rotateY(-34deg) translateZ(46px); }
   38% { transform: rotateY(-74deg) translateZ(56px); }
   44% { transform: rotateY(-116deg) translateZ(34px); }
-  50%, 100% { transform: rotateY(-164deg) translateZ(3.0px); }
+  50%, 100% { transform: rotateY(-180deg) translateZ(0.9px); }
 }
 @keyframes bo-flip1 {
   0%, 42% { transform: rotateY(0deg) translateZ(calc(2.4px - var(--i) * 0.6px)); }
   48% { transform: rotateY(-34deg) translateZ(46px); }
   54% { transform: rotateY(-74deg) translateZ(56px); }
   60% { transform: rotateY(-116deg) translateZ(34px); }
-  66%, 100% { transform: rotateY(-164deg) translateZ(2.7px); }
+  66%, 100% { transform: rotateY(-180deg) translateZ(0.7px); }
 }
 @keyframes bo-flip2 {
   0%, 58% { transform: rotateY(0deg) translateZ(calc(2.4px - var(--i) * 0.6px)); }
   64% { transform: rotateY(-34deg) translateZ(46px); }
   70% { transform: rotateY(-74deg) translateZ(56px); }
   76% { transform: rotateY(-116deg) translateZ(34px); }
-  82%, 100% { transform: rotateY(-164deg) translateZ(2.4px); }
+  82%, 100% { transform: rotateY(-180deg) translateZ(0.5px); }
 }
 /* עיקול-נייר: הדף מתעקל מעט סביב אמצע-ההיפוך (scaleX קטן + skew), ומשתטח בנחיתה. */
 @keyframes bo-curl0 {
