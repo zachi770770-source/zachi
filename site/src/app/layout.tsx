@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
+import { Analytics } from "@vercel/analytics/next";
 import { MotionRoot } from "@/components/shared/MotionRoot";
 import { PersonaProvider } from "@/components/persona/PersonaProvider";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
@@ -109,6 +110,12 @@ export default function RootLayout({
             <CookieConsent />
           </SiteChrome>
           <AnalyticsScripts />
+          {/* Vercel Web Analytics — נטען פעם אחת ברמת ה-root, ורק בפרודקשן של
+              Vercel (שם מוגש /_vercel/insights/script.js). מזריק את הסקריפט
+              ושולח pageviews ל-Vercel; cookieless ונפרד לחלוטין מ-GA/GTM/Meta
+              (AnalyticsScripts). מגודר ב-VERCEL_ENV=production — אותה אמת-מידה
+              של robots למעלה — כדי לא לטעון 404 מקומית/ב-CI/בתצוגות-preview. */}
+          {process.env.VERCEL_ENV === "production" ? <Analytics /> : null}
         </PersonaProvider>
       </body>
     </html>
