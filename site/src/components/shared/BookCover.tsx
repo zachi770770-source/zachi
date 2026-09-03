@@ -6,64 +6,63 @@ import { cn } from "@/lib/utils";
 
 /**
  * עטיפת הספר בתצוגת תלת-ממד עדינה (זווית, עובי דפים וצל רך).
- * העיצוב הוא CSS טהור מעל SVG שטוח, כך שהעטיפה חדה בכל רזולוציה
- * ואינה נחתכת. יש להחליף בעטיפה אמיתית ברגע שתסופק.
+ * העיצוב הוא CSS טהור מעל תמונת-כריכה, כך שהעטיפה חדה בכל רזולוציה.
  *
- * `opening` (אופציונלי): רגע-פתיחה חד-פעמי וברור — הכריכה *נפתחת* סביב השדרה,
- * ואז שלושה דפים מתהפכים בזה-אחר-זה (turn מלא, לא riffle), כל אחד חושף את הדף
- * שמתחתיו, והספר נשאר פתוח לרגע לפני שהוא נסגר בחזרה לכריכה. הדפים הם שכבות
- * aria-hidden בתוך אותו הקשר-3D של הכריכה, עם משטח-נייר אמיתי (חום, שורות,
- * צל-שדרה, צל-קצה). ה-<img> של הכריכה עצמה היא ה„דף” הקדמי שנפתח — כך זהות
- * הכריכה נשמרת ואין כפילות. במנוחה (וכן בסוף הרצף) הכול חוזר לכריכה הסגורה
- * המדויקת. מונפש פעם אחת בלבד תחת `.motion-js` (globals.css). reduced-motion /
- * ללא-JS ⇒ הדפים אינם מרונדרים והכריכה סטטית לגמרי. transform/opacity בלבד.
+ * `opening` (אופציונלי): רגע-פתיחה קולנועי חד-פעמי — הספר מופיע סגור, הכריכה
+ * הקדמית מתרוממת מהשדרה ונפתחת שמאלה, והספר הופך ל־SPREAD אמיתי (עמוד-שמאל +
+ * שדרה מרכזית + עמוד-ימין). אז כמה דפים מתהפכים בזה-אחר-זה — כל דף מתעקל מעט
+ * בזמן ההיפוך — והספר נשאר פתוח. שכבת-הכריכה הנפתחת משתמשת באותה תמונת-כריכה
+ * (רקע), כדי שזהות הכריכה נשמרת בלי לגעת בתמונת המקור; ה-<img> האמיתי הוא מצב-
+ * המנוחה הסגור ומקור מעבר-הכריכה אל /preview. מונפש פעם אחת בלבד תחת `.motion-js`.
+ * reduced-motion / ללא-JS ⇒ `.book-open` אינו מרונדר והכריכה סטטית לגמרי.
+ * transform/opacity/filter בלבד (ללא CLS). הדפים `aria-hidden` (דקורטיביים).
  */
-/**
- * תוכן-הדפים המודפס (טקסט אמיתי, לא placeholders). שלושה עמודים שונים, כל אחד
- * עם פריסה אחרת: עמוד-כותרת+פסקה, עמוד-ציטוט, ועמוד דו-מקטעי. המשפטים הם
- * ניסוחי-התֵּמה המאושרים של האתר („דייטינג הוא חיפוש / אהבה היא בנייה” וכו’) —
- * לא ציטוטים מהספר ולא המצאות. aria-hidden (דקורטיבי; מסתובב עם הדף ב-3D).
- */
-const bookOpenPages: Record<number, React.ReactNode> = {
-  // עמוד 1 — פסקה: כותרת מודגשת + גוף-טקסט רציף.
-  0: (
+
+/** גיליון-טקסט אחד (RTL) המודפס על פני-דף. הטקסט הוא ניסוחי-התֵּמה המאושרים של
+ *  האתר — לא ציטוטים מהספר ולא המצאות. הטקסט הוא פרט שמגלים אחרי שקוראים „ספר”. */
+function SheetParagraph() {
+  return (
     <span className="book-open__sheet">
       <span className="book-open__h">דייטינג הוא חיפוש</span>
       <span className="book-open__p">למצוא זה רק ההתחלה.</span>
-      <span className="book-open__p">דייטינג הוא חיפוש.</span>
       <span className="book-open__p">אהבה היא בנייה.</span>
       <span className="book-open__p">עובדה היא מה שקרה.</span>
       <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
       <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
-      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.</span>
-      <span className="book-open__p">הספר עוזר לזהות מה חוזר אצלכם, ולבחור אחרת בפעם הבאה.</span>
+      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים.</span>
     </span>
-  ),
-  // עמוד 2 — ציטוט: ציטוט גדול פותח + שורות-גוף תומכות.
-  1: (
+  );
+}
+function SheetQuote() {
+  return (
     <span className="book-open__sheet">
       <span className="book-open__q">„אהבה היא בנייה.”</span>
       <span className="book-open__p">למצוא זה רק ההתחלה.</span>
       <span className="book-open__p">דייטינג הוא חיפוש.</span>
       <span className="book-open__p">עובדה היא מה שקרה.</span>
-      <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
       <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
-      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.</span>
+      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים.</span>
     </span>
-  ),
-  // עמוד 3 — שתי פסקאות: תת-כותרת + שורות, פעמיים.
-  2: (
+  );
+}
+function SheetSections() {
+  return (
     <span className="book-open__sheet">
       <span className="book-open__sub">עובדה</span>
       <span className="book-open__p">עובדה היא מה שקרה.</span>
       <span className="book-open__p">למצוא זה רק ההתחלה.</span>
-      <span className="book-open__p">דייטינג הוא חיפוש.</span>
       <span className="book-open__sub">סיפור</span>
       <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
       <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
-      <span className="book-open__p">לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.</span>
     </span>
-  ),
+  );
+}
+
+/** תוכן פני-הדפים המתהפכים (p0 נפתח ראשון). כל דף פריסה שונה. */
+const turningSheets: Record<number, React.ReactNode> = {
+  0: <SheetParagraph />,
+  1: <SheetQuote />,
+  2: <SheetSections />,
 };
 
 export function BookCover({
@@ -75,37 +74,63 @@ export function BookCover({
   priority?: boolean;
   opening?: boolean;
 }) {
+  const coverUrl = `url(${siteConfig.images.mockup3d})`;
   return (
     <div className={cn("book-cover", opening && "book-cover--open", className)}>
       <div className="book-cover__inner">
         <span className="book-cover__pages" aria-hidden="true" />
 
         {opening ? (
-          // בלוק-הדפים יושב *מאחורי* הכריכה ונחשף כשהיא נפתחת. הדף התחתון
-          // (spread) הוא הבסיס; מעליו שלושה דפים שמתהפכים בזה-אחר-זה. z-index
-          // יורד עם סדר-ההיפוך כך שכל דף חושף את שמתחתיו.
-          <span className="book-open" aria-hidden="true">
-            <span className="book-open__spine" />
-            <span className="book-open__spread book-open__face">
-              <span className="book-open__sheet">
-                <span className="book-open__h">לראות אחרת</span>
-                <span className="book-open__p">למצוא זה רק ההתחלה.</span>
-                <span className="book-open__p">דייטינג הוא חיפוש.</span>
-                <span className="book-open__p">אהבה היא בנייה.</span>
-                <span className="book-open__p">עובדה היא מה שקרה.</span>
-                <span className="book-open__p">סיפור הוא מה שאנחנו מספרים לעצמנו.</span>
-                <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
+          // רצף-הפתיחה יושב באותו הקשר-3D של הכריכה. `book-open__book` נושא את
+          // התאמת-המסגרת (recenter+scale) כדי שה-spread ייפתח בלי לחדור לטקסט,
+          // ושכבת-הכריכה `book-open__cover` (רקע = אותה תמונת-כריכה) נפתחת שמאלה.
+          <span
+            className="book-open"
+            aria-hidden="true"
+            style={{ ["--cover-src" as string]: coverUrl }}
+          >
+            <span className="book-open__book">
+              {/* בסיס ה-SPREAD: עמוד-ימין (נחשף מתחת לכריכה) + עמוד-שמאל (הלוח
+                  שהכריכה נפתחת אליו) + עובי-דפים בשני הקצוות + שדרה מרכזית. */}
+              <span className="book-open__stack book-open__stack--right" />
+              <span className="book-open__stack book-open__stack--left" />
+              <span className="book-open__leaf book-open__leaf--right">
+                <SheetQuote />
+              </span>
+              {/* עמוד-שמאל: יושב מעל הדפים שנוחתים (translateZ גבוה), ולכן הוא
+                  „עמוד-השמאל” הקבוע — הדפים המתהפכים חולפים מעליו ואז נתחבים
+                  מאחוריו. נושא טקסט משלו. */}
+              <span className="book-open__leaf book-open__leaf--left">
+                <SheetSections />
+              </span>
+
+              {/* הדפים המתהפכים — hinge בשדרה, כל אחד עם עטיפת-עיקול (curl). */}
+              {[2, 1, 0].map((i) => (
+                <span
+                  key={i}
+                  className={`book-open__page book-open__page--p${i}`}
+                  style={{ ["--i" as string]: String(i), zIndex: 20 - i }}
+                >
+                  <span className="book-open__curl">
+                    <span className="book-open__face book-open__face--front">
+                      {turningSheets[i]}
+                    </span>
+                    {/* גב-הדף — נייר בלבד; נתחב מאחורי עמוד-השמאל בנחיתה. */}
+                    <span className="book-open__face book-open__face--back" />
+                  </span>
+                </span>
+              ))}
+
+              {/* השדרה — קפל מרכזי: צל-מרזב פנימי + הבזק-אור עדין. מעל הבסיס. */}
+              <span className="book-open__gutter" />
+
+              {/* שכבת-הכריכה הקדמית: אותה תמונת-כריכה, נפתחת סביב השדרה ונשארת
+                  פתוחה כלוח-שמאל. ה-face הוא הכריכה; ה-inner הוא הצד הפנימי. */}
+              <span className="book-open__cover">
+                <span className="book-open__cover-face" />
+                <span className="book-open__cover-liner" />
               </span>
             </span>
-            {[2, 1, 0].map((i) => (
-              <span
-                key={i}
-                className={`book-open__page book-open__face book-open__page--p${i}`}
-                style={{ ["--i" as string]: String(i), zIndex: 10 - i }}
-              >
-                {bookOpenPages[i]}
-              </span>
-            ))}
           </span>
         ) : null}
 
