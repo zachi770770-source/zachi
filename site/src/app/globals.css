@@ -5072,6 +5072,11 @@ body:has([data-fm-active]) {
   transform-origin: 50% 50%;
   animation: bo-fit var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
 }
+/* טלפונים (פריסה מוערמת: הספר מעל הקופי). ה-spread מרכזי ורחב מה-viewport, ולכן
+   הסטה קטנה ימינה מונעת חיתוך של עמוד-שמאל בקצה-המסך. לא משפיע על 768 ומעלה. */
+@media (max-width: 640px) {
+  .book-cover--open { --open-shift: 30%; }
+}
 /* ה-SPREAD גדל עם המרחב הפנוי (מימין ל-H1). ערכים לפי breakpoint (responsive,
    לא scale אחד קבוע): רחב ומרשים ב-1440/1280, מצומצם רק כנדרש ב-1024. */
 @media (min-width: 1024px) {
@@ -5166,8 +5171,10 @@ body:has([data-fm-active]) {
   box-shadow: 2px 5px 9px -6px rgba(0, 0, 0, 0.26);
 }
 .book-open__stack--left {
-  right: 100%;
-  margin-right: calc(var(--leaf-w) * -100%);
+  /* בקצה-החופשי (השמאלי) של עמוד-שמאל: קצה-ימין של הגוש בדיוק על קצה-הדף
+     (x = -leaf-w·W). הנוסחה הקודמת (margin שלילי) מיקמה אותו בטעות בתוך עמוד-
+     ימין — בולט כפס אנכי כש-leaf-w קטן (מובייל/טאבלט). */
+  right: calc(100% + var(--leaf-w) * 100%);
   left: auto;
   transform: translateZ(1px);
   border-radius: 2px 0 0 2px;
