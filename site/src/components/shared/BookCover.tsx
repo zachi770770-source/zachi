@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils";
  * עטיפת-הספר של ה-Hero. במנוחה: כריכת-הספר (מקור מעבר-הכריכה ל-/preview).
  * `opening` הופך אותה ל-signature-object: כריכת-המותג האמיתית כאובייקט פיזי
  * יוקרתי — hardcover בזווית ¾ עדינה, spine, עובי-דפים (page-block) בקצוות
- * החופשיים, צל-מגע וזוהר-הפרדה. הכריכה הקדמית נפתחת מעט בלבד (~24°) וחושפת הצצה
- * דקה של דפים לבנים — בלי spread, בלי טקסט-reader. הכריכה היא הגיבור הוויזואלי.
- * מונפש פעם אחת תחת `.motion-js` (presence → lift → partial-open → settle);
- * reduced-motion/ללא-JS ⇒ ה-object אינו מרונדר והכריכה הסגורה נשארת סטטית.
- * transform/opacity/filter בלבד (CLS=0). דקורטיבי.
+ * החופשיים, צל-מגע וזוהר-הפרדה.
+ *
+ * במהלך ההנפשה הכריכה נפתחת רחב יותר וחושפת שני דפים פנימיים אמיתיים עם טקסט
+ * עברי (RTL, קריא, לא-משוקף) — הדף העליון מתהפך, אחריו הדף השני — ואז הספר
+ * מתייצב חזרה למצב ה-premium הסופי (כריכה בהצצה דקה בלבד). לכל היותר שני דפדופים.
+ * מונפש פעם אחת תחת `.motion-js`; reduced-motion/ללא-JS ⇒ ה-object אינו מרונדר
+ * והכריכה הסגורה נשארת סטטית. transform/opacity/filter בלבד (CLS=0). דקורטיבי.
  */
 export function BookCover({
   className,
@@ -48,9 +50,44 @@ export function BookCover({
                 <span className="pbook__spine" />
                 <span className="pbook__edge pbook__edge--fore" />
                 <span className="pbook__edge pbook__edge--bottom" />
-                {/* הדף העליון הלבן — נחשף בהצצה כשהכריכה נפתחת מעט */}
+
+                {/* גוש-הדפים: דף-בסיס לבן (הצצה סופית) + שני דפים מתהפכים עם
+                    טקסט עברי אמיתי (קדמי=טקסט, אחורי=נייר ריק כדי שלא ישוקף). */}
                 <span className="pbook__page" />
-                {/* הכריכה הקדמית — אמנות-המותג; נפתחת ~24° סביב השדרה */}
+
+                {/* דף שני (נחשף אחרי הדפדוף הראשון) */}
+                <span className="pbook__leaf pbook__leaf--p2">
+                  <span className="pbook__face pbook__face--front">
+                    <span className="pbook__ptext">
+                      <span className="pbook__ph">אהבה היא בנייה.</span>
+                      <span className="pbook__pl">עובדה היא מה שקרה.</span>
+                      <span className="pbook__pl">
+                        סיפור הוא מה שאנחנו מספרים לעצמנו.
+                      </span>
+                      <span className="pbook__pl">
+                        לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
+                      </span>
+                    </span>
+                  </span>
+                  <span className="pbook__face pbook__face--back" />
+                </span>
+
+                {/* דף ראשון (העליון — מתהפך ראשון) */}
+                <span className="pbook__leaf pbook__leaf--p1">
+                  <span className="pbook__face pbook__face--front">
+                    <span className="pbook__ptext">
+                      <span className="pbook__ph">דייטינג הוא חיפוש.</span>
+                      <span className="pbook__pl">למצוא זה רק ההתחלה.</span>
+                      <span className="pbook__pl">אהבה היא בנייה.</span>
+                      <span className="pbook__pl">
+                        לבחור אחרת מתחיל בלראות אחרת.
+                      </span>
+                    </span>
+                  </span>
+                  <span className="pbook__face pbook__face--back" />
+                </span>
+
+                {/* הכריכה הקדמית — אמנות-המותג; נפתחת רחב לדפדוף ואז מתייצבת ~13° */}
                 <span className="pbook__cover" />
               </span>
             </span>
