@@ -5047,6 +5047,9 @@ body:has([data-fm-active]) {
      והסטה שמחזיקים את הספר הפתוח בתוך ה-viewport ורחוק מהטקסט. דסקטופ דורס. */
   --leaf-w: 0.74;
   --open-scale: 0.92;
+  /* קנה-מידה אנכי נפרד — ברירת-מחדל זהה לאופקי (scale אחיד). רק 1440 דורס אותו
+     כדי לתת ל-spread פרופורציה מעט רחבה-יותר (ספר אמיתי, לא חוברת גבוהה-צרה). */
+  --open-scale-y: var(--open-scale);
   --open-shift: 0%;
 }
 .book-open { display: none; }
@@ -5078,7 +5081,12 @@ body:has([data-fm-active]) {
   .book-cover--open { --leaf-w: 0.94; --open-scale: 0.84; --open-shift: 15%; }
 }
 @media (min-width: 1440px) {
-  .book-cover--open { --leaf-w: 0.96; --open-scale: 0.86; --open-shift: 25%; }
+  .book-cover--open {
+    --leaf-w: 0.96;
+    --open-scale: 0.93; /* רחב יותר (~+8%), נשאר כולו בתוך ה-Hero */
+    --open-scale-y: 0.87; /* מעט פחות גבוה — פרופורציה רחבה-יותר, עיוות-טקסט מזערי */
+    --open-shift: 35%; /* מחזיק את הקצה-השמאלי מחוץ ל-H1; ההרחבה בעיקר ימינה */
+  }
 }
 /* ה-<img> האמיתי נמוג ברגע ששכבת-הכריכה משתלטת (crossfade בלתי-נראה — אותה
    תמונה, אותו מקום). לא מסתובב יותר; הסיבוב על שכבת-הכריכה בתוך ה-3D. */
@@ -5172,30 +5180,24 @@ body:has([data-fm-active]) {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 5%;
-  transform: translateX(-50%) translateZ(10px);
+  /* crease רך ורחב: „עמק” של צל עדין שנוצר משני הצדדים אל קו-הקיפול, בלי קו/פס
+     חד ובלי border. רחב יותר ובעל שיא נמוך כך שהמעבר בין העמודים אורגני. */
+  width: 11%;
+  transform: translateX(-50%) translateZ(9px);
   z-index: 30;
   pointer-events: none;
   opacity: 0;
   background: linear-gradient(
     90deg,
     rgba(22, 22, 26, 0) 0%,
-    rgba(22, 22, 26, 0.05) 36%,
-    rgba(22, 22, 26, 0.12) 50%,
-    rgba(22, 22, 26, 0.05) 64%,
+    rgba(22, 22, 26, 0.018) 24%,
+    rgba(22, 22, 26, 0.055) 43%,
+    rgba(22, 22, 26, 0.075) 50%,
+    rgba(22, 22, 26, 0.055) 57%,
+    rgba(22, 22, 26, 0.018) 76%,
     rgba(22, 22, 26, 0) 100%
   );
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
-}
-.book-open__gutter::after {
-  /* הבזק-אור דקיק בדיוק על קו-הקיפול. */
-  content: "";
-  position: absolute;
-  inset: 6% 0;
-  left: 50%;
-  width: 1.5px;
-  transform: translateX(-50%);
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3) 22%, rgba(255, 255, 255, 0.3) 78%, transparent);
 }
 
 /* שכבת-הכריכה הקדמית — אותה תמונת-כריכה, נפתחת סביב השדרה (x=0) ונשארת פתוחה
@@ -5307,10 +5309,10 @@ body:has([data-fm-active]) {
   margin-bottom: 0.5em;
 }
 .book-open__p {
-  font-size: 5.4cqw;
+  font-size: 6cqw;
   line-height: 1.5;
   font-weight: 500;
-  margin: 0 0 0.32em;
+  margin: 0 0 0.34em;
 }
 .book-open__q {
   font-size: 9.6cqw;
@@ -5321,7 +5323,7 @@ body:has([data-fm-active]) {
   text-indent: -0.08em;
 }
 .book-open__sub {
-  font-size: 5.7cqw;
+  font-size: 6.3cqw;
   font-weight: 800;
   color: color-mix(in oklab, var(--color-ink) 95%, #4a3d2e);
   margin: 0.55em 0 0.24em;
@@ -5347,8 +5349,8 @@ body:has([data-fm-active]) {
 /* התאמת-מסגרת: כשהספר נפתח הוא מתכווץ ומוסט מעט (מהשדרה) כדי להיכנס במסגרת. */
 @keyframes bo-fit {
   0%, 8% { transform: translateX(0) scale(1); }
-  30% { transform: translateX(var(--open-shift)) scale(var(--open-scale)); }
-  100% { transform: translateX(var(--open-shift)) scale(var(--open-scale)); }
+  30% { transform: translateX(var(--open-shift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
+  100% { transform: translateX(var(--open-shift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
 }
 /* חשיפת בסיס-ה-spread (עלים/שדרה/עובי) ככל שהכריכה מתרוממת. */
 @keyframes bo-reveal {
