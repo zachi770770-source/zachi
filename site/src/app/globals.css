@@ -4342,8 +4342,8 @@ body:has([data-fm-active]) {
      אנכית עם margins, לא חתוך ולא מודבק לתחתית. */
   .sig-hero__object {
     position: absolute;
-    inset-block: 4% 4%;
-    inset-inline-start: 4%; /* RTL: מוסט פנימה מעט — scene אחד, נוכחות בצד */
+    inset-block: 5% 8%; /* ממורכז-אנכית עם bias קל מטה — בלי חיתוך תחתון */
+    inset-inline-start: 11%; /* RTL: קרוב יותר לכותרת — scene אחד, tension */
     inset-inline-end: auto;
     width: min(49%, 38rem);
     min-height: 0;
@@ -5482,7 +5482,7 @@ body:has([data-fm-active]) {
    נפתחת מעט בלבד (~24°) וחושפת הצצה דקה של דפים לבנים — בלי spread, בלי טקסט.
    הכריכה היא הגיבור. presence → lift → partial-open → settle. reduced-motion/
    ללא-JS ⇒ ה-object אינו מרונדר; הכריכה הסגורה (ה-<img>) נשארת. */
-.book-cover--open { perspective: 1500px; }
+.book-cover--open { perspective: 1000px; }
 /* מנטרלים את הטיית-ה-inner הסביבתית — ה-¾ מוגדר על ה-pbook (reduced-motion שומר
    על הטיית-הכריכה הסגורה). */
 .motion-js .book-cover--open .book-cover__inner { transform: none; animation: none; }
@@ -5495,11 +5495,11 @@ body:has([data-fm-active]) {
   inset: 0;
   transform-style: preserve-3d;
   pointer-events: none;
-  --pb-thick: 22px; /* עובי-הספר */
-  --pb-open: 21deg; /* זווית-פתיחת-הכריכה (מעט — הכריכה נשארת הגיבור) */
-  --pb-yaw: -19deg; /* סיבוב-¾ */
-  --pb-pitch: 6deg; /* הטיית-מבט קלה מלמעלה */
-  --pb-page: #f4f2ec; /* דף עליון (שנהב חם עדין) */
+  --pb-thick: 30px; /* עובי-הספר */
+  --pb-open: 13deg; /* זווית-פתיחת-הכריכה — glimpse דק בלבד */
+  --pb-yaw: -31deg; /* סיבוב-¾ מורגש: רואים עובי-כריכה, שדרה ו-page-block */
+  --pb-pitch: 5deg; /* הטיית-מבט עדינה מלמעלה */
+  --pb-page: #e7e3d8; /* דף עליון — paper-white (לא בוהק) */
   --pb-board: #201d1a; /* לוח-כריכה / שדרה */
   animation: pb-fade 420ms var(--ease-standard) var(--book-open-delay) both;
 }
@@ -5525,10 +5525,10 @@ body:has([data-fm-active]) {
   inset: 0;
   border-radius: 2px 5px 5px 2px;
   background:
-    linear-gradient(100deg, #eceae3, var(--pb-page) 40%, #f7f5ef);
+    linear-gradient(100deg, #d9d4c7, var(--pb-page) 45%, #efece3);
   box-shadow:
-    inset 10px 0 22px -16px rgba(20, 18, 14, 0.28),
-    inset 0 -12px 22px -16px rgba(20, 18, 14, 0.18);
+    inset 14px 0 26px -16px rgba(20, 18, 14, 0.4),
+    inset 0 -14px 24px -16px rgba(20, 18, 14, 0.26);
 }
 
 /* לוח-הכריכה האחורי (מאחורי גוש-הדפים). */
@@ -5603,27 +5603,27 @@ body:has([data-fm-active]) {
 /* צל-מגע על ה„רצפה” — מקרקע ומפריד מהרקע. אינו מסתובב עם הספר. */
 .pbook__contact {
   position: absolute;
-  left: 49%;
-  bottom: 9%;
-  width: 66%;
-  height: 11%;
+  left: 56%; /* כיוון-אור מלמעלה-שמאל ⇒ הצל נופל מעט ימינה */
+  bottom: 7%;
+  width: 74%;
+  height: 13%;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.38) 42%, transparent 72%);
-  filter: blur(17px);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.45) 40%, transparent 74%);
+  filter: blur(19px);
   animation: pb-fade 760ms var(--ease-standard) var(--book-open-delay) both;
 }
-/* זוהר-הפרדה עדין מאחורי הספר. */
+/* זוהר-הפרדה — נמשך מעט אל צד-הכותרת (RTL=שמאל) כדי לקשור את הספר לשדה ה-H1. */
 .pbook__halo {
   position: absolute;
-  left: 50%;
-  top: 44%;
-  width: 76%;
-  aspect-ratio: 1.05;
+  left: 62%;
+  top: 46%;
+  width: 108%;
+  aspect-ratio: 1.15;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in oklab, var(--color-secondary) 20%, transparent), transparent 66%);
-  filter: blur(40px);
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-secondary) 20%, transparent), transparent 62%);
+  filter: blur(46px);
 }
 
 /* ── keyframes ── */
