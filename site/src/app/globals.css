@@ -5734,10 +5734,10 @@ body:has([data-fm-active]) {
 /* גוש-הטקסט: RTL, מרחק מהשדרה (ימין) ומצד-הכריכה-הנפתחת (שמאל) שה-glimpse יישאר ריק. */
 .pbook__ptext {
   position: absolute;
-  inset: 13% 22% 12% 12%;
+  inset: 11% 20% 10% 12%;
   display: flex;
   flex-direction: column;
-  gap: 0.55em;
+  gap: 0.34em;
   direction: rtl;
   text-align: start;
   font-family: var(--font-serif, serif);
@@ -5745,14 +5745,23 @@ body:has([data-fm-active]) {
 }
 .pbook__ph {
   font-weight: 600;
-  font-size: 4.5cqw;
+  font-size: 4.4cqw;
   line-height: 1.22;
   color: var(--color-secondary);
-  margin-bottom: 0.3em;
+  margin-bottom: 0.35em;
+}
+/* תווית-מדור (עובדה / סיפור / לראות אחרת) — מפרידה בין קטעי-התוכן על העמוד. */
+.pbook__sub {
+  font-weight: 600;
+  font-size: 3.5cqw;
+  line-height: 1.2;
+  color: color-mix(in oklab, var(--color-secondary) 82%, var(--color-ink));
+  margin-top: 0.7em;
+  margin-bottom: 0.1em;
 }
 .pbook__pl {
-  font-size: 3.4cqw;
-  line-height: 1.5;
+  font-size: 3.15cqw;
+  line-height: 1.42;
   color: color-mix(in oklab, var(--color-ink) 88%, transparent);
 }
 
@@ -5763,9 +5772,11 @@ body:has([data-fm-active]) {
   /* ¾ עמוק יותר + הזזה שמאלה + width קטן מעט — הדפדוף הפיזי המלא נשאר במסך. */
   .motion-js .book-cover--open .pbook { --pb-yaw: 47deg; transform: translateX(-9%); }
   .pbook__stage { width: 66%; }
-  .pbook__ptext { inset: 18% 24% 16% 12%; gap: 0.5em; }
-  .pbook__ph { font-size: 7cqw; line-height: 1.28; margin-bottom: 0.15em; }
-  .pbook__pl { font-size: 5.7cqw; }
-  .pbook__pl ~ .pbook__pl { display: none; } /* משאיר כותרת + שורה אחת גדולה */
+  .pbook__ptext { inset: 17% 24% 15% 12%; gap: 0.5em; }
+  .pbook__ph { font-size: 7cqw; line-height: 1.28; margin-bottom: 0.2em; }
+  .pbook__pl { font-size: 5.3cqw; line-height: 1.4; }
+  .pbook__sub { display: none; } /* מובייל: בלי תוויות-מדור — מילים גדולות בלבד */
+  /* מובייל: כותרת + 2–3 שורות גדולות; משאיר שלוש הראשונות ומסתיר מעבר לכך. */
+  .pbook__pl ~ .pbook__pl ~ .pbook__pl ~ .pbook__pl { display: none; }
 }
 
