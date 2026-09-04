@@ -46,7 +46,7 @@ export function BookCover({
               <span className="pbook__slab">
                 {/* לוח-הכריכה האחורי (מאחור) */}
                 <span className="pbook__back" />
-                {/* פאות-העובי: שדרה (שמאל) + גוש-דפים (ימין ותחתית) */}
+                {/* פאות-העובי: שדרה (ימין — כריכת ספר עברי) + גוש-דפים (שמאל ותחתית) */}
                 <span className="pbook__spine" />
                 <span className="pbook__edge pbook__edge--fore" />
                 <span className="pbook__edge pbook__edge--bottom" />
@@ -68,6 +68,7 @@ export function BookCover({
                         לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
                       </span>
                     </span>
+                    <span className="pbook__sheen" aria-hidden="true" />
                   </span>
                   <span className="pbook__face pbook__face--back" />
                 </span>
@@ -83,6 +84,7 @@ export function BookCover({
                         לבחור אחרת מתחיל בלראות אחרת.
                       </span>
                     </span>
+                    <span className="pbook__sheen" aria-hidden="true" />
                   </span>
                   <span className="pbook__face pbook__face--back" />
                 </span>
