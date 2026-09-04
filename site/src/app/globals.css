@@ -5348,14 +5348,20 @@ body:has([data-fm-active]) {
 }
 /* התאמת-מסגרת: כשהספר נפתח הוא מתכווץ ומוסט מעט (מהשדרה) כדי להיכנס במסגרת. */
 @keyframes bo-fit {
-  0%, 8% { transform: translateX(0) scale(1); }
-  30% { transform: translateX(var(--open-shift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
+  /* מחזיקים את גודל/מיקום הכריכה הסגורה עד מסירת ה-<img> (~4.5%), ואז מכניסים
+     את הספר למסגרת-הבטוחה (scale+shift) מוקדם — עד 14% — כדי שכשעמוד-השמאל
+     נחשף (bo-reveal מ-14%) המסגרת כבר מוסטת ימינה ושום שטח לבן אינו חוצה שמאלה
+     אל אזור ה-H1. הגודל/המיקום הסופיים ללא שינוי. */
+  0%, 5% { transform: translateX(0) scale(1); }
+  14% { transform: translateX(var(--open-shift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
   100% { transform: translateX(var(--open-shift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
 }
-/* חשיפת בסיס-ה-spread (עלים/שדרה/עובי) ככל שהכריכה מתרוממת. */
+/* חשיפת בסיס-ה-spread (עלים/שדרה/עובי) ככל שהכריכה מתרוממת. מתחילה רק אחרי
+   שהמסגרת (bo-fit) הוסטה למקום-הבטוח (~14%) — כך עמוד-השמאל לעולם אינו מופיע
+   בעודו חוצה שמאלה אל אזור ה-H1. */
 @keyframes bo-reveal {
-  0%, 7% { opacity: 0; }
-  20% { opacity: 1; }
+  0%, 14% { opacity: 0; }
+  24% { opacity: 1; }
   100% { opacity: 1; }
 }
 /* הכריכה הקדמית נפתחת סביב השדרה ונשארת פתוחה (לוח-שמאל). */
@@ -5371,23 +5377,23 @@ body:has([data-fm-active]) {
    השדרה → נוחת בצד-שמאל ונשאר (forwards). translateZ בסיס לפי --i (עובי-גוש). */
 @keyframes bo-flip0 {
   0%, 26% { transform: rotateY(0deg) translateZ(calc(2.4px - var(--i) * 0.6px)); }
-  32% { transform: rotateY(-34deg) translateZ(46px); }
-  38% { transform: rotateY(-74deg) translateZ(56px); }
-  44% { transform: rotateY(-116deg) translateZ(34px); }
+  32% { transform: rotateY(-38deg) translateZ(28px); }
+  38% { transform: rotateY(-82deg) translateZ(34px); }
+  44% { transform: rotateY(-124deg) translateZ(22px); }
   50%, 100% { transform: rotateY(-180deg) translateZ(0.9px); }
 }
 @keyframes bo-flip1 {
   0%, 42% { transform: rotateY(0deg) translateZ(calc(2.4px - var(--i) * 0.6px)); }
-  48% { transform: rotateY(-34deg) translateZ(46px); }
-  54% { transform: rotateY(-74deg) translateZ(56px); }
-  60% { transform: rotateY(-116deg) translateZ(34px); }
+  48% { transform: rotateY(-38deg) translateZ(28px); }
+  54% { transform: rotateY(-82deg) translateZ(34px); }
+  60% { transform: rotateY(-124deg) translateZ(22px); }
   66%, 100% { transform: rotateY(-180deg) translateZ(0.7px); }
 }
 @keyframes bo-flip2 {
   0%, 58% { transform: rotateY(0deg) translateZ(calc(2.4px - var(--i) * 0.6px)); }
-  64% { transform: rotateY(-34deg) translateZ(46px); }
-  70% { transform: rotateY(-74deg) translateZ(56px); }
-  76% { transform: rotateY(-116deg) translateZ(34px); }
+  64% { transform: rotateY(-38deg) translateZ(28px); }
+  70% { transform: rotateY(-82deg) translateZ(34px); }
+  76% { transform: rotateY(-124deg) translateZ(22px); }
   82%, 100% { transform: rotateY(-180deg) translateZ(0.5px); }
 }
 /* עיקול-נייר: הדף מתעקל מעט סביב אמצע-ההיפוך (scaleX קטן + skew), ומשתטח בנחיתה. */
