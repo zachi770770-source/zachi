@@ -75,6 +75,7 @@ export function BookCover({
                       <span className="pbook__pl">
                         לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
                       </span>
+                      <span className="pbook__pl">אהבה היא בנייה.</span>
                     </span>
                     <span className="pbook__sheen" aria-hidden="true" />
                   </span>
@@ -100,9 +101,7 @@ export function BookCover({
                       <span className="pbook__pl">
                         לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
                       </span>
-                      <span className="pbook__pl">
-                        הספר עוזר לזהות מה חוזר אצלכם, ולבחור אחרת בפעם הבאה.
-                      </span>
+                      <span className="pbook__pl">דייטינג הוא חיפוש.</span>
                     </span>
                     <span className="pbook__sheen" aria-hidden="true" />
                   </span>
