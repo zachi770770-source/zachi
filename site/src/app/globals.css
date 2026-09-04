@@ -4158,8 +4158,7 @@ body:has([data-fm-active]) {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 34svh;
-  order: 2; /* מובייל: המסר קודם, הספר מתחתיו (דסקטופ דורס למיקום מוחלט). */
+  order: 2; /* מובייל: המסר קודם, הספר מיד מתחתיו (דסקטופ דורס למיקום מוחלט). */
 }
 .sig-hero__stage {
   display: none; /* בסצנה המאוחדת אין „במה” נפרדת — כל ה-Hero הוא השדה. */
@@ -4180,7 +4179,7 @@ body:has([data-fm-active]) {
 .sig-hero__cover {
   position: relative;
   z-index: 1;
-  width: clamp(10rem, 44vw, 15rem);
+  width: clamp(13rem, 58vw, 17rem);
   filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.55));
 }
 .sig-hero__cover-shadow {
@@ -4344,9 +4343,9 @@ body:has([data-fm-active]) {
   .sig-hero__object {
     position: absolute;
     inset-block: 4% 4%;
-    inset-inline-start: 1.5%; /* RTL: מרווח מהקצה הימני */
+    inset-inline-start: 4%; /* RTL: מוסט פנימה מעט — scene אחד, נוכחות בצד */
     inset-inline-end: auto;
-    width: min(52%, 40rem);
+    width: min(49%, 38rem);
     min-height: 0;
     place-items: center;
     z-index: 1;
@@ -4414,7 +4413,7 @@ body:has([data-fm-active]) {
     width: min(46%, 32rem);
   }
   .sig-hero__cover {
-    width: clamp(15rem, 27vw, 19.5rem);
+    width: clamp(17rem, 31vw, 22rem);
   }
 }
 
@@ -5477,262 +5476,172 @@ body:has([data-fm-active]) {
   82%, 100% { opacity: 0; }
 }
 
-/* ══ E · ספר-חתימה פתוח בזווית ¾ (Hero) — REDESIGN ══════════════════════════
-   הספר מופיע סגור (כריכת-המותג), נפתח בתנועה אחת גדולה ל„ספר פיזי פתוח” בזווית
-   ¾: לוחות-כריכה כהים עוטפים דפים לבנים, עובי-דפים בקצה-החופשי, קפל-שדרה טבעי,
-   צל-מגע אמיתי על הרקע וזוהר-הפרדה; ואז דף אחד מתהפך. הטקסט דהוי (טקסטורה
-   עריכתית). transform/opacity/filter בלבד. reduced-motion/ללא-JS ⇒ אינו מרונדר. */
-.book-cover--open { perspective: 1250px; }
-/* במצב-פתיחה (motion) מנטרלים את הטיית-ה-inner הסביבתית — ה-¾ מוגדר במלואו על
-   ה-hbook, כך שהספר סימטרי ובשליטה. reduced-motion שומר על הטיית-הכריכה הסגורה. */
+/* ══ E · ספר-חתימה (Hero) — כריכת-המותג כאובייקט פיזי ═══════════════════════
+   הכריכה האמיתית של „מדייטים לאהבה” כ-hardcover יוקרתי בזווית ¾ עדינה: שדרה,
+   עובי-דפים (page-block) בקצוות החופשיים, צל-מגע וזוהר-הפרדה. הכריכה הקדמית
+   נפתחת מעט בלבד (~24°) וחושפת הצצה דקה של דפים לבנים — בלי spread, בלי טקסט.
+   הכריכה היא הגיבור. presence → lift → partial-open → settle. reduced-motion/
+   ללא-JS ⇒ ה-object אינו מרונדר; הכריכה הסגורה (ה-<img>) נשארת. */
+.book-cover--open { perspective: 1500px; }
+/* מנטרלים את הטיית-ה-inner הסביבתית — ה-¾ מוגדר על ה-pbook (reduced-motion שומר
+   על הטיית-הכריכה הסגורה). */
 .motion-js .book-cover--open .book-cover__inner { transform: none; animation: none; }
 
-.hbook { display: none; }
-.motion-js .book-cover--open .hbook {
+.pbook { display: none; }
+.motion-js .book-cover--open .pbook {
   display: grid;
   place-items: center;
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
   pointer-events: none;
-  container-type: inline-size;
-  /* פרמטרים לכוונון per-breakpoint */
-  --hb-open: 33deg; /* חצי-זווית-פתיחה של דף (סימטרי סביב השדרה) */
-  --hb-tilt: 17deg; /* הטיית-מבט מלמעלה (¾) */
-  --hb-yaw: -7deg; /* סיבוב-¾ עדין (שני העמודים כמעט-שווים) */
-  --hb-w: 152%; /* רוחב גוש-הספר יחסית למכל */
-  --hb-paper-hi: #fafaf8;
-  --hb-paper-lo: #ececea;
-  animation: hb-fade 460ms var(--ease-standard) var(--book-open-delay) both;
+  --pb-thick: 22px; /* עובי-הספר */
+  --pb-open: 21deg; /* זווית-פתיחת-הכריכה (מעט — הכריכה נשארת הגיבור) */
+  --pb-yaw: -19deg; /* סיבוב-¾ */
+  --pb-pitch: 6deg; /* הטיית-מבט קלה מלמעלה */
+  --pb-page: #f4f2ec; /* דף עליון (שנהב חם עדין) */
+  --pb-board: #201d1a; /* לוח-כריכה / שדרה */
+  animation: pb-fade 420ms var(--ease-standard) var(--book-open-delay) both;
 }
 
-/* גוש-הספר: הטיה + התרוממות עדינה לתוך המסגרת. */
-.hbook__book {
+/* גוף-הספר: ¾ + התרוממות/התייצבות. */
+.pbook__stage {
   position: relative;
-  width: var(--hb-w);
-  aspect-ratio: 1.52 / 1;
+  width: 76%;
+  aspect-ratio: 0.66 / 1;
   transform-style: preserve-3d;
-  transform: rotateX(var(--hb-tilt)) rotateY(var(--hb-yaw));
-  animation: hb-rise var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw));
+  animation: pb-rise var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
 }
-
-/* שני חצאי-הספר, hinge בשדרה (מרכז). נפתחים מ„כמעט-סגור” לזווית-הפתיחה. */
-.hbook__side {
+.pbook__slab {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
+  inset: 0;
   transform-style: preserve-3d;
 }
-.hbook__side--left {
-  left: 0;
-  transform-origin: 100% 50%;
-  animation: hb-open-left var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
-}
-.hbook__side--right {
-  right: 0;
-  transform-origin: 0% 50%;
-  animation: hb-open-right var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
-}
 
-/* לוח-כריכה כהה מאחורי הדף, גדול-מעט (overhang) = עובי-כריכה + silhouette. */
-.hbook__board {
+/* הדף העליון הלבן (מתחת לכריכה) — נחשף בהצצה בעת הפתיחה. */
+.pbook__page {
   position: absolute;
-  transform: translateZ(-15px);
-  background: linear-gradient(135deg, #2b2f36, #141519 74%);
-  box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-    0 1px 0 0 rgba(0, 0, 0, 0.5);
-}
-.hbook__side--left .hbook__board {
-  inset: -3.5% -1.5% -4.5% -4.5%;
-  border-radius: 10px 3px 3px 10px;
-}
-.hbook__side--right .hbook__board {
-  inset: -3.5% -4.5% -4.5% -1.5%;
-  border-radius: 3px 10px 10px 3px;
-}
-
-/* עובי-דפים בקצה-החופשי — פאה ניצבת (גוש דפים). */
-.hbook__stack {
-  position: absolute;
-  top: 3.5%;
-  bottom: 3.5%;
-  width: 15px;
+  inset: 0;
+  border-radius: 2px 5px 5px 2px;
   background:
-    repeating-linear-gradient(to bottom, rgba(16, 16, 20, 0.11) 0 1px, transparent 1px 2.5px),
-    linear-gradient(90deg, #e4e4e0, #f4f4f2 45%, #e0e0dc);
+    linear-gradient(100deg, #eceae3, var(--pb-page) 40%, #f7f5ef);
+  box-shadow:
+    inset 10px 0 22px -16px rgba(20, 18, 14, 0.28),
+    inset 0 -12px 22px -16px rgba(20, 18, 14, 0.18);
 }
-.hbook__side--left .hbook__stack {
-  left: 0;
-  transform-origin: left center;
-  transform: translateZ(-7px) rotateY(90deg);
-  border-radius: 2px 0 0 2px;
+
+/* לוח-הכריכה האחורי (מאחורי גוש-הדפים). */
+.pbook__back {
+  position: absolute;
+  inset: -2.6%;
+  transform: translateZ(calc(-1 * var(--pb-thick)));
+  border-radius: 3px 7px 7px 3px;
+  background: linear-gradient(135deg, #2a2622, #17140f 74%);
 }
-.hbook__side--right .hbook__stack {
+
+/* פאות-העובי (page-block + שדרה). front plane ב-z=0, הספר מוברר אחורה. */
+.pbook__edge {
+  position: absolute;
+  background:
+    repeating-linear-gradient(to bottom, rgba(20, 16, 10, 0.10) 0 1px, transparent 1px 2.4px),
+    linear-gradient(90deg, #d9d4c8, #efece2 45%, #d3cec1);
+}
+.pbook__edge--fore {
+  top: 2.6%;
+  bottom: 2.6%;
   right: 0;
+  width: var(--pb-thick);
   transform-origin: right center;
-  transform: translateZ(-7px) rotateY(-90deg);
-  border-radius: 0 2px 2px 0;
+  transform: rotateY(90deg);
 }
-
-/* עמוד לבן (פן קדמי). עומק-דף: עקומת-מרזב (צד-שדרה) + הבזק-קצה + הצללת עליון/תחתון. */
-.hbook__page {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  backface-visibility: hidden;
-  background-color: var(--hb-paper-hi);
-  /* טונליות-נייר עדינה: sheen אלכסוני + כהות רכה בתחתית — לא פאנל לבן אחיד.
-     גוון ניטרלי בלבד (הנייר נשאר לבן; העומק מהצללים). */
-  background-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 58%, rgba(20, 20, 24, 0.05)),
-    linear-gradient(104deg, var(--hb-paper-lo), var(--hb-paper-hi) 46%, #f0f0ee);
-}
-.hbook__side--left .hbook__page {
-  border-radius: 9px 2px 2px 9px;
-  box-shadow:
-    inset -22px 0 42px -24px rgba(18, 18, 22, 0.36),
-    inset 9px 0 12px -9px rgba(255, 255, 255, 0.5),
-    inset 0 15px 26px -18px rgba(18, 18, 22, 0.16),
-    inset 0 -17px 30px -18px rgba(18, 18, 22, 0.24);
-}
-.hbook__side--right .hbook__page {
-  border-radius: 2px 9px 9px 2px;
-  box-shadow:
-    inset 22px 0 42px -24px rgba(18, 18, 22, 0.36),
-    inset -9px 0 12px -9px rgba(255, 255, 255, 0.5),
-    inset 0 15px 26px -18px rgba(18, 18, 22, 0.16),
-    inset 0 -17px 30px -18px rgba(18, 18, 22, 0.24);
-}
-
-/* קפל-שדרה — הבזק דק במפגש שני הדפים. */
-.hbook__spine {
-  position: absolute;
-  top: 2%;
-  bottom: 2%;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%) translateZ(0.5px);
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.22) 20%, rgba(255, 255, 255, 0.22) 80%, transparent);
-  z-index: 6;
-}
-
-/* טקסטורת-טקסט עריכתית דהויה. */
-.hbook__text {
-  position: absolute;
-  inset: 12% 11% 12% 11%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
-  direction: rtl;
-  text-align: right;
-  overflow: hidden;
-  backface-visibility: hidden;
-  color: color-mix(in oklab, var(--color-ink) 74%, transparent);
-  font-family: var(--font-literary), var(--font-quote), Georgia, serif;
-}
-.hbook__q {
-  font-size: 7.4cqw;
-  font-weight: 700;
-  line-height: 1.15;
-  margin-bottom: 0.3em;
-  color: color-mix(in oklab, var(--color-ink) 82%, transparent);
-}
-.hbook__l {
-  font-size: 4.4cqw;
-  line-height: 1.5;
-  font-weight: 500;
-}
-.hbook__l--short {
-  width: 62%;
-}
-
-/* דף מתהפך אחד — hinge בשדרה, מתחיל על עמוד-ימין ונוחת על עמוד-שמאל. */
-.hbook__turn {
-  position: absolute;
-  top: 0;
+.pbook__edge--bottom {
+  left: 2.6%;
+  right: 2.6%;
   bottom: 0;
-  left: 50%;
-  width: 50%;
-  transform-origin: left center;
-  transform-style: preserve-3d;
-  z-index: 7;
-  animation: hb-turn var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
+  height: var(--pb-thick);
+  transform-origin: bottom center;
+  transform: rotateX(-90deg);
+  background:
+    repeating-linear-gradient(to right, rgba(20, 16, 10, 0.10) 0 1px, transparent 1px 2.4px),
+    linear-gradient(180deg, #d9d4c8, #efece2 45%, #d3cec1);
 }
-.hbook__turn-face {
+/* שדרה — הצד הכרוך (שמאל), כהה כלוח-הכריכה. */
+.pbook__spine {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-  backface-visibility: hidden;
-  border-radius: 2px 9px 9px 2px;
-  background-color: var(--hb-paper-hi);
-  background-image: linear-gradient(100deg, var(--hb-paper-lo), var(--hb-paper-hi) 45%);
-  box-shadow: inset 14px 0 30px -20px rgba(18, 18, 22, 0.3);
-}
-.hbook__turn-face--back {
-  transform: rotateY(180deg);
-  border-radius: 9px 2px 2px 9px;
+  top: -2.6%;
+  bottom: -2.6%;
+  left: 0;
+  width: calc(var(--pb-thick) + 2px);
+  transform-origin: left center;
+  transform: rotateY(-90deg);
+  background: linear-gradient(90deg, #14110d, #2a2622 60%, #14110d);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
 }
 
-/* צל-מגע על הרקע — מקרקע ומפריד. אינו מסתובב עם הספר. */
-.hbook__shadow {
+/* הכריכה הקדמית — אמנות-המותג. hinge בשדרה (שמאל); נפתחת ~24°. */
+.pbook__cover {
   position: absolute;
-  left: 50%;
-  bottom: 13%;
-  width: 62%;
-  height: 8%;
+  inset: -2.6%;
+  transform-origin: left center;
+  transform: rotateY(0deg);
+  border-radius: 3px 8px 8px 3px;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0) 32%, rgba(20, 14, 8, 0.14) 100%),
+    linear-gradient(100deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0) 22%),
+    var(--cover-src);
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    inset 2px 0 0 0 rgba(255, 255, 255, 0.14),
+    inset -1px 0 0 0 rgba(0, 0, 0, 0.25),
+    18px 26px 40px -22px rgba(0, 0, 0, 0.6);
+  backface-visibility: hidden;
+  animation: pb-open var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+}
+
+/* צל-מגע על ה„רצפה” — מקרקע ומפריד מהרקע. אינו מסתובב עם הספר. */
+.pbook__contact {
+  position: absolute;
+  left: 49%;
+  bottom: 9%;
+  width: 66%;
+  height: 11%;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.26) 46%, transparent 72%);
-  filter: blur(13px);
-  animation: hb-fade 760ms var(--ease-standard) var(--book-open-delay) both;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.38) 42%, transparent 72%);
+  filter: blur(17px);
+  animation: pb-fade 760ms var(--ease-standard) var(--book-open-delay) both;
 }
-/* זוהר-הפרדה מאחורי הספר. */
-.hbook__halo {
+/* זוהר-הפרדה עדין מאחורי הספר. */
+.pbook__halo {
   position: absolute;
   left: 50%;
-  top: 46%;
-  width: 86%;
-  aspect-ratio: 1.6;
+  top: 44%;
+  width: 76%;
+  aspect-ratio: 1.05;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in oklab, var(--color-secondary) 22%, transparent), transparent 64%);
-  filter: blur(36px);
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-secondary) 20%, transparent), transparent 66%);
+  filter: blur(40px);
 }
 
 /* ── keyframes ── */
-@keyframes hb-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes hb-rise {
-  0% { transform: translateY(5%) rotateX(calc(var(--hb-tilt) + 5deg)) rotateY(var(--hb-yaw)) scale(0.97); }
-  100% { transform: translateY(0) rotateX(var(--hb-tilt)) rotateY(var(--hb-yaw)) scale(1); }
+@keyframes pb-fade { from { opacity: 0; } to { opacity: 1; } }
+/* presence → הרמה קלה → התייצבות. */
+@keyframes pb-rise {
+  0% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(3%) scale(0.985); }
+  10% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(2.4%) scale(0.99); }
+  46% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(-1.2%) scale(1.006); }
+  100% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
 }
-@keyframes hb-open-left {
-  0%, 10% { transform: rotateY(7deg); }
-  58%, 100% { transform: rotateY(var(--hb-open)); }
-}
-@keyframes hb-open-right {
-  0%, 10% { transform: rotateY(-7deg); }
-  58%, 100% { transform: rotateY(calc(-1 * var(--hb-open))); }
-}
-@keyframes hb-turn {
-  0%, 56% { transform: rotateY(calc(-1 * var(--hb-open))); }
-  74% { transform: rotateY(-90deg); }
-  90%, 100% { transform: rotateY(calc(-180deg + var(--hb-open))); }
+/* הכריכה: סגורה בזמן ה-presence → נפתחת מעט → מתייצבת. */
+@keyframes pb-open {
+  0%, 14% { transform: rotateY(0deg); }
+  44% { transform: rotateY(calc(-1 * var(--pb-open) - 3deg)); }
+  100% { transform: rotateY(calc(-1 * var(--pb-open))); }
 }
 
-/* מובייל (≤640px) — art-direction נפרד: המסר קודם, והספר הוא אובייקט קומפקטי
-   ומרשים *סגור* (כריכת-המותג) מתחתיו — לא spread פתוח מיניאטורי עם טקסט זעיר.
-   ה-hbook אינו מרונדר; כריכת-ה-<img> נשארת גלויה (ללא ה-fade של מצב-הפתיחה) עם
-   עובי-הדפים. reduced-motion זהה. (בסוף הבלוק — גובר על display:grid לפי הסדר.) */
-@media (max-width: 640px) {
-  .motion-js .book-cover--open .hbook { display: none; }
-  .motion-js .book-cover--open .book-cover__img {
-    animation: none;
-    opacity: 1;
-  }
-  .motion-js .book-cover--open .book-cover__pages {
-    animation: none;
-    opacity: 1;
-  }
-}
+/* מובייל (≤640px) — אותו art-direction: המסר קודם, והספר (אותו object) מיד מתחתיו
+   בקומפוזיציה קומפקטית. גדלים/מיקום מטופלים ב-sig-hero. */
+
