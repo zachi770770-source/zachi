@@ -4158,7 +4158,8 @@ body:has([data-fm-active]) {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 44svh;
+  min-height: 34svh;
+  order: 2; /* מובייל: המסר קודם, הספר מתחתיו (דסקטופ דורס למיקום מוחלט). */
 }
 .sig-hero__stage {
   display: none; /* בסצנה המאוחדת אין „במה” נפרדת — כל ה-Hero הוא השדה. */
@@ -4201,6 +4202,7 @@ body:has([data-fm-active]) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  order: 1; /* מובייל: המסר קודם (דסקטופ מתעלם — copy בזרימה, object מוחלט). */
 }
 .sig-hero__eyebrow {
   font-size: 12.5px;
@@ -4337,14 +4339,16 @@ body:has([data-fm-active]) {
     padding-block: 0;
     align-content: center;
   }
-  /* הכריכה: אובייקט ענק בצד-ההתחלה (RTL=ימין), חתוך בקצה, עולה מהתחתית. */
+  /* הספר: signature-object בצד-ההתחלה (RTL=ימין) — כולו בתוך ה-Hero, ממורכז
+     אנכית עם margins, לא חתוך ולא מודבק לתחתית. */
   .sig-hero__object {
     position: absolute;
-    inset-block: 2% -14%;
-    inset-inline-start: -4%; /* RTL: הקצה הימני */
-    width: min(48%, 36rem);
+    inset-block: 4% 4%;
+    inset-inline-start: 1.5%; /* RTL: מרווח מהקצה הימני */
+    inset-inline-end: auto;
+    width: min(52%, 40rem);
     min-height: 0;
-    place-items: end center;
+    place-items: center;
     z-index: 1;
   }
   .sig-hero__glow {
@@ -4358,9 +4362,9 @@ body:has([data-fm-active]) {
     filter: blur(40px);
   }
   .sig-hero__cover {
-    width: clamp(18rem, 30vw, 26rem);
-    margin-bottom: -12%;
-    filter: drop-shadow(0 56px 74px rgba(0, 0, 0, 0.6));
+    width: clamp(20rem, 32vw, 29rem);
+    margin-bottom: 0;
+    filter: drop-shadow(0 40px 58px rgba(0, 0, 0, 0.5));
   }
   /* דסקטופ: יש מרחב — ה-SPREAD רחב יותר (~1.86×) ומתכווץ פחות. */
   /* (הגדרות ה-SPREAD הרספונסיביות ל-1024/1280/1440 יושבות ליד בלוק ה-book,
@@ -4400,6 +4404,17 @@ body:has([data-fm-active]) {
     inset-inline-start: 30%;
     transform: none;
     height: clamp(3rem, 9vh, 5.5rem);
+  }
+}
+/* טווח-ביניים (1024–1279): פחות מרחב פנוי — הספר מעט קטן ומוסט ימינה כדי לשמור
+   הפרדה נקייה מה-H1 בלי חפיפה, וכולו בתוך ה-Hero. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .sig-hero__object {
+    inset-inline-start: 0.5%;
+    width: min(46%, 32rem);
+  }
+  .sig-hero__cover {
+    width: clamp(15rem, 27vw, 19.5rem);
   }
 }
 
@@ -5074,28 +5089,12 @@ body:has([data-fm-active]) {
   transform-origin: 50% 50%;
   animation: bo-fit var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
 }
-/* מובייל (≤640px) — שינוי responsive מכוון: *לא* spread מלא. הכריכה נשארת
-   האובייקט הראשי; הכריכה הקדמית מתרוממת חלקית וחושפת רק הצצה של דף לבן ריק — בלי
-   טקסט-פנים זעיר וקריא. „אהבה בונים.” נשאר האלמנט הוויזואלי הראשי. הספר בגודל-
-   הכריכה (אינו מתרחב ל-spread) כדי לא להשתלט על ראש ה-Hero. אובייקט-עריכה premium,
-   לא mini-reader. (reduced-motion ⇒ כריכה סגורה סטטית — לא מושפע.) */
-@media (max-width: 640px) {
-  .book-cover--open {
-    --open-shift: 0%;
-    --open-scale: 1;
-    --open-scale-y: 1;
-  }
-  /* הכריכה הקדמית מתרוממת חלקית בלבד ונעצרת (glimpse), במקום להיפתח ל-180°. */
-  .motion-js .book-cover--open .book-open__cover { animation-name: bo-cover-open-mobile; }
-  /* בלי spread: מסתירים דפים מתהפכים, עמוד-שמאל + עובי-הקצה שלו, השדרה, וכל
-     טקסט-פנים. הדף הלבן שנחשף מתחת לכריכה (leaf--right) נשאר — בלי הטקסט.
-     (קידומת .book-cover--open להעלאת specificity מעל הגדרות-הבסיס המאוחרות יותר.) */
-  .book-cover--open .book-open__page,
-  .book-cover--open .book-open__leaf--left,
-  .book-cover--open .book-open__stack--left,
-  .book-cover--open .book-open__gutter,
-  .book-cover--open .book-open__sheet { display: none; }
-}
+/* מובייל (≤640px) — art-direction נפרד: המסר קודם, והספר הוא אובייקט קומפקטי
+   ומרשים *סגור* (כריכת-המותג) מתחת לו — לא spread פתוח מיניאטורי עם טקסט זעיר.
+   ה-hbook (הספר הפתוח) אינו מרונדר; כריכת-ה-<img> נשארת גלויה (ללא ה-fade של
+   מצב-הפתיחה) עם עובי-הדפים שלה. reduced-motion זהה — כריכה סגורה יציבה. */
+/* (כללי-המובייל של ה-hbook יושבים בסוף בלוק ה-hbook — אחרי הגדרותיו — כדי לגבור
+   לפי סדר-המקור.) */
 /* ה-SPREAD גדל עם המרחב הפנוי (מימין ל-H1). ערכים לפי breakpoint (responsive,
    לא scale אחד קבוע): רחב ומרשים ב-1440/1280, מצומצם רק כנדרש ב-1024. */
 @media (min-width: 1024px) {
@@ -5476,4 +5475,264 @@ body:has([data-fm-active]) {
   0%, 58% { opacity: 0; }
   70% { opacity: 1; }
   82%, 100% { opacity: 0; }
+}
+
+/* ══ E · ספר-חתימה פתוח בזווית ¾ (Hero) — REDESIGN ══════════════════════════
+   הספר מופיע סגור (כריכת-המותג), נפתח בתנועה אחת גדולה ל„ספר פיזי פתוח” בזווית
+   ¾: לוחות-כריכה כהים עוטפים דפים לבנים, עובי-דפים בקצה-החופשי, קפל-שדרה טבעי,
+   צל-מגע אמיתי על הרקע וזוהר-הפרדה; ואז דף אחד מתהפך. הטקסט דהוי (טקסטורה
+   עריכתית). transform/opacity/filter בלבד. reduced-motion/ללא-JS ⇒ אינו מרונדר. */
+.book-cover--open { perspective: 1250px; }
+/* במצב-פתיחה (motion) מנטרלים את הטיית-ה-inner הסביבתית — ה-¾ מוגדר במלואו על
+   ה-hbook, כך שהספר סימטרי ובשליטה. reduced-motion שומר על הטיית-הכריכה הסגורה. */
+.motion-js .book-cover--open .book-cover__inner { transform: none; animation: none; }
+
+.hbook { display: none; }
+.motion-js .book-cover--open .hbook {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  container-type: inline-size;
+  /* פרמטרים לכוונון per-breakpoint */
+  --hb-open: 33deg; /* חצי-זווית-פתיחה של דף (סימטרי סביב השדרה) */
+  --hb-tilt: 17deg; /* הטיית-מבט מלמעלה (¾) */
+  --hb-yaw: -7deg; /* סיבוב-¾ עדין (שני העמודים כמעט-שווים) */
+  --hb-w: 152%; /* רוחב גוש-הספר יחסית למכל */
+  --hb-paper-hi: #fafaf8;
+  --hb-paper-lo: #ececea;
+  animation: hb-fade 460ms var(--ease-standard) var(--book-open-delay) both;
+}
+
+/* גוש-הספר: הטיה + התרוממות עדינה לתוך המסגרת. */
+.hbook__book {
+  position: relative;
+  width: var(--hb-w);
+  aspect-ratio: 1.52 / 1;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--hb-tilt)) rotateY(var(--hb-yaw));
+  animation: hb-rise var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+}
+
+/* שני חצאי-הספר, hinge בשדרה (מרכז). נפתחים מ„כמעט-סגור” לזווית-הפתיחה. */
+.hbook__side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  transform-style: preserve-3d;
+}
+.hbook__side--left {
+  left: 0;
+  transform-origin: 100% 50%;
+  animation: hb-open-left var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+}
+.hbook__side--right {
+  right: 0;
+  transform-origin: 0% 50%;
+  animation: hb-open-right var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+}
+
+/* לוח-כריכה כהה מאחורי הדף, גדול-מעט (overhang) = עובי-כריכה + silhouette. */
+.hbook__board {
+  position: absolute;
+  transform: translateZ(-15px);
+  background: linear-gradient(135deg, #2b2f36, #141519 74%);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+    0 1px 0 0 rgba(0, 0, 0, 0.5);
+}
+.hbook__side--left .hbook__board {
+  inset: -3.5% -1.5% -4.5% -4.5%;
+  border-radius: 10px 3px 3px 10px;
+}
+.hbook__side--right .hbook__board {
+  inset: -3.5% -4.5% -4.5% -1.5%;
+  border-radius: 3px 10px 10px 3px;
+}
+
+/* עובי-דפים בקצה-החופשי — פאה ניצבת (גוש דפים). */
+.hbook__stack {
+  position: absolute;
+  top: 3.5%;
+  bottom: 3.5%;
+  width: 15px;
+  background:
+    repeating-linear-gradient(to bottom, rgba(16, 16, 20, 0.11) 0 1px, transparent 1px 2.5px),
+    linear-gradient(90deg, #e4e4e0, #f4f4f2 45%, #e0e0dc);
+}
+.hbook__side--left .hbook__stack {
+  left: 0;
+  transform-origin: left center;
+  transform: translateZ(-7px) rotateY(90deg);
+  border-radius: 2px 0 0 2px;
+}
+.hbook__side--right .hbook__stack {
+  right: 0;
+  transform-origin: right center;
+  transform: translateZ(-7px) rotateY(-90deg);
+  border-radius: 0 2px 2px 0;
+}
+
+/* עמוד לבן (פן קדמי). עומק-דף: עקומת-מרזב (צד-שדרה) + הבזק-קצה + הצללת עליון/תחתון. */
+.hbook__page {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  background-color: var(--hb-paper-hi);
+  /* טונליות-נייר עדינה: sheen אלכסוני + כהות רכה בתחתית — לא פאנל לבן אחיד.
+     גוון ניטרלי בלבד (הנייר נשאר לבן; העומק מהצללים). */
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 58%, rgba(20, 20, 24, 0.05)),
+    linear-gradient(104deg, var(--hb-paper-lo), var(--hb-paper-hi) 46%, #f0f0ee);
+}
+.hbook__side--left .hbook__page {
+  border-radius: 9px 2px 2px 9px;
+  box-shadow:
+    inset -22px 0 42px -24px rgba(18, 18, 22, 0.36),
+    inset 9px 0 12px -9px rgba(255, 255, 255, 0.5),
+    inset 0 15px 26px -18px rgba(18, 18, 22, 0.16),
+    inset 0 -17px 30px -18px rgba(18, 18, 22, 0.24);
+}
+.hbook__side--right .hbook__page {
+  border-radius: 2px 9px 9px 2px;
+  box-shadow:
+    inset 22px 0 42px -24px rgba(18, 18, 22, 0.36),
+    inset -9px 0 12px -9px rgba(255, 255, 255, 0.5),
+    inset 0 15px 26px -18px rgba(18, 18, 22, 0.16),
+    inset 0 -17px 30px -18px rgba(18, 18, 22, 0.24);
+}
+
+/* קפל-שדרה — הבזק דק במפגש שני הדפים. */
+.hbook__spine {
+  position: absolute;
+  top: 2%;
+  bottom: 2%;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%) translateZ(0.5px);
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.22) 20%, rgba(255, 255, 255, 0.22) 80%, transparent);
+  z-index: 6;
+}
+
+/* טקסטורת-טקסט עריכתית דהויה. */
+.hbook__text {
+  position: absolute;
+  inset: 12% 11% 12% 11%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  direction: rtl;
+  text-align: right;
+  overflow: hidden;
+  backface-visibility: hidden;
+  color: color-mix(in oklab, var(--color-ink) 74%, transparent);
+  font-family: var(--font-literary), var(--font-quote), Georgia, serif;
+}
+.hbook__q {
+  font-size: 7.4cqw;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 0.3em;
+  color: color-mix(in oklab, var(--color-ink) 82%, transparent);
+}
+.hbook__l {
+  font-size: 4.4cqw;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.hbook__l--short {
+  width: 62%;
+}
+
+/* דף מתהפך אחד — hinge בשדרה, מתחיל על עמוד-ימין ונוחת על עמוד-שמאל. */
+.hbook__turn {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 50%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  z-index: 7;
+  animation: hb-turn var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
+}
+.hbook__turn-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  border-radius: 2px 9px 9px 2px;
+  background-color: var(--hb-paper-hi);
+  background-image: linear-gradient(100deg, var(--hb-paper-lo), var(--hb-paper-hi) 45%);
+  box-shadow: inset 14px 0 30px -20px rgba(18, 18, 22, 0.3);
+}
+.hbook__turn-face--back {
+  transform: rotateY(180deg);
+  border-radius: 9px 2px 2px 9px;
+}
+
+/* צל-מגע על הרקע — מקרקע ומפריד. אינו מסתובב עם הספר. */
+.hbook__shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 13%;
+  width: 62%;
+  height: 8%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.26) 46%, transparent 72%);
+  filter: blur(13px);
+  animation: hb-fade 760ms var(--ease-standard) var(--book-open-delay) both;
+}
+/* זוהר-הפרדה מאחורי הספר. */
+.hbook__halo {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 86%;
+  aspect-ratio: 1.6;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-secondary) 22%, transparent), transparent 64%);
+  filter: blur(36px);
+}
+
+/* ── keyframes ── */
+@keyframes hb-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hb-rise {
+  0% { transform: translateY(5%) rotateX(calc(var(--hb-tilt) + 5deg)) rotateY(var(--hb-yaw)) scale(0.97); }
+  100% { transform: translateY(0) rotateX(var(--hb-tilt)) rotateY(var(--hb-yaw)) scale(1); }
+}
+@keyframes hb-open-left {
+  0%, 10% { transform: rotateY(7deg); }
+  58%, 100% { transform: rotateY(var(--hb-open)); }
+}
+@keyframes hb-open-right {
+  0%, 10% { transform: rotateY(-7deg); }
+  58%, 100% { transform: rotateY(calc(-1 * var(--hb-open))); }
+}
+@keyframes hb-turn {
+  0%, 56% { transform: rotateY(calc(-1 * var(--hb-open))); }
+  74% { transform: rotateY(-90deg); }
+  90%, 100% { transform: rotateY(calc(-180deg + var(--hb-open))); }
+}
+
+/* מובייל (≤640px) — art-direction נפרד: המסר קודם, והספר הוא אובייקט קומפקטי
+   ומרשים *סגור* (כריכת-המותג) מתחתיו — לא spread פתוח מיניאטורי עם טקסט זעיר.
+   ה-hbook אינו מרונדר; כריכת-ה-<img> נשארת גלויה (ללא ה-fade של מצב-הפתיחה) עם
+   עובי-הדפים. reduced-motion זהה. (בסוף הבלוק — גובר על display:grid לפי הסדר.) */
+@media (max-width: 640px) {
+  .motion-js .book-cover--open .hbook { display: none; }
+  .motion-js .book-cover--open .book-cover__img {
+    animation: none;
+    opacity: 1;
+  }
+  .motion-js .book-cover--open .book-cover__pages {
+    animation: none;
+    opacity: 1;
+  }
 }
