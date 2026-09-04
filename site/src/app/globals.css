@@ -5051,6 +5051,8 @@ body:has([data-fm-active]) {
      כדי לתת ל-spread פרופורציה מעט רחבה-יותר (ספר אמיתי, לא חוברת גבוהה-צרה). */
   --open-scale-y: var(--open-scale);
   --open-shift: 0%;
+  /* הרמה אנכית קלה (breathing room מתחת לספר). ברירת-מחדל 0; דסקטופ דורס. */
+  --open-lift: 0%;
 }
 .book-open { display: none; }
 .motion-js .book-cover--open .book-open {
@@ -5072,18 +5074,35 @@ body:has([data-fm-active]) {
   transform-origin: 50% 50%;
   animation: bo-fit var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
 }
-/* טלפונים (פריסה מוערמת: הספר מעל הקופי). ה-spread מרכזי ורחב מה-viewport, ולכן
-   הסטה קטנה ימינה מונעת חיתוך של עמוד-שמאל בקצה-המסך. לא משפיע על 768 ומעלה. */
+/* מובייל (≤640px) — שינוי responsive מכוון: *לא* spread מלא. הכריכה נשארת
+   האובייקט הראשי; הכריכה הקדמית מתרוממת חלקית וחושפת רק הצצה של דף לבן ריק — בלי
+   טקסט-פנים זעיר וקריא. „אהבה בונים.” נשאר האלמנט הוויזואלי הראשי. הספר בגודל-
+   הכריכה (אינו מתרחב ל-spread) כדי לא להשתלט על ראש ה-Hero. אובייקט-עריכה premium,
+   לא mini-reader. (reduced-motion ⇒ כריכה סגורה סטטית — לא מושפע.) */
 @media (max-width: 640px) {
-  .book-cover--open { --open-shift: 30%; }
+  .book-cover--open {
+    --open-shift: 0%;
+    --open-scale: 1;
+    --open-scale-y: 1;
+  }
+  /* הכריכה הקדמית מתרוממת חלקית בלבד ונעצרת (glimpse), במקום להיפתח ל-180°. */
+  .motion-js .book-cover--open .book-open__cover { animation-name: bo-cover-open-mobile; }
+  /* בלי spread: מסתירים דפים מתהפכים, עמוד-שמאל + עובי-הקצה שלו, השדרה, וכל
+     טקסט-פנים. הדף הלבן שנחשף מתחת לכריכה (leaf--right) נשאר — בלי הטקסט.
+     (קידומת .book-cover--open להעלאת specificity מעל הגדרות-הבסיס המאוחרות יותר.) */
+  .book-cover--open .book-open__page,
+  .book-cover--open .book-open__leaf--left,
+  .book-cover--open .book-open__stack--left,
+  .book-cover--open .book-open__gutter,
+  .book-cover--open .book-open__sheet { display: none; }
 }
 /* ה-SPREAD גדל עם המרחב הפנוי (מימין ל-H1). ערכים לפי breakpoint (responsive,
    לא scale אחד קבוע): רחב ומרשים ב-1440/1280, מצומצם רק כנדרש ב-1024. */
 @media (min-width: 1024px) {
-  .book-cover--open { --leaf-w: 0.92; --open-scale: 0.68; --open-shift: 13%; }
+  .book-cover--open { --leaf-w: 0.92; --open-scale: 0.68; --open-shift: 13%; --open-lift: -5%; }
 }
 @media (min-width: 1280px) {
-  .book-cover--open { --leaf-w: 0.94; --open-scale: 0.84; --open-shift: 15%; }
+  .book-cover--open { --leaf-w: 0.94; --open-scale: 0.84; --open-shift: 15%; --open-lift: -5%; }
 }
 @media (min-width: 1440px) {
   .book-cover--open {
@@ -5091,6 +5110,7 @@ body:has([data-fm-active]) {
     --open-scale: 0.93; /* רחב יותר (~+8%), נשאר כולו בתוך ה-Hero */
     --open-scale-y: 0.87; /* מעט פחות גבוה — פרופורציה רחבה-יותר, עיוות-טקסט מזערי */
     --open-shift: 35%; /* מחזיק את הקצה-השמאלי מחוץ ל-H1; ההרחבה בעיקר ימינה */
+    --open-lift: -6%; /* breathing room מתחת לספר */
   }
 }
 /* ה-<img> האמיתי נמוג ברגע ששכבת-הכריכה משתלטת (crossfade בלתי-נראה — אותה
@@ -5131,10 +5151,14 @@ body:has([data-fm-active]) {
   transform-origin: 0% 50%;
   transform: translateZ(0.4px);
   border-radius: 1px 7px 7px 1px; /* פינה מעוגלת בקצה-החופשי (ימין) */
-  /* צל-מרזב פנימי (בצד השדרה = שמאל) + הבזק-אור בקצה-החופשי. */
+  /* עומק-דף: עקומת-מרזב עמוקה יותר בצד-השדרה (שמאל) + הבזק-קצה-חופשי + הצללת
+     קצה עליון/תחתון — כדי שהעמוד ייראה כגוף עם קצוות, לא מלבן לבן שטוח. גוון
+     ניטרלי (גרפיט) בלבד; הנייר נשאר לבן. */
   box-shadow:
-    inset 10px 0 24px -16px rgba(24, 24, 28, 0.2),
-    inset -5px 0 8px -6px rgba(255, 255, 255, 0.4);
+    inset 16px 0 36px -18px rgba(22, 22, 26, 0.28),
+    inset -6px 0 10px -7px rgba(255, 255, 255, 0.45),
+    inset 0 11px 20px -16px rgba(20, 20, 24, 0.16),
+    inset 0 -13px 24px -16px rgba(20, 20, 24, 0.22);
 }
 .book-open__leaf--left {
   right: 100%; /* יושב משמאל לשדרה: [-leaf-w·W, 0] */
@@ -5157,11 +5181,13 @@ body:has([data-fm-active]) {
   position: absolute;
   top: 4%;
   bottom: 4%;
-  width: 7px;
+  width: 9px;
   opacity: 0;
+  /* „גוש דפים”: קווי-דפים דקים (אנכית) + סימון עומק (אופקית — כהה בשוליים, בהיר
+     במרכז) כדי שהקצה ייראה כערימת דפים מעוגלת, לא כפס אחיד. */
   background:
-    repeating-linear-gradient(to bottom, rgba(20, 20, 24, 0.05) 0 1px, transparent 1px 2.6px),
-    linear-gradient(#f4f4f5, #e9e9ea);
+    repeating-linear-gradient(to bottom, rgba(18, 18, 22, 0.07) 0 1px, transparent 1px 2.4px),
+    linear-gradient(90deg, #e6e6e4 0%, #f6f6f5 42%, #ededeb 78%, #dedddb 100%);
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
 }
 .book-open__stack--right {
@@ -5230,7 +5256,13 @@ body:has([data-fm-active]) {
 .book-open__cover-liner {
   transform: rotateY(180deg); /* הצד הפנימי — פונה החוצה כשהכריכה נפתחת */
   border-radius: 8px 3px 3px 8px;
-  box-shadow: inset -10px 0 20px -12px rgba(28, 28, 32, 0.42);
+  /* עומק-דף לעמוד-שמאל, סימטרי לעמוד-ימין: עקומת-מרזב בצד-השדרה + הצללת קצה
+     עליון/תחתון. (ה-liner מסובב 180°, ולכן ‎-x = צד-השדרה.) */
+  box-shadow:
+    inset -16px 0 36px -18px rgba(22, 22, 26, 0.3),
+    inset 6px 0 10px -7px rgba(255, 255, 255, 0.4),
+    inset 0 11px 20px -16px rgba(20, 20, 24, 0.16),
+    inset 0 -13px 24px -16px rgba(20, 20, 24, 0.22);
 }
 
 /* דפים מתהפכים — outer = סיבוב (hinge בשדרה); inner (.book-open__curl) = עיקול.
@@ -5359,9 +5391,9 @@ body:has([data-fm-active]) {
      את הספר למסגרת-הבטוחה (scale+shift) מוקדם — עד 14% — כדי שכשעמוד-השמאל
      נחשף (bo-reveal מ-14%) המסגרת כבר מוסטת ימינה ושום שטח לבן אינו חוצה שמאלה
      אל אזור ה-H1. הגודל/המיקום הסופיים ללא שינוי. */
-  0%, 5% { transform: translateX(0) scale(1); }
-  14% { transform: translateX(var(--open-shift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
-  100% { transform: translateX(var(--open-shift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
+  0%, 5% { transform: translate(0, 0) scale(1); }
+  14% { transform: translate(var(--open-shift), var(--open-lift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
+  100% { transform: translate(var(--open-shift), var(--open-lift)) scaleX(var(--open-scale)) scaleY(var(--open-scale-y)); }
 }
 /* חשיפת בסיס-ה-spread (עלים/שדרה/עובי) ככל שהכריכה מתרוממת. מתחילה רק אחרי
    שהמסגרת (bo-fit) הוסטה למקום-הבטוח (~14%) — כך עמוד-השמאל לעולם אינו מופיע
@@ -5379,6 +5411,13 @@ body:has([data-fm-active]) {
   24% { transform: translateZ(4px) rotateY(-146deg); }
   32% { transform: translateZ(1.5px) rotateY(-180deg); }
   100% { transform: translateZ(1.5px) rotateY(-180deg); }
+}
+/* מובייל: הכריכה הקדמית מתרוממת חלקית (~-40°), חושפת הצצת-דף לבנה, ונעצרת שם. */
+@keyframes bo-cover-open-mobile {
+  0% { transform: translateZ(8px) rotateY(0deg); }
+  8% { transform: translateZ(8px) rotateY(-9deg); }
+  42% { transform: translateZ(7px) rotateY(-40deg); }
+  100% { transform: translateZ(7px) rotateY(-40deg); }
 }
 /* הפיכת-דף: rest → הקצה החופשי מתרומם אל הצופה (translateZ) → אנכי → חוצה את
    השדרה → נוחת בצד-שמאל ונשאר (forwards). translateZ בסיס לפי --i (עובי-גוש). */
