@@ -204,6 +204,12 @@
   --animate-slide-up: slide-up 0.4s ease-out;
   /* כניסת מגירת התפריט במובייל (מהצד המתחיל ב-RTL) — תחושת אפליקציה. */
   --animate-drawer-in: drawer-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  /* יציאת אותה מגירה. בלעדיה המגירה *נעלמת* בפריים אחד בעוד מגירת „שאלו את
+     הספר” נסגרת בתנועה — אותו רכיב-ממשק בדיוק, שתי שפות-תנועה. היציאה חוזרת
+     באותו ציר שבו נכנסה (סיבתיות: מה שנכנס מהצד, יוצא לאותו צד), בטוקן-משך
+     המשותף ובאותו ה-easing של מגירת המצפן. */
+  --animate-drawer-out: drawer-out var(--dur-ui) var(--ease-emphasized)
+    forwards;
   /* „שאלו את הספר”: פתיחה/סגירה של הפאנל הצדדי (מהקצה end = שמאל ב-RTL).
      תחת prefers-reduced-motion התנועה מבוטלת גלובלית והסגירה מיידית. */
   --animate-fade-out: fade-out var(--motion-panel) ease-in forwards;
@@ -256,6 +262,16 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+  @keyframes drawer-out {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0.6;
+      transform: translateX(100%);
     }
   }
   @keyframes slide-up {
