@@ -393,7 +393,7 @@ export function CompassConsole({
                 <button
                   type="button"
                   onClick={() => void runQuery(q)}
-                  className="group flex w-full items-start gap-2.5 rounded-lg border border-border-strong bg-surface px-4 py-3 text-start text-[15px] leading-relaxed text-foreground transition-colors hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  className="group flex w-full items-start gap-2.5 rounded-lg border border-border-strong bg-surface px-4 py-3 text-start text-[15px] leading-relaxed text-foreground transition-colors hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
                   <Compass
                     className="mt-0.5 h-4 w-4 shrink-0 text-brand"

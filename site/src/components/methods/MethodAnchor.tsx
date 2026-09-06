@@ -14,10 +14,10 @@ export function MethodAnchor({ anchor }: { anchor: MethodAnchorData }) {
     /* ---- ציטוט-עורך בולט (quiet-check): עיקרון תלוי עם קו-מוביל טרקוטה ---- */
     case "pullquote":
       return (
-        <figure className="reveal relative border-s-2 border-brand/45 ps-5 sm:ps-7">
+        <figure className="reveal relative border-s-2 border-sage-ink/50 ps-5 sm:ps-7">
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute -top-4 start-3 select-none font-serif text-6xl leading-none text-brand/15 sm:text-7xl"
+            className="pointer-events-none absolute -top-4 start-3 select-none font-serif text-6xl leading-none text-sage-ink/20 sm:text-7xl"
           >
             „
           </span>

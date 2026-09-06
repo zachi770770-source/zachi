@@ -9,12 +9,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // פעולה ראשית = דיו/פחם (לא חום). המותג נשאר accent בלבד.
+        // פעולה ראשית על משטח בהיר = פטרול עמוק + טקסט שנהב (10.5:1).
+        // טרקוטה נשארת accent בלבד — לא צבע כפתור-הרכישה.
         primary:
-          "bg-foreground text-surface hover:bg-[#33373d] shadow-sm",
-        // אזור נבחר/מודגש = מרווה עמוק ומודרני.
+          "bg-[color:var(--color-petrol)] text-[color:var(--color-secondary-foreground)] hover:bg-[color:var(--color-petrol-2)] shadow-sm",
+        // היררכיה: `secondary` היה `bg-secondary` — כלומר מילוי פטרול + שנהב,
+        // *זהה ויזואלית* ל-primary, ושתי פעולות באותו משקל אינן היררכיה.
+        // עכשיו הוא נקרא כמשני בבירור: מתאר פטרול על משטח בהיר, בלי מילוי.
         secondary:
-          "bg-secondary text-secondary-foreground hover:opacity-90",
+          "border border-secondary/45 bg-transparent text-secondary hover:bg-secondary/8",
         outline:
           "border border-border-strong bg-surface text-foreground hover:bg-surface-muted",
         ghost: "bg-transparent text-foreground hover:bg-surface-muted",

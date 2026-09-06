@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { focusUi, getFocusSituation } from "@/content/focusMode";
+import { focusUi, focusSituations, getFocusSituation } from "@/content/focusMode";
 import type { HomePathId } from "@/content/homePaths";
 import { withViewTransition } from "@/lib/motion/viewTransition";
 
@@ -41,12 +41,15 @@ export function FocusMode({
   situationId,
   onContinue,
   onBack,
+  onSwitch,
 }: {
   situationId: HomePathId;
   /** ממשיך אל השיחה הדטרמיניסטית של המצב (נחשף בשלב הפעולה). */
   onContinue: () => void;
   /** חזרה לבחירת-המצב. */
   onBack: () => void;
+  /** מעבר ישיר למצב אחר — בלי לחזור לרשת (החלפה אלגנטית). */
+  onSwitch?: (id: HomePathId) => void;
 }) {
   const s = getFocusSituation(situationId);
   const [stage, setStage] = React.useState<Stage>("enter");
@@ -104,6 +107,7 @@ export function FocusMode({
       role="region"
       aria-label={focusUi.regionLabel}
       data-stage={stage}
+      data-situation={situationId}
     >
       {/* עומק-רקע (controlled gradients) + נשימת-Ambient — דקורטיביים בלבד. */}
       <span className="fm-bg" aria-hidden="true" />
@@ -125,12 +129,40 @@ export function FocusMode({
               />
             ))}
           </span>
+          {/* הקשר-המצב הקבוע — המצב שנבחר נשאר גלוי לאורך כל הפעימות. */}
+          <span className="fm-status" aria-hidden="true">
+            <span className="fm-status__dot" />
+            {s.title}
+          </span>
+          {/* החלפת-מצב אלגנטית: כל ארבעת המצבים נשארים בהישג-יד; הנבחר מודגש
+              והאחרים שקטים — בלי לחזור לרשת ובלי לאבד את ההקשר. */}
+          {onSwitch ? (
+            <span className="fm-switch" role="group" aria-label={focusUi.regionLabel}>
+              {focusSituations.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className="fm-switch__chip"
+                  aria-current={f.id === situationId ? "true" : undefined}
+                  onClick={() => f.id !== situationId && onSwitch(f.id)}
+                >
+                  {f.title}
+                </button>
+              ))}
+            </span>
+          ) : null}
         </div>
 
         {stage === "enter" && (
           <div className="fm-scene fm-scene--enter">
-            <p className="fm-eyebrow">{focusUi.eyebrow}</p>
+            {/* סמן-מצב עריכתי (שם התחנה) לפני הקיקר המשותף — כל תוצאה מזוהה
+                מיד עם המצב שנבחר, באותה שפה עיצובית. */}
+            <p className="fm-eyebrow">
+              <span className="fm-marker">{s.marker}</span>
+              {focusUi.eyebrow}
+            </p>
             <h3 className="fm-title fm-title--hero">{s.title}</h3>
+            <span className="fm-title-rule" aria-hidden="true" />
             <p className="fm-lede">{focusUi.intro}</p>
             <div className="fm-cta-row">
               <button type="button" onClick={() => go("split")} className="fm-cta fm-cta--ghost">

@@ -31,7 +31,7 @@ export function ReaderResourceLink({
           /* לא-קריטי */
         }
       }}
-      className="group flex items-start justify-between gap-3 rounded-2xl border border-border bg-surface p-4 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+      className="group flex items-start justify-between gap-3 rounded-2xl border border-border bg-surface p-4 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
     >
       <span>
         <span className="font-serif text-[15px] font-semibold text-foreground">{title}</span>

@@ -3,75 +3,63 @@ import { Reveal } from "@/components/shared/Reveal";
 import { readiness, patterns } from "@/content/book";
 
 /**
- * „למה אנחנו נתקעים” — שאלת המוכנות (מזיזה את הפוקוס פנימה) והדפוסים הלא-מודעים.
- * ממוקם ב-/book אחרי „למי הספר” ולפני „השיטה”: זיהוי-עצמי לפני הפתרון. הטבלה
- * היא טבלה בדסקטופ וכרטיסים מוערכים במובייל (אותו תוכן, ללא גלילה אופקית).
+ * „למה אנחנו נתקעים” — שאלת המוכנות והדפוסים הלא-מודעים. זיהוי-עצמי לפני
+ * הפתרון, בין „למי הספר” ל„השיטה”.
+ *
+ * גרסה מרוסנת: הסקשן הוסר בעבר מ-/book כדי לקצר את העמוד, אבל הוא נושא תוכן
+ * מאושר (שאלת המוכנות, הציטוט, ושלושת הדפוסים) — ולכן חזר. מה שהצטמצם הוא
+ * ה*נפח*, לא המשמעות: ריפוד מחצית (py-24/32 → py-14/20), טיפוגרפיה קטנה
+ * בדרגה, והדפוסים כרשימת-הגדרות אחת (שם · רקע · הצורך) במקום טבלה בת שלוש
+ * עמודות עם שורת-כותרות נפרדת. אותו טקסט בדיוק, פחות ארכיטקטורה.
  */
 export function PatternsSection() {
   return (
     <section
       id="patterns"
-      className="scroll-mt-20 border-y border-border bg-surface-muted/40 py-24 sm:py-32"
+      className="scroll-mt-20 border-y border-border bg-surface-muted/40 py-14 sm:py-20"
       aria-labelledby="patterns-heading"
     >
       <Container>
-        {/* שאלת המוכנות — ציטוט + השאלה שמזיזה את הפוקוס פנימה */}
+        {/* שאלת המוכנות — הציטוט והשאלה שמזיזה את הפוקוס פנימה */}
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="kicker justify-center">{readiness.kicker}</span>
-          <blockquote className="type-literary mt-6 text-[clamp(1.25rem,2.6vw,1.65rem)] font-medium leading-snug text-foreground">
+          <blockquote className="type-literary mt-4 text-[clamp(1.1rem,2.1vw,1.35rem)] font-medium leading-snug text-foreground">
             „{readiness.quote}”
           </blockquote>
-          <p className="mt-8 font-serif text-[clamp(1.5rem,3.4vw,2.15rem)] font-semibold leading-tight text-brand-hover">
+          <p className="mt-5 font-serif text-[clamp(1.25rem,2.6vw,1.6rem)] font-semibold leading-tight text-brand-hover">
             {readiness.question}
           </p>
-          <p className="type-lead mt-4 text-foreground-muted">{readiness.framing}</p>
+          <p className="mx-auto mt-3 max-w-[54ch] text-[15px] leading-relaxed text-foreground-muted">
+            {readiness.framing}
+          </p>
         </Reveal>
 
-        {/* הדפוסים הלא מודעים — טבלה/כרטיסים */}
-        <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
-          <span className="kicker justify-center">{patterns.kicker}</span>
-          <h2 id="patterns-heading" className="type-h2 mt-4 text-center">
+        {/* הדפוסים הלא מודעים — רשימת-הגדרות קומפקטית */}
+        <Reveal className="mx-auto mt-10 max-w-2xl sm:mt-12">
+          <h2 id="patterns-heading" className="type-h3 text-center">
             {patterns.title}
           </h2>
-          <p className="type-lead mx-auto mt-4 max-w-[54ch] text-center text-foreground-muted">
+          <p className="mx-auto mt-3 max-w-[54ch] text-center text-[15px] leading-relaxed text-foreground-muted">
             {patterns.intro}
           </p>
 
-          <div className="mt-10">
-            {/* כותרות עמודות — דסקטופ בלבד */}
-            <div className="hidden grid-cols-3 gap-4 border-b border-border-strong pb-3 sm:grid">
-              {patterns.columns.map((c) => (
-                <p
-                  key={c}
-                  className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover"
-                >
-                  {c}
+          <ul className="mt-7 space-y-3">
+            {patterns.rows.map((r) => (
+              <li
+                key={r.pattern}
+                className="rounded-xl border border-border bg-surface px-5 py-4"
+              >
+                <p className="font-serif text-[1.05rem] font-semibold leading-snug text-foreground">
+                  {r.pattern}
                 </p>
-              ))}
-            </div>
-            <ul>
-              {patterns.rows.map((r) => (
-                <li
-                  key={r.pattern}
-                  className="border-b border-border py-5 sm:grid sm:grid-cols-3 sm:items-baseline sm:gap-4"
-                >
-                  <p className="font-serif text-[1.1rem] font-semibold text-foreground">
-                    {r.pattern}
-                  </p>
-                  <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted sm:mt-0">
-                    <span className="font-semibold text-brand-hover sm:hidden">
-                      {patterns.columns[1]}:{" "}
-                    </span>
-                    {r.root}
-                  </p>
-                  <p className="mt-2 text-[15px] leading-relaxed text-foreground sm:mt-0">
-                    <span className="font-semibold text-brand-hover sm:hidden">הצורך: </span>
-                    {r.need}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+                <p className="mt-1.5 text-[14.5px] leading-relaxed text-foreground-muted">
+                  <span className="text-ink-soft">{patterns.columns[1]}:</span> {r.root}
+                  {" · "}
+                  <span className="text-ink-soft">{patterns.columns[2]}:</span> {r.need}
+                </p>
+              </li>
+            ))}
+          </ul>
         </Reveal>
       </Container>
     </section>

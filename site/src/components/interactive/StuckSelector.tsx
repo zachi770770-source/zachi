@@ -110,7 +110,7 @@ export function StuckSelector({
     requestAnimationFrame(() => {
       const group = groupRef.current;
       if (!group) return;
-      group.scrollIntoView({ block: "nearest" });
+      group.scrollIntoView({ block: "nearest", behavior: "auto" });
       group.querySelector<HTMLInputElement>('input[type="radio"]')?.focus();
     });
   }, []);

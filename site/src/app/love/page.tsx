@@ -135,7 +135,7 @@ export default function LovePage() {
             <Link
               key={st.href}
               href={st.href}
-              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               <span className="font-serif text-[1.05rem] font-semibold text-foreground">
                 {st.label}

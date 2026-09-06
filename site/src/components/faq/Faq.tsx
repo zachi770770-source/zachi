@@ -126,7 +126,7 @@ export function Faq({ items }: { items: FaqItem[] }) {
                 </span>
               </span>
               <ChevronDown
-                className="h-5 w-5 shrink-0 self-center text-brand/70 transition-transform duration-200 group-open:rotate-180 group-open:text-brand group-hover:text-brand"
+                className="h-5 w-5 shrink-0 self-center text-ink-soft/70 transition-transform duration-200 group-open:rotate-180 group-open:text-brand group-hover:text-brand"
                 aria-hidden="true"
               />
             </summary>

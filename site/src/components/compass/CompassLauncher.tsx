@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { isEnglishPath } from "@/lib/language";
 import { compassQuiz } from "@/content/compass";
 import type { AskStationId } from "@/content/askRoute";
 
@@ -93,10 +95,20 @@ export function CompassLauncher({
   // על הגלילה. מכובד תחת reduced-motion (המעבר מתאפס גלובלית).
   React.useEffect(() => {
     let raf = 0;
+    let current: boolean | null = null;
     const compute = () => {
       raf = 0;
       const threshold = Math.max(320, Math.round(window.innerHeight * 0.6));
-      setPastHero(window.scrollY > threshold);
+      const next = window.scrollY > threshold;
+      if (next === current) return;
+      current = next;
+      // מחויב *באותו פריים* שבו זוהתה החצייה. בלי זה העדכון עובר במסלול
+      // התזמון הרגיל של React, וה-DOM (ובעקבותיו כלל-ה-CSS שמסתיר את הגלולה
+      // במובייל) משתרך אחרי הגלילה — נמדד כמה מאות מ״ש על חומרה עמוסה, שם
+      // הגלולה נשארה שקופה הרבה אחרי שהמשתמש כבר חלף על פני ה-Hero.
+      // ה-flushSync מוגן מאחורי בדיקת-שינוי, ולכן רץ רק בחצייה עצמה ולא בכל
+      // פריים-גלילה.
+      flushSync(() => setPastHero(next));
     };
     const onScroll = () => {
       if (!raf) raf = window.requestAnimationFrame(compute);
@@ -147,6 +159,11 @@ export function CompassLauncher({
   // (ההחזרה מוקדמת אך *אחרי* כל ה-hooks, כדי לא להפר את סדר ה-hooks.)
   if (pathname?.startsWith("/compass")) return null;
 
+  // „/en” אנגלי: מנוע-ההכוונה („שאל את הספר”) הוא עברי בלבד ואין לו מקבילה
+  // אנגלית. בועה בעברית על עמוד אנגלי היא בדיוק ה-UI-העברי-האקראי שיש להסיר —
+  // ובועה אנגלית שפותחת תוכן עברי הייתה מטעה. לכן מוסתרת כאן לחלוטין.
+  if (isEnglishPath(pathname)) return null;
+
   // מצב שאלה-חופשית פעיל: הבועה מנווטת אל /compass (החוויה החופשית) במקום לפתוח
   // את מגירת המנוע המודרך. אותה גלולה ויזואלית ואותה לוגיקת-חשיפה, ללא Dialog.
   // בתוך /compass מופיע קישור „לא בטוחים מה לשאול? המצפן המודרך”.
@@ -161,7 +178,7 @@ export function CompassLauncher({
         data-past-hero={pastHero ? "true" : "false"}
         style={{ bottom: bubbleBottom }}
         className={cn(
-          "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
+          "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgb(var(--shadow-tint)/0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-secondary/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
         )}
       >
         <span
@@ -203,7 +220,7 @@ export function CompassLauncher({
             // מתחרה ב-CTA הכהה, לא כבד. הבסיס הרספונסיבי כמשתנה: מובייל 5.5rem
             // (מעל בר-הטעימה), דסקטופ 2rem. „bottom” אינו ב-transition —
             // ההרמה מעל הבאנר מיידית. RTL: end-*.
-            "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
+            "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgb(var(--shadow-tint)/0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-secondary/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
           )}
         >
           {/* סמל-המצפן הטרקוטה — הזהות של „מה הספר אומר על המצב שלי”. */}

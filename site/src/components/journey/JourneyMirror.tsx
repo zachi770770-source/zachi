@@ -63,7 +63,7 @@ export function JourneyMirror({
                 >
                   <span
                     aria-hidden="true"
-                    className="font-serif text-[1.75rem] font-bold leading-none text-brand/85 sm:text-[2rem]"
+                    className="font-serif text-[1.75rem] font-bold leading-none text-sage-ink/90 sm:text-[2rem]"
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>

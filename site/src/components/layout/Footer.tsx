@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
 import { footerLinks } from "@/config/nav";
+import { isEnglishPath } from "@/lib/language";
 import { Container } from "@/components/shared/Container";
 import { BrandMark } from "@/components/shared/BrandMark";
 import { SignatureMark } from "@/components/shared/SignatureMark";
@@ -11,8 +15,14 @@ import { InstagramIcon, FacebookIcon } from "@/components/shared/SocialIcons";
  * פוטר עריכתי: בלוק מותג עם הסמל בצד המתחיל, שני טורי קישורים בצד המסים,
  * וקו שיער שמפריד את שורת הזכויות/הנגישות. משטח-עומק מרווה (secondary),
  * טיפוגרפיה מדורגת וקצב אנכי נדיב — לא רשת קישורים גנרית.
+ *
+ * ב-„/en” (אנגלי, LTR): גרסה רזה — בלי טורי-הניווט העבריים (אין להם מקבילה
+ * אנגלית, וקישורם היה מחזיר עברית לעמוד אנגלי). מותג + זכויות + קישור חזרה
+ * לאתר העברי, הכל באנגלית.
  */
 export function Footer() {
+  const english = isEnglishPath(usePathname());
+  if (english) return <EnglishFooter />;
   const hasSocial = siteConfig.social.instagram || siteConfig.social.facebook;
 
   const linkClass =
@@ -84,6 +94,47 @@ export function Footer() {
               className="underline underline-offset-2 hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-muted"
             >
               הצהרת נגישות
+            </Link>
+          </p>
+        </div>
+      </Container>
+    </footer>
+  );
+}
+
+/** גרסת „/en” — פוטר אנגלי רזה, LTR, בלי טורי-הניווט העבריים. */
+function EnglishFooter() {
+  const edition = siteConfig.englishEdition;
+  return (
+    <footer
+      lang="en"
+      dir="ltr"
+      className="border-t border-secondary-foreground/15 bg-secondary text-secondary-foreground"
+    >
+      <Container className="flex flex-col gap-6 py-10 text-start sm:py-12">
+        <div className="flex max-w-md flex-col gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <BrandMark withRing className="h-9 w-9 shrink-0 text-secondary-foreground" />
+            <span className="font-sans text-xl font-extrabold tracking-tight">
+              {edition.title}
+            </span>
+          </div>
+          <p className="type-literary text-[1.05rem] leading-relaxed text-secondary-foreground/85">
+            {edition.subtitle}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-secondary-foreground/15 pt-5 text-[13px] text-secondary-foreground/85 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
+          <p>
+            © {siteConfig.copyrightYear} {edition.title}. All rights reserved.
+          </p>
+          <p>
+            <Link
+              href="/"
+              hrefLang="he"
+              className="underline underline-offset-2 hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-muted"
+            >
+              Visit the Hebrew site
             </Link>
           </p>
         </div>

@@ -93,7 +93,7 @@ export function PurchaseCard() {
             width={300}
             height={450}
             unoptimized
-            className="h-auto w-36 rounded-sm shadow-[0_18px_36px_-22px_rgba(43,36,31,0.6)] sm:w-full sm:max-w-[180px]"
+            className="h-auto w-36 rounded-sm shadow-[0_18px_36px_-22px_rgb(var(--shadow-tint)/0.6)] sm:w-full sm:max-w-[180px]"
           />
         </div>
       </div>

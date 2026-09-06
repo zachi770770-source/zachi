@@ -21,7 +21,8 @@ describe("FocusMode — enter → split → aha → action sequence", () => {
     );
 
     // פעימה 1 — enter: המצב דומיננטי; עדיין אין עובדה/סיפור ואין CTA-המשך.
-    expect(screen.getByText(s.title)).toBeTruthy();
+    // כותרת-המצב (heading) — צ׳יפ-ההקשר בסרגל נושא אותו טקסט, ולכן ממקדים לכותרת.
+    expect(screen.getByRole("heading", { name: s.title })).toBeTruthy();
     expect(screen.queryByText(s.fact)).toBeNull();
     expect(screen.queryByText(focusUi.separationLine)).toBeNull();
     expect(screen.queryByText(focusUi.continueLabel)).toBeNull();

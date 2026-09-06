@@ -161,7 +161,7 @@ export function AskRoute({
     const el = headingRef.current;
     if (!el) return;
     const raf = requestAnimationFrame(() => {
-      el.scrollIntoView({ block: "nearest" });
+      el.scrollIntoView({ block: "nearest", behavior: "auto" });
       el.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(raf);
@@ -324,7 +324,7 @@ function Choice({
               className={`lift-hover group flex items-center justify-between gap-3 rounded-xl border px-5 py-4 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
                 selected
                   ? "border-brand bg-brand-muted/50"
-                  : "border-border-strong bg-surface hover:border-brand/40 hover:bg-surface-muted"
+                  : "border-border-strong bg-surface hover:border-secondary/35 hover:bg-surface-muted"
               }`}
             >
               <span className="flex flex-col">

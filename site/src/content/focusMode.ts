@@ -39,9 +39,23 @@ function story(text: string): string {
   return text;
 }
 
+/**
+ * סמן-עריכה קצר לכל מצב — שם עמוד-התחנה המאושר. נותן לכל תוצאה זהות משלה
+ * („התשובה הזו שייכת למצב שבחרתי”) בלי לייצר ארבעה עיצובים, בלי טענה חדשה
+ * ובלי אבחון: זהו בדיוק שם התחנה שאליה המצב מוביל.
+ */
+const MARKERS: Record<HomePathId, string> = {
+  dating: "לפני קשר",
+  building: "בניית קשר",
+  existing: "בתוך קשר",
+  breakup: "אחרי פרידה",
+};
+
 export interface FocusSituation {
   /** מזהה המצב — משותף עם `homePaths` וכרטיס-המצב (shared-element). */
   id: HomePathId;
+  /** סמן-עריכה קצר (שם התחנה) — הבחנה מרוסנת בין ארבעת המצבים. */
+  marker: string;
   /** כותרת-המצב (מהכרטיס) — עולה לכותרת-הבמה בהמשכיות-אלמנט. */
   title: string;
   /** העובדה — מה שקרה בפועל (מתוך factStory.moments). */
@@ -75,6 +89,7 @@ export const focusSituations: FocusSituation[] = homePaths.map((p) => {
   const c = COMPOSITION[p.id];
   return {
     id: p.id,
+    marker: MARKERS[p.id],
     title: p.buttonTitle,
     fact: momentFact(c.fact),
     story: story(c.story),

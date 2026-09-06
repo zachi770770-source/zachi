@@ -7,14 +7,12 @@ import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookLink } from "@/components/shared/BookLink";
 import { AskBookLink } from "@/components/journey/AskBookLink";
-import { BehindSection } from "@/components/sections/BehindSection";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
 import { PatternsSection } from "@/components/sections/PatternsSection";
 import { AttachmentSection } from "@/components/sections/AttachmentSection";
 import { MethodSection } from "@/components/sections/MethodSection";
 import { ToolsBento } from "@/components/sections/ToolsBento";
-import { InsideBookSection } from "@/components/sections/InsideBookSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { ReaderKitOffer } from "@/components/reader/ReaderKitOffer";
@@ -112,7 +110,7 @@ export default function BookPage() {
               {siteConfig.description}
             </p>
             {/* נקודת האיזון של הגישה, הועברה לכאן מהשער כדי לשמור על עמוד בית חיובי. */}
-            <p className="mx-auto mt-5 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted/90">
+            <p className="mx-auto mt-5 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted">
               {bigIdea.clarification}
             </p>
             <p className="mx-auto mt-4 max-w-[60ch] text-[14px] italic text-foreground-muted">
@@ -127,18 +125,24 @@ export default function BookPage() {
         </Container>
       </header>
 
-      <BehindSection />
+      {/* קשת עמוד-מוצר ממוקדת: רעיון → למי → *למה נתקעים* → איך → כלים →
+          מה משתנה → רכישה.
+          שני סקשני הזיהוי-העצמי (#patterns, #attachment) הוסרו כאן בעבר כחלק
+          מקיצור העמוד — וזו הייתה טעות: הם נושאים תוכן מאושר ש-e2e שומר עליו
+          במפורש (`book-self-recognition.spec.ts`). הם הוחזרו בגרסה מרוסנת:
+          אותו טקסט בדיוק, כמחצית הנפח. מקומם בקשת הוא בין „למי הספר”
+          ל„השיטה” — זיהוי-עצמי לפני הפתרון. */}
       <ThesisSection />
       <AudienceSection />
-      {/* זיהוי-עצמי לפני „השיטה”: שאלת המוכנות + הדפוסים הלא-מודעים, ואז ריקוד
-          ההיקשרות — הקורא מזהה את עצמו, ומשם עובר לפתרון. */}
       <PatternsSection />
       <AttachmentSection />
       <MethodSection />
       {/* ששת הכלים המעשיים — אזור Editorial Luxury אינטראקטיבי. עוגני
           #tool-<id> משמשים deep-link מ-Path Finder ומקישורים ישירים. */}
       <ToolsBento />
-      <InsideBookSection />
+      {/* „מה יש בתוך הספר” הוסר: הוא חזר על שלושת השלבים ש-MethodSection כבר
+          מסביר לעומק (רעש → שער → בנייה) כרשימת-תוכן בת 186 תווים, והנספח
+          („כלים לשימוש חוזר”) מכוסה ב-ToolsBento. הרכיב נשאר בריפו. */}
       <OutcomesSection />
       {/* ערכת הקורא — נקודת-ערך לפני הרכישה: „קונים את הספר ומקבלים גם את
           הכלים”. וריאנט „link” בלבד — מפנה ל-/reader בלי CTA-אמזון שני שמתחרה

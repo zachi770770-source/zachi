@@ -6,16 +6,61 @@ import { cn } from "@/lib/utils";
 
 /**
  * עטיפת-הספר של ה-Hero. במנוחה: כריכת-הספר (מקור מעבר-הכריכה ל-/preview).
- * `opening` הופך אותה ל-signature-object: כריכת-המותג האמיתית כאובייקט פיזי
- * יוקרתי — hardcover בזווית ¾ עדינה, spine, עובי-דפים (page-block) בקצוות
- * החופשיים, צל-מגע וזוהר-הפרדה.
  *
- * במהלך ההנפשה הכריכה נפתחת רחב יותר וחושפת שני דפים פנימיים אמיתיים עם טקסט
- * עברי (RTL, קריא, לא-משוקף) — הדף העליון מתהפך, אחריו הדף השני — ואז הספר
- * מתייצב חזרה למצב ה-premium הסופי (כריכה בהצצה דקה בלבד). לכל היותר שני דפדופים.
- * מונפש פעם אחת תחת `.motion-js`; reduced-motion/ללא-JS ⇒ ה-object אינו מרונדר
- * והכריכה הסגורה נשארת סטטית. transform/opacity/filter בלבד (CLS=0). דקורטיבי.
+ * `opening` הופך אותה ל-signature-object: הספר נכנס סגור, הכריכה הקדמית מתרוממת
+ * מהשדרה (ימין — ספר עברי) ונפתחת שמאלה, והספר הופך ל-SPREAD אמיתי — עמוד-ימין
+ * קבוע + קפל-שדרה רך + עמוד-שמאל — ששני עמודיו *מולחנים* בטקסט עברי אמיתי (RTL,
+ * קריא, לא-משוקף). אז מתהפך גיליון אחד עם משקל-נייר ועיקול עדין, חושף את הזוג
+ * הבא, והספר *נשאר פתוח* על spread מולחן. אין „עמוד ריק מולחן”: מתחת לכל גיליון
+ * מתהפך יש תמיד עמוד-ימין נושא-טקסט ועמוד-שמאל נושא-טקסט.
+ *
+ * מונפש פעם אחת תחת `.motion-js`; reduced-motion/ללא-JS ⇒ `.book-open` אינו
+ * מרונדר והכריכה הסגורה (ה-<img>) נשארת סטטית. transform/opacity/filter בלבד
+ * (CLS=0). דקורטיבי (aria-hidden). הטקסט הוא ניסוחי-התֵּמה המאושרים בלבד.
  */
+
+/** עמוד-ימין (recto — נקרא ראשון ב-RTL): הפתיח. */
+function RectoOpen() {
+  return (
+    <span className="book-open__sheet">
+      <span className="book-open__h">דייטינג הוא חיפוש.</span>
+      <span className="book-open__p">למצוא זה רק ההתחלה.</span>
+      <span className="book-open__p">עובדה היא מה שקרה.</span>
+      <span className="book-open__p">
+        סיפור הוא מה שאנחנו מספרים לעצמנו.
+      </span>
+    </span>
+  );
+}
+
+/** עמוד-שמאל (verso — ממול): הפנייה קדימה. */
+function VersoBuild() {
+  return (
+    <span className="book-open__sheet">
+      <span className="book-open__q">אהבה היא בנייה.</span>
+      <span className="book-open__p">לבחור אחרת מתחיל בלראות אחרת.</span>
+      <span className="book-open__p">
+        לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
+      </span>
+    </span>
+  );
+}
+
+/** הזוג הנחשף אחרי ההיפוך — אותו אוצר-מילים, פריסה שקטה יותר. */
+function RectoNext() {
+  return (
+    <span className="book-open__sheet">
+      <span className="book-open__sub">עובדה</span>
+      <span className="book-open__p">עובדה היא מה שקרה.</span>
+      <span className="book-open__p">למצוא זה רק ההתחלה.</span>
+      <span className="book-open__sub">סיפור</span>
+      <span className="book-open__p">
+        סיפור הוא מה שאנחנו מספרים לעצמנו.
+      </span>
+    </span>
+  );
+}
+
 export function BookCover({
   className,
   priority = false,
@@ -33,83 +78,49 @@ export function BookCover({
 
         {opening ? (
           <span
-            className="pbook"
+            className="book-open"
             aria-hidden="true"
             style={{ ["--cover-src" as string]: coverUrl }}
           >
-            {/* צל-מגע על ה„רצפה” + זוהר-הפרדה מאחורי הספר. */}
-            <span className="pbook__contact" />
-            <span className="pbook__halo" />
+            <span className="book-open__book">
+              {/* עובי-דפים (fore-edges) בשני הקצוות. */}
+              <span className="book-open__stack book-open__stack--right" />
+              <span className="book-open__stack book-open__stack--left" />
 
-            {/* גוף-הספר: hardcover בזווית ¾, עם עובי אמיתי. */}
-            <span className="pbook__stage">
-              <span className="pbook__slab">
-                {/* לוח-הכריכה האחורי (מאחור) */}
-                <span className="pbook__back" />
-                {/* פאות-העובי: שדרה (ימין — כריכת ספר עברי) + גוש-דפים (שמאל ותחתית) */}
-                <span className="pbook__spine" />
-                <span className="pbook__edge pbook__edge--fore" />
-                <span className="pbook__edge pbook__edge--bottom" />
+              {/* עמוד-ימין הקבוע — נחשף אחרי שהגיליון הראשון מתהפך; נושא טקסט. */}
+              <span className="book-open__leaf book-open__leaf--right">
+                <RectoNext />
+              </span>
+              {/* עמוד-שמאל הבסיסי — מתחת ל-liner של הכריכה שנוחת שטוח. */}
+              <span className="book-open__leaf book-open__leaf--left">
+                <VersoBuild />
+              </span>
 
-                {/* גוש-הדפים: דף-בסיס לבן (הצצה סופית) + שני דפים מתהפכים עם
-                    טקסט עברי אמיתי (קדמי=טקסט, אחורי=נייר ריק כדי שלא ישוקף). */}
-                <span className="pbook__page" />
-
-                {/* דף שני (נחשף אחרי הדפדוף הראשון) — מבנה שתי-מדורות (עובדה / סיפור),
-                    כולו מניסוחי-התֵּמה המאושרים. */}
-                <span className="pbook__leaf pbook__leaf--p2">
-                  <span className="pbook__face pbook__face--front">
-                    <span className="pbook__ptext">
-                      <span className="pbook__ph">אהבה היא בנייה.</span>
-                      <span className="pbook__sub">עובדה</span>
-                      <span className="pbook__pl">עובדה היא מה שקרה.</span>
-                      <span className="pbook__pl">למצוא זה רק ההתחלה.</span>
-                      <span className="pbook__pl">דייטינג הוא חיפוש.</span>
-                      <span className="pbook__sub">סיפור</span>
-                      <span className="pbook__pl">
-                        סיפור הוא מה שאנחנו מספרים לעצמנו.
-                      </span>
-                      <span className="pbook__pl">
-                        לבחור אחרת מתחיל בלראות אחרת.
-                      </span>
-                      <span className="pbook__pl">
-                        לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
-                      </span>
-                      <span className="pbook__pl">אהבה היא בנייה.</span>
-                    </span>
-                    <span className="pbook__sheen" aria-hidden="true" />
+              {/* גיליון אחד מתהפך — קדמי (recto הראשון) + אחורי (נייר; נתחב מאחורי
+                  עמוד-שמאל בנחיתה, לכן אינו נראה כעמוד ריק). */}
+              <span
+                className="book-open__page book-open__page--p0"
+                style={{ ["--i" as string]: "0", zIndex: 20 }}
+              >
+                <span className="book-open__curl">
+                  <span className="book-open__face book-open__face--front">
+                    <RectoOpen />
                   </span>
-                  <span className="pbook__face pbook__face--back" />
+                  <span className="book-open__face book-open__face--back" />
                 </span>
+              </span>
 
-                {/* דף ראשון (העליון — מתהפך ראשון) — פתיח זורם + מדור „לראות אחרת”,
-                    כולו מניסוחי-התֵּמה המאושרים. */}
-                <span className="pbook__leaf pbook__leaf--p1">
-                  <span className="pbook__face pbook__face--front">
-                    <span className="pbook__ptext">
-                      <span className="pbook__ph">דייטינג הוא חיפוש.</span>
-                      <span className="pbook__pl">למצוא זה רק ההתחלה.</span>
-                      <span className="pbook__pl">אהבה היא בנייה.</span>
-                      <span className="pbook__pl">עובדה היא מה שקרה.</span>
-                      <span className="pbook__pl">
-                        סיפור הוא מה שאנחנו מספרים לעצמנו.
-                      </span>
-                      <span className="pbook__sub">לראות אחרת</span>
-                      <span className="pbook__pl">
-                        לבחור אחרת מתחיל בלראות אחרת.
-                      </span>
-                      <span className="pbook__pl">
-                        לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת.
-                      </span>
-                      <span className="pbook__pl">דייטינג הוא חיפוש.</span>
-                    </span>
-                    <span className="pbook__sheen" aria-hidden="true" />
-                  </span>
-                  <span className="pbook__face pbook__face--back" />
+              {/* קפל-השדרה — crease רך, לא פס-שדרה שחור. */}
+              <span className="book-open__gutter" />
+
+              {/* שכבת-הכריכה הקדמית — אותה תמונת-כריכה; נפתחת שטוח (‎-180°)
+                  ונשארת כלוח-שמאל. ה-liner (הצד הפנימי) נושא את טקסט עמוד-שמאל
+                  הסופי, סימטרי לעמוד-ימין. */}
+              <span className="book-open__cover">
+                <span className="book-open__cover-face" />
+                <span className="book-open__cover-liner">
+                  <VersoBuild />
                 </span>
-
-                {/* הכריכה הקדמית — אמנות-המותג; נפתחת רחב לדפדוף ואז מתייצבת ~13° */}
-                <span className="pbook__cover" />
               </span>
             </span>
           </span>

@@ -259,7 +259,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
             <Link
               key={rel.href}
               href={rel.href}
-              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               <div>
                 <span className="font-serif text-[1.05rem] font-semibold leading-tight text-foreground">
@@ -283,7 +283,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
         {guide.method ? (
           <Link
             href={guide.method.href}
-            className="lift-hover group mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-brand/40 bg-surface p-5 hover:border-brand/60 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className="lift-hover group mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-sage-ink/45 bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             <div>
               <span className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
@@ -309,7 +309,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
         {guide.secondary ? (
           <Link
             href={guide.secondary.href}
-            className="lift-hover group mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-surface p-5 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className="lift-hover group mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             <div>
               <span className="font-serif text-[1.05rem] font-semibold text-foreground">
@@ -332,7 +332,9 @@ export function GuidePage({ guide }: { guide: Guide }) {
         <div className="mt-8">
           <Link
             href={guide.hub.href}
-            className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            /* טרקוטה בגוון-הטקסט (brand-hover, 5.8:1) — הגוון המלא נכשל ב-AA
+               לטקסט קטן ולכן שמור לקישוט/כותרות גדולות בלבד. */
+            className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {guidesUi.hubTitle}: {guide.hub.label}

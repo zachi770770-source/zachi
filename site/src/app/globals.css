@@ -8,21 +8,25 @@
  */
 :root {
   /* נייר ניטרלי בהיר — לא קרם צהוב. הבסיס כבר לא חום. */
-  --color-background: #f5f4f1;
-  --color-surface: #fdfdfc;
+  --color-background: #f6f0e7;
+  --color-surface: #fcf8f1;
   /* משטח משני קריר-בהיר (כחול-אפור) — הבנדים המתחלפים נקראים קרירים. */
-  --color-surface-muted: #e7ece6;
+  --color-surface-muted: #ede3d3;
   /* פחם ניטרלי לטקסט — לא אספרסו חום. */
-  --color-foreground: #24272c;
+  --color-foreground: #25312f;
   /* טקסט משני — הוכהה מעט (#575c63 → #4d525a) כדי לעבור AA בנוחות (~7.2:1
      על נייר) בלי לשטח את ההיררכיה מול foreground הכהה. */
-  --color-foreground-muted: #4d525a;
+  --color-foreground-muted: #55625e;
+  /* מדרג-דיו רך (ניטרל, לא מבטא): לתוויות משניות שיושבות גם על הבנדים הכהים
+     יותר של הנייר. הקיקר על `/book` נחת שם על rgb(210,204,189) והגיע ל-3.98:1
+     עם foreground-muted; הגוון הזה נותן 5.05:1 על אותו רקע ו-7.54:1 על משטח. */
+  --color-ink-soft: #4a5350;
   /* פחם ניטרלי לצל אובייקט העטיפה בלבד. */
-  --color-ink: #262a2f;
+  --color-ink: #25312f;
 
   /* מסגרות אפור-כחלחל קריר במקום בז'. */
-  --color-border: #d4dbd2;
-  --color-border-strong: #bcc6ba;
+  --color-border: #ded5c6;
+  --color-border-strong: #c9bfad;
 
   /* ── מערכת ה-UI הצף התחתון ────────────────────────────────────────────────
    * במובייל יושבים בתחתית המסך שני פקדים קבועים (`position: fixed`): בועת
@@ -44,25 +48,47 @@
   --fab-gap: 0.75rem;
   --floating-ui-clearance: calc(var(--fab-bottom) + var(--fab-height) + var(--fab-gap));
 
-  /* טרקוטה — צבע מותג והדגשה בלבד: CTA ראשי, קישורים, בחירה, תגים. */
-  --color-brand: #ad5836;
-  --color-brand-foreground: #fdfdfc;
-  --color-brand-hover: #8f4626;
-  --color-brand-muted: #f1e2d6;
+  /* ── ארבעה צבעים, משמעת אחת ─────────────────────────────────────────────
+   * פטרול (משטח כהה) · שנהב/נייר חמים (ניטרל) · מרווה (מבטא שקט) ·
+   * טרקוטה (הדגשה נדירה בלבד). אין צבע חמישי.
+   *
+   * כיול פטרול: המקור (#193d37) היה 170° ורוויה 42% — וברינדור בפועל עדיין
+   * נקרא ירוק/אמרלד על שטח גדול. הכיול הסופי: גוון 170°→160°, רוויה
+   * 42%→22% (כמעט חצי), ובהירות עמוקה במעט. עמוק, שקט ופחות „ירוק”,
+   * ועדיין רחוק משחור (כרומה 18 — מעל סף בדיקת-השחור) — ובפועל *שיפר*
+   * את הניגודיות מול שנהב: 10.51 → 12.08.
+   */
+  --color-petrol: #20322c;      /* משטח כהה ראשי (Hero/Focus/פוטר) — 12.08:1 מול שנהב */
+  --color-petrol-2: #2a3e38;    /* משטח כהה משני — 10.03:1 מול שנהב */
+  /* מרווה בשני מדרגים של אותה משפחה (לא צבע נוסף): בהיר למשטח כהה, עמוק
+     למשטח בהיר — כדי שמבטא-המרווה יעבור 3:1 גם על נייר. */
+  --color-sage: #9eb3a9;        /* על פטרול — 6.14:1 */
+  --color-sage-ink: #547869;    /* על שנהב — 4.35:1 (עובר גם 3:1 לגרפיקה) */
+  --color-paper: #ede3d3;       /* נייר חמים */
+  /* טרקוטה — רגעים בודדים בעלי ערך: מצב נבחר/פעיל, סמן, שורת-הדגשה אחת.
+     לא צבע-כפתור, לא תווית-סקשן חוזרת, לא זוהר. */
+  --color-brand: #b96e55;       /* דקורטיבי/גרפיקה — 3.42:1 מול שנהב */
+  --color-brand-foreground: #fdfaf4;
+  --color-brand-hover: #8f4a32; /* טקסט — 5.80:1 מול שנהב */
+  --color-brand-muted: #f2e3d9;
+
+  /* גוון-צל אחד לכל האתר: דיו-פטרול חמים. מחליף rgba(0,0,0,…) ואת הפחם
+     הקר הישן rgba(34,38,43,…) — צל לא אמור להרגיש שחור. */
+  --shadow-tint: 32 50 44;
 
   /* משני קריר ומובהק — כחול-אפור עמוק. משטחי-עומק (פוטר) וכפתורים משניים. */
-  --color-secondary: #47624f;
-  --color-secondary-foreground: #f2f6f0;
-  --color-secondary-muted: #dde5db;
+  --color-secondary: #20322c;
+  --color-secondary-foreground: #f6f0e7;
+  --color-secondary-muted: #dce3da;
 
-  --color-accent: #47624f;
-  --color-accent-foreground: #f2f6f0;
+  --color-accent: #2a3e38;
+  --color-accent-foreground: #f6f0e7;
 
-  --color-success: #2f6b46;
+  --color-success: #2f6350;
   --color-success-foreground: #f1f8f3;
-  --color-warning: #91560f;
+  --color-warning: #8a5a1e;
   --color-warning-foreground: #fdf5e9;
-  --color-danger: #a3312a;
+  --color-danger: #9a4038;
   --color-danger-foreground: #fdf1f0;
 
   --font-sans: var(--font-body);
@@ -91,6 +117,20 @@
   --motion-dist-md: 16px; /* הופעת סקשן */
   --motion-dist-lg: 28px; /* כניסה מודגשת (כריכה/כותרת) */
   --motion-stagger: 90ms; /* מרווח בין פריטים ברצף */
+
+  /* ===== 2026 Motion families — שפת-תנועה אחת, חמש משפחות מתוזמנות =====
+     כל שאר הטוקנים (--motion-fast וכו׳) הם aliases אל המשפחות האלה כדי שלא
+     יתפזרו עשרות משכים שרירותיים. easings משותפים: standard ליציאה, emphasized
+     לכניסה מודגשת, settle להתיישבות פיזית. */
+  --dur-micro: 180ms;      /* לחיצה/hover/אנדרליין — 150–220 */
+  --dur-ui: 280ms;         /* מעברי-ממשק/פאנל — 220–350 */
+  --dur-focus: 460ms;      /* טרנספורמציית-מצב (Focus/shared-element) — 350–550 */
+  --dur-editorial: 620ms;  /* חשיפת-סקשן עריכתית — 450–700 */
+  --dur-physical: 950ms;   /* תנועה פיזית (ספר/כריכה) — 800–1100 */
+  --ease-out: var(--ease-standard);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* היפוך סימטרי (דף/מצלמה) */
+  /* aliases לאחור-תאימות — ממופים אל המשפחות. */
+  --vt-dur: var(--dur-ui); /* משך מעבר-מסלול (View Transitions) */
 }
 
 /* בדסקטופ הבועה יושבת נמוך יותר ויש יותר אוויר, ולכן גם טווח-הנחיתה קטן.
@@ -111,9 +151,16 @@
   --color-foreground: var(--color-foreground);
   --color-foreground-muted: var(--color-foreground-muted);
   --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
 
   --color-border: var(--color-border);
   --color-border-strong: var(--color-border-strong);
+
+  --color-petrol: var(--color-petrol);
+  --color-petrol-2: var(--color-petrol-2);
+  --color-sage: var(--color-sage);
+  --color-sage-ink: var(--color-sage-ink);
+  --color-paper: var(--color-paper);
 
   --color-brand: var(--color-brand);
   --color-brand-foreground: var(--color-brand-foreground);
@@ -235,8 +282,18 @@
     border-color: var(--color-border);
   }
 
+  /* ── אין `scroll-behavior: smooth` גלובלי ──────────────────────────────
+   * הכלל הזה הפך *כל* גלילה תכנותית באתר לאנימציה על ה-main thread, כולל
+   * כאלה שאינן חוויית-משתמש מכוונת (ניהול-פוקוס, קפיצת-עוגן, deep-link).
+   * כשה-thread עמוס (הידרציה + עליית ה-WebGL), האנימציה נרעבת: נמדד
+   * `scrollTo(0, scrollHeight)` שנשאר על scrollY=0 במשך 4.2 שניות ואז קפץ
+   * — כלומר המשתמש מבקש לגלול ושום דבר לא קורה. זה גם מה שהחזיק את הבועה
+   * הצפה מוסתרת: היא שיקפה נאמנה מיקום-גלילה שלא זז.
+   *
+   * לכן: גלילה תכנותית היא מיידית ודטרמיניסטית כברירת-מחדל, ותנועה רכה
+   * נשארת רק במקומות שבהם היא באמת חלק מהחוויה — ומוצהרת שם מפורשות
+   * (FocusMode: `behavior: "smooth"`; קרוסלת-הכלים: כלל ממוקד למטה). */
   html {
-    scroll-behavior: smooth;
     /* מונע שינוי גודל טקסט אוטומטי בסיבוב מסך ב-iOS (יציבות טיפוגרפית). */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -459,7 +516,12 @@
     font-family: var(--font-literary), Georgia, "Times New Roman", serif;
   }
 
-  /* קיקר עריכתי: תווית קטנה עם קו מוביל קצר */
+  /* קיקר עריכתי: תווית קטנה עם קו מוביל קצר.
+   *
+   * משמעת-צבע: זהו האלמנט החוזר ביותר באתר (39 רכיבים) — כמעט כל סקשן נפתח
+   * בו. כשהוא היה טרקוטה (טקסט *וגם* קו), המבטא היקר של המותג הופיע עשרות
+   * פעמים בכל מסלול והפך מהדגשה לקישוט. עכשיו הוא שקט: טקסט דיו-משני וקו
+   * מרווה-עמוק (4.35:1 על שנהב). טרקוטה נשמרת לרגעים ספורים באמת. */
   .kicker {
     display: inline-flex;
     align-items: center;
@@ -469,14 +531,14 @@
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-brand-hover);
+    color: var(--color-ink-soft);
   }
   .kicker::before {
     content: "";
     inline-size: 1.75rem;
     block-size: 2px;
     border-radius: 2px;
-    background: var(--color-brand);
+    background: var(--color-sage-ink);
   }
   /* מקטע-המידע ב-Hero קורא כמידע על המוצר, לא כתגית עיצובית: מסירים את
      קו-התווית הדקורטיבי *רק שם*, ומגדילים את הגופן מעט — 14px במקום 13px של
@@ -542,6 +604,11 @@
     will-change: opacity, transform;
   }
   .motion-js .reveal.is-visible {
+    /* מנעול חד-כיווני. `animation: none` כאן הוא ההגנה המבנית: אם אי-פעם
+       תוחל שוב אנימציה כלשהי על `.reveal`, היא מתבטלת ברגע החשיפה — ולכן
+       שני המסלולים אינם יכולים להתנגש על opacity/transform. הסלקטור ספציפי
+       יותר מ-`.motion-js .reveal`, ולכן גובר בלי `!important`. */
+    animation: none;
     opacity: 1;
     transform: none;
   }
@@ -754,26 +821,24 @@
     width: 4px;
     pointer-events: none;
   }
+  /* משמעת-צבע: הפס היה טרקוטה עם גרדיאנט ושתי הילות-זוהר — מבטא בוהק שנע
+     על המסך לאורך כל הגלילה, בכל עמוד. עכשיו הוא פטרול שקט במילוי אחיד,
+     בלי זוהר; רק „ראש הבנייה” נשאר טרקוטה — נקודה אחת קטנה שמסמנת התקדמות,
+     וזה בדיוק סוג הרגע שהמבטא הזה שמור לו. */
   .build-spine__track {
     position: absolute;
     inset: 0;
-    background: color-mix(in oklab, var(--color-brand) 16%, transparent);
+    background: color-mix(in oklab, var(--color-petrol) 14%, transparent);
   }
   .build-spine__fill {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--color-brand) 55%, transparent),
-      var(--color-brand)
-    );
+    background: color-mix(in oklab, var(--color-petrol) 62%, transparent);
     transform-origin: top center;
     transform: scaleY(var(--build-progress, 0));
     will-change: transform;
-    box-shadow: 0 0 10px color-mix(in oklab, var(--color-brand) 45%, transparent);
   }
-  /* „ראש הבנייה” — נקודת אור טרקוטה שנעה לאורך הקצה עם התקדמות הקריאה,
-     והופכת את הפס לאלמנט נרטיבי מובחן ולא לקישוט כמעט-בלתי-נראה. */
+  /* „ראש הבנייה” — נקודת-הסימון היחידה שנעה עם התקדמות הקריאה. */
   .build-spine__head {
     position: absolute;
     inset-inline: -3px;
@@ -781,9 +846,6 @@
     height: 10px;
     border-radius: 9999px;
     background: var(--color-brand);
-    box-shadow:
-      0 0 12px 2px color-mix(in oklab, var(--color-brand) 70%, transparent),
-      0 0 24px 4px color-mix(in oklab, var(--color-brand) 35%, transparent);
     transform: translateY(-50%);
     will-change: top;
   }
@@ -802,9 +864,11 @@
     border-radius: inherit;
     opacity: 0;
     transition: opacity 220ms var(--ease-standard);
+    /* אור-הריחוף היה טרקוטה — מבטא חם שנדלק על כל כרטיס שעוברים מעליו.
+       עכשיו הוא רחיצת-פטרול שקטה: אותו עומק, בלי „לצבוע” בהדגשה. */
     background: radial-gradient(
       16rem 16rem at var(--mx, 50%) var(--my, 0%),
-      color-mix(in oklab, var(--color-brand) 12%, transparent),
+      color-mix(in oklab, var(--color-petrol) 10%, transparent),
       transparent 60%
     );
   }
@@ -1083,8 +1147,10 @@
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+    /* בלי דילול-שקיפות: --color-foreground-muted הוא כבר הגוון המשני
+       המכויל (5.69:1 על שנהב). ה-opacity: 0.85 הוריד אותו ל-4.08:1 —
+       נפילת-AA אמיתית על טקסט 12px. */
     color: var(--color-foreground-muted);
-    opacity: 0.85;
   }
 
   /* אזור „איפה אני” בראש עמוד-המסע: המחוון + הכניסה-הישירה השקטה. */
@@ -1364,8 +1430,8 @@
   position: relative;
   z-index: 2;
   /* תאורת מוצר: צל עומק מדורג + נגיעת אור עדינה בשדרה (inset) לנפח */
-  box-shadow: -34px 40px 70px -28px rgba(34, 38, 43, 0.52),
-    -10px 16px 30px -16px rgba(34, 38, 43, 0.34),
+  box-shadow: -34px 40px 70px -28px rgb(var(--shadow-tint) / 0.52),
+    -10px 16px 30px -16px rgb(var(--shadow-tint) / 0.34),
     inset 2px 0 0 0 rgba(255, 255, 255, 0.16);
 }
 .book-cover__pages {
@@ -1384,7 +1450,7 @@
     #ddd3c2 2px,
     #ddd3c2 3px
   );
-  box-shadow: -2px 6px 14px -8px rgba(34, 38, 43, 0.4);
+  box-shadow: -2px 6px 14px -8px rgb(var(--shadow-tint) / 0.4);
 }
 @media (hover: hover) {
   .book-cover:hover .book-cover__inner {
@@ -1431,7 +1497,7 @@
   pointer-events: none;
   border-radius: 0.75rem;
   opacity: var(--curl, 0);
-  background: radial-gradient(140% 90% at 100% 50%, transparent 52%, rgba(43, 36, 31, 0.16));
+  background: radial-gradient(140% 90% at 100% 50%, transparent 52%, rgb(var(--shadow-tint) / 0.16));
 }
 @media (prefers-reduced-motion: no-preference) {
   /* #1 היפוך-דף בגרירה: הדף הנוכחי מסתובב בעקבות --drag (-1..1 מ-JS); ב-release
@@ -1463,7 +1529,7 @@
     transform-style: preserve-3d;
     /* הצללת „גב הדף” שמתחזקת ככל שהדף נהפך — קורא כדף אמיתי מתרומם */
     background: var(--color-surface);
-    box-shadow: -14px 0 30px -12px rgba(34, 38, 43, 0.45);
+    box-shadow: -14px 0 30px -12px rgb(var(--shadow-tint) / 0.45);
   }
   /* מעבר דף מרוסן (9–11°): שכבה נכנסת + שכבה יוצאת אמיתיות סביב הכריכה (RTL),
      עם צל נע — בלי „היפוך” מוגזם. */
@@ -2189,11 +2255,13 @@
 
 /* מקטע-השיחה בבית באמת בתוך המסך → מסתירים את הבועה הצפה *במובייל בלבד*: המקטע
  * עצמו הוא כבר הזמנה בולטת לדבר עם הספר, ואסור שתי הזמנות מתחרות באותו מסך.
- * הסמן `data-path-in-view` נוכח ב-DOM רק כל עוד ה-IntersectionObserver מדווח
- * שהמקטע נראה (נראוּת בפועל, לא היסט-פיקסלים) — כשגוללים משם הוא מוסר והבועה
- * חוזרת. בדסקטופ אין תחרות (הפריסה רחבה) ולכן הכלל מוגבל למובייל. */
+ *
+ * הסמן `data-path-in-view` יושב על ה-<body> ונכתב ישירות מחישוב-גאומטריה ב-rAF
+ * (ראו HomePathEntry): נראוּת בפועל, לא היסט-פיקסלים קשיח — וברגע שהמקטע יוצא
+ * מהמסך הסמן יורד באותו פריים, בלי להמתין ל-callback של IntersectionObserver
+ * ולמסלול-רינדור של React. בדסקטופ אין תחרות (הפריסה רחבה) ולכן מוגבל למובייל. */
 @media (max-width: 767px) {
-  body:has([data-path-in-view]) .compass-pill {
+  body[data-path-in-view] .compass-pill {
     opacity: 0;
     transform: translateY(8px);
     pointer-events: none;
@@ -2452,12 +2520,12 @@
   .lift-hover:hover {
     transform: translateY(-2px);
     border-color: color-mix(in oklab, var(--color-brand) 45%, var(--color-border-strong));
-    box-shadow: 0 14px 26px -18px rgba(43, 36, 31, 0.45);
+    box-shadow: 0 14px 26px -18px rgb(var(--shadow-tint) / 0.45);
   }
 }
 .lift-hover:focus-visible {
   transform: translateY(-2px);
-  box-shadow: 0 14px 26px -18px rgba(43, 36, 31, 0.45);
+  box-shadow: 0 14px 26px -18px rgb(var(--shadow-tint) / 0.45);
 }
 /* reduced-motion: מבטלים את ההרמה (transform) ומשאירים הדגשת מסגרת/צל בלבד. */
 @media (prefers-reduced-motion: reduce) {
@@ -2600,12 +2668,12 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .sample-reader[data-reader-theme="dark"] {
-  --reader-bg: #1f2124;
-  --reader-fg: #e8e6e0;
-  --reader-fg-muted: #a8adb2;
-  --reader-border: #343840;
-  --reader-accent: #db8c6a;
-  --reader-surface-2: #2a241f;
+  --reader-bg: var(--color-petrol);
+  --reader-fg: #f0ebe0;
+  --reader-fg-muted: #bcc7c2;
+  --reader-border: #2f544d;
+  --reader-accent: #dd9a80;
+  --reader-surface-2: #22423c;
 }
 
 .reader-toolbar {
@@ -2930,10 +2998,11 @@
   }
 }
 
-/* ===== View Transitions (עם fallback) ===== */
-@view-transition {
-  navigation: auto;
-}
+/* ===== View Transitions =====
+   הערה: `@view-transition { navigation: auto }` הוסר — הוא חל על ניווט
+   cross-document בלבד, וניווטי App Router הם same-document, ולכן הוא מעולם לא
+   רץ. המעברים שכן פועלים כאן הם מבוססי-JS (`document.startViewTransition`):
+   מעבר-הכריכה אל /preview ו-Focus Mode. הגארד שלהלן מנטרל אותם ב-reduced-motion. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -2995,11 +3064,24 @@ html.vt-book-nav::view-transition-group(book-cover) {
    Hover מרים ומדגיש בלבד (ללא flip, ללא פתיחה ב-hover). כיבוד reduced-motion.
    ========================================================================== */
 .tools-lux {
-  --lux-cream: #faf8f5;
-  --lux-copper: #c86a4b;
+  /* משמעת: קודם חיו כאן „נחושת” (#c86a4b) ו„קרם” (#faf8f5) משלהם — בפועל
+     מבטא חם חמישי וניטרל קר נוסף, שהתחרו בטרקוטה ובשנהב של המערכת. עכשיו
+     שניהם aliases לטוקנים הקיימים. --lux-copper-ink = מדרג-הטקסט (5.80:1);
+     --lux-copper נשאר לגרפיקה/מסגרות בלבד (3.42:1). */
+  --lux-cream: var(--color-surface);
+  --lux-copper: var(--color-brand);
+  --lux-copper-ink: var(--color-brand-hover);
 }
 
 /* Viewport + track: מובייל קרוסלה, דסקטופ גריד */
+/* קרוסלת-הכלים היא המקום היחיד שבו גלילה רכה היא החוויה עצמה: החלקה בין
+   כרטיסים עם scroll-snap, מהחצים/המונה. ממוקד למכולה הזו בלבד ומגודר
+   ב-prefers-reduced-motion (ראו גם הכלל המפורש בבלוק ה-reduced-motion). */
+@media (prefers-reduced-motion: no-preference) {
+  .tools-lux__track {
+    scroll-behavior: smooth;
+  }
+}
 .tools-lux__track {
   display: flex;
   gap: 0.85rem;
@@ -3052,7 +3134,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
 .tool-lux-card:hover {
   transform: translateY(-4px);
   border-color: color-mix(in srgb, var(--lux-copper) 45%, transparent);
-  box-shadow: 0 18px 40px -26px rgba(43, 36, 31, 0.55);
+  box-shadow: 0 18px 40px -26px rgb(var(--shadow-tint) / 0.55);
 }
 .tool-lux-card:focus-visible {
   outline: 2px solid var(--color-brand);
@@ -3060,7 +3142,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
 }
 .tool-lux-card[data-open] {
   border-color: var(--lux-copper);
-  box-shadow: 0 20px 44px -24px rgba(200, 106, 75, 0.5);
+  box-shadow: 0 20px 44px -24px rgb(var(--shadow-tint) / 0.45);
 }
 .tool-lux-card__top {
   display: flex;
@@ -3074,7 +3156,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
   font-size: 1.55rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--lux-copper);
+  color: var(--lux-copper-ink);
   font-variant-numeric: tabular-nums;
 }
 .tool-lux-card__icon {
@@ -3084,7 +3166,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
   height: 44px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--lux-copper) 12%, transparent);
-  color: var(--lux-copper);
+  color: var(--lux-copper-ink);
 }
 .tool-lux-card__svg {
   width: 22px;
@@ -3308,9 +3390,9 @@ html.vt-book-nav::view-transition-group(book-cover) {
   --fm-ease: var(--ease-settle);
   --fm-ease-emphasis: var(--ease-emphasized);
   /* פלטת המצב האימרסיבי: Ink עמוק + Ivory, על בסיס זהות המותג. */
-  --fm-ink: #16181c;
-  --fm-ink-2: #232931;
-  --fm-ivory: #f4f2ee;
+  --fm-ink: var(--color-petrol);
+  --fm-ink-2: var(--color-petrol-2);
+  --fm-ivory: var(--color-background);
   --fm-ivory-muted: color-mix(in oklab, var(--fm-ivory) 64%, transparent);
   --fm-hairline: color-mix(in oklab, var(--fm-ivory) 22%, transparent);
 }
@@ -3322,11 +3404,11 @@ html.vt-book-nav::view-transition-group(book-cover) {
   display: flex;
   margin-top: 1.5rem;
   margin-inline: -1.5rem; /* full-bleed בתוך ריפוד-הקונטיינר (מובייל) */
-  padding: clamp(1.75rem, 6vw, 3.25rem) clamp(1.25rem, 5vw, 3rem);
-  /* ממלא את המסך מתחת לכותרת הדביקה — כמעט-viewport בכל רוחב, כדי שהחוויה
-     תחזיק את המסך לבדה (הסקשנים שמתחת יוצאים מהתצוגה). מוגבל ב-54rem למסכים
-     גבוהים מאוד, שלא ייווצר חלל-ריק מוגזם. */
-  min-height: min(calc(100svh - var(--header-height, 4rem) - 1rem), 54rem);
+  padding: clamp(1.75rem, 5vw, 2.75rem) clamp(1.25rem, 5vw, 3rem);
+  /* גובה עוקב-תוכן: קומפוזיציה מרוכזת ומולחנת במקום סלאב-ריק בגובה-מסך. floor
+     צנוע (עקבי בין הפעימות כדי למנוע קפיצות-גובה), לא כמעט-viewport. */
+  min-height: clamp(19rem, 46svh, 30rem);
+  --fm-accent: var(--color-secondary);
   /* בגלילה-לתוך-תצוגה: משאיר מקום לכותרת הדביקה כדי שראש-הבמה לא ייחתך. */
   scroll-margin-top: calc(var(--header-height, 4rem) + 0.75rem);
   color: var(--fm-ivory);
@@ -3338,8 +3420,8 @@ html.vt-book-nav::view-transition-group(book-cover) {
     margin-inline: -2rem;
     border-radius: var(--radius-xl);
     box-shadow:
-      0 34px 90px -46px rgba(0, 0, 0, 0.6),
-      0 10px 34px -22px rgba(0, 0, 0, 0.45);
+      0 34px 90px -46px rgb(var(--shadow-tint) / 0.6),
+      0 10px 34px -22px rgb(var(--shadow-tint) / 0.45);
   }
 }
 
@@ -3392,7 +3474,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 32%, transparent),
       transparent 60%
     ),
-    linear-gradient(158deg, #14161a, #0e1013);
+    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
 }
 
 /* Ambient — נשימת-זוהר עדינה מעל הרקע. */
@@ -3473,7 +3555,66 @@ body:has([data-fm-active]) {
     background-color var(--motion-panel) var(--fm-ease);
 }
 .fm-steps__dot[data-on="true"] {
-  background: color-mix(in oklab, var(--color-brand) 45%, var(--fm-ivory));
+  background: color-mix(in oklab, var(--fm-accent) 60%, var(--fm-ivory));
+}
+
+/* ── מערכת אחת, לא ארבע ערכות-צבע ────────────────────────────────────────
+ * קודם קיבל כל מצב גוון-חתימה משלו (פטרול / פטרול-טרקוטה / טרקוטה / שנהב) —
+ * בפועל ארבע ערכות-צבע שונות באותו מסך. עכשיו כל ארבעת המצבים חולקים מבטא
+ * אחד (מרווה על פטרול, 5.64:1), וההבחנה ביניהם נעשית בטיפוגרפיה בלבד:
+ * סמן-המצב (`.fm-marker` — „לפני קשר” / „בניית קשר” / …) וקו-הכותרת.
+ * כך לכל תוצאה יש זהות ברורה, בלי שהצבע יהפוך לרעש.
+ */
+.fm-stage[data-situation] { --fm-accent: var(--color-sage); }
+/* ההבחנה בין המצבים: צורת קו-הכותרת בלבד — אותו צבע, אותו אורך, אותו גובה.
+   משתנה רק תבנית-הסימן (עצירות-קשות באותו gradient), ולכן זהו שינוי של
+   מאפיין אחד באלמנט אחד — לא רקע אחר, לא צבע נוסף ולא עיצוב נוסף.
+   כיוון פיזי (90deg) נשמר בכוונה: התבניות סימטריות, פרט ל„אחרי פרידה”
+   שבו השבר ממוקם כך שב-RTL הוא נופל בקצה-הסיום. */
+.fm-stage[data-situation="dating"] .fm-title-rule {
+  background: linear-gradient(
+    90deg,
+    var(--fm-rule) 0 38%, transparent 38% 62%, var(--fm-rule) 62% 100%
+  );
+}
+.fm-stage[data-situation="building"] .fm-title-rule {
+  background: linear-gradient(
+    90deg,
+    var(--fm-rule) 0 47%, transparent 47% 53%, var(--fm-rule) 53% 100%
+  );
+}
+.fm-stage[data-situation="existing"] .fm-title-rule {
+  background: var(--fm-rule);
+}
+.fm-stage[data-situation="breakup"] .fm-title-rule {
+  background: linear-gradient(
+    90deg,
+    var(--fm-rule) 0 17%, transparent 17% 27%, var(--fm-rule) 27% 100%
+  );
+}
+
+/* צ׳יפ-הקשר: המצב שנבחר, גלוי לאורך כל הפעימות. */
+.fm-status {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.75rem 0.32rem 0.85rem;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fm-ivory);
+  border: 1px solid color-mix(in oklab, var(--fm-accent) 42%, transparent);
+  background: color-mix(in oklab, var(--fm-accent) 12%, transparent);
+  white-space: nowrap;
+}
+.fm-status__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--fm-accent);
+}
+@media (min-width: 560px) {
+  .fm-status { display: inline-flex; }
 }
 
 /* ── סצנה: מעטפת משותפת, כניסה רכה ── */
@@ -3505,8 +3646,10 @@ body:has([data-fm-active]) {
   text-transform: none;
   color: var(--fm-ivory-muted);
 }
+/* „פעולה” יושב על משטח בהיר ב-12.5px — טרקוטה-הגרפיקה נותנת שם 3.66:1
+   בלבד. מדרג-הטקסט של אותה טרקוטה נותן 5.80:1, בלי לשנות את המבטא. */
 .fm-eyebrow--brand {
-  color: var(--color-brand);
+  color: var(--color-brand-hover);
 }
 .fm-lede {
   max-width: 46ch;
@@ -3546,8 +3689,18 @@ body:has([data-fm-active]) {
   text-align: center;
   align-items: center;
 }
+.fm-scene--enter .fm-eyebrow {
+  color: color-mix(in oklab, var(--fm-accent) 58%, var(--fm-ivory));
+}
 .fm-scene--enter .fm-lede {
   margin-inline: auto;
+}
+.fm-scene--enter .fm-cta--ghost {
+  border-color: color-mix(in oklab, var(--fm-accent) 42%, transparent);
+  background: color-mix(in oklab, var(--fm-accent) 10%, transparent);
+}
+.fm-scene--enter .fm-cta--ghost:hover {
+  background: color-mix(in oklab, var(--fm-accent) 18%, transparent);
 }
 
 /* ── פעימת split — שני צדדים שנפתחים זה מזה ── */
@@ -3726,7 +3879,7 @@ body:has([data-fm-active]) {
   background: var(--color-surface);
   color: var(--color-foreground);
   text-align: center;
-  box-shadow: 0 24px 60px -34px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 60px -34px rgb(var(--shadow-tint) / 0.55);
 }
 .fm-bridge {
   margin-top: 0.75rem;
@@ -3790,12 +3943,12 @@ body:has([data-fm-active]) {
   transform: translateY(-2px);
 }
 .fm-cta--solid {
-  color: var(--color-ink);
+  color: var(--color-petrol);
   background: var(--fm-ivory);
 }
 .fm-cta--solid:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 28px -14px rgb(var(--shadow-tint) / 0.5);
 }
 .fm-cta--quiet {
   color: var(--fm-ivory-muted);
@@ -3806,13 +3959,13 @@ body:has([data-fm-active]) {
   border-color: var(--fm-hairline);
 }
 .fm-cta--brand {
-  color: var(--color-brand-foreground);
-  background: var(--color-brand);
+  color: var(--color-secondary-foreground);
+  background: var(--color-petrol);
 }
 .fm-cta--brand:hover {
-  background: var(--color-brand-hover);
+  background: var(--color-petrol-2);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -14px color-mix(in oklab, var(--color-brand) 60%, transparent);
+  box-shadow: 0 12px 28px -14px rgb(var(--shadow-tint) / 0.45);
 }
 .fm-cta--link {
   color: var(--color-foreground-muted);
@@ -3894,7 +4047,12 @@ body:has([data-fm-active]) {
   transition-delay: calc(var(--i, 0) * 55ms);
 }
 .motion-js .thesis-scene.is-visible .thesis-noise__word {
-  opacity: 0.62;
+  /* מילות-„הרעש” הן טקסט אמיתי, לא קישוט. `opacity: 0.62` מיזג את
+     --color-foreground-muted אל #8f938a על הנייר = 2.46:1 — נפילת-AA חמורה.
+     דילול-שקיפות אינו יכול לפתור זאת (גם ב-0.8 מגיעים ל-3.4:1 בלבד).
+     ההיררכיה נשמרת בגוון ולא בשקיפות: הרעש נשאר משני (5.09:1) מול טקסט
+     התזה (10.6:1) — נראה שקט יותר, ועדיין קריא. */
+  opacity: 1;
   transform: translateY(var(--rest-y, 0));
 }
 
@@ -4082,14 +4240,14 @@ body:has([data-fm-active]) {
  * reduced-motion — מצב סופי מיידי.
  * =================================================================== */
 .sig-hero {
-  --sig-ivory: #f4f2ee;
-  --sig-ivory-muted: color-mix(in oklab, #f4f2ee 60%, transparent);
+  --sig-ivory: var(--color-background);
+  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 60%, transparent);
   --sig-warm: color-mix(in oklab, var(--color-brand) 46%, #f4f2ee);
   position: relative;
   overflow: clip;
   isolation: isolate;
   color: var(--sig-ivory);
-  background: #16181c;
+  background: var(--color-petrol);
 }
 
 /* שדה-ה-Ink החמים + זוהר + גרעין. */
@@ -4110,7 +4268,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 24%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, #232931, #14161a);
+    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
 }
 .sig-hero__field {
   position: absolute;
@@ -4133,6 +4291,7 @@ body:has([data-fm-active]) {
 }
 .sig-hero__grain {
   position: absolute;
+  pointer-events: none;
   inset: 0;
   opacity: 0.5;
   background-image: radial-gradient(
@@ -4163,8 +4322,12 @@ body:has([data-fm-active]) {
 .sig-hero__stage {
   display: none; /* בסצנה המאוחדת אין „במה” נפרדת — כל ה-Hero הוא השדה. */
 }
+/* שכבות-קישוט חייבות להיות שקופות ללחיצה. ה-glow הזה (aria-hidden) ישב מעל
+   ה-CTA הראשי של ה-Hero *ובלע את הלחיצה עליו* — ליקוי אמיתי, לא רק בעיית-בדיקה:
+   דפדפן עושה hit-test על השכבה ולא על הקישור. אותו תיקון לכל שכבות-הקישוט. */
 .sig-hero__glow {
   position: absolute;
+  pointer-events: none;
   z-index: 0;
   width: 78%;
   aspect-ratio: 1;
@@ -4180,7 +4343,40 @@ body:has([data-fm-active]) {
   position: relative;
   z-index: 1;
   width: clamp(14rem, 62vw, 18rem);
-  filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 34px 48px rgb(var(--shadow-tint) / 0.55));
+}
+
+/* ── ההצגה החתומה: ספר WebGL (Three.js) ──
+   מוסתר עד שה-JS מפעיל WebGL בהצלחה (data-active). כשפעיל — כריכת-ה-CSS
+   (fallback) מוסתרת דרך :has, ואין ספר כפול. */
+.hero-bookgl {
+  display: none;
+  position: relative;
+  width: 100%;
+  max-width: 36rem;
+  aspect-ratio: 8 / 5;
+  margin-inline: auto;
+}
+.hero-bookgl[data-active="true"] {
+  display: block;
+}
+.sig-hero__object:has(.hero-bookgl[data-active="true"]) .sig-hero__cover {
+  display: none;
+}
+.hero-bookgl__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 8px;
+}
+.hero-bookgl__link:focus-visible {
+  outline: 2px solid var(--sig-ivory);
+  outline-offset: 6px;
+}
+.hero-bookgl__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .sig-hero__cover-shadow {
   display: none;
@@ -4253,11 +4449,13 @@ body:has([data-fm-active]) {
   display: none;
 }
 .sig-hero__cta {
-  margin-top: clamp(1.4rem, 4vw, 1.9rem);
+  /* מובייל: אחרי ספר-החתימה (H1 → מסר → ספר → פעולה). */
+  order: 3;
+  margin-top: clamp(1.15rem, 3.5vw, 1.6rem);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 .sig-hero__cta-primary {
   display: inline-flex;
@@ -4265,10 +4463,11 @@ body:has([data-fm-active]) {
   gap: 0.5rem;
   width: 100%;
   justify-content: center;
+  white-space: nowrap;
   padding: 0.95rem 1.75rem;
   border-radius: 999px;
   background: var(--sig-ivory);
-  color: var(--color-ink);
+  color: var(--color-petrol);
   font-size: 16.5px;
   font-weight: 700;
   transition:
@@ -4277,7 +4476,7 @@ body:has([data-fm-active]) {
 }
 .sig-hero__cta-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 34px -16px rgb(var(--shadow-tint) / 0.6);
 }
 .sig-hero__cta-primary:focus-visible {
   outline: 2px solid var(--sig-ivory);
@@ -4294,7 +4493,7 @@ body:has([data-fm-active]) {
   gap: 0.5rem;
   font-size: 15px;
   font-weight: 600;
-  color: color-mix(in oklab, var(--color-brand) 42%, var(--sig-ivory));
+  color: color-mix(in oklab, var(--sig-ivory) 80%, var(--color-petrol));
   text-underline-offset: 4px;
 }
 .sig-hero__cta-secondary:hover {
@@ -4333,19 +4532,25 @@ body:has([data-fm-active]) {
   .sig-hero__container {
     width: 100%;
   }
+  /* דסקטופ: רשת דו-טורית אמיתית — הספר (טור-הפתיחה, RTL=ימין, רחב) לצד הטקסט
+     (טור-הסיום, שמאל). ללא חפיפה: כל טור בתאו — ה-H1 שוב אינו מוסתר מאחורי
+     דפי-הספר, ולסצנה יש נשימה והיררכיה אחת ברורה. */
   .sig-hero__scene {
-    min-height: min(78svh, 46rem);
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 29rem);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3.75rem);
+    min-height: min(80svh, 48rem);
     padding-block: 0;
-    align-content: center;
   }
-  /* הספר: signature-object בצד-ההתחלה (RTL=ימין) — כולו בתוך ה-Hero, ממורכז
-     אנכית עם margins, לא חתוך ולא מודבק לתחתית. */
+  /* הספר: signature-object בטור-הימני (RTL=start), אובייקט גדול ומרשים,
+     ממורכז בתאו — הדפדוף הפיזי נשאר בתוך התא ורחוק מהטקסט. */
   .sig-hero__object {
-    position: absolute;
-    inset-block: 6% 6%; /* מעט מטה — נכנס לאזור-האור של ה-H1 (בלי חיתוך תחתון) */
-    inset-inline-start: 13%; /* RTL: מעט שמאלה — אותו illuminated scene */
-    inset-inline-end: auto;
-    width: min(49%, 38rem);
+    position: static;
+    order: 0;
+    inset: auto;
+    width: 100%;
+    align-self: center;
+    justify-self: stretch;
     min-height: 0;
     place-items: center;
     z-index: 1;
@@ -4363,7 +4568,7 @@ body:has([data-fm-active]) {
   .sig-hero__cover {
     width: clamp(20rem, 32vw, 29rem);
     margin-bottom: 0;
-    filter: drop-shadow(0 40px 58px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 40px 58px rgb(var(--shadow-tint) / 0.5));
   }
   /* דסקטופ: יש מרחב — ה-SPREAD רחב יותר (~1.86×) ומתכווץ פחות. */
   /* (הגדרות ה-SPREAD הרספונסיביות ל-1024/1280/1440 יושבות ליד בלוק ה-book,
@@ -4372,9 +4577,25 @@ body:has([data-fm-active]) {
   .sig-hero__copy {
     position: relative;
     z-index: 2;
-    max-width: 34rem;
-    margin-inline-start: auto; /* RTL: נדחף אל צד-הסיום (שמאל), הרחק מהכריכה */
-    padding-block: 2rem;
+    order: 0;
+    max-width: 29rem;
+    margin-inline-start: 0;
+    padding-block: 2rem 0;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+  }
+  /* ה-CTA חוזר אל תחתית טור-הטקסט (הפריסה המאושרת בדסקטופ). */
+  .sig-hero__cta {
+    order: 0;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    padding-block: 0 2rem;
+  }
+  .sig-hero__object {
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
   .sig-hero__eyebrow {
     font-size: 14px;
@@ -4392,9 +4613,9 @@ body:has([data-fm-active]) {
     display: block;
   }
   .sig-hero__cta {
-    flex-direction: row;
-    align-items: center;
-    gap: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
   }
   .sig-hero__cta-primary {
     width: auto;
@@ -4408,13 +4629,11 @@ body:has([data-fm-active]) {
 /* טווח-ביניים (1024–1279): פחות מרחב פנוי — הספר מעט קטן ומוסט ימינה כדי לשמור
    הפרדה נקייה מה-H1 בלי חפיפה, וכולו בתוך ה-Hero. */
 @media (min-width: 1024px) and (max-width: 1279px) {
-  .sig-hero__object {
-    /* מעט שמאלה — פותח מרווח מימין לדפדוף הפיזי (ספר עברי), עדיין רחוק מה-H1. */
-    inset-inline-start: 11%;
-    width: min(41%, 28rem);
+  .sig-hero__scene {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 25rem);
   }
   .sig-hero__cover {
-    width: clamp(15rem, 29vw, 20rem);
+    width: clamp(15rem, 27vw, 20rem);
   }
 }
 
@@ -4556,8 +4775,8 @@ body:has([data-fm-active]) {
  * בהירה. לא „כרטיס CTA ירוק”. הקופי/קישורים לא השתנו.
  * =================================================================== */
 .sig-close {
-  --sig-ivory: #f4f2ee;
-  --sig-ivory-muted: color-mix(in oklab, #f4f2ee 62%, transparent);
+  --sig-ivory: var(--color-background);
+  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 62%, transparent);
   position: relative;
   isolation: isolate;
   overflow: clip;
@@ -4579,7 +4798,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 22%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, #232931, #14161a);
+    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
 }
 .sig-close__container {
   position: relative;
@@ -4599,10 +4818,11 @@ body:has([data-fm-active]) {
   display: grid;
   place-items: center;
   width: clamp(8rem, 30vw, 12rem);
-  filter: drop-shadow(0 34px 46px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 34px 46px rgb(var(--shadow-tint) / 0.55));
 }
 .sig-close__glow {
   position: absolute;
+  pointer-events: none;
   z-index: -1;
   width: 150%;
   aspect-ratio: 1;
@@ -4646,7 +4866,7 @@ body:has([data-fm-active]) {
   padding: 1rem 2rem;
   border-radius: 999px;
   background: var(--sig-ivory);
-  color: var(--color-ink);
+  color: var(--color-petrol);
   font-size: 16.5px;
   font-weight: 700;
   transition:
@@ -4655,7 +4875,7 @@ body:has([data-fm-active]) {
 }
 .sig-close__buy:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 38px -16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 18px 38px -16px rgb(var(--shadow-tint) / 0.6);
 }
 .sig-close__buy:focus-visible {
   outline: 2px solid var(--sig-ivory);
@@ -4668,7 +4888,7 @@ body:has([data-fm-active]) {
 }
 .sig-close__secondary-link {
   font-weight: 600;
-  color: color-mix(in oklab, var(--color-brand) 42%, var(--sig-ivory));
+  color: color-mix(in oklab, var(--sig-ivory) 80%, var(--color-petrol));
   text-underline-offset: 4px;
 }
 .sig-close__secondary-link:hover {
@@ -5057,15 +5277,17 @@ body:has([data-fm-active]) {
   --paper-hi: #ffffff;
   --paper-lo: #fdfdfc;
   --paper-edge: #f1f0ee;
-  --paper-ink: color-mix(in oklab, var(--color-ink) 92%, #2a2a28);
+  --paper-ink: color-mix(in oklab, var(--color-ink) 92%, #2f3a36);
   /* גיאומטריית ה-SPREAD (מובייל): רוחב עמוד-שמאל כשבר מרוחב הכריכה, וקנה-מידה
      והסטה שמחזיקים את הספר הפתוח בתוך ה-viewport ורחוק מהטקסט. דסקטופ דורס. */
-  --leaf-w: 0.74;
-  --open-scale: 0.92;
+  --leaf-w: 0.82;
+  --open-scale: 0.7;
   /* קנה-מידה אנכי נפרד — ברירת-מחדל זהה לאופקי (scale אחיד). רק 1440 דורס אותו
      כדי לתת ל-spread פרופורציה מעט רחבה-יותר (ספר אמיתי, לא חוברת גבוהה-צרה). */
   --open-scale-y: var(--open-scale);
-  --open-shift: 0%;
+  /* מובייל: ה-spread מרחיב שמאלה מקופסת-הכריכה; shift ימינה כדי למרכזו ולא לחתוך
+     את עמוד-שמאל בקצה-המסך. */
+  --open-shift: 22%;
   /* הרמה אנכית קלה (breathing room מתחת לספר). ברירת-מחדל 0; דסקטופ דורס. */
   --open-lift: 0%;
 }
@@ -5097,20 +5319,22 @@ body:has([data-fm-active]) {
    לפי סדר-המקור.) */
 /* ה-SPREAD גדל עם המרחב הפנוי (מימין ל-H1). ערכים לפי breakpoint (responsive,
    לא scale אחד קבוע): רחב ומרשים ב-1440/1280, מצומצם רק כנדרש ב-1024. */
+/* טאבלט (768–1023): סצנה אנכית (טקסט מעל, ספר מתחת) עם יותר מרחב — spread מעט
+   גדול יותר, ממורכז. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .book-cover--open { --leaf-w: 0.86; --open-scale: 0.78; --open-scale-y: 0.78; --open-shift: 20%; }
+}
+/* SPREAD בתוך תא-הרשת: הספר הפתוח (עמוד-שמאל מרחיב שמאלה מקופסת-הכריכה) חייב
+   להיכנס כולו בתא הימני ולהתמרכז בו. open-shift דוחף ימינה כדי לקזז את הרחבת
+   עמוד-שמאל, כך שה-spread ממורכז בתא ולא חודר לטקסט. */
 @media (min-width: 1024px) {
-  .book-cover--open { --leaf-w: 0.92; --open-scale: 0.68; --open-shift: 13%; --open-lift: -5%; }
+  .book-cover--open { --leaf-w: 0.9; --open-scale: 0.62; --open-scale-y: 0.62; --open-shift: 26%; --open-lift: 0%; }
 }
 @media (min-width: 1280px) {
-  .book-cover--open { --leaf-w: 0.94; --open-scale: 0.84; --open-shift: 15%; --open-lift: -5%; }
+  .book-cover--open { --leaf-w: 0.9; --open-scale: 0.66; --open-scale-y: 0.66; --open-shift: 26%; --open-lift: 0%; }
 }
 @media (min-width: 1440px) {
-  .book-cover--open {
-    --leaf-w: 0.96;
-    --open-scale: 0.93; /* רחב יותר (~+8%), נשאר כולו בתוך ה-Hero */
-    --open-scale-y: 0.87; /* מעט פחות גבוה — פרופורציה רחבה-יותר, עיוות-טקסט מזערי */
-    --open-shift: 35%; /* מחזיק את הקצה-השמאלי מחוץ ל-H1; ההרחבה בעיקר ימינה */
-    --open-lift: -6%; /* breathing room מתחת לספר */
-  }
+  .book-cover--open { --leaf-w: 0.9; --open-scale: 0.72; --open-scale-y: 0.7; --open-shift: 26%; --open-lift: 0%; }
 }
 /* ה-<img> האמיתי נמוג ברגע ששכבת-הכריכה משתלטת (crossfade בלתי-נראה — אותה
    תמונה, אותו מקום). לא מסתובב יותר; הסיבוב על שכבת-הכריכה בתוך ה-3D. */
@@ -5142,7 +5366,7 @@ body:has([data-fm-active]) {
   background-color: var(--paper-hi);
   background-image:
     linear-gradient(105deg, var(--paper-lo), var(--paper-hi) 46%, var(--paper-lo)),
-    repeating-linear-gradient(94deg, rgba(60, 60, 66, 0.016) 0 1.5px, transparent 1.5px 3.5px);
+    repeating-linear-gradient(94deg, rgb(var(--shadow-tint) / 0.016) 0 1.5px, transparent 1.5px 3.5px);
 }
 
 /* בסיס ה-SPREAD — שני עלים סטטיים, hinge בשדרה (x=0). */
@@ -5154,10 +5378,10 @@ body:has([data-fm-active]) {
      קצה עליון/תחתון — כדי שהעמוד ייראה כגוף עם קצוות, לא מלבן לבן שטוח. גוון
      ניטרלי (גרפיט) בלבד; הנייר נשאר לבן. */
   box-shadow:
-    inset 16px 0 36px -18px rgba(22, 22, 26, 0.28),
+    inset 16px 0 36px -18px rgb(var(--shadow-tint) / 0.28),
     inset -6px 0 10px -7px rgba(255, 255, 255, 0.45),
-    inset 0 11px 20px -16px rgba(20, 20, 24, 0.16),
-    inset 0 -13px 24px -16px rgba(20, 20, 24, 0.22);
+    inset 0 11px 20px -16px rgb(var(--shadow-tint) / 0.16),
+    inset 0 -13px 24px -16px rgb(var(--shadow-tint) / 0.22);
 }
 .book-open__leaf--left {
   right: 100%; /* יושב משמאל לשדרה: [-leaf-w·W, 0] */
@@ -5168,7 +5392,7 @@ body:has([data-fm-active]) {
   transform: translateZ(0.3px);
   border-radius: 7px 1px 1px 7px; /* קצה-חופשי בשמאל */
   box-shadow:
-    inset -10px 0 24px -16px rgba(24, 24, 28, 0.19),
+    inset -10px 0 24px -16px rgb(var(--shadow-tint) / 0.19),
     inset 5px 0 8px -6px rgba(255, 255, 255, 0.36);
   /* מופיע כשהכריכה נפתחת (Beat 2→3). */
   opacity: 0;
@@ -5185,7 +5409,7 @@ body:has([data-fm-active]) {
   /* „גוש דפים”: קווי-דפים דקים (אנכית) + סימון עומק (אופקית — כהה בשוליים, בהיר
      במרכז) כדי שהקצה ייראה כערימת דפים מעוגלת, לא כפס אחיד. */
   background:
-    repeating-linear-gradient(to bottom, rgba(18, 18, 22, 0.07) 0 1px, transparent 1px 2.4px),
+    repeating-linear-gradient(to bottom, rgb(var(--shadow-tint) / 0.07) 0 1px, transparent 1px 2.4px),
     linear-gradient(90deg, #e6e6e4 0%, #f6f6f5 42%, #ededeb 78%, #dedddb 100%);
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
 }
@@ -5193,7 +5417,7 @@ body:has([data-fm-active]) {
   right: -5px; /* בקצה-הימני של עמוד-ימין */
   transform: translateZ(0.4px);
   border-radius: 0 2px 2px 0;
-  box-shadow: 2px 5px 9px -6px rgba(0, 0, 0, 0.26);
+  box-shadow: 2px 5px 9px -6px rgb(var(--shadow-tint) / 0.26);
 }
 .book-open__stack--left {
   /* בקצה-החופשי (השמאלי) של עמוד-שמאל: קצה-ימין של הגוש בדיוק על קצה-הדף
@@ -5203,7 +5427,7 @@ body:has([data-fm-active]) {
   left: auto;
   transform: translateZ(1px);
   border-radius: 2px 0 0 2px;
-  box-shadow: -2px 5px 9px -6px rgba(0, 0, 0, 0.24);
+  box-shadow: -2px 5px 9px -6px rgb(var(--shadow-tint) / 0.24);
 }
 
 /* השדרה — קפל מרכזי אמיתי: צל-מרזב עמוק + עקמומיות-נייר סמוכה + הבזק דק. */
@@ -5221,13 +5445,13 @@ body:has([data-fm-active]) {
   opacity: 0;
   background: linear-gradient(
     90deg,
-    rgba(22, 22, 26, 0) 0%,
-    rgba(22, 22, 26, 0.018) 24%,
-    rgba(22, 22, 26, 0.055) 43%,
-    rgba(22, 22, 26, 0.075) 50%,
-    rgba(22, 22, 26, 0.055) 57%,
-    rgba(22, 22, 26, 0.018) 76%,
-    rgba(22, 22, 26, 0) 100%
+    rgb(var(--shadow-tint) / 0) 0%,
+    rgb(var(--shadow-tint) / 0.018) 24%,
+    rgb(var(--shadow-tint) / 0.055) 43%,
+    rgb(var(--shadow-tint) / 0.075) 50%,
+    rgb(var(--shadow-tint) / 0.055) 57%,
+    rgb(var(--shadow-tint) / 0.018) 76%,
+    rgb(var(--shadow-tint) / 0) 100%
   );
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
 }
@@ -5258,10 +5482,10 @@ body:has([data-fm-active]) {
   /* עומק-דף לעמוד-שמאל, סימטרי לעמוד-ימין: עקומת-מרזב בצד-השדרה + הצללת קצה
      עליון/תחתון. (ה-liner מסובב 180°, ולכן ‎-x = צד-השדרה.) */
   box-shadow:
-    inset -16px 0 36px -18px rgba(22, 22, 26, 0.3),
+    inset -16px 0 36px -18px rgb(var(--shadow-tint) / 0.3),
     inset 6px 0 10px -7px rgba(255, 255, 255, 0.4),
-    inset 0 11px 20px -16px rgba(20, 20, 24, 0.16),
-    inset 0 -13px 24px -16px rgba(20, 20, 24, 0.22);
+    inset 0 11px 20px -16px rgb(var(--shadow-tint) / 0.16),
+    inset 0 -13px 24px -16px rgb(var(--shadow-tint) / 0.22);
 }
 
 /* דפים מתהפכים — outer = סיבוב (hinge בשדרה); inner (.book-open__curl) = עיקול.
@@ -5291,7 +5515,7 @@ body:has([data-fm-active]) {
 .book-open__face--back {
   transform: rotateY(180deg);
   border-radius: 7px 1px 1px 7px;
-  box-shadow: inset -10px 0 18px -12px rgba(28, 28, 32, 0.4);
+  box-shadow: inset -10px 0 18px -12px rgb(var(--shadow-tint) / 0.4);
 }
 /* צל-נע + הבזק-קצה בזמן ההיפוך: overlay שמתחזק ליד ה-mid-turn ונחלש בנחיתה. */
 .book-open__face--front::after {
@@ -5327,10 +5551,10 @@ body:has([data-fm-active]) {
    overflow:hidden + שוליים כמו ספר; RTL; backface מוסתר (אין טקסט-מראה). */
 .book-open__sheet {
   position: absolute;
-  inset: 9% 9% 9% 9%;
+  inset: 13% 12% 13% 12%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center; /* טיפוגרפיה מולחנת — ממורכזת אנכית, לא תלויה בראש-העמוד */
   overflow: hidden;
   direction: rtl;
   text-align: right;
@@ -5477,319 +5701,236 @@ body:has([data-fm-active]) {
   82%, 100% { opacity: 0; }
 }
 
-/* ══ E · ספר-חתימה (Hero) — כריכת-המותג כאובייקט פיזי ═══════════════════════
-   הכריכה האמיתית של „מדייטים לאהבה” כ-hardcover יוקרתי בזווית ¾ עדינה: שדרה,
-   עובי-דפים (page-block) בקצוות החופשיים, צל-מגע וזוהר-הפרדה. הכריכה הקדמית
-   נפתחת מעט בלבד (~24°) וחושפת הצצה דקה של דפים לבנים — בלי spread, בלי טקסט.
-   הכריכה היא הגיבור. presence → lift → partial-open → settle. reduced-motion/
-   ללא-JS ⇒ ה-object אינו מרונדר; הכריכה הסגורה (ה-<img>) נשארת. */
-.book-cover--open { perspective: 900px; }
-/* מנטרלים את הטיית-ה-inner הסביבתית — ה-¾ מוגדר על ה-pbook (reduced-motion שומר
-   על הטיית-הכריכה הסגורה). */
-.motion-js .book-cover--open .book-cover__inner { transform: none; animation: none; }
-
-.pbook { display: none; }
-.motion-js .book-cover--open .pbook {
-  display: grid;
-  place-items: center;
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  pointer-events: none;
-  --pb-thick: 35px; /* עובי-הספר */
-  --pb-open: 13deg; /* זווית-הכריכה במצב הסופי — glimpse דק בלבד (ללא שינוי) */
-  --pb-openwide: 82deg; /* זווית-פתיחה בזמן הדפדוף — חושף את הדף הפנימי במלואו */
-  --pb-yaw: 35deg; /* סיבוב-¾ מורגש (מַרְאֵה לספר עברי: שדרה מימין, נסוגה לעומק) */
-  --pb-yaw-read: 27deg; /* ¾ מעט מתון בזמן ה-hold בלבד — העמוד הנקרא יותר front-facing.
-                           ה-flip חוזר ל-full yaw (זהה לגמרי). */
-  --pb-pitch: 5deg; /* הטיית-מבט עדינה מלמעלה */
-  --pb-page: #e7e3d8; /* דף עליון — paper-white (לא בוהק) */
-  --pb-leaf: #efece3; /* נייר-הדפים הפנימיים */
-  --pb-board: #201d1a; /* לוח-כריכה / שדרה */
-  --pb-total: 5900ms; /* משך הרצף — מכויל ל-hold קריא של ~1.85s לכל עמוד */
-  animation: pb-fade 420ms var(--ease-standard) var(--book-open-delay) both;
-}
-
-/* גוף-הספר: ¾ + התרוממות/התייצבות. */
-.pbook__stage {
-  position: relative;
-  width: 76%;
-  aspect-ratio: 0.66 / 1;
-  transform-style: preserve-3d;
-  transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw));
-  animation: pb-rise var(--pb-total) linear var(--book-open-delay) both;
-}
-.pbook__slab {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-}
-
-/* הדף העליון הלבן (מתחת לכריכה) — נחשף בהצצה בעת הפתיחה. gutter מימין (שדרה). */
-.pbook__page {
-  position: absolute;
-  inset: 0;
-  border-radius: 5px 2px 2px 5px;
-  background:
-    linear-gradient(260deg, #d9d4c7, var(--pb-page) 45%, #efece3);
-  box-shadow:
-    inset -14px 0 26px -16px rgba(20, 18, 14, 0.4),
-    inset 0 -14px 24px -16px rgba(20, 18, 14, 0.26);
-}
-
-/* לוח-הכריכה האחורי (מאחורי גוש-הדפים). */
-.pbook__back {
-  position: absolute;
-  inset: -3.4%;
-  transform: translateZ(calc(-1 * var(--pb-thick)));
-  border-radius: 8px 3px 3px 8px;
-  background: linear-gradient(225deg, #302b26, #16130e 76%);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-}
-
-/* פאות-העובי (page-block + שדרה). front plane ב-z=0, הספר מוברר אחורה. */
-.pbook__edge {
-  position: absolute;
-  background:
-    repeating-linear-gradient(to bottom, rgba(20, 16, 10, 0.10) 0 1px, transparent 1px 2.4px),
-    linear-gradient(90deg, #d9d4c8, #efece2 45%, #d3cec1);
-}
-/* גוש-הדפים (fore-edge) — הצד החופשי (שמאל בספר עברי). */
-.pbook__edge--fore {
-  top: 2.6%;
-  bottom: 2.6%;
-  left: 0;
-  width: var(--pb-thick);
-  transform-origin: left center;
-  transform: rotateY(-90deg);
-}
-.pbook__edge--bottom {
-  left: 2.6%;
-  right: 2.6%;
-  bottom: 0;
-  height: var(--pb-thick);
-  transform-origin: bottom center;
-  transform: rotateX(-90deg);
-  background:
-    repeating-linear-gradient(to right, rgba(20, 16, 10, 0.10) 0 1px, transparent 1px 2.4px),
-    linear-gradient(180deg, #d9d4c8, #efece2 45%, #d3cec1);
-}
-/* שדרה — הצד הכרוך (ימין — כריכת ספר עברי), כהה כלוח-הכריכה. */
-.pbook__spine {
-  position: absolute;
-  top: -2.6%;
-  bottom: -2.6%;
-  right: 0;
-  width: calc(var(--pb-thick) + 2px);
-  transform-origin: right center;
-  transform: rotateY(90deg);
-  background: linear-gradient(270deg, #14110d, #2a2622 60%, #14110d);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
-}
-
-/* הכריכה הקדמית — אמנות-המותג. hinge בשדרה (ימין); נפתחת שמאלה כספר עברי.
-   ה-background אינו ממוראה — הטקסט על הכריכה נשאר תקין וקריא. */
-.pbook__cover {
-  position: absolute;
-  inset: -2.6%;
-  transform-origin: right center;
-  transform: translateZ(3px) rotateY(var(--pb-open));
-  border-radius: 8px 3px 3px 8px;
-  background-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0) 32%, rgba(20, 14, 8, 0.14) 100%),
-    linear-gradient(260deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0) 22%),
-    var(--cover-src);
-  background-size: cover;
-  background-position: center;
-  box-shadow:
-    inset -2px 0 0 0 rgba(255, 255, 255, 0.14),
-    inset 1px 0 0 0 rgba(0, 0, 0, 0.25),
-    -18px 26px 40px -22px rgba(0, 0, 0, 0.6);
-  backface-visibility: hidden;
-  animation: pb-open var(--pb-total) linear var(--book-open-delay) both;
-}
-
-/* צל-מגע על ה„רצפה” — מקרקע ומפריד מהרקע. אינו מסתובב עם הספר. */
-.pbook__contact {
-  position: absolute;
-  left: 55%; /* כיוון-אור מלמעלה-שמאל ⇒ הצל נופל מעט ימינה */
-  bottom: 5%;
-  width: 88%;
-  height: 14%;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.4) 38%, rgba(0, 0, 0, 0.16) 60%, transparent 80%);
-  filter: blur(24px);
-  animation: pb-fade 760ms var(--ease-standard) var(--book-open-delay) both;
-}
-/* זוהר-הפרדה — נמשך מעט אל צד-הכותרת (RTL=שמאל) כדי לקשור את הספר לשדה ה-H1. */
-.pbook__halo {
-  position: absolute;
-  left: 62%;
-  top: 46%;
-  width: 108%;
-  aspect-ratio: 1.15;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in oklab, var(--color-secondary) 20%, transparent), transparent 62%);
-  filter: blur(46px);
-}
-
-/* ── keyframes ── */
-@keyframes pb-fade { from { opacity: 0; } to { opacity: 1; } }
-/* presence → הרמה קלה → התייצבות מוקדמת (עד 13%) ואז יציב — כדי שהטקסט לא ינוע
-   בזמן ה-hold. הזמנים לינאריים; ה-easing מוגדר פר-מקטע. */
-@keyframes pb-rise {
-  0% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(3.2%) scale(0.984); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-  13% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); }
-  36% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-  39% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
-  50% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-  55% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); }
-  74% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-  77% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
-  100% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
-}
-/* הכריכה: סגורה (presence) → נפתחת רחב שמאלה (ספר עברי) → יציבה בזמן שני ה-holds
-   והדפדופים → מתייצבת ל-glimpse הסופי (settle). */
-@keyframes pb-open {
-  0% { transform: translateZ(3px) rotateY(0deg); }
-  4% { transform: translateZ(3px) rotateY(0deg); animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1); }
-  14% { transform: translateZ(3px) rotateY(calc(var(--pb-openwide) + 2deg)); }
-  20% { transform: translateZ(3px) rotateY(var(--pb-openwide)); }
-  88% { transform: translateZ(3px) rotateY(var(--pb-openwide)); animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1); }
-  100% { transform: translateZ(3px) rotateY(var(--pb-open)); }
-}
-/* דף ראשון — דפדוף פיזי מלא: שטוח (טקסט עברי, יציב ב-hold עד 39%) → מתרומם ב-hinge
-   בשדרה (ימין) עם curl/arc עדין (rotateX) והרמת-Z מתונה, מסתובב 180° במלואו ונשכב
-   מעבר לשדרה (ימינה — מתרחק מה-H1). הדף קיים לאורך כל הסיבוב; הפָּן האחורי נייר ריק.
-   ב-settle חוזר שטוח כדי לשמר את ה-glimpse הריק של המצב הסופי. easing פר-מקטע. */
-@keyframes pb-flip1 {
-  0% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); }
-  39% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-  43% { transform: translateZ(16px) rotateY(52deg) rotateX(-7deg); animation-timing-function: linear; }
-  47% { transform: translateZ(14px) rotateY(120deg) rotateX(-6deg); animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
-  50% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); }
-  88% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-  94% { transform: translateZ(13px) rotateY(96deg) rotateX(-5deg); }
-  100% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); }
-}
-/* דף שני — נחשף אחרי הדפדוף הראשון; דפדוף פיזי מלא זהה, עם hold קריא משלו (50%→77%). */
-@keyframes pb-flip2 {
-  0% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); }
-  77% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-  81% { transform: translateZ(15px) rotateY(52deg) rotateX(-7deg); animation-timing-function: linear; }
-  85% { transform: translateZ(13px) rotateY(120deg) rotateX(-6deg); animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
-  88% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); }
-  90.5% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-  100% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); }
-}
-/* moving shadow — הצללה נעה על-פני הדף המסתובב (מתחזקת סביב האנך). */
-@keyframes pb-sheen1 {
-  0%, 39% { opacity: 0; }
-  45% { opacity: 0.34; }
-  50%, 88% { opacity: 0; }
-  94% { opacity: 0.24; }
-  100% { opacity: 0; }
-}
-@keyframes pb-sheen2 {
-  0%, 77% { opacity: 0; }
-  83% { opacity: 0.34; }
-  88%, 100% { opacity: 0; }
-}
-
-/* ── דפים מתהפכים (leaves) — hinge בשדרה (ימין), טקסט עברי אמיתי בפָּן הקדמי ── */
-.pbook__leaf {
-  position: absolute;
-  inset: 0;
-  transform-origin: right center;
-  transform-style: preserve-3d;
-}
-.pbook__leaf--p2 { transform: translateZ(1.4px) rotateY(0deg); }
-.pbook__leaf--p1 { transform: translateZ(2.2px) rotateY(0deg); }
-.motion-js .book-cover--open .pbook__leaf--p1 {
-  animation: pb-flip1 var(--pb-total) linear var(--book-open-delay) both;
-}
-.motion-js .book-cover--open .pbook__leaf--p2 {
-  animation: pb-flip2 var(--pb-total) linear var(--book-open-delay) both;
-}
-/* שני פָּנים לכל דף — קדמי (טקסט) ואחורי (נייר ריק, מסובב 180° כדי שהטקסט לא ישוקף). */
-.pbook__face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  border-radius: 6px 2px 2px 6px;
-  overflow: hidden;
-  container-type: inline-size; /* טקסט קנה-מידה יחסי לרוחב-הדף */
-  background: linear-gradient(260deg, #e4e0d5, var(--pb-leaf) 46%, #f5f3ec);
-  box-shadow:
-    inset -12px 0 24px -16px rgba(20, 18, 14, 0.34),
-    inset 0 -12px 22px -16px rgba(20, 18, 14, 0.2);
-}
-.pbook__face--back { transform: rotateY(180deg); }
-/* moving shadow — שכבת-הצללה מעל הדף (opacity מונפש). */
-.pbook__sheen {
-  position: absolute;
-  inset: 0;
-  border-radius: 6px 2px 2px 6px;
-  background: linear-gradient(255deg, rgba(20, 16, 10, 0.5), rgba(20, 16, 10, 0.12) 46%, rgba(20, 16, 10, 0) 78%);
-  opacity: 0;
-  pointer-events: none;
-}
-.motion-js .book-cover--open .pbook__leaf--p1 .pbook__sheen {
-  animation: pb-sheen1 var(--pb-total) linear var(--book-open-delay) both;
-}
-.motion-js .book-cover--open .pbook__leaf--p2 .pbook__sheen {
-  animation: pb-sheen2 var(--pb-total) linear var(--book-open-delay) both;
-}
-/* גוש-הטקסט: RTL, מרחק מהשדרה (ימין) ומצד-הכריכה-הנפתחת (שמאל) שה-glimpse יישאר ריק. */
-.pbook__ptext {
-  position: absolute;
-  inset: 11% 20% 10% 12%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.34em;
-  direction: rtl;
-  text-align: start;
-  font-family: var(--font-serif, serif);
-  color: var(--color-ink);
-}
-.pbook__ph {
-  font-weight: 600;
-  font-size: 4.4cqw;
-  line-height: 1.22;
-  color: var(--color-secondary);
-  margin-bottom: 0.35em;
-}
-/* תווית-מדור (עובדה / סיפור / לראות אחרת) — מפרידה בין קטעי-התוכן על העמוד. */
-.pbook__sub {
-  font-weight: 600;
-  font-size: 3.5cqw;
-  line-height: 1.2;
-  color: color-mix(in oklab, var(--color-secondary) 82%, var(--color-ink));
-  margin-top: 0.7em;
-  margin-bottom: 0.1em;
-}
-.pbook__pl {
-  font-size: 3.15cqw;
-  line-height: 1.42;
-  color: color-mix(in oklab, var(--color-ink) 88%, transparent);
-}
-
-/* מובייל (≤640px) — אותו art-direction: המסר קודם, והספר (אותו object) מיד מתחתיו
-   בקומפוזיציה קומפקטית. גדלים/מיקום מטופלים ב-sig-hero.
-   בדפדוף: לא reader זעיר — מילים גדולות בלבד (כותרת + שורה אחת), מאותו טקסט מאושר. */
+/* ── ספר-ה-CSS הישן (.pbook) הוסר ──
+   הוחלף בספר ה-WebGL (Three.js). הבלוק היה קוד-מת (שום רכיב לא מרנדר .pbook)
+   ונשא את ערכי-הכהות האחרונים שאינם ממשפחת הפטרול. ה-fallback ללא-WebGL הוא
+   `.book-open`, וללא-JS/reduced-motion — כריכת ה-<img> הסטטית. */
 @media (max-width: 640px) {
-  /* ¾ עמוק יותר + הזזה שמאלה + width קטן מעט — הדפדוף הפיזי המלא נשאר במסך. */
-  .motion-js .book-cover--open .pbook { --pb-yaw: 47deg; --pb-yaw-read: 39deg; transform: translateX(-9%); --pb-total: 4200ms; }
-  .pbook__stage { width: 66%; }
-  .pbook__ptext { inset: 17% 24% 15% 12%; gap: 0.5em; }
-  .pbook__ph { font-size: 7cqw; line-height: 1.28; margin-bottom: 0.2em; }
-  .pbook__pl { font-size: 5.3cqw; line-height: 1.4; }
-  .pbook__sub { display: none; } /* מובייל: בלי תוויות-מדור — מילים גדולות בלבד */
-  /* מובייל: כותרת + 2–3 שורות גדולות; משאיר שלוש הראשונות ומסתיר מעבר לכך. */
-  .pbook__pl ~ .pbook__pl ~ .pbook__pl ~ .pbook__pl { display: none; }
-  /* נשימה קלה בין תחתית-הספר לסקשן הבא (RecognitionBeat) — בלי להזיז את הספר. */
+  /* נשימה קלה בין תחתית-הספר לסקשן הבא. */
   .sig-hero__object { margin-block-end: 2rem; }
 }
 
+
+/* ── ניווט-מסלול: ללא View Transitions ──
+   נבדק והוסר. `@view-transition { navigation: auto }` חל על ניווט cross-document
+   בלבד, ואילו ניווטי App Router הם same-document; המסלול הרשמי (React
+   `<ViewTransition>` + experimental.viewTransition) דורש React canary — הפרויקט
+   מקובע ל-React 19.2.4 יציב שאינו מייצא את הרכיב כלל. במקום קוד-מת שאינו רץ,
+   הניווט נשאר מיידי ונקי. מעברי ה-shared-element שכן פועלים הם מבוססי-JS
+   (`document.startViewTransition`): מעבר-הכריכה אל /preview ו-Focus Mode. */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * 2026 MOTION — Scroll-driven reveals (CSS scroll/view timelines)
+ * מחליף חשיפות-JS גנריות בחשיפה נטיבית מונעת-גלילה, קומפוזיטור-בלבד
+ * (opacity/transform). מוחל בררנית: כותרות-סקשן ובלוקים עריכתיים — לא כל
+ * פסקה, בלי scroll-jacking. Progressive enhancement: ללא תמיכה או תחת
+ * reduced-motion האלמנטים גלויים לגמרי (המצב הסופי הוא ברירת-המחדל).
+ * ═══════════════════════════════════════════════════════════════════════ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-rise {
+      animation: scroll-rise-kf linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 62%;
+    }
+    .scroll-fade {
+      animation: scroll-fade-kf linear both;
+      animation-timeline: view();
+      animation-range: entry 4% entry 44%;
+    }
+    /* מפריד עריכתי שנמשך עם הגלילה — רמז-קצב שקט, לא גימיק. */
+    .scroll-rule {
+      animation: scroll-rule-kf linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+      transform-origin: right center; /* RTL */
+    }
+  }
+}
+@keyframes scroll-rise-kf {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes scroll-fade-kf {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scroll-rule-kf {
+  from { transform: scaleX(0); opacity: 0.3; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+/* ── למה אין כאן scroll-timeline על `.reveal` ────────────────────────────
+ * קודם היה כאן: `.motion-js .reveal { animation: scroll-reveal-kf linear both;
+ * animation-timeline: view(); animation-range: entry 3% entry 46%; }`.
+ * זה היה באג-מוצר אמיתי, לא אי-נוחות:
+ *
+ *   • `view()` הוא ציר *דו-כיווני* — הוא נסוג יחד עם הגלילה. `is-visible`
+ *     לעומת זאת הוא חד-כיווני (נוסף ולא מוסר).
+ *   • כשגוללים חזרה למעלה, ה-currentTime של אלמנט מתחת-לקיפול הופך שלילי
+ *     (נמדד בפועל: ‎-125% / -293% / -406%‎), ועם `fill: both` הדפדפן מקבע את
+ *     קיינפריים ה-`from` — כלומר `opacity: 0`.
+ *   • אנימציות גוברות בקסקדה על הצהרות רגילות, ולכן
+ *     `.is-visible { opacity: 1 }` לא יכול היה לנצח: תוכן שכבר נקרא נעלם.
+ *
+ * דרישה ארכיטקטונית: תוכן ממשי לעולם אינו תלוי בהשלמת אנימציית-גלילה, וברגע
+ * שנחשף — הוא נשאר חשוף. לכן החשיפה של תוכן רצה אך ורק במסלול החד-כיווני
+ * (IntersectionObserver ב-MotionRoot → `.is-visible`), ו-scroll-timelines
+ * שמורים לשכבת-העשרה דקורטיבית בלבד (`.scroll-rise` / `.scroll-fade` /
+ * `.scroll-rule` למטה) — לעולם לא לתוכן. */
+
+/* ── Focus Mode: מעבר-מצב אחד ורציף (shared-element) ──
+   הכרטיס הנבחר ממשיך דרך כותרתו (fm-title) אל כותרת-התוצאה; שאר הכרטיסים
+   *נסוגים* — מתרחקים מעט ודוהים — במקום להיחתך. בחזרה הם עולים בחזרה למקומם.
+   רק transform/opacity (קומפוזיטור). ללא תמיכה ב-VT: החלפת-מצב מיידית. */
+::view-transition-old(sit-card-0),
+::view-transition-old(sit-card-1),
+::view-transition-old(sit-card-2),
+::view-transition-old(sit-card-3) {
+  animation: sit-recede var(--dur-focus) var(--ease-out) both;
+}
+::view-transition-new(sit-card-0),
+::view-transition-new(sit-card-1),
+::view-transition-new(sit-card-2),
+::view-transition-new(sit-card-3) {
+  animation: sit-return var(--dur-focus) var(--ease-out) both;
+}
+@keyframes sit-recede {
+  to { opacity: 0; transform: scale(0.94) translateY(6px); }
+}
+@keyframes sit-return {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+}
+
+/* מחליף-מצב בתוך התוצאה — מעבר בין מצבים בלי לחזור לרשת. */
+.fm-switch {
+  display: none;
+  align-items: center;
+  gap: 0.3rem;
+}
+@media (min-width: 720px) {
+  .fm-switch { display: inline-flex; }
+  .fm-status { display: none; }
+}
+.fm-switch__chip {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fm-ivory-muted);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out);
+}
+.fm-switch__chip:hover {
+  color: var(--fm-ivory);
+  background: color-mix(in oklab, var(--fm-ivory) 8%, transparent);
+}
+.fm-switch__chip[aria-current="true"] {
+  color: var(--fm-ivory);
+  border-color: color-mix(in oklab, var(--fm-accent) 48%, transparent);
+  background: color-mix(in oklab, var(--fm-accent) 15%, transparent);
+}
+.fm-switch__chip:focus-visible {
+  outline: 2px solid var(--fm-ivory);
+  outline-offset: 3px;
+}
+
+
+/* ── סמן-מצב עריכתי + קו-דגש: זהות פרטנית לכל אחד מארבעת המצבים, בתוך אותה
+   שפה עיצובית (אין ארבעה עיצובים — יש ארבעה מבטאים). ── */
+.fm-scene--enter .fm-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.fm-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-inline-end: 0.55rem;
+  border-inline-end: 1px solid color-mix(in oklab, var(--fm-accent) 40%, transparent);
+  color: color-mix(in oklab, var(--fm-accent) 72%, var(--fm-ivory));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.fm-marker::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--fm-accent);
+}
+/* קו-דגש דק מתחת לכותרת-המצב — נמשך בכניסה, בגוון-החתימה של המצב. */
+/* קו-הכותרת הוא *האלמנט היחיד* שנושא את זהות-המצב. קודם הוא נבדל באורך
+   בלבד (2.5–5.5rem) — הבדל שנקרא רק כשמשווים ארבעה מסכים זה לצד זה, ולא
+   במסך הבודד שהמשתמש באמת רואה. עכשיו האורך והצבע זהים בארבעתם, ומה
+   שמשתנה הוא *צורת הסימן*: כמות סימנים דיסקרטית נקלטת מיד, גם בלי השוואה.
+   סימן דקורטיבי ומופשט בלבד (aria-hidden) — אינו טענה, אבחון או שלב במסלול. */
+.fm-title-rule {
+  display: block;
+  width: clamp(3.5rem, 12vw, 5rem);
+  height: 2px;
+  border-radius: 2px;
+  margin-inline: auto;
+  --fm-rule: color-mix(in oklab, var(--fm-accent) 85%, transparent);
+  background: var(--fm-rule);
+  transform-origin: center;
+}
+.motion-js .fm-scene--enter .fm-title-rule {
+  animation: fm-rule-in var(--dur-focus) var(--ease-out) both;
+}
+@keyframes fm-rule-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+/* ── „/en”: זהות-מותג משותפת (brand parity) ──
+   לא שכפול של עמוד-הבית העברי: אותה שפה עריכתית — קו-דגש מתחת לכותרות,
+   קצב-סקשנים אחיד, וסימן-חתימה סוגר — בגרסה פשוטה יותר, LTR. */
+.en-rule {
+  display: block;
+  width: 3.25rem;
+  height: 3px;
+  border-radius: 3px;
+  margin-top: 0.85rem;
+  background: color-mix(in oklab, var(--color-brand) 72%, var(--color-secondary));
+}
+.en-rule--sage {
+  background: color-mix(in oklab, var(--color-secondary) 78%, var(--color-brand));
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .en-rule {
+      animation: en-rule-in linear both;
+      animation-timeline: view();
+      animation-range: entry 8% entry 46%;
+      transform-origin: left center;
+    }
+  }
+}
+@keyframes en-rule-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+/* סימן-חתימה אנגלי — סוגר-מותג שקט, מקביל ל-SignatureMark העברי. */
+.en-signature {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--color-foreground-muted);
+}
+.en-signature::before {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-brand) 60%, transparent);
+}

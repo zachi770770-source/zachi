@@ -40,7 +40,7 @@ export function JourneyInteraction({ id }: { id: JourneyId }) {
         {data.intro}
       </p>
       {data.note ? (
-        <p className="mt-2 text-[13px] font-medium tracking-[0.01em] text-foreground-muted/90">
+        <p className="mt-2 text-[13px] font-medium tracking-[0.01em] text-foreground-muted">
           {data.note}
         </p>
       ) : null}
