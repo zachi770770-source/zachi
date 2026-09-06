@@ -110,7 +110,7 @@ export function ToolsBento() {
   };
 
   // deep-link: ‏#tool-<id> פותח את הכלי, גולל אליו וממקד אותו. רץ בטעינה ובכל
-  // שינוי hash. הגלילה מיידית (בלי לשבור smooth גלובלי) ומכבדת scroll-mt.
+  // שינוי hash. הגלילה מיידית ומכבדת scroll-mt.
   React.useEffect(() => {
     const openFromHash = () => {
       const hash = window.location.hash;
@@ -121,13 +121,13 @@ export function ToolsBento() {
       const el = cardRefs.current[id];
       if (!el) return;
       el.focus({ preventScroll: true });
-      const html = document.documentElement;
-      const prev = html.style.scrollBehavior;
-      html.style.scrollBehavior = "auto";
-      el.scrollIntoView({ block: "center", inline: "center" });
+      // קודם היה כאן דריסה זמנית של `html.style.scrollBehavior` — מעקף
+      // לכלל ה-smooth הגלובלי שהוסר. עכשיו מספיק להצהיר מפורשות.
+      // הקריאה השנייה ב-rAF נשמרת: פתיחת הכלי משנה את גובה הכרטיס, ולכן
+      // ממרכזים שוב אחרי ה-layout.
+      el.scrollIntoView({ block: "center", inline: "center", behavior: "auto" });
       requestAnimationFrame(() => {
-        el.scrollIntoView({ block: "center", inline: "center" });
-        html.style.scrollBehavior = prev;
+        el.scrollIntoView({ block: "center", inline: "center", behavior: "auto" });
       });
     };
     openFromHash();

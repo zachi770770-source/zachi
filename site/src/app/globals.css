@@ -282,8 +282,18 @@
     border-color: var(--color-border);
   }
 
+  /* ── אין `scroll-behavior: smooth` גלובלי ──────────────────────────────
+   * הכלל הזה הפך *כל* גלילה תכנותית באתר לאנימציה על ה-main thread, כולל
+   * כאלה שאינן חוויית-משתמש מכוונת (ניהול-פוקוס, קפיצת-עוגן, deep-link).
+   * כשה-thread עמוס (הידרציה + עליית ה-WebGL), האנימציה נרעבת: נמדד
+   * `scrollTo(0, scrollHeight)` שנשאר על scrollY=0 במשך 4.2 שניות ואז קפץ
+   * — כלומר המשתמש מבקש לגלול ושום דבר לא קורה. זה גם מה שהחזיק את הבועה
+   * הצפה מוסתרת: היא שיקפה נאמנה מיקום-גלילה שלא זז.
+   *
+   * לכן: גלילה תכנותית היא מיידית ודטרמיניסטית כברירת-מחדל, ותנועה רכה
+   * נשארת רק במקומות שבהם היא באמת חלק מהחוויה — ומוצהרת שם מפורשות
+   * (FocusMode: `behavior: "smooth"`; קרוסלת-הכלים: כלל ממוקד למטה). */
   html {
-    scroll-behavior: smooth;
     /* מונע שינוי גודל טקסט אוטומטי בסיבוב מסך ב-iOS (יציבות טיפוגרפית). */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -3064,6 +3074,14 @@ html.vt-book-nav::view-transition-group(book-cover) {
 }
 
 /* Viewport + track: מובייל קרוסלה, דסקטופ גריד */
+/* קרוסלת-הכלים היא המקום היחיד שבו גלילה רכה היא החוויה עצמה: החלקה בין
+   כרטיסים עם scroll-snap, מהחצים/המונה. ממוקד למכולה הזו בלבד ומגודר
+   ב-prefers-reduced-motion (ראו גם הכלל המפורש בבלוק ה-reduced-motion). */
+@media (prefers-reduced-motion: no-preference) {
+  .tools-lux__track {
+    scroll-behavior: smooth;
+  }
+}
 .tools-lux__track {
   display: flex;
   gap: 0.85rem;

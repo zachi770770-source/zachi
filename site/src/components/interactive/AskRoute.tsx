@@ -161,7 +161,7 @@ export function AskRoute({
     const el = headingRef.current;
     if (!el) return;
     const raf = requestAnimationFrame(() => {
-      el.scrollIntoView({ block: "nearest" });
+      el.scrollIntoView({ block: "nearest", behavior: "auto" });
       el.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(raf);
