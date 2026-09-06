@@ -17,6 +17,10 @@
   /* טקסט משני — הוכהה מעט (#575c63 → #4d525a) כדי לעבור AA בנוחות (~7.2:1
      על נייר) בלי לשטח את ההיררכיה מול foreground הכהה. */
   --color-foreground-muted: #55625e;
+  /* מדרג-דיו רך (ניטרל, לא מבטא): לתוויות משניות שיושבות גם על הבנדים הכהים
+     יותר של הנייר. הקיקר על `/book` נחת שם על rgb(210,204,189) והגיע ל-3.98:1
+     עם foreground-muted; הגוון הזה נותן 5.05:1 על אותו רקע ו-7.54:1 על משטח. */
+  --color-ink-soft: #4a5350;
   /* פחם ניטרלי לצל אובייקט העטיפה בלבד. */
   --color-ink: #25312f;
 
@@ -44,22 +48,40 @@
   --fab-gap: 0.75rem;
   --floating-ui-clearance: calc(var(--fab-bottom) + var(--fab-height) + var(--fab-gap));
 
-  /* טרקוטה — צבע מותג והדגשה בלבד: CTA ראשי, קישורים, בחירה, תגים. */
-  --color-petrol: #193d37;      /* משטח כהה ראשי (Hero/Focus/פוטר) */
-  --color-petrol-2: #254a43;    /* משטח כהה משני */
-  --color-sage: #9eaf9e;        /* מבטא שקט — 5.15:1 על פטרול */
+  /* ── ארבעה צבעים, משמעת אחת ─────────────────────────────────────────────
+   * פטרול (משטח כהה) · שנהב/נייר חמים (ניטרל) · מרווה (מבטא שקט) ·
+   * טרקוטה (הדגשה נדירה בלבד). אין צבע חמישי.
+   *
+   * כיול פטרול: המקור (#193d37) היה 170° ורוויה 42% — וברינדור בפועל עדיין
+   * נקרא ירוק/אמרלד על שטח גדול. הכיול הסופי: גוון 170°→160°, רוויה
+   * 42%→22% (כמעט חצי), ובהירות עמוקה במעט. עמוק, שקט ופחות „ירוק”,
+   * ועדיין רחוק משחור (כרומה 18 — מעל סף בדיקת-השחור) — ובפועל *שיפר*
+   * את הניגודיות מול שנהב: 10.51 → 12.08.
+   */
+  --color-petrol: #20322c;      /* משטח כהה ראשי (Hero/Focus/פוטר) — 12.08:1 מול שנהב */
+  --color-petrol-2: #2a3e38;    /* משטח כהה משני — 10.03:1 מול שנהב */
+  /* מרווה בשני מדרגים של אותה משפחה (לא צבע נוסף): בהיר למשטח כהה, עמוק
+     למשטח בהיר — כדי שמבטא-המרווה יעבור 3:1 גם על נייר. */
+  --color-sage: #9eb3a9;        /* על פטרול — 6.14:1 */
+  --color-sage-ink: #547869;    /* על שנהב — 4.35:1 (עובר גם 3:1 לגרפיקה) */
   --color-paper: #ede3d3;       /* נייר חמים */
-  --color-brand: #b96e55;
+  /* טרקוטה — רגעים בודדים בעלי ערך: מצב נבחר/פעיל, סמן, שורת-הדגשה אחת.
+     לא צבע-כפתור, לא תווית-סקשן חוזרת, לא זוהר. */
+  --color-brand: #b96e55;       /* דקורטיבי/גרפיקה — 3.42:1 מול שנהב */
   --color-brand-foreground: #fdfaf4;
-  --color-brand-hover: #8f4a32;
+  --color-brand-hover: #8f4a32; /* טקסט — 5.80:1 מול שנהב */
   --color-brand-muted: #f2e3d9;
 
+  /* גוון-צל אחד לכל האתר: דיו-פטרול חמים. מחליף rgba(0,0,0,…) ואת הפחם
+     הקר הישן rgba(34,38,43,…) — צל לא אמור להרגיש שחור. */
+  --shadow-tint: 32 50 44;
+
   /* משני קריר ומובהק — כחול-אפור עמוק. משטחי-עומק (פוטר) וכפתורים משניים. */
-  --color-secondary: #193d37;
+  --color-secondary: #20322c;
   --color-secondary-foreground: #f6f0e7;
   --color-secondary-muted: #dce3da;
 
-  --color-accent: #254a43;
+  --color-accent: #2a3e38;
   --color-accent-foreground: #f6f0e7;
 
   --color-success: #2f6350;
@@ -129,9 +151,16 @@
   --color-foreground: var(--color-foreground);
   --color-foreground-muted: var(--color-foreground-muted);
   --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
 
   --color-border: var(--color-border);
   --color-border-strong: var(--color-border-strong);
+
+  --color-petrol: var(--color-petrol);
+  --color-petrol-2: var(--color-petrol-2);
+  --color-sage: var(--color-sage);
+  --color-sage-ink: var(--color-sage-ink);
+  --color-paper: var(--color-paper);
 
   --color-brand: var(--color-brand);
   --color-brand-foreground: var(--color-brand-foreground);
@@ -477,7 +506,12 @@
     font-family: var(--font-literary), Georgia, "Times New Roman", serif;
   }
 
-  /* קיקר עריכתי: תווית קטנה עם קו מוביל קצר */
+  /* קיקר עריכתי: תווית קטנה עם קו מוביל קצר.
+   *
+   * משמעת-צבע: זהו האלמנט החוזר ביותר באתר (39 רכיבים) — כמעט כל סקשן נפתח
+   * בו. כשהוא היה טרקוטה (טקסט *וגם* קו), המבטא היקר של המותג הופיע עשרות
+   * פעמים בכל מסלול והפך מהדגשה לקישוט. עכשיו הוא שקט: טקסט דיו-משני וקו
+   * מרווה-עמוק (4.35:1 על שנהב). טרקוטה נשמרת לרגעים ספורים באמת. */
   .kicker {
     display: inline-flex;
     align-items: center;
@@ -487,14 +521,14 @@
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-brand-hover);
+    color: var(--color-ink-soft);
   }
   .kicker::before {
     content: "";
     inline-size: 1.75rem;
     block-size: 2px;
     border-radius: 2px;
-    background: var(--color-brand);
+    background: var(--color-sage-ink);
   }
   /* מקטע-המידע ב-Hero קורא כמידע על המוצר, לא כתגית עיצובית: מסירים את
      קו-התווית הדקורטיבי *רק שם*, ומגדילים את הגופן מעט — 14px במקום 13px של
@@ -772,26 +806,24 @@
     width: 4px;
     pointer-events: none;
   }
+  /* משמעת-צבע: הפס היה טרקוטה עם גרדיאנט ושתי הילות-זוהר — מבטא בוהק שנע
+     על המסך לאורך כל הגלילה, בכל עמוד. עכשיו הוא פטרול שקט במילוי אחיד,
+     בלי זוהר; רק „ראש הבנייה” נשאר טרקוטה — נקודה אחת קטנה שמסמנת התקדמות,
+     וזה בדיוק סוג הרגע שהמבטא הזה שמור לו. */
   .build-spine__track {
     position: absolute;
     inset: 0;
-    background: color-mix(in oklab, var(--color-brand) 16%, transparent);
+    background: color-mix(in oklab, var(--color-petrol) 14%, transparent);
   }
   .build-spine__fill {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--color-brand) 55%, transparent),
-      var(--color-brand)
-    );
+    background: color-mix(in oklab, var(--color-petrol) 62%, transparent);
     transform-origin: top center;
     transform: scaleY(var(--build-progress, 0));
     will-change: transform;
-    box-shadow: 0 0 10px color-mix(in oklab, var(--color-brand) 45%, transparent);
   }
-  /* „ראש הבנייה” — נקודת אור טרקוטה שנעה לאורך הקצה עם התקדמות הקריאה,
-     והופכת את הפס לאלמנט נרטיבי מובחן ולא לקישוט כמעט-בלתי-נראה. */
+  /* „ראש הבנייה” — נקודת-הסימון היחידה שנעה עם התקדמות הקריאה. */
   .build-spine__head {
     position: absolute;
     inset-inline: -3px;
@@ -799,9 +831,6 @@
     height: 10px;
     border-radius: 9999px;
     background: var(--color-brand);
-    box-shadow:
-      0 0 12px 2px color-mix(in oklab, var(--color-brand) 70%, transparent),
-      0 0 24px 4px color-mix(in oklab, var(--color-brand) 35%, transparent);
     transform: translateY(-50%);
     will-change: top;
   }
@@ -820,9 +849,11 @@
     border-radius: inherit;
     opacity: 0;
     transition: opacity 220ms var(--ease-standard);
+    /* אור-הריחוף היה טרקוטה — מבטא חם שנדלק על כל כרטיס שעוברים מעליו.
+       עכשיו הוא רחיצת-פטרול שקטה: אותו עומק, בלי „לצבוע” בהדגשה. */
     background: radial-gradient(
       16rem 16rem at var(--mx, 50%) var(--my, 0%),
-      color-mix(in oklab, var(--color-brand) 12%, transparent),
+      color-mix(in oklab, var(--color-petrol) 10%, transparent),
       transparent 60%
     );
   }
@@ -1382,8 +1413,8 @@
   position: relative;
   z-index: 2;
   /* תאורת מוצר: צל עומק מדורג + נגיעת אור עדינה בשדרה (inset) לנפח */
-  box-shadow: -34px 40px 70px -28px rgba(34, 38, 43, 0.52),
-    -10px 16px 30px -16px rgba(34, 38, 43, 0.34),
+  box-shadow: -34px 40px 70px -28px rgb(var(--shadow-tint) / 0.52),
+    -10px 16px 30px -16px rgb(var(--shadow-tint) / 0.34),
     inset 2px 0 0 0 rgba(255, 255, 255, 0.16);
 }
 .book-cover__pages {
@@ -1402,7 +1433,7 @@
     #ddd3c2 2px,
     #ddd3c2 3px
   );
-  box-shadow: -2px 6px 14px -8px rgba(34, 38, 43, 0.4);
+  box-shadow: -2px 6px 14px -8px rgb(var(--shadow-tint) / 0.4);
 }
 @media (hover: hover) {
   .book-cover:hover .book-cover__inner {
@@ -1449,7 +1480,7 @@
   pointer-events: none;
   border-radius: 0.75rem;
   opacity: var(--curl, 0);
-  background: radial-gradient(140% 90% at 100% 50%, transparent 52%, rgba(43, 36, 31, 0.16));
+  background: radial-gradient(140% 90% at 100% 50%, transparent 52%, rgb(var(--shadow-tint) / 0.16));
 }
 @media (prefers-reduced-motion: no-preference) {
   /* #1 היפוך-דף בגרירה: הדף הנוכחי מסתובב בעקבות --drag (-1..1 מ-JS); ב-release
@@ -1481,7 +1512,7 @@
     transform-style: preserve-3d;
     /* הצללת „גב הדף” שמתחזקת ככל שהדף נהפך — קורא כדף אמיתי מתרומם */
     background: var(--color-surface);
-    box-shadow: -14px 0 30px -12px rgba(34, 38, 43, 0.45);
+    box-shadow: -14px 0 30px -12px rgb(var(--shadow-tint) / 0.45);
   }
   /* מעבר דף מרוסן (9–11°): שכבה נכנסת + שכבה יוצאת אמיתיות סביב הכריכה (RTL),
      עם צל נע — בלי „היפוך” מוגזם. */
@@ -2470,12 +2501,12 @@
   .lift-hover:hover {
     transform: translateY(-2px);
     border-color: color-mix(in oklab, var(--color-brand) 45%, var(--color-border-strong));
-    box-shadow: 0 14px 26px -18px rgba(43, 36, 31, 0.45);
+    box-shadow: 0 14px 26px -18px rgb(var(--shadow-tint) / 0.45);
   }
 }
 .lift-hover:focus-visible {
   transform: translateY(-2px);
-  box-shadow: 0 14px 26px -18px rgba(43, 36, 31, 0.45);
+  box-shadow: 0 14px 26px -18px rgb(var(--shadow-tint) / 0.45);
 }
 /* reduced-motion: מבטלים את ההרמה (transform) ומשאירים הדגשת מסגרת/צל בלבד. */
 @media (prefers-reduced-motion: reduce) {
@@ -2618,7 +2649,7 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .sample-reader[data-reader-theme="dark"] {
-  --reader-bg: #17352f;
+  --reader-bg: var(--color-petrol);
   --reader-fg: #f0ebe0;
   --reader-fg-muted: #bcc7c2;
   --reader-border: #2f544d;
@@ -3014,8 +3045,13 @@ html.vt-book-nav::view-transition-group(book-cover) {
    Hover מרים ומדגיש בלבד (ללא flip, ללא פתיחה ב-hover). כיבוד reduced-motion.
    ========================================================================== */
 .tools-lux {
-  --lux-cream: #faf8f5;
-  --lux-copper: #c86a4b;
+  /* משמעת: קודם חיו כאן „נחושת” (#c86a4b) ו„קרם” (#faf8f5) משלהם — בפועל
+     מבטא חם חמישי וניטרל קר נוסף, שהתחרו בטרקוטה ובשנהב של המערכת. עכשיו
+     שניהם aliases לטוקנים הקיימים. --lux-copper-ink = מדרג-הטקסט (5.80:1);
+     --lux-copper נשאר לגרפיקה/מסגרות בלבד (3.42:1). */
+  --lux-cream: var(--color-surface);
+  --lux-copper: var(--color-brand);
+  --lux-copper-ink: var(--color-brand-hover);
 }
 
 /* Viewport + track: מובייל קרוסלה, דסקטופ גריד */
@@ -3071,7 +3107,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
 .tool-lux-card:hover {
   transform: translateY(-4px);
   border-color: color-mix(in srgb, var(--lux-copper) 45%, transparent);
-  box-shadow: 0 18px 40px -26px rgba(43, 36, 31, 0.55);
+  box-shadow: 0 18px 40px -26px rgb(var(--shadow-tint) / 0.55);
 }
 .tool-lux-card:focus-visible {
   outline: 2px solid var(--color-brand);
@@ -3079,7 +3115,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
 }
 .tool-lux-card[data-open] {
   border-color: var(--lux-copper);
-  box-shadow: 0 20px 44px -24px rgba(200, 106, 75, 0.5);
+  box-shadow: 0 20px 44px -24px rgb(var(--shadow-tint) / 0.45);
 }
 .tool-lux-card__top {
   display: flex;
@@ -3093,7 +3129,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
   font-size: 1.55rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--lux-copper);
+  color: var(--lux-copper-ink);
   font-variant-numeric: tabular-nums;
 }
 .tool-lux-card__icon {
@@ -3103,7 +3139,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
   height: 44px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--lux-copper) 12%, transparent);
-  color: var(--lux-copper);
+  color: var(--lux-copper-ink);
 }
 .tool-lux-card__svg {
   width: 22px;
@@ -3327,9 +3363,9 @@ html.vt-book-nav::view-transition-group(book-cover) {
   --fm-ease: var(--ease-settle);
   --fm-ease-emphasis: var(--ease-emphasized);
   /* פלטת המצב האימרסיבי: Ink עמוק + Ivory, על בסיס זהות המותג. */
-  --fm-ink: #193d37;
-  --fm-ink-2: #254a43;
-  --fm-ivory: #f6f0e7;
+  --fm-ink: var(--color-petrol);
+  --fm-ink-2: var(--color-petrol-2);
+  --fm-ivory: var(--color-background);
   --fm-ivory-muted: color-mix(in oklab, var(--fm-ivory) 64%, transparent);
   --fm-hairline: color-mix(in oklab, var(--fm-ivory) 22%, transparent);
 }
@@ -3357,8 +3393,8 @@ html.vt-book-nav::view-transition-group(book-cover) {
     margin-inline: -2rem;
     border-radius: var(--radius-xl);
     box-shadow:
-      0 34px 90px -46px rgba(0, 0, 0, 0.6),
-      0 10px 34px -22px rgba(0, 0, 0, 0.45);
+      0 34px 90px -46px rgb(var(--shadow-tint) / 0.6),
+      0 10px 34px -22px rgb(var(--shadow-tint) / 0.45);
   }
 }
 
@@ -3411,7 +3447,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 32%, transparent),
       transparent 60%
     ),
-    linear-gradient(158deg, #17352f, #122b27);
+    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
 }
 
 /* Ambient — נשימת-זוהר עדינה מעל הרקע. */
@@ -3495,17 +3531,19 @@ body:has([data-fm-active]) {
   background: color-mix(in oklab, var(--fm-accent) 60%, var(--fm-ivory));
 }
 
-/* ── מבטא-מצב מרוסן: כל מצב מקבל גוון-חתימה אחד (--fm-accent), שמופיע בעקביות
-   בקיקר, במחוון, ובצ׳יפ-ההקשר — כדי שכל תוצאה תרגיש מותאמת ומובחנת, בשפה
-   ויזואלית אחת. Terracotta = דגש מבוקר (מצב „בתוך קשר”). ── */
-.fm-stage[data-situation="dating"] { --fm-accent: var(--color-secondary); }
-.fm-stage[data-situation="building"] {
-  --fm-accent: color-mix(in oklab, var(--color-secondary) 62%, var(--color-brand));
-}
-.fm-stage[data-situation="existing"] { --fm-accent: var(--color-brand); }
-.fm-stage[data-situation="breakup"] {
-  --fm-accent: color-mix(in oklab, var(--fm-ivory) 52%, var(--color-secondary));
-}
+/* ── מערכת אחת, לא ארבע ערכות-צבע ────────────────────────────────────────
+ * קודם קיבל כל מצב גוון-חתימה משלו (פטרול / פטרול-טרקוטה / טרקוטה / שנהב) —
+ * בפועל ארבע ערכות-צבע שונות באותו מסך. עכשיו כל ארבעת המצבים חולקים מבטא
+ * אחד (מרווה על פטרול, 5.64:1), וההבחנה ביניהם נעשית בטיפוגרפיה בלבד:
+ * סמן-המצב (`.fm-marker` — „לפני קשר” / „בניית קשר” / …) וקו-הכותרת.
+ * כך לכל תוצאה יש זהות ברורה, בלי שהצבע יהפוך לרעש.
+ */
+.fm-stage[data-situation] { --fm-accent: var(--color-sage); }
+/* ההבחנה בין המצבים: אורך קו-הכותרת בלבד — סימן שקט, לא צבע נוסף. */
+.fm-stage[data-situation="dating"] .fm-title-rule { width: 2.5rem; }
+.fm-stage[data-situation="building"] .fm-title-rule { width: 3.5rem; }
+.fm-stage[data-situation="existing"] .fm-title-rule { width: 4.5rem; }
+.fm-stage[data-situation="breakup"] .fm-title-rule { width: 5.5rem; }
 
 /* צ׳יפ-הקשר: המצב שנבחר, גלוי לאורך כל הפעימות. */
 .fm-status {
@@ -3560,8 +3598,10 @@ body:has([data-fm-active]) {
   text-transform: none;
   color: var(--fm-ivory-muted);
 }
+/* „פעולה” יושב על משטח בהיר ב-12.5px — טרקוטה-הגרפיקה נותנת שם 3.66:1
+   בלבד. מדרג-הטקסט של אותה טרקוטה נותן 5.80:1, בלי לשנות את המבטא. */
 .fm-eyebrow--brand {
-  color: var(--color-brand);
+  color: var(--color-brand-hover);
 }
 .fm-lede {
   max-width: 46ch;
@@ -3791,7 +3831,7 @@ body:has([data-fm-active]) {
   background: var(--color-surface);
   color: var(--color-foreground);
   text-align: center;
-  box-shadow: 0 24px 60px -34px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 60px -34px rgb(var(--shadow-tint) / 0.55);
 }
 .fm-bridge {
   margin-top: 0.75rem;
@@ -3855,12 +3895,12 @@ body:has([data-fm-active]) {
   transform: translateY(-2px);
 }
 .fm-cta--solid {
-  color: var(--color-ink);
+  color: var(--color-petrol);
   background: var(--fm-ivory);
 }
 .fm-cta--solid:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 28px -14px rgb(var(--shadow-tint) / 0.5);
 }
 .fm-cta--quiet {
   color: var(--fm-ivory-muted);
@@ -3871,13 +3911,13 @@ body:has([data-fm-active]) {
   border-color: var(--fm-hairline);
 }
 .fm-cta--brand {
-  color: var(--color-brand-foreground);
-  background: var(--color-brand);
+  color: var(--color-secondary-foreground);
+  background: var(--color-petrol);
 }
 .fm-cta--brand:hover {
-  background: var(--color-brand-hover);
+  background: var(--color-petrol-2);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -14px color-mix(in oklab, var(--color-brand) 60%, transparent);
+  box-shadow: 0 12px 28px -14px rgb(var(--shadow-tint) / 0.45);
 }
 .fm-cta--link {
   color: var(--color-foreground-muted);
@@ -4147,14 +4187,14 @@ body:has([data-fm-active]) {
  * reduced-motion — מצב סופי מיידי.
  * =================================================================== */
 .sig-hero {
-  --sig-ivory: #f6f0e7;
+  --sig-ivory: var(--color-background);
   --sig-ivory-muted: color-mix(in oklab, #f6f0e7 60%, transparent);
   --sig-warm: color-mix(in oklab, var(--color-brand) 46%, #f4f2ee);
   position: relative;
   overflow: clip;
   isolation: isolate;
   color: var(--sig-ivory);
-  background: #193d37;
+  background: var(--color-petrol);
 }
 
 /* שדה-ה-Ink החמים + זוהר + גרעין. */
@@ -4175,7 +4215,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 24%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, #254a43, #17352f);
+    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
 }
 .sig-hero__field {
   position: absolute;
@@ -4245,7 +4285,7 @@ body:has([data-fm-active]) {
   position: relative;
   z-index: 1;
   width: clamp(14rem, 62vw, 18rem);
-  filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 34px 48px rgb(var(--shadow-tint) / 0.55));
 }
 
 /* ── ההצגה החתומה: ספר WebGL (Three.js) ──
@@ -4369,7 +4409,7 @@ body:has([data-fm-active]) {
   padding: 0.95rem 1.75rem;
   border-radius: 999px;
   background: var(--sig-ivory);
-  color: var(--color-ink);
+  color: var(--color-petrol);
   font-size: 16.5px;
   font-weight: 700;
   transition:
@@ -4378,7 +4418,7 @@ body:has([data-fm-active]) {
 }
 .sig-hero__cta-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 34px -16px rgb(var(--shadow-tint) / 0.6);
 }
 .sig-hero__cta-primary:focus-visible {
   outline: 2px solid var(--sig-ivory);
@@ -4395,7 +4435,7 @@ body:has([data-fm-active]) {
   gap: 0.5rem;
   font-size: 15px;
   font-weight: 600;
-  color: color-mix(in oklab, var(--color-brand) 42%, var(--sig-ivory));
+  color: color-mix(in oklab, var(--sig-ivory) 80%, var(--color-petrol));
   text-underline-offset: 4px;
 }
 .sig-hero__cta-secondary:hover {
@@ -4470,7 +4510,7 @@ body:has([data-fm-active]) {
   .sig-hero__cover {
     width: clamp(20rem, 32vw, 29rem);
     margin-bottom: 0;
-    filter: drop-shadow(0 40px 58px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 40px 58px rgb(var(--shadow-tint) / 0.5));
   }
   /* דסקטופ: יש מרחב — ה-SPREAD רחב יותר (~1.86×) ומתכווץ פחות. */
   /* (הגדרות ה-SPREAD הרספונסיביות ל-1024/1280/1440 יושבות ליד בלוק ה-book,
@@ -4677,7 +4717,7 @@ body:has([data-fm-active]) {
  * בהירה. לא „כרטיס CTA ירוק”. הקופי/קישורים לא השתנו.
  * =================================================================== */
 .sig-close {
-  --sig-ivory: #f6f0e7;
+  --sig-ivory: var(--color-background);
   --sig-ivory-muted: color-mix(in oklab, #f6f0e7 62%, transparent);
   position: relative;
   isolation: isolate;
@@ -4700,7 +4740,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 22%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, #254a43, #17352f);
+    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
 }
 .sig-close__container {
   position: relative;
@@ -4720,7 +4760,7 @@ body:has([data-fm-active]) {
   display: grid;
   place-items: center;
   width: clamp(8rem, 30vw, 12rem);
-  filter: drop-shadow(0 34px 46px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 34px 46px rgb(var(--shadow-tint) / 0.55));
 }
 .sig-close__glow {
   position: absolute;
@@ -4767,7 +4807,7 @@ body:has([data-fm-active]) {
   padding: 1rem 2rem;
   border-radius: 999px;
   background: var(--sig-ivory);
-  color: var(--color-ink);
+  color: var(--color-petrol);
   font-size: 16.5px;
   font-weight: 700;
   transition:
@@ -4776,7 +4816,7 @@ body:has([data-fm-active]) {
 }
 .sig-close__buy:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 38px -16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 18px 38px -16px rgb(var(--shadow-tint) / 0.6);
 }
 .sig-close__buy:focus-visible {
   outline: 2px solid var(--sig-ivory);
@@ -4789,7 +4829,7 @@ body:has([data-fm-active]) {
 }
 .sig-close__secondary-link {
   font-weight: 600;
-  color: color-mix(in oklab, var(--color-brand) 42%, var(--sig-ivory));
+  color: color-mix(in oklab, var(--sig-ivory) 80%, var(--color-petrol));
   text-underline-offset: 4px;
 }
 .sig-close__secondary-link:hover {
@@ -5267,7 +5307,7 @@ body:has([data-fm-active]) {
   background-color: var(--paper-hi);
   background-image:
     linear-gradient(105deg, var(--paper-lo), var(--paper-hi) 46%, var(--paper-lo)),
-    repeating-linear-gradient(94deg, rgba(60, 60, 66, 0.016) 0 1.5px, transparent 1.5px 3.5px);
+    repeating-linear-gradient(94deg, rgb(var(--shadow-tint) / 0.016) 0 1.5px, transparent 1.5px 3.5px);
 }
 
 /* בסיס ה-SPREAD — שני עלים סטטיים, hinge בשדרה (x=0). */
@@ -5279,10 +5319,10 @@ body:has([data-fm-active]) {
      קצה עליון/תחתון — כדי שהעמוד ייראה כגוף עם קצוות, לא מלבן לבן שטוח. גוון
      ניטרלי (גרפיט) בלבד; הנייר נשאר לבן. */
   box-shadow:
-    inset 16px 0 36px -18px rgba(22, 22, 26, 0.28),
+    inset 16px 0 36px -18px rgb(var(--shadow-tint) / 0.28),
     inset -6px 0 10px -7px rgba(255, 255, 255, 0.45),
-    inset 0 11px 20px -16px rgba(20, 20, 24, 0.16),
-    inset 0 -13px 24px -16px rgba(20, 20, 24, 0.22);
+    inset 0 11px 20px -16px rgb(var(--shadow-tint) / 0.16),
+    inset 0 -13px 24px -16px rgb(var(--shadow-tint) / 0.22);
 }
 .book-open__leaf--left {
   right: 100%; /* יושב משמאל לשדרה: [-leaf-w·W, 0] */
@@ -5293,7 +5333,7 @@ body:has([data-fm-active]) {
   transform: translateZ(0.3px);
   border-radius: 7px 1px 1px 7px; /* קצה-חופשי בשמאל */
   box-shadow:
-    inset -10px 0 24px -16px rgba(24, 24, 28, 0.19),
+    inset -10px 0 24px -16px rgb(var(--shadow-tint) / 0.19),
     inset 5px 0 8px -6px rgba(255, 255, 255, 0.36);
   /* מופיע כשהכריכה נפתחת (Beat 2→3). */
   opacity: 0;
@@ -5310,7 +5350,7 @@ body:has([data-fm-active]) {
   /* „גוש דפים”: קווי-דפים דקים (אנכית) + סימון עומק (אופקית — כהה בשוליים, בהיר
      במרכז) כדי שהקצה ייראה כערימת דפים מעוגלת, לא כפס אחיד. */
   background:
-    repeating-linear-gradient(to bottom, rgba(18, 18, 22, 0.07) 0 1px, transparent 1px 2.4px),
+    repeating-linear-gradient(to bottom, rgb(var(--shadow-tint) / 0.07) 0 1px, transparent 1px 2.4px),
     linear-gradient(90deg, #e6e6e4 0%, #f6f6f5 42%, #ededeb 78%, #dedddb 100%);
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
 }
@@ -5318,7 +5358,7 @@ body:has([data-fm-active]) {
   right: -5px; /* בקצה-הימני של עמוד-ימין */
   transform: translateZ(0.4px);
   border-radius: 0 2px 2px 0;
-  box-shadow: 2px 5px 9px -6px rgba(0, 0, 0, 0.26);
+  box-shadow: 2px 5px 9px -6px rgb(var(--shadow-tint) / 0.26);
 }
 .book-open__stack--left {
   /* בקצה-החופשי (השמאלי) של עמוד-שמאל: קצה-ימין של הגוש בדיוק על קצה-הדף
@@ -5328,7 +5368,7 @@ body:has([data-fm-active]) {
   left: auto;
   transform: translateZ(1px);
   border-radius: 2px 0 0 2px;
-  box-shadow: -2px 5px 9px -6px rgba(0, 0, 0, 0.24);
+  box-shadow: -2px 5px 9px -6px rgb(var(--shadow-tint) / 0.24);
 }
 
 /* השדרה — קפל מרכזי אמיתי: צל-מרזב עמוק + עקמומיות-נייר סמוכה + הבזק דק. */
@@ -5346,13 +5386,13 @@ body:has([data-fm-active]) {
   opacity: 0;
   background: linear-gradient(
     90deg,
-    rgba(22, 22, 26, 0) 0%,
-    rgba(22, 22, 26, 0.018) 24%,
-    rgba(22, 22, 26, 0.055) 43%,
-    rgba(22, 22, 26, 0.075) 50%,
-    rgba(22, 22, 26, 0.055) 57%,
-    rgba(22, 22, 26, 0.018) 76%,
-    rgba(22, 22, 26, 0) 100%
+    rgb(var(--shadow-tint) / 0) 0%,
+    rgb(var(--shadow-tint) / 0.018) 24%,
+    rgb(var(--shadow-tint) / 0.055) 43%,
+    rgb(var(--shadow-tint) / 0.075) 50%,
+    rgb(var(--shadow-tint) / 0.055) 57%,
+    rgb(var(--shadow-tint) / 0.018) 76%,
+    rgb(var(--shadow-tint) / 0) 100%
   );
   animation: bo-reveal var(--book-open-total) var(--ease-standard) var(--book-open-delay) both;
 }
@@ -5383,10 +5423,10 @@ body:has([data-fm-active]) {
   /* עומק-דף לעמוד-שמאל, סימטרי לעמוד-ימין: עקומת-מרזב בצד-השדרה + הצללת קצה
      עליון/תחתון. (ה-liner מסובב 180°, ולכן ‎-x = צד-השדרה.) */
   box-shadow:
-    inset -16px 0 36px -18px rgba(22, 22, 26, 0.3),
+    inset -16px 0 36px -18px rgb(var(--shadow-tint) / 0.3),
     inset 6px 0 10px -7px rgba(255, 255, 255, 0.4),
-    inset 0 11px 20px -16px rgba(20, 20, 24, 0.16),
-    inset 0 -13px 24px -16px rgba(20, 20, 24, 0.22);
+    inset 0 11px 20px -16px rgb(var(--shadow-tint) / 0.16),
+    inset 0 -13px 24px -16px rgb(var(--shadow-tint) / 0.22);
 }
 
 /* דפים מתהפכים — outer = סיבוב (hinge בשדרה); inner (.book-open__curl) = עיקול.
@@ -5416,7 +5456,7 @@ body:has([data-fm-active]) {
 .book-open__face--back {
   transform: rotateY(180deg);
   border-radius: 7px 1px 1px 7px;
-  box-shadow: inset -10px 0 18px -12px rgba(28, 28, 32, 0.4);
+  box-shadow: inset -10px 0 18px -12px rgb(var(--shadow-tint) / 0.4);
 }
 /* צל-נע + הבזק-קצה בזמן ההיפוך: overlay שמתחזק ליד ה-mid-turn ונחלש בנחיתה. */
 .book-open__face--front::after {

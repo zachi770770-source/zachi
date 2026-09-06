@@ -79,7 +79,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#fbf8f3",
+  themeColor: "#f6f0e7", // = --color-background (כרום-הדפדפן באותו נייר חמים)
 };
 
 export default function RootLayout({

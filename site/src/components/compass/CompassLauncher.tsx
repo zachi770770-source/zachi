@@ -167,7 +167,7 @@ export function CompassLauncher({
         data-past-hero={pastHero ? "true" : "false"}
         style={{ bottom: bubbleBottom }}
         className={cn(
-          "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
+          "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgb(var(--shadow-tint)/0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-secondary/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
         )}
       >
         <span
@@ -209,7 +209,7 @@ export function CompassLauncher({
             // מתחרה ב-CTA הכהה, לא כבד. הבסיס הרספונסיבי כמשתנה: מובייל 5.5rem
             // (מעל בר-הטעימה), דסקטופ 2rem. „bottom” אינו ב-transition —
             // ההרמה מעל הבאנר מיידית. RTL: end-*.
-            "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgba(43,36,31,0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-brand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
+            "compass-pill group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgb(var(--shadow-tint)/0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-secondary/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:end-6 md:pe-5 md:text-[15px]"
           )}
         >
           {/* סמל-המצפן הטרקוטה — הזהות של „מה הספר אומר על המצב שלי”. */}

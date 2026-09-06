@@ -22,7 +22,7 @@ export function TrustStrip() {
               {i > 0 ? (
                 <span
                   aria-hidden="true"
-                  className="h-1 w-1 shrink-0 rounded-full bg-brand/70"
+                  className="h-1 w-1 shrink-0 rounded-full bg-sage-ink/70"
                 />
               ) : null}
               <span>{fact}</span>

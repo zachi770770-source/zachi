@@ -46,7 +46,7 @@ export function WhyTheBook() {
           </div>
 
           {/* הספר — הנקודה נפתחת לציר: ציר אנכי נמשך, והתחנות נבנות עליו לפי סדר. */}
-          <div className="s2p__path relative border-t-2 border-brand/40 px-5 py-5 sm:px-7 sm:py-6">
+          <div className="s2p__path relative border-t-2 border-sage-ink/45 px-5 py-5 sm:px-7 sm:py-6">
             <span className="s2p__axis" aria-hidden="true" />
             <p className="s2p__book-label text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
               {whyTheBook.book.label}

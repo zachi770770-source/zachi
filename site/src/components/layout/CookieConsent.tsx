@@ -221,7 +221,7 @@ export function CookieConsent() {
         {...(english ? { lang: "en", dir: "ltr" } : {})}
         className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:px-4"
       >
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 rounded-xl border border-border-strong bg-surface/95 px-3.5 py-2 shadow-[0_12px_32px_-22px_rgba(34,38,43,0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-3">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 rounded-xl border border-border-strong bg-surface/95 px-3.5 py-2 shadow-[0_12px_32px_-22px_rgb(var(--shadow-tint)/0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-3">
         <p className="text-[12.5px] leading-snug text-foreground-muted sm:flex-1">
           {t.body}{" "}
           <a

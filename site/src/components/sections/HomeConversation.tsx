@@ -520,7 +520,7 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
                       setInput(d.label);
                       inputRef.current?.focus();
                     }}
-                    className="rounded-full border border-border-strong bg-surface px-3.5 py-1.5 text-[13.5px] text-foreground transition-colors hover:border-brand/50 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    className="rounded-full border border-border-strong bg-surface px-3.5 py-1.5 text-[13.5px] text-foreground transition-colors hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                   >
                     {d.label}
                   </button>

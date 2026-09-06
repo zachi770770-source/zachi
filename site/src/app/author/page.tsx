@@ -66,7 +66,7 @@ export default function AuthorPage() {
                 alt={PHOTO_ALT}
                 loading="eager"
                 decoding="async"
-                className="block w-full rounded-3xl object-cover shadow-[0_34px_64px_-32px_rgba(43,36,31,0.55)] ring-1 ring-border-strong/60"
+                className="block w-full rounded-3xl object-cover shadow-[0_34px_64px_-32px_rgb(var(--shadow-tint)/0.55)] ring-1 ring-border-strong/60"
               />
             </picture>
           </div>

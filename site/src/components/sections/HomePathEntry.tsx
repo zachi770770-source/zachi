@@ -225,7 +225,7 @@ export function HomePathEntry({
             e.preventDefault();
             openBroad();
           }}
-          className="home-composer group flex w-full items-center gap-3 rounded-2xl border border-border-strong bg-surface px-5 py-4 text-start shadow-sm transition-[border-color,box-shadow] hover:border-brand/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-6 sm:py-5"
+          className="home-composer group flex w-full items-center gap-3 rounded-2xl border border-border-strong bg-surface px-5 py-4 text-start shadow-sm transition-[border-color,box-shadow] hover:border-secondary/35 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-6 sm:py-5"
         >
           {/* סמן-הכתיבה המהבהב הוא „אפשר להקליד כאן” — נכון רק כשהכתיבה-החופשית
               חיה. במצב המודרך התיבה פותחת שיחה מודרכת, ולכן הסמן אינו מוצג כדי
@@ -285,11 +285,11 @@ export function HomePathEntry({
                 e.preventDefault();
                 openFocus(p.id, p.askStation);
               }}
-              className="situation-card group flex h-full flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 text-start shadow-sm transition-[border-color,background-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-brand/40 hover:bg-surface-muted/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0 sm:p-5"
+              className="situation-card group flex h-full flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 text-start shadow-sm transition-[border-color,background-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-secondary/35 hover:bg-surface-muted/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0 sm:p-5"
             >
               <span
                 aria-hidden="true"
-                className="mb-0.5 text-brand/70 opacity-80 transition-opacity group-hover:opacity-100"
+                className="mb-0.5 text-sage-ink/80 opacity-80 transition-opacity group-hover:opacity-100"
               >
                 <MessageCircle className="h-[18px] w-[18px]" />
               </span>

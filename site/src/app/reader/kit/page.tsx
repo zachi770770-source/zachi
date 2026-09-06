@@ -121,7 +121,7 @@ export default async function ReaderKitPage() {
             {readerSeriesDays.map((d) => (
               <li key={d.day} className="py-4 first:pt-0">
                 <div className="flex items-baseline gap-3">
-                  <span className="font-serif text-[1.25rem] font-bold text-brand/85">
+                  <span className="font-serif text-[1.25rem] font-bold text-sage-ink">
                     {String(d.day).padStart(2, "0")}
                   </span>
                   <Link

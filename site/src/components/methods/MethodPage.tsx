@@ -189,7 +189,7 @@ export function MethodPage({ method }: { method: Method }) {
             <Link
               key={rel.href}
               href={rel.href}
-              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-brand/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               <div>
                 <span className="font-serif text-[1.05rem] font-semibold leading-tight text-foreground">

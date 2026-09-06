@@ -21,7 +21,7 @@ export function BehindSection() {
           <h2 id="behind-heading" className="type-h2 mt-4">
             {behind.title}
           </h2>
-          <div className="mt-8 flex flex-col gap-5 border-r-2 border-brand/30 pr-6 sm:pr-8">
+          <div className="mt-8 flex flex-col gap-5 border-r-2 border-sage-ink/40 pr-6 sm:pr-8">
             {behind.paragraphs.map((paragraph) => (
               <p
                 key={paragraph}

@@ -106,7 +106,7 @@ export default function EnglishPage() {
                 priority
                 // גדלי התצוגה בפועל: 176px במובייל, 208px בטאבלט, 256px בדסקטופ.
                 sizes="(max-width: 640px) 176px, (max-width: 1024px) 208px, 256px"
-                className="h-auto w-full rounded-s-[3px] rounded-e-[10px] shadow-[0_20px_44px_-22px_rgba(34,38,43,0.5)] ring-1 ring-black/5"
+                className="h-auto w-full rounded-s-[3px] rounded-e-[10px] shadow-[0_20px_44px_-22px_rgb(var(--shadow-tint)/0.5)] ring-1 ring-[color:rgb(var(--shadow-tint)/0.10)]"
               />
             </div>
           </div>
