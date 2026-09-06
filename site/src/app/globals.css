@@ -4250,8 +4250,8 @@ body:has([data-fm-active]) {
   display: none;
   position: relative;
   width: 100%;
-  max-width: 34rem;
-  aspect-ratio: 3 / 2;
+  max-width: 36rem;
+  aspect-ratio: 8 / 5;
   margin-inline: auto;
 }
 .hero-bookgl[data-active="true"] {
