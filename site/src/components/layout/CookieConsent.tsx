@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
+import { isEnglishPath } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -46,7 +48,52 @@ function getServerConsentRawSnapshot() {
   return null;
 }
 
+const COPY = {
+  he: {
+    region: "הסכמה לשימוש בעוגיות",
+    body: "אנו משתמשים בעוגיות לשיפור החוויה, ונוספות רק באישורכם.",
+    privacy: "מדיניות פרטיות",
+    acceptAll: "אישור הכל",
+    essentialOnly: "רק הכרחי",
+    essentialOnlyAria: "רק הכרחי - דחיית עוגיות לא הכרחיות",
+    manage: "ניהול",
+    manageAria: "ניהול העדפות עוגיות",
+    dialogTitle: "ניהול העדפות עוגיות",
+    dialogDesc:
+      "בחרו אילו קטגוריות עוגיות לאשר. עוגיות הכרחיות תמיד פעילות ואינן ניתנות לכיבוי.",
+    necessary: "הכרחיות",
+    necessaryDesc: "נדרשות לתפעול בסיסי של האתר ואינן ניתנות לכיבוי.",
+    analytics: "אנליטיקה",
+    analyticsDesc: "עוזרות לנו להבין כיצד משתמשים באתר, לצורך שיפורו.",
+    marketing: "שיווק",
+    marketingDesc: "משמשות למדידת אפקטיביות של קמפיינים שיווקיים.",
+    save: "שמירת העדפות",
+  },
+  en: {
+    region: "Cookie consent",
+    body: "We use cookies to improve your experience; non-essential ones are set only with your consent.",
+    privacy: "Privacy policy",
+    acceptAll: "Accept all",
+    essentialOnly: "Essential only",
+    essentialOnlyAria: "Essential only — reject non-essential cookies",
+    manage: "Manage",
+    manageAria: "Manage cookie preferences",
+    dialogTitle: "Manage cookie preferences",
+    dialogDesc:
+      "Choose which cookie categories to allow. Essential cookies are always on and cannot be turned off.",
+    necessary: "Essential",
+    necessaryDesc: "Required for basic site operation and cannot be turned off.",
+    analytics: "Analytics",
+    analyticsDesc: "Help us understand how the site is used, in order to improve it.",
+    marketing: "Marketing",
+    marketingDesc: "Used to measure the effectiveness of marketing campaigns.",
+    save: "Save preferences",
+  },
+} as const;
+
 export function CookieConsent() {
+  const english = isEnglishPath(usePathname());
+  const t = english ? COPY.en : COPY.he;
   // מבוסס useSyncExternalStore ולא useState+useEffect, כי מדובר בסנכרון
   // עם מקור חיצוני אמיתי (localStorage) שיכול להשתנות גם מלשוניות אחרות.
   const consentRaw = React.useSyncExternalStore(
@@ -170,42 +217,43 @@ export function CookieConsent() {
       <div
         ref={bannerRef}
         role="region"
-        aria-label="הסכמה לשימוש בעוגיות"
+        aria-label={t.region}
+        {...(english ? { lang: "en", dir: "ltr" } : {})}
         className="animate-slide-up fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:px-4"
       >
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 rounded-xl border border-border-strong bg-surface/95 px-3.5 py-2 shadow-[0_12px_32px_-22px_rgba(34,38,43,0.5)] backdrop-blur sm:flex-row sm:items-center sm:gap-3">
         <p className="text-[12.5px] leading-snug text-foreground-muted sm:flex-1">
-          אנו משתמשים בעוגיות לשיפור החוויה, ונוספות רק באישורכם.{" "}
+          {t.body}{" "}
           <a
             href="/privacy"
             className="text-brand-hover underline underline-offset-2 hover:text-foreground"
           >
-            מדיניות פרטיות
+            {t.privacy}
           </a>
         </p>
         {/* יעדי-מגע ≥44px (min-h-11) בשלושת הכפתורים — מעל מינימום WCAG, נוח
             במובייל — תוך שמירה על מראה קומפקטי (px מרוסן). */}
         <div className="flex flex-wrap gap-2 sm:shrink-0">
           <Button size="sm" onClick={acceptAll} className="min-h-11">
-            אישור הכל
+            {t.acceptAll}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={rejectNonEssential}
-            aria-label="רק הכרחי - דחיית עוגיות לא הכרחיות"
+            aria-label={t.essentialOnlyAria}
             className="min-h-11"
           >
-            רק הכרחי
+            {t.essentialOnly}
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setManageOpen(true)}
-            aria-label="ניהול העדפות עוגיות"
+            aria-label={t.manageAria}
             className="min-h-11"
           >
-            ניהול
+            {t.manage}
           </Button>
         </div>
         </div>
@@ -214,21 +262,16 @@ export function CookieConsent() {
       <Dialog open={manageOpen} onOpenChange={setManageOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>ניהול העדפות עוגיות</DialogTitle>
-            <DialogDescription>
-              בחרו אילו קטגוריות עוגיות לאשר. עוגיות הכרחיות תמיד פעילות
-              ואינן ניתנות לכיבוי.
-            </DialogDescription>
+            <DialogTitle>{t.dialogTitle}</DialogTitle>
+            <DialogDescription>{t.dialogDesc}</DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3">
               <Checkbox checked disabled id="necessary" />
               <div>
-                <Label htmlFor="necessary">הכרחיות</Label>
-                <p className="text-sm text-foreground-muted">
-                  נדרשות לתפעול בסיסי של האתר ואינן ניתנות לכיבוי.
-                </p>
+                <Label htmlFor="necessary">{t.necessary}</Label>
+                <p className="text-sm text-foreground-muted">{t.necessaryDesc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -238,10 +281,8 @@ export function CookieConsent() {
                 onCheckedChange={(v) => setAnalytics(v === true)}
               />
               <div>
-                <Label htmlFor="analytics">אנליטיקה</Label>
-                <p className="text-sm text-foreground-muted">
-                  עוזרות לנו להבין כיצד משתמשים באתר, לצורך שיפורו.
-                </p>
+                <Label htmlFor="analytics">{t.analytics}</Label>
+                <p className="text-sm text-foreground-muted">{t.analyticsDesc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -251,15 +292,13 @@ export function CookieConsent() {
                 onCheckedChange={(v) => setMarketing(v === true)}
               />
               <div>
-                <Label htmlFor="marketing">שיווק</Label>
-                <p className="text-sm text-foreground-muted">
-                  משמשות למדידת אפקטיביות של קמפיינים שיווקיים.
-                </p>
+                <Label htmlFor="marketing">{t.marketing}</Label>
+                <p className="text-sm text-foreground-muted">{t.marketingDesc}</p>
               </div>
             </div>
           </div>
 
-          <Button onClick={savePreferences}>שמירת העדפות</Button>
+          <Button onClick={savePreferences}>{t.save}</Button>
         </DialogContent>
       </Dialog>
     </>

@@ -12,7 +12,13 @@ import { MotionRoot } from "@/components/shared/MotionRoot";
 import { PersonaProvider } from "@/components/persona/PersonaProvider";
 import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { SiteChrome } from "@/components/layout/SiteChrome";
+import { LocaleDocument } from "@/components/layout/LocaleDocument";
 import { resolveCompassSurface } from "@/lib/compass/assistant/config";
+
+// קובע lang/dir=en/ltr ל-„/en” טרם-הצביעה (ללא הבהוב RTL), עוד לפני הידרציה.
+// ה-root מרונדר he/rtl כברירת-מחדל; LocaleDocument שומר על הסנכרון בניווט.
+const LOCALE_BOOTSTRAP =
+  "(function(){try{var p=location.pathname;if(p==='/en'||p.indexOf('/en/')===0){var e=document.documentElement;e.lang='en';e.dir='ltr';}}catch(e){}})();";
 
 /**
  * Heebo משמש לממשק, לגוף ולכותרות המרכזיות.
@@ -90,7 +96,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-svh flex-col bg-background text-foreground antialiased">
+        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOTSTRAP }} />
         <PersonaProvider>
+          <LocaleDocument />
           <MotionRoot />
           <SkipToContent />
           {/* הקליפה השיווקית מוסתרת בלוח-הבקרה הניהולי (/admin). */}

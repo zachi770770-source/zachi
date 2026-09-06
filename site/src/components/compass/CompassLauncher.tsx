@@ -7,6 +7,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Compass, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { isEnglishPath } from "@/lib/language";
 import { compassQuiz } from "@/content/compass";
 import type { AskStationId } from "@/content/askRoute";
 
@@ -146,6 +147,11 @@ export function CompassLauncher({
   // בתוך /compass עצמו העמוד *הוא* המנוע — אין טעם בבועה צפה שמובילה אליו.
   // (ההחזרה מוקדמת אך *אחרי* כל ה-hooks, כדי לא להפר את סדר ה-hooks.)
   if (pathname?.startsWith("/compass")) return null;
+
+  // „/en” אנגלי: מנוע-ההכוונה („שאל את הספר”) הוא עברי בלבד ואין לו מקבילה
+  // אנגלית. בועה בעברית על עמוד אנגלי היא בדיוק ה-UI-העברי-האקראי שיש להסיר —
+  // ובועה אנגלית שפותחת תוכן עברי הייתה מטעה. לכן מוסתרת כאן לחלוטין.
+  if (isEnglishPath(pathname)) return null;
 
   // מצב שאלה-חופשית פעיל: הבועה מנווטת אל /compass (החוויה החופשית) במקום לפתוח
   // את מגירת המנוע המודרך. אותה גלולה ויזואלית ואותה לוגיקת-חשיפה, ללא Dialog.
