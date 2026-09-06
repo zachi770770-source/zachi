@@ -5500,6 +5500,8 @@ body:has([data-fm-active]) {
   --pb-open: 13deg; /* זווית-הכריכה במצב הסופי — glimpse דק בלבד (ללא שינוי) */
   --pb-openwide: 82deg; /* זווית-פתיחה בזמן הדפדוף — חושף את הדף הפנימי במלואו */
   --pb-yaw: 35deg; /* סיבוב-¾ מורגש (מַרְאֵה לספר עברי: שדרה מימין, נסוגה לעומק) */
+  --pb-yaw-read: 27deg; /* ¾ מעט מתון בזמן ה-hold בלבד — העמוד הנקרא יותר front-facing.
+                           ה-flip חוזר ל-full yaw (זהה לגמרי). */
   --pb-pitch: 5deg; /* הטיית-מבט עדינה מלמעלה */
   --pb-page: #e7e3d8; /* דף עליון — paper-white (לא בוהק) */
   --pb-leaf: #efece3; /* נייר-הדפים הפנימיים */
@@ -5639,7 +5641,13 @@ body:has([data-fm-active]) {
    בזמן ה-hold. הזמנים לינאריים; ה-easing מוגדר פר-מקטע. */
 @keyframes pb-rise {
   0% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(3.2%) scale(0.984); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-  13% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
+  13% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); }
+  36% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  39% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
+  50% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  55% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); }
+  74% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  77% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
   100% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
 }
 /* הכריכה: סגורה (presence) → נפתחת רחב שמאלה (ספר עברי) → יציבה בזמן שני ה-holds
@@ -5773,7 +5781,7 @@ body:has([data-fm-active]) {
    בדפדוף: לא reader זעיר — מילים גדולות בלבד (כותרת + שורה אחת), מאותו טקסט מאושר. */
 @media (max-width: 640px) {
   /* ¾ עמוק יותר + הזזה שמאלה + width קטן מעט — הדפדוף הפיזי המלא נשאר במסך. */
-  .motion-js .book-cover--open .pbook { --pb-yaw: 47deg; transform: translateX(-9%); --pb-total: 4200ms; }
+  .motion-js .book-cover--open .pbook { --pb-yaw: 47deg; --pb-yaw-read: 39deg; transform: translateX(-9%); --pb-total: 4200ms; }
   .pbook__stage { width: 66%; }
   .pbook__ptext { inset: 17% 24% 15% 12%; gap: 0.5em; }
   .pbook__ph { font-size: 7cqw; line-height: 1.28; margin-bottom: 0.2em; }
@@ -5781,5 +5789,7 @@ body:has([data-fm-active]) {
   .pbook__sub { display: none; } /* מובייל: בלי תוויות-מדור — מילים גדולות בלבד */
   /* מובייל: כותרת + 2–3 שורות גדולות; משאיר שלוש הראשונות ומסתיר מעבר לכך. */
   .pbook__pl ~ .pbook__pl ~ .pbook__pl ~ .pbook__pl { display: none; }
+  /* נשימה קלה בין תחתית-הספר לסקשן הבא (RecognitionBeat) — בלי להזיז את הספר. */
+  .sig-hero__object { margin-block-end: 2rem; }
 }
 
