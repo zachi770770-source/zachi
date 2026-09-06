@@ -9,6 +9,8 @@ import { BookLink } from "@/components/shared/BookLink";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
+import { PatternsSection } from "@/components/sections/PatternsSection";
+import { AttachmentSection } from "@/components/sections/AttachmentSection";
 import { MethodSection } from "@/components/sections/MethodSection";
 import { ToolsBento } from "@/components/sections/ToolsBento";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
@@ -108,7 +110,7 @@ export default function BookPage() {
               {siteConfig.description}
             </p>
             {/* נקודת האיזון של הגישה, הועברה לכאן מהשער כדי לשמור על עמוד בית חיובי. */}
-            <p className="mx-auto mt-5 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted/90">
+            <p className="mx-auto mt-5 max-w-[60ch] text-[15px] leading-relaxed text-foreground-muted">
               {bigIdea.clarification}
             </p>
             <p className="mx-auto mt-4 max-w-[60ch] text-[14px] italic text-foreground-muted">
@@ -123,11 +125,17 @@ export default function BookPage() {
         </Container>
       </header>
 
-      {/* קשת עמוד-מוצר ממוקדת: רעיון → למי → איך → כלים → מה בפנים → מה משתנה →
-          רכישה. הרקע/הדפוסים/ההיקשרות (זיהוי-עצמי ורקע-המחבר) חיים בבית ובמדריכים
-          — לא משוכפלים כאן, כדי שהעמוד ימכור את *הספר* ולא יחזור על השער. */}
+      {/* קשת עמוד-מוצר ממוקדת: רעיון → למי → *למה נתקעים* → איך → כלים →
+          מה משתנה → רכישה.
+          שני סקשני הזיהוי-העצמי (#patterns, #attachment) הוסרו כאן בעבר כחלק
+          מקיצור העמוד — וזו הייתה טעות: הם נושאים תוכן מאושר ש-e2e שומר עליו
+          במפורש (`book-self-recognition.spec.ts`). הם הוחזרו בגרסה מרוסנת:
+          אותו טקסט בדיוק, כמחצית הנפח. מקומם בקשת הוא בין „למי הספר”
+          ל„השיטה” — זיהוי-עצמי לפני הפתרון. */}
       <ThesisSection />
       <AudienceSection />
+      <PatternsSection />
+      <AttachmentSection />
       <MethodSection />
       {/* ששת הכלים המעשיים — אזור Editorial Luxury אינטראקטיבי. עוגני
           #tool-<id> משמשים deep-link מ-Path Finder ומקישורים ישירים. */}
