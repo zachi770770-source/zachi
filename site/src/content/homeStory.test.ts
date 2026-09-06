@@ -20,11 +20,14 @@ describe("home story is source-backed, not authored marketing copy", () => {
     expect(whyTheBook.book.lines).toEqual(preview.tableOfContents.slice(1));
   });
 
-  it("takes the author beat verbatim from the approved bio", () => {
-    // משפטים שלמים כלשונם — לא ניסוח מחדש ולא חיתוך באמצע משפט.
-    expect(authorContent.fullBio[1]).toContain(authorNote.body);
-    for (const sentence of authorNote.body.split(". ")) {
-      expect(authorContent.fullBio[1]).toContain(sentence);
+  it("keeps the author beat as approved site copy, free of promises", () => {
+    // הוחלף מציטוט-ביו לקופי-אתר מאושר (הרעיון שממנו נכתב הספר) — בלי ביוגרפיה
+    // שלא קיימת ובלי הבטחות. הבדיקה מקבעת את הניסוח המאושר ושומרת על הגבול.
+    expect(authorNote.body).toContain("אותו מסע");
+    expect(authorNote.bodyClose).toContain("בלי נוסחאות ובלי הבטחות קסם");
+    const beat = `${authorNote.body} ${authorNote.bodyClose}`;
+    for (const banned of ["מבטיח", "מובטח", "בוודאות", "תרפא", "ירפא", "פתרון מובטח"]) {
+      expect(beat).not.toContain(banned);
     }
   });
 
@@ -41,6 +44,7 @@ describe("home story is source-backed, not authored marketing copy", () => {
       whyTheBook.title,
       whyTheBook.site.line,
       authorNote.body,
+      authorNote.bodyClose,
     ].join(" ");
     for (const banned of ["פסיכולוג", "מטפל", "מוסמך", "תואר", "קליני"]) {
       expect(everything).not.toContain(banned);
@@ -55,6 +59,7 @@ describe("home story is source-backed, not authored marketing copy", () => {
       whyTheBook.site.line,
       whyTheBook.book.note,
       authorNote.body,
+      authorNote.bodyClose,
     ].join(" ");
     expect(authored).not.toMatch(/לחפש|מחפשים|מוצאים/);
     // שורת-המשנה מונה את ארבע התחנות ולכן רשאית לנקוב ב„מחפשים קשר” כשלב-חיים —

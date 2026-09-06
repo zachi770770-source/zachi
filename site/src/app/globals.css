@@ -4409,11 +4409,12 @@ body:has([data-fm-active]) {
    הפרדה נקייה מה-H1 בלי חפיפה, וכולו בתוך ה-Hero. */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .sig-hero__object {
-    inset-inline-start: 0.5%;
-    width: min(46%, 32rem);
+    /* מעט שמאלה — פותח מרווח מימין לדפדוף הפיזי (ספר עברי), עדיין רחוק מה-H1. */
+    inset-inline-start: 11%;
+    width: min(41%, 28rem);
   }
   .sig-hero__cover {
-    width: clamp(17rem, 31vw, 22rem);
+    width: clamp(15rem, 29vw, 20rem);
   }
 }
 
@@ -5496,11 +5497,16 @@ body:has([data-fm-active]) {
   transform-style: preserve-3d;
   pointer-events: none;
   --pb-thick: 35px; /* עובי-הספר */
-  --pb-open: 13deg; /* זווית-פתיחת-הכריכה — glimpse דק בלבד (ללא שינוי) */
-  --pb-yaw: -35deg; /* סיבוב-¾ מורגש: רואים עובי-כריכה, גב ו-page-block */
+  --pb-open: 13deg; /* זווית-הכריכה במצב הסופי — glimpse דק בלבד (ללא שינוי) */
+  --pb-openwide: 82deg; /* זווית-פתיחה בזמן הדפדוף — חושף את הדף הפנימי במלואו */
+  --pb-yaw: 35deg; /* סיבוב-¾ מורגש (מַרְאֵה לספר עברי: שדרה מימין, נסוגה לעומק) */
+  --pb-yaw-read: 27deg; /* ¾ מעט מתון בזמן ה-hold בלבד — העמוד הנקרא יותר front-facing.
+                           ה-flip חוזר ל-full yaw (זהה לגמרי). */
   --pb-pitch: 5deg; /* הטיית-מבט עדינה מלמעלה */
   --pb-page: #e7e3d8; /* דף עליון — paper-white (לא בוהק) */
+  --pb-leaf: #efece3; /* נייר-הדפים הפנימיים */
   --pb-board: #201d1a; /* לוח-כריכה / שדרה */
+  --pb-total: 5900ms; /* משך הרצף — מכויל ל-hold קריא של ~1.85s לכל עמוד */
   animation: pb-fade 420ms var(--ease-standard) var(--book-open-delay) both;
 }
 
@@ -5511,7 +5517,7 @@ body:has([data-fm-active]) {
   aspect-ratio: 0.66 / 1;
   transform-style: preserve-3d;
   transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw));
-  animation: pb-rise var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-rise var(--pb-total) linear var(--book-open-delay) both;
 }
 .pbook__slab {
   position: absolute;
@@ -5519,15 +5525,15 @@ body:has([data-fm-active]) {
   transform-style: preserve-3d;
 }
 
-/* הדף העליון הלבן (מתחת לכריכה) — נחשף בהצצה בעת הפתיחה. */
+/* הדף העליון הלבן (מתחת לכריכה) — נחשף בהצצה בעת הפתיחה. gutter מימין (שדרה). */
 .pbook__page {
   position: absolute;
   inset: 0;
-  border-radius: 2px 5px 5px 2px;
+  border-radius: 5px 2px 2px 5px;
   background:
-    linear-gradient(100deg, #d9d4c7, var(--pb-page) 45%, #efece3);
+    linear-gradient(260deg, #d9d4c7, var(--pb-page) 45%, #efece3);
   box-shadow:
-    inset 14px 0 26px -16px rgba(20, 18, 14, 0.4),
+    inset -14px 0 26px -16px rgba(20, 18, 14, 0.4),
     inset 0 -14px 24px -16px rgba(20, 18, 14, 0.26);
 }
 
@@ -5536,8 +5542,8 @@ body:has([data-fm-active]) {
   position: absolute;
   inset: -3.4%;
   transform: translateZ(calc(-1 * var(--pb-thick)));
-  border-radius: 3px 8px 8px 3px;
-  background: linear-gradient(135deg, #302b26, #16130e 76%);
+  border-radius: 8px 3px 3px 8px;
+  background: linear-gradient(225deg, #302b26, #16130e 76%);
   box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -5548,13 +5554,14 @@ body:has([data-fm-active]) {
     repeating-linear-gradient(to bottom, rgba(20, 16, 10, 0.10) 0 1px, transparent 1px 2.4px),
     linear-gradient(90deg, #d9d4c8, #efece2 45%, #d3cec1);
 }
+/* גוש-הדפים (fore-edge) — הצד החופשי (שמאל בספר עברי). */
 .pbook__edge--fore {
   top: 2.6%;
   bottom: 2.6%;
-  right: 0;
+  left: 0;
   width: var(--pb-thick);
-  transform-origin: right center;
-  transform: rotateY(90deg);
+  transform-origin: left center;
+  transform: rotateY(-90deg);
 }
 .pbook__edge--bottom {
   left: 2.6%;
@@ -5567,38 +5574,39 @@ body:has([data-fm-active]) {
     repeating-linear-gradient(to right, rgba(20, 16, 10, 0.10) 0 1px, transparent 1px 2.4px),
     linear-gradient(180deg, #d9d4c8, #efece2 45%, #d3cec1);
 }
-/* שדרה — הצד הכרוך (שמאל), כהה כלוח-הכריכה. */
+/* שדרה — הצד הכרוך (ימין — כריכת ספר עברי), כהה כלוח-הכריכה. */
 .pbook__spine {
   position: absolute;
   top: -2.6%;
   bottom: -2.6%;
-  left: 0;
+  right: 0;
   width: calc(var(--pb-thick) + 2px);
-  transform-origin: left center;
-  transform: rotateY(-90deg);
-  background: linear-gradient(90deg, #14110d, #2a2622 60%, #14110d);
+  transform-origin: right center;
+  transform: rotateY(90deg);
+  background: linear-gradient(270deg, #14110d, #2a2622 60%, #14110d);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
 }
 
-/* הכריכה הקדמית — אמנות-המותג. hinge בשדרה (שמאל); נפתחת ~24°. */
+/* הכריכה הקדמית — אמנות-המותג. hinge בשדרה (ימין); נפתחת שמאלה כספר עברי.
+   ה-background אינו ממוראה — הטקסט על הכריכה נשאר תקין וקריא. */
 .pbook__cover {
   position: absolute;
   inset: -2.6%;
-  transform-origin: left center;
-  transform: rotateY(0deg);
-  border-radius: 3px 8px 8px 3px;
+  transform-origin: right center;
+  transform: translateZ(3px) rotateY(var(--pb-open));
+  border-radius: 8px 3px 3px 8px;
   background-image:
     linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0) 32%, rgba(20, 14, 8, 0.14) 100%),
-    linear-gradient(100deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0) 22%),
+    linear-gradient(260deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0) 22%),
     var(--cover-src);
   background-size: cover;
   background-position: center;
   box-shadow:
-    inset 2px 0 0 0 rgba(255, 255, 255, 0.14),
-    inset -1px 0 0 0 rgba(0, 0, 0, 0.25),
-    18px 26px 40px -22px rgba(0, 0, 0, 0.6);
+    inset -2px 0 0 0 rgba(255, 255, 255, 0.14),
+    inset 1px 0 0 0 rgba(0, 0, 0, 0.25),
+    -18px 26px 40px -22px rgba(0, 0, 0, 0.6);
   backface-visibility: hidden;
-  animation: pb-open var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-open var(--pb-total) linear var(--book-open-delay) both;
 }
 
 /* צל-מגע על ה„רצפה” — מקרקע ומפריד מהרקע. אינו מסתובב עם הספר. */
@@ -5629,20 +5637,159 @@ body:has([data-fm-active]) {
 
 /* ── keyframes ── */
 @keyframes pb-fade { from { opacity: 0; } to { opacity: 1; } }
-/* presence → הרמה קלה → התייצבות. */
+/* presence → הרמה קלה → התייצבות מוקדמת (עד 13%) ואז יציב — כדי שהטקסט לא ינוע
+   בזמן ה-hold. הזמנים לינאריים; ה-easing מוגדר פר-מקטע. */
 @keyframes pb-rise {
-  0% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(3%) scale(0.985); }
-  10% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(2.4%) scale(0.99); }
-  46% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(-1.2%) scale(1.006); }
+  0% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(3.2%) scale(0.984); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  13% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); }
+  36% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  39% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
+  50% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  55% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); }
+  74% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw-read)) translateY(0) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  77% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
   100% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
 }
-/* הכריכה: סגורה בזמן ה-presence → נפתחת מעט → מתייצבת. */
+/* הכריכה: סגורה (presence) → נפתחת רחב שמאלה (ספר עברי) → יציבה בזמן שני ה-holds
+   והדפדופים → מתייצבת ל-glimpse הסופי (settle). */
 @keyframes pb-open {
-  0%, 14% { transform: rotateY(0deg); }
-  44% { transform: rotateY(calc(-1 * var(--pb-open) - 3deg)); }
-  100% { transform: rotateY(calc(-1 * var(--pb-open))); }
+  0% { transform: translateZ(3px) rotateY(0deg); }
+  4% { transform: translateZ(3px) rotateY(0deg); animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1); }
+  14% { transform: translateZ(3px) rotateY(calc(var(--pb-openwide) + 2deg)); }
+  20% { transform: translateZ(3px) rotateY(var(--pb-openwide)); }
+  88% { transform: translateZ(3px) rotateY(var(--pb-openwide)); animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1); }
+  100% { transform: translateZ(3px) rotateY(var(--pb-open)); }
+}
+/* דף ראשון — דפדוף פיזי מלא: שטוח (טקסט עברי, יציב ב-hold עד 39%) → מתרומם ב-hinge
+   בשדרה (ימין) עם curl/arc עדין (rotateX) והרמת-Z מתונה, מסתובב 180° במלואו ונשכב
+   מעבר לשדרה (ימינה — מתרחק מה-H1). הדף קיים לאורך כל הסיבוב; הפָּן האחורי נייר ריק.
+   ב-settle חוזר שטוח כדי לשמר את ה-glimpse הריק של המצב הסופי. easing פר-מקטע. */
+@keyframes pb-flip1 {
+  0% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); }
+  39% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  43% { transform: translateZ(16px) rotateY(52deg) rotateX(-7deg); animation-timing-function: linear; }
+  47% { transform: translateZ(14px) rotateY(120deg) rotateX(-6deg); animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
+  50% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); }
+  88% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  94% { transform: translateZ(13px) rotateY(96deg) rotateX(-5deg); }
+  100% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); }
+}
+/* דף שני — נחשף אחרי הדפדוף הראשון; דפדוף פיזי מלא זהה, עם hold קריא משלו (50%→77%). */
+@keyframes pb-flip2 {
+  0% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); }
+  77% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  81% { transform: translateZ(15px) rotateY(52deg) rotateX(-7deg); animation-timing-function: linear; }
+  85% { transform: translateZ(13px) rotateY(120deg) rotateX(-6deg); animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
+  88% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); }
+  90.5% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  100% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); }
+}
+/* moving shadow — הצללה נעה על-פני הדף המסתובב (מתחזקת סביב האנך). */
+@keyframes pb-sheen1 {
+  0%, 39% { opacity: 0; }
+  45% { opacity: 0.34; }
+  50%, 88% { opacity: 0; }
+  94% { opacity: 0.24; }
+  100% { opacity: 0; }
+}
+@keyframes pb-sheen2 {
+  0%, 77% { opacity: 0; }
+  83% { opacity: 0.34; }
+  88%, 100% { opacity: 0; }
+}
+
+/* ── דפים מתהפכים (leaves) — hinge בשדרה (ימין), טקסט עברי אמיתי בפָּן הקדמי ── */
+.pbook__leaf {
+  position: absolute;
+  inset: 0;
+  transform-origin: right center;
+  transform-style: preserve-3d;
+}
+.pbook__leaf--p2 { transform: translateZ(1.4px) rotateY(0deg); }
+.pbook__leaf--p1 { transform: translateZ(2.2px) rotateY(0deg); }
+.motion-js .book-cover--open .pbook__leaf--p1 {
+  animation: pb-flip1 var(--pb-total) linear var(--book-open-delay) both;
+}
+.motion-js .book-cover--open .pbook__leaf--p2 {
+  animation: pb-flip2 var(--pb-total) linear var(--book-open-delay) both;
+}
+/* שני פָּנים לכל דף — קדמי (טקסט) ואחורי (נייר ריק, מסובב 180° כדי שהטקסט לא ישוקף). */
+.pbook__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 6px 2px 2px 6px;
+  overflow: hidden;
+  container-type: inline-size; /* טקסט קנה-מידה יחסי לרוחב-הדף */
+  background: linear-gradient(260deg, #e4e0d5, var(--pb-leaf) 46%, #f5f3ec);
+  box-shadow:
+    inset -12px 0 24px -16px rgba(20, 18, 14, 0.34),
+    inset 0 -12px 22px -16px rgba(20, 18, 14, 0.2);
+}
+.pbook__face--back { transform: rotateY(180deg); }
+/* moving shadow — שכבת-הצללה מעל הדף (opacity מונפש). */
+.pbook__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px 2px 2px 6px;
+  background: linear-gradient(255deg, rgba(20, 16, 10, 0.5), rgba(20, 16, 10, 0.12) 46%, rgba(20, 16, 10, 0) 78%);
+  opacity: 0;
+  pointer-events: none;
+}
+.motion-js .book-cover--open .pbook__leaf--p1 .pbook__sheen {
+  animation: pb-sheen1 var(--pb-total) linear var(--book-open-delay) both;
+}
+.motion-js .book-cover--open .pbook__leaf--p2 .pbook__sheen {
+  animation: pb-sheen2 var(--pb-total) linear var(--book-open-delay) both;
+}
+/* גוש-הטקסט: RTL, מרחק מהשדרה (ימין) ומצד-הכריכה-הנפתחת (שמאל) שה-glimpse יישאר ריק. */
+.pbook__ptext {
+  position: absolute;
+  inset: 11% 20% 10% 12%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.34em;
+  direction: rtl;
+  text-align: start;
+  font-family: var(--font-serif, serif);
+  color: var(--color-ink);
+}
+.pbook__ph {
+  font-weight: 600;
+  font-size: 4.4cqw;
+  line-height: 1.22;
+  color: var(--color-secondary);
+  margin-bottom: 0.35em;
+}
+/* תווית-מדור (עובדה / סיפור / לראות אחרת) — מפרידה בין קטעי-התוכן על העמוד. */
+.pbook__sub {
+  font-weight: 600;
+  font-size: 3.5cqw;
+  line-height: 1.2;
+  color: color-mix(in oklab, var(--color-secondary) 82%, var(--color-ink));
+  margin-top: 0.7em;
+  margin-bottom: 0.1em;
+}
+.pbook__pl {
+  font-size: 3.15cqw;
+  line-height: 1.42;
+  color: color-mix(in oklab, var(--color-ink) 88%, transparent);
 }
 
 /* מובייל (≤640px) — אותו art-direction: המסר קודם, והספר (אותו object) מיד מתחתיו
-   בקומפוזיציה קומפקטית. גדלים/מיקום מטופלים ב-sig-hero. */
+   בקומפוזיציה קומפקטית. גדלים/מיקום מטופלים ב-sig-hero.
+   בדפדוף: לא reader זעיר — מילים גדולות בלבד (כותרת + שורה אחת), מאותו טקסט מאושר. */
+@media (max-width: 640px) {
+  /* ¾ עמוק יותר + הזזה שמאלה + width קטן מעט — הדפדוף הפיזי המלא נשאר במסך. */
+  .motion-js .book-cover--open .pbook { --pb-yaw: 47deg; --pb-yaw-read: 39deg; transform: translateX(-9%); --pb-total: 4200ms; }
+  .pbook__stage { width: 66%; }
+  .pbook__ptext { inset: 17% 24% 15% 12%; gap: 0.5em; }
+  .pbook__ph { font-size: 7cqw; line-height: 1.28; margin-bottom: 0.2em; }
+  .pbook__pl { font-size: 5.3cqw; line-height: 1.4; }
+  .pbook__sub { display: none; } /* מובייל: בלי תוויות-מדור — מילים גדולות בלבד */
+  /* מובייל: כותרת + 2–3 שורות גדולות; משאיר שלוש הראשונות ומסתיר מעבר לכך. */
+  .pbook__pl ~ .pbook__pl ~ .pbook__pl ~ .pbook__pl { display: none; }
+  /* נשימה קלה בין תחתית-הספר לסקשן הבא (RecognitionBeat) — בלי להזיז את הספר. */
+  .sig-hero__object { margin-block-end: 2rem; }
+}
 

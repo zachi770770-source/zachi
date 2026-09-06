@@ -29,6 +29,9 @@ export function AuthorNote() {
           <p className="mt-3 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.7] text-foreground/90 [text-wrap:pretty]">
             {authorNote.body}
           </p>
+          <p className="mt-3 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.7] text-foreground/90 [text-wrap:pretty]">
+            {authorNote.bodyClose}
+          </p>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border pt-4">
             <div className="flex items-center gap-3">
