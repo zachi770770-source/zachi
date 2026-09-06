@@ -4265,6 +4265,7 @@ body:has([data-fm-active]) {
   gap: 0.5rem;
   width: 100%;
   justify-content: center;
+  white-space: nowrap;
   padding: 0.95rem 1.75rem;
   border-radius: 999px;
   background: var(--sig-ivory);
@@ -4333,19 +4334,25 @@ body:has([data-fm-active]) {
   .sig-hero__container {
     width: 100%;
   }
+  /* דסקטופ: רשת דו-טורית אמיתית — הספר (טור-הפתיחה, RTL=ימין, רחב) לצד הטקסט
+     (טור-הסיום, שמאל). ללא חפיפה: כל טור בתאו — ה-H1 שוב אינו מוסתר מאחורי
+     דפי-הספר, ולסצנה יש נשימה והיררכיה אחת ברורה. */
   .sig-hero__scene {
-    min-height: min(78svh, 46rem);
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 29rem);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3.75rem);
+    min-height: min(80svh, 48rem);
     padding-block: 0;
-    align-content: center;
   }
-  /* הספר: signature-object בצד-ההתחלה (RTL=ימין) — כולו בתוך ה-Hero, ממורכז
-     אנכית עם margins, לא חתוך ולא מודבק לתחתית. */
+  /* הספר: signature-object בטור-הימני (RTL=start), אובייקט גדול ומרשים,
+     ממורכז בתאו — הדפדוף הפיזי נשאר בתוך התא ורחוק מהטקסט. */
   .sig-hero__object {
-    position: absolute;
-    inset-block: 6% 6%; /* מעט מטה — נכנס לאזור-האור של ה-H1 (בלי חיתוך תחתון) */
-    inset-inline-start: 13%; /* RTL: מעט שמאלה — אותו illuminated scene */
-    inset-inline-end: auto;
-    width: min(49%, 38rem);
+    position: static;
+    order: 0;
+    inset: auto;
+    width: auto;
+    align-self: center;
+    justify-self: center;
     min-height: 0;
     place-items: center;
     z-index: 1;
@@ -4372,8 +4379,9 @@ body:has([data-fm-active]) {
   .sig-hero__copy {
     position: relative;
     z-index: 2;
-    max-width: 34rem;
-    margin-inline-start: auto; /* RTL: נדחף אל צד-הסיום (שמאל), הרחק מהכריכה */
+    order: 0;
+    max-width: 29rem;
+    margin-inline-start: 0;
     padding-block: 2rem;
   }
   .sig-hero__eyebrow {
@@ -4392,9 +4400,9 @@ body:has([data-fm-active]) {
     display: block;
   }
   .sig-hero__cta {
-    flex-direction: row;
-    align-items: center;
-    gap: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
   }
   .sig-hero__cta-primary {
     width: auto;
@@ -4408,13 +4416,11 @@ body:has([data-fm-active]) {
 /* טווח-ביניים (1024–1279): פחות מרחב פנוי — הספר מעט קטן ומוסט ימינה כדי לשמור
    הפרדה נקייה מה-H1 בלי חפיפה, וכולו בתוך ה-Hero. */
 @media (min-width: 1024px) and (max-width: 1279px) {
-  .sig-hero__object {
-    /* מעט שמאלה — פותח מרווח מימין לדפדוף הפיזי (ספר עברי), עדיין רחוק מה-H1. */
-    inset-inline-start: 11%;
-    width: min(41%, 28rem);
+  .sig-hero__scene {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 25rem);
   }
   .sig-hero__cover {
-    width: clamp(15rem, 29vw, 20rem);
+    width: clamp(15rem, 27vw, 20rem);
   }
 }
 
@@ -5060,12 +5066,14 @@ body:has([data-fm-active]) {
   --paper-ink: color-mix(in oklab, var(--color-ink) 92%, #2a2a28);
   /* גיאומטריית ה-SPREAD (מובייל): רוחב עמוד-שמאל כשבר מרוחב הכריכה, וקנה-מידה
      והסטה שמחזיקים את הספר הפתוח בתוך ה-viewport ורחוק מהטקסט. דסקטופ דורס. */
-  --leaf-w: 0.74;
-  --open-scale: 0.92;
+  --leaf-w: 0.82;
+  --open-scale: 0.7;
   /* קנה-מידה אנכי נפרד — ברירת-מחדל זהה לאופקי (scale אחיד). רק 1440 דורס אותו
      כדי לתת ל-spread פרופורציה מעט רחבה-יותר (ספר אמיתי, לא חוברת גבוהה-צרה). */
   --open-scale-y: var(--open-scale);
-  --open-shift: 0%;
+  /* מובייל: ה-spread מרחיב שמאלה מקופסת-הכריכה; shift ימינה כדי למרכזו ולא לחתוך
+     את עמוד-שמאל בקצה-המסך. */
+  --open-shift: 22%;
   /* הרמה אנכית קלה (breathing room מתחת לספר). ברירת-מחדל 0; דסקטופ דורס. */
   --open-lift: 0%;
 }
@@ -5097,20 +5105,22 @@ body:has([data-fm-active]) {
    לפי סדר-המקור.) */
 /* ה-SPREAD גדל עם המרחב הפנוי (מימין ל-H1). ערכים לפי breakpoint (responsive,
    לא scale אחד קבוע): רחב ומרשים ב-1440/1280, מצומצם רק כנדרש ב-1024. */
+/* טאבלט (768–1023): סצנה אנכית (טקסט מעל, ספר מתחת) עם יותר מרחב — spread מעט
+   גדול יותר, ממורכז. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .book-cover--open { --leaf-w: 0.86; --open-scale: 0.78; --open-scale-y: 0.78; --open-shift: 20%; }
+}
+/* SPREAD בתוך תא-הרשת: הספר הפתוח (עמוד-שמאל מרחיב שמאלה מקופסת-הכריכה) חייב
+   להיכנס כולו בתא הימני ולהתמרכז בו. open-shift דוחף ימינה כדי לקזז את הרחבת
+   עמוד-שמאל, כך שה-spread ממורכז בתא ולא חודר לטקסט. */
 @media (min-width: 1024px) {
-  .book-cover--open { --leaf-w: 0.92; --open-scale: 0.68; --open-shift: 13%; --open-lift: -5%; }
+  .book-cover--open { --leaf-w: 0.9; --open-scale: 0.62; --open-scale-y: 0.62; --open-shift: 26%; --open-lift: 0%; }
 }
 @media (min-width: 1280px) {
-  .book-cover--open { --leaf-w: 0.94; --open-scale: 0.84; --open-shift: 15%; --open-lift: -5%; }
+  .book-cover--open { --leaf-w: 0.9; --open-scale: 0.66; --open-scale-y: 0.66; --open-shift: 26%; --open-lift: 0%; }
 }
 @media (min-width: 1440px) {
-  .book-cover--open {
-    --leaf-w: 0.96;
-    --open-scale: 0.93; /* רחב יותר (~+8%), נשאר כולו בתוך ה-Hero */
-    --open-scale-y: 0.87; /* מעט פחות גבוה — פרופורציה רחבה-יותר, עיוות-טקסט מזערי */
-    --open-shift: 35%; /* מחזיק את הקצה-השמאלי מחוץ ל-H1; ההרחבה בעיקר ימינה */
-    --open-lift: -6%; /* breathing room מתחת לספר */
-  }
+  .book-cover--open { --leaf-w: 0.9; --open-scale: 0.72; --open-scale-y: 0.7; --open-shift: 26%; --open-lift: 0%; }
 }
 /* ה-<img> האמיתי נמוג ברגע ששכבת-הכריכה משתלטת (crossfade בלתי-נראה — אותה
    תמונה, אותו מקום). לא מסתובב יותר; הסיבוב על שכבת-הכריכה בתוך ה-3D. */
@@ -5327,10 +5337,10 @@ body:has([data-fm-active]) {
    overflow:hidden + שוליים כמו ספר; RTL; backface מוסתר (אין טקסט-מראה). */
 .book-open__sheet {
   position: absolute;
-  inset: 9% 9% 9% 9%;
+  inset: 13% 12% 13% 12%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center; /* טיפוגרפיה מולחנת — ממורכזת אנכית, לא תלויה בראש-העמוד */
   overflow: hidden;
   direction: rtl;
   text-align: right;
