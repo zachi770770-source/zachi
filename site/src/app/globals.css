@@ -3539,11 +3539,32 @@ body:has([data-fm-active]) {
  * כך לכל תוצאה יש זהות ברורה, בלי שהצבע יהפוך לרעש.
  */
 .fm-stage[data-situation] { --fm-accent: var(--color-sage); }
-/* ההבחנה בין המצבים: אורך קו-הכותרת בלבד — סימן שקט, לא צבע נוסף. */
-.fm-stage[data-situation="dating"] .fm-title-rule { width: 2.5rem; }
-.fm-stage[data-situation="building"] .fm-title-rule { width: 3.5rem; }
-.fm-stage[data-situation="existing"] .fm-title-rule { width: 4.5rem; }
-.fm-stage[data-situation="breakup"] .fm-title-rule { width: 5.5rem; }
+/* ההבחנה בין המצבים: צורת קו-הכותרת בלבד — אותו צבע, אותו אורך, אותו גובה.
+   משתנה רק תבנית-הסימן (עצירות-קשות באותו gradient), ולכן זהו שינוי של
+   מאפיין אחד באלמנט אחד — לא רקע אחר, לא צבע נוסף ולא עיצוב נוסף.
+   כיוון פיזי (90deg) נשמר בכוונה: התבניות סימטריות, פרט ל„אחרי פרידה”
+   שבו השבר ממוקם כך שב-RTL הוא נופל בקצה-הסיום. */
+.fm-stage[data-situation="dating"] .fm-title-rule {
+  background: linear-gradient(
+    90deg,
+    var(--fm-rule) 0 38%, transparent 38% 62%, var(--fm-rule) 62% 100%
+  );
+}
+.fm-stage[data-situation="building"] .fm-title-rule {
+  background: linear-gradient(
+    90deg,
+    var(--fm-rule) 0 47%, transparent 47% 53%, var(--fm-rule) 53% 100%
+  );
+}
+.fm-stage[data-situation="existing"] .fm-title-rule {
+  background: var(--fm-rule);
+}
+.fm-stage[data-situation="breakup"] .fm-title-rule {
+  background: linear-gradient(
+    90deg,
+    var(--fm-rule) 0 17%, transparent 17% 27%, var(--fm-rule) 27% 100%
+  );
+}
 
 /* צ׳יפ-הקשר: המצב שנבחר, גלוי לאורך כל הפעימות. */
 .fm-status {
@@ -5812,17 +5833,19 @@ body:has([data-fm-active]) {
   background: var(--fm-accent);
 }
 /* קו-דגש דק מתחת לכותרת-המצב — נמשך בכניסה, בגוון-החתימה של המצב. */
+/* קו-הכותרת הוא *האלמנט היחיד* שנושא את זהות-המצב. קודם הוא נבדל באורך
+   בלבד (2.5–5.5rem) — הבדל שנקרא רק כשמשווים ארבעה מסכים זה לצד זה, ולא
+   במסך הבודד שהמשתמש באמת רואה. עכשיו האורך והצבע זהים בארבעתם, ומה
+   שמשתנה הוא *צורת הסימן*: כמות סימנים דיסקרטית נקלטת מיד, גם בלי השוואה.
+   סימן דקורטיבי ומופשט בלבד (aria-hidden) — אינו טענה, אבחון או שלב במסלול. */
 .fm-title-rule {
   display: block;
-  width: clamp(3rem, 12vw, 5.5rem);
+  width: clamp(3.5rem, 12vw, 5rem);
   height: 2px;
   border-radius: 2px;
   margin-inline: auto;
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--fm-accent) 85%, transparent),
-    color-mix(in oklab, var(--fm-accent) 20%, transparent)
-  );
+  --fm-rule: color-mix(in oklab, var(--fm-accent) 85%, transparent);
+  background: var(--fm-rule);
   transform-origin: center;
 }
 .motion-js .fm-scene--enter .fm-title-rule {
