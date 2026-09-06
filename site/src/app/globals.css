@@ -6053,3 +6053,14 @@ body:has([data-fm-active]) {
   outline: 2px solid var(--fm-ivory);
   outline-offset: 3px;
 }
+
+/* reduced-motion: מעברי-מסלול וחשיפות-גלילה הופכים למיידיים — לא „אותה אנימציה
+   מהר יותר”, אלא החלפת-מצב נקייה. (חשיפות-הגלילה ממילא מגודרות ב-no-preference,
+   ולכן התוכן פשוט גלוי.) */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

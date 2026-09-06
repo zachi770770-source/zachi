@@ -226,7 +226,7 @@ export function CookieConsent() {
           {t.body}{" "}
           <a
             href="/privacy"
-            className="text-brand-hover underline underline-offset-2 hover:text-foreground"
+            className="whitespace-nowrap text-brand-hover underline underline-offset-2 hover:text-foreground"
           >
             {t.privacy}
           </a>
