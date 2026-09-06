@@ -103,19 +103,24 @@ export function Hero() {
               מפעיל אותם — ולבנות זוגיות טובה יותר.
             </p>
 
-            <div className="sig-hero__cta">
-              <BookLink href="/preview" morphCover className="sig-hero__cta-primary">
-                קראו טעימה מהספר · 2 דקות
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </BookLink>
-              <AmazonBuyLink source="home" className="sig-hero__cta-secondary group">
-                לרכישת הספר באמזון
-                <ArrowLeft
-                  className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                  aria-hidden="true"
-                />
-              </AmazonBuyLink>
-            </div>
+          </div>
+
+          {/* ה-CTA הוא אח של הטקסט (ולא בתוכו) כדי שבמובייל יוכל לשבת *אחרי*
+              הספר: היררכיית הקיפול-הראשון היא H1 → מסר → ספר-החתימה → פעולה.
+              בדסקטופ מיקום-הרשת המפורש מחזיר אותו אל תחתית טור-הטקסט, בדיוק
+              כמו בפריסה המאושרת. */}
+          <div className="sig-hero__cta">
+            <BookLink href="/preview" morphCover className="sig-hero__cta-primary">
+              קראו טעימה מהספר · 2 דקות
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </BookLink>
+            <AmazonBuyLink source="home" className="sig-hero__cta-secondary group">
+              לרכישת הספר באמזון
+              <ArrowLeft
+                className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                aria-hidden="true"
+              />
+            </AmazonBuyLink>
           </div>
         </div>
       </Container>

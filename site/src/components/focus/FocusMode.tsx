@@ -155,8 +155,14 @@ export function FocusMode({
 
         {stage === "enter" && (
           <div className="fm-scene fm-scene--enter">
-            <p className="fm-eyebrow">{focusUi.eyebrow}</p>
+            {/* סמן-מצב עריכתי (שם התחנה) לפני הקיקר המשותף — כל תוצאה מזוהה
+                מיד עם המצב שנבחר, באותה שפה עיצובית. */}
+            <p className="fm-eyebrow">
+              <span className="fm-marker">{s.marker}</span>
+              {focusUi.eyebrow}
+            </p>
             <h3 className="fm-title fm-title--hero">{s.title}</h3>
+            <span className="fm-title-rule" aria-hidden="true" />
             <p className="fm-lede">{focusUi.intro}</p>
             <div className="fm-cta-row">
               <button type="button" onClick={() => go("split")} className="fm-cta fm-cta--ghost">

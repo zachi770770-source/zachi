@@ -69,6 +69,7 @@ export default function EnglishPage() {
           <div className="mt-4 grid items-start gap-8 sm:grid-cols-[minmax(0,1fr)_13rem] sm:gap-10 lg:grid-cols-[minmax(0,1fr)_16rem]">
             <div className="order-2 sm:order-1">
               <h1 className="font-serif type-hero text-foreground">{en.hero.title}</h1>
+              <span className="en-rule" aria-hidden="true" />
               <p className="mt-3 max-w-[52ch] font-serif text-[1.25rem] leading-snug text-foreground-muted">
                 {en.hero.subtitle}
               </p>
@@ -114,6 +115,7 @@ export default function EnglishPage() {
         {/* ── What the book is about ───────────────────────────────────── */}
         <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
           <h2 className="type-h2 font-serif text-foreground">{en.about.title}</h2>
+          <span className="en-rule en-rule--sage" aria-hidden="true" />
           {en.about.body.map((p) => (
             <p key={p} className="mt-4 max-w-[62ch] text-[1.05rem] leading-relaxed text-foreground-muted">
               {p}
@@ -124,6 +126,7 @@ export default function EnglishPage() {
         {/* ── Who this book is for ─────────────────────────────────────── */}
         <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
           <h2 className="type-h2 font-serif text-foreground">{en.audience.title}</h2>
+          <span className="en-rule en-rule--sage" aria-hidden="true" />
           <ul className="mt-6 grid gap-4 sm:grid-cols-3">
             {en.audience.items.map((item) => (
               <li key={item.title} className="rounded-2xl border border-border bg-surface p-5">
@@ -137,6 +140,7 @@ export default function EnglishPage() {
         {/* ── What the book works on ───────────────────────────────────── */}
         <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
           <h2 className="type-h2 font-serif text-foreground">{en.themes.title}</h2>
+          <span className="en-rule en-rule--sage" aria-hidden="true" />
           <ul className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2">
             {en.themes.items.map((item) => (
               <li key={item.title}>
@@ -150,6 +154,7 @@ export default function EnglishPage() {
         {/* ── About the author ─────────────────────────────────────────── */}
         <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
           <h2 className="type-h2 font-serif text-foreground">{en.author.title}</h2>
+          <span className="en-rule en-rule--sage" aria-hidden="true" />
           {en.author.body.map((p) => (
             <p key={p} className="mt-4 max-w-[62ch] text-[1.05rem] leading-relaxed text-foreground-muted">
               {p}
@@ -169,8 +174,10 @@ export default function EnglishPage() {
 
         {/* ── Final CTA ────────────────────────────────────────────────── */}
         <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
+          <p className="en-signature mb-5">{en.hero.lead.split(".")[0]}. {en.hero.lead.split(".")[1]}.</p>
           <div className="rounded-2xl border border-border bg-surface-muted p-7 sm:p-9">
             <h2 className="type-h2 font-serif text-foreground">{en.cta.title}</h2>
+            <span className="en-rule" aria-hidden="true" />
             <p className="mt-3 max-w-[56ch] text-[1.05rem] leading-relaxed text-foreground-muted">
               {en.cta.body}
             </p>

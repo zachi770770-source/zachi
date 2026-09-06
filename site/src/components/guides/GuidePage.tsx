@@ -332,7 +332,9 @@ export function GuidePage({ guide }: { guide: Guide }) {
         <div className="mt-8">
           <Link
             href={guide.hub.href}
-            className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            /* טרקוטה בגוון-הטקסט (brand-hover, 5.8:1) — הגוון המלא נכשל ב-AA
+               לטקסט קטן ולכן שמור לקישוט/כותרות גדולות בלבד. */
+            className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {guidesUi.hubTitle}: {guide.hub.label}

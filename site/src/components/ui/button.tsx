@@ -9,9 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // פעולה ראשית = דיו/פחם (לא חום). המותג נשאר accent בלבד.
+        // פעולה ראשית על משטח בהיר = פטרול עמוק + טקסט שנהב (10.5:1).
+        // טרקוטה נשארת accent בלבד — לא צבע כפתור-הרכישה.
         primary:
-          "bg-foreground text-surface hover:bg-[#33373d] shadow-sm",
+          "bg-[color:var(--color-petrol)] text-[color:var(--color-secondary-foreground)] hover:bg-[color:var(--color-petrol-2)] shadow-sm",
         // אזור נבחר/מודגש = מרווה עמוק ומודרני.
         secondary:
           "bg-secondary text-secondary-foreground hover:opacity-90",

@@ -8,21 +8,21 @@
  */
 :root {
   /* נייר ניטרלי בהיר — לא קרם צהוב. הבסיס כבר לא חום. */
-  --color-background: #f5f4f1;
-  --color-surface: #fdfdfc;
+  --color-background: #f6f0e7;
+  --color-surface: #fcf8f1;
   /* משטח משני קריר-בהיר (כחול-אפור) — הבנדים המתחלפים נקראים קרירים. */
-  --color-surface-muted: #e7ece6;
+  --color-surface-muted: #ede3d3;
   /* פחם ניטרלי לטקסט — לא אספרסו חום. */
-  --color-foreground: #24272c;
+  --color-foreground: #25312f;
   /* טקסט משני — הוכהה מעט (#575c63 → #4d525a) כדי לעבור AA בנוחות (~7.2:1
      על נייר) בלי לשטח את ההיררכיה מול foreground הכהה. */
-  --color-foreground-muted: #4d525a;
+  --color-foreground-muted: #55625e;
   /* פחם ניטרלי לצל אובייקט העטיפה בלבד. */
-  --color-ink: #262a2f;
+  --color-ink: #25312f;
 
   /* מסגרות אפור-כחלחל קריר במקום בז'. */
-  --color-border: #d4dbd2;
-  --color-border-strong: #bcc6ba;
+  --color-border: #ded5c6;
+  --color-border-strong: #c9bfad;
 
   /* ── מערכת ה-UI הצף התחתון ────────────────────────────────────────────────
    * במובייל יושבים בתחתית המסך שני פקדים קבועים (`position: fixed`): בועת
@@ -45,24 +45,28 @@
   --floating-ui-clearance: calc(var(--fab-bottom) + var(--fab-height) + var(--fab-gap));
 
   /* טרקוטה — צבע מותג והדגשה בלבד: CTA ראשי, קישורים, בחירה, תגים. */
-  --color-brand: #ad5836;
-  --color-brand-foreground: #fdfdfc;
-  --color-brand-hover: #8f4626;
-  --color-brand-muted: #f1e2d6;
+  --color-petrol: #193d37;      /* משטח כהה ראשי (Hero/Focus/פוטר) */
+  --color-petrol-2: #254a43;    /* משטח כהה משני */
+  --color-sage: #9eaf9e;        /* מבטא שקט — 5.15:1 על פטרול */
+  --color-paper: #ede3d3;       /* נייר חמים */
+  --color-brand: #b96e55;
+  --color-brand-foreground: #fdfaf4;
+  --color-brand-hover: #8f4a32;
+  --color-brand-muted: #f2e3d9;
 
   /* משני קריר ומובהק — כחול-אפור עמוק. משטחי-עומק (פוטר) וכפתורים משניים. */
-  --color-secondary: #47624f;
-  --color-secondary-foreground: #f2f6f0;
-  --color-secondary-muted: #dde5db;
+  --color-secondary: #193d37;
+  --color-secondary-foreground: #f6f0e7;
+  --color-secondary-muted: #dce3da;
 
-  --color-accent: #47624f;
-  --color-accent-foreground: #f2f6f0;
+  --color-accent: #254a43;
+  --color-accent-foreground: #f6f0e7;
 
-  --color-success: #2f6b46;
+  --color-success: #2f6350;
   --color-success-foreground: #f1f8f3;
-  --color-warning: #91560f;
+  --color-warning: #8a5a1e;
   --color-warning-foreground: #fdf5e9;
-  --color-danger: #a3312a;
+  --color-danger: #9a4038;
   --color-danger-foreground: #fdf1f0;
 
   --font-sans: var(--font-body);
@@ -2614,12 +2618,12 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .sample-reader[data-reader-theme="dark"] {
-  --reader-bg: #1f2124;
-  --reader-fg: #e8e6e0;
-  --reader-fg-muted: #a8adb2;
-  --reader-border: #343840;
-  --reader-accent: #db8c6a;
-  --reader-surface-2: #2a241f;
+  --reader-bg: #17352f;
+  --reader-fg: #f0ebe0;
+  --reader-fg-muted: #bcc7c2;
+  --reader-border: #2f544d;
+  --reader-accent: #dd9a80;
+  --reader-surface-2: #22423c;
 }
 
 .reader-toolbar {
@@ -2944,10 +2948,11 @@
   }
 }
 
-/* ===== View Transitions (עם fallback) ===== */
-@view-transition {
-  navigation: auto;
-}
+/* ===== View Transitions =====
+   הערה: `@view-transition { navigation: auto }` הוסר — הוא חל על ניווט
+   cross-document בלבד, וניווטי App Router הם same-document, ולכן הוא מעולם לא
+   רץ. המעברים שכן פועלים כאן הם מבוססי-JS (`document.startViewTransition`):
+   מעבר-הכריכה אל /preview ו-Focus Mode. הגארד שלהלן מנטרל אותם ב-reduced-motion. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -3322,9 +3327,9 @@ html.vt-book-nav::view-transition-group(book-cover) {
   --fm-ease: var(--ease-settle);
   --fm-ease-emphasis: var(--ease-emphasized);
   /* פלטת המצב האימרסיבי: Ink עמוק + Ivory, על בסיס זהות המותג. */
-  --fm-ink: #16181c;
-  --fm-ink-2: #232931;
-  --fm-ivory: #f4f2ee;
+  --fm-ink: #193d37;
+  --fm-ink-2: #254a43;
+  --fm-ivory: #f6f0e7;
   --fm-ivory-muted: color-mix(in oklab, var(--fm-ivory) 64%, transparent);
   --fm-hairline: color-mix(in oklab, var(--fm-ivory) 22%, transparent);
 }
@@ -3406,7 +3411,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 32%, transparent),
       transparent 60%
     ),
-    linear-gradient(158deg, #14161a, #0e1013);
+    linear-gradient(158deg, #17352f, #122b27);
 }
 
 /* Ambient — נשימת-זוהר עדינה מעל הרקע. */
@@ -4142,14 +4147,14 @@ body:has([data-fm-active]) {
  * reduced-motion — מצב סופי מיידי.
  * =================================================================== */
 .sig-hero {
-  --sig-ivory: #f4f2ee;
-  --sig-ivory-muted: color-mix(in oklab, #f4f2ee 60%, transparent);
+  --sig-ivory: #f6f0e7;
+  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 60%, transparent);
   --sig-warm: color-mix(in oklab, var(--color-brand) 46%, #f4f2ee);
   position: relative;
   overflow: clip;
   isolation: isolate;
   color: var(--sig-ivory);
-  background: #16181c;
+  background: #193d37;
 }
 
 /* שדה-ה-Ink החמים + זוהר + גרעין. */
@@ -4170,7 +4175,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 24%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, #232931, #14161a);
+    linear-gradient(158deg, #254a43, #17352f);
 }
 .sig-hero__field {
   position: absolute;
@@ -4346,11 +4351,13 @@ body:has([data-fm-active]) {
   display: none;
 }
 .sig-hero__cta {
-  margin-top: clamp(1.4rem, 4vw, 1.9rem);
+  /* מובייל: אחרי ספר-החתימה (H1 → מסר → ספר → פעולה). */
+  order: 3;
+  margin-top: clamp(1.15rem, 3.5vw, 1.6rem);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 .sig-hero__cta-primary {
   display: inline-flex;
@@ -4475,7 +4482,22 @@ body:has([data-fm-active]) {
     order: 0;
     max-width: 29rem;
     margin-inline-start: 0;
-    padding-block: 2rem;
+    padding-block: 2rem 0;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+  }
+  /* ה-CTA חוזר אל תחתית טור-הטקסט (הפריסה המאושרת בדסקטופ). */
+  .sig-hero__cta {
+    order: 0;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    padding-block: 0 2rem;
+  }
+  .sig-hero__object {
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
   .sig-hero__eyebrow {
     font-size: 14px;
@@ -4655,8 +4677,8 @@ body:has([data-fm-active]) {
  * בהירה. לא „כרטיס CTA ירוק”. הקופי/קישורים לא השתנו.
  * =================================================================== */
 .sig-close {
-  --sig-ivory: #f4f2ee;
-  --sig-ivory-muted: color-mix(in oklab, #f4f2ee 62%, transparent);
+  --sig-ivory: #f6f0e7;
+  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 62%, transparent);
   position: relative;
   isolation: isolate;
   overflow: clip;
@@ -4678,7 +4700,7 @@ body:has([data-fm-active]) {
       color-mix(in oklab, var(--color-brand) 22%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, #232931, #14161a);
+    linear-gradient(158deg, #254a43, #17352f);
 }
 .sig-close__container {
   position: relative;
@@ -5897,36 +5919,13 @@ body:has([data-fm-active]) {
 }
 
 
-/* ═══════════════════════════════════════════════════════════════════════
- * 2026 MOTION — Route View Transitions (native, progressive enhancement)
- * ניווט צד-לקוח (App Router) הוא same-document, ולכן `navigation: auto` נותן
- * מעבר-מסלול נטיבי בדפדפנים תומכים (Chrome). ברירת-מחדל: crossfade מהיר עם
- * הרמה עדינה — לא fade-to-black, לא החלקה אופקית ענקית. ~UI family (280ms).
- * דפדפנים ללא תמיכה: ניווט רגיל, בלי רגרסיה. reduced-motion: בלי תנועה.
- * ═══════════════════════════════════════════════════════════════════════ */
-@view-transition {
-  navigation: auto;
-}
-::view-transition-group(root) {
-  animation-duration: var(--vt-dur);
-  animation-timing-function: var(--ease-out);
-}
-::view-transition-old(root) {
-  animation: vt-out var(--vt-dur) var(--ease-out) both;
-}
-::view-transition-new(root) {
-  animation: vt-in var(--vt-dur) var(--ease-out) both;
-}
-@keyframes vt-out {
-  to { opacity: 0; transform: translateY(-6px); }
-}
-@keyframes vt-in {
-  from { opacity: 0; transform: translateY(8px); }
-}
-/* עוגני-שיתוף יציבים בין מסלולים — הלוגו/ההדר אינם „מהבהבים” במעבר. */
-.site-brand-anchor {
-  view-transition-name: brand-anchor;
-}
+/* ── ניווט-מסלול: ללא View Transitions ──
+   נבדק והוסר. `@view-transition { navigation: auto }` חל על ניווט cross-document
+   בלבד, ואילו ניווטי App Router הם same-document; המסלול הרשמי (React
+   `<ViewTransition>` + experimental.viewTransition) דורש React canary — הפרויקט
+   מקובע ל-React 19.2.4 יציב שאינו מייצא את הרכיב כלל. במקום קוד-מת שאינו רץ,
+   הניווט נשאר מיידי ונקי. מעברי ה-shared-element שכן פועלים הם מבוססי-JS
+   (`document.startViewTransition`): מעבר-הכריכה אל /preview ו-Focus Mode. */
 
 /* ═══════════════════════════════════════════════════════════════════════
  * 2026 MOTION — Scroll-driven reveals (CSS scroll/view timelines)
@@ -6054,13 +6053,94 @@ body:has([data-fm-active]) {
   outline-offset: 3px;
 }
 
-/* reduced-motion: מעברי-מסלול וחשיפות-גלילה הופכים למיידיים — לא „אותה אנימציה
-   מהר יותר”, אלא החלפת-מצב נקייה. (חשיפות-הגלילה ממילא מגודרות ב-no-preference,
-   ולכן התוכן פשוט גלוי.) */
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
+
+/* ── סמן-מצב עריכתי + קו-דגש: זהות פרטנית לכל אחד מארבעת המצבים, בתוך אותה
+   שפה עיצובית (אין ארבעה עיצובים — יש ארבעה מבטאים). ── */
+.fm-scene--enter .fm-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.fm-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-inline-end: 0.55rem;
+  border-inline-end: 1px solid color-mix(in oklab, var(--fm-accent) 40%, transparent);
+  color: color-mix(in oklab, var(--fm-accent) 72%, var(--fm-ivory));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.fm-marker::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--fm-accent);
+}
+/* קו-דגש דק מתחת לכותרת-המצב — נמשך בכניסה, בגוון-החתימה של המצב. */
+.fm-title-rule {
+  display: block;
+  width: clamp(3rem, 12vw, 5.5rem);
+  height: 2px;
+  border-radius: 2px;
+  margin-inline: auto;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--fm-accent) 85%, transparent),
+    color-mix(in oklab, var(--fm-accent) 20%, transparent)
+  );
+  transform-origin: center;
+}
+.motion-js .fm-scene--enter .fm-title-rule {
+  animation: fm-rule-in var(--dur-focus) var(--ease-out) both;
+}
+@keyframes fm-rule-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+/* ── „/en”: זהות-מותג משותפת (brand parity) ──
+   לא שכפול של עמוד-הבית העברי: אותה שפה עריכתית — קו-דגש מתחת לכותרות,
+   קצב-סקשנים אחיד, וסימן-חתימה סוגר — בגרסה פשוטה יותר, LTR. */
+.en-rule {
+  display: block;
+  width: 3.25rem;
+  height: 3px;
+  border-radius: 3px;
+  margin-top: 0.85rem;
+  background: color-mix(in oklab, var(--color-brand) 72%, var(--color-secondary));
+}
+.en-rule--sage {
+  background: color-mix(in oklab, var(--color-secondary) 78%, var(--color-brand));
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .en-rule {
+      animation: en-rule-in linear both;
+      animation-timeline: view();
+      animation-range: entry 8% entry 46%;
+      transform-origin: left center;
+    }
   }
+}
+@keyframes en-rule-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+/* סימן-חתימה אנגלי — סוגר-מותג שקט, מקביל ל-SignatureMark העברי. */
+.en-signature {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--color-foreground-muted);
+}
+.en-signature::before {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-brand) 60%, transparent);
 }

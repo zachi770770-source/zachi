@@ -11,7 +11,6 @@ import { ThesisSection } from "@/components/sections/ThesisSection";
 import { AudienceSection } from "@/components/sections/AudienceSection";
 import { MethodSection } from "@/components/sections/MethodSection";
 import { ToolsBento } from "@/components/sections/ToolsBento";
-import { InsideBookSection } from "@/components/sections/InsideBookSection";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { ReaderKitOffer } from "@/components/reader/ReaderKitOffer";
@@ -133,7 +132,9 @@ export default function BookPage() {
       {/* ששת הכלים המעשיים — אזור Editorial Luxury אינטראקטיבי. עוגני
           #tool-<id> משמשים deep-link מ-Path Finder ומקישורים ישירים. */}
       <ToolsBento />
-      <InsideBookSection />
+      {/* „מה יש בתוך הספר” הוסר: הוא חזר על שלושת השלבים ש-MethodSection כבר
+          מסביר לעומק (רעש → שער → בנייה) כרשימת-תוכן בת 186 תווים, והנספח
+          („כלים לשימוש חוזר”) מכוסה ב-ToolsBento. הרכיב נשאר בריפו. */}
       <OutcomesSection />
       {/* ערכת הקורא — נקודת-ערך לפני הרכישה: „קונים את הספר ומקבלים גם את
           הכלים”. וריאנט „link” בלבד — מפנה ל-/reader בלי CTA-אמזון שני שמתחרה
