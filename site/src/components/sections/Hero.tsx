@@ -90,7 +90,7 @@ export function Hero() {
             </p>
             <p className="sig-hero__sub sig-hero__sub--desktop">
               מציאת אדם היא רק ההתחלה. הספר עוזר לזהות דפוסים שחוזרים בקשרים, להבין מה
-              מפעיל אותם — ולבנות קשר אחרת.
+              מפעיל אותם — ולבנות זוגיות אחרת.
             </p>
 
             <div className="sig-hero__cta">
