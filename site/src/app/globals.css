@@ -103,34 +103,44 @@
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
 
-  /* ===== מערכת מוֹשַן אחת (PHASE 14) — טוקנים לזמן ולהאטה ===== */
+  /* ===== שפת-תנועה אחת: סולם-משכים קנוני יחיד + easings משותפים =====
+   *
+   * הסולם הקנוני הוא `--dur-*` (חמש משפחות סמנטיות). קודם התקיימו כאן *שני*
+   * סולמות עצמאיים במקביל — `--motion-fast/panel/reveal/slow` מול
+   * `--dur-micro/ui/focus/editorial/physical` — והערה קודמת טענה שהראשונים
+   * הם aliases אל השניים. הם לא היו: שניהם היו ערכים ספרותיים נפרדים.
+   * עכשיו הטענה נכונה: `--motion-*` הם aliases אמיתיים.
+   *
+   * ערכי הסולם הקנוני כוילו אל *השימוש הרווח בפועל*, כדי שהמרת-הטוקנים לא
+   * תשנה תזמון נראה: --dur-micro אימץ את 220ms של --motion-fast (35 שימושים),
+   * --dur-ui את 300ms של --motion-panel (11), ו---dur-editorial את 560ms של
+   * חשיפת-הסקשן (19 שורות). כך רוב מוחלט של ההצהרות שומר על התזמון המדויק
+   * שהיה, ורק מיעוט זז ב-20–40ms — מתחת לסף-הבחנה במשכים האלה. */
+  --dur-micro: 220ms;      /* לחיצה/hover/אנדרליין */
+  --dur-ui: 300ms;         /* מעברי-ממשק/פאנל */
+  --dur-focus: 460ms;      /* טרנספורמציית-מצב (Focus/shared-element) */
+  --dur-editorial: 560ms;  /* חשיפת-סקשן עריכתית */
+  --dur-physical: 900ms;   /* תנועה פיזית (ספר/כריכה) */
+
+  /* easings משותפים: standard ליציאה, emphasized לכניסה מודגשת,
+     settle להתיישבות פיזית. */
   --ease-standard: cubic-bezier(0.33, 0, 0.2, 1); /* יציאה רכה, ללא באונס */
   --ease-emphasized: cubic-bezier(0.2, 0, 0, 1); /* מודגש, פתיחת פאנל */
-  --motion-fast: 220ms; /* כפתורים ואינטראקציות קטנות (180–260) */
-  --motion-panel: 300ms; /* פאנלים ומעברים מקומיים (240–360) */
-  --motion-reveal: 600ms; /* הופעת סקשן (450–700) */
-  /* PHASE MOTION 1 — הרחבת שפת התנועה: התיישבות רכה, מרחקים וסטגר משותפים.
-     כל התנועה מבוססת opacity/transform בלבד (ללא CLS). */
   --ease-settle: cubic-bezier(0.22, 1, 0.36, 1); /* התיישבות/בנייה, ללא באונס */
-  --motion-slow: 900ms; /* פתיחי-על (Hero cinematic) */
-  --motion-dist-sm: 8px; /* מיקרו-תנועה (חיצים, hover) */
-  --motion-dist-md: 16px; /* הופעת סקשן */
-  --motion-dist-lg: 28px; /* כניסה מודגשת (כריכה/כותרת) */
-  --motion-stagger: 90ms; /* מרווח בין פריטים ברצף */
-
-  /* ===== 2026 Motion families — שפת-תנועה אחת, חמש משפחות מתוזמנות =====
-     כל שאר הטוקנים (--motion-fast וכו׳) הם aliases אל המשפחות האלה כדי שלא
-     יתפזרו עשרות משכים שרירותיים. easings משותפים: standard ליציאה, emphasized
-     לכניסה מודגשת, settle להתיישבות פיזית. */
-  --dur-micro: 180ms;      /* לחיצה/hover/אנדרליין — 150–220 */
-  --dur-ui: 280ms;         /* מעברי-ממשק/פאנל — 220–350 */
-  --dur-focus: 460ms;      /* טרנספורמציית-מצב (Focus/shared-element) — 350–550 */
-  --dur-editorial: 620ms;  /* חשיפת-סקשן עריכתית — 450–700 */
-  --dur-physical: 950ms;   /* תנועה פיזית (ספר/כריכה) — 800–1100 */
   --ease-out: var(--ease-standard);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* היפוך סימטרי (דף/מצלמה) */
-  /* aliases לאחור-תאימות — ממופים אל המשפחות. */
-  --vt-dur: var(--dur-ui); /* משך מעבר-מסלול (View Transitions) */
+
+  /* aliases אמיתיים אל הסולם הקנוני — נשמרים כי יש להם 51 אתרי-קריאה קיימים,
+     והשמות נושאים משמעות מקומית ברורה. אין להם ערך משלהם. */
+  --motion-fast: var(--dur-micro);
+  --motion-panel: var(--dur-ui);
+  --motion-reveal: var(--dur-editorial);
+  --motion-slow: var(--dur-physical);
+
+  /* מרחק-תנועה וסטגר משותפים (כל התנועה opacity/transform בלבד — ללא CLS).
+     שניהם נדרסים במובייל בבלוק של .reveal, שם התנועה מרוסנת יותר. */
+  --motion-dist-sm: 8px;   /* מיקרו-תנועה (פקדים צפים, חיצים) */
+  --motion-dist-md: 16px;  /* הופעת סקשן */
+  --motion-stagger: 80ms;  /* מרווח בין פריטים ברצף */
 }
 
 /* בדסקטופ הבועה יושבת נמוך יותר ויש יותר אוויר, ולכן גם טווח-הנחיתה קטן.
@@ -594,13 +604,17 @@
    * ללא JS / reduced-motion / כשל הידרציה — התוכן פשוט גלוי מיד. */
   .motion-js .reveal {
     opacity: 0;
-    /* fade-up עדין ואחיד: translateY 16px → 0, opacity 0 → 1, 560ms, ease-out
-       (var(--ease-standard)). מרוסן ו-Premium — לא „מוקפץ”, transform+opacity
-       בלבד (ללא CLS). */
-    transform: translateY(16px);
+    /* fade-up עדין ואחיד, מוגדר בטוקנים בלבד: מרחק --motion-dist-md (16px),
+       משך --dur-editorial (560ms), ease-out. שלושת הערכים נמסרים דרך משתנים
+       מקומיים כדי שגרסת-המובייל תדרוס אותם בנקודה אחת (למטה) במקום לשכפל
+       את כל ההצהרה. transform+opacity בלבד (ללא CLS). */
+    --reveal-dur: var(--dur-editorial);
+    --reveal-dist: var(--motion-dist-md);
+    --reveal-stagger: var(--motion-stagger);
+    transform: translateY(var(--reveal-dist));
     transition:
-      opacity 560ms var(--ease-standard),
-      transform 560ms var(--ease-standard);
+      opacity var(--reveal-dur) var(--ease-standard),
+      transform var(--reveal-dur) var(--ease-standard);
     will-change: opacity, transform;
   }
   .motion-js .reveal.is-visible {
@@ -614,16 +628,17 @@
   }
   /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה בסטגר עדין (--i נקבע ב-JSX / מונה). */
   .motion-js .reveal[data-stagger] {
-    transition-delay: calc(var(--i, 0) * 80ms);
+    transition-delay: calc(var(--i, 0) * var(--reveal-stagger));
   }
   /* מובייל: תנועה וסטגר מופחתים — תחושת מהירות, בלי לעכב תוכן. */
   @media (max-width: 640px) {
+    /* מובייל: אותה חשיפה, מרוסנת יותר. הערכים כאן נשארים ספרותיים בכוונה —
+       הם *הפחתה* מכוונת של הבסיס ולא מדרגה בסולם הקנוני, ולכן אין להם טוקן
+       משלהם. נדרסים בנקודה אחת, וההצהרה עצמה למעלה נשארת מבוססת-טוקנים. */
     .motion-js .reveal {
-      transform: translateY(12px);
-      transition-duration: 460ms;
-    }
-    .motion-js .reveal[data-stagger] {
-      transition-delay: calc(var(--i, 0) * 55ms);
+      --reveal-dur: 460ms;
+      --reveal-dist: 12px;
+      --reveal-stagger: 55ms;
     }
   }
   /* אין כאן „גיבוי-על” מבוסס-זמן: אנימציית reveal-failsafe שחשפה כל .reveal
@@ -679,7 +694,7 @@
   @keyframes askStepIn {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(var(--motion-dist-sm));
     }
     to {
       opacity: 1;
@@ -1515,7 +1530,7 @@
     user-select: none;
   }
   .peek-page--enter {
-    animation: peekEnter 560ms var(--ease-settle) both;
+    animation: peekEnter var(--dur-editorial) var(--ease-settle) both;
     transform-origin: right center;
     transform-style: preserve-3d;
   }
@@ -1852,7 +1867,7 @@
    * נקרא כאנימציית-ווב ולא כחתימה עריכתית. שני האפקטים יחד היו הצטברות.) */
   .hero-build__stroke {
     transform: scaleX(0);
-    animation: heroBuildStroke 560ms var(--ease-settle) 1520ms both;
+    animation: heroBuildStroke var(--dur-editorial) var(--ease-settle) 1520ms both;
   }
   @keyframes heroBuildStroke {
     to {
@@ -1874,7 +1889,7 @@
   }
   /* ה-CTA וגוש הפעולה — transform בלבד (opacity נשארת 1) ⇒ גלוי ולחיץ מיידית. */
   .hero-rise-soft {
-    transform: translateY(8px);
+    transform: translateY(var(--motion-dist-sm));
     animation: heroRiseSoft 360ms var(--ease-settle) both;
   }
   @keyframes heroRiseSoft {
@@ -2235,7 +2250,7 @@
 @media (max-width: 767px) {
   .compass-pill[data-past-hero="false"] {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(var(--motion-dist-sm));
     pointer-events: none;
   }
 }
@@ -2248,7 +2263,7 @@
 @media (max-width: 767px) {
   body:has([data-ask-inline-active]) .compass-pill {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(var(--motion-dist-sm));
     pointer-events: none;
   }
 }
@@ -2263,7 +2278,7 @@
 @media (max-width: 767px) {
   body[data-path-in-view] .compass-pill {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(var(--motion-dist-sm));
     pointer-events: none;
   }
 }
@@ -3435,7 +3450,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
 body:has([data-fm-active]) .compass-pill,
 body:has([data-fm-active]) aside[aria-label="בר הטעימה"] {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(var(--motion-dist-sm));
   pointer-events: none;
 }
 /* מונע סחיפת-גלילה: כשגובה-תוכן הבמה משתנה בין הפעימות, עיגון-הגלילה של הדפדפן
@@ -4189,10 +4204,10 @@ body:has([data-fm-active]) {
 }
 @media (min-width: 640px) {
   .motion-js .fslab-split__fact {
-    animation: fslab-sep-fact 560ms var(--ease-emphasized) both;
+    animation: fslab-sep-fact var(--dur-editorial) var(--ease-emphasized) both;
   }
   .motion-js .fslab-split__story {
-    animation: fslab-sep-story 560ms var(--ease-emphasized) both;
+    animation: fslab-sep-story var(--dur-editorial) var(--ease-emphasized) both;
   }
 }
 @keyframes fslab-sep-fact {
@@ -4221,7 +4236,7 @@ body:has([data-fm-active]) {
 @keyframes fslab-strike {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(var(--motion-dist-sm));
   }
   to {
     opacity: 1;
@@ -4971,10 +4986,10 @@ body:has([data-fm-active]) {
 }
 .motion-js .recog .recog__support {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(var(--motion-dist-sm));
   transition:
-    opacity 560ms var(--ease-standard) 420ms,
-    transform 560ms var(--ease-settle) 420ms;
+    opacity var(--dur-editorial) var(--ease-standard) 420ms,
+    transform var(--dur-editorial) var(--ease-settle) 420ms;
 }
 .motion-js .recog.is-visible .recog__support {
   opacity: 1;
@@ -4987,7 +5002,7 @@ body:has([data-fm-active]) {
 }
 .motion-js .recog .recog__quote {
   border-inline-start-color: transparent;
-  transition: border-color 500ms var(--ease-standard) 560ms;
+  transition: border-color 500ms var(--ease-standard) var(--dur-editorial);
 }
 .motion-js .recog.is-visible .recog__quote {
   border-inline-start-color: var(--color-brand);
@@ -5008,7 +5023,7 @@ body:has([data-fm-active]) {
 }
 .motion-js .recog .recog__love {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(var(--motion-dist-sm));
   transition:
     opacity 360ms var(--ease-standard) 820ms,
     transform 360ms var(--ease-settle) 820ms;
@@ -5064,8 +5079,8 @@ body:has([data-fm-active]) {
   opacity: 0;
   transform: translateY(12px);
   transition:
-    opacity 560ms var(--ease-settle),
-    transform 560ms var(--ease-settle);
+    opacity var(--dur-editorial) var(--ease-settle),
+    transform var(--dur-editorial) var(--ease-settle);
 }
 .motion-js .s2p.is-visible .s2p__head {
   opacity: 1;
@@ -5093,7 +5108,7 @@ body:has([data-fm-active]) {
 /* הציר נמשך מהנקודה כלפי מטה — „נקודה → מסלול”. */
 .motion-js .s2p .s2p__axis {
   transform: scaleY(0);
-  transition: transform 560ms var(--ease-emphasized) 400ms;
+  transition: transform var(--dur-editorial) var(--ease-emphasized) 400ms;
 }
 .motion-js .s2p.is-visible .s2p__axis {
   transform: scaleY(1);
@@ -5112,7 +5127,7 @@ body:has([data-fm-active]) {
   transition:
     opacity 380ms var(--ease-settle),
     transform 380ms var(--ease-settle);
-  transition-delay: calc(560ms + var(--i, 0) * 80ms);
+  transition-delay: calc(var(--dur-editorial) + var(--i, 0) * var(--motion-stagger));
 }
 .motion-js .s2p.is-visible .s2p__station {
   opacity: 1;
@@ -5122,7 +5137,7 @@ body:has([data-fm-active]) {
 .motion-js .s2p .s2p__node {
   transform: scale(0.4);
   transition: transform 380ms var(--ease-emphasized);
-  transition-delay: calc(560ms + var(--i, 0) * 80ms);
+  transition-delay: calc(var(--dur-editorial) + var(--i, 0) * var(--motion-stagger));
 }
 .motion-js .s2p.is-visible .s2p__node {
   transform: none;
@@ -5158,7 +5173,7 @@ body:has([data-fm-active]) {
 }
 .motion-js .path-awaken .path-awaken__thread {
   transform: translateX(-50%) scaleY(0);
-  transition: transform 560ms var(--ease-emphasized);
+  transition: transform var(--dur-editorial) var(--ease-emphasized);
 }
 .motion-js .path-awaken.is-visible .path-awaken__thread {
   transform: translateX(-50%) scaleY(1);
@@ -5234,8 +5249,8 @@ body:has([data-fm-active]) {
   opacity: 0;
   transform: translateY(10px);
   transition:
-    opacity 560ms var(--ease-standard) 440ms,
-    transform 560ms var(--ease-settle) 440ms;
+    opacity var(--dur-editorial) var(--ease-standard) 440ms,
+    transform var(--dur-editorial) var(--ease-settle) 440ms;
 }
 .motion-js .sig-close__inner.is-visible .sig-close__avail {
   opacity: 1;
@@ -5799,7 +5814,7 @@ body:has([data-fm-active]) {
   to { opacity: 0; transform: scale(0.94) translateY(6px); }
 }
 @keyframes sit-return {
-  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  from { opacity: 0; transform: scale(0.96) translateY(var(--motion-dist-sm)); }
 }
 
 /* מחליף-מצב בתוך התוצאה — מעבר בין מצבים בלי לחזור לרשת. */
