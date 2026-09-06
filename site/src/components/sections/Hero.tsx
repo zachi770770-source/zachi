@@ -7,6 +7,8 @@ import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
 import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
+import { HeroBookGL } from "@/components/shared/book-gl/HeroBookGL";
+import { siteConfig } from "@/config/site";
 
 /**
  * Hero — „opening scene של מותג” (PHASE SIGNATURE). לא „כריכה ליד טקסט וכפתור”:
@@ -54,6 +56,14 @@ export function Hero() {
                 </BookLink>
               </BookTilt>
             </div>
+
+            {/* ההצגה החתומה: ספר WebGL (Three.js) — נטען עצלנית ורק כשמותר תנועה
+                ו-WebGL זמין. כשהוא פעיל, כריכת-ה-CSS מוסתרת (‎:has). אחרת ה-CSS
+                נשאר כ-fallback מלא (reduced-motion / no-WebGL / no-JS). */}
+            <HeroBookGL
+              coverSrc={siteConfig.images.mockup3d}
+              coverAlt="הציצו בספר, לקריאת טעימה"
+            />
           </div>
 
           {/* הטיפוגרפיה: חוצה מעל הבמה בשטח-שלילי. */}

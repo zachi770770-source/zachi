@@ -91,6 +91,20 @@
   --motion-dist-md: 16px; /* הופעת סקשן */
   --motion-dist-lg: 28px; /* כניסה מודגשת (כריכה/כותרת) */
   --motion-stagger: 90ms; /* מרווח בין פריטים ברצף */
+
+  /* ===== 2026 Motion families — שפת-תנועה אחת, חמש משפחות מתוזמנות =====
+     כל שאר הטוקנים (--motion-fast וכו׳) הם aliases אל המשפחות האלה כדי שלא
+     יתפזרו עשרות משכים שרירותיים. easings משותפים: standard ליציאה, emphasized
+     לכניסה מודגשת, settle להתיישבות פיזית. */
+  --dur-micro: 180ms;      /* לחיצה/hover/אנדרליין — 150–220 */
+  --dur-ui: 280ms;         /* מעברי-ממשק/פאנל — 220–350 */
+  --dur-focus: 460ms;      /* טרנספורמציית-מצב (Focus/shared-element) — 350–550 */
+  --dur-editorial: 620ms;  /* חשיפת-סקשן עריכתית — 450–700 */
+  --dur-physical: 950ms;   /* תנועה פיזית (ספר/כריכה) — 800–1100 */
+  --ease-out: var(--ease-standard);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* היפוך סימטרי (דף/מצלמה) */
+  /* aliases לאחור-תאימות — ממופים אל המשפחות. */
+  --vt-dur: var(--dur-ui); /* משך מעבר-מסלול (View Transitions) */
 }
 
 /* בדסקטופ הבועה יושבת נמוך יותר ויש יותר אוויר, ולכן גם טווח-הנחיתה קטן.
@@ -4228,6 +4242,39 @@ body:has([data-fm-active]) {
   width: clamp(14rem, 62vw, 18rem);
   filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.55));
 }
+
+/* ── ההצגה החתומה: ספר WebGL (Three.js) ──
+   מוסתר עד שה-JS מפעיל WebGL בהצלחה (data-active). כשפעיל — כריכת-ה-CSS
+   (fallback) מוסתרת דרך :has, ואין ספר כפול. */
+.hero-bookgl {
+  display: none;
+  position: relative;
+  width: 100%;
+  max-width: 34rem;
+  aspect-ratio: 3 / 2;
+  margin-inline: auto;
+}
+.hero-bookgl[data-active="true"] {
+  display: block;
+}
+.sig-hero__object:has(.hero-bookgl[data-active="true"]) .sig-hero__cover {
+  display: none;
+}
+.hero-bookgl__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 8px;
+}
+.hero-bookgl__link:focus-visible {
+  outline: 2px solid var(--sig-ivory);
+  outline-offset: 6px;
+}
+.hero-bookgl__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 .sig-hero__cover-shadow {
   display: none;
 }
@@ -4396,9 +4443,9 @@ body:has([data-fm-active]) {
     position: static;
     order: 0;
     inset: auto;
-    width: auto;
+    width: 100%;
     align-self: center;
-    justify-self: center;
+    justify-self: stretch;
     min-height: 0;
     place-items: center;
     z-index: 1;
