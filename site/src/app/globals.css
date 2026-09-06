@@ -5504,6 +5504,7 @@ body:has([data-fm-active]) {
   --pb-page: #e7e3d8; /* דף עליון — paper-white (לא בוהק) */
   --pb-leaf: #efece3; /* נייר-הדפים הפנימיים */
   --pb-board: #201d1a; /* לוח-כריכה / שדרה */
+  --pb-total: 5900ms; /* משך הרצף — מכויל ל-hold קריא של ~1.85s לכל עמוד */
   animation: pb-fade 420ms var(--ease-standard) var(--book-open-delay) both;
 }
 
@@ -5514,7 +5515,7 @@ body:has([data-fm-active]) {
   aspect-ratio: 0.66 / 1;
   transform-style: preserve-3d;
   transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw));
-  animation: pb-rise var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-rise var(--pb-total) linear var(--book-open-delay) both;
 }
 .pbook__slab {
   position: absolute;
@@ -5603,7 +5604,7 @@ body:has([data-fm-active]) {
     inset 1px 0 0 0 rgba(0, 0, 0, 0.25),
     -18px 26px 40px -22px rgba(0, 0, 0, 0.6);
   backface-visibility: hidden;
-  animation: pb-open var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-open var(--pb-total) linear var(--book-open-delay) both;
 }
 
 /* צל-מגע על ה„רצפה” — מקרקע ומפריד מהרקע. אינו מסתובב עם הספר. */
@@ -5634,57 +5635,59 @@ body:has([data-fm-active]) {
 
 /* ── keyframes ── */
 @keyframes pb-fade { from { opacity: 0; } to { opacity: 1; } }
-/* presence → הרמה קלה → התייצבות. */
+/* presence → הרמה קלה → התייצבות מוקדמת (עד 13%) ואז יציב — כדי שהטקסט לא ינוע
+   בזמן ה-hold. הזמנים לינאריים; ה-easing מוגדר פר-מקטע. */
 @keyframes pb-rise {
-  0% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(3%) scale(0.985); }
-  10% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(2.4%) scale(0.99); }
-  46% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(-1.2%) scale(1.006); }
+  0% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(3.2%) scale(0.984); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  13% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
   100% { transform: rotateX(var(--pb-pitch)) rotateY(var(--pb-yaw)) translateY(0) scale(1); }
 }
-/* הכריכה: סגורה (presence) → נפתחת רחב שמאלה (ספר עברי) → מתייצבת ל-glimpse הסופי. */
+/* הכריכה: סגורה (presence) → נפתחת רחב שמאלה (ספר עברי) → יציבה בזמן שני ה-holds
+   והדפדופים → מתייצבת ל-glimpse הסופי (settle). */
 @keyframes pb-open {
-  0%, 10% { transform: translateZ(3px) rotateY(0deg); }
-  22% { transform: translateZ(3px) rotateY(calc(var(--pb-openwide) + 2deg)); }
-  70% { transform: translateZ(3px) rotateY(var(--pb-openwide)); }
+  0% { transform: translateZ(3px) rotateY(0deg); }
+  4% { transform: translateZ(3px) rotateY(0deg); animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1); }
+  14% { transform: translateZ(3px) rotateY(calc(var(--pb-openwide) + 2deg)); }
+  20% { transform: translateZ(3px) rotateY(var(--pb-openwide)); }
+  88% { transform: translateZ(3px) rotateY(var(--pb-openwide)); animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1); }
   100% { transform: translateZ(3px) rotateY(var(--pb-open)); }
 }
-/* דף ראשון — דפדוף פיזי מלא: שטוח (טקסט עברי) → מתרומם ב-hinge בשדרה (ימין), מקבל
-   curl/arc עדין (rotateX) והרמת-Z מתונה, מסתובב 180° במלואו ונשכב מעבר לשדרה
-   (ימינה — מתרחק מה-H1). הדף קיים לאורך כל הסיבוב; הפָּן האחורי נייר ריק. בסוף חוזר
-   שטוח כדי לשמר את ה-glimpse הריק של המצב הסופי. */
+/* דף ראשון — דפדוף פיזי מלא: שטוח (טקסט עברי, יציב ב-hold עד 39%) → מתרומם ב-hinge
+   בשדרה (ימין) עם curl/arc עדין (rotateX) והרמת-Z מתונה, מסתובב 180° במלואו ונשכב
+   מעבר לשדרה (ימינה — מתרחק מה-H1). הדף קיים לאורך כל הסיבוב; הפָּן האחורי נייר ריק.
+   ב-settle חוזר שטוח כדי לשמר את ה-glimpse הריק של המצב הסופי. easing פר-מקטע. */
 @keyframes pb-flip1 {
-  0%, 30% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); }
-  36% { transform: translateZ(15px) rotateY(52deg) rotateX(-7deg); }
-  41% { transform: translateZ(14px) rotateY(120deg) rotateX(-6deg); }
-  46% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); }
-  76% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); }
-  90% { transform: translateZ(13px) rotateY(96deg) rotateX(-5deg); }
+  0% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); }
+  39% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  43% { transform: translateZ(16px) rotateY(52deg) rotateX(-7deg); animation-timing-function: linear; }
+  47% { transform: translateZ(14px) rotateY(120deg) rotateX(-6deg); animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
+  50% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); }
+  88% { transform: translateZ(3px) rotateY(180deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  94% { transform: translateZ(13px) rotateY(96deg) rotateX(-5deg); }
   100% { transform: translateZ(2.2px) rotateY(0deg) rotateX(0deg); }
 }
-/* דף שני — נחשף אחרי הדפדוף הראשון; דפדוף פיזי מלא זהה, מעט מאוחר יותר. */
+/* דף שני — נחשף אחרי הדפדוף הראשון; דפדוף פיזי מלא זהה, עם hold קריא משלו (50%→77%). */
 @keyframes pb-flip2 {
-  0%, 54% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); }
-  60% { transform: translateZ(14px) rotateY(52deg) rotateX(-7deg); }
-  65% { transform: translateZ(13px) rotateY(120deg) rotateX(-6deg); }
-  70% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); }
-  80% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); }
-  92% { transform: translateZ(12px) rotateY(96deg) rotateX(-5deg); }
+  0% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); }
+  77% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  81% { transform: translateZ(15px) rotateY(52deg) rotateX(-7deg); animation-timing-function: linear; }
+  85% { transform: translateZ(13px) rotateY(120deg) rotateX(-6deg); animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
+  88% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); }
+  90.5% { transform: translateZ(2.5px) rotateY(180deg) rotateX(0deg); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
   100% { transform: translateZ(1.4px) rotateY(0deg) rotateX(0deg); }
 }
 /* moving shadow — הצללה נעה על-פני הדף המסתובב (מתחזקת סביב האנך). */
 @keyframes pb-sheen1 {
-  0%, 30% { opacity: 0; }
-  38% { opacity: 0.36; }
-  46%, 84% { opacity: 0; }
-  92% { opacity: 0.28; }
+  0%, 39% { opacity: 0; }
+  45% { opacity: 0.34; }
+  50%, 88% { opacity: 0; }
+  94% { opacity: 0.24; }
   100% { opacity: 0; }
 }
 @keyframes pb-sheen2 {
-  0%, 54% { opacity: 0; }
-  62% { opacity: 0.36; }
-  70%, 86% { opacity: 0; }
-  94% { opacity: 0.26; }
-  100% { opacity: 0; }
+  0%, 77% { opacity: 0; }
+  83% { opacity: 0.34; }
+  88%, 100% { opacity: 0; }
 }
 
 /* ── דפים מתהפכים (leaves) — hinge בשדרה (ימין), טקסט עברי אמיתי בפָּן הקדמי ── */
@@ -5697,10 +5700,10 @@ body:has([data-fm-active]) {
 .pbook__leaf--p2 { transform: translateZ(1.4px) rotateY(0deg); }
 .pbook__leaf--p1 { transform: translateZ(2.2px) rotateY(0deg); }
 .motion-js .book-cover--open .pbook__leaf--p1 {
-  animation: pb-flip1 var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-flip1 var(--pb-total) linear var(--book-open-delay) both;
 }
 .motion-js .book-cover--open .pbook__leaf--p2 {
-  animation: pb-flip2 var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-flip2 var(--pb-total) linear var(--book-open-delay) both;
 }
 /* שני פָּנים לכל דף — קדמי (טקסט) ואחורי (נייר ריק, מסובב 180° כדי שהטקסט לא ישוקף). */
 .pbook__face {
@@ -5726,10 +5729,10 @@ body:has([data-fm-active]) {
   pointer-events: none;
 }
 .motion-js .book-cover--open .pbook__leaf--p1 .pbook__sheen {
-  animation: pb-sheen1 var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-sheen1 var(--pb-total) linear var(--book-open-delay) both;
 }
 .motion-js .book-cover--open .pbook__leaf--p2 .pbook__sheen {
-  animation: pb-sheen2 var(--book-open-total) var(--ease-settle) var(--book-open-delay) both;
+  animation: pb-sheen2 var(--pb-total) linear var(--book-open-delay) both;
 }
 /* גוש-הטקסט: RTL, מרחק מהשדרה (ימין) ומצד-הכריכה-הנפתחת (שמאל) שה-glimpse יישאר ריק. */
 .pbook__ptext {
@@ -5770,7 +5773,7 @@ body:has([data-fm-active]) {
    בדפדוף: לא reader זעיר — מילים גדולות בלבד (כותרת + שורה אחת), מאותו טקסט מאושר. */
 @media (max-width: 640px) {
   /* ¾ עמוק יותר + הזזה שמאלה + width קטן מעט — הדפדוף הפיזי המלא נשאר במסך. */
-  .motion-js .book-cover--open .pbook { --pb-yaw: 47deg; transform: translateX(-9%); }
+  .motion-js .book-cover--open .pbook { --pb-yaw: 47deg; transform: translateX(-9%); --pb-total: 4200ms; }
   .pbook__stage { width: 66%; }
   .pbook__ptext { inset: 17% 24% 15% 12%; gap: 0.5em; }
   .pbook__ph { font-size: 7cqw; line-height: 1.28; margin-bottom: 0.2em; }
