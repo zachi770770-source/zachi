@@ -162,6 +162,10 @@ export function HomePathEntry({
             situationId={active.situation}
             onContinue={() => openStation(active.station)}
             onBack={closeActive}
+            onSwitch={(id) => {
+              const next = homePaths.find((x) => x.id === id);
+              if (next) openFocus(next.id, next.askStation);
+            }}
           />
         </React.Suspense>
       </>
@@ -269,7 +273,13 @@ export function HomePathEntry({
             <Link
               href={p.stationHref}
               data-index={index}
-              style={{ ["--i" as string]: String(index) }}
+              // שם-מעבר ייחודי לכל כרטיס: כשמצב נבחר, הכרטיסים האחרים *נסוגים*
+              // (מתרחקים ודוהים) במקום להיעלם בחיתוך — והנבחר ממשיך דרך כותרתו
+              // (fm-title) אל כותרת-התוצאה. מעבר-מצב אחד ורציף.
+              style={{
+                ["--i" as string]: String(index),
+                viewTransitionName: `sit-card-${index}`,
+              }}
               onClick={(e) => {
                 if (!isPlainClick(e)) return;
                 e.preventDefault();

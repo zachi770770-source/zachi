@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { focusUi, getFocusSituation } from "@/content/focusMode";
+import { focusUi, focusSituations, getFocusSituation } from "@/content/focusMode";
 import type { HomePathId } from "@/content/homePaths";
 import { withViewTransition } from "@/lib/motion/viewTransition";
 
@@ -41,12 +41,15 @@ export function FocusMode({
   situationId,
   onContinue,
   onBack,
+  onSwitch,
 }: {
   situationId: HomePathId;
   /** ממשיך אל השיחה הדטרמיניסטית של המצב (נחשף בשלב הפעולה). */
   onContinue: () => void;
   /** חזרה לבחירת-המצב. */
   onBack: () => void;
+  /** מעבר ישיר למצב אחר — בלי לחזור לרשת (החלפה אלגנטית). */
+  onSwitch?: (id: HomePathId) => void;
 }) {
   const s = getFocusSituation(situationId);
   const [stage, setStage] = React.useState<Stage>("enter");
@@ -131,6 +134,23 @@ export function FocusMode({
             <span className="fm-status__dot" />
             {s.title}
           </span>
+          {/* החלפת-מצב אלגנטית: כל ארבעת המצבים נשארים בהישג-יד; הנבחר מודגש
+              והאחרים שקטים — בלי לחזור לרשת ובלי לאבד את ההקשר. */}
+          {onSwitch ? (
+            <span className="fm-switch" role="group" aria-label={focusUi.regionLabel}>
+              {focusSituations.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className="fm-switch__chip"
+                  aria-current={f.id === situationId ? "true" : undefined}
+                  onClick={() => f.id !== situationId && onSwitch(f.id)}
+                >
+                  {f.title}
+                </button>
+              ))}
+            </span>
+          ) : null}
         </div>
 
         {stage === "enter" && (

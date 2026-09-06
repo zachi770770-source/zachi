@@ -5991,3 +5991,65 @@ body:has([data-fm-active]) {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: none; }
 }
+
+/* ── Focus Mode: מעבר-מצב אחד ורציף (shared-element) ──
+   הכרטיס הנבחר ממשיך דרך כותרתו (fm-title) אל כותרת-התוצאה; שאר הכרטיסים
+   *נסוגים* — מתרחקים מעט ודוהים — במקום להיחתך. בחזרה הם עולים בחזרה למקומם.
+   רק transform/opacity (קומפוזיטור). ללא תמיכה ב-VT: החלפת-מצב מיידית. */
+::view-transition-old(sit-card-0),
+::view-transition-old(sit-card-1),
+::view-transition-old(sit-card-2),
+::view-transition-old(sit-card-3) {
+  animation: sit-recede var(--dur-focus) var(--ease-out) both;
+}
+::view-transition-new(sit-card-0),
+::view-transition-new(sit-card-1),
+::view-transition-new(sit-card-2),
+::view-transition-new(sit-card-3) {
+  animation: sit-return var(--dur-focus) var(--ease-out) both;
+}
+@keyframes sit-recede {
+  to { opacity: 0; transform: scale(0.94) translateY(6px); }
+}
+@keyframes sit-return {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+}
+
+/* מחליף-מצב בתוך התוצאה — מעבר בין מצבים בלי לחזור לרשת. */
+.fm-switch {
+  display: none;
+  align-items: center;
+  gap: 0.3rem;
+}
+@media (min-width: 720px) {
+  .fm-switch { display: inline-flex; }
+  .fm-status { display: none; }
+}
+.fm-switch__chip {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fm-ivory-muted);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out);
+}
+.fm-switch__chip:hover {
+  color: var(--fm-ivory);
+  background: color-mix(in oklab, var(--fm-ivory) 8%, transparent);
+}
+.fm-switch__chip[aria-current="true"] {
+  color: var(--fm-ivory);
+  border-color: color-mix(in oklab, var(--fm-accent) 48%, transparent);
+  background: color-mix(in oklab, var(--fm-accent) 15%, transparent);
+}
+.fm-switch__chip:focus-visible {
+  outline: 2px solid var(--fm-ivory);
+  outline-offset: 3px;
+}
