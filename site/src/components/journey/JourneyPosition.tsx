@@ -54,6 +54,8 @@ export function JourneyPosition({ journeyId }: { journeyId: JourneyId }) {
           <li
             key={step.id}
             className="journey-progress__step"
+            // אינדקס-הרצף לסטגר: התחנות מתיישבות אחת אחרי השנייה.
+            style={{ ["--i" as string]: String(i) }}
             data-state={step.state}
             aria-current={step.state === "current" ? "step" : undefined}
           >
