@@ -5896,3 +5896,98 @@ body:has([data-fm-active]) {
   .sig-hero__object { margin-block-end: 2rem; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * 2026 MOTION — Route View Transitions (native, progressive enhancement)
+ * ניווט צד-לקוח (App Router) הוא same-document, ולכן `navigation: auto` נותן
+ * מעבר-מסלול נטיבי בדפדפנים תומכים (Chrome). ברירת-מחדל: crossfade מהיר עם
+ * הרמה עדינה — לא fade-to-black, לא החלקה אופקית ענקית. ~UI family (280ms).
+ * דפדפנים ללא תמיכה: ניווט רגיל, בלי רגרסיה. reduced-motion: בלי תנועה.
+ * ═══════════════════════════════════════════════════════════════════════ */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(root) {
+  animation-duration: var(--vt-dur);
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-old(root) {
+  animation: vt-out var(--vt-dur) var(--ease-out) both;
+}
+::view-transition-new(root) {
+  animation: vt-in var(--vt-dur) var(--ease-out) both;
+}
+@keyframes vt-out {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes vt-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+/* עוגני-שיתוף יציבים בין מסלולים — הלוגו/ההדר אינם „מהבהבים” במעבר. */
+.site-brand-anchor {
+  view-transition-name: brand-anchor;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * 2026 MOTION — Scroll-driven reveals (CSS scroll/view timelines)
+ * מחליף חשיפות-JS גנריות בחשיפה נטיבית מונעת-גלילה, קומפוזיטור-בלבד
+ * (opacity/transform). מוחל בררנית: כותרות-סקשן ובלוקים עריכתיים — לא כל
+ * פסקה, בלי scroll-jacking. Progressive enhancement: ללא תמיכה או תחת
+ * reduced-motion האלמנטים גלויים לגמרי (המצב הסופי הוא ברירת-המחדל).
+ * ═══════════════════════════════════════════════════════════════════════ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-rise {
+      animation: scroll-rise-kf linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 62%;
+    }
+    .scroll-fade {
+      animation: scroll-fade-kf linear both;
+      animation-timeline: view();
+      animation-range: entry 4% entry 44%;
+    }
+    /* מפריד עריכתי שנמשך עם הגלילה — רמז-קצב שקט, לא גימיק. */
+    .scroll-rule {
+      animation: scroll-rule-kf linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+      transform-origin: right center; /* RTL */
+    }
+  }
+}
+@keyframes scroll-rise-kf {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes scroll-fade-kf {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scroll-rule-kf {
+  from { transform: scaleX(0); opacity: 0.3; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+/* Reveal → scroll-driven נטיבי: היכן שנתמך (ותנועה מותרת), החשיפה מונעת-גלילה
+   בקומפוזיטור במקום IntersectionObserver+transition. סטגר טבעי לפי מיקום (כל
+   אלמנט נחשף כשהוא-עצמו נכנס). fallback: מנוע ללא תמיכה נשאר על מסלול ה-JS. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .motion-js .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+      animation: scroll-reveal-kf linear both;
+      animation-timeline: view();
+      animation-range: entry 3% entry 46%;
+    }
+    .motion-js .reveal[data-stagger] {
+      animation-delay: 0s;
+    }
+  }
+}
+@keyframes scroll-reveal-kf {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}

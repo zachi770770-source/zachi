@@ -42,7 +42,7 @@ export function Header() {
             לשתי שורות במובייל. */}
         <Link
           href={english ? "/en" : "/"}
-          className="group flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand sm:gap-2.5"
+          className="site-brand-anchor group flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand sm:gap-2.5"
           aria-label={english ? `${edition.title}, home` : `${siteConfig.bookTitle}, לעמוד הבית`}
         >
           <BrandMark className="h-9 w-9 shrink-0 text-foreground" />
