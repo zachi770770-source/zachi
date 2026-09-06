@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -94,10 +95,20 @@ export function CompassLauncher({
   // על הגלילה. מכובד תחת reduced-motion (המעבר מתאפס גלובלית).
   React.useEffect(() => {
     let raf = 0;
+    let current: boolean | null = null;
     const compute = () => {
       raf = 0;
       const threshold = Math.max(320, Math.round(window.innerHeight * 0.6));
-      setPastHero(window.scrollY > threshold);
+      const next = window.scrollY > threshold;
+      if (next === current) return;
+      current = next;
+      // מחויב *באותו פריים* שבו זוהתה החצייה. בלי זה העדכון עובר במסלול
+      // התזמון הרגיל של React, וה-DOM (ובעקבותיו כלל-ה-CSS שמסתיר את הגלולה
+      // במובייל) משתרך אחרי הגלילה — נמדד כמה מאות מ״ש על חומרה עמוסה, שם
+      // הגלולה נשארה שקופה הרבה אחרי שהמשתמש כבר חלף על פני ה-Hero.
+      // ה-flushSync מוגן מאחורי בדיקת-שינוי, ולכן רץ רק בחצייה עצמה ולא בכל
+      // פריים-גלילה.
+      flushSync(() => setPastHero(next));
     };
     const onScroll = () => {
       if (!raf) raf = window.requestAnimationFrame(compute);

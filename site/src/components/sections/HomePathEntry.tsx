@@ -74,7 +74,6 @@ export function HomePathEntry({
   freeTextEnabled?: boolean;
 }) {
   const [active, setActive] = React.useState<Active>(null);
-  const [inView, setInView] = React.useState(false);
   // המצב שנלחץ — כותרתו נושאת `view-transition-name: fm-title` כדי שתתמזג
   // (morph) מהכרטיס אל כותרת-הבמה של Focus Mode, במקום „להיעלם”.
   const [morphId, setMorphId] = React.useState<HomePathId | null>(null);
@@ -97,18 +96,54 @@ export function HomePathEntry({
     }
   }, [active]);
 
-  // נוכחות-המקטע-במסך: מסמן `data-path-in-view` כל עוד `#path` באמת בתוך המסך,
-  // כדי שכלל-CSS יסתיר את הבועה הצפה במובייל (אין שתי הזמנות מתחרות). מבוסס
-  // נראוּת בפועל (IntersectionObserver) ולא היסט-פיקסלים קשיח.
+  // נוכחות-המקטע-במסך: מסמן `data-path-in-view` על ה-<body> כל עוד `#path` באמת
+  // בתוך המסך, כדי שכלל-CSS יסתיר את הבועה הצפה במובייל (אין שתי הזמנות מתחרות).
+  //
+  // ── למה גאומטריה ב-rAF ולא IntersectionObserver ─────────────────────────
+  // קודם הסמן נגזר מ-IO והורנדר כאלמנט React מותנה. שרשרת-העדכון הייתה:
+  // גלילה → callback של IO (מקובץ, לא מובטח באותו פריים) → setState → רינדור
+  // → commit → רק אז הסמן יורד מה-DOM והבועה נעשית זכאית להופיע. באתר יש
+  // `scroll-behavior: smooth` גלובלי, כך ש-`scrollTo(0, scrollHeight)` הוא
+  // *אנימציה*: המקטע באמת חוצה את המסך בדרך, הסמן נדלק לגיטימית, ואז כיבויו
+  // תלוי בכל השרשרת הזו. על חומרה איטית הזנב הזה נמדד בשניות — הבועה נשארה
+  // מוסתרת הרבה אחרי שהמשתמש כבר עזב את המקטע (נכשל ב-CI פעמיים בתוך 4 שניות).
+  //
+  // עכשיו מקור-האמת הוא הגאומטריה עצמה, נקראת ב-rAF באותו פריים של הגלילה
+  // (אותה תבנית שכבר משמשת את `pastHero` במשגר), והכתיבה היא ל-DOM ישירות —
+  // בלי מסלול-רינדור של React. אין המתנה שרירותית ואין התנהגות ייעודית לסביבה:
+  // ברגע שהמקטע יצא מהמסך, הסמן יורד באותו פריים.
   React.useEffect(() => {
     const section = document.getElementById("path");
-    if (!section || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      (entries) => setInView(entries[0]?.isIntersecting ?? false),
-      { rootMargin: "-15% 0px -20% 0px", threshold: 0 },
-    );
-    io.observe(section);
-    return () => io.disconnect();
+    const body = document.body;
+    if (!section || !body) return;
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const r = section.getBoundingClientRect();
+      // אותו טווח-התבוננות של ה-IO הקודם (rootMargin: -15% למעלה, -20% למטה):
+      // המקטע נחשב „במסך” רק כשהוא חותך את הפס האמצעי.
+      const inBand = r.bottom > vh * 0.15 && r.top < vh * 0.8;
+      body.toggleAttribute("data-path-in-view", inBand);
+    };
+    const schedule = () => {
+      if (!raf) raf = window.requestAnimationFrame(compute);
+    };
+    compute(); // מצב התחלתי (שחזור מיקום-גלילה / deep-link)
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    // גובה-המסמך יכול להשתנות בלי אירוע-גלילה (תמונות/גופנים שנטענים), ואז
+    // מיקום המקטע ביחס למסך משתנה — מחשבים גם על שינוי-גודל של המסמך.
+    const ro =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
+    ro?.observe(body);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      ro?.disconnect();
+      if (raf) window.cancelAnimationFrame(raf);
+      body.removeAttribute("data-path-in-view");
+    };
   }, []);
 
   // בחירת מצב-מוכר פותחת קודם את Focus Mode (הבמה של „עובדה מול סיפור”), לא את
@@ -133,18 +168,12 @@ export function HomePathEntry({
     withViewTransition(() => flushSync(() => setActive(null)));
   };
 
-  // כל עוד המקטע במסך — הבועה הצפה מוסתרת (מובייל). קיים גם `data-ask-inline-active`
-  // לזמן שיחה פעילה, כגיבוי מפורש למצב שבו המקטע נגלל אך השיחה עדיין פתוחה.
-  const inViewMarker = inView ? (
-    <span data-path-in-view hidden aria-hidden="true" />
-  ) : null;
 
   // Focus Mode — הבמה של „עובדה מול סיפור” למצב שנבחר. הרכיב נושא בעצמו את
   // כפתור-החזרה ואת אזור-ה-region; ה-CTA „המשיכו עם הספר” ממשיך אל השיחה.
   if (active?.mode === "focus") {
     return (
       <>
-        {inViewMarker}
         <span data-ask-inline-active hidden aria-hidden="true" />
         {/* סמן ייעודי ל-Focus Mode (בנפרד מ-`data-ask-inline-active`, שמשמש גם
             את השיחה): כל עוד הוא ב-DOM, כללי-CSS מכווצים את כותרת-המקטע ומסתירים
@@ -175,7 +204,6 @@ export function HomePathEntry({
   if (active) {
     return (
       <div className="home-ask mx-auto mt-6 max-w-2xl">
-        {inViewMarker}
         <span data-ask-inline-active hidden aria-hidden="true" />
         <div className="mb-3 flex justify-center sm:justify-start">
           <button
@@ -210,7 +238,6 @@ export function HomePathEntry({
 
   return (
     <>
-      {inViewMarker}
 
       {/* ── נקודת-הכניסה הראשית: תיבת-כתיבה חופשית ── גדולה, רגועה, וברור שאפשר
           להקליד בה (סמן מהבהב + כיתוב-placeholder + אייקון עֵט). אפורדנס אמיתי:
