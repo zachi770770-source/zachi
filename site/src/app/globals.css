@@ -3322,11 +3322,11 @@ html.vt-book-nav::view-transition-group(book-cover) {
   display: flex;
   margin-top: 1.5rem;
   margin-inline: -1.5rem; /* full-bleed בתוך ריפוד-הקונטיינר (מובייל) */
-  padding: clamp(1.75rem, 6vw, 3.25rem) clamp(1.25rem, 5vw, 3rem);
-  /* ממלא את המסך מתחת לכותרת הדביקה — כמעט-viewport בכל רוחב, כדי שהחוויה
-     תחזיק את המסך לבדה (הסקשנים שמתחת יוצאים מהתצוגה). מוגבל ב-54rem למסכים
-     גבוהים מאוד, שלא ייווצר חלל-ריק מוגזם. */
-  min-height: min(calc(100svh - var(--header-height, 4rem) - 1rem), 54rem);
+  padding: clamp(1.75rem, 5vw, 2.75rem) clamp(1.25rem, 5vw, 3rem);
+  /* גובה עוקב-תוכן: קומפוזיציה מרוכזת ומולחנת במקום סלאב-ריק בגובה-מסך. floor
+     צנוע (עקבי בין הפעימות כדי למנוע קפיצות-גובה), לא כמעט-viewport. */
+  min-height: clamp(19rem, 46svh, 30rem);
+  --fm-accent: var(--color-secondary);
   /* בגלילה-לתוך-תצוגה: משאיר מקום לכותרת הדביקה כדי שראש-הבמה לא ייחתך. */
   scroll-margin-top: calc(var(--header-height, 4rem) + 0.75rem);
   color: var(--fm-ivory);
@@ -3473,7 +3473,43 @@ body:has([data-fm-active]) {
     background-color var(--motion-panel) var(--fm-ease);
 }
 .fm-steps__dot[data-on="true"] {
-  background: color-mix(in oklab, var(--color-brand) 45%, var(--fm-ivory));
+  background: color-mix(in oklab, var(--fm-accent) 60%, var(--fm-ivory));
+}
+
+/* ── מבטא-מצב מרוסן: כל מצב מקבל גוון-חתימה אחד (--fm-accent), שמופיע בעקביות
+   בקיקר, במחוון, ובצ׳יפ-ההקשר — כדי שכל תוצאה תרגיש מותאמת ומובחנת, בשפה
+   ויזואלית אחת. Terracotta = דגש מבוקר (מצב „בתוך קשר”). ── */
+.fm-stage[data-situation="dating"] { --fm-accent: var(--color-secondary); }
+.fm-stage[data-situation="building"] {
+  --fm-accent: color-mix(in oklab, var(--color-secondary) 62%, var(--color-brand));
+}
+.fm-stage[data-situation="existing"] { --fm-accent: var(--color-brand); }
+.fm-stage[data-situation="breakup"] {
+  --fm-accent: color-mix(in oklab, var(--fm-ivory) 52%, var(--color-secondary));
+}
+
+/* צ׳יפ-הקשר: המצב שנבחר, גלוי לאורך כל הפעימות. */
+.fm-status {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.75rem 0.32rem 0.85rem;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fm-ivory);
+  border: 1px solid color-mix(in oklab, var(--fm-accent) 42%, transparent);
+  background: color-mix(in oklab, var(--fm-accent) 12%, transparent);
+  white-space: nowrap;
+}
+.fm-status__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--fm-accent);
+}
+@media (min-width: 560px) {
+  .fm-status { display: inline-flex; }
 }
 
 /* ── סצנה: מעטפת משותפת, כניסה רכה ── */
@@ -3546,8 +3582,18 @@ body:has([data-fm-active]) {
   text-align: center;
   align-items: center;
 }
+.fm-scene--enter .fm-eyebrow {
+  color: color-mix(in oklab, var(--fm-accent) 58%, var(--fm-ivory));
+}
 .fm-scene--enter .fm-lede {
   margin-inline: auto;
+}
+.fm-scene--enter .fm-cta--ghost {
+  border-color: color-mix(in oklab, var(--fm-accent) 42%, transparent);
+  background: color-mix(in oklab, var(--fm-accent) 10%, transparent);
+}
+.fm-scene--enter .fm-cta--ghost:hover {
+  background: color-mix(in oklab, var(--fm-accent) 18%, transparent);
 }
 
 /* ── פעימת split — שני צדדים שנפתחים זה מזה ── */

@@ -104,6 +104,7 @@ export function FocusMode({
       role="region"
       aria-label={focusUi.regionLabel}
       data-stage={stage}
+      data-situation={situationId}
     >
       {/* עומק-רקע (controlled gradients) + נשימת-Ambient — דקורטיביים בלבד. */}
       <span className="fm-bg" aria-hidden="true" />
@@ -124,6 +125,11 @@ export function FocusMode({
                 data-on={i <= stepIndex ? "true" : undefined}
               />
             ))}
+          </span>
+          {/* הקשר-המצב הקבוע — המצב שנבחר נשאר גלוי לאורך כל הפעימות. */}
+          <span className="fm-status" aria-hidden="true">
+            <span className="fm-status__dot" />
+            {s.title}
           </span>
         </div>
 
