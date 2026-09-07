@@ -204,6 +204,12 @@
   --animate-slide-up: slide-up 0.4s ease-out;
   /* כניסת מגירת התפריט במובייל (מהצד המתחיל ב-RTL) — תחושת אפליקציה. */
   --animate-drawer-in: drawer-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  /* יציאת אותה מגירה. בלעדיה המגירה *נעלמת* בפריים אחד בעוד מגירת „שאלו את
+     הספר” נסגרת בתנועה — אותו רכיב-ממשק בדיוק, שתי שפות-תנועה. היציאה חוזרת
+     באותו ציר שבו נכנסה (סיבתיות: מה שנכנס מהצד, יוצא לאותו צד), בטוקן-משך
+     המשותף ובאותו ה-easing של מגירת המצפן. */
+  --animate-drawer-out: drawer-out var(--dur-ui) var(--ease-emphasized)
+    forwards;
   /* „שאלו את הספר”: פתיחה/סגירה של הפאנל הצדדי (מהקצה end = שמאל ב-RTL).
      תחת prefers-reduced-motion התנועה מבוטלת גלובלית והסגירה מיידית. */
   --animate-fade-out: fade-out var(--motion-panel) ease-in forwards;
@@ -256,6 +262,16 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+  @keyframes drawer-out {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0.6;
+      transform: translateX(100%);
     }
   }
   @keyframes slide-up {
@@ -2604,6 +2620,82 @@
 
 /* (heroBookRise הישן — כניסה חלשה מונעת-גלילה — הוסר ב-PHASE MOTION 2 לטובת
  * כניסת ה-on-load הקולנועית שלמעלה, כדי שלא יתנגשו על אותו .hero-book.) */
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * שפת-תנועה למסע (ארבעת עמודי-השלב)
+ * ═══════════════════════════════════════════════════════════════════════
+ * הבעיה שנמדדה: /before-relationship, /building-relationship,
+ * /inside-relationship ו-/after-breakup היו זהים לחלוטין בתנועה — עשר
+ * חשיפות fade-up גנריות, אותן שתי אנימציות בלבד, יחס-גנריות 0.83. כלומר
+ * ארבעה עותקים של אותו אפקט, בלי שהתנועה תאמר דבר על *המסע*.
+ *
+ * הפתרון אינו ארבעה עיצובים נפרדים אלא שפה אחת שנגזרת ממצב-אמת: המשתנה
+ * `--journey-pos` (0–1) מגיע מ-`getJourneyFlow` — תחנה 1/3 → 0.33 וכן הלאה,
+ * וגשר (after-breakup) → 0. הפס המוביל מציג עד היכן הגענו, ולכן ארבעת
+ * העמודים נבדלים בגלל *מיקום אמיתי במסלול* ולא בגלל קישוט.
+ *
+ * תפקידי-UX: התמצאות (איפה אני במסלול), מצב (איזו תחנה), והמשכיות
+ * (העמוד עצמו קורא כמסלול, לא כערימת סקשנים).
+ * כיוון: אנכי בלבד — נכון ל-RTL מעצם היותו א-כיווני אופקית.
+ */
+.journey-page {
+  position: relative;
+}
+/* הפס המוביל: קו-בסיס שקט לכל אורך העמוד, ומעליו מקטע-התקדמות שאורכו הוא
+   מיקום-המסע בפועל. נמשך מלמעלה למטה (scaleY) — „התקדמנו עד כאן”. */
+@media (min-width: 1024px) {
+  .journey-page::before,
+  .journey-page::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: -1.25rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  .journey-page::before {
+    background: color-mix(in oklab, var(--color-border-strong) 55%, transparent);
+  }
+  .journey-page::after {
+    background: var(--color-sage-ink);
+    transform-origin: top center;
+    /* המקטע שהושלם — אורכו = מיקום-המסע. ללא JS. */
+    transform: scaleY(var(--journey-pos, 0));
+  }
+  .motion-js .journey-page::after {
+    animation: journey-rail-draw var(--dur-physical) var(--ease-settle) 120ms both;
+  }
+}
+@keyframes journey-rail-draw {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(var(--journey-pos, 0)); }
+}
+
+/* מחוון-המיקום מגיע כרצף: התחנות מתיישבות אחת אחרי השנייה, והתחנה הנוכחית
+   „נפתחת” אחרונה. תפקיד: התמצאות + מצב. הסטגר משתמש בטוקן המשותף. */
+.motion-js .journey-progress__step {
+  animation: journey-step-in var(--dur-ui) var(--ease-settle) both;
+  animation-delay: calc(200ms + var(--i, 0) * var(--motion-stagger));
+}
+@keyframes journey-step-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+/* התחנה הנוכחית: הטבעת נפתחת בסוף הרצף — „כאן אני עכשיו”. */
+.motion-js .journey-progress__step[data-state="current"] .journey-progress__dot {
+  animation: journey-here var(--dur-focus) var(--ease-settle)
+    calc(360ms + var(--i, 0) * var(--motion-stagger)) both;
+}
+@keyframes journey-here {
+  from { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+  to {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand) 16%, transparent);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Loader2 } from "lucide-react";
 
 import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
@@ -137,7 +138,17 @@ export function ReaderClaimForm() {
 
       <div>
         <Button type="submit" size="lg" disabled={state.kind === "submitting"}>
-          {state.kind === "submitting" ? "שולח…" : "שלחו לאישור"}
+          {/* אותה שפת-משוב כמו יתר טפסי האתר (יצירת-קשר, המצפן): בזמן השליחה
+              הכפתור נושא מחוון-התקדמות מסתובב, לא רק טקסט. שליחת קובץ עשויה
+              להימשך, וסטטי „שולח…” לבדו אינו מוסר שמשהו עדיין קורה. */}
+          {state.kind === "submitting" ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              שולח…
+            </>
+          ) : (
+            "שלחו לאישור"
+          )}
         </Button>
       </div>
     </form>

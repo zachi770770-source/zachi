@@ -10,6 +10,7 @@ import type {
   JourneyVariant,
 } from "@/content/journeyPages";
 import { cn } from "@/lib/utils";
+import { getJourneyFlow } from "@/content/journeyFlow";
 import { Container } from "@/components/shared/Container";
 import { JourneyWayfinder } from "@/components/journey/JourneyWayfinder";
 import { JourneyNext } from "@/components/journey/JourneyNext";
@@ -120,8 +121,20 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
   const sectionHeading =
     "font-serif text-[clamp(1.5rem,2.4vw,2.05rem)] font-bold leading-[1.15] text-foreground [text-wrap:balance]";
 
+  // מיקום-המסע כמספר יחיד (0–1): תחנה 1/3 → 0.33, 2/3 → 0.66, 3/3 → 1.
+  // גשר (after-breakup / starting-again) אינו במחזור ולכן אין לו מיקום.
+  // זהו מקור-האמת היחיד לשפת-התנועה של עמודי-המסע: הפס המוביל מציג עד היכן
+  // הגענו במסלול, ולכן ארבעת העמודים נבדלים זה מזה בגלל *מצב אמיתי* ולא
+  // בגלל ארבעה עיצובים נפרדים.
+  const posFlow = getJourneyFlow(journey.id);
+  const journeyPos =
+    posFlow.station !== null && posFlow.total > 0 ? posFlow.station / posFlow.total : 0;
+
   return (
-    <Container className="py-10 sm:py-14 lg:py-16">
+    <Container
+      className="journey-page py-10 sm:py-14 lg:py-16"
+      style={{ ["--journey-pos" as string]: String(journeyPos) }}
+    >
       <BreadcrumbSchema
         items={[
           { name: "בית", path: "/" },

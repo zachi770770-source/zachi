@@ -19,6 +19,7 @@ import { ReaderKitOffer } from "@/components/reader/ReaderKitOffer";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
+import { BuildSpine } from "@/components/shared/BuildSpine";
 
 export const metadata = pageMetadata({
   title: "ספר זוגיות: מדריך מעשי לדייטינג ולבניית קשר",
@@ -38,6 +39,12 @@ export default function BookPage() {
     <>
       {/* מדידה (Phase A) — צפייה בעמוד הספר, פעם אחת. */}
       <ViewEvent event="book_viewed" />
+      {/* קו-הקריאה: /book הוא העמוד הארוך באתר (~9,000px), והתנועה היחידה
+          שהייתה בגופו היא חשיפת-סקשן גנרית חוזרת. הפס הזה נותן לתנועה תפקיד
+          אמיתי — התמצאות: „כמה נשאר”. אינו רכיב חדש אלא אותו BuildSpine
+          המאושר שכבר משרת את עמוד-הבית: דסקטופ בלבד, aria-hidden,
+          ומכובד תחת reduced-motion (הרכיב יוצא מוקדם וה-CSS מסתיר אותו). */}
+      <BuildSpine />
       {/* עמוד הספר הקנוני נושא את סכימת ה-Book (בנוסף לבית) — הישות המבנית
           מופיעה על ה-URL הייעודי של המוצר. */}
       <BookSchema />
