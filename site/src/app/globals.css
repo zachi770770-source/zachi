@@ -5420,11 +5420,15 @@ body:has([data-fm-active]) {
 .path-marker {
   position: absolute;
   inset-block-start: 0;
-  inset-inline-start: 0;
+  /* עוגן *פיזי* בכוונה. `--marker-x` נמדד כהיסט פיזי משפת-השמאל של הרשת
+     (`rect.left - grid.left`), ולכן העוגן חייב להיות אותה שפה. עם
+     `inset-inline-start` העוגן היה עובר לימין ב-RTL וההיסט היה נדחף החוצה
+     מהמסך — נמדד x=1954 ברוחב 1440. */
+  left: 0;
   z-index: 1;
   width: 7px;
   height: 7px;
-  margin-inline-start: -3.5px;
+  margin-left: -3.5px;
   border-radius: 50%;
   background: var(--color-brand);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-brand) 18%, transparent);
@@ -5503,6 +5507,53 @@ body:has([data-fm-active]) {
   opacity: 1;
   transform: none;
 }
+/* ── סגירת-המסע: נקודות → מסלול ── שלוש נקודות מופיעות ברצף, ואז הקו שמחבר
+   ביניהן נמשך מכיוון הקריאה. סימן קטן שסוגר את המוטיב שנפתח ב-Hero, לא
+   מופע-סיום. transform/opacity בלבד; המידות קבועות ⇒ אין CLS. */
+.close-resolve {
+  position: relative;
+  display: block;
+  width: 62px;
+  height: 7px;
+  margin-block-end: 1.1rem;
+}
+.close-resolve__line {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline: 0;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-brand) 55%, transparent);
+  transform-origin: right center; /* RTL: נמשך מימין לשמאל */
+}
+.close-resolve__dot {
+  position: absolute;
+  inset-block-start: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  inset-inline-start: calc(var(--i) * 27px);
+}
+.motion-js .sig-close__inner .close-resolve__dot {
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity var(--dur-ui) var(--ease-settle),
+    transform var(--dur-ui) var(--ease-settle);
+  transition-delay: calc(var(--i, 0) * 120ms);
+}
+.motion-js .sig-close__inner.is-visible .close-resolve__dot {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .sig-close__inner .close-resolve__line {
+  transform: scaleX(0);
+  transition: transform var(--dur-editorial) var(--ease-emphasized) 400ms;
+}
+.motion-js .sig-close__inner.is-visible .close-resolve__line {
+  transform: scaleX(1);
+}
+
 .motion-js .sig-close__inner .sig-close__title {
   opacity: 0;
   transform: translateY(14px);

@@ -33,6 +33,15 @@ export function NewsletterSection() {
           </div>
 
           <div className="sig-close__copy">
+            {/* סגירת-המסע: שלוש נקודות שנקשרות לקו אחד — „נקודות → מסלול →
+                מבנה”, אותו מוטיב שנפתח ב-Hero ונמשך דרך „נקודה → מסלול”.
+                דקורטיבי בלבד, בגודל של סימן ולא של סצנה. */}
+            <span className="close-resolve" aria-hidden="true">
+              <span className="close-resolve__line" />
+              <span className="close-resolve__dot" style={{ ["--i" as string]: "0" }} />
+              <span className="close-resolve__dot" style={{ ["--i" as string]: "1" }} />
+              <span className="close-resolve__dot" style={{ ["--i" as string]: "2" }} />
+            </span>
             <h2 id="get-the-book-heading" className="sig-close__title">
               {closing.title}
             </h2>
