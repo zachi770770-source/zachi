@@ -5290,6 +5290,102 @@ body:has([data-fm-active]) {
   opacity: 1;
   transform: none;
 }
+
+/* ── התעוררות-הצומת ── כל כרטיס נושא נקודת-צומת על שפתו העליונה. הנקודה היא
+   שנדלקת (scale + צבע) כשהחוט „מגיע” אליה — כך שהאפקט העיקרי הוא *התעוררות
+   של צומת במסלול*, ולא עוד fade-up. הנקודה דקורטיבית (aria-hidden ברמת ה-
+   pseudo-element) ואינה משנה פריסה. */
+.situation-card {
+  position: relative;
+}
+.situation-card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-start: 1.35rem;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+  transition:
+    transform var(--dur-ui) var(--ease-settle),
+    background-color var(--dur-ui) var(--ease-standard);
+}
+.motion-js .path-nodes .situation-card::before {
+  transform: scale(0);
+}
+.motion-js .path-nodes.is-visible .situation-card::before {
+  transform: scale(1);
+  /* הנקודה נדלקת מעט *אחרי* שהכרטיס הגיע — החוט מגיע, ואז הצומת נענה. */
+  transition-delay: calc(var(--i, 0) * 110ms + 220ms);
+}
+/* הצומת שנבחר — ההדגשה הברורה ביותר במסלול. */
+.situation-card[data-selected] {
+  border-color: color-mix(in oklab, var(--color-sage-ink) 55%, transparent);
+  background: color-mix(in oklab, var(--color-sage) 12%, var(--color-surface));
+}
+.situation-card[data-selected]::before {
+  background: var(--color-brand);
+  transform: scale(1.45);
+}
+
+/* ── הסמן שנוסע אל הצומת הנבחר ──
+   נמצא בשכבה נפרדת מעל הרשת, ונע ב-transform בלבד (compositor). מיקומו מגיע
+   מ---marker-x/y שנמדדים ב-rAF יחיד, ולכן הוא נכון בכל מספר-עמודות (1/2/4)
+   ובשני כיווני-הכתיבה — אין כאן הנחה על סדר או על צד. */
+.path-nodes {
+  position: relative;
+}
+.path-marker {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  margin-inline-start: -3.5px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-brand) 18%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(var(--marker-x, 0), calc(var(--marker-y, 0) - 4px), 0);
+}
+.path-nodes[data-marker-ready] .path-marker {
+  opacity: 1;
+}
+.motion-js .path-marker {
+  transition:
+    transform var(--dur-focus) var(--ease-emphasized),
+    opacity var(--dur-ui) var(--ease-standard);
+}
+
+/* ── תשובת-הזיהוי, במקום ── נפתחת מתחת לצמתים אחרי בחירה. עולה ומתבהרת
+   (transform/opacity בלבד); התוכן עצמו קיים ב-DOM ברגע הבחירה, ולכן שום דבר
+   בו אינו תלוי בסיום האנימציה. */
+.motion-js .path-recognition {
+  animation: path-recognition-in var(--dur-ui) var(--ease-settle) both;
+}
+@keyframes path-recognition-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.motion-js .path-recognition__beat,
+.motion-js .path-recognition__cta {
+  animation: path-recognition-in var(--dur-ui) var(--ease-settle) both;
+}
+.motion-js .path-recognition__beat {
+  animation-delay: 90ms;
+}
+.motion-js .path-recognition__cta {
+  animation-delay: 170ms;
+}
 /* התיבה-החופשית (נקודת-הכניסה הראשית) עולה ראשונה, לפני הצמתים. */
 .motion-js .path-composer.reveal {
   opacity: 1;
