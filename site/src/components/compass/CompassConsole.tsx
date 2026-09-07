@@ -60,6 +60,24 @@ export function CompassConsole({
   const [submitting, setSubmitting] = React.useState(false);
   const formRef = React.useRef<HTMLFormElement>(null);
   /**
+   * ── שמירה מפני מירוצים בשאילתה ──────────────────────────────────────────
+   * `inflight` מחזיק את הבקשה הפעילה כדי לבטלה, ו-`reqId` הוא מונה-דורות:
+   * כל תשובה שחוזרת מסומנת בדור שבו נשלחה, ותשובה מדור ישן *אינה* נכתבת.
+   * בלי זה, שליחה חוזרת מהירה או פירוק באמצע בקשה יכולים לכתוב תשובה ישנה
+   * מעל חדשה, או לעדכן state אחרי unmount.
+   */
+  const inflight = React.useRef<AbortController | null>(null);
+  const reqId = React.useRef(0);
+  const mounted = React.useRef(true);
+  React.useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      inflight.current?.abort();
+      inflight.current = null;
+    };
+  }, []);
+  /**
    * שלב-החיפוש המוצג בזמן ההמתנה. שלושת הניסוחים מתארים את מה שהשרת באמת עושה
    * (אחזור קטעים → הצלבה → ניסוח כיוון מהספר) ואינם ממציאים שמות-פרקים או תוכן:
    * התשובה והציטוט מגיעים רק בסוף, ולכן אין מה להציג מהם באמצע. מתקדם בטיימר
@@ -129,13 +147,25 @@ export function CompassConsole({
       setSearchStage(0);
       setAnswer(null);
 
+      // בקשה קודמת שעדיין באוויר מבוטלת, ונפתח דור חדש.
+      inflight.current?.abort();
+      const ctrl = new AbortController();
+      inflight.current = ctrl;
+      const myId = ++reqId.current;
+      /** נכון לכתוב רק אם זו עדיין הבקשה האחרונה והרכיב עדיין חי. */
+      const isCurrent = () => mounted.current && myId === reqId.current;
+
       try {
         const res = await fetch("/api/compass", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: q, company }),
+          signal: ctrl.signal,
         });
         const data = await res.json().catch(() => null);
+
+        // תשובה מדור ישן (שליחה חדשה עקפה אותה) או אחרי פירוק — נזרקת בשקט.
+        if (!isCurrent()) return;
 
         if (data && typeof data.remaining === "number") setRemaining(data.remaining);
 
@@ -168,10 +198,16 @@ export function CompassConsole({
         } else {
           setAnswer({ kind: "error", text: compass.ui.genericError });
         }
-      } catch {
+      } catch (err) {
+        // ביטול מכוון (שליחה חדשה / פירוק) אינו שגיאה שמוצגת למשתמש.
+        if ((err as { name?: string } | null)?.name === "AbortError") return;
+        if (!isCurrent()) return;
         setAnswer({ kind: "error", text: compass.ui.genericError });
       } finally {
-        setSubmitting(false);
+        // גם כאן: רק הדור האחרון רשאי לכבות את מצב-השליחה, אחרת בקשה ישנה
+        // שבוטלה הייתה מכבה את החיווי של הבקשה החדשה שרצה עכשיו.
+        if (isCurrent()) setSubmitting(false);
+        if (inflight.current === ctrl) inflight.current = null;
       }
     },
     [company, submitting, outOfQuestions, uiPreview]
@@ -413,7 +449,7 @@ export function CompassConsole({
         {submitting || answer ? (
         <AnswerView title="התשובה שלך מהספר">
         {submitting ? (
-          <div className={CARD_SHELL} role="status">
+          <div className={`${CARD_SHELL} compass-stage-in`} role="status">
             <p className="flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
               {/* „המצפן החי” במצב חיפוש — מחט שמתנודדת בטווח חסום ודועכת אל
                   הכיוון, במקום לוגו שמסתובב בלי סוף. הסטטוס הנגיש הוא הטקסט
