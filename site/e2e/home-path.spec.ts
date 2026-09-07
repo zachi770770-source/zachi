@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { test, expect, openFocusMode } from "./fixtures";
 
 import { homePathUi } from "../src/content/homePaths";
 import { askStations, askUi } from "../src/content/askRoute";
@@ -68,7 +68,7 @@ for (const s of STAGES) {
     const path = page.locator("#path");
     const sit = getFocusSituation(s.id);
 
-    await path.locator(`a.situation-card[href="${s.href}"]`).click();
+    await openFocusMode(page, s.href);
     await expect(page).toHaveURL(/\/$/);
 
     // פעימה 1 — enter: אזור-הבמה עולה עם כותרת-המצב; הכרטיסים התקפלו.
@@ -126,6 +126,15 @@ test("keyboard: Tab reaches a situation starter and Enter opens Focus Mode (no n
   const card = page.locator('#path a.situation-card[href="/building-relationship"]');
   await card.focus();
   await expect(card).toBeFocused();
+
+  // Enter בוחר את המצב במקום (זיהוי), בלי לנווט.
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(card).toHaveAttribute("aria-current", "true");
+
+  // ומשם, במקלדת בלבד, ממשיכים אל הבמה — אותה הבטחה כמו קודם.
+  const cta = page.locator("#path .path-recognition__cta button").first();
+  await cta.focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/$/);
   await expect(
@@ -174,7 +183,7 @@ test("mobile 390: the floating bubble is suppressed while #path is in view, and 
   await expect(bubble).toHaveCSS("pointer-events", "none");
 
   // פתיחת Focus Mode — עדיין מוסתרת (data-ask-inline-active פעיל).
-  await path.locator('a.situation-card[href="/inside-relationship"]').click();
+  await openFocusMode(page, "/inside-relationship");
   await expect(path.getByRole("region", { name: focusUi.regionLabel })).toBeVisible();
   await expect(bubble).toHaveCSS("opacity", "0", { timeout: 4000 });
 
@@ -220,7 +229,7 @@ test("Focus Mode Aha: the story recedes (gone), the fact is affirmed, the separa
   const path = page.locator("#path");
   const sit = getFocusSituation("existing");
 
-  await path.locator('a.situation-card[href="/inside-relationship"]').click();
+  await openFocusMode(page, "/inside-relationship");
   const focus = path.getByRole("region", { name: focusUi.regionLabel });
   await expect(focus).toBeVisible();
   await focus.getByRole("button", { name: focusUi.enterCta }).click();
@@ -248,7 +257,7 @@ test("mobile 390: the immersive Focus Mode stage never causes horizontal overflo
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
 
-  await path.locator('a.situation-card[href="/before-relationship"]').click();
+  await openFocusMode(page, "/before-relationship");
   const focus = path.getByRole("region", { name: focusUi.regionLabel });
   await expect(focus).toBeVisible();
 

@@ -101,9 +101,18 @@ export function StickyCta() {
     if (typeof IntersectionObserver === "undefined") return;
     const scene = document.querySelector(".s2b");
     if (!scene) return; // הסצנה קיימת רק בעמוד הבית
+    // הסתרה *רק* כשהסצנה באמת שולטת במסך. הכלל הזה נכתב מראש עבור הסצנה
+    // הזו אך שכב רדום (המחלקה `.s2b` לא הייתה קיימת, ולכן ה-effect יצא מוקדם).
+    // ברגע שהסצנה נבנתה הוא נדלק — ועם threshold 0 ו-rootMargin שלילי הוא
+    // הסתיר את הבר על פני *כל* הרצועה שסביבה: במסך נמוך (680px) חלון-ההופעה
+    // של הבר נבלע לגמרי והוא לא הופיע כלל. עכשיו נדרשת נוכחות ממשית של
+    // הסצנה, והבר חוזר מיד כשהיא כבר אינה הרגע הדומיננטי.
     const io = new IntersectionObserver(
-      ([entry]) => setSceneInView(entry.isIntersecting),
-      { threshold: 0, rootMargin: "0px 0px -20% 0px" }
+      // רק כשהסצנה ממלאת את המסך כמעט לגמרי היא „הרגע הדומיננטי”. סף נמוך
+      // יותר הסתיר את הבר לאורך רצועה שלמה אחרי ה-Hero — בדיוק המקום שבו הוא
+      // אמור להופיע.
+      ([entry]) => setSceneInView(entry.intersectionRatio >= 0.9),
+      { threshold: [0, 0.5, 0.9, 1] }
     );
     io.observe(scene);
     return () => io.disconnect();
