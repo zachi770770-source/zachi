@@ -77,7 +77,15 @@ export function ParallaxScroll({
     <div
       ref={ref}
       className={className}
-      style={{ "--hero-parallax": 0 } as React.CSSProperties}
+      /* ערך-המנוחה תלוי-מצב, וזה מהותי: ב-"page" הטווח הוא 0→1 מראש העמוד,
+         ולכן 0 = „טרם גללנו” = ללא הזזה. ב-"element" הטווח סימטרי סביב מרכז
+         החלון, ולכן *0.5* הוא המרכז — כלומר ללא הזזה. עם 0 גם כאן, האלמנט
+         ישב מוזז בקצה-הטווח כל עוד ה-JS לא כתב: כך הדיוקן נשאר מוזז 40px
+         תחת תנועה-מופחתת ובמצביע גס, שם ה-effect יוצא מוקדם ואינו כותב כלל.
+         נמדד ותוקן. */
+      style={
+        { "--hero-parallax": mode === "element" ? 0.5 : 0 } as React.CSSProperties
+      }
     >
       {children}
     </div>

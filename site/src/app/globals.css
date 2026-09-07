@@ -764,11 +764,6 @@
   /* עומק/פרלקסה מרוסנת לכריכת השער (ההזזה מונעת מ-JS ב-ParallaxScroll דרך
      המשתנה --hero-parallax; ברירת מחדל 0 ⇒ אין הזזה עד שיש גלילה, אין קפיצה
      ב-first-paint). transform בלבד ⇒ מרוכב ב-compositor. */
-  .hero-depth-book,
-  .hero-depth-halo {
-    will-change: transform;
-  }
-
   /* כניסת הכריכה — פעם אחת בלבד: fade + scale עדין (0.97→1) ועלייה קצרה.
      אין לולאה קבועה. transform+opacity בלבד ⇒ 60fps, ללא CLS. */
   .motion-js .hero-float {
@@ -1729,27 +1724,6 @@
  *  - prefers-reduced-motion: כל התנועה מבוטלת; מוצג המצב הסופי הקריא.
  * כל האנימציות על opacity/transform/filter בלבד — אין CLS.
  * =================================================================== */
-/* שדה-צבע חי בבאנד ה-Sage — ההילות נסחפות ונושמות לאט (עומק רקע). */
-@media (prefers-reduced-motion: no-preference) {
-  .thesis-halos > div {
-    animation: thesisHaloDrift 16s ease-in-out infinite;
-    will-change: transform;
-  }
-  .thesis-halos > div:last-child {
-    animation-duration: 20s;
-    animation-delay: -6s;
-  }
-  @keyframes thesisHaloDrift {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    50% {
-      transform: translate3d(4%, -3%, 0) scale(1.16);
-    }
-  }
-}
-
 /* כניסת הכריכה בעמוד /book — נחיתה מוצרית ברורה (למעלה מהקיפול, on-load).
    בסיס גלוי; רק תחת motion-js מריצים כניסה. reduced-motion / no-JS ⇒ סטטי גלוי. */
 .motion-js .book-hero-enter {
@@ -2317,7 +2291,16 @@
    גבוה בעמוד), ולכן -14% נותן מהלך של ~7% מגובה הדיוקן — בתוך הטווח המבוקש. */
 .portrait-parallax {
   display: block;
-  transform: translateY(calc((var(--hero-parallax, 0.5) - 0.5) * -14%));
+  /* ברירת-מחדל *מוצהרת* על האלמנט עצמו, לא fallback ב-var(). זה מה שהופך את
+     המנוחה לאמינה: כשהאפקט אינו פעיל (תנועה מופחתת / מצביע גס) ה-JS לעולם
+     אינו כותב, הערך נשאר 0.5, וההיסט הוא בדיוק 0. כשהוא פעיל, ה-JS דורס
+     בסגנון-שורה.
+     שתי הגרסאות הקודמות נכשלו כאן ושתיהן נמדדו: fallback של 0.5 לא חל כלל
+     (המשתנה נפתר ל-0 ⇒ הדיוקן עמד מוזז 40px תחת reduced-motion), ונוסחה
+     שמבוססת 0 נתנה קפיצת-first-paint של 39px בראש העמוד. מרכז ב-0.5 עם
+     ברירת-מחדל מוצהרת פותר את שניהם. */
+  --hero-parallax: 0.5;
+  transform: translateY(calc((var(--hero-parallax) - 0.5) * -14%));
 }
 
 /* #4 מצפן חי — טבעות סטטיות + מחט שמתייצבת לכיוון עם spring. */
@@ -5427,7 +5410,8 @@ body:has([data-fm-active]) {
    חד-כיווני מעצם המבנה: הטריגר הוא `.is-visible`, שהוא תפס חד-כיווני
    (MotionRoot) — גלילה חזרה למעלה אינה יכולה להסתיר שורה שכבר נבנתה.
    בטיחות: ברירת-המחדל (ללא JS / reduced-motion) היא הטקסט המלא והגלוי;
-   ההסתרה מתחילה רק תחת `.motion-js`, כלומר רק אחרי שזמן-הריצה של התנועה עלה. */
+   ההסתרה מתחילה רק תחת `.motion-js`, כלומר רק אחרי שזמן-הריצה של התנועה עלה.
+
    הליבה היא החשיפה עצמה. „העמקת-הדיו” היא תוספת opt-in (`.build-focus--ink`)
    ולא ברירת-מחדל, כדי שלא תדרוס צבע-מותג שנבחר במפורש לשורה (למשל
    `.thesis-build`, שהיא טרקוטה בכוונה). */
