@@ -7,6 +7,7 @@ import { authorContent } from "@/content/author";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/shared/BookCover";
+import { BookTilt } from "@/components/shared/BookTilt";
 import { SignatureMark } from "@/components/shared/SignatureMark";
 import { BookLink } from "@/components/shared/BookLink";
 import { AskBookLink } from "@/components/journey/AskBookLink";
@@ -14,6 +15,7 @@ import { AuthorAudio } from "@/components/author/AuthorAudio";
 import { AuthorPageView } from "@/components/author/AuthorPageView";
 import { PersonSchema } from "@/components/schema/PersonSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 
 export const metadata = pageMetadata({
   title: "צחי חן, מחבר הספר",
@@ -43,6 +45,10 @@ export default function AuthorPage() {
       {/* Hero — תמונת המחבר לצד הכותרת */}
       <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">
         <div className="order-1 mx-auto w-full max-w-[300px] sm:max-w-[360px] lg:mx-0 lg:max-w-none">
+          {/* עומק מרוסן לדיוקן: 6-8% בלבד, דסקטופ בלבד, מונע-גלילה. אין ריחוף,
+              אין נשימת-scale ואין אנימציית-filter — רק היסט קטן שנותן לדיוקן
+              מקום במרחב. במגע/תנועה-מופחתת המשתנה נשאר 0 והדיוקן סטטי. */}
+          <ParallaxScroll mode="element" className="portrait-parallax">
           <div className="portrait-reveal relative">
             <div
               aria-hidden="true"
@@ -70,6 +76,7 @@ export default function AuthorPage() {
               />
             </picture>
           </div>
+          </ParallaxScroll>
         </div>
 
         <div className="enter-stagger order-2 flex flex-col items-start text-start">
@@ -165,7 +172,7 @@ export default function AuthorPage() {
           אל עמוד ההצצה. אין כאן מכירה: הפעולה מובילה לטעימה החינמית. */}
       <div className="mx-auto mt-14 flex max-w-[64ch] flex-col items-start gap-x-8 gap-y-6 border-t border-border pt-10 sm:flex-row sm:items-center">
         <div data-vt-book-source className="w-[100px] shrink-0 sm:w-[116px]">
-          <BookCover />
+          <BookTilt><BookCover /></BookTilt>
         </div>
         <div className="flex flex-col items-start gap-3">
           <Button asChild size="lg" className="w-full px-7 text-[16px] sm:w-auto">

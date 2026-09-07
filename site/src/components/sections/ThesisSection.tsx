@@ -75,7 +75,8 @@ export function ThesisSection() {
               aria-hidden="true"
               className="thesis-axis mx-auto my-6 block h-14 w-px bg-gradient-to-b from-foreground/20 to-brand"
             />
-            <h2 id="thesis-heading" className="thesis-build type-h2 text-brand-hover">
+            {/* השורה הנושאת את כל הרעיון — היחידה בסצנה שמקבלת את טיפול-הבנייה. */}
+            <h2 id="thesis-heading" className="thesis-build build-focus type-h2 text-brand-hover">
               אהבה היא בנייה.
               <span className="thesis-build__stroke" aria-hidden="true" />
             </h2>

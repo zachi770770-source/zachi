@@ -641,6 +641,10 @@
     animation: none;
     opacity: 1;
     transform: none;
+    /* משחררים את רמז-הריבוד ברגע שהחשיפה נגמרה. בלי זה כל `.reveal` בעמוד
+       מחזיק שכבת-קומפוזיטור *לתמיד* — עשרות שכבות שנשארות אחרי שהאנימציה
+       שלהן הסתיימה ולא תחזור (החשיפה חד-כיוונית). */
+    will-change: auto;
   }
   /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה בסטגר עדין (--i נקבע ב-JSX / מונה). */
   .motion-js .reveal[data-stagger] {
@@ -760,11 +764,6 @@
   /* עומק/פרלקסה מרוסנת לכריכת השער (ההזזה מונעת מ-JS ב-ParallaxScroll דרך
      המשתנה --hero-parallax; ברירת מחדל 0 ⇒ אין הזזה עד שיש גלילה, אין קפיצה
      ב-first-paint). transform בלבד ⇒ מרוכב ב-compositor. */
-  .hero-depth-book,
-  .hero-depth-halo {
-    will-change: transform;
-  }
-
   /* כניסת הכריכה — פעם אחת בלבד: fade + scale עדין (0.97→1) ועלייה קצרה.
      אין לולאה קבועה. transform+opacity בלבד ⇒ 60fps, ללא CLS. */
   .motion-js .hero-float {
@@ -1725,27 +1724,6 @@
  *  - prefers-reduced-motion: כל התנועה מבוטלת; מוצג המצב הסופי הקריא.
  * כל האנימציות על opacity/transform/filter בלבד — אין CLS.
  * =================================================================== */
-/* שדה-צבע חי בבאנד ה-Sage — ההילות נסחפות ונושמות לאט (עומק רקע). */
-@media (prefers-reduced-motion: no-preference) {
-  .thesis-halos > div {
-    animation: thesisHaloDrift 16s ease-in-out infinite;
-    will-change: transform;
-  }
-  .thesis-halos > div:last-child {
-    animation-duration: 20s;
-    animation-delay: -6s;
-  }
-  @keyframes thesisHaloDrift {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    50% {
-      transform: translate3d(4%, -3%, 0) scale(1.16);
-    }
-  }
-}
-
 /* כניסת הכריכה בעמוד /book — נחיתה מוצרית ברורה (למעלה מהקיפול, on-load).
    בסיס גלוי; רק תחת motion-js מריצים כניסה. reduced-motion / no-JS ⇒ סטטי גלוי. */
 .motion-js .book-hero-enter {
@@ -2299,6 +2277,32 @@
   }
 }
 
+/* דיוקן המחבר — עומק מרוסן מונע-גלילה (6-8%). היסט קטן בלבד: אין ריחוף,
+   אין נשימת-scale ואין אנימציית-filter. `--hero-parallax` נשאר 0 במגע
+   ובתנועה-מופחתת (ParallaxScroll אינו נרשם שם כלל), ולכן הדיוקן סטטי שם. */
+/* ההיסט יושב על *העטיפה*, לא על `.portrait-reveal`.
+   `.portrait-reveal` נושא `animation: portraitIn ... both`, ואנימציה עם fill
+   גוברת על הצהרת-transform רגילה בקסקייד — כלומר ההיסט נדרס בשקט והדיוקן
+   לא זז בכלל (נמדד: travel = 0px). העטיפה נקייה מאנימציה, ולכן שם הוא עובד.
+
+   היחידה היא *אחוז* ולא פיקסלים: ב-translateY אחוז מתייחס לגובה האלמנט עצמו,
+   ולכן אותו ערך נותן אותה תחושה יחסית ב-1440 וב-1024 במקום היסט שגדל יחסית
+   בדיוקן קטן. הטווח האפקטיבי של --hero-parallax כאן הוא ~0..0.5 (הדיוקן יושב
+   גבוה בעמוד), ולכן -14% נותן מהלך של ~7% מגובה הדיוקן — בתוך הטווח המבוקש. */
+.portrait-parallax {
+  display: block;
+  /* ברירת-מחדל *מוצהרת* על האלמנט עצמו, לא fallback ב-var(). זה מה שהופך את
+     המנוחה לאמינה: כשהאפקט אינו פעיל (תנועה מופחתת / מצביע גס) ה-JS לעולם
+     אינו כותב, הערך נשאר 0.5, וההיסט הוא בדיוק 0. כשהוא פעיל, ה-JS דורס
+     בסגנון-שורה.
+     שתי הגרסאות הקודמות נכשלו כאן ושתיהן נמדדו: fallback של 0.5 לא חל כלל
+     (המשתנה נפתר ל-0 ⇒ הדיוקן עמד מוזז 40px תחת reduced-motion), ונוסחה
+     שמבוססת 0 נתנה קפיצת-first-paint של 39px בראש העמוד. מרכז ב-0.5 עם
+     ברירת-מחדל מוצהרת פותר את שניהם. */
+  --hero-parallax: 0.5;
+  transform: translateY(calc((var(--hero-parallax) - 0.5) * -14%));
+}
+
 /* #4 מצפן חי — טבעות סטטיות + מחט שמתייצבת לכיוון עם spring. */
 .living-compass {
   display: block;
@@ -2317,7 +2321,9 @@
   stroke-width: 1;
   stroke-opacity: 0.16;
 }
-/* טבעת מקווקוות מסתובבת — תנועה מתמדת ועדינה שמסמנת „חי” */
+/* טבעת מקווקוות — *סטטית*. קודם רצו כאן שתי אנימציות `infinite` (סיבוב-טבעת
+   ומטאטא-ראדאר): תנועה שרצה תמיד, אינה נגזרת מאף מצב, ובזמן טעינה הופכת ללוגו
+   מסתובב בלי סוף. הוסרו. התגובה היחידה של הטבעת היא למצב „חיפוש”, והיא חסומה. */
 .living-compass__ring-sweep {
   fill: none;
   stroke: var(--color-brand);
@@ -2326,40 +2332,16 @@
   stroke-dasharray: 6 10;
   transform-box: view-box;
   transform-origin: 50% 50%;
+  transition:
+    stroke-opacity var(--dur-focus) var(--ease-standard),
+    transform var(--dur-focus) var(--ease-settle);
 }
-.living-compass__sweep {
-  stroke: var(--color-brand);
-  stroke-width: 1.4;
+.living-compass[data-compass-state="seeking"] .living-compass__ring-sweep {
+  stroke-opacity: 0.72;
+  transform: scale(1.06);
+}
+.living-compass[data-compass-state="settled"] .living-compass__ring-sweep {
   stroke-opacity: 0.5;
-  stroke-linecap: round;
-  transform-box: view-box;
-  transform-origin: 50% 50%;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .living-compass__ring-sweep {
-    animation: compassRingSpin 14s linear infinite;
-  }
-  .living-compass__sweep {
-    animation: compassSweep 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-}
-@keyframes compassRingSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes compassSweep {
-  0% {
-    transform: rotate(0deg);
-    stroke-opacity: 0.5;
-  }
-  70% {
-    stroke-opacity: 0.5;
-  }
-  100% {
-    transform: rotate(360deg);
-    stroke-opacity: 0.5;
-  }
 }
 .living-compass__tick {
   stroke: var(--color-brand);
@@ -2372,12 +2354,9 @@
   transition: transform 1000ms cubic-bezier(0.34, 1.7, 0.4, 1); /* spring מודגש */
 }
 @media (prefers-reduced-motion: reduce) {
-  .living-compass__needle {
+  .living-compass__needle,
+  .living-compass__ring-sweep {
     transition: none;
-  }
-  .living-compass__ring-sweep,
-  .living-compass__sweep {
-    animation: none;
   }
 }
 .living-compass__north {
@@ -2441,12 +2420,6 @@
     transform: none;
   }
 }
-@keyframes compassSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* כניסה מתואמת בטעינה (מעל הקיפול): ראש/כותרת/פאנל בהדרגה. */
 @media (prefers-reduced-motion: no-preference) {
   .enter {
@@ -2491,10 +2464,6 @@
     animation: portraitIn 460ms var(--ease-standard) both;
   }
 
-  /* אינדיקציית טעינה יחידה ומרוסנת של אייקון המצפן (רק בזמן הבקשה). */
-  .compass-loading {
-    animation: compassSpin 1.6s linear infinite;
-  }
 
   /* PHASE MOTION 2 — „שאל את הספר”: המצפן שליד תיבת הכתיבה נע קלות בזמן
      שהמשתמש מקליד. משוב-מיקרו בלבד: נדנוד עדין של ±6°, transform בלבד ⇒ אין
@@ -2669,6 +2638,55 @@
     animation: journey-rail-draw var(--dur-physical) var(--ease-settle) 120ms both;
   }
 }
+/* ── זהות-השלב, בתוך אותה שפה ──────────────────────────────────────────────
+   כל חמשת העמודים חולקים את אותו דקדוק: פס מוביל אחד + רצף-הגעה מדורג. מה
+   שמבדיל ביניהם הוא *אופיו של הפס* — והמשמעות נגזרת מהשלב עצמו, לא מקישוט:
+     לפני קשר      — נקודות נפרדות שנעשות קריאות (אפשרות שעוד לא התחברה)
+     מתחילים קשר   — מקטעים שמתקרבים לקצב אחיד (התחלה של מבנה)
+     בתוך קשר      — קו רציף אחד (קשר מתמשך)
+     אחרי פרידה    — קו שנקטע (בלי דרמה: הפסקה, לא שבר)
+     מתחילים מחדש  — קטע-שבור שנפתר לקו חדש בהמשכו
+   מיושם ב-background בלבד (gradient), ולכן אינו נוגע בפריסה ואינו מוסיף
+   אנימציה נוספת: אותה משיכת-scaleY אחת נשארת המנוע. */
+@media (min-width: 1024px) {
+  .journey-page[data-journey-stage="before-relationship"]::after {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-sage-ink) 0 6px,
+      transparent 6px 14px
+    );
+  }
+  .journey-page[data-journey-stage="building-relationship"]::after {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-sage-ink) 0 14px,
+      transparent 14px 20px
+    );
+  }
+  /* „בתוך קשר” — רציף, ללא הפסקה. זהו גם ברירת-המחדל.
+
+     הגשרים (אחרי פרידה / מתחילים מחדש) אינם תחנות במחזור, ולכן
+     `--journey-pos` שלהם הוא 0 ופס-ההתקדמות (::after) נשאר ב-scaleY(0) —
+     בכוונה, כדי לא להבטיח התקדמות שלא קרתה. כדי שהאופי שלהם בכל זאת ייראה,
+     הוא נישא על פס-הבסיס (::before) ולא על פס-ההתקדמות. */
+  .journey-page[data-journey-stage="after-breakup"]::before {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-border-strong) 55%, transparent) 0 42%,
+      transparent 42% 58%,
+      color-mix(in oklab, var(--color-border-strong) 30%, transparent) 58% 100%
+    );
+  }
+  .journey-page[data-journey-stage="starting-again"]::before {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-border-strong) 28%, transparent) 0 22%,
+      transparent 22% 34%,
+      color-mix(in oklab, var(--color-sage-ink) 60%, transparent) 34% 100%
+    );
+  }
+}
+
 @keyframes journey-rail-draw {
   from { transform: scaleY(0); }
   to { transform: scaleY(var(--journey-pos, 0)); }
@@ -3246,6 +3264,71 @@ html.vt-book-nav::view-transition-group(book-cover) {
 .tool-lux-card:focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 3px;
+}
+
+/* ── חומריות: אור-סמן, עומק והטיה, לחיצה עם קפיץ ──────────────────────────
+   הכל מגודר ל*מצביע מדויק עם hover* בלבד. במגע אין אור ואין הטיה — רק משוב
+   לחיצה/בחירה נקי, כי „אור שעוקב אחרי הסמן” חסר משמעות באצבע. */
+@media (hover: hover) and (pointer: fine) {
+  .tool-lux-card {
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+  }
+  /* אור רך שממוקם לפי --px/--py שנכתבים ב-rAF. שכבה נפרדת ⇒ לא נוגע בטקסט
+     ולא משנה ניגודיות של תוכן. */
+  .tool-lux-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      42% 42% at var(--px, 50%) var(--py, 50%),
+      color-mix(in srgb, var(--lux-copper) 22%, transparent),
+      transparent 70%
+    );
+    transition: opacity var(--dur-ui) var(--ease-standard);
+  }
+  .tool-lux-card:hover::after {
+    opacity: 1;
+  }
+  .tool-lux-card:hover {
+    transform: perspective(900px) translateY(-4px) rotateX(var(--tilt-x, 0deg))
+      rotateY(var(--tilt-y, 0deg));
+  }
+  /* לחיצה: שקיעה קצרה עם easing „קפיצי” (back-out) — תגובה פיזית לאובייקט
+     מוחשי, לפי כלל-הפיזיקה. לא ספרייה: cubic-bezier בלבד. */
+  .tool-lux-card[data-pressed] {
+    transform: perspective(900px) translateY(-1px) scale(0.985);
+    transition-duration: 90ms;
+  }
+}
+/* מצביע גס / מגע — משוב לחיצה בלבד. */
+@media (hover: none), (pointer: coarse) {
+  .tool-lux-card[data-pressed] {
+    transform: scale(0.985);
+    border-color: var(--lux-copper);
+  }
+}
+/* מקלדת: אותה הכרה חזותית שהעכבר מקבל. */
+.tool-lux-card:focus-visible {
+  border-color: color-mix(in srgb, var(--lux-copper) 45%, transparent);
+  box-shadow: 0 18px 40px -26px rgb(var(--shadow-tint) / 0.55);
+}
+/* העדפת תנועה מופחתת: הדגשת צבע/מסגרת בלבד — בלי אור, בלי הטיה, בלי שקיעה. */
+@media (prefers-reduced-motion: reduce) {
+  .tool-lux-card:hover,
+  .tool-lux-card[data-pressed] {
+    transform: none;
+  }
+  .tool-lux-card::after {
+    display: none;
+  }
+  .tool-lux-card[data-pressed],
+  .tool-lux-card:hover {
+    border-color: var(--lux-copper);
+  }
 }
 .tool-lux-card[data-open] {
   border-color: var(--lux-copper);
@@ -4163,6 +4246,20 @@ body:has([data-fm-active]) {
   transform: translateY(var(--rest-y, 0));
 }
 
+/* התכנסות: אחרי שהמילים התיישבו, ענן-הרעש *מתכנס* מעט ומתעמעם בזמן שציר-
+   הבנייה נמשך — השלב שחסר בין „רעש” ל„מבנה”: חיפוש → בהירות → התכנסות →
+   מבנה מחובר.
+   *רק* scaleX על המכל — בכוונה בלי opacity. מילות-הרעש הן טקסט אמיתי, וכל
+   דילול-שקיפות עליהן הוא בדיוק נפילת-ה-AA שכבר תוקנה כאן פעם (2.46:1).
+   ההתכנסות נמסרת בתנועה, לא בהעלמה. */
+.motion-js .thesis-scene .thesis-noise {
+  transform: scaleX(1.05);
+  transition: transform 0.9s var(--ease-settle) 0.5s;
+}
+.motion-js .thesis-scene.is-visible .thesis-noise {
+  transform: scaleX(1);
+}
+
 /* ציר-הבנייה נמשך מלמעלה למטה (scaleY) — הציר שסביבו נבנה הצד השני. */
 .motion-js .thesis-scene .thesis-axis {
   transform: scaleY(0);
@@ -4176,17 +4273,11 @@ body:has([data-fm-active]) {
   opacity: 1;
 }
 
-/* כותרת-הבנייה עולה, וקו-החתימה נמשך תחתיה. */
+/* כותרת-הבנייה *נבנית* (חשיפת-מסכה מכיוון הקריאה, ראו `.build-focus`), וקו-
+   החתימה נמשך תחתיה. במכוון ללא fade-up: זו השורה שנושאת את הרעיון, והיא לא
+   אמורה להיכנס כמו כל פסקה אחרת. ההשהיה מסונכרנת עם משיכת הציר שמעליה. */
 .motion-js .thesis-scene .thesis-build {
-  opacity: 0;
-  transform: translateY(14px);
-  transition:
-    opacity 0.6s var(--ease-settle) 0.6s,
-    transform 0.6s var(--ease-settle) 0.6s;
-}
-.motion-js .thesis-scene.is-visible .thesis-build {
-  opacity: 1;
-  transform: none;
+  --build-focus-delay: 600ms;
 }
 .motion-js .thesis-scene .thesis-build__stroke {
   transform: scaleX(0);
@@ -4284,6 +4375,231 @@ body:has([data-fm-active]) {
   }
 }
 
+/* ── המצפן כחוויה אחת: פתיח → שאלה → חיפוש → תשובה ────────────────────────
+   שלושת המעברים הגדולים אינם חיתוכים: כרטיס-החיפוש נכנס מלמטה כשהשאלה
+   נשלחת, וכרטיס-התשובה מחליף אותו בעלייה (`.stuck-answer` הקיים). מה שנשאר
+   קבוע — מסגרת הכרטיס והמצפן — הוא מה שקושר את השלבים זה לזה, ולכן אין
+   תחושת „מסך חדש”. אין כאן תיאטרון-חשיבה: מה שמוצג הוא שלב-החיפוש האמיתי
+   שהשרת מבצע, ובמצפן חסום ודועך. */
+.motion-js .compass-stage-in {
+  animation: compass-stage-in var(--dur-ui) var(--ease-settle) both;
+}
+@keyframes compass-stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── „הצצה פנימה” — כניסה מוחשית אל הטעימה ────────────────────────────────
+   עלה שנהפך: פרספקטיבה, סיבוב של ~10° וצל-קיפול שנע איתו. העלה הישן מתרחק
+   והבא נחשף *מתחתיו*. מצב-הבסיס (ללא JS) הוא העלה הפעיל, גלוי וקריא —
+   שום טקסט אינו תלוי בסיום אנימציה. */
+.peek {
+  margin-block-start: 2rem;
+}
+.peek__stack {
+  position: relative;
+  height: clamp(9.5rem, 22vw, 12rem);
+  margin-block-start: 0.85rem;
+  perspective: 1100px;
+  touch-action: pan-y; /* גרירה אופקית שלנו, גלילה אנכית של הדפדפן */
+  border-radius: var(--radius-lg);
+  /* גרירה להפיכת עלה אינה אמורה *לסמן טקסט*. בלי זה הגרירה צובעת את הפסקה
+     בכחול/טרקוטה של בחירת-מערכת וההיפוך נראה שבור — נתפס בבדיקה חזותית,
+     לא במספרים. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.peek__stack:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 4px;
+}
+.peek__leaf {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  transform-origin: right center; /* RTL: העלה מסתובב סביב שדרת-הימין */
+  backface-visibility: hidden;
+}
+.peek__text {
+  margin: 0;
+  font-family: var(--font-serif, serif);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.6;
+  text-align: center;
+  text-wrap: pretty;
+  color: var(--color-foreground);
+}
+/* עומק הערימה: כל עלה שממתין יושב מעט מתחת ומאחור. */
+.peek__leaf[data-state="ahead"] {
+  transform: translateY(calc(var(--depth) * 5px)) scale(calc(1 - var(--depth) * 0.02));
+  z-index: 0;
+}
+.peek__leaf[data-state="current"] {
+  z-index: 2;
+  box-shadow: 0 14px 34px -22px rgb(var(--shadow-tint) / 0.5);
+}
+/* עלה שכבר נהפך — יצא מהדרך. */
+.peek__leaf[data-state="turned"] {
+  transform: rotateY(-32deg) translateX(-14%);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .peek__leaf {
+    transition:
+      transform 460ms var(--ease-settle),
+      opacity 380ms var(--ease-standard);
+  }
+  /* בזמן גרירה — העלה עוקב אחרי האצבע: סיבוב עד ~10° וצל שמתעמק.
+     ה-transition מבוטל כדי שהמעקב יהיה מיידי; בשחרור הוא חוזר ומייצר את
+     ה„חזרה החדה” (snap-back) או את ההשלמה. */
+  .peek__stack[data-dragging] .peek__leaf[data-state="current"] {
+    transition: none;
+    transform: rotateY(calc(var(--peek-drag) * 10deg))
+      translateX(calc(var(--peek-drag) * 8%));
+    box-shadow: 0 18px 40px -20px
+      rgb(var(--shadow-tint) / calc(0.35 + 0.35 * max(var(--peek-drag), var(--peek-drag) * -1)));
+  }
+}
+/* מובייל — קל וקטן יותר *באמת*.
+   שלושה שינויים, כי מדידה הראתה שזווית קטנה יותר לבדה אינה מספיקה:
+   1. פרספקטיבה *גדולה* יותר (1200 מול 1100 בדסקטופ) — ערך גבוה = עיוות
+      מתון יותר. קודם היה כאן 800px, כלומר עיוות *חזק* יותר מהדסקטופ לכל
+      מעלה — ההפך מ„קל יותר”.
+   2. זווית-היציאה יורדת ל-15° (דסקטופ 32°).
+   3. גם מעקב-הגרירה מתמתן ל-6° (דסקטופ 10°) — קודם הוא היה זהה בשניהם. */
+@media (max-width: 640px) {
+  .peek__stack {
+    perspective: 1200px;
+  }
+  .peek__leaf[data-state="turned"] {
+    transform: rotateY(-15deg) translateX(-8%);
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  .peek__stack[data-dragging] .peek__leaf[data-state="current"] {
+    transform: rotateY(calc(var(--peek-drag) * 6deg))
+      translateX(calc(var(--peek-drag) * 5%));
+  }
+}
+/* תנועה מופחתת — החלפה מיידית, בלי סיבוב ובלי צל נע. */
+@media (prefers-reduced-motion: reduce) {
+  .peek__leaf {
+    transition: none;
+  }
+  .peek__leaf[data-state="turned"] {
+    transform: none;
+  }
+}
+
+.peek__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-block-start: 0.85rem;
+}
+.peek__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  color: var(--color-foreground);
+  background: var(--color-surface);
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+.peek__btn:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+}
+.peek__btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.peek__btn:disabled {
+  opacity: 0.45;
+}
+.peek__btn:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+.peek__count {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-foreground-muted);
+}
+.peek__more {
+  margin-block-start: 0.85rem;
+}
+.peek__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-brand-hover);
+  text-underline-offset: 4px;
+}
+.peek__link:hover {
+  text-decoration: underline;
+}
+
+/* ── „בדיקת השקט” — התנועה היא ההסבר ─────────────────────────────────────
+   העובדה מעוגנת ואינה זזה; הפרשנות נפרדת ממנה ונסוגה; העיקרון נפתר מתוך
+   המרחק שנוצר. אותה שפה בדיוק של fact-story, כי זה אותו רעיון.
+   ללא JS. תחת reduced-motion שלוש השכבות מוצגות מיד במצבן הסופי. */
+.motion-js .quiet-demo .quiet-demo__fact {
+  opacity: 0.6;
+  transform: none;
+  transition: opacity var(--dur-editorial) var(--ease-standard) 120ms;
+}
+.motion-js .quiet-demo.is-visible .quiet-demo__fact {
+  opacity: 1;
+}
+.motion-js .quiet-demo .quiet-demo__story {
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+  transition:
+    opacity var(--dur-editorial) var(--ease-emphasized) 320ms,
+    transform var(--dur-editorial) var(--ease-emphasized) 320ms;
+}
+@media (min-width: 640px) {
+  .motion-js .quiet-demo .quiet-demo__story {
+    transform: translateX(38%) scale(0.955);
+  }
+}
+.motion-js .quiet-demo.is-visible .quiet-demo__story {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .quiet-demo .quiet-demo__resolve {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity var(--dur-editorial) var(--ease-settle) 760ms,
+    transform var(--dur-editorial) var(--ease-settle) 760ms;
+}
+.motion-js .quiet-demo.is-visible .quiet-demo__resolve {
+  opacity: 1;
+  transform: none;
+}
+
 /* ── E · Method fact-story signature: separation/recombine ──
    מיחזור ישיר של שפת ה-split מ-Focus Mode: כששלב-ההפרדה נחשף, שני הצדדים
    מתחילים מכונסים אל המרכז (inward) ואז נפרדים אל מקומם — הפער נוצר לנגד העין,
@@ -4302,20 +4618,41 @@ body:has([data-fm-active]) {
     animation: fslab-sep-story var(--dur-editorial) var(--ease-emphasized) both;
   }
 }
+/* העובדה היא *הקרקע*: היא כמעט אינה זזה. קודם שני הצדדים נעו ±34% בסימטריה,
+   וזה לימד „שני דברים שווים שנפרדים”. הכלי מלמד משהו אחר: העובדה עומדת,
+   והפרשנות היא זו שמתרחקת ממנה. */
 @keyframes fslab-sep-fact {
   from {
-    opacity: 0.35;
-    transform: translateX(-34%) scale(0.965);
+    opacity: 0.55;
+    transform: translateX(-8%) scale(0.99);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
+/* הסיפור *נפרד* מהעובדה — הוא זה שנע, והמרחק בין השניים הוא התובנה. */
 @keyframes fslab-sep-story {
   from {
-    opacity: 0.35;
-    transform: translateX(34%) scale(0.965);
+    opacity: 0.3;
+    transform: translateX(46%) scale(0.955);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* הפעולה *נפתרת מתוך ההבחנה*: היא עולה מהמרווח שנוצר בין העובדה לסיפור,
+   אחרי שההפרדה כבר נראתה. לכן ההשהיה — הפעולה אינה עוד בלוק שנכנס, היא
+   התוצאה של מה שקרה מעליה. */
+.motion-js .fslab-action {
+  animation: fslab-action-resolve var(--dur-editorial) var(--ease-settle) 420ms both;
+}
+@keyframes fslab-action-resolve {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.985);
   }
   to {
     opacity: 1;
@@ -5065,16 +5402,41 @@ body:has([data-fm-active]) {
   }
 }
 /* הכותרת „תלויה” מהחוט: עולה מעט אחרי שהחוט מגיע. */
-.motion-js .recog .recog__line {
-  opacity: 0;
-  transform: translateY(12px);
-  transition:
-    opacity 620ms var(--ease-settle) 260ms,
-    transform 620ms var(--ease-settle) 260ms;
+/* ── `.build-focus` — טיפול-הבנייה לשורות החזקות ביותר ──────────────────────
+   השורות הנושאות את הרעיון אינן עולות ב-fade-up גנרי כמו כל השאר. הן *נבנות*:
+   נחשפות במסכה מכיוון הקריאה (RTL — מימין לשמאל), והדיו „מתעמק” מגוון מרוכך
+   אל צבע-הטקסט המלא. אין הקלדה ואין חשיפה מילה-אחר-מילה.
+
+   חד-כיווני מעצם המבנה: הטריגר הוא `.is-visible`, שהוא תפס חד-כיווני
+   (MotionRoot) — גלילה חזרה למעלה אינה יכולה להסתיר שורה שכבר נבנתה.
+   בטיחות: ברירת-המחדל (ללא JS / reduced-motion) היא הטקסט המלא והגלוי;
+   ההסתרה מתחילה רק תחת `.motion-js`, כלומר רק אחרי שזמן-הריצה של התנועה עלה.
+
+   הליבה היא החשיפה עצמה. „העמקת-הדיו” היא תוספת opt-in (`.build-focus--ink`)
+   ולא ברירת-מחדל, כדי שלא תדרוס צבע-מותג שנבחר במפורש לשורה (למשל
+   `.thesis-build`, שהיא טרקוטה בכוונה). */
+.motion-js .build-focus {
+  clip-path: inset(0 0 0 100%);
 }
-.motion-js .recog.is-visible .recog__line {
-  opacity: 1;
-  transform: none;
+.motion-js .is-visible .build-focus,
+.motion-js .build-focus.is-visible {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 720ms var(--ease-settle) var(--build-focus-delay, 0ms);
+}
+.motion-js .build-focus--ink {
+  color: var(--color-foreground-muted);
+}
+.motion-js .is-visible .build-focus--ink,
+.motion-js .build-focus--ink.is-visible {
+  color: var(--color-foreground);
+  transition:
+    clip-path 720ms var(--ease-settle) var(--build-focus-delay, 0ms),
+    color 620ms var(--ease-standard) var(--build-focus-delay, 0ms);
+}
+
+/* השורה החזקה בעמוד הבית — נבנית, לא עולה. */
+.motion-js .recog .recog__line {
+  --build-focus-delay: 260ms;
 }
 .motion-js .recog .recog__support {
   opacity: 0;
@@ -5242,6 +5604,111 @@ body:has([data-fm-active]) {
   opacity: 1;
 }
 
+/* ── „מחיפוש לבנייה” — המעבר של עמוד הבית ────────────────────────────────
+   ארבעה שלבים ברצף אחד: פיזור → בהירות → יישור → מבנה, ואז העברה כלפי מטה
+   אל `#path`. כל התנועה היא transform/opacity; המידות קבועות ⇒ ללא CLS.
+   הבסיס (ללא JS / reduced-motion) הוא *המצב הבנוי הסופי*: הנקודות מיושרות,
+   הציר משורטט, הטקסט מלא — כך שכשל-הידרציה או העדפת-תנועה אינם משאירים
+   שום דבר נסתר. אין pinning ואין scroll-timeline, ולכן ניווט-hash אינו נתקע. */
+.s2b {
+  padding-block: clamp(2.25rem, 5vw, 3.5rem);
+}
+.s2b__line {
+  color: var(--color-foreground-muted);
+}
+.s2b__build {
+  font-weight: 600;
+  color: var(--color-brand-hover);
+}
+.s2b__field {
+  position: relative;
+  height: 84px;
+  margin-block-start: clamp(1.25rem, 3vw, 2rem);
+}
+/* מצב-הבסיס = מיושר ובנוי. */
+.s2b__pt {
+  position: absolute;
+  top: 50%;
+  left: var(--ax);
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--color-sage-ink);
+}
+.s2b__rail {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  margin-top: -0.5px;
+  background: color-mix(in oklab, var(--color-sage-ink) 55%, transparent);
+  transform-origin: right center; /* RTL: נמשך מכיוון הקריאה */
+}
+.s2b__handoff {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 30px;
+  margin-left: -1px;
+  transform-origin: top center;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-brand) 55%, transparent),
+    color-mix(in oklab, var(--color-brand) 8%, transparent)
+  );
+}
+
+/* שלב 1+2 — פיזור, ואז הרגעה. */
+.motion-js .s2b.reveal {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .s2b .s2b__pt {
+  left: var(--sx);
+  transform: translateY(var(--sy)) scale(0.55);
+  opacity: 0;
+  transition:
+    left 620ms var(--ease-settle),
+    transform 620ms var(--ease-settle),
+    opacity 320ms var(--ease-standard);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+/* שלב 3 — יישור: כולן זזות אל הציר כמעט יחד, ולכן זה נקרא כהתיישרות ולא
+   כעוד רצף-כניסה. */
+.motion-js .s2b.is-visible .s2b__pt {
+  left: var(--ax);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  transition-delay: calc(520ms + var(--i, 0) * 18ms);
+}
+/* שלב 4 — מבנה: הציר נמשך אחרי שהנקודות התיישרו. */
+.motion-js .s2b .s2b__rail {
+  transform: scaleX(0);
+  transition: transform 720ms var(--ease-emphasized) 1000ms;
+}
+.motion-js .s2b.is-visible .s2b__rail {
+  transform: scaleX(1);
+}
+/* ההעברה כלפי מטה — אחרונה, אחרי שהמבנה קיים. */
+.motion-js .s2b .s2b__handoff {
+  transform: scaleY(0);
+  transition: transform 460ms var(--ease-emphasized) 1620ms;
+}
+.motion-js .s2b.is-visible .s2b__handoff {
+  transform: scaleY(1);
+}
+/* חצי-„הבנייה” של השורה נבנה יחד עם הציר. */
+.motion-js .s2b .s2b__build {
+  clip-path: inset(0 0 0 100%);
+}
+.motion-js .s2b.is-visible .s2b__build {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 620ms var(--ease-settle) 1000ms;
+}
+
 /* ── C · התעוררות-המסלול (#path): החוט ממשיך, והתחנות „מופיעות” כצמתים ──
    בלי כרומת-טופס חדשה: הכרטיסים עצמם הם הצמתים; הם עולים ברצף כשהמקטע נכנס,
    כאילו החוט „מגיע” אל כל אחד. */
@@ -5290,6 +5757,106 @@ body:has([data-fm-active]) {
   opacity: 1;
   transform: none;
 }
+
+/* ── התעוררות-הצומת ── כל כרטיס נושא נקודת-צומת על שפתו העליונה. הנקודה היא
+   שנדלקת (scale + צבע) כשהחוט „מגיע” אליה — כך שהאפקט העיקרי הוא *התעוררות
+   של צומת במסלול*, ולא עוד fade-up. הנקודה דקורטיבית (aria-hidden ברמת ה-
+   pseudo-element) ואינה משנה פריסה. */
+.situation-card {
+  position: relative;
+}
+.situation-card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-start: 1.35rem;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+  transition:
+    transform var(--dur-ui) var(--ease-settle),
+    background-color var(--dur-ui) var(--ease-standard);
+}
+.motion-js .path-nodes .situation-card::before {
+  transform: scale(0);
+}
+.motion-js .path-nodes.is-visible .situation-card::before {
+  transform: scale(1);
+  /* הנקודה נדלקת מעט *אחרי* שהכרטיס הגיע — החוט מגיע, ואז הצומת נענה. */
+  transition-delay: calc(var(--i, 0) * 110ms + 220ms);
+}
+/* הצומת שנבחר — ההדגשה הברורה ביותר במסלול. */
+.situation-card[data-selected] {
+  border-color: color-mix(in oklab, var(--color-sage-ink) 55%, transparent);
+  background: color-mix(in oklab, var(--color-sage) 12%, var(--color-surface));
+}
+.situation-card[data-selected]::before {
+  background: var(--color-brand);
+  transform: scale(1.45);
+}
+
+/* ── הסמן שנוסע אל הצומת הנבחר ──
+   נמצא בשכבה נפרדת מעל הרשת, ונע ב-transform בלבד (compositor). מיקומו מגיע
+   מ---marker-x/y שנמדדים ב-rAF יחיד, ולכן הוא נכון בכל מספר-עמודות (1/2/4)
+   ובשני כיווני-הכתיבה — אין כאן הנחה על סדר או על צד. */
+.path-nodes {
+  position: relative;
+}
+.path-marker {
+  position: absolute;
+  inset-block-start: 0;
+  /* עוגן *פיזי* בכוונה. `--marker-x` נמדד כהיסט פיזי משפת-השמאל של הרשת
+     (`rect.left - grid.left`), ולכן העוגן חייב להיות אותה שפה. עם
+     `inset-inline-start` העוגן היה עובר לימין ב-RTL וההיסט היה נדחף החוצה
+     מהמסך — נמדד x=1954 ברוחב 1440. */
+  left: 0;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-brand) 18%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(var(--marker-x, 0), calc(var(--marker-y, 0) - 4px), 0);
+}
+.path-nodes[data-marker-ready] .path-marker {
+  opacity: 1;
+}
+.motion-js .path-marker {
+  transition:
+    transform var(--dur-focus) var(--ease-emphasized),
+    opacity var(--dur-ui) var(--ease-standard);
+}
+
+/* ── תשובת-הזיהוי, במקום ── נפתחת מתחת לצמתים אחרי בחירה. עולה ומתבהרת
+   (transform/opacity בלבד); התוכן עצמו קיים ב-DOM ברגע הבחירה, ולכן שום דבר
+   בו אינו תלוי בסיום האנימציה. */
+.motion-js .path-recognition {
+  animation: path-recognition-in var(--dur-ui) var(--ease-settle) both;
+}
+@keyframes path-recognition-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.motion-js .path-recognition__beat,
+.motion-js .path-recognition__cta {
+  animation: path-recognition-in var(--dur-ui) var(--ease-settle) both;
+}
+.motion-js .path-recognition__beat {
+  animation-delay: 90ms;
+}
+.motion-js .path-recognition__cta {
+  animation-delay: 170ms;
+}
 /* התיבה-החופשית (נקודת-הכניסה הראשית) עולה ראשונה, לפני הצמתים. */
 .motion-js .path-composer.reveal {
   opacity: 1;
@@ -5326,6 +5893,53 @@ body:has([data-fm-active]) {
   opacity: 1;
   transform: none;
 }
+/* ── סגירת-המסע: נקודות → מסלול ── שלוש נקודות מופיעות ברצף, ואז הקו שמחבר
+   ביניהן נמשך מכיוון הקריאה. סימן קטן שסוגר את המוטיב שנפתח ב-Hero, לא
+   מופע-סיום. transform/opacity בלבד; המידות קבועות ⇒ אין CLS. */
+.close-resolve {
+  position: relative;
+  display: block;
+  width: 62px;
+  height: 7px;
+  margin-block-end: 1.1rem;
+}
+.close-resolve__line {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline: 0;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-brand) 55%, transparent);
+  transform-origin: right center; /* RTL: נמשך מימין לשמאל */
+}
+.close-resolve__dot {
+  position: absolute;
+  inset-block-start: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  inset-inline-start: calc(var(--i) * 27px);
+}
+.motion-js .sig-close__inner .close-resolve__dot {
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity var(--dur-ui) var(--ease-settle),
+    transform var(--dur-ui) var(--ease-settle);
+  transition-delay: calc(var(--i, 0) * 120ms);
+}
+.motion-js .sig-close__inner.is-visible .close-resolve__dot {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .sig-close__inner .close-resolve__line {
+  transform: scaleX(0);
+  transition: transform var(--dur-editorial) var(--ease-emphasized) 400ms;
+}
+.motion-js .sig-close__inner.is-visible .close-resolve__line {
+  transform: scaleX(1);
+}
+
 .motion-js .sig-close__inner .sig-close__title {
   opacity: 0;
   transform: translateY(14px);

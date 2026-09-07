@@ -186,7 +186,12 @@ test.describe("Launch-readiness", () => {
     // (מדלג על „איפה אתם?” ומתחיל בדילמה).
     const path = page.locator("#path");
     await path.scrollIntoViewIfNeeded();
-    await path.locator('a[href="/before-relationship"]').click();
+    // בחירה במקום (זיהוי) ואז כניסה לבמה — שני צעדים מכוונים, בלי ניווט.
+    await path.locator('a.situation-card[href="/before-relationship"]').click();
+    await expect(page).toHaveURL(/\/$/);
+    const enterStage = path.locator(".path-recognition__cta button").first();
+    await enterStage.waitFor({ state: "visible" });
+    await enterStage.click();
     await expect(page).toHaveURL(/\/$/);
     const focus = path.getByRole("region", { name: focusUi.regionLabel });
     await focus.getByRole("button", { name: focusUi.enterCta }).click();

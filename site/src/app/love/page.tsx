@@ -33,7 +33,7 @@ function DeepLink({ href, label }: { href: string; label: string }) {
     >
       {label}
       <ArrowLeft
-        className="h-4 w-4 transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+        className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
         aria-hidden="true"
       />
     </Link>
@@ -141,7 +141,7 @@ export default function LovePage() {
                 {st.label}
               </span>
               <ArrowUpLeft
-                className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1 group-hover:-translate-y-1"
+                className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-hover:-translate-y-1 group-focus-visible:-translate-x-1.5 group-focus-visible:-translate-y-1"
                 aria-hidden="true"
               />
             </Link>
@@ -164,7 +164,7 @@ export default function LovePage() {
         >
           {love.close.cta}
           <ArrowLeft
-            className="h-4 w-4 transition-transform group-hover:-translate-x-1.5"
+            className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
             aria-hidden="true"
           />
         </AmazonBuyLink>

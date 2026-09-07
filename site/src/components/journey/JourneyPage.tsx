@@ -133,6 +133,12 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
   return (
     <Container
       className="journey-page py-10 sm:py-14 lg:py-16"
+      // זהות-השלב לשפת-התנועה. אותה דקדוק לכל החמישה (אותו פס מוביל, אותו
+      // רצף-הגעה), אבל *אופי הפס עצמו* אומר באיזה שלב אנחנו: נקודות נפרדות
+      // שנעשות קריאות (לפני), מקטעים שמתקרבים לקצב (מתחילים), קו רציף (בתוך),
+      // קו שנקטע (אחרי פרידה), וקטע-שבור שנפתר להתחלה חדשה (מתחילים מחדש).
+      // המשמעות מגיעה מזהות התחנה, לא מארבעה עיצובים שרירותיים.
+      data-journey-stage={journey.id}
       style={{ ["--journey-pos" as string]: String(journeyPos) }}
     >
       <BreadcrumbSchema

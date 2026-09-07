@@ -153,6 +153,12 @@ export interface Method {
   factStory?: FactStoryLab;
   /** עוגן חזותי סטטי (אופציונלי) — לעמודי-המושג שאין להם אינטראקציה. */
   anchor?: MethodAnchor;
+  /**
+   * הדגמת „בדיקת השקט” (אופציונלי) — קיימת רק שם, כי שם התנועה *היא* ההסבר:
+   * עובדה מעוגנת מול פרשנות שנפרדת ממנה. שלוש המחרוזות חייבות להיות ציטוט
+   * מילה-במילה מגוף העמוד, לא ניסוח חדש.
+   */
+  quietDemo?: { fact: string; interpretation: string; principle: string };
   datePublished: string;
 }
 
@@ -209,6 +215,12 @@ const quietCheck: Method = {
     kind: "pullquote",
     quote: "שקט הוא לא בהכרח דחייה, הוא לעיתים קרובות פשוט שקט.",
     caption: "העיקרון שמאחורי „בדיקת השקט”",
+  },
+  // שלוש המחרוזות מצוטטות מגוף העמוד עצמו (ה-intro וה„מה זה”).
+  quietDemo: {
+    fact: "עדיין לא התקבלה תשובה",
+    interpretation: "פסלו אותי",
+    principle: "שקט הוא לא בהכרח דחייה, הוא לעיתים קרובות פשוט שקט.",
   },
   datePublished: PUBLISHED,
 };

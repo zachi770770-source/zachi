@@ -65,7 +65,11 @@ async function openSituation(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 2500 }).catch(() => {});
   const path = page.locator("#path");
   await path.scrollIntoViewIfNeeded();
-  await path.locator('a[href="/before-relationship"]').click();
+  // בחירה במקום ואז כניסה לבמה (ראו openFocusMode ב-fixtures).
+  await path.locator('a.situation-card[href="/before-relationship"]').click();
+  const enterStage = path.locator(".path-recognition__cta button").first();
+  await enterStage.waitFor({ state: "visible" });
+  await enterStage.click();
   // בחירת-מצב פותחת קודם את Focus Mode (enter → split → aha → action). עוברים
   // את הרצף, ואז „המשיכו עם הספר” ממשיך אל השיחה — שאר הבדיקה עוסקת בשיחה.
   const focus = path.getByRole("region", { name: focusUi.regionLabel });

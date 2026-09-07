@@ -129,7 +129,7 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
             >
               להישאר כאן ולהעמיק בקטע הקריאה של התחנה הזו
               <ArrowLeft
-                className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+                className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
               />
             </Link>
@@ -139,7 +139,7 @@ export function JourneyNext({ journey }: { journey: JourneyPageData }) {
             >
               להעיף מבט אל „{flow.bridge.label}”, בקצב שלכם
               <ArrowLeft
-                className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+                className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
               />
             </Link>

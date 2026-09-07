@@ -9,6 +9,7 @@ import { methodByToolId } from "@/content/methods";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { usePersonaOptional } from "@/components/persona/PersonaProvider";
+import { usePointerTactility } from "@/lib/motion/pointerTactility";
 
 /**
  * „הכלים המעשיים” — אזור Editorial Luxury חם ואינטראקטיבי לששת הכלים מהספר
@@ -101,6 +102,11 @@ export function ToolsBento() {
   const viewportRef = React.useRef<HTMLDivElement>(null);
   const cardRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
   const panelRef = React.useRef<HTMLDivElement>(null);
+
+  // חומריות-מצביע לששת הכלים: אור לפי מיקום הסמן, הטיה זעירה ולחיצה עם
+  // תחושת-קפיץ — דסקטופ בלבד. במגע וב-reduced-motion הכל נופל חזרה למשוב
+  // צבע/מסגרת, בלי אור ובלי הטיה.
+  usePointerTactility(viewportRef, ".tool-lux-card");
 
   const openTool: ToolItem | null =
     (openId && items.find((t) => t.id === openId)) || null;

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
-import { ArrowRight, Compass, MessageCircle, PenLine } from "lucide-react";
+import { ArrowLeft, ArrowRight, Compass, MessageCircle, PenLine } from "lucide-react";
 
 import { homePaths, homePathUi, type HomePathId } from "@/content/homePaths";
 import type { AskStationId } from "@/content/askRoute";
@@ -48,6 +48,21 @@ type Active =
   | { mode: "open" }
   | null;
 
+/**
+ * „זיהוי במקום” — המצב שנבחר *נשאר על המסך*, מסומן, והמסלול נע אליו.
+ *
+ * לפני כן לחיצה על כרטיס החליפה מיד את כל הרשת ב-Focus Mode: החלפת-תוכן חדה
+ * שבה ארבע האפשרויות נעלמות ברגע. עכשיו יש שלב-ביניים אחד ושקט — הכרטיס נדלק,
+ * הסמן נוסע אליו, ומתחת נפתחת תשובת-זיהוי קצרה מהתוכן המאושר של אותו מצב
+ * (`heading` + מוקד אחד) ואז ה-CTA אל החוויה העמוקה (Focus Mode) שכבר קיימת.
+ * זו אינה שאלון ואינו טופס: אין שדות, אין שלבים, ואפשר לבחור מצב אחר בלחיצה.
+ */
+interface Selected {
+  id: HomePathId;
+  station: AskStationId;
+  index: number;
+}
+
 /** לחיצה „רגילה” בלבד נחטפת; Cmd/Ctrl/Shift/Alt או לחצן-אמצע ממשיכים כרגיל. */
 function isPlainClick(e: React.MouseEvent): boolean {
   return (
@@ -74,6 +89,8 @@ export function HomePathEntry({
   freeTextEnabled?: boolean;
 }) {
   const [active, setActive] = React.useState<Active>(null);
+  // המצב שנבחר „במקום” — לפני המעבר לחוויה העמוקה.
+  const [selected, setSelected] = React.useState<Selected | null>(null);
   // המצב שנלחץ — כותרתו נושאת `view-transition-name: fm-title` כדי שתתמזג
   // (morph) מהכרטיס אל כותרת-הבמה של Focus Mode, במקום „להיעלם”.
   const [morphId, setMorphId] = React.useState<HomePathId | null>(null);
@@ -144,6 +161,63 @@ export function HomePathEntry({
       body.removeAttribute("data-path-in-view");
     };
   }, []);
+
+  // ── הסמן שנוסע אל הכרטיס הנבחר ─────────────────────────────────────────────
+  // הרשת משנה מספר-עמודות לפי רוחב (1 / 2 / 4), ולכן מיקום הכרטיס אינו ידוע
+  // מראש ונמדד. כל המדידות מתבצעות ב-rAF *אחד*: קודם כל הקריאות (getBoundingClientRect)
+  // ואז כל הכתיבות (CSS custom properties) — אין קריאה-אחרי-כתיבה, ולכן אין
+  // layout thrashing. התנועה עצמה היא transform בלבד.
+  //
+  // מירוצים: כל בחירה חדשה מבטלת rAF תלוי-ועומד לפני שהיא מתזמנת אחד חדש, וה-
+  // cleanup מבטל אותו גם בפירוק ומנתק את ה-ResizeObserver — כך שאף callback לא
+  // יורה אחרי unmount ולא נשאר סמן במיקום ישן.
+  React.useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      if (selected === null) {
+        grid.removeAttribute("data-marker-ready");
+        return;
+      }
+      const card = grid.querySelector<HTMLElement>(`a[data-index="${selected.index}"]`);
+      if (!card) return;
+      // קריאות
+      const g = grid.getBoundingClientRect();
+      const c = card.getBoundingClientRect();
+      const x = c.left - g.left + c.width / 2;
+      const y = c.top - g.top;
+      const w = c.width;
+      // כתיבות
+      grid.style.setProperty("--marker-x", `${Math.round(x)}px`);
+      grid.style.setProperty("--marker-y", `${Math.round(y)}px`);
+      grid.style.setProperty("--marker-w", `${Math.round(w)}px`);
+      grid.setAttribute("data-marker-ready", "");
+    };
+    const schedule = () => {
+      if (raf) window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(measure);
+    };
+    schedule();
+    const ro =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
+    ro?.observe(grid);
+    window.addEventListener("resize", schedule, { passive: true });
+    return () => {
+      window.removeEventListener("resize", schedule);
+      ro?.disconnect();
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, [selected]);
+
+  // בחירה „במקום”: הכרטיס נדלק, הסמן נוסע אליו, ותשובת-הזיהוי נפתחת מתחת.
+  // בחירה חוזרת מהירה בין מצבים אינה יכולה להשאיר תוכן ישן: פאנל-הזיהוי מקבל
+  // `key={selected.id}` ולכן React מפרק ובונה אותו מחדש לכל מצב — אין מסלול שבו
+  // כותרת של מצב אחד מוצגת עם טקסט של אחר.
+  const selectState = (id: HomePathId, station: AskStationId, index: number) => {
+    setSelected((prev) => (prev?.id === id ? prev : { id, station, index }));
+  };
 
   // בחירת מצב-מוכר פותחת קודם את Focus Mode (הבמה של „עובדה מול סיפור”), לא את
   // השיחה עצמה. אירוע „שיחה נפתחה” (`ask_open_home`) נשמר למעבר לשיחה בפועל
@@ -235,6 +309,12 @@ export function HomePathEntry({
     );
   }
 
+  // המצב שנבחר, כאובייקט התוכן המלא שלו. נגזר ולא מוחזק כ-state נפרד, ולכן
+  // אינו יכול לצאת מסנכרון עם `selected`.
+  const selectedPath = selected
+    ? homePaths.find((p) => p.id === selected.id) ?? null
+    : null;
+
   return (
     <>
 
@@ -292,8 +372,11 @@ export function HomePathEntry({
           ושורת-תחושה אחת. הכרטיסים נשארים `<a>` אמיתיים (SEO/ללא-JS). */}
       <ul
         ref={gridRef}
-        className="path-nodes reveal mx-auto mt-5 grid max-w-2xl grid-cols-1 gap-3 sm:max-w-4xl sm:grid-cols-2 lg:grid-cols-4"
+        className="path-nodes reveal relative mx-auto mt-5 grid max-w-2xl grid-cols-1 gap-3 sm:max-w-4xl sm:grid-cols-2 lg:grid-cols-4"
       >
+        {/* הסמן שנוסע אל הצומת שנבחר — המסלול „מגיע” אל המצב. דקורטיבי בלבד:
+            המידע עצמו נמסר ע"י aria-current על הכרטיס. */}
+        <span className="path-marker" aria-hidden="true" />
         {homePaths.map((p, index) => (
           <li key={p.id} className="contents">
             <Link
@@ -306,10 +389,16 @@ export function HomePathEntry({
                 ["--i" as string]: String(index),
                 viewTransitionName: `sit-card-${index}`,
               }}
+              // לחיצה ראשונה בוחרת *במקום* (זיהוי); לחיצה על מצב שכבר נבחר
+              // ממשיכה אל החוויה העמוקה. כך אין החלפת-תוכן חדה, והמשתמש שולט
+              // בקצב שבו הוא נכנס פנימה.
+              aria-current={selected?.id === p.id ? "true" : undefined}
+              data-selected={selected?.id === p.id ? "" : undefined}
               onClick={(e) => {
                 if (!isPlainClick(e)) return;
                 e.preventDefault();
-                openFocus(p.id, p.askStation);
+                if (selected?.id === p.id) openFocus(p.id, p.askStation);
+                else selectState(p.id, p.askStation, index);
               }}
               className="situation-card group flex h-full flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 text-start shadow-sm transition-[border-color,background-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-secondary/35 hover:bg-surface-muted/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0 sm:p-5"
             >
@@ -336,6 +425,47 @@ export function HomePathEntry({
           </li>
         ))}
       </ul>
+
+      {/* ── תשובת-הזיהוי, במקום ── כותרת-הזיהוי של המצב שנבחר, מוקד-התמצאות אחד,
+          ואז ה-CTA אל החוויה העמוקה. כל הטקסט מגיע מהתוכן המאושר של אותו מצב
+          (`homePaths`) — לא נכתב כאן תוכן חדש. `key` לפי המצב: החלפה מהירה בין
+          מצבים מפרקת ובונה מחדש, ולכן לא ייתכן שילוב של כותרת אחת עם טקסט אחר. */}
+      {selectedPath ? (
+        <div
+          key={selectedPath.id}
+          className="path-recognition mx-auto mt-4 max-w-2xl rounded-2xl border border-sage-ink/30 bg-surface-muted/50 p-5 text-start sm:max-w-4xl sm:p-6"
+          role="region"
+          aria-live="polite"
+          aria-label={selectedPath.buttonTitle}
+        >
+          <p className="path-recognition__lead font-serif text-[17px] font-semibold leading-snug text-foreground sm:text-[19px]">
+            {selectedPath.heading}
+          </p>
+          <p className="path-recognition__beat mt-2.5 text-[14.5px] leading-relaxed text-foreground-muted [text-wrap:pretty] sm:text-[15px]">
+            <span className="font-semibold text-sage-ink">
+              {selectedPath.focuses[0].title}
+            </span>
+            {" — "}
+            {selectedPath.focuses[0].line}
+          </p>
+          <div className="path-recognition__cta mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <button
+              type="button"
+              onClick={() => openFocus(selectedPath.id, selectedPath.askStation)}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-[color:var(--color-petrol)] px-6 text-[15px] font-semibold text-[color:var(--color-secondary-foreground)] transition-colors hover:bg-[color:var(--color-petrol-2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              {homePathUi.ctaSecondary}
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <Link
+              href={selectedPath.stationHref}
+              className="text-[14.5px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              {selectedPath.stationLabel}
+            </Link>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

@@ -5,9 +5,11 @@ import { bigIdea } from "@/content/book";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
+import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { ThesisSection } from "@/components/sections/ThesisSection";
+import { PeekInside } from "@/components/preview/PeekInside";
 import { AudienceSection } from "@/components/sections/AudienceSection";
 import { PatternsSection } from "@/components/sections/PatternsSection";
 import { AttachmentSection } from "@/components/sections/AttachmentSection";
@@ -77,7 +79,7 @@ export default function BookPage() {
               {/* #6 המשכיות אובייקט: הכריכה גם יעד (בהגעה מהבית) וגם מקור (ביציאה
                   אל /preview) — אותו ספר „ממשיך” הלאה, ללא כריכה כפולה. */}
               <div data-vt-book-dest data-vt-book-source className="w-full">
-                <BookCover priority />
+                <BookTilt><BookCover priority /></BookTilt>
               </div>
             </div>
             <span className="kicker justify-center">הספר לעומק</span>
@@ -140,6 +142,12 @@ export default function BookPage() {
           אותו טקסט בדיוק, כמחצית הנפח. מקומם בקשת הוא בין „למי הספר”
           ל„השיטה” — זיהוי-עצמי לפני הפתרון. */}
       <ThesisSection />
+
+      {/* כניסה מוחשית אל הטעימה — שלושה עלים להצצה, ואז הקורא המלא.
+          הקורא ב-/preview נשאר הראשי; זו אינה עותק שני שלו. */}
+      <Container>
+        <PeekInside />
+      </Container>
       <AudienceSection />
       <PatternsSection />
       <AttachmentSection />

@@ -2,6 +2,7 @@ import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/sections/Hero";
 import { RecognitionBeat } from "@/components/sections/RecognitionBeat";
+import { SearchToBuild } from "@/components/sections/SearchToBuild";
 import { HomePathSelector } from "@/components/sections/HomePathSelector";
 import { AuthorNote } from "@/components/sections/AuthorNote";
 import { WhyTheBook } from "@/components/sections/WhyTheBook";
@@ -63,6 +64,8 @@ export default function HomePage() {
       {/* הקשת הרגשית: סקרנות (Hero) → זיהוי → בחירת תחנה → אמון → רצון → פעולה.
           כל ביט כאן נוסף כדי לסגור חוסר אמיתי, לא כדי להוסיף עוד סקשן. */}
       <RecognitionBeat />
+      {/* המעבר עצמו: פיזור → בהירות → יישור → מבנה, וההעברה אל מסלול-המצבים. */}
+      <SearchToBuild />
       <HomePathSelector />
       <AuthorNote />
       <WhyTheBook />

@@ -9,6 +9,11 @@ import { siteConfig } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
 import { getPersona } from "@/content/personas";
 import { usePersona } from "@/components/persona/PersonaProvider";
+import {
+  subscribeJourneyStage,
+  getJourneyStageSnapshot,
+  getJourneyStageServerSnapshot,
+} from "@/lib/journeyStage";
 
 /**
  * בר-הטעימה החכם — פעולה דביקה אחת ומאוחדת. בטרום-השקה זו תמיד הטעימה החינמית
@@ -28,6 +33,17 @@ export function StickyCta() {
   const [dismissed, setDismissed] = React.useState(false);
   const [bannerHeight, setBannerHeight] = React.useState(0);
   const [bannerOpen, setBannerOpen] = React.useState(false);
+  /**
+   * שלב-המסע נקרא *פעם אחת* ב-mount, לפני שהבר בכלל מוצג ולכן לפני שאפשר
+   * למקד אותו. זו הערובה לדרישה „לעולם אל תשנה יעד תחת פוקוס”: היעד נקבע
+   * לפני שהפוקוס יכול לנחות עליו, ואינו משתנה שוב במחזור-החיים של הבר.
+   * מתחילים ב-"browsing" גם בשרת וגם בלקוח ⇒ אין אי-התאמת הידרציה.
+   */
+  const stage = React.useSyncExternalStore(
+    subscribeJourneyStage,
+    getJourneyStageSnapshot,
+    getJourneyStageServerSnapshot,
+  );
 
   // סגירה נזכרת ל-session — לא מציקים שוב אחרי שהמבקר סגר.
   React.useEffect(() => {
@@ -85,9 +101,18 @@ export function StickyCta() {
     if (typeof IntersectionObserver === "undefined") return;
     const scene = document.querySelector(".s2b");
     if (!scene) return; // הסצנה קיימת רק בעמוד הבית
+    // הסתרה *רק* כשהסצנה באמת שולטת במסך. הכלל הזה נכתב מראש עבור הסצנה
+    // הזו אך שכב רדום (המחלקה `.s2b` לא הייתה קיימת, ולכן ה-effect יצא מוקדם).
+    // ברגע שהסצנה נבנתה הוא נדלק — ועם threshold 0 ו-rootMargin שלילי הוא
+    // הסתיר את הבר על פני *כל* הרצועה שסביבה: במסך נמוך (680px) חלון-ההופעה
+    // של הבר נבלע לגמרי והוא לא הופיע כלל. עכשיו נדרשת נוכחות ממשית של
+    // הסצנה, והבר חוזר מיד כשהיא כבר אינה הרגע הדומיננטי.
     const io = new IntersectionObserver(
-      ([entry]) => setSceneInView(entry.isIntersecting),
-      { threshold: 0, rootMargin: "0px 0px -20% 0px" }
+      // רק כשהסצנה ממלאת את המסך כמעט לגמרי היא „הרגע הדומיננטי”. סף נמוך
+      // יותר הסתיר את הבר לאורך רצועה שלמה אחרי ה-Hero — בדיוק המקום שבו הוא
+      // אמור להופיע.
+      ([entry]) => setSceneInView(entry.intersectionRatio >= 0.9),
+      { threshold: [0, 0.5, 0.9, 1] }
     );
     io.observe(scene);
     return () => io.disconnect();
@@ -142,9 +167,21 @@ export function StickyCta() {
 
   // אם נבחרה פרסונה — ה-CTA הרגשי שלה; אחרת הטעימה החינמית ללא הרשמה. הרכישה
   // עצמה מתבצעת באמזון (בגוף העמוד), לא דרך הבר הזה.
-  const href = persona ? persona.ctaHref : "/preview";
-  const label = persona ? persona.ctaLabel : "קראו טעימה מהספר · 2 דקות";
-  const subline = persona ? "מותאם למצב שלכם" : "טעימה מהספר · בלי הרשמה";
+  // התקדמות מודעת-הקשר: לפני שהטעימה נקראה — מזמינים לקרוא. אחרי שנקראה —
+  // הצעד הבא הוא הספר עצמו. אזור-הרכישה ב-/book נשאר אמזון כ-primary, והבר
+  // הזה לעולם אינו מתחרה בו: הוא מפנה אל ההקשר, לא אל החנות.
+  const sampled = stage === "sampled";
+  const href = persona ? persona.ctaHref : sampled ? "/book#purchase" : "/preview";
+  const label = persona
+    ? persona.ctaLabel
+    : sampled
+      ? "המשיכו אל הספר המלא"
+      : "קראו טעימה מהספר · 2 דקות";
+  const subline = persona
+    ? "מותאם למצב שלכם"
+    : sampled
+      ? "קראתם את הטעימה · הספר זמין באמזון"
+      : "טעימה מהספר · בלי הרשמה";
 
   return (
     <aside

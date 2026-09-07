@@ -1,4 +1,4 @@
-import { test as base, expect } from "@playwright/test";
+import { test as base, expect, type Page } from "@playwright/test";
 
 /**
  * בידוד E2E דטרמיניסטי.
@@ -28,3 +28,20 @@ export const test = base.extend({
 
 export { expect };
 export type { Page, Locator } from "@playwright/test";
+
+/**
+ * פותח את Focus Mode ממצב מסוים בעמוד הבית.
+ *
+ * מאז „זיהוי במקום” בחירת-מצב אינה קופצת ישר לבמה: הלחיצה הראשונה *בוחרת*
+ * (הכרטיס נדלק, הסמן נוסע, ונפתחת תשובת-זיהוי קצרה), והכניסה לבמה היא הצעד
+ * המכוון שאחריה — דרך ה-CTA של פאנל-הזיהוי או לחיצה חוזרת על אותו כרטיס.
+ * העוזר הזה מבטא בדיוק את הזרימה הזו, כך שהבדיקות ממשיכות לאמת את *אותן*
+ * הבטחות (Focus Mode נפתח, בלי ניווט) מבלי לקבע את מספר הלחיצות.
+ */
+export async function openFocusMode(page: Page, href: string): Promise<void> {
+  const path = page.locator("#path");
+  await path.locator(`a.situation-card[href="${href}"]`).click();
+  const cta = path.locator(".path-recognition__cta button").first();
+  await cta.waitFor({ state: "visible" });
+  await cta.click();
+}
