@@ -78,10 +78,16 @@ describe("CompassConsole, motion states", () => {
     fireEvent.change(textarea, { target: { value: "איך יודעים שזו התאמה?" } });
     fireEvent.click(screen.getByRole("button", { name: /שאל את הספר/ }));
 
-    // מצב טעינה: role=status מופיע, ואייקון המצפן נושא את מחלקת התנועה.
+    // מצב טעינה: role=status מופיע, ולצדו „המצפן החי” במצב חיפוש.
+    // הבדיקה הודקה ולא הוחלשה: קודם היא אישרה מחלקה של *סיבוב אינסופי*
+    // (`.compass-loading`), שהוסרה במכוון — לוגו שמסתובב בלי סוף אינו משוב.
+    // עכשיו היא מאשרת את אותו הדבר שהיא באמת שמרה עליו (יש מחוון-חיפוש
+    // ליד הסטטוס) *ובנוסף* שהמחוון נמצא במצב „seeking” האמיתי.
     const status = await screen.findByRole("status");
     expect(status).toHaveTextContent("מחפשים בין דפי הספר…");
-    expect(status.querySelector(".compass-loading")).not.toBeNull();
+    const indicator = status.querySelector(".living-compass");
+    expect(indicator).not.toBeNull();
+    expect(indicator).toHaveAttribute("data-compass-state", "seeking");
 
     // סיום.
     resolvePost({ available: true, status: "answered", answer: "בנו על יסודות.", remaining: 2 });

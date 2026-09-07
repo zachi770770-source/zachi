@@ -641,6 +641,10 @@
     animation: none;
     opacity: 1;
     transform: none;
+    /* משחררים את רמז-הריבוד ברגע שהחשיפה נגמרה. בלי זה כל `.reveal` בעמוד
+       מחזיק שכבת-קומפוזיטור *לתמיד* — עשרות שכבות שנשארות אחרי שהאנימציה
+       שלהן הסתיימה ולא תחזור (החשיפה חד-כיוונית). */
+    will-change: auto;
   }
   /* מדרג ילדים/כרטיסים: נכנסים בזה-אחר-זה בסטגר עדין (--i נקבע ב-JSX / מונה). */
   .motion-js .reveal[data-stagger] {
@@ -2317,7 +2321,9 @@
   stroke-width: 1;
   stroke-opacity: 0.16;
 }
-/* טבעת מקווקוות מסתובבת — תנועה מתמדת ועדינה שמסמנת „חי” */
+/* טבעת מקווקוות — *סטטית*. קודם רצו כאן שתי אנימציות `infinite` (סיבוב-טבעת
+   ומטאטא-ראדאר): תנועה שרצה תמיד, אינה נגזרת מאף מצב, ובזמן טעינה הופכת ללוגו
+   מסתובב בלי סוף. הוסרו. התגובה היחידה של הטבעת היא למצב „חיפוש”, והיא חסומה. */
 .living-compass__ring-sweep {
   fill: none;
   stroke: var(--color-brand);
@@ -2326,40 +2332,16 @@
   stroke-dasharray: 6 10;
   transform-box: view-box;
   transform-origin: 50% 50%;
+  transition:
+    stroke-opacity var(--dur-focus) var(--ease-standard),
+    transform var(--dur-focus) var(--ease-settle);
 }
-.living-compass__sweep {
-  stroke: var(--color-brand);
-  stroke-width: 1.4;
+.living-compass[data-compass-state="seeking"] .living-compass__ring-sweep {
+  stroke-opacity: 0.72;
+  transform: scale(1.06);
+}
+.living-compass[data-compass-state="settled"] .living-compass__ring-sweep {
   stroke-opacity: 0.5;
-  stroke-linecap: round;
-  transform-box: view-box;
-  transform-origin: 50% 50%;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .living-compass__ring-sweep {
-    animation: compassRingSpin 14s linear infinite;
-  }
-  .living-compass__sweep {
-    animation: compassSweep 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-}
-@keyframes compassRingSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes compassSweep {
-  0% {
-    transform: rotate(0deg);
-    stroke-opacity: 0.5;
-  }
-  70% {
-    stroke-opacity: 0.5;
-  }
-  100% {
-    transform: rotate(360deg);
-    stroke-opacity: 0.5;
-  }
 }
 .living-compass__tick {
   stroke: var(--color-brand);
@@ -2372,12 +2354,9 @@
   transition: transform 1000ms cubic-bezier(0.34, 1.7, 0.4, 1); /* spring מודגש */
 }
 @media (prefers-reduced-motion: reduce) {
-  .living-compass__needle {
+  .living-compass__needle,
+  .living-compass__ring-sweep {
     transition: none;
-  }
-  .living-compass__ring-sweep,
-  .living-compass__sweep {
-    animation: none;
   }
 }
 .living-compass__north {
@@ -2441,12 +2420,6 @@
     transform: none;
   }
 }
-@keyframes compassSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* כניסה מתואמת בטעינה (מעל הקיפול): ראש/כותרת/פאנל בהדרגה. */
 @media (prefers-reduced-motion: no-preference) {
   .enter {
@@ -2491,10 +2464,6 @@
     animation: portraitIn 460ms var(--ease-standard) both;
   }
 
-  /* אינדיקציית טעינה יחידה ומרוסנת של אייקון המצפן (רק בזמן הבקשה). */
-  .compass-loading {
-    animation: compassSpin 1.6s linear infinite;
-  }
 
   /* PHASE MOTION 2 — „שאל את הספר”: המצפן שליד תיבת הכתיבה נע קלות בזמן
      שהמשתמש מקליד. משוב-מיקרו בלבד: נדנוד עדין של ±6°, transform בלבד ⇒ אין
@@ -3295,6 +3264,71 @@ html.vt-book-nav::view-transition-group(book-cover) {
 .tool-lux-card:focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 3px;
+}
+
+/* ── חומריות: אור-סמן, עומק והטיה, לחיצה עם קפיץ ──────────────────────────
+   הכל מגודר ל*מצביע מדויק עם hover* בלבד. במגע אין אור ואין הטיה — רק משוב
+   לחיצה/בחירה נקי, כי „אור שעוקב אחרי הסמן” חסר משמעות באצבע. */
+@media (hover: hover) and (pointer: fine) {
+  .tool-lux-card {
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+  }
+  /* אור רך שממוקם לפי --px/--py שנכתבים ב-rAF. שכבה נפרדת ⇒ לא נוגע בטקסט
+     ולא משנה ניגודיות של תוכן. */
+  .tool-lux-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      42% 42% at var(--px, 50%) var(--py, 50%),
+      color-mix(in srgb, var(--lux-copper) 22%, transparent),
+      transparent 70%
+    );
+    transition: opacity var(--dur-ui) var(--ease-standard);
+  }
+  .tool-lux-card:hover::after {
+    opacity: 1;
+  }
+  .tool-lux-card:hover {
+    transform: perspective(900px) translateY(-4px) rotateX(var(--tilt-x, 0deg))
+      rotateY(var(--tilt-y, 0deg));
+  }
+  /* לחיצה: שקיעה קצרה עם easing „קפיצי” (back-out) — תגובה פיזית לאובייקט
+     מוחשי, לפי כלל-הפיזיקה. לא ספרייה: cubic-bezier בלבד. */
+  .tool-lux-card[data-pressed] {
+    transform: perspective(900px) translateY(-1px) scale(0.985);
+    transition-duration: 90ms;
+  }
+}
+/* מצביע גס / מגע — משוב לחיצה בלבד. */
+@media (hover: none), (pointer: coarse) {
+  .tool-lux-card[data-pressed] {
+    transform: scale(0.985);
+    border-color: var(--lux-copper);
+  }
+}
+/* מקלדת: אותה הכרה חזותית שהעכבר מקבל. */
+.tool-lux-card:focus-visible {
+  border-color: color-mix(in srgb, var(--lux-copper) 45%, transparent);
+  box-shadow: 0 18px 40px -26px rgb(var(--shadow-tint) / 0.55);
+}
+/* העדפת תנועה מופחתת: הדגשת צבע/מסגרת בלבד — בלי אור, בלי הטיה, בלי שקיעה. */
+@media (prefers-reduced-motion: reduce) {
+  .tool-lux-card:hover,
+  .tool-lux-card[data-pressed] {
+    transform: none;
+  }
+  .tool-lux-card::after {
+    display: none;
+  }
+  .tool-lux-card[data-pressed],
+  .tool-lux-card:hover {
+    border-color: var(--lux-copper);
+  }
 }
 .tool-lux-card[data-open] {
   border-color: var(--lux-copper);

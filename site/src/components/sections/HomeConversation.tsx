@@ -403,7 +403,7 @@ export function HomeConversation({ station }: { station?: AskStationId }) {
             >
               {ui.closingCta}
               <ArrowLeft
-                className="h-4 w-4 transition-transform group-hover:-translate-x-1"
+                className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
                 aria-hidden="true"
               />
             </AmazonBuyLink>

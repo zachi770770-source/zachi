@@ -341,7 +341,7 @@ function Choice({
                     : "border-border-strong text-transparent"
                 }`}
               >
-                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5" />
               </span>
             </button>
           );

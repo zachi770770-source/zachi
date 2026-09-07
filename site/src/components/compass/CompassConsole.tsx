@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Compass, Loader2, ArrowLeft, BookOpen, TriangleAlert } from "lucide-react";
 
 import { compass } from "@/content/compass";
+import { LivingCompass } from "@/components/compass/LivingCompass";
 import { trackEvent } from "@/lib/analytics";
 import { formatCitation } from "@/lib/compass/answerFormat";
 import { Button } from "@/components/ui/button";
@@ -214,7 +215,7 @@ export function CompassConsole({
             className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover"
             role="status"
           >
-            <Compass className="compass-loading h-4 w-4" aria-hidden="true" />
+            <LivingCompass state="seeking" className="h-6 w-6 shrink-0 text-brand" />
             {compass.ui.loading}
           </p>
           <div className="mt-5 space-y-3" aria-hidden="true">
@@ -413,9 +414,11 @@ export function CompassConsole({
         <AnswerView title="התשובה שלך מהספר">
         {submitting ? (
           <div className={CARD_SHELL} role="status">
-            <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
-              {/* אינדיקציית טעינה יחידה ומרוסנת — אייקון המצפן מסתובב בעדינות */}
-              <Compass className="compass-loading h-4 w-4" aria-hidden="true" />
+            <p className="flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wide text-brand-hover">
+              {/* „המצפן החי” במצב חיפוש — מחט שמתנודדת בטווח חסום ודועכת אל
+                  הכיוון, במקום לוגו שמסתובב בלי סוף. הסטטוס הנגיש הוא הטקסט
+                  שלצדו (role="status"), לא הגרפיקה. */}
+              <LivingCompass state="seeking" className="h-7 w-7 shrink-0 text-brand" />
               {compass.ui.searchStages[searchStage]}
             </p>
             <div className="mt-5 space-y-3" aria-hidden="true">

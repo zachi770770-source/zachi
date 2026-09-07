@@ -88,7 +88,7 @@ export function ReaderKitOffer({
           >
             לכל מה שכלול בערכת הקורא
             <ArrowLeft
-              className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+              className="h-4 w-4 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
               aria-hidden="true"
             />
           </Link>

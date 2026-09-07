@@ -33,7 +33,7 @@ export function AskBookLink({
       <MessageCircleQuestion className="h-4 w-4 text-brand" aria-hidden="true" />
       {askBook.cta}
       <ArrowLeft
-        className="h-3.5 w-3.5 text-brand transition-transform group-hover:-translate-x-1 group-focus-visible:-translate-x-1"
+        className="h-3.5 w-3.5 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
         aria-hidden="true"
       />
     </Link>
