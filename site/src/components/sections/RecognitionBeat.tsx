@@ -34,7 +34,7 @@ export function RecognitionBeat() {
         <div className="recog__intro mx-auto max-w-2xl text-center">
           <h2
             id="recognition-heading"
-            className="recog__line font-serif text-[clamp(1.6rem,3.4vw,2.5rem)] font-bold leading-[1.15] tracking-[-0.01em] text-foreground [text-wrap:balance]"
+            className="recog__line build-focus build-focus--ink font-serif text-[clamp(1.6rem,3.4vw,2.5rem)] font-bold leading-[1.15] tracking-[-0.01em] text-foreground [text-wrap:balance]"
           >
             {recognition.line}
           </h2>

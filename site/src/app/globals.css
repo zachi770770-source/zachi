@@ -2669,6 +2669,55 @@
     animation: journey-rail-draw var(--dur-physical) var(--ease-settle) 120ms both;
   }
 }
+/* ── זהות-השלב, בתוך אותה שפה ──────────────────────────────────────────────
+   כל חמשת העמודים חולקים את אותו דקדוק: פס מוביל אחד + רצף-הגעה מדורג. מה
+   שמבדיל ביניהם הוא *אופיו של הפס* — והמשמעות נגזרת מהשלב עצמו, לא מקישוט:
+     לפני קשר      — נקודות נפרדות שנעשות קריאות (אפשרות שעוד לא התחברה)
+     מתחילים קשר   — מקטעים שמתקרבים לקצב אחיד (התחלה של מבנה)
+     בתוך קשר      — קו רציף אחד (קשר מתמשך)
+     אחרי פרידה    — קו שנקטע (בלי דרמה: הפסקה, לא שבר)
+     מתחילים מחדש  — קטע-שבור שנפתר לקו חדש בהמשכו
+   מיושם ב-background בלבד (gradient), ולכן אינו נוגע בפריסה ואינו מוסיף
+   אנימציה נוספת: אותה משיכת-scaleY אחת נשארת המנוע. */
+@media (min-width: 1024px) {
+  .journey-page[data-journey-stage="before-relationship"]::after {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-sage-ink) 0 6px,
+      transparent 6px 14px
+    );
+  }
+  .journey-page[data-journey-stage="building-relationship"]::after {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-sage-ink) 0 14px,
+      transparent 14px 20px
+    );
+  }
+  /* „בתוך קשר” — רציף, ללא הפסקה. זהו גם ברירת-המחדל.
+
+     הגשרים (אחרי פרידה / מתחילים מחדש) אינם תחנות במחזור, ולכן
+     `--journey-pos` שלהם הוא 0 ופס-ההתקדמות (::after) נשאר ב-scaleY(0) —
+     בכוונה, כדי לא להבטיח התקדמות שלא קרתה. כדי שהאופי שלהם בכל זאת ייראה,
+     הוא נישא על פס-הבסיס (::before) ולא על פס-ההתקדמות. */
+  .journey-page[data-journey-stage="after-breakup"]::before {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-border-strong) 55%, transparent) 0 42%,
+      transparent 42% 58%,
+      color-mix(in oklab, var(--color-border-strong) 30%, transparent) 58% 100%
+    );
+  }
+  .journey-page[data-journey-stage="starting-again"]::before {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-border-strong) 28%, transparent) 0 22%,
+      transparent 22% 34%,
+      color-mix(in oklab, var(--color-sage-ink) 60%, transparent) 34% 100%
+    );
+  }
+}
+
 @keyframes journey-rail-draw {
   from { transform: scaleY(0); }
   to { transform: scaleY(var(--journey-pos, 0)); }
@@ -4163,6 +4212,20 @@ body:has([data-fm-active]) {
   transform: translateY(var(--rest-y, 0));
 }
 
+/* התכנסות: אחרי שהמילים התיישבו, ענן-הרעש *מתכנס* מעט ומתעמעם בזמן שציר-
+   הבנייה נמשך — השלב שחסר בין „רעש” ל„מבנה”: חיפוש → בהירות → התכנסות →
+   מבנה מחובר.
+   *רק* scaleX על המכל — בכוונה בלי opacity. מילות-הרעש הן טקסט אמיתי, וכל
+   דילול-שקיפות עליהן הוא בדיוק נפילת-ה-AA שכבר תוקנה כאן פעם (2.46:1).
+   ההתכנסות נמסרת בתנועה, לא בהעלמה. */
+.motion-js .thesis-scene .thesis-noise {
+  transform: scaleX(1.05);
+  transition: transform 0.9s var(--ease-settle) 0.5s;
+}
+.motion-js .thesis-scene.is-visible .thesis-noise {
+  transform: scaleX(1);
+}
+
 /* ציר-הבנייה נמשך מלמעלה למטה (scaleY) — הציר שסביבו נבנה הצד השני. */
 .motion-js .thesis-scene .thesis-axis {
   transform: scaleY(0);
@@ -4176,17 +4239,11 @@ body:has([data-fm-active]) {
   opacity: 1;
 }
 
-/* כותרת-הבנייה עולה, וקו-החתימה נמשך תחתיה. */
+/* כותרת-הבנייה *נבנית* (חשיפת-מסכה מכיוון הקריאה, ראו `.build-focus`), וקו-
+   החתימה נמשך תחתיה. במכוון ללא fade-up: זו השורה שנושאת את הרעיון, והיא לא
+   אמורה להיכנס כמו כל פסקה אחרת. ההשהיה מסונכרנת עם משיכת הציר שמעליה. */
 .motion-js .thesis-scene .thesis-build {
-  opacity: 0;
-  transform: translateY(14px);
-  transition:
-    opacity 0.6s var(--ease-settle) 0.6s,
-    transform 0.6s var(--ease-settle) 0.6s;
-}
-.motion-js .thesis-scene.is-visible .thesis-build {
-  opacity: 1;
-  transform: none;
+  --build-focus-delay: 600ms;
 }
 .motion-js .thesis-scene .thesis-build__stroke {
   transform: scaleX(0);
@@ -5065,16 +5122,40 @@ body:has([data-fm-active]) {
   }
 }
 /* הכותרת „תלויה” מהחוט: עולה מעט אחרי שהחוט מגיע. */
-.motion-js .recog .recog__line {
-  opacity: 0;
-  transform: translateY(12px);
-  transition:
-    opacity 620ms var(--ease-settle) 260ms,
-    transform 620ms var(--ease-settle) 260ms;
+/* ── `.build-focus` — טיפול-הבנייה לשורות החזקות ביותר ──────────────────────
+   השורות הנושאות את הרעיון אינן עולות ב-fade-up גנרי כמו כל השאר. הן *נבנות*:
+   נחשפות במסכה מכיוון הקריאה (RTL — מימין לשמאל), והדיו „מתעמק” מגוון מרוכך
+   אל צבע-הטקסט המלא. אין הקלדה ואין חשיפה מילה-אחר-מילה.
+
+   חד-כיווני מעצם המבנה: הטריגר הוא `.is-visible`, שהוא תפס חד-כיווני
+   (MotionRoot) — גלילה חזרה למעלה אינה יכולה להסתיר שורה שכבר נבנתה.
+   בטיחות: ברירת-המחדל (ללא JS / reduced-motion) היא הטקסט המלא והגלוי;
+   ההסתרה מתחילה רק תחת `.motion-js`, כלומר רק אחרי שזמן-הריצה של התנועה עלה. */
+   הליבה היא החשיפה עצמה. „העמקת-הדיו” היא תוספת opt-in (`.build-focus--ink`)
+   ולא ברירת-מחדל, כדי שלא תדרוס צבע-מותג שנבחר במפורש לשורה (למשל
+   `.thesis-build`, שהיא טרקוטה בכוונה). */
+.motion-js .build-focus {
+  clip-path: inset(0 0 0 100%);
 }
-.motion-js .recog.is-visible .recog__line {
-  opacity: 1;
-  transform: none;
+.motion-js .is-visible .build-focus,
+.motion-js .build-focus.is-visible {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 720ms var(--ease-settle) var(--build-focus-delay, 0ms);
+}
+.motion-js .build-focus--ink {
+  color: var(--color-foreground-muted);
+}
+.motion-js .is-visible .build-focus--ink,
+.motion-js .build-focus--ink.is-visible {
+  color: var(--color-foreground);
+  transition:
+    clip-path 720ms var(--ease-settle) var(--build-focus-delay, 0ms),
+    color 620ms var(--ease-standard) var(--build-focus-delay, 0ms);
+}
+
+/* השורה החזקה בעמוד הבית — נבנית, לא עולה. */
+.motion-js .recog .recog__line {
+  --build-focus-delay: 260ms;
 }
 .motion-js .recog .recog__support {
   opacity: 0;
