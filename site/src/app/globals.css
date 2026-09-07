@@ -5323,6 +5323,111 @@ body:has([data-fm-active]) {
   opacity: 1;
 }
 
+/* ── „מחיפוש לבנייה” — המעבר של עמוד הבית ────────────────────────────────
+   ארבעה שלבים ברצף אחד: פיזור → בהירות → יישור → מבנה, ואז העברה כלפי מטה
+   אל `#path`. כל התנועה היא transform/opacity; המידות קבועות ⇒ ללא CLS.
+   הבסיס (ללא JS / reduced-motion) הוא *המצב הבנוי הסופי*: הנקודות מיושרות,
+   הציר משורטט, הטקסט מלא — כך שכשל-הידרציה או העדפת-תנועה אינם משאירים
+   שום דבר נסתר. אין pinning ואין scroll-timeline, ולכן ניווט-hash אינו נתקע. */
+.s2b {
+  padding-block: clamp(2.25rem, 5vw, 3.5rem);
+}
+.s2b__line {
+  color: var(--color-foreground-muted);
+}
+.s2b__build {
+  font-weight: 600;
+  color: var(--color-brand-hover);
+}
+.s2b__field {
+  position: relative;
+  height: 84px;
+  margin-block-start: clamp(1.25rem, 3vw, 2rem);
+}
+/* מצב-הבסיס = מיושר ובנוי. */
+.s2b__pt {
+  position: absolute;
+  top: 50%;
+  left: var(--ax);
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--color-sage-ink);
+}
+.s2b__rail {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  margin-top: -0.5px;
+  background: color-mix(in oklab, var(--color-sage-ink) 55%, transparent);
+  transform-origin: right center; /* RTL: נמשך מכיוון הקריאה */
+}
+.s2b__handoff {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 30px;
+  margin-left: -1px;
+  transform-origin: top center;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-brand) 55%, transparent),
+    color-mix(in oklab, var(--color-brand) 8%, transparent)
+  );
+}
+
+/* שלב 1+2 — פיזור, ואז הרגעה. */
+.motion-js .s2b.reveal {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .s2b .s2b__pt {
+  left: var(--sx);
+  transform: translateY(var(--sy)) scale(0.55);
+  opacity: 0;
+  transition:
+    left 620ms var(--ease-settle),
+    transform 620ms var(--ease-settle),
+    opacity 320ms var(--ease-standard);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+/* שלב 3 — יישור: כולן זזות אל הציר כמעט יחד, ולכן זה נקרא כהתיישרות ולא
+   כעוד רצף-כניסה. */
+.motion-js .s2b.is-visible .s2b__pt {
+  left: var(--ax);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  transition-delay: calc(520ms + var(--i, 0) * 18ms);
+}
+/* שלב 4 — מבנה: הציר נמשך אחרי שהנקודות התיישרו. */
+.motion-js .s2b .s2b__rail {
+  transform: scaleX(0);
+  transition: transform 720ms var(--ease-emphasized) 1000ms;
+}
+.motion-js .s2b.is-visible .s2b__rail {
+  transform: scaleX(1);
+}
+/* ההעברה כלפי מטה — אחרונה, אחרי שהמבנה קיים. */
+.motion-js .s2b .s2b__handoff {
+  transform: scaleY(0);
+  transition: transform 460ms var(--ease-emphasized) 1620ms;
+}
+.motion-js .s2b.is-visible .s2b__handoff {
+  transform: scaleY(1);
+}
+/* חצי-„הבנייה” של השורה נבנה יחד עם הציר. */
+.motion-js .s2b .s2b__build {
+  clip-path: inset(0 0 0 100%);
+}
+.motion-js .s2b.is-visible .s2b__build {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 620ms var(--ease-settle) 1000ms;
+}
+
 /* ── C · התעוררות-המסלול (#path): החוט ממשיך, והתחנות „מופיעות” כצמתים ──
    בלי כרומת-טופס חדשה: הכרטיסים עצמם הם הצמתים; הם עולים ברצף כשהמקטע נכנס,
    כאילו החוט „מגיע” אל כל אחד. */
