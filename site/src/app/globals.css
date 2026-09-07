@@ -2306,12 +2306,18 @@
 /* דיוקן המחבר — עומק מרוסן מונע-גלילה (6-8%). היסט קטן בלבד: אין ריחוף,
    אין נשימת-scale ואין אנימציית-filter. `--hero-parallax` נשאר 0 במגע
    ובתנועה-מופחתת (ParallaxScroll אינו נרשם שם כלל), ולכן הדיוקן סטטי שם. */
+/* ההיסט יושב על *העטיפה*, לא על `.portrait-reveal`.
+   `.portrait-reveal` נושא `animation: portraitIn ... both`, ואנימציה עם fill
+   גוברת על הצהרת-transform רגילה בקסקייד — כלומר ההיסט נדרס בשקט והדיוקן
+   לא זז בכלל (נמדד: travel = 0px). העטיפה נקייה מאנימציה, ולכן שם הוא עובד.
+
+   היחידה היא *אחוז* ולא פיקסלים: ב-translateY אחוז מתייחס לגובה האלמנט עצמו,
+   ולכן אותו ערך נותן אותה תחושה יחסית ב-1440 וב-1024 במקום היסט שגדל יחסית
+   בדיוקן קטן. הטווח האפקטיבי של --hero-parallax כאן הוא ~0..0.5 (הדיוקן יושב
+   גבוה בעמוד), ולכן -14% נותן מהלך של ~7% מגובה הדיוקן — בתוך הטווח המבוקש. */
 .portrait-parallax {
   display: block;
-}
-.portrait-parallax .portrait-reveal {
-  transform: translateY(calc((var(--hero-parallax, 0) - 0.5) * -14px));
-  will-change: auto;
+  transform: translateY(calc((var(--hero-parallax, 0.5) - 0.5) * -14%));
 }
 
 /* #4 מצפן חי — טבעות סטטיות + מחט שמתייצבת לכיוון עם spring. */
@@ -4420,6 +4426,11 @@ body:has([data-fm-active]) {
   perspective: 1100px;
   touch-action: pan-y; /* גרירה אופקית שלנו, גלילה אנכית של הדפדפן */
   border-radius: var(--radius-lg);
+  /* גרירה להפיכת עלה אינה אמורה *לסמן טקסט*. בלי זה הגרירה צובעת את הפסקה
+     בכחול/טרקוטה של בחירת-מערכת וההיפוך נראה שבור — נתפס בבדיקה חזותית,
+     לא במספרים. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 .peek__stack:focus-visible {
   outline: 2px solid var(--color-brand);
@@ -4480,13 +4491,25 @@ body:has([data-fm-active]) {
       rgb(var(--shadow-tint) / calc(0.35 + 0.35 * max(var(--peek-drag), var(--peek-drag) * -1)));
   }
 }
-/* מובייל — קל וקטן יותר. */
+/* מובייל — קל וקטן יותר *באמת*.
+   שלושה שינויים, כי מדידה הראתה שזווית קטנה יותר לבדה אינה מספיקה:
+   1. פרספקטיבה *גדולה* יותר (1200 מול 1100 בדסקטופ) — ערך גבוה = עיוות
+      מתון יותר. קודם היה כאן 800px, כלומר עיוות *חזק* יותר מהדסקטופ לכל
+      מעלה — ההפך מ„קל יותר”.
+   2. זווית-היציאה יורדת ל-15° (דסקטופ 32°).
+   3. גם מעקב-הגרירה מתמתן ל-6° (דסקטופ 10°) — קודם הוא היה זהה בשניהם. */
 @media (max-width: 640px) {
   .peek__stack {
-    perspective: 800px;
+    perspective: 1200px;
   }
   .peek__leaf[data-state="turned"] {
-    transform: rotateY(-22deg) translateX(-10%);
+    transform: rotateY(-15deg) translateX(-8%);
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  .peek__stack[data-dragging] .peek__leaf[data-state="current"] {
+    transform: rotateY(calc(var(--peek-drag) * 6deg))
+      translateX(calc(var(--peek-drag) * 5%));
   }
 }
 /* תנועה מופחתת — החלפה מיידית, בלי סיבוב ובלי צל נע. */
