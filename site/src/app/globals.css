@@ -2303,6 +2303,17 @@
   }
 }
 
+/* דיוקן המחבר — עומק מרוסן מונע-גלילה (6-8%). היסט קטן בלבד: אין ריחוף,
+   אין נשימת-scale ואין אנימציית-filter. `--hero-parallax` נשאר 0 במגע
+   ובתנועה-מופחתת (ParallaxScroll אינו נרשם שם כלל), ולכן הדיוקן סטטי שם. */
+.portrait-parallax {
+  display: block;
+}
+.portrait-parallax .portrait-reveal {
+  transform: translateY(calc((var(--hero-parallax, 0) - 0.5) * -14px));
+  will-change: auto;
+}
+
 /* #4 מצפן חי — טבעות סטטיות + מחט שמתייצבת לכיוון עם spring. */
 .living-compass {
   display: block;
@@ -4375,6 +4386,46 @@ body:has([data-fm-active]) {
   }
 }
 
+/* ── „בדיקת השקט” — התנועה היא ההסבר ─────────────────────────────────────
+   העובדה מעוגנת ואינה זזה; הפרשנות נפרדת ממנה ונסוגה; העיקרון נפתר מתוך
+   המרחק שנוצר. אותה שפה בדיוק של fact-story, כי זה אותו רעיון.
+   ללא JS. תחת reduced-motion שלוש השכבות מוצגות מיד במצבן הסופי. */
+.motion-js .quiet-demo .quiet-demo__fact {
+  opacity: 0.6;
+  transform: none;
+  transition: opacity var(--dur-editorial) var(--ease-standard) 120ms;
+}
+.motion-js .quiet-demo.is-visible .quiet-demo__fact {
+  opacity: 1;
+}
+.motion-js .quiet-demo .quiet-demo__story {
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+  transition:
+    opacity var(--dur-editorial) var(--ease-emphasized) 320ms,
+    transform var(--dur-editorial) var(--ease-emphasized) 320ms;
+}
+@media (min-width: 640px) {
+  .motion-js .quiet-demo .quiet-demo__story {
+    transform: translateX(38%) scale(0.955);
+  }
+}
+.motion-js .quiet-demo.is-visible .quiet-demo__story {
+  opacity: 1;
+  transform: none;
+}
+.motion-js .quiet-demo .quiet-demo__resolve {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity var(--dur-editorial) var(--ease-settle) 760ms,
+    transform var(--dur-editorial) var(--ease-settle) 760ms;
+}
+.motion-js .quiet-demo.is-visible .quiet-demo__resolve {
+  opacity: 1;
+  transform: none;
+}
+
 /* ── E · Method fact-story signature: separation/recombine ──
    מיחזור ישיר של שפת ה-split מ-Focus Mode: כששלב-ההפרדה נחשף, שני הצדדים
    מתחילים מכונסים אל המרכז (inward) ואז נפרדים אל מקומם — הפער נוצר לנגד העין,
@@ -4393,20 +4444,41 @@ body:has([data-fm-active]) {
     animation: fslab-sep-story var(--dur-editorial) var(--ease-emphasized) both;
   }
 }
+/* העובדה היא *הקרקע*: היא כמעט אינה זזה. קודם שני הצדדים נעו ±34% בסימטריה,
+   וזה לימד „שני דברים שווים שנפרדים”. הכלי מלמד משהו אחר: העובדה עומדת,
+   והפרשנות היא זו שמתרחקת ממנה. */
 @keyframes fslab-sep-fact {
   from {
-    opacity: 0.35;
-    transform: translateX(-34%) scale(0.965);
+    opacity: 0.55;
+    transform: translateX(-8%) scale(0.99);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
+/* הסיפור *נפרד* מהעובדה — הוא זה שנע, והמרחק בין השניים הוא התובנה. */
 @keyframes fslab-sep-story {
   from {
-    opacity: 0.35;
-    transform: translateX(34%) scale(0.965);
+    opacity: 0.3;
+    transform: translateX(46%) scale(0.955);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* הפעולה *נפתרת מתוך ההבחנה*: היא עולה מהמרווח שנוצר בין העובדה לסיפור,
+   אחרי שההפרדה כבר נראתה. לכן ההשהיה — הפעולה אינה עוד בלוק שנכנס, היא
+   התוצאה של מה שקרה מעליה. */
+.motion-js .fslab-action {
+  animation: fslab-action-resolve var(--dur-editorial) var(--ease-settle) 420ms both;
+}
+@keyframes fslab-action-resolve {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.985);
   }
   to {
     opacity: 1;

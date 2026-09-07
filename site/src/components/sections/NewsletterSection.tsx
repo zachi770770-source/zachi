@@ -5,6 +5,7 @@ import { siteConfig } from "@/config/site";
 import { Container } from "@/components/shared/Container";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookCover } from "@/components/shared/BookCover";
+import { BookTilt } from "@/components/shared/BookTilt";
 import { closing } from "@/content/homeStory";
 
 /**
@@ -29,7 +30,7 @@ export function NewsletterSection() {
           {/* הכריכה חוזרת — אובייקט-סיום, עם זוהר ועומק. דקורטיבי. */}
           <div className="sig-close__cover" aria-hidden="true">
             <span className="sig-close__glow" />
-            <BookCover className="w-full" />
+            <BookTilt><BookCover className="w-full" /></BookTilt>
           </div>
 
           <div className="sig-close__copy">

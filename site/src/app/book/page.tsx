@@ -5,6 +5,7 @@ import { bigIdea } from "@/content/book";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
 import { BookCover } from "@/components/shared/BookCover";
+import { BookTilt } from "@/components/shared/BookTilt";
 import { BookLink } from "@/components/shared/BookLink";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { ThesisSection } from "@/components/sections/ThesisSection";
@@ -77,7 +78,7 @@ export default function BookPage() {
               {/* #6 המשכיות אובייקט: הכריכה גם יעד (בהגעה מהבית) וגם מקור (ביציאה
                   אל /preview) — אותו ספר „ממשיך” הלאה, ללא כריכה כפולה. */}
               <div data-vt-book-dest data-vt-book-source className="w-full">
-                <BookCover priority />
+                <BookTilt><BookCover priority /></BookTilt>
               </div>
             </div>
             <span className="kicker justify-center">הספר לעומק</span>

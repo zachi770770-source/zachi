@@ -175,7 +175,8 @@ export function MethodFactStory({ lab }: { lab: FactStoryLab }) {
             {lab.separationLine}
           </p>
 
-          <div className="mt-5 border-t border-border pt-5">
+          {/* הפעולה נפתרת מתוך ההבחנה שמעליה (ראו `.fslab-action`). */}
+          <div className="fslab-action mt-5 border-t border-border pt-5">
             <span className="kicker">{lab.actionEyebrow}</span>
             <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
               {lab.actionIntro}

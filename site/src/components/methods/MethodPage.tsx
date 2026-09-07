@@ -8,6 +8,7 @@ import { AskBookLink } from "@/components/journey/AskBookLink";
 import { MethodFilterMap } from "@/components/methods/MethodFilterMap";
 import { MethodFactStory } from "@/components/methods/MethodFactStory";
 import { MethodAnchor } from "@/components/methods/MethodAnchor";
+import { MethodQuietCheck } from "@/components/methods/MethodQuietCheck";
 import { SignatureMark } from "@/components/shared/SignatureMark";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
@@ -104,6 +105,13 @@ export function MethodPage({ method }: { method: Method }) {
         {/* עוגן חזותי סטטי — לעמודי-המושג שאין להם אינטראקציה. תופס את אותו חריץ
             (אחרי הפתיח, לפני הגוף) כדי לשמור על מקצב זהה לשני העמודים העשירים. */}
         {method.anchor ? <MethodAnchor anchor={method.anchor} /> : null}
+        {method.quietDemo ? (
+          <MethodQuietCheck
+            fact={method.quietDemo.fact}
+            interpretation={method.quietDemo.interpretation}
+            principle={method.quietDemo.principle}
+          />
+        ) : null}
 
         {/* מקטעי גוף — ההסבר המלא (שני הטורים, הטעויות, העיקרון), אחרי השיפוט. */}
         {method.sections.map((section) => (
