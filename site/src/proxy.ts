@@ -38,8 +38,28 @@ const ARTICLE_REDIRECTS: Record<string, string> = {
   "/articles/why-attracted-unavailable": "/guide/attracted-to-unavailable",
 };
 
+/**
+ * שם הכותרת שדרכה `global-not-found` לומד באיזו שפה להגיש 404.
+ *
+ * למה זה נדרש: `global-not-found` עוקף את שרשרת-הרינדור ולכן אינו מקבל את
+ * הנתיב המבוקש — הוא רינדר `lang="he" dir="rtl"` קבוע, וכתובת לא-קיימת תחת
+ * ‎/en החזירה 404 בעברית מימין-לשמאל. שתי החלופות נבדקו ונדחו: `notFound()`
+ * מתוך catch-all מרונדר במסלול-השגיאה של Next ומאבד את ה-root layout לגמרי
+ * (נמדד: `<html id="__next_error__">`, בלי lang/dir בכלל), ו-`not-found.tsx`
+ * ברמת קבוצת-המסלולים התנהג זהה. הכותרת היא הדרך היחידה שנותרה להעביר את
+ * ההקשר, והיא זולה: מחרוזת אחת, רק על ‎/en.
+ */
+export const LOCALE_HEADER = "x-zachi-locale";
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // מסמנים בקשות של המהדורה האנגלית, כדי ש-404 יוגש באנגלית ובכיוון הנכון.
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    const headers = new Headers(request.headers);
+    headers.set(LOCALE_HEADER, "en");
+    return NextResponse.next({ request: { headers } });
+  }
   // נרמול לוכסן סוגר, כדי ש-/about/ יטופל כמו /about.
   const key =
     pathname.length > 1 && pathname.endsWith("/")
@@ -73,5 +93,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/about", "/articles", "/articles/:path*"],
+  matcher: ["/about", "/articles", "/articles/:path*", "/en", "/en/:path*"],
 };
