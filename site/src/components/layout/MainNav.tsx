@@ -68,7 +68,7 @@ export function MainNav() {
       {/* מחליף-שפה לפני ה-CTA ובסגנון שקט, כדי שלא יתחרה בכפתור הרכישה. */}
       <LanguageSwitch to={english ? "he" : "en"} className="me-3" />
 
-      <Button asChild size="sm" className="header-buy h-10 px-5 text-[15px]">
+      <Button asChild size="sm" data-cta={pathname === "/" ? "quiet" : "strong"} className="header-buy h-10 px-5 text-[15px]">
         {english ? (
           <a href={edition.url} target="_blank" rel="noopener noreferrer">
             {edition.buyLabel}

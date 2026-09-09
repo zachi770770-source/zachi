@@ -17,7 +17,7 @@ export function AudienceSection() {
     >
       <Container>
         {/* חשיפה מקובצת אחת לשתי העמודות. */}
-        <Reveal className="grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
+        <Reveal className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <span className="kicker">
               למי הספר הזה
@@ -25,7 +25,7 @@ export function AudienceSection() {
             <h2 id="audience-heading" className="type-h2 mt-4">
               {problem.title}
             </h2>
-            <p className="type-lead mt-6 max-w-[48ch] text-foreground-muted">
+            <p className="type-lead mt-4 max-w-[48ch] text-foreground-muted">
               {problem.closing}
             </p>
           </div>
@@ -34,7 +34,7 @@ export function AudienceSection() {
             {situations.map((situation, index) => (
               <div
                 key={situation}
-                className="flex items-baseline gap-5 border-t border-border py-6 last:border-b"
+                className="flex items-baseline gap-5 border-t border-border py-4 last:border-b"
               >
                 <span
                   className="type-quote shrink-0 text-2xl text-foreground-muted tabular-nums"

@@ -1,52 +1,35 @@
 import { ArrowLeft } from "lucide-react";
 
-import { sampleReader } from "@/content/sample";
+import { sampleReader, sampleCtaLabel } from "@/content/sample";
 import { Container } from "@/components/shared/Container";
-import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
 
 /**
  * „קראו טעימה” — הצעד הרביעי בעמוד השדרה (הבנה → זיהוי → מה הספר נותן →
- * **טעימה** → רכישה), כמקטע אמיתי בזרימת העמוד.
+ * **טעימה** → רכישה).
  *
- * המקטע הזה מחליף את `StickyCta` — בר-טעימה צף שליווה את עמוד הבית. הבר עשה
- * עבודה נכונה במקום שגוי: במובייל הוא ישב, יחד עם בועת-המצפן, מעל ה-CTA הסוגר
- * והסתיר את „עוד לא בטוחים? קראו טעימה מהספר”, כלומר התחרה בדיוק במה שהוא בא
- * לשרת. אותה הזמנה, עכשיו במקום שבו היא נכונה בזרימה, ובלי לכסות דבר.
+ * **גשר, לא סצנה.** הגרסה הראשונה שלו נמדדה ב-502px: קיקר, כותרת-h2, ציטוט
+ * בן שתי פסקאות, כפתור והערה — כלומר מקטע-מלא שהחליף בר צף בן 64px והאריך
+ * את העמוד במקום לקצר אותו. עכשיו זו שורה אחת מהספר וקישור: משפט-העיקרון
+ * המאושר, שהוא ממילא המשפט שהמבקר בא לבדוק, ומיד הפעולה. אין כותרת-מקטע —
+ * גשר אינו צריך כותרת, הוא צריך להעביר.
  *
- * התוכן אינו חדש: זו פתיחת-הטעימה המאושרת (`sampleReader.opening`) ומשפט
- * העיקרון שלה. המבקר קורא שתי שורות אמיתיות מהספר לפני שהוא מחליט אם ללחוץ.
+ * התוכן אינו חדש: `sampleReader.principle.emphasis`, אותו משפט שמופיע בטעימה.
  */
 export function SampleBridge() {
   return (
     <section
       id="sample-bridge"
-      className="sample-bridge scroll-mt-20 py-12 sm:py-16"
-      aria-labelledby="sample-bridge-heading"
+      className="sample-bridge scroll-mt-20 py-8 sm:py-10"
+      aria-label="טעימה מהספר"
     >
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="kicker justify-center">טעימה</span>
-          <h2 id="sample-bridge-heading" className="type-h2 mt-2">
-            כך זה נשמע מבפנים.
-          </h2>
-          <blockquote className="sample-bridge__quote mt-6 text-start">
-            <p className="text-[17px] leading-relaxed text-foreground-muted [text-wrap:pretty] sm:text-[18px]">
-              {sampleReader.opening}
-            </p>
-            <p className="mt-4 font-serif text-[19px] font-semibold leading-snug text-foreground sm:text-[21px]">
-              {sampleReader.principle.emphasis}
-            </p>
-          </blockquote>
-          <div className="mt-8 flex flex-col items-center gap-2">
-            <Button asChild size="lg">
-              <BookLink href="/preview">
-                {sampleReader.title}
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </BookLink>
-            </Button>
-            <p className="text-[13.5px] text-foreground-muted">בלי הרשמה.</p>
-          </div>
+        <div className="sample-bridge__inner">
+          <p className="sample-bridge__line">{sampleReader.principle.emphasis}</p>
+          <BookLink href="/preview" className="sample-bridge__cta">
+            {sampleCtaLabel()}
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </BookLink>
         </div>
       </Container>
     </section>

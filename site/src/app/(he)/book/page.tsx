@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
@@ -11,7 +12,6 @@ import { BookLink } from "@/components/shared/BookLink";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { PeekInside } from "@/components/preview/PeekInside";
 import { AudienceSection } from "@/components/sections/AudienceSection";
-import { PatternsSection } from "@/components/sections/PatternsSection";
 import { MethodSection } from "@/components/sections/MethodSection";
 import { ToolsBento } from "@/components/sections/ToolsBento";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
@@ -161,15 +161,29 @@ export default function BookPage() {
       {/* ── ההחלטה ── */}
       <PurchaseSection />
 
-      {/* ── מתחת להחלטה: חומר-לימוד ── ששת הכלים ודפוסי-העומק. הם נשארים
-          בעמוד (תוכן מאושר, ו-e2e שומר עליהם), אך אינם עומדים יותר בין
-          המבקר לבין הכרטיס. */}
+      {/* ── מתחת להחלטה: חומר-לימוד ── ששת הכלים נשארים כאן: הם *הספר*, לא
+          רקע תיאורטי, ויש להם עוגני-deep-link מהמצפן וממקומות אחרים. הם רק
+          אינם עומדים יותר בין המבקר לבין הכרטיס. */}
       <ToolsBento />
-      <PatternsSection />
 
-      {/* הדלת אל הכלי — מתחת להחלטה, לא לפניה. */}
+      {/* שני בלוקי-הדפוסים („למה אנחנו חוזרים שוב ושוב לאותו מקום?” ו„הריקוד
+          שאף אחד לא בחר בו”) עברו אל /guide/attachment-styles — עמוד-החיפוש
+          הקנוני של הנושא, שהיה ממילא יעד-ההעמקה מכאן. במקומם נשאר קישור אחד:
+          כוונת-החיפוש והקישור-הפנימי נשמרו, התוכן לא שוכפל ולא אבד, ו-2,000px
+          של חומר-לימוד יצאו ממסלול-הרכישה. */}
       <Container className="pb-16">
-        <DeeperEntry />
+        <p className="mx-auto max-w-2xl text-center text-[15.5px] leading-relaxed text-foreground-muted">
+          רוצים להבין מה חוזר מתחת לפני השטח?{" "}
+          <Link
+            href="/guide/attachment-styles"
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            דפוסים חוזרים בזוגיות: מה מניע אותם, וסגנונות ההתקשרות שמאחוריהם
+          </Link>
+        </p>
+        <div className="mt-10">
+          <DeeperEntry />
+        </div>
       </Container>
     </>
   );

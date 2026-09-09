@@ -6367,24 +6367,39 @@ html.vt-book-nav::view-transition-group(book-cover) {
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── היררכיית ה-CTA בהדר ─────────────────────────────────────────────────
-   פעולה ראשית אחת בכל מסך, וזה חל גם על ההדר. בצביעה הראשונה של עמוד הבית
-   היו שני כפתורים מלאים שווי-משקל: „קראו טעימה” ב-Hero ו„לרכישת הספר”
-   בהדר — ורק אחד מהם נכון למי שהגיע לפני שנייה. לכן, כל עוד ה-Hero על המסך,
-   כפתור-הרכישה שקט (מתאר); אחרי ה-Hero הוא נעשה מלא.
+   פעולה ראשית אחת בכל מסך, וזה חל גם על ההדר. בעמוד הבית היו שני כפתורים
+   מלאים שווי-משקל בצביעה הראשונה: „קראו טעימה” ב-Hero ו„לרכישת הספר” בהדר —
+   ורק אחד מהם נכון למי שהגיע לפני שנייה.
 
-   ברירת-המחדל היא *הבולטת*: `data-past-hero` נכתב על ה-root ע"י
-   `HeaderCtaScope`, ובלי JS הוא לעולם אינו נכתב — ולכן הרכישה מעולם אינה
-   נתקעת במצב השקט. רק הופעה משתנה; היעד, הגודל ושטח-המגע זהים בשני המצבים,
-   ולכן אין קפיצת-פריסה ואין שינוי ביעד-המגע. */
-:root:not([data-past-hero]) .header-buy {
+   **ההכרעה נעשית בשרת, לא אחרי הידרציה.** ה-`data-cta` נכתב ברינדור לפי
+   המסלול (`Header`/`MainNav` הם רכיבי-לקוח שקוראים `usePathname()`, שזמין גם
+   ב-SSR): בעמוד הבית „quiet”, בכל עמוד אחר „strong”. לכן ה-HTML הראשון כבר
+   מגיע נכון, ואין שום מסלול שבו הכפתור נצבע מלא ואז מתקן את עצמו לשקט.
+
+   אחרי שהמבקר עובר את ה-Hero, `HeaderCtaScope` מוסיף `data-past-hero` לשורש
+   והכפתור השקט נעשה מלא — שינוי יזום שמופעל בגלילה, לא תיקון של צביעה שגויה.
+   היעד, הגודל ושטח-המגע זהים בשני המצבים ⇒ אין קפיצת-פריסה. */
+.header-buy[data-cta="quiet"] {
   background: transparent;
   color: var(--color-foreground);
   border: 1px solid var(--color-border-strong);
   box-shadow: none;
 }
-:root:not([data-past-hero]) .header-buy:hover {
+.header-buy[data-cta="quiet"]:hover {
   background: color-mix(in oklab, var(--color-foreground) 6%, transparent);
   border-color: var(--color-foreground);
+}
+/* עבר את ה-Hero ⇒ שקילת-מוצר ⇒ הרכישה נעשית בולטת.
+   הגוון הוא בדיוק זה של `Button` בברירת-מחדל (פטרול), ולא הטרקוטה של
+   ‎--color-brand: אחרת כפתור-הרכישה בעמוד הבית היה נראה אחרת מאותו כפתור
+   בדיוק בכל שאר העמודים — נמדד rgb(185,110,85) מול rgb(32,50,44). */
+:root[data-past-hero] .header-buy[data-cta="quiet"] {
+  background: var(--color-petrol);
+  color: var(--color-secondary-foreground);
+  border-color: transparent;
+}
+:root[data-past-hero] .header-buy[data-cta="quiet"]:hover {
+  background: var(--color-petrol-2);
 }
 .motion-js .header-buy {
   transition:
@@ -6399,15 +6414,16 @@ html.vt-book-nav::view-transition-group(book-cover) {
    בעמוד-המסע, ולכן „תחנה 3” אינה סותרת דבר. */
 .path-groups {
   display: grid;
-  gap: clamp(1.75rem, 4vw, 2.75rem);
+  gap: clamp(0.9rem, 2vw, 1.3rem);
+  margin-top: 1.25rem;
 }
 .path-group__head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.25rem 0.75rem;
-  margin-bottom: 0.9rem;
-  padding-bottom: 0.6rem;
+  gap: 0.2rem 0.6rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--color-border);
 }
 .path-group__label {
@@ -6422,8 +6438,15 @@ html.vt-book-nav::view-transition-group(book-cover) {
 }
 .path-group__list {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.6rem;
   grid-template-columns: 1fr;
+}
+/* כרטיס קומפקטי: הכותרת והשורה נשארות, הריפוד יורד. */
+.path-group__list .situation-card {
+  padding: 0.85rem 1rem;
+}
+@media (min-width: 640px) {
+  .path-group__list .situation-card { padding: 1rem 1.15rem; }
 }
 @media (min-width: 640px) {
   .path-group__list[data-kind="station"] { grid-template-columns: repeat(3, 1fr); }
@@ -6469,13 +6492,51 @@ html.vt-book-nav::view-transition-group(book-cover) {
   border-radius: 4px;
 }
 
-/* ── מקטע-הטעימה בבית ────────────────────────────────────────────────────
-   מחליף את בר-הטעימה הצף. הציטוט הוא פתיחת-הטעימה המאושרת. */
-.sample-bridge__quote {
+/* ── גשר-הטעימה בבית ─────────────────────────────────────────────────────
+   שורה אחת מהספר + קישור, בשורה אחת בדסקטופ. מחליף את בר-הטעימה הצף:
+   אותה הזמנה, בתוך הזרימה, ובלי לכסות את ה-CTA הסוגר במובייל. */
+.sample-bridge__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1.5rem;
+  max-width: 62rem;
   margin-inline: auto;
-  max-width: 46ch;
-  border-inline-start: 2px solid color-mix(in oklab, var(--color-brand) 45%, transparent);
-  padding-inline-start: 1.15rem;
+  padding-block: 1.1rem;
+  border-block: 1px solid var(--color-border);
+  text-align: center;
+}
+.sample-bridge__line {
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-foreground);
+}
+.sample-bridge__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding-inline: 1.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-foreground);
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+.sample-bridge__cta:hover {
+  background: color-mix(in oklab, var(--color-foreground) 6%, transparent);
+  border-color: var(--color-foreground);
+}
+.sample-bridge__cta:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
 }
 
 /* ── דלת ההדגמה בעמוד-המושג ──────────────────────────────────────────────

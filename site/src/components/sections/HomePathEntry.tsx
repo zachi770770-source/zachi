@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { homePaths, homePathUi, type HomePathKind } from "@/content/homePaths";
 
@@ -56,13 +55,6 @@ function PathGroup({
               <span className="text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[14px]">
                 {p.buttonSub}
               </span>
-              {/* החץ הוא האות היחיד שנדרש: זהו קישור למקום אחר, לא בחירה בטופס. */}
-              <span
-                aria-hidden="true"
-                className="mt-auto pt-3 text-brand-hover opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </span>
             </Link>
           </li>
         ))}
@@ -73,7 +65,7 @@ function PathGroup({
 
 export function HomePathEntry() {
   return (
-    <div className="path-groups reveal mx-auto mt-7 max-w-4xl">
+    <div className="path-groups reveal mx-auto max-w-4xl">
       <PathGroup
         kind="station"
         label={homePathUi.stationsLabel}

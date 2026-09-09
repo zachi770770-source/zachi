@@ -17,7 +17,7 @@ export function HomePathSelector() {
   return (
     <section
       id="path"
-      className="path-awaken scroll-mt-20 py-5 sm:py-10"
+      className="path-awaken scroll-mt-20 py-4 sm:py-8"
       aria-labelledby="path-heading"
     >
       <Container>
@@ -26,7 +26,7 @@ export function HomePathSelector() {
           <h2 id="path-heading" className="type-h2 mt-2">
             {homePathUi.heading}
           </h2>
-          <p className="type-lead mx-auto mt-3 max-w-[46ch] text-foreground-muted [text-wrap:pretty]">
+          <p className="mx-auto mt-2 max-w-[46ch] text-[15.5px] leading-relaxed text-foreground-muted [text-wrap:pretty]">
             {homePathUi.sub}
           </p>
         </div>
