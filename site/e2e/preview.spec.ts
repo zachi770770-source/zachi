@@ -63,13 +63,28 @@ test("/preview mobile: אין שום בקרה צפה — הקריאה מחזיק
 }) => {
   // הבדיקה התהפכה במכוון. קודם היא שמרה על בר-CTA דביק בתוך עמוד-הקריאה;
   // הבר הוסר, יחד עם בועת-המצפן, מפני שעמוד-הטעימה הוא חוויית קריאה שקטה
-  // וכל שכבה שמרחפת מעליה מתחרה בה. הטענה החדשה חזקה יותר: *אף* אלמנט
-  // fixed/sticky אינו מרחף מעל התוכן (למעט ההדר), בשום מיקום-גלילה.
+  // וכל שכבת-שיווק שמרחפת מעליה מתחרה בה.
+  //
+  // מה *כן* מותר לרחף: ההדר, וסרגל-הקורא עצמו (חזרה, גודל-כתב, מצב-קריאה).
+  // הסרגל אינו CTA מתחרה אלא הפקדים של חוויית-הקריאה, והוא חלק מהחוויה
+  // המאושרת. הניסוח הראשון שלי כאן היה רחב מדי ותפס אותו — זו הייתה שגיאת
+  // ניסוח, ולכן הוא הוחרג במפורש ולא „הוחלש”: הטענה עדיין אוסרת כל שכבה
+  // צפה אחרת, בכל מיקום-גלילה.
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  // הסכמת-העוגיות היא השכבה הצפה היחידה שמותרת באתר, והיא מופיעה במובייל
+  // אחרי השהיה — כלומר לחיצה חד-פעמית בתחילת הבדיקה אינה אמינה. מציבים את
+  // ההסכמה מראש כדי למדוד את המצב היציב: מבקר שכבר החליט, וקורא.
+  await ctx.addInitScript(() => {
+    try {
+      localStorage.setItem(
+        "cookie-consent",
+        JSON.stringify({ necessary: true, analytics: true, marketing: true }),
+      );
+    } catch {}
+  });
   const page = await ctx.newPage();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/preview", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
   for (const frac of [0, 0.35, 0.7, 1]) {
     await page.evaluate((f) => {
@@ -85,12 +100,16 @@ test("/preview mobile: אין שום בקרה צפה — הקריאה מחזיק
           if (cs.visibility === "hidden" || cs.opacity === "0") return false;
           const r = el.getBoundingClientRect();
           if (r.width < 40 || r.height < 20) return false;
-          return !el.closest("header");
+          return !el.closest("header") && !el.closest(".reader-toolbar");
         })
         .map((el) => el.tagName + "." + String(el.className).slice(0, 40)),
     );
     expect(floats, `floating layers at ${frac * 100}% of /preview`).toEqual([]);
   }
+
+  // ובמפורש: שתי השכבות שהוסרו אינן חוזרות בשום צורה.
+  await expect(page.locator(".compass-pill")).toHaveCount(0);
+  await expect(page.getByRole("complementary", { name: "בר הטעימה" })).toHaveCount(0);
   await ctx.close();
 });
 
