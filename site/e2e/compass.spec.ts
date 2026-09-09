@@ -33,7 +33,10 @@ test("ask: station → dilemma → 8-part result (tool + sample + amazon), no %"
   await expect(r.getByText("כדאי לבדוק לפני שמחליטים")).toBeVisible();
   await expect(r.getByText("כלי מהספר שמתאים כאן")).toBeVisible();
   await expect(r.getByText("פעולה קטנה להיום")).toBeVisible();
-  await expect(r.getByText("מה לא כדאי להסיק מהר מדי")).toBeVisible();
+  // „מה לא כדאי להסיק מהר מדי” אינו עוד כותרת-משנה נפרדת: חמש הכותרות בתוצאה
+  // צומצמו לשלוש, והסייג נכנס לתוך בלוק-הפעולה. הטענה עברה מהתווית *לתוכן* —
+  // כלומר היא עדיין מוכיחה שהסייג מוצג, ולא רק שהכותרת קיימת.
+  await expect(r.getByText(/אל תסמנו את עצמכם כ„לא בנויים לזה”/)).toBeVisible();
   // כלי + טעימה מתאימה (d-start → fact-story-action) + רכישה באמזון (ערוץ יחיד)
   await expect(r.locator('a[href="/book#tool-fact-story-action"]')).toBeVisible();
   await expect(

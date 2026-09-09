@@ -7,7 +7,7 @@ import { test, expect, type Page } from "./fixtures";
  * ה-edge cases: מוקד בתשובה, איפוס בהתחלה-מחדש, שמירת-מוקד ברענון, ו-h1 יחיד.
  */
 
-const INTRO_MARKER = "2-3 שאלות קצרות"; // צ'יפ בקליפת-הפתיח
+const INTRO_MARKER = "כמה שאלות קצרות"; // צ'יפ בקליפת-הפתיח
 
 async function walkToResult(page: Page) {
   for (let i = 0; i < 4; i++) {

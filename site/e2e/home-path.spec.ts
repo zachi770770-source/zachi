@@ -47,8 +47,12 @@ test("#path: מודל-המסע מוצג — שלוש תחנות ושני שער�
   const path = page.locator("#path");
   await path.scrollIntoViewIfNeeded();
 
-  await expect(path.getByText(homePathUi.stationsLabel)).toBeVisible();
-  await expect(path.getByText(homePathUi.gatesLabel)).toBeVisible();
+  await expect(
+    path.getByRole("heading", { name: homePathUi.stationsLabel }),
+  ).toBeVisible();
+  await expect(
+    path.getByRole("heading", { name: homePathUi.gatesLabel }),
+  ).toBeVisible();
   await expect(path.locator('[data-kind="station"] a.situation-card')).toHaveCount(
     STATIONS.length,
   );

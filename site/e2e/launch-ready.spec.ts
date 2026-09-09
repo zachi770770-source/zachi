@@ -23,16 +23,14 @@ test.describe("Launch-readiness", () => {
       heroSection.getByRole("link", { name: /לרכישת הספר באמזון/ }),
     ).toHaveAttribute("href", /amazon\.com\/dp\/B0GJ3SL9H2/);
 
-    // תיבת-הכתיבה החופשית „ספרו לי מה קורה אצלכם…” אינה בשער — היא חיה במקטע
-    // השיחה (#path), כדי לא להתחרות בשתי הפעולות הראשיות. הפונקציונליות נשמרת:
-    // ללא JS זהו קישור אמיתי אל /compass (אותו מנוע).
-    await expect(
-      heroSection.getByRole("link", { name: /ספרו לי מה קורה אצלכם/ }),
-    ).toHaveCount(0);
-    const ask = page.locator("#path").getByRole("link", {
-      name: /ספרו לי מה קורה אצלכם/,
-    });
-    await expect(ask).toHaveAttribute("href", "/compass");
+    // התיבה „ספרו לי מה קורה אצלכם…” הוסרה מכל האתר: היא נראתה כשדה-כתיבה
+    // והייתה בפועל `<a href="/compass">`, כלומר הזמינה להקליד וניווטה לשאלון.
+    // הבדיקה כאן קיבעה קודם את *מיקומה*; עכשיו היא אוכפת את היעדרה, ובמקומה
+    // את הדלת היחידה — קישור-טקסט מנוסח כמו מה שהוא עושה.
+    await expect(page.getByText(/ספרו לי מה קורה אצלכם/)).toHaveCount(0);
+    const door = page.locator(".deeper-entry a[href='/compass']");
+    await expect(door).toHaveCount(1);
+    await expect(door).toContainText("איפה להתחיל בספר");
   });
 
   test("home closing: Amazon is the only purchase channel (no waitlist form)", async ({ page }) => {

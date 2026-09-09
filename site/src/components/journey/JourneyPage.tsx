@@ -197,20 +197,28 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             {/* הספר, מוקדם. עמוד-מסע הוא עמוד ארוך (5,200–5,900px), והכריכה
                 הופיעה בו לראשונה סביב y≈3,400 — כלומר מבקר שנחת מהבית ראה
                 כמעט שני מסכים של פרוזה לפני שראה שיש כאן מוצר בכלל. */}
-            <p className="journey-book-early">
+            {/* div ולא p: `BookCover` מרנדר <div>, ו-<p> אינו יכול להכיל
+                אלמנט בלוק — הפרסר היה מוציא אותו החוצה, עץ-הלקוח לא היה תואם
+                את ה-HTML מהשרת, ו-React נפל ל-hydration mismatch (#418) בכל
+                חמשת עמודי-המסע. */}
+            <div className="journey-book-early">
               <BookLink href={previewHref} className="journey-book-early__link" morphCover>
                 <span className="journey-book-early__cover" aria-hidden="true">
                   <BookCover />
                 </span>
                 <span>
                   <span className="journey-book-early__label">מתוך הספר</span>
+                  {/* תווית קצרה ומובחנת. שימוש ב-`samplePrimaryLabel` כאן יצר
+                      שני קישורים עם *אותו* שם-נגישות ואותו יעד באותו עמוד —
+                      כפילות אמיתית, לא רק בעיית-בדיקה. הניסוח המפורט נשאר
+                      במקטע-הטעימה הייעודי שלמטה. */}
                   <span className="journey-book-early__cta">
-                    {journey.samplePrimaryLabel}
+                    קראו טעימה
                     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                   </span>
                 </span>
               </BookLink>
-            </p>
+            </div>
           </div>
           <div
             className={cn(
@@ -248,20 +256,28 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             {/* הספר, מוקדם. עמוד-מסע הוא עמוד ארוך (5,200–5,900px), והכריכה
                 הופיעה בו לראשונה סביב y≈3,400 — כלומר מבקר שנחת מהבית ראה
                 כמעט שני מסכים של פרוזה לפני שראה שיש כאן מוצר בכלל. */}
-            <p className="journey-book-early">
+            {/* div ולא p: `BookCover` מרנדר <div>, ו-<p> אינו יכול להכיל
+                אלמנט בלוק — הפרסר היה מוציא אותו החוצה, עץ-הלקוח לא היה תואם
+                את ה-HTML מהשרת, ו-React נפל ל-hydration mismatch (#418) בכל
+                חמשת עמודי-המסע. */}
+            <div className="journey-book-early">
               <BookLink href={previewHref} className="journey-book-early__link" morphCover>
                 <span className="journey-book-early__cover" aria-hidden="true">
                   <BookCover />
                 </span>
                 <span>
                   <span className="journey-book-early__label">מתוך הספר</span>
+                  {/* תווית קצרה ומובחנת. שימוש ב-`samplePrimaryLabel` כאן יצר
+                      שני קישורים עם *אותו* שם-נגישות ואותו יעד באותו עמוד —
+                      כפילות אמיתית, לא רק בעיית-בדיקה. הניסוח המפורט נשאר
+                      במקטע-הטעימה הייעודי שלמטה. */}
                   <span className="journey-book-early__cta">
-                    {journey.samplePrimaryLabel}
+                    קראו טעימה
                     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                   </span>
                 </span>
               </BookLink>
-            </p>
+            </div>
         </header>
       )}
 
