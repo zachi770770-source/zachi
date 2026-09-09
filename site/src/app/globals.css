@@ -60,8 +60,16 @@
    * ועדיין רחוק משחור (כרומה 18 — מעל סף בדיקת-השחור) — ובפועל *שיפר*
    * את הניגודיות מול שנהב: 10.51 → 12.08.
    */
-  --color-petrol: #20322c;      /* משטח כהה ראשי (Hero/Focus/פוטר) — 12.08:1 מול שנהב */
-  --color-petrol-2: #2a3e38;    /* משטח כהה משני — 10.03:1 מול שנהב */
+  --color-petrol: #20322c;      /* משטח כהה ראשי (Focus/פוטר/פקדים) — 12.97:1 מול שנהב */
+  --color-petrol-2: #2a3e38;    /* משטח כהה משני — 10.93:1 מול שנהב */
+  /* ── משטחי-הפטרול הגדולים (Hero + סגירת-הרכישה) ──────────────────────────
+     אותה משפחה בדיוק (גוון 160–162°, רוויה 20–22%) — רק בהירות. על שטח מלא
+     במסך שלם הפטרול הכהה נקרא כמעט-שחור: מדידת-פיקסלים על ה-Hero המרונדר
+     נתנה ממוצע ‎#253933‎ (‎L*≈22‎), כלומר הירוק שהזהות בנויה עליו כמעט לא נראה.
+     המשטחים הגדולים בלבד מתבהרים; הפקדים, הקווים הדקים והפרטים נשארים על
+     ‎--color-petrol‎ הכהה — ומכאן מגיע העומק: שדה בהיר יותר, פקדים כהים יותר. */
+  --color-petrol-field: #233731;   /* משטח גדול ראשי */
+  --color-petrol-field-2: #2f453e; /* משטח גדול משני (ראש הגרדיאנט) */
   /* מרווה בשני מדרגים של אותה משפחה (לא צבע נוסף): בהיר למשטח כהה, עמוק
      למשטח בהיר — כדי שמבטא-המרווה יעבור 3:1 גם על נייר. */
   --color-sage: #9eb3a9;        /* על פטרול — 6.14:1 */
@@ -170,6 +178,8 @@
 
   --color-petrol: var(--color-petrol);
   --color-petrol-2: var(--color-petrol-2);
+  --color-petrol-field: var(--color-petrol-field);
+  --color-petrol-field-2: var(--color-petrol-field-2);
   --color-sage: var(--color-sage);
   --color-sage-ink: var(--color-sage-ink);
   --color-paper: var(--color-paper);
@@ -4571,13 +4581,16 @@ html.vt-book-nav::view-transition-group(book-cover) {
  * =================================================================== */
 .sig-hero {
   --sig-ivory: var(--color-background);
-  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 60%, transparent);
+  /* 60%→68% נדרש *אך ורק* לניגודיות: השדה הגדול התבהר, ולכן שורת-המשנה
+     השקופה ירדה ל-4.52:1 בנקודה הבהירה ביותר של הגרדיאנט — עובר AA בקושי.
+     68% מחזיר אותה ל-5.32:1. אותו צבע בדיוק, שקיפות בלבד. */
+  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 68%, transparent);
   --sig-warm: color-mix(in oklab, var(--color-brand) 46%, #f4f2ee);
   position: relative;
   overflow: clip;
   isolation: isolate;
   color: var(--sig-ivory);
-  background: var(--color-petrol);
+  background: var(--color-petrol-field);
 }
 
 /* שדה-ה-Ink החמים + זוהר + גרעין. */
@@ -4598,7 +4611,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
       color-mix(in oklab, var(--color-brand) 24%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
+    linear-gradient(158deg, var(--color-petrol-field-2), var(--color-petrol-field));
 }
 .sig-hero__field {
   position: absolute;
@@ -4679,6 +4692,11 @@ html.vt-book-nav::view-transition-group(book-cover) {
 /* ── ההצגה החתומה: ספר WebGL (Three.js) ──
    מוסתר עד שה-JS מפעיל WebGL בהצלחה (data-active). כשפעיל — כריכת-ה-CSS
    (fallback) מוסתרת דרך :has, ואין ספר כפול. */
+/* נוכחות-המוצר. המצלמה בסצנה קבועה (fov אנכי 26°, מרחק קבוע), ולכן הספר
+   המרונדר גדל עם *גובה* הקנבס ולא עם רוחבו — מדוד: 576×360 ⇒ ספר ברוחב ~336.
+   מכאן שהמינוף הנכון הוא יחס-הממדים של העטיפה, ולא max-width: הרוחב נשאר 576
+   (בלי לדחוק את הטיפוגרפיה), והספר גדל אנכית לתוך מרחב שכבר היה ריק.
+   מובייל נשאר 8/5 במכוון — שם אין מרווח לבזבז, והעמוד לא יתארך. */
 .hero-bookgl {
   display: none;
   position: relative;
@@ -4686,6 +4704,16 @@ html.vt-book-nav::view-transition-group(book-cover) {
   max-width: 36rem;
   aspect-ratio: 8 / 5;
   margin-inline: auto;
+}
+@media (min-width: 641px) {
+  .hero-bookgl {
+    aspect-ratio: 8 / 5.5; /* ‎+10% נוכחות */
+  }
+}
+@media (min-width: 1024px) {
+  .hero-bookgl {
+    aspect-ratio: 8 / 5.7; /* ‎+14% נוכחות */
+  }
 }
 .hero-bookgl[data-active="true"] {
   display: block;
@@ -4895,8 +4923,10 @@ html.vt-book-nav::view-transition-group(book-cover) {
     );
     filter: blur(40px);
   }
+  /* ה-fallback (ללא WebGL / תנועה-מופחתת) גדל באותו שיעור כמו ספר-ה-GL,
+     כדי ששני המסלולים יציגו את אותה נוכחות-מוצר. */
   .sig-hero__cover {
-    width: clamp(20rem, 32vw, 29rem);
+    width: clamp(22.8rem, 36.5vw, 33rem);
     margin-bottom: 0;
     filter: drop-shadow(0 40px 58px rgb(var(--shadow-tint) / 0.5));
   }
@@ -4963,7 +4993,13 @@ html.vt-book-nav::view-transition-group(book-cover) {
     grid-template-columns: minmax(0, 1fr) minmax(15rem, 25rem);
   }
   .sig-hero__cover {
-    width: clamp(15rem, 27vw, 20rem);
+    width: clamp(17rem, 30.5vw, 22.8rem);
+  }
+}
+/* טאבלט — סצנה חד-טורית; ה-fallback גדל ב-10%, כמו ספר-ה-GL בטווח הזה. */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .sig-hero__cover {
+    width: clamp(15.4rem, 62vw, 19.8rem);
   }
 }
 
@@ -5106,7 +5142,8 @@ html.vt-book-nav::view-transition-group(book-cover) {
  * =================================================================== */
 .sig-close {
   --sig-ivory: var(--color-background);
-  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 62%, transparent);
+  /* 62%→68% — אותו תיקון-ניגודיות כמו ב-Hero, על אותו שדה שהתבהר. */
+  --sig-ivory-muted: color-mix(in oklab, #f6f0e7 68%, transparent);
   position: relative;
   isolation: isolate;
   overflow: clip;
@@ -5128,7 +5165,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
       color-mix(in oklab, var(--color-brand) 22%, transparent),
       transparent 58%
     ),
-    linear-gradient(158deg, var(--color-petrol-2), var(--color-petrol));
+    linear-gradient(158deg, var(--color-petrol-field-2), var(--color-petrol-field));
 }
 .sig-close__container {
   position: relative;
@@ -5376,21 +5413,52 @@ html.vt-book-nav::view-transition-group(book-cover) {
 /* ── B · POINT → PATH: „האתר עונה על שאלה. הספר מלווה תהליך.” ──
    צד-האתר = נקודה אחת; צד-הספר = אותה נקודה שנפתחת לציר אנכי שהתחנות נבנות
    עליו. הצורה טוענת את הטענה לפני הטקסט. */
+/* קומפוזיציה עריכתית פתוחה: אין מיכל, אין מספור. הנקודה והציר יושבים על אותו
+   קו אנכי (מרכז ב-4px מתחילת הבלוק), כך שהמעבר „נקודה → מסלול” נקרא כרצף אחד. */
+.s2p__body {
+  display: grid;
+  gap: clamp(1.1rem, 2.4vw, 1.6rem);
+}
+.s2p__point,
+.s2p__path {
+  position: relative;
+  padding-inline-start: 1.5rem;
+}
+.s2p__point {
+  padding-bottom: clamp(1.1rem, 2.4vw, 1.5rem);
+  border-bottom: 1px solid var(--color-border);
+}
 .s2p__dot {
-  margin-top: 0.15rem;
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
+  position: absolute;
+  inset-block-start: 0.42rem;
+  inset-inline-start: 0;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
   background: var(--color-foreground-muted);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-foreground-muted) 14%, transparent);
+}
+.s2p__side-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-foreground-muted);
+}
+.s2p__book-label {
+  color: var(--color-brand-hover);
+}
+.s2p__side-line {
+  margin-top: 0.4rem;
+  font-size: clamp(1rem, 1.25vw, 1.1rem);
+  line-height: 1.7;
+  color: var(--color-foreground);
+  text-wrap: pretty;
 }
 .s2p__axis {
   position: absolute;
   z-index: 0;
-  /* מיושר עם מרכז הצמתים (h-5 = 20px) של הרשימה למטה. */
-  inset-inline-start: calc(1.25rem + 10px);
-  inset-block: 3.4rem 2.6rem;
+  inset-inline-start: 3px;
+  inset-block: 0.5rem 2.2rem;
   width: 2px;
   border-radius: 2px;
   background: linear-gradient(
@@ -5400,21 +5468,57 @@ html.vt-book-nav::view-transition-group(book-cover) {
   );
   transform-origin: top center;
 }
-@media (min-width: 640px) {
-  .s2p__axis {
-    inset-inline-start: calc(1.75rem + 10px);
-  }
+.s2p__stations {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.6rem;
 }
 .s2p__station {
   position: relative;
   z-index: 1;
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 1.5vw, 1.28rem);
+  line-height: 1.55;
+  color: var(--color-foreground);
+  text-wrap: pretty;
+}
+/* סימן-מסלול קטן במקום צומת ממוספר: המספור אמר „ארבעה שלבים במוצר”,
+   והשורות כאן אינן שלבים אלא שלוש תוצאות. */
+.s2p__node {
+  position: absolute;
+  inset-block-start: 0.62em;
+  inset-inline-start: -1.5rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-brand);
+}
+.s2p__note {
+  margin-top: 0.9rem;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--color-foreground-muted);
+}
+.s2p__link {
+  font-weight: 600;
+  color: var(--color-brand-hover);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.s2p__link:hover {
+  color: var(--color-brand);
+}
+.s2p__link:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 .motion-js .s2p.reveal {
   opacity: 1;
   transform: none;
 }
-/* הכותרת + הפאנל נכנסים, ואז הנקודה „נפתחת” לציר והתחנות נבנות. */
+/* הכותרת והגוף נכנסים, ואז הנקודה „נפתחת” לציר והשורות נבנות. */
 .motion-js .s2p .s2p__head {
   opacity: 0;
   transform: translateY(12px);
@@ -5426,14 +5530,14 @@ html.vt-book-nav::view-transition-group(book-cover) {
   opacity: 1;
   transform: none;
 }
-.motion-js .s2p .s2p__panel {
+.motion-js .s2p .s2p__body {
   opacity: 0;
   transform: translateY(16px);
   transition:
     opacity 620ms var(--ease-settle) 200ms,
     transform 620ms var(--ease-settle) 200ms;
 }
-.motion-js .s2p.is-visible .s2p__panel {
+.motion-js .s2p.is-visible .s2p__body {
   opacity: 1;
   transform: none;
 }
@@ -5460,7 +5564,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
 .motion-js .s2p.is-visible .s2p__book-label {
   opacity: 1;
 }
-/* התחנות נבנות בזו-אחר-זו כשהציר „מגיע” אליהן. */
+/* השורות נבנות בזו-אחר-זו כשהציר „מגיע” אליהן. */
 .motion-js .s2p .s2p__station {
   opacity: 0;
   transform: translateY(12px);
@@ -5473,7 +5577,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
   opacity: 1;
   transform: none;
 }
-/* הצומת נדלק כשהתחנה נבנית. */
+/* סימן-המסלול נדלק כשהשורה נבנית. */
 .motion-js .s2p .s2p__node {
   transform: scale(0.4);
   transition: transform 380ms var(--ease-emphasized);
@@ -5557,43 +5661,11 @@ html.vt-book-nav::view-transition-group(book-cover) {
   transform: none;
 }
 
-/* ── התעוררות-הצומת ── כל כרטיס נושא נקודת-צומת על שפתו העליונה. הנקודה היא
-   שנדלקת (scale + צבע) כשהחוט „מגיע” אליה — כך שהאפקט העיקרי הוא *התעוררות
-   של צומת במסלול*, ולא עוד fade-up. הנקודה דקורטיבית (aria-hidden ברמת ה-
-   pseudo-element) ואינה משנה פריסה. */
-.situation-card {
-  position: relative;
-}
-.situation-card::before {
-  content: "";
-  position: absolute;
-  inset-block-start: -4px;
-  inset-inline-start: 1.35rem;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-border-strong);
-  transition:
-    transform var(--dur-ui) var(--ease-settle),
-    background-color var(--dur-ui) var(--ease-standard);
-}
-.motion-js .path-nodes .situation-card::before {
-  transform: scale(0);
-}
-.motion-js .path-nodes.is-visible .situation-card::before {
-  transform: scale(1);
-  /* הנקודה נדלקת מעט *אחרי* שהכרטיס הגיע — החוט מגיע, ואז הצומת נענה. */
-  transition-delay: calc(var(--i, 0) * 110ms + 220ms);
-}
-/* הצומת שנבחר — ההדגשה הברורה ביותר במסלול. */
-.situation-card[data-selected] {
-  border-color: color-mix(in oklab, var(--color-sage-ink) 55%, transparent);
-  background: color-mix(in oklab, var(--color-sage) 12%, var(--color-surface));
-}
-.situation-card[data-selected]::before {
-  background: var(--color-brand);
-  transform: scale(1.45);
-}
+/* ── התעוררות-הצומת ──
+   נקודת-הצומת שישבה על שפת כל כרטיס (‎.situation-card::before‎) ומצב-הבחירה
+   (‎[data-selected]‎) הוסרו יחד עם כרום-הכרטיס: בטיפול העריכתי החדש השורות
+   מופרדות בקו-שיער, ונקודה צפה על שפה שאינה קיימת עוד נקראה כתקלה. הבחירה
+   עצמה מעולם לא הייתה מצב-ביניים בעמוד הבית — לחיצה = מעבר לעמוד. */
 
 /* ── הסמן שנוסע אל הצומת הנבחר ──
    נמצא בשכבה נפרדת מעל הרשת, ונע ב-transform בלבד (compositor). מיקומו מגיע
@@ -6408,53 +6480,204 @@ html.vt-book-nav::view-transition-group(book-cover) {
     color var(--motion-panel) var(--ease-standard);
 }
 
-/* ── חמש נקודות-הפתיחה: המסלול והשערים ───────────────────────────────────
-   שתי קבוצות מובחנות ויזואלית, כי הן באמת שונות: שלוש תחנות ממוספרות
-   במחזור, ושני שערים שאינם חלק ממנו. המבקר רואה כאן את אותו מודל שיפגוש
-   בעמוד-המסע, ולכן „תחנה 3” אינה סותרת דבר. */
-.path-groups {
+/* ── חמש נקודות-הפתיחה ───────────────────────────────────────────────────
+   טיפול עריכתי קל: שורות מופרדות בקו-שיער, לא חמישה כרטיסי-SaaS. אין רדיוס
+   כבד, אין צל, אין הרמה בריחוף. מה שנשאר הוא מה שהמבקר צריך: כותרת-מצב חזקה,
+   שורת-הסבר, וסימן-כיוון קטן שמופיע ברמז — כלומר עדיין ברור מיד שאלה חמש
+   בחירות לחיצות.
+
+   ההבחנה 3+2 נשארת גלויה בלי להיאמר: שתי שורות, מופרדות במרווח ובקו אחד. */
+.path-rows {
   display: grid;
-  gap: clamp(0.9rem, 2vw, 1.3rem);
+  gap: 0;
   margin-top: 1.25rem;
 }
-.path-group__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.2rem 0.6rem;
-  margin-bottom: 0.55rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--color-border);
-}
-.path-group__label {
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-foreground);
-}
-.path-group__hint {
-  font-size: 13.5px;
-  color: var(--color-foreground-muted);
-}
-.path-group__list {
+.path-row {
   display: grid;
-  gap: 0.6rem;
+  gap: 0;
   grid-template-columns: 1fr;
 }
-/* כרטיס קומפקטי: הכותרת והשורה נשארות, הריפוד יורד. */
-.path-group__list .situation-card {
-  padding: 0.85rem 1rem;
+.path-row[data-kind="gate"] {
+  margin-top: clamp(0.9rem, 2vw, 1.4rem);
+  padding-top: clamp(0.9rem, 2vw, 1.4rem);
+  border-top: 1px solid var(--color-border);
+}
+.situation-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 44px;
+  padding: 0.85rem 0.25rem;
+  border-block-end: 1px solid var(--color-border);
+  text-align: start;
+  transition:
+    background-color var(--dur-ui) var(--ease-standard),
+    border-color var(--dur-ui) var(--ease-standard);
+}
+.path-row > li:last-child .situation-card {
+  border-block-end: 0;
+}
+.situation-card:hover {
+  background: color-mix(in oklab, var(--color-surface-muted) 70%, transparent);
+  border-block-end-color: var(--color-border-strong);
+}
+.situation-card:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.situation-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-foreground);
+}
+/* הסימן נשאר גלוי גם במנוחה (בעוצמה נמוכה): במגע אין ריחוף, ובלעדיו חמש
+   השורות עלולות להיקרא ככותרות ולא כבחירות. בריחוף/פוקוס הוא מתחזק וזז. */
+.situation-card__cue {
+  width: 15px;
+  height: 15px;
+  color: var(--color-brand);
+  opacity: 0.5;
+  transition:
+    opacity var(--dur-ui) var(--ease-standard),
+    transform var(--dur-ui) var(--ease-settle);
+}
+.situation-card:hover .situation-card__cue,
+.situation-card:focus-visible .situation-card__cue {
+  opacity: 1;
+  transform: translateX(-3px);
+}
+.situation-card__sub {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--color-foreground-muted);
+  text-wrap: pretty;
 }
 @media (min-width: 640px) {
-  .path-group__list .situation-card { padding: 1rem 1.15rem; }
+  .path-row[data-kind="station"] {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 clamp(1rem, 2.5vw, 2rem);
+  }
+  .path-row[data-kind="gate"] {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 clamp(1rem, 2.5vw, 2rem);
+  }
+  .situation-card {
+    height: 100%;
+    padding: 0.9rem 0.1rem;
+  }
+  /* בשורה רב-טורית קו-השיער הוא קו-בסיס אחד לכל השורה. */
+  .path-row > li:last-child .situation-card {
+    border-block-end: 1px solid var(--color-border);
+  }
+  .situation-card__title {
+    font-size: 18px;
+  }
 }
-@media (min-width: 640px) {
-  .path-group__list[data-kind="station"] { grid-template-columns: repeat(3, 1fr); }
-  .path-group__list[data-kind="gate"] { grid-template-columns: repeat(2, 1fr); }
+
+/* ── רגע-המחבר: אדם, לא לוח-מידע ──────────────────────────────────────────
+   אין מיכל ואין מסגרת. דיוקן + טיפוגרפיה + קו-הפרדה אחד. בדסקטופ הדיוקן הוא
+   טור עריכתי; במובייל הוא יורד לשורת-החתימה בגודל קטן, כדי שהפנים יישארו
+   נוכחות בלי בלוק-ביוגרפיה. */
+.author-note {
+  display: grid;
+  gap: 1.25rem;
 }
-/* השערים שקטים במכוון: הם אינם המסלול. */
-.path-group__list[data-kind="gate"] .situation-card {
-  background: var(--color-surface-muted);
+.author-note__portrait {
+  display: none;
+}
+.author-note__img {
+  display: block;
+  width: 100%;
+  border-radius: 1rem;
+  object-fit: cover;
+  aspect-ratio: 4 / 5;
+}
+.author-note__portrait-inline {
+  display: block;
+  width: 56px;
+  flex: 0 0 auto;
+}
+.author-note__img--inline {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  aspect-ratio: 1;
+  object-position: center 22%;
+}
+.author-note__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-foreground);
+  text-wrap: balance;
+}
+.author-note__body {
+  margin-top: 0.75rem;
+  font-size: clamp(1.02rem, 1.4vw, 1.13rem);
+  line-height: 1.72;
+  color: color-mix(in oklab, var(--color-foreground) 92%, transparent);
+  text-wrap: pretty;
+}
+.author-note__byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin-top: 1.15rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-border);
+}
+.author-note__name {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-foreground);
+}
+.author-note__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  margin-inline-start: auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-brand-hover);
+  text-underline-offset: 4px;
+}
+.author-note__link:hover {
+  text-decoration: underline;
+}
+.author-note__link:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.author-note__boundary {
+  margin-top: 0.7rem;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--color-foreground-muted);
+}
+@media (min-width: 768px) {
+  .author-note {
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.75rem, 4vw, 2.75rem);
+  }
+  .author-note__portrait {
+    display: block;
+  }
+  .author-note__portrait-inline {
+    display: none;
+  }
 }
 
 /* ── הדלת אל השכבה העמוקה ────────────────────────────────────────────────

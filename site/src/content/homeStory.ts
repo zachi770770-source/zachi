@@ -1,4 +1,4 @@
-import { preview } from "@/content/book";
+import { outcomes, preview } from "@/content/book";
 import { authorContent } from "@/content/author";
 import { canonicalExcerpt } from "@/content/sample";
 
@@ -74,10 +74,24 @@ export const whyTheBook = {
   },
   book: {
     label: "בספר",
-    /** תוכן-העניינים המאושר (preview.tableOfContents) — הסדר הוא העניין. */
-    lines: preview.tableOfContents.slice(1),
+    /**
+     * שלוש אמירות-תוצאה, מילה במילה מתוך `outcomes.items` המאושר — לא תוכן
+     * חדש ולא הבטחה חדשה. הן נבחרו כך שיענו על שלוש שאלות שונות ולא על אותה
+     * שאלה שלוש פעמים: מה מתבהר (‎[5]‎), מה לומדים לזהות (‎[0]‎), ומה אפשר
+     * להתחיל לעשות אחרת (‎[4]‎).
+     *
+     * מה ירד כאן ולמה: קודם עמדה במקום הזה רשימת תוכן-העניינים (ארבע שורות
+     * ממוספרות בתוך פאנל). היא ענתה על „מה יש בספר” — שאלת-מבנה — בזמן
+     * שהשאלה שנשאלת בדיוק בנקודה הזו בעמוד היא „מה זה ייתן לי”. תוכן-העניינים
+     * נשאר במלואו ב-`/book`, ומקושר מכאן בקישור-טקסט משני.
+     */
+    lines: [outcomes.items[5], outcomes.items[0], outcomes.items[4]],
     note: "אותו מסע לפי סדר, עם הכלים במקום שבו הם באמת נחוצים.",
   },
+  /** קישור-טקסט משני בלבד. אין כאן CTA מלא — הפעולה של העמוד היא הטעימה. */
+  linkLabel: "ראו מה יש בספר",
+  /** תוכן-העניינים המאושר נשאר זמין לבדיקות-הרגרסיה ולשימוש ב-/book. */
+  tableOfContents: preview.tableOfContents.slice(1),
 } as const;
 
 /**

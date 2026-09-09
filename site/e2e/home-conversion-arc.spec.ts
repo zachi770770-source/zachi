@@ -20,13 +20,15 @@ test.describe("home conversion arc", () => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     // הסדר הזה הוא הלב של שינוי-המבנה. קודם המבקר התבקש לסווג את עצמו (#path)
-    // *לפני* שראה מי כתב את הספר ולפני שנאמר לו מה הספר נותן. עכשיו עמוד השדרה
-    // הוא: רעיון → זיהוי → אמון → מה הספר נותן → טעימה → (ניווט אישי) → רכישה.
+    // *לפני* שראה מי כתב את הספר ולפני שנאמר לו מה הספר נותן. עמוד השדרה עכשיו:
+    // רעיון → זיהוי → מה הספר נותן → אמון → טעימה → (ניווט אישי) → רכישה.
+    // „מה זה ייתן לי” עלה לפני סיפור-המחבר: זו השאלה שנשאלת מיד אחרי הזיהוי,
+    // והאמון נדרש רק אחרי שיש סיבה להקשיב.
     const order = [
       "main > section:first-of-type", // Hero — הרעיון
       "[aria-labelledby='recognition-heading']", // זיהוי
-      "[aria-labelledby='author-note-heading']", // אמון — מי כתב
-      "[aria-labelledby='why-book-heading']", // מה הספר נותן
+      "[aria-labelledby='why-book-heading']", // מה הספר נותן — השאלה שבאה מיד אחרי הזיהוי
+      "[aria-labelledby='author-note-heading']", // ואז: מי כתב, ולמה
       "#sample-bridge", // טעימה
       "#path", // ניווט אישי, אחרי הטיעון ולא לפניו
       "#get-the-book", // רכישה
@@ -65,10 +67,13 @@ test.describe("home conversion arc", () => {
     await expect(why.getByText(whyTheBook.site.label, { exact: true })).toBeVisible();
     await expect(why.getByText(whyTheBook.book.label, { exact: true })).toBeVisible();
     await expect(why.getByText(whyTheBook.site.line)).toBeVisible();
-    await expect(why.locator("ol > li")).toHaveCount(whyTheBook.book.lines.length);
+    // הרשימה עברה מ-`ol` ממוספר (תוכן-עניינים) ל-`ul` של אמירות-תוצאה: המספור
+    // אמר „ארבעה שלבים במוצר”, והשאלה כאן היא „מה זה ייתן לי”. אין מספור.
+    await expect(why.locator("ul > li")).toHaveCount(whyTheBook.book.lines.length);
+    await expect(why.locator("ol")).toHaveCount(0);
     // הא-סימטריה היא הטיעון: האתר תופס שורה, הספר תופס רצף. אם צד-האתר יגדל
-    // חזרה לרשימה משלו, ההשוואה שוב תיראה כשני דברים שקולים.
-    await expect(why.locator("ul")).toHaveCount(0);
+    // לרשימה משלו, ההשוואה שוב תיראה כשני דברים שקולים.
+    await expect(why.locator("ul")).toHaveCount(1);
   });
 
   test("the author is a reason to trust, and the boundary line survives", async ({ page }) => {
