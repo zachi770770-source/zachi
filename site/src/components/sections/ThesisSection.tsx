@@ -36,7 +36,7 @@ export function ThesisSection() {
         <div className="absolute -bottom-32 start-[-8%] h-[560px] w-[560px] rounded-full bg-secondary/[0.10] blur-[130px]" />
       </div>
 
-      <div className="py-24 sm:py-32">
+      <div className="py-16 sm:py-24">
         <Container>
           {/* חשיפה אחת לכל הסצנה המרכזית — רעש החיפוש, העצירה והתובנה,
               וההבטחה — במקום ארבע חשיפות נפרדות. `thesis-scene` נושא את

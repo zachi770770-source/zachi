@@ -59,9 +59,6 @@ async function dismissCookies(page: Page) {
   }
 }
 
-const compass = (page: Page) =>
-  page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
-
 /** מפרק href לבסיס-מסלול פנימי (בלי origin/hash/query), או null לחיצוני. */
 function internalPath(href: string, origin: string): string | null {
   let u: URL;
@@ -148,35 +145,30 @@ test.describe("Home, no dead links or ghost buttons anywhere on the page", () =>
   });
 });
 
-test.describe("Assistant bubble, the tool link and the Amazon link both work", () => {
-  test("desktop: tool link inside the drawer navigates to /book and reveals that tool; Amazon link is a real external buy", async ({
+test.describe("Guidance result: the tool link and the Amazon link both work", () => {
+  test("the tool link navigates to /book and reveals that tool; the Amazon link is a real external buy", async ({
     page,
   }) => {
+    // המגירה הצפה הוסרה. הטענות עצמן — קישור-כלי אמיתי אל העוגן הנכון, ואמזון
+    // כקישור חיצוני תקין — נשמרו במלואן ונבדקות על המנוע במקומו הקבוע.
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 1440, height: 900 });
-    // תחנה ידועה מהנתיב → הבועה פותחת ישר בדילמה.
-    await page.goto("/before-relationship", { waitUntil: "networkidle" });
+    await page.goto("/compass?station=dating", { waitUntil: "networkidle" });
     await dismissCookies(page);
-    await expect(compass(page)).toHaveCSS("opacity", "1", { timeout: 4000 });
-    await compass(page).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByRole("radio", { name: /שחוק.* מאפליקציות ומדייטים/ }).click();
-    await expect(dialog.getByRole("article")).toBeVisible();
 
-    // האמזון שבתוך התוצאה — קישור חיצוני אמיתי (href/target/rel), עוד לפני הניווט.
-    const amazon = dialog.locator(`a[href*="amazon.com/dp/${AMAZON_ASIN}"]`).first();
+    const scope = page.locator("main");
+    await scope.getByRole("radio", { name: /שחוק.* מאפליקציות ומדייטים/ }).click();
+    await expect(scope.getByRole("article")).toBeVisible();
+
+    const amazon = scope.locator(`a[href*="amazon.com/dp/${AMAZON_ASIN}"]`).first();
     await expect(amazon).toHaveAttribute("target", "_blank");
     await expect(amazon).toHaveAttribute("rel", /noopener/);
 
-    // קישור-הכלי (הכותרת המודגשת) → /book#tool-<id>. הכלי של דילמה זו: boundary-ladder
-    // ‏(„קו אדום מול גמישות”).
-    const toolLink = dialog.getByRole("link", { name: /קו אדום מול גמישות/ }).first();
+    const toolLink = scope.getByRole("link", { name: /קו אדום מול גמישות/ }).first();
     await expect(toolLink).toHaveAttribute("href", /\/book#tool-boundary-ladder$/);
     await toolLink.click();
 
-    // מגיעים ל-/book, ה-drawer נסגר (ה-Overlay לא נשאר), והכלי מודגש/גלוי.
     await page.waitForURL(/\/book(#|$)/);
-    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.locator("#tool-boundary-ladder")).toBeVisible();
   });
 });

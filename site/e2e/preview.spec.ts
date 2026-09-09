@@ -58,27 +58,40 @@ test("/preview has a clear transition to the compass and buys via Amazon (no loc
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
 });
 
-test("/preview mobile: sticky waitlist CTA appears after scroll, hides at the form", async ({
-  page,
+test("/preview mobile: אין שום בקרה צפה — הקריאה מחזיקה את המסך לבדה", async ({
+  browser,
 }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  // הבדיקה התהפכה במכוון. קודם היא שמרה על בר-CTA דביק בתוך עמוד-הקריאה;
+  // הבר הוסר, יחד עם בועת-המצפן, מפני שעמוד-הטעימה הוא חוויית קריאה שקטה
+  // וכל שכבה שמרחפת מעליה מתחרה בה. הטענה החדשה חזקה יותר: *אף* אלמנט
+  // fixed/sticky אינו מרחף מעל התוכן (למעט ההדר), בשום מיקום-גלילה.
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/preview", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
-  const sticky = page.locator('.md\\:hidden a[href="#join"]');
-  // בראש העמוד — מוסתר (מחליק מטה).
-  await expect(sticky).not.toBeInViewport();
-
-  // גלילה חושפת גם את ה-CTA וגם את באנר העוגיות. ה-CTA מוסתר בכוונה כל עוד
-  // הבאנר פתוח (כדי לא לכסותו); אחרי אישור העוגיות — הוא מופיע. גוללים אל תוך
-  // אזור הקריאה (מעבר לסף החשיפה ≈0.7 מסך) אך לפני טופס-הסיום (#join),
-  // שבעמוד הקריאה האחיד יושב גבוה יותר מבעבר.
-  await page.mouse.wheel(0, 900);
-  await page.getByRole("button", { name: "אישור הכל" }).click().catch(() => {});
-  await expect(sticky).toBeInViewport();
-
-  // בטופס הסיום — נעלם כדי לא לכסות את הטופס/הפוטר.
-  await page.locator("#join").scrollIntoViewIfNeeded();
-  await expect(sticky).not.toBeInViewport();
+  for (const frac of [0, 0.35, 0.7, 1]) {
+    await page.evaluate((f) => {
+      document.documentElement.style.scrollBehavior = "auto";
+      window.scrollTo(0, document.body.scrollHeight * f);
+    }, frac);
+    await page.waitForTimeout(250);
+    const floats = await page.evaluate(() =>
+      [...document.querySelectorAll("body *")]
+        .filter((el) => {
+          const cs = getComputedStyle(el);
+          if (cs.position !== "fixed" && cs.position !== "sticky") return false;
+          if (cs.visibility === "hidden" || cs.opacity === "0") return false;
+          const r = el.getBoundingClientRect();
+          if (r.width < 40 || r.height < 20) return false;
+          return !el.closest("header");
+        })
+        .map((el) => el.tagName + "." + String(el.className).slice(0, 40)),
+    );
+    expect(floats, `floating layers at ${frac * 100}% of /preview`).toEqual([]);
+  }
+  await ctx.close();
 });
 
 test("/preview closing: Amazon is the primary and only purchase action (no waitlist, no form)", async ({ page }) => {

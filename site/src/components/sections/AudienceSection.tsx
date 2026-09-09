@@ -12,7 +12,7 @@ export function AudienceSection() {
   return (
     <section
       id="audience"
-      className="scroll-mt-20 py-24 sm:py-32"
+      className="scroll-mt-20 py-16 sm:py-20"
       aria-labelledby="audience-heading"
     >
       <Container>

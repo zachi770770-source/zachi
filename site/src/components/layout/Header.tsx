@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { siteConfig } from "@/config/site";
 import { isEnglishPath } from "@/lib/language";
 import { Button } from "@/components/ui/button";
+import { HeaderCtaScope } from "@/components/layout/HeaderCtaScope";
 import { MainNav } from "@/components/layout/MainNav";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
@@ -34,6 +35,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+      {/* קובע `data-past-hero` על ה-root — ראו HeaderCtaScope. */}
+      <HeaderCtaScope />
       <div
         className="container-page flex h-16 items-center justify-between gap-1.5 sm:h-[76px] sm:gap-4"
         {...(english ? { lang: "en", dir: "ltr" } : {})}
@@ -69,7 +72,7 @@ export function Header() {
 
           {/* גובה 44px (h-11) — יעד-מגע תקין במובייל, תואם את כפתור ההמבורגר
               שלצדו, ונשאר בתוך גובה ההדר (h-16). הרוחב נשאר קומפקטי (px-3). */}
-          <Button asChild size="sm" className="h-11 px-2 text-[13px]">
+          <Button asChild size="sm" className="header-buy h-11 px-2 text-[13px]">
             {english ? (
               <a href={edition.url} target="_blank" rel="noopener noreferrer">
                 {edition.buyLabel}

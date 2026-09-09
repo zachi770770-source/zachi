@@ -45,7 +45,11 @@ test("desktop top nav: every item is a real page and none uses a hash fragment",
   // מיפוי היעדים הנדרש (לפי התוויות הקיימות).
   expect(map["על המחבר"]).toBe("/author");
   expect(map["הספר"]).toBe("/book");
-  expect(map["מה הספר אומר?"]).toBe("/compass");
+  // ‎/compass ירד מהניווט הראשי במכוון: פריט-תפריט ראשי מצהיר „זה אחד
+  // מהדברים שהאתר עושה”, וכשאחד מהם שאלון — המסר הוא שהאתר מאבחן קשרים.
+  // הכלי נשאר בפוטר ובדלת מסומנת אחת בגוף העמוד.
+  expect(Object.keys(map)).not.toContain("מה הספר אומר?");
+  expect(Object.values(map)).not.toContain("/compass");
   expect(map["טעימה"]).toBe("/preview");
   expect(map["שאלות נפוצות"]).toBe("/faq");
 });

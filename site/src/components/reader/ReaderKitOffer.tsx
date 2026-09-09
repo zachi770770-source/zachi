@@ -36,7 +36,11 @@ export function ReaderKitOffer({
         {readerKitOffer.lead}
       </p>
 
-      {/* מה כלול — לפי צורך, לא רשימת קבצים. */}
+      {/* מה כלול — לפי צורך, לא רשימת קבצים.
+          ב-/book (variant="link") הרשימה המלאה אינה מוצגת: שם זה בלוק-ערך
+          אחד לפני כרטיס-הרכישה, לא עמוד-מוצר שני. הפירוט המלא חי ב-/reader
+          וזמין בקישור — כלומר תוכן לא הוסר, רק יצא ממסלול-הרכישה. */}
+      {variant === "full" ? (
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {readerKitGroups.map((group) => (
           <li key={group.id} className="rounded-2xl border border-border bg-surface p-4">
@@ -56,6 +60,7 @@ export function ReaderKitOffer({
           </li>
         ))}
       </ul>
+      ) : null}
 
       <p className="mt-6 text-[15px] font-semibold text-foreground">
         {readerKitOffer.includedLine}

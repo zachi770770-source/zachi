@@ -47,7 +47,7 @@ export function JourneyPosition({ journeyId }: { journeyId: JourneyId }) {
     <div
       className="journey-progress"
       role="group"
-      aria-label={`מיקום במסע: תחנה ${flow.station} מתוך ${flow.total}`}
+      aria-label={`מיקום במסע: ${flow.steps.find((x) => x.state === "current")?.label ?? ""}, מתוך המסלול`}
     >
       <ol className="journey-progress__track">
         {flow.steps.map((step, i) => (
@@ -70,9 +70,12 @@ export function JourneyPosition({ journeyId }: { journeyId: JourneyId }) {
           </li>
         ))}
       </ol>
-      <span className="journey-progress__caption">
-        תחנה {flow.station} מתוך {flow.total}
-      </span>
+      {/* המונה המספרי („תחנה 3 מתוך 3”) הוסר.
+          עמוד הבית מציע חמש נקודות-פתיחה; מבקר שבחר אחת מהן ונחת על „3 מתוך 3”
+          קרא סתירה — הוא לא ספר שלוש. הרצועה השמית כבר אומרת בדיוק את אותו
+          דבר („לפני קשר · מתחילים קשר · **בתוך קשר**”) בלי חשבון, והיא עובדת
+          גם בשערים, שאין להם מספר כלל. */}
+      <span className="journey-progress__caption">{flow.routeLabel}</span>
     </div>
   );
 }

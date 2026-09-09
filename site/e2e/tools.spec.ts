@@ -61,15 +61,10 @@ test("/book deep-link (#tool-…) opens the matching tool and moves focus to it"
 
 test("ask result links directly to a real tool card in /book", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/", { waitUntil: "networkidle" });
+  // הגלולה הצפה הוסרה; המנוע נבדק במקומו הקבוע. הטענה עצמה לא השתנתה.
+  await page.goto("/compass", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
-  // פותחים את חלונית „שאל את הספר” מהגלולה הצפה (מקטע ה-#where הוסר בקיצור העמוד).
-  const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
-  await page.mouse.wheel(0, 200);
-  await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
-  await pill.click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
+  const dialog = page.locator("main");
 
   // תחנה → דילמה → תוצאה. „לפני קשר” + „מתקשה להתחיל” (בלי שאלת-הקשר)
   // ממופה לכלי fact-story-action.

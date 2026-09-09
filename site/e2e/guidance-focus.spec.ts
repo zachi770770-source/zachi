@@ -69,15 +69,11 @@ test.describe("guidance focus — guided compass", () => {
 });
 
 test.describe("guidance focus — embedded engines keep their own single h1", () => {
-  test("home page keeps exactly one h1 even when the inline guided engine reaches an answer", async ({ page }) => {
+  test("home page keeps exactly one h1, and no engine is embedded in it any more", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    // open the inline guided conversation from a situation starter, then walk to an answer.
-    const starter = page.getByRole("link", { name: /לפני קשר|זוגיות|פרידה|בתוך/ }).first();
-    if (await starter.count()) {
-      await starter.click().catch(() => {});
-      await walkToResult(page).catch(() => {});
-    }
-    // the embedded engine must NOT inject a second page h1 (AnswerView h1 is gated to page surfaces).
+    // אין יותר מנוע מוטמע בעמוד הבית — ולכן גם אין מסלול שבו הוא מזריק h1 שני.
     await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("section.answer-view")).toHaveCount(0);
+    await expect(page.getByRole("radio")).toHaveCount(0);
   });
 });

@@ -9,7 +9,7 @@ export function OutcomesSection() {
   return (
     <section
       id="outcomes"
-      className="scroll-mt-20 bg-surface-muted py-24 sm:py-32"
+      className="scroll-mt-20 bg-surface-muted py-16 sm:py-20"
       aria-labelledby="outcomes-heading"
     >
       <Container>

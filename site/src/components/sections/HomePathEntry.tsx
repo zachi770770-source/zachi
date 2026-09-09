@@ -1,471 +1,89 @@
-"use client";
-
-import * as React from "react";
-import { flushSync } from "react-dom";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Compass, MessageCircle, PenLine } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
-import { homePaths, homePathUi, type HomePathId } from "@/content/homePaths";
-import type { AskStationId } from "@/content/askRoute";
-import { trackEvent } from "@/lib/analytics";
-import { withViewTransition } from "@/lib/motion/viewTransition";
-
-// טעינה עצלה של רגע-ההקשבה: קוד השיחה (+ askRoute.ts) נטען כ-chunk נפרד רק כשמבקר
-// מתחיל שיחה — לא בטעינת עמוד הבית עצמו, כדי שה-Hero לא ישלם על ה-JS של השיחה.
-const HomeConversation = React.lazy(() =>
-  import("@/components/sections/HomeConversation").then((m) => ({
-    default: m.HomeConversation,
-  })),
-);
-
-// Focus Mode — חוויית „איפה זה פוגש אותך עכשיו?”. גם היא chunk נפרד: התוכן
-// (focusMode.ts, ודרכו methods.ts) נטען רק כשמצב-מוכר נבחר, לא בטעינת העמוד.
-const FocusMode = React.lazy(() =>
-  import("@/components/focus/FocusMode").then((m) => ({ default: m.FocusMode })),
-);
+import { homePaths, homePathUi, type HomePathKind } from "@/content/homePaths";
 
 /**
- * רגע-ההקשבה של „איפה אתם נמצאים עכשיו?” — האי-אינטראקטיבי של HomePathSelector.
+ * חמש נקודות-הפתיחה של „איפה אתם נמצאים עכשיו?” — **ניווט, ולא הערכה עצמית**.
  *
- * המקטע מורכב מחדש כשיחה, לא כשאלון: קודם *תיבת-כתיבה חופשית* גדולה ורגועה
- * („ספרו לי מה קורה אצלכם…”) כנקודת-הכניסה הראשית, ורק מתחתיה — כחלופה שקטה —
- * ארבעה מצבים מוכרים כפותחי-שיחה (בלי חיצי-ניווט, בלי „מסלול/צמתים”, בלי בקרות
- * שנראות כמו טופס).
+ * מה היה כאן קודם ולמה זה ירד:
  *
- * שכבת בסיס (SSR / ללא-JS / SEO): התיבה החופשית והכרטיסים נשארים `<a>` אמיתיים
- * — התיבה אל ‎/compass, הכרטיסים אל עמודי-המסע. עם JS זהו שיפור-הדרגתי: לחיצה
- * פותחת את מנוע „שאל את הספר” *במקום*, בלי לנווט. אין כאן ארכיטקטורה חדשה —
- * אותו מנוע דטרמיניסטי + השיחה החיה (HomeConversation).
+ *   1. תיבה שנראתה כמו שדה-כתיבה („ספרו לי מה קורה אצלכם…”) ובפועל הייתה
+ *      `<a href="/compass">`. היא הזמינה להקליד והובילה לשאלון. זה אפורדנס
+ *      שקרי, והוא ירד — לא הוסתר מאחורי דגל.
+ *   2. „זיהוי במקום”: לחיצה ראשונה בחרה, לחיצה שנייה פתחה את Focus Mode.
+ *      כלומר שלושה צעדים ושישה פקדים גלויים לפני שהמבקר בכלל ראה את הספר.
+ *      עכשיו לחיצה אחת = מעבר לעמוד-המסע. זהו.
+ *   3. Focus Mode והשיחה (HomeConversation) — יצאו מהזרימה הראשית לגמרי.
+ *      Focus Mode נכנס בבחירה מפורשת בלבד (ראו `DeeperEntry`).
  *
- * הבועה הצפה: כל עוד המקטע נמצא באמת בתוך המסך (IntersectionObserver → הסמן
- * `data-path-in-view`), הבועה „שאל את הספר” מוסתרת במובייל — כדי שלא יהיו שתי
- * הזמנות מתחרות לדבר עם הספר באותו מסך. כשגוללים משם, היא חוזרת כרגיל.
+ * המקטע הוא עכשיו רכיב-שרת: אין state, אין rAF, אין מדידות, אין hydration.
+ * חמישה `<a>` אמיתיים — עובדים ללא JS, נסרקים, ומהירים.
+ *
+ * המודל מוצג כפי שהוא באמת קיים ב-`journeyFlow.ts`: שלוש תחנות במחזור ושני
+ * שערי-מעבר שאינם ממוספרים. מבקר שבחר כאן ונחת על „לפני קשר · מתחילים קשר ·
+ * בתוך קשר” כבר ראה את אותו מודל — אין עוד סתירה בין „ארבעה כרטיסים” ל„תחנה
+ * 3 מתוך 3”.
  */
 
-type Active =
-  | { mode: "focus"; situation: HomePathId; station: AskStationId }
-  | { mode: "station"; station: AskStationId }
-  | { mode: "open" }
-  | null;
-
-/**
- * „זיהוי במקום” — המצב שנבחר *נשאר על המסך*, מסומן, והמסלול נע אליו.
- *
- * לפני כן לחיצה על כרטיס החליפה מיד את כל הרשת ב-Focus Mode: החלפת-תוכן חדה
- * שבה ארבע האפשרויות נעלמות ברגע. עכשיו יש שלב-ביניים אחד ושקט — הכרטיס נדלק,
- * הסמן נוסע אליו, ומתחת נפתחת תשובת-זיהוי קצרה מהתוכן המאושר של אותו מצב
- * (`heading` + מוקד אחד) ואז ה-CTA אל החוויה העמוקה (Focus Mode) שכבר קיימת.
- * זו אינה שאלון ואינו טופס: אין שדות, אין שלבים, ואפשר לבחור מצב אחר בלחיצה.
- */
-interface Selected {
-  id: HomePathId;
-  station: AskStationId;
-  index: number;
-}
-
-/** לחיצה „רגילה” בלבד נחטפת; Cmd/Ctrl/Shift/Alt או לחצן-אמצע ממשיכים כרגיל. */
-function isPlainClick(e: React.MouseEvent): boolean {
-  return (
-    e.button === 0 &&
-    !e.defaultPrevented &&
-    !e.metaKey &&
-    !e.ctrlKey &&
-    !e.shiftKey &&
-    !e.altKey
-  );
-}
-
-export function HomePathEntry({
-  freeTextEnabled = false,
+function PathGroup({
+  kind,
+  label,
+  hint,
 }: {
-  /**
-   * מצב-התצוגה (נקבע בשרת ב-`HomePathSelector`): כשהכתיבה-החופשית חיה, התיבה
-   * הראשית היא באמת שדה-כתיבה — סמן מהבהב, אייקון עֵט, ורמז „אפשר לכתוב…”.
-   * כשברירת המחדל פעילה (המצפן המודרך בלבד), לחיצה פותחת שיחה מודרכת קצרה ולא
-   * שדה-כתיבה, ולכן האפורדנס הופך כן: אייקון מצפן (זהות „שאל את הספר”), בלי סמן-
-   * כתיבה, ורמז שמתאר את המהלך המודרך — כדי לא להבטיח הקלדה שאינה מתקיימת עדיין.
-   * ברירת מחדל `false` = ההתנהגות בפרודקשן.
-   */
-  freeTextEnabled?: boolean;
+  kind: HomePathKind;
+  label: string;
+  hint: string;
 }) {
-  const [active, setActive] = React.useState<Active>(null);
-  // המצב שנבחר „במקום” — לפני המעבר לחוויה העמוקה.
-  const [selected, setSelected] = React.useState<Selected | null>(null);
-  // המצב שנלחץ — כותרתו נושאת `view-transition-name: fm-title` כדי שתתמזג
-  // (morph) מהכרטיס אל כותרת-הבמה של Focus Mode, במקום „להיעלם”.
-  const [morphId, setMorphId] = React.useState<HomePathId | null>(null);
-  const regionRef = React.useRef<HTMLDivElement>(null);
-  const gridRef = React.useRef<HTMLUListElement>(null);
-  const wasActive = React.useRef(false);
-
-  // ניהול פוקוס נגיש: בפתיחה מעבירים פוקוס לאזור-השיחה; בחזרה — לכרטיס הראשון.
-  React.useEffect(() => {
-    if (active) {
-      const el = regionRef.current;
-      if (el) {
-        el.focus({ preventScroll: true });
-        el.scrollIntoView({ block: "nearest", behavior: "auto" });
-      }
-      wasActive.current = true;
-    } else if (wasActive.current) {
-      wasActive.current = false;
-      gridRef.current?.querySelector<HTMLAnchorElement>("a.situation-card")?.focus();
-    }
-  }, [active]);
-
-  // נוכחות-המקטע-במסך: מסמן `data-path-in-view` על ה-<body> כל עוד `#path` באמת
-  // בתוך המסך, כדי שכלל-CSS יסתיר את הבועה הצפה במובייל (אין שתי הזמנות מתחרות).
-  //
-  // ── למה גאומטריה ב-rAF ולא IntersectionObserver ─────────────────────────
-  // קודם הסמן נגזר מ-IO והורנדר כאלמנט React מותנה. שרשרת-העדכון הייתה:
-  // גלילה → callback של IO (מקובץ, לא מובטח באותו פריים) → setState → רינדור
-  // → commit → רק אז הסמן יורד מה-DOM והבועה נעשית זכאית להופיע. בגלילה
-  // ארוכה המקטע באמת חוצה את המסך בדרך, הסמן נדלק לגיטימית, וכיבויו תלוי
-  // בכל השרשרת הזו — זנב שנמדד במאות מ״ש ויותר תחת עומס, שבו הבועה נשארה
-  // מוסתרת הרבה אחרי שהמשתמש כבר עזב את המקטע.
-  //
-  // עכשיו מקור-האמת הוא הגאומטריה עצמה, נקראת ב-rAF באותו פריים של הגלילה
-  // (אותה תבנית שכבר משמשת את `pastHero` במשגר), והכתיבה היא ל-DOM ישירות —
-  // בלי מסלול-רינדור של React. אין המתנה שרירותית ואין התנהגות ייעודית לסביבה:
-  // ברגע שהמקטע יצא מהמסך, הסמן יורד באותו פריים.
-  React.useEffect(() => {
-    const section = document.getElementById("path");
-    const body = document.body;
-    if (!section || !body) return;
-    let raf = 0;
-    const compute = () => {
-      raf = 0;
-      const vh = window.innerHeight || document.documentElement.clientHeight;
-      const r = section.getBoundingClientRect();
-      // אותו טווח-התבוננות של ה-IO הקודם (rootMargin: -15% למעלה, -20% למטה):
-      // המקטע נחשב „במסך” רק כשהוא חותך את הפס האמצעי.
-      const inBand = r.bottom > vh * 0.15 && r.top < vh * 0.8;
-      body.toggleAttribute("data-path-in-view", inBand);
-    };
-    const schedule = () => {
-      if (!raf) raf = window.requestAnimationFrame(compute);
-    };
-    compute(); // מצב התחלתי (שחזור מיקום-גלילה / deep-link)
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-    // גובה-המסמך יכול להשתנות בלי אירוע-גלילה (תמונות/גופנים שנטענים), ואז
-    // מיקום המקטע ביחס למסך משתנה — מחשבים גם על שינוי-גודל של המסמך.
-    const ro =
-      typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
-    ro?.observe(body);
-    return () => {
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      ro?.disconnect();
-      if (raf) window.cancelAnimationFrame(raf);
-      body.removeAttribute("data-path-in-view");
-    };
-  }, []);
-
-  // ── הסמן שנוסע אל הכרטיס הנבחר ─────────────────────────────────────────────
-  // הרשת משנה מספר-עמודות לפי רוחב (1 / 2 / 4), ולכן מיקום הכרטיס אינו ידוע
-  // מראש ונמדד. כל המדידות מתבצעות ב-rAF *אחד*: קודם כל הקריאות (getBoundingClientRect)
-  // ואז כל הכתיבות (CSS custom properties) — אין קריאה-אחרי-כתיבה, ולכן אין
-  // layout thrashing. התנועה עצמה היא transform בלבד.
-  //
-  // מירוצים: כל בחירה חדשה מבטלת rAF תלוי-ועומד לפני שהיא מתזמנת אחד חדש, וה-
-  // cleanup מבטל אותו גם בפירוק ומנתק את ה-ResizeObserver — כך שאף callback לא
-  // יורה אחרי unmount ולא נשאר סמן במיקום ישן.
-  React.useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    let raf = 0;
-    const measure = () => {
-      raf = 0;
-      if (selected === null) {
-        grid.removeAttribute("data-marker-ready");
-        return;
-      }
-      const card = grid.querySelector<HTMLElement>(`a[data-index="${selected.index}"]`);
-      if (!card) return;
-      // קריאות
-      const g = grid.getBoundingClientRect();
-      const c = card.getBoundingClientRect();
-      const x = c.left - g.left + c.width / 2;
-      const y = c.top - g.top;
-      const w = c.width;
-      // כתיבות
-      grid.style.setProperty("--marker-x", `${Math.round(x)}px`);
-      grid.style.setProperty("--marker-y", `${Math.round(y)}px`);
-      grid.style.setProperty("--marker-w", `${Math.round(w)}px`);
-      grid.setAttribute("data-marker-ready", "");
-    };
-    const schedule = () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      raf = window.requestAnimationFrame(measure);
-    };
-    schedule();
-    const ro =
-      typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
-    ro?.observe(grid);
-    window.addEventListener("resize", schedule, { passive: true });
-    return () => {
-      window.removeEventListener("resize", schedule);
-      ro?.disconnect();
-      if (raf) window.cancelAnimationFrame(raf);
-    };
-  }, [selected]);
-
-  // בחירה „במקום”: הכרטיס נדלק, הסמן נוסע אליו, ותשובת-הזיהוי נפתחת מתחת.
-  // בחירה חוזרת מהירה בין מצבים אינה יכולה להשאיר תוכן ישן: פאנל-הזיהוי מקבל
-  // `key={selected.id}` ולכן React מפרק ובונה אותו מחדש לכל מצב — אין מסלול שבו
-  // כותרת של מצב אחד מוצגת עם טקסט של אחר.
-  const selectState = (id: HomePathId, station: AskStationId, index: number) => {
-    setSelected((prev) => (prev?.id === id ? prev : { id, station, index }));
-  };
-
-  // בחירת מצב-מוכר פותחת קודם את Focus Mode (הבמה של „עובדה מול סיפור”), לא את
-  // השיחה עצמה. אירוע „שיחה נפתחה” (`ask_open_home`) נשמר למעבר לשיחה בפועל
-  // (`openStation` מתוך ה-CTA של Focus Mode), כדי שמשמעות המדד לא תשתנה.
-  const openFocus = (situation: HomePathId, station: AskStationId) => {
-    // מסמנים את הכרטיס הנלחץ לפני צילום-ה-VT, כדי שכותרתו תתמזג אל הבמה.
-    flushSync(() => setMorphId(situation));
-    withViewTransition(() =>
-      flushSync(() => setActive({ mode: "focus", situation, station })),
-    );
-  };
-  const openStation = (station: AskStationId) => {
-    trackEvent("ask_open_home", { via: "card", station });
-    withViewTransition(() => flushSync(() => setActive({ mode: "station", station })));
-  };
-  const openBroad = () => {
-    trackEvent("ask_open_home", { via: "composer" });
-    withViewTransition(() => flushSync(() => setActive({ mode: "open" })));
-  };
-  const closeActive = () => {
-    withViewTransition(() => flushSync(() => setActive(null)));
-  };
-
-
-  // Focus Mode — הבמה של „עובדה מול סיפור” למצב שנבחר. הרכיב נושא בעצמו את
-  // כפתור-החזרה ואת אזור-ה-region; ה-CTA „המשיכו עם הספר” ממשיך אל השיחה.
-  if (active?.mode === "focus") {
-    return (
-      <>
-        <span data-ask-inline-active hidden aria-hidden="true" />
-        {/* סמן ייעודי ל-Focus Mode (בנפרד מ-`data-ask-inline-active`, שמשמש גם
-            את השיחה): כל עוד הוא ב-DOM, כללי-CSS מכווצים את כותרת-המקטע ומסתירים
-            פקדים צפים כדי שהחוויה האימרסיבית לא תתחרה בשום שכבה. */}
-        <span data-fm-active hidden aria-hidden="true" />
-        <React.Suspense
-          fallback={
-            <p className="mt-6 py-10 text-center text-[15px] text-foreground-muted" role="status">
-              טוען…
-            </p>
-          }
-        >
-          <FocusMode
-            key={active.situation}
-            situationId={active.situation}
-            onContinue={() => openStation(active.station)}
-            onBack={closeActive}
-            onSwitch={(id) => {
-              const next = homePaths.find((x) => x.id === id);
-              if (next) openFocus(next.id, next.askStation);
-            }}
-          />
-        </React.Suspense>
-      </>
-    );
-  }
-
-  if (active) {
-    return (
-      <div className="home-ask mx-auto mt-6 max-w-2xl">
-        <span data-ask-inline-active hidden aria-hidden="true" />
-        <div className="mb-3 flex justify-center sm:justify-start">
-          <button
-            type="button"
-            onClick={closeActive}
-            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-            {homePathUi.backToPaths}
-          </button>
-        </div>
-        <div
-          ref={regionRef}
-          tabIndex={-1}
-          role="region"
-          aria-label={homePathUi.conversationLabel}
-          className="home-ask__region focus:outline-none"
-        >
-          <React.Suspense
-            fallback={
-              <p className="py-10 text-center text-[15px] text-foreground-muted" role="status">
-                טוען…
-              </p>
-            }
-          >
-            <HomeConversation station={active.mode === "station" ? active.station : undefined} />
-          </React.Suspense>
-        </div>
-      </div>
-    );
-  }
-
-  // המצב שנבחר, כאובייקט התוכן המלא שלו. נגזר ולא מוחזק כ-state נפרד, ולכן
-  // אינו יכול לצאת מסנכרון עם `selected`.
-  const selectedPath = selected
-    ? homePaths.find((p) => p.id === selected.id) ?? null
-    : null;
-
+  const paths = homePaths.filter((p) => p.kind === kind);
   return (
-    <>
-
-      {/* ── נקודת-הכניסה הראשית: תיבת-כתיבה חופשית ── גדולה, רגועה, וברור שאפשר
-          להקליד בה (סמן מהבהב + כיתוב-placeholder + אייקון עֵט). אפורדנס אמיתי:
-          לחיצה/פוקוס פותחים את השיחה הרחבה במקום; בלי JS — קישור אל ‎/compass.
-          לא כפתור-CTA כהה: זו האינטראקציה החזקה במקטע, אך שקטה. */}
-      <div className="path-composer reveal mx-auto mt-6 max-w-2xl">
-        <Link
-          href="/compass"
-          aria-label={homePathUi.composerAriaLabel}
-          onClick={(e) => {
-            if (!isPlainClick(e)) return;
-            e.preventDefault();
-            openBroad();
-          }}
-          className="home-composer group flex w-full items-center gap-3 rounded-2xl border border-border-strong bg-surface px-5 py-4 text-start shadow-sm transition-[border-color,box-shadow] hover:border-secondary/35 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-6 sm:py-5"
-        >
-          {/* סמן-הכתיבה המהבהב הוא „אפשר להקליד כאן” — נכון רק כשהכתיבה-החופשית
-              חיה. במצב המודרך התיבה פותחת שיחה מודרכת, ולכן הסמן אינו מוצג כדי
-              לא להבטיח הקלדה. */}
-          {freeTextEnabled ? (
-            <span aria-hidden="true" className="home-composer__caret" />
-          ) : null}
-          <span className="min-w-0 flex-1 text-[16.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[18px]">
-            {homePathUi.composerLead}
-          </span>
-          {/* אייקון: עֵט (כתיבה) כשהכתיבה-החופשית חיה; אחרת מצפן — זהות „שאל את
-              הספר” העקבית עם ה-CompassLauncher ועם מקטע התחנות. */}
-          <span
-            aria-hidden="true"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground sm:h-10 sm:w-10"
-          >
-            {freeTextEnabled ? (
-              <PenLine className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-            ) : (
-              <Compass className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-            )}
-          </span>
-        </Link>
-        <p className="mt-2 px-1 text-[13px] leading-relaxed text-foreground-muted">
-          {freeTextEnabled ? homePathUi.composerHint : homePathUi.composerHintGuided}
-        </p>
+    <div className="path-group">
+      <div className="path-group__head">
+        <h3 className="path-group__label">{label}</h3>
+        <p className="path-group__hint">{hint}</p>
       </div>
-
-      {/* ── מפריד שקט אל המצבים המוכרים ── */}
-      <div className="mx-auto mt-7 flex max-w-2xl items-center gap-3 sm:mt-9">
-        <span className="h-px flex-1 bg-border" aria-hidden="true" />
-        <span className="text-[13px] text-foreground-muted">{homePathUi.startersLabel}</span>
-        <span className="h-px flex-1 bg-border" aria-hidden="true" />
-      </div>
-
-      {/* ── פותחי-שיחה משניים: המצבים המוכרים ── לא כרטיסי-ניווט ולא שאלון: אין
-          חיצים, אין צמתים/מסלול, אין באדג'ים. אייקון-שיחה מרוסן, כותרת רגועה,
-          ושורת-תחושה אחת. הכרטיסים נשארים `<a>` אמיתיים (SEO/ללא-JS). */}
-      <ul
-        ref={gridRef}
-        className="path-nodes reveal relative mx-auto mt-5 grid max-w-2xl grid-cols-1 gap-3 sm:max-w-4xl sm:grid-cols-2 lg:grid-cols-4"
-      >
-        {/* הסמן שנוסע אל הצומת שנבחר — המסלול „מגיע” אל המצב. דקורטיבי בלבד:
-            המידע עצמו נמסר ע"י aria-current על הכרטיס. */}
-        <span className="path-marker" aria-hidden="true" />
-        {homePaths.map((p, index) => (
-          <li key={p.id} className="contents">
+      <ul className="path-group__list" data-kind={kind}>
+        {paths.map((p, index) => (
+          <li key={p.id}>
             <Link
               href={p.stationHref}
-              data-index={index}
-              // שם-מעבר ייחודי לכל כרטיס: כשמצב נבחר, הכרטיסים האחרים *נסוגים*
-              // (מתרחקים ודוהים) במקום להיעלם בחיתוך — והנבחר ממשיך דרך כותרתו
-              // (fm-title) אל כותרת-התוצאה. מעבר-מצב אחד ורציף.
-              style={{
-                ["--i" as string]: String(index),
-                viewTransitionName: `sit-card-${index}`,
-              }}
-              // לחיצה ראשונה בוחרת *במקום* (זיהוי); לחיצה על מצב שכבר נבחר
-              // ממשיכה אל החוויה העמוקה. כך אין החלפת-תוכן חדה, והמשתמש שולט
-              // בקצב שבו הוא נכנס פנימה.
-              aria-current={selected?.id === p.id ? "true" : undefined}
-              data-selected={selected?.id === p.id ? "" : undefined}
-              onClick={(e) => {
-                if (!isPlainClick(e)) return;
-                e.preventDefault();
-                if (selected?.id === p.id) openFocus(p.id, p.askStation);
-                else selectState(p.id, p.askStation, index);
-              }}
+              style={{ ["--i" as string]: String(index) }}
               className="situation-card group flex h-full flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 text-start shadow-sm transition-[border-color,background-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-secondary/35 hover:bg-surface-muted/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:translate-y-0 sm:p-5"
             >
-              <span
-                aria-hidden="true"
-                className="mb-0.5 text-sage-ink/80 opacity-80 transition-opacity group-hover:opacity-100"
-              >
-                <MessageCircle className="h-[18px] w-[18px]" />
-              </span>
-              <span
-                className="font-serif text-[17px] font-semibold leading-snug text-foreground sm:text-[19px]"
-                style={
-                  morphId === p.id
-                    ? ({ viewTransitionName: "fm-title" } as React.CSSProperties)
-                    : undefined
-                }
-              >
+              <span className="font-serif text-[17px] font-semibold leading-snug text-foreground sm:text-[19px]">
                 {p.buttonTitle}
               </span>
               <span className="text-[13.5px] leading-snug text-foreground-muted [text-wrap:pretty] sm:text-[14px]">
                 {p.buttonSub}
               </span>
+              {/* החץ הוא האות היחיד שנדרש: זהו קישור למקום אחר, לא בחירה בטופס. */}
+              <span
+                aria-hidden="true"
+                className="mt-auto pt-3 text-brand-hover opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </span>
             </Link>
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
 
-      {/* ── תשובת-הזיהוי, במקום ── כותרת-הזיהוי של המצב שנבחר, מוקד-התמצאות אחד,
-          ואז ה-CTA אל החוויה העמוקה. כל הטקסט מגיע מהתוכן המאושר של אותו מצב
-          (`homePaths`) — לא נכתב כאן תוכן חדש. `key` לפי המצב: החלפה מהירה בין
-          מצבים מפרקת ובונה מחדש, ולכן לא ייתכן שילוב של כותרת אחת עם טקסט אחר. */}
-      {selectedPath ? (
-        <div
-          key={selectedPath.id}
-          className="path-recognition mx-auto mt-4 max-w-2xl rounded-2xl border border-sage-ink/30 bg-surface-muted/50 p-5 text-start sm:max-w-4xl sm:p-6"
-          role="region"
-          aria-live="polite"
-          aria-label={selectedPath.buttonTitle}
-        >
-          <p className="path-recognition__lead font-serif text-[17px] font-semibold leading-snug text-foreground sm:text-[19px]">
-            {selectedPath.heading}
-          </p>
-          <p className="path-recognition__beat mt-2.5 text-[14.5px] leading-relaxed text-foreground-muted [text-wrap:pretty] sm:text-[15px]">
-            <span className="font-semibold text-sage-ink">
-              {selectedPath.focuses[0].title}
-            </span>
-            {" — "}
-            {selectedPath.focuses[0].line}
-          </p>
-          <div className="path-recognition__cta mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-            <button
-              type="button"
-              onClick={() => openFocus(selectedPath.id, selectedPath.askStation)}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-[color:var(--color-petrol)] px-6 text-[15px] font-semibold text-[color:var(--color-secondary-foreground)] transition-colors hover:bg-[color:var(--color-petrol-2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
-              {homePathUi.ctaSecondary}
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </button>
-            <Link
-              href={selectedPath.stationHref}
-              className="text-[14.5px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              {selectedPath.stationLabel}
-            </Link>
-          </div>
-        </div>
-      ) : null}
-    </>
+export function HomePathEntry() {
+  return (
+    <div className="path-groups reveal mx-auto mt-7 max-w-4xl">
+      <PathGroup
+        kind="station"
+        label={homePathUi.stationsLabel}
+        hint={homePathUi.stationsHint}
+      />
+      <PathGroup
+        kind="gate"
+        label={homePathUi.gatesLabel}
+        hint={homePathUi.gatesHint}
+      />
+    </div>
   );
 }

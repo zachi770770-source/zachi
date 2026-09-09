@@ -1,3 +1,4 @@
+import { sampleCtaLabel } from "@/content/sample";
 import * as React from "react";
 import { ArrowLeft } from "lucide-react";
 
@@ -111,7 +112,7 @@ export function Hero() {
               כמו בפריסה המאושרת. */}
           <div className="sig-hero__cta">
             <BookLink href="/preview" morphCover className="sig-hero__cta-primary">
-              קראו טעימה מהספר · 2 דקות
+              {sampleCtaLabel()}
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </BookLink>
             <AmazonBuyLink source="home" className="sig-hero__cta-secondary group">

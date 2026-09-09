@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Menu, X, Compass } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
@@ -59,7 +59,6 @@ export function MobileMenu() {
           <nav aria-label="ניווט ראשי" className="-mx-1 flex flex-col">
             {navLinks.map((link) => {
               const active = isActivePath(pathname, link.href);
-              const isCompass = link.href === "/compass";
               return (
                 <Link
                   key={link.href}
@@ -73,12 +72,6 @@ export function MobileMenu() {
                       : "border-transparent font-medium text-foreground-muted hover:bg-surface-muted hover:text-foreground"
                   )}
                 >
-                  {isCompass ? (
-                    <Compass
-                      className={cn("h-[18px] w-[18px]", active ? "text-brand" : "text-brand-hover/80")}
-                      aria-hidden="true"
-                    />
-                  ) : null}
                   {link.label}
                 </Link>
               );

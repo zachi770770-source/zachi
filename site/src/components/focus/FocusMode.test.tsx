@@ -5,56 +5,67 @@ import { FocusMode } from "@/components/focus/FocusMode";
 import { focusUi, getFocusSituation } from "@/content/focusMode";
 
 /**
- * Focus Mode — רצף ארבע הפעימות: enter → split (עובדה מול סיפור) → aha → action.
- * הבדיקה מאמתת שלכל פעימה יש תוכן משלה, שהסיפור נסוג ב-Aha, ושהפעולה (וה-CTA
- * לשיחה) מופיעה רק בשלב-הפעולה הנקי — לא כחלק מאותו מסך. רצה ללא `.motion-js`
- * (כמו reduced-motion), ולכן מעברי-המצב מיידיים ולא תלויי View Transitions.
+ * „עובדה מול סיפור” — שני שלבים: הפיצול, וההבנה.
+ *
+ * שתי טענות כאן חדשות, ושתיהן נועדו למנוע חזרה של הליקוי החמור באתר:
+ *
+ *   1. **ה-CTA הסוגר הוא קישור אמיתי אל /book.** קודם הוא היה `<button>`
+ *      שקרא ל-`onContinue`, והבדיקה אישרה בסך-הכול שה-callback נקרא — כלומר
+ *      היא הייתה עוברת גם כשה-callback פתח שאלון נוסף, וזה בדיוק מה שקרה
+ *      בפרודקשן. עכשיו הבדיקה אוכפת `href="/book"` על היעד עצמו, ולכן שום
+ *      מימוש שאינו מנווט אל הספר אינו יכול לעבור אותה.
+ *   2. **הדוגמה מוצהרת כדוגמה מהספר** — התרגיל אינו מבקש מהמבקר להתבונן
+ *      פנימה ואז מציג לו רגע של מישהו אחר.
+ *
+ * רצה ללא `.motion-js` (כמו reduced-motion): מעברי-המצב מיידיים.
  */
-describe("FocusMode — enter → split → aha → action sequence", () => {
+describe("FocusMode — פיצול → הבנה, ויציאה אחת אל הספר", () => {
   const s = getFocusSituation("existing");
 
-  it("walks the four beats; the action + conversation CTA appear only at the clean action stage", () => {
-    const onContinue = vi.fn();
-    const onBack = vi.fn();
-    render(
-      <FocusMode situationId="existing" onContinue={onContinue} onBack={onBack} />,
-    );
+  it("שני שלבים בלבד, והיציאה היא קישור אמיתי אל /book", () => {
+    render(<FocusMode situationId="existing" onClose={vi.fn()} />);
 
-    // פעימה 1 — enter: המצב דומיננטי; עדיין אין עובדה/סיפור ואין CTA-המשך.
-    // כותרת-המצב (heading) — צ׳יפ-ההקשר בסרגל נושא אותו טקסט, ולכן ממקדים לכותרת.
-    expect(screen.getByRole("heading", { name: s.title })).toBeTruthy();
-    expect(screen.queryByText(s.fact)).toBeNull();
-    expect(screen.queryByText(focusUi.separationLine)).toBeNull();
-    expect(screen.queryByText(focusUi.continueLabel)).toBeNull();
-
-    // enter → split: עובדה וסיפור *שניהם* גלויים, עם התוויות הוויזואליות.
-    fireEvent.click(screen.getByText(focusUi.enterCta));
+    // שלב 1 — הפיצול: עובדה וסיפור שניהם גלויים, עם התוויות.
     expect(screen.getByText(s.fact)).toBeTruthy();
     expect(screen.getByText(s.story)).toBeTruthy();
     expect(screen.getByText(focusUi.factTag)).toBeTruthy();
     expect(screen.getByText(focusUi.storyTag)).toBeTruthy();
+    // מסגור-אמת: זו דוגמה מהספר, ולא „הרגע שלכם”.
+    expect(screen.getByText(focusUi.exampleNote)).toBeTruthy();
+    // אין עדיין יציאה.
+    expect(screen.queryByText(focusUi.continueLabel)).toBeNull();
 
-    // split → aha: כותרת-ה-Aha הקצרה + ההסבר הקנוני מתחתיה; הסיפור נסוג (יצא
-    // מה-DOM), ואין עדיין CTA.
+    // שלב 2 — ההבנה: הכותרת הקצרה + ההסבר; הסיפור נסוג לגמרי.
     fireEvent.click(screen.getByText(focusUi.separateLabel));
     expect(screen.getByText(focusUi.ahaHeadline)).toBeTruthy();
     expect(screen.getByText(focusUi.separationLine)).toBeTruthy();
-    expect(screen.queryByText(s.story)).toBeNull();
-    expect(screen.queryByText(focusUi.continueLabel)).toBeNull();
-
-    // aha → action: שלב נקי — מסגור-הפעולה, הגשר, וה-CTA לשיחה.
-    fireEvent.click(screen.getByText(focusUi.ahaCta));
-    expect(screen.getByText(focusUi.actionEyebrow)).toBeTruthy();
     expect(screen.getByText(s.bridge)).toBeTruthy();
-    const cta = screen.getByText(focusUi.continueLabel);
-    fireEvent.click(cta);
-    expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(s.story)).toBeNull();
+
+    // היציאה: קישור, לא כפתור, ואל הספר.
+    const cta = screen.getByRole("link", { name: new RegExp(focusUi.continueLabel) });
+    expect(cta.getAttribute("href")).toBe("/book");
   });
 
-  it("back calls onBack from the first beat", () => {
-    const onBack = vi.fn();
-    render(<FocusMode situationId="dating" onContinue={vi.fn()} onBack={onBack} />);
+  it("אין chrome של אפליקציה: לא לשוניות-מצבים ולא מחוון-שלבים", () => {
+    const { container } = render(<FocusMode situationId="existing" onClose={vi.fn()} />);
+    expect(container.querySelector(".fm-switch")).toBeNull();
+    expect(container.querySelector(".fm-steps")).toBeNull();
+  });
+
+  it("הסגירה מחזירה את השליטה לעמוד", () => {
+    const onClose = vi.fn();
+    render(<FocusMode situationId="dating" onClose={onClose} />);
     fireEvent.click(screen.getByText(focusUi.backLabel));
-    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("אין בתרגיל שום מסלול שמוביל לשאלון", () => {
+    const { container } = render(<FocusMode situationId="existing" onClose={vi.fn()} />);
+    fireEvent.click(screen.getByText(focusUi.separateLabel));
+    const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    expect(hrefs).not.toContain("/compass");
+    // וכל קישור שיוצא מכאן — יוצא אל הספר.
+    expect(hrefs.filter(Boolean)).toEqual(["/book"]);
   });
 });

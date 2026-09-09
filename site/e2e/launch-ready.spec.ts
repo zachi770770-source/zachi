@@ -1,6 +1,6 @@
 import { test, expect } from "./fixtures";
+import { sampleCtaLabel } from "../src/content/sample";
 
-import { focusUi } from "../src/content/focusMode";
 
 const MOBILE = { width: 390, height: 844 };
 
@@ -12,7 +12,7 @@ test.describe("Launch-readiness", () => {
 
     // פעולה דומיננטית *יחידה*: „קראו טעימה מהספר · 2 דקות” → /preview.
     const dominant = heroSection.getByRole("link", {
-      name: "קראו טעימה מהספר · 2 דקות",
+      name: sampleCtaLabel(),
     });
     await expect(dominant).toBeVisible();
     await expect(dominant).toHaveAttribute("href", "/preview");
@@ -159,50 +159,39 @@ test.describe("Launch-readiness", () => {
     // פעולת ההמרה הראשית בשער — „קראו טעימה מהספר · 2 דקות” → /preview — פעילה.
     await expect(
       page.locator("main section").first().getByRole("link", {
-        name: "קראו טעימה מהספר · 2 דקות",
+        name: sampleCtaLabel(),
       })
     ).toBeVisible();
   });
 
-  test("home: the floating ask engine still opens, and selecting a situation opens the listening conversation inline (no navigation)", async ({
+  test("home: the main flow reaches the book with no questionnaire, and the tool is one marked door", async ({
     page,
   }) => {
+    // הבדיקה הקודמת כאן קיבעה בדיוק את מה שהאודיט מצא כשגוי: גלולה צפה בכל
+    // עמוד, בחירת-מצב שפותחת במה בת ארבעה שלבים, ו„המשיכו עם הספר” שממשיך אל
+    // *שאלון*. היא עברה במלואה — ולכן היא לא הגנה על המבקר אלא על התקלה.
+    // הטענות החדשות הפוכות ומחמירות: אין גלולה צפה, בחירת-מצב מנווטת לעמוד,
+    // ואין שום שאלון בזרימה הראשית של עמוד הבית.
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "אישור הכל" }).click({ timeout: 3000 }).catch(() => {});
 
-    // בבית: מנוע ההכוונה זמין כגלולה צפה — פותח את בורר התחנות. נשאר ללא שינוי.
-    const pill = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
-    await page.mouse.wheel(0, 200);
-    await expect(pill).toHaveCSS("opacity", "1", { timeout: 4000 });
-    await pill.click();
-    await expect(
-      page.getByRole("dialog").getByRole("heading", { name: "איפה אתם עכשיו?" }),
-    ).toBeVisible();
-    await page.keyboard.press("Escape");
+    // אין בועה צפה בשום מקום באתר.
+    await expect(page.locator(".compass-pill")).toHaveCount(0);
 
-    // בחירת מצב ב-Home פותחת קודם את Focus Mode (עובדה מול סיפור) *במקום* לנווט;
-    // מפרידים, וה-CTA „המשיכו עם הספר” ממשיך אל מנוע „שאל את הספר”, מזוהה לתחנה
-    // (מדלג על „איפה אתם?” ומתחיל בדילמה).
+    // בחירת-מצב = ניווט. צעד אחד, יעד אמיתי.
     const path = page.locator("#path");
     await path.scrollIntoViewIfNeeded();
-    // בחירה במקום (זיהוי) ואז כניסה לבמה — שני צעדים מכוונים, בלי ניווט.
-    await path.locator('a.situation-card[href="/before-relationship"]').click();
-    await expect(page).toHaveURL(/\/$/);
-    const enterStage = path.locator(".path-recognition__cta button").first();
-    await enterStage.waitFor({ state: "visible" });
-    await enterStage.click();
-    await expect(page).toHaveURL(/\/$/);
-    const focus = path.getByRole("region", { name: focusUi.regionLabel });
-    await focus.getByRole("button", { name: focusUi.enterCta }).click();
-    await focus.getByRole("button", { name: focusUi.separateLabel }).click();
-    await focus.getByRole("button", { name: focusUi.ahaCta }).click();
-    await focus.getByRole("button", { name: focusUi.continueLabel }).click();
-    await expect(
-      path
-        .getByRole("region", { name: /שיחה קצרה עם הספר/ })
-        .getByRole("heading", { name: "מה הכי מעסיק אתכם כרגע?" }),
-    ).toBeVisible();
+    await Promise.all([
+      page.waitForURL(/\/before-relationship$/),
+      path.locator('a.situation-card[href="/before-relationship"]').click(),
+    ]);
+
+    // הכלי קיים — אבל רק מאחורי דלת מסומנת אחת, ובשמו האמיתי.
+    await page.goto("/", { waitUntil: "networkidle" });
+    const door = page.locator(".deeper-entry a[href='/compass']");
+    await expect(door).toHaveCount(1);
+    await expect(door).toContainText("איפה להתחיל בספר");
   });
 
   test("journey page: personal landing with breadcrumb, contextual sample, and a quiet way back to the selector", async ({

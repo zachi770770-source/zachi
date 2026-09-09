@@ -62,7 +62,7 @@ test("home (before selection): three content areas really visible, real text, ve
   await ctx.close();
 });
 
-test("home: four real navigation cards linking to the four journey pages", async ({
+test("home: חמישה כרטיסי-ניווט אמיתיים אל חמשת עמודי-המסע", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
@@ -72,7 +72,7 @@ test("home: four real navigation cards linking to the four journey pages", async
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
-  for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/]) {
+  for (const name of [/אני מחפש/, /אני בתחילת/, /אני בתוך/, /אני אחרי/, /אני מתחיל/]) {
     await expect(path.getByText(name).first()).toBeVisible();
   }
   for (const href of [
@@ -80,11 +80,14 @@ test("home: four real navigation cards linking to the four journey pages", async
     "/building-relationship",
     "/inside-relationship",
     "/after-breakup",
+    "/starting-again",
   ]) {
     await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
-  // ארבעה כרטיסי-מצב, כל אחד קישור יחיד ליעד שלו — בלי שלב בחירה ביניים.
-  await expect(path.locator(".situation-card")).toHaveCount(4);
+  // חמישה כרטיסי-מצב, כל אחד קישור יחיד ליעד שלו — בלי שלב בחירה ביניים.
+  // „מתחילים מחדש” נוסף: הוא היה מסלול קיים שעמוד הבית מעולם לא הציג, ולכן
+  // מבקר יכול היה לפגוש אותו רק במקרה.
+  await expect(path.locator(".situation-card")).toHaveCount(5);
   await ctx.close();
 });
 

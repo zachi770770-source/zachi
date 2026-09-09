@@ -9,65 +9,9 @@ import { test, expect } from "./fixtures";
 // מקטע „שאל את הספר” המוטמע (#where) וסצנת Search→Build (#thesis-heading). הבדיקות
 // שנשענו עליהם הוסרו בהתאם — אין להמציא/להחזיר תוכן שלא מוצג.
 
-test("mobile 390: assistant bubble stays visible ABOVE the cookie banner (no overlap), and returns to the bottom after consent", async ({
-  browser,
-}) => {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const page = await ctx.newPage();
-  await page.goto("/", { waitUntil: "networkidle" });
-
-  // באנר העוגיות מזוין אחרי גלילה. הגלולה מוסתרת בכוונה כל עוד מקטע-השיחה
-  // (#path) במסך, ולכן גוללים אל מעברו (תחתית העמוד) — שם היא נחשפת — כדי לבדוק
-  // את הדו-קיום שלה עם הבאנר.
-  await page.evaluate(() => window.scrollTo(0, 700));
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  const banner = page.getByRole("region", { name: "הסכמה לשימוש בעוגיות" });
-  await expect(banner).toBeVisible();
-  await page.waitForFunction(
-    () => document.body.getAttribute("data-cookie-banner") === "open"
-  );
-
-  // הגלולה הצפה (aria-label מלא) — נבדלת מכפתור ה-#where „שאל את הספר” המדויק.
-  const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
-
-  // הגלולה נשארת גלויה כשהבאנר פתוח (לא מוסתרת) — נוכחת ולחיצה למשתמש חדש.
-  await expect(bubble).toBeVisible();
-  await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
-
-  // ואינה חופפת לבאנר — יושבת מעליו עם מרווח ברור (יעד 12–20px).
-  const gapAboveBanner = async () => {
-    const b = await bubble.boundingBox();
-    const c = await banner.boundingBox();
-    if (!b || !c) throw new Error("missing box");
-    return c.y - (b.y + b.height); // >0 ⇒ הגלולה כולה מעל ראש הבאנר
-  };
-  const gap = await gapAboveBanner();
-  expect(gap, "bubble must sit fully above the banner").toBeGreaterThan(0);
-  expect(gap, "clear gap above the banner").toBeGreaterThanOrEqual(8);
-
-  const bottomWhileOpen = (await bubble.boundingBox())!.y;
-
-  await page.getByRole("button", { name: "אישור הכל" }).click();
-  await expect(banner).toHaveCount(0);
-  await page.waitForFunction(
-    () => !document.body.hasAttribute("data-cookie-banner")
-  );
-
-  // אחרי ההסכמה — הגלולה נשארת גלויה וחוזרת חלק למיקום התחתון הרגיל (נמוך יותר).
-  await expect(bubble).toBeVisible();
-  await expect(bubble).toHaveCSS("opacity", "1");
-  await page.waitForFunction(
-    (prevY) => {
-      const el = document.querySelector('button[aria-label^="מה הספר אומר על המצב שלי"]');
-      if (!el) return false;
-      return el.getBoundingClientRect().top > prevY + 4; // ירדה כלפי מטה
-    },
-    bottomWhileOpen,
-    { timeout: 4000 }
-  );
-
-  await ctx.close();
-});
+// (הוסר) — אין יותר בועה צפה; השכבה הצפה היחידה היא הסכמת-העוגיות. הבדיקה
+// שעקבה אחרי מיקומה מול באנר-העוגיות אינה רלוונטית, ובמקומה נוספה למטה
+// טענה חזקה יותר: *אין* שכבה צפה שמכסה את ה-CTA הסוגר במובייל.
 
 for (const w of [320, 360, 390]) {
   test(`no horizontal overflow at ${w}px`, async ({ browser }) => {

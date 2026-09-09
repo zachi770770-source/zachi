@@ -1,4 +1,5 @@
 import { test, expect } from "./fixtures";
+import { sampleCtaLabel } from "../src/content/sample";
 
 /**
  * נתיב ההמרה (עודכן — אמזון הוא ערוץ הרכישה היחיד, אין רשימת המתנה). ה-Hero
@@ -12,7 +13,7 @@ test("Hero: the single dominant action is the free sample, not an email form", a
   const hero = page.locator("main section").first();
   // אין שדה אימייל בשער — הטעימה נפתחת מיד וללא הרשמה.
   await expect(hero.getByLabel("כתובת אימייל")).toHaveCount(0);
-  const dominant = hero.getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" });
+  const dominant = hero.getByRole("link", { name: sampleCtaLabel() });
   await expect(dominant).toHaveAttribute("href", "/preview");
 });
 
@@ -35,9 +36,9 @@ test("/preview is publicly accessible directly, without any registration", async
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("home path selector: four real navigation cards to the journey pages (SEO)", async ({ page }) => {
+test("home path selector: חמישה כרטיסי-ניווט אמיתיים אל עמודי-המסע (SEO)", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  // הבית האישי: אזור „איפה אתם נמצאים עכשיו?” (#path) — שער לארבע חוויות.
+  // הבית האישי: אזור „איפה אתם נמצאים עכשיו?” (#path) — שער לחמש חוויות.
   await expect(page.locator("#where")).toHaveCount(0);
   const path = page.locator("#path");
   await expect(path).toHaveCount(1);
@@ -50,11 +51,12 @@ test("home path selector: four real navigation cards to the journey pages (SEO)"
     "/building-relationship",
     "/inside-relationship",
     "/after-breakup",
+    "/starting-again",
   ]) {
     await expect(path.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
-  // ארבעה כרטיסי-מצב, כל אחד קישור יחיד ליעד שלו — בלי שלב בחירה ביניים.
-  await expect(path.locator(".situation-card")).toHaveCount(4);
+  // חמישה כרטיסי-מצב, כל אחד קישור יחיד ליעד שלו — בלי שלב בחירה ביניים.
+  await expect(path.locator(".situation-card")).toHaveCount(5);
 });
 
 test("home: the repeated sample teaser was removed; /preview is reached from the hero action", async ({
@@ -67,7 +69,7 @@ test("home: the repeated sample teaser was removed; /preview is reached from the
   // הכניסה לטעימה נשארת דרך הפעולה הראשית בשער.
   const hero = page.locator("main section").first();
   await expect(
-    hero.getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" }),
+    hero.getByRole("link", { name: sampleCtaLabel() }),
   ).toHaveAttribute("href", "/preview");
 });
 
