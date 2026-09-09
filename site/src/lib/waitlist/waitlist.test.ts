@@ -6,7 +6,7 @@ import {
   classifyWaitlistDbError,
   formatWaitlistDbErrorLog,
 } from "@/lib/waitlist/diagnostics";
-import { POST } from "@/app/api/waitlist/route";
+import { POST } from "@/app/(he)/api/waitlist/route";
 
 const g = globalThis as unknown as Record<string, unknown>;
 

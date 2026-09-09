@@ -16,12 +16,22 @@ const STATIONS = Object.keys(journeyPages) as JourneyId[];
 /** ששת הכלים הקנוניים — אין אחר. */
 const CANONICAL = ["quiet-check", "fact-story", "core-values", "pace-check", "eye-level-talk", "clean-exit"];
 
-/** ממפה href פנימי לקובץ-עמוד קיים ב-App Router (מתעלם מ-query). */
+/**
+ * ממפה href פנימי לקובץ-עמוד קיים ב-App Router (מתעלם מ-query).
+ *
+ * מאז פיצול ה-root layouts, כל המסלולים יושבים בתוך קבוצת-מסלולים —
+ * `(he)` לעברית ו-`(en)` ל-‎/en. קבוצות בסוגריים אינן חלק מה-URL, ולכן
+ * הבדיקה מחפשת בכל הקבוצות וגם בשורש. הטענה עצמה לא הוחלשה: היא עדיין
+ * דורשת שקובץ-עמוד *אמיתי* יתקיים עבור כל href פנימי.
+ */
+const ROUTE_ROOTS = ["src/app", "src/app/(he)", "src/app/(en)"];
+
 function pageExists(href: string): boolean {
   const path = href.split(/[?#]/)[0].replace(/^\/+|\/+$/g, "");
   const segments = path ? path.split("/") : [];
-  const file = resolve(process.cwd(), "src/app", ...segments, "page.tsx");
-  return existsSync(file);
+  return ROUTE_ROOTS.some((root) =>
+    existsSync(resolve(process.cwd(), root, ...segments, "page.tsx")),
+  );
 }
 
 describe("journey mirror outcomes — data integrity", () => {

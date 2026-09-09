@@ -1,41 +1,48 @@
 "use client";
 
 import * as React from "react";
-import { Compass } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 import { compassQuiz } from "@/content/compass";
+import { BookCover } from "@/components/shared/BookCover";
 import { askUi, type AskStationId } from "@/content/askRoute";
 import { AskRoute } from "@/components/interactive/AskRoute";
 import { GuidanceFocusProvider, GuidanceIntro } from "@/components/guidance/GuidanceFocus";
 
-const POINTS = ["2-3 שאלות קצרות", "בחירה מתוך תשובות", "נקודת פתיחה, לא אבחון"];
+const POINTS = compassQuiz.points;
 
 /**
- * המצפן המודרך כמשטח-הכוונה עם „מצב-תגובה”: קליפת-הפתיח (אייקון/כותרת/צ'יפים)
- * עטופה ב-GuidanceIntro ומתקפלת ברגע ש-AskRoute מגיע לתוצאה — כך שהתשובה הופכת
- * למוקד המסך במקום לשבת מתחת לכותרת שיווקית. הפתיח נושא את ה-h1; במצב-תשובה
- * ה-h1 עובר ל-AnswerView (h1 אחד תמיד).
+ * המצפן המודרך — **כלי ניווט בספר**, לא הערכה של הקשר.
+ *
+ * מסך-הפתיחה מוסגר מחדש בשלוש נקודות שנמדדו כבעיה:
+ *
+ *   1. **הכריכה נמצאת כאן.** קודם המסך הזה הראה אייקון-מצפן, כותרת „מה הספר
+ *      אומר על המצב שלי?”, ארבעה רדיו — ואז את הפוטר. אפס נוכחות של הספר.
+ *      מבקר שהגיע מהתפריט הראשי ראה שאלון ולא הבין מה הקשר לספר.
+ *   2. **יש יציאה.** מי שאינו רוצה לענות היה מגיע לפוטר בלי שום המשך. עכשיו
+ *      יש שתי דרכים החוצה אל הספר עצמו, בלי לענות על כלום.
+ *   3. **השם.** „איפה להתחיל בספר?” מתאר את מה שהכלי עושה. הצ'יפ „נקודת
+ *      פתיחה, לא אבחון” כבר אינו נדרש כהתנצלות והפך ל„נקודת התחלה לקריאה”.
+ *
+ * הפתיח מתקפל ברגע שיש תוצאה (GuidanceIntro), כדי שהתשובה תהיה מוקד המסך.
+ * הוא נושא את ה-h1; במצב-תשובה ה-h1 עובר ל-AnswerView (h1 אחד תמיד).
  */
 export function GuidedCompass({ initialStation }: { initialStation?: AskStationId }) {
   return (
     <GuidanceFocusProvider>
       <GuidanceIntro className="mb-10 sm:mb-12">
         <header className="enter-stagger mx-auto max-w-2xl text-center">
-          <span
-            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-muted text-brand ring-1 ring-brand/15"
-            aria-hidden="true"
-          >
-            <Compass className="h-6 w-6" />
-          </span>
+          {/* הספר עצמו, ולא אייקון של כלי: זה מה שהמבקר בא בשבילו. */}
+          <div className="mx-auto w-[104px] sm:w-[120px]" aria-hidden="true">
+            <BookCover />
+          </div>
           <span className="kicker mt-6 justify-center">{askUi.eyebrow}</span>
           <h1 className="mt-4 font-serif type-hero text-foreground">
             {compassQuiz.ask.title}
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-[clamp(1.05rem,1.5vw,1.2rem)] leading-relaxed text-balance text-foreground-muted">
             {compassQuiz.ask.subtitle}
-          </p>
-          <p className="mx-auto mt-3 max-w-xl text-[14px] italic text-foreground-muted">
-            כאן לא שופטים אתכם, מבינים.
           </p>
 
           <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
@@ -49,6 +56,24 @@ export function GuidedCompass({ initialStation }: { initialStation?: AskStationI
               </li>
             ))}
           </ul>
+
+          {/* יציאה אל הספר — למי שלא רוצה לענות על דבר. חובה: מסך שמבקש
+              קלט חייב להציע גם דרך שאינה דורשת אותו. */}
+          <p className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14.5px]">
+            <Link
+              href="/book"
+              className="inline-flex items-center gap-1.5 font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              או פשוט ראו מה יש בספר
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/preview"
+              className="text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            >
+              קראו טעימה
+            </Link>
+          </p>
         </header>
       </GuidanceIntro>
 

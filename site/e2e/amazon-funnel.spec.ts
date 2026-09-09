@@ -1,4 +1,5 @@
 import type { Locator } from "@playwright/test";
+import { sampleCtaLabel } from "../src/content/sample";
 
 import { test, expect } from "./fixtures";
 
@@ -23,7 +24,7 @@ test("Flow A, Home offers a real external Amazon purchase (secondary to the samp
   await page.goto("/", { waitUntil: "networkidle" });
   // הפעולה הראשית נשארת הטעימה.
   await expect(
-    page.locator("main section").first().getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" }),
+    page.locator("main section").first().getByRole("link", { name: sampleCtaLabel() }),
   ).toBeVisible();
   // וקיימת רכישה חיצונית באמזון.
   await expectAmazonBuy(page.locator("main"));

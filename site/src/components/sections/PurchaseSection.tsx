@@ -14,7 +14,7 @@ export function PurchaseSection() {
       // ב-bg-surface-muted, וכששני הבנדים צמודים הם נמזגים לגוש-muted אחד ארוך.
       // כאן ה„צעד הבא” יושב על הקנבס הנקי — כרטיס-הרכישה המוגבה נושא את רגע-הסגירה
       // (כמו סגירת עמוד-הבית: סקשן שקוף, פאנל מובחן) — והבנד של Outcomes נשאר יחיד.
-      className="scroll-mt-20 py-24 sm:py-32"
+      className="scroll-mt-20 py-16 sm:py-20"
       aria-labelledby="purchase-heading"
     >
       <Container>

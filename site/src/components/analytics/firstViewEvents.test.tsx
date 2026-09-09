@@ -196,14 +196,14 @@ describe("LovePage → love_viewed", () => {
   it("משגר את אירוע-הצפייה פעם אחת כשיש הסכמה וספק", async () => {
     grantConsent();
     const gtag = attachGtagProvider();
-    const { default: LovePage } = await import("@/app/love/page");
+    const { default: LovePage } = await import("@/app/(he)/love/page");
     render(<LovePage />);
     expect(eventCalls(gtag, "love_viewed")).toHaveLength(1);
   });
 
   it("אינו משגר דבר בלי הסכמה, ומשגר כשהיא ניתנת אחר כך", async () => {
     const gtag = attachGtagProvider();
-    const { default: LovePage } = await import("@/app/love/page");
+    const { default: LovePage } = await import("@/app/(he)/love/page");
     render(<LovePage />);
     expect(eventCalls(gtag, "love_viewed")).toHaveLength(0);
 

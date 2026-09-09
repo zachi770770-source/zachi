@@ -434,24 +434,10 @@ function Result({
         </div>
       ) : null}
 
-      {/* 2. ההבחנה המרכזית */}
-      <Block label={L.distinction}>
-        <p className="font-serif text-[1.12rem] leading-snug text-foreground">{a.distinction}</p>
-      </Block>
-
-      {/* 3. מה כדאי לבדוק */}
-      <Block label={L.checks}>
-        <ul className="space-y-1.5">
-          {checks.map((c) => (
-            <li key={c} className="flex gap-2 text-[15px] leading-relaxed text-foreground-muted">
-              <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
-              {c}
-            </li>
-          ))}
-        </ul>
-      </Block>
-
-      {/* 4. הכלי המתאים */}
+      {/* ── התשובה עצמה, ראשונה ──────────────────────────────────────────
+          המבקר שאל „איפה להתחיל?”, ולכן הדבר הראשון שהוא רואה הוא המקום
+          בספר. קודם הוא הופיע רביעי, אחרי שלושה בלוקים מסומנים — כלומר
+          התוצאה נקראה כדוח-הערכה שבסופו יש גם ספר. */}
       {tool ? (
         <div className="mt-5 rounded-xl border-s-2 border-brand bg-surface-muted/60 p-4">
           <p className="text-[12px] font-semibold uppercase tracking-wide text-brand-hover">
@@ -468,14 +454,31 @@ function Result({
         </div>
       ) : null}
 
-      {/* 5. פעולה קטנה להיום */}
-      <Block label={L.action}>
-        <p className="text-[15px] leading-relaxed text-foreground">{action}</p>
+      {/* מכאן — שלוש כותרות-משנה בלבד. קודם היו חמש, והתוצאה נקראה כמו
+          פלט של מערכת-אבחון. */}
+      <Block label={L.distinction}>
+        <p className="font-serif text-[1.12rem] leading-snug text-foreground">{a.distinction}</p>
       </Block>
 
-      {/* 6. מה לא כדאי להסיק מהר מדי */}
-      <Block label={L.avoid}>
-        <p className="text-[15px] leading-relaxed text-foreground-muted">{a.avoid}</p>
+      {/* 3. מה כדאי לבדוק */}
+      <Block label={L.checks}>
+        <ul className="space-y-1.5">
+          {checks.map((c) => (
+            <li key={c} className="flex gap-2 text-[15px] leading-relaxed text-foreground-muted">
+              <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+              {c}
+            </li>
+          ))}
+        </ul>
+      </Block>
+
+      {/* פעולה — והסייג שלה באותו בלוק. „מה לא כדאי להסיק” היה כותרת-משנה
+          חמישית נפרדת; הוא שייך לאותה נשימה, ולכן הוא שורה שקטה בתוכה. */}
+      <Block label={L.action}>
+        <p className="text-[15px] leading-relaxed text-foreground">{action}</p>
+        <p className="mt-2.5 text-[14px] leading-relaxed text-foreground-muted">
+          {a.avoid}
+        </p>
       </Block>
 
       {/* 7 + 8. קטע מהספר + המשך */}

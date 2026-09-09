@@ -57,6 +57,13 @@ export interface JourneyFlow {
   bridge: StationRef | null;
   /** שלושת צעדי המחוון עם המצב יחסית לעמוד הנוכחי (למסלול הראשי בלבד). */
   steps: ProgressStep[];
+  /**
+   * תווית-המסלול לכיתוב שמתחת למחוון. החליפה את המונה „תחנה N מתוך M”:
+   * המונה יצר סתירה גלויה מול חמש נקודות-הפתיחה שבעמוד הבית (בחרתי מתוך
+   * חמש, ונחתתי על „3 מתוך 3”), והוא גם חסר-משמעות בשערים. התווית אומרת
+   * את אותו הדבר בלי חשבון, ועובדת בשני סוגי-העמודים.
+   */
+  routeLabel: string;
 }
 
 /** מעברי-הגשר המפורשים — שער-המעבר וגשר-החזרה, מחוץ למחזור שלוש התחנות. */
@@ -92,6 +99,7 @@ export function getJourneyFlow(id: JourneyId): JourneyFlow {
       complete: isLast,
       bridge: null,
       steps,
+      routeLabel: "המסלול · שלוש תחנות",
     };
   }
 
@@ -106,5 +114,6 @@ export function getJourneyFlow(id: JourneyId): JourneyFlow {
     complete: false,
     bridge: bridgeId ? ref(bridgeId) : null,
     steps: [],
+    routeLabel: "שער מעבר · מחוץ למסלול",
   };
 }

@@ -1,3 +1,4 @@
+import { sampleCtaLabel } from "@/content/sample";
 import Image from "next/image";
 import Link from "next/link";
 import { Smartphone, BookOpen, ArrowLeft, Sparkles } from "lucide-react";
@@ -65,7 +66,7 @@ export function PurchaseCard() {
             morphCover
             className="group inline-flex items-center gap-2 self-start text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
-            קראו טעימה מהספר · 2 דקות
+            {sampleCtaLabel()}
             <ArrowLeft
               className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
               aria-hidden="true"

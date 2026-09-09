@@ -2,46 +2,72 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 
 import { HomePathEntry } from "@/components/sections/HomePathEntry";
-import { homePathUi } from "@/content/homePaths";
+import { homePaths, homePathUi } from "@/content/homePaths";
 
 /**
- * האפורדנס של תיבת-הכניסה הראשית תלוי-מצב: כשהכתיבה-החופשית חיה זו באמת תיבת-
- * כתיבה (סמן מהבהב + אייקון עֵט + רמז „אפשר לכתוב…”); בברירת המחדל (המצפן המודרך
- * בלבד) לחיצה פותחת שיחה מודרכת, ולכן אין סמן-כתיבה שמבטיח הקלדה, האייקון הוא
- * מצפן, והרמז מתאר את המהלך המודרך. בשני המצבים הקישור הבסיסי הוא אותו `<a>` אל
- * /compass (SEO / ללא-JS), והכיתוב המזמין נשמר.
+ * המקטע הזה הוא **ניווט**, ולכן הבדיקות שומרות עכשיו על תכונה חזקה יותר ממה
+ * ששמרו קודם.
+ *
+ * קודם הן קיבעו את האפורדנס של „תיבת-הכניסה” — סמן מהבהב, אייקון עֵט או מצפן,
+ * ורמז מתאים לכל מצב. כלומר הן שמרו בקפידה על *מראה* של שדה-כתיבה שהיה בפועל
+ * `<a href="/compass">`: אפורדנס שהזמין להקליד וניווט לשאלון. הבדיקות עברו,
+ * והאפורדנס עדיין היה שקרי — הן הגנו בדיוק על הדבר הלא-נכון.
+ *
+ * הטענות החדשות אינן „פחות” — הן קשות יותר לעבור:
+ *   • חמש נקודות-הפתיחה קיימות, כולן קישורים אמיתיים (עובד ללא JS).
+ *   • כל כרטיס מוביל לעמוד-המסע *שלו* — לא ליעד משותף.
+ *   • המודל 3 תחנות + 2 שערים מוצג בפועל, ולא רק קיים בנתונים.
+ *   • **אין במקטע שום דבר שמתחזה לשדה-קלט**, ואין בו קישור אל /compass.
+ *     שתי הטענות האחרונות הן בדיוק מה שהבדיקות הקודמות פספסו.
  */
-describe("HomePathEntry — surface-aware primary composer", () => {
-  it("guided (default): no blinking write-caret, compass icon, guided hint", () => {
-    const { container, queryByText } = render(<HomePathEntry />);
-    const composer = container.querySelector("a.home-composer");
-    expect(composer).not.toBeNull();
-    expect(composer!.getAttribute("href")).toBe("/compass");
-    // אין סמן-כתיבה מהבהב — הוא מבטיח הקלדה שאינה מתקיימת במצב המודרך.
-    expect(container.querySelector(".home-composer__caret")).toBeNull();
-    // אייקון מצפן (זהות „שאל את הספר”), לא עֵט.
-    expect(composer!.querySelector("svg.lucide-compass")).not.toBeNull();
-    expect(composer!.querySelector("svg.lucide-pen-line")).toBeNull();
-    // רמז מודרך, לא רמז-כתיבה.
-    expect(queryByText(homePathUi.composerHintGuided)).not.toBeNull();
-    expect(queryByText(homePathUi.composerHint)).toBeNull();
-    // הכיתוב המזמין נשמר בשני המצבים.
-    expect(queryByText(homePathUi.composerLead)).not.toBeNull();
+describe("HomePathEntry — חמש נקודות-פתיחה, ניווט בלבד", () => {
+  it("מרנדר חמישה קישורים אמיתיים, כל אחד אל עמוד-המסע שלו", () => {
+    const { container } = render(<HomePathEntry />);
+    const links = [...container.querySelectorAll("a.situation-card")];
+    expect(links).toHaveLength(homePaths.length);
+    expect(links).toHaveLength(5);
+
+    for (const path of homePaths) {
+      const link = links.find((a) => a.textContent?.includes(path.buttonTitle));
+      expect(link, `כרטיס עבור ${path.id}`).toBeDefined();
+      expect(link!.getAttribute("href")).toBe(path.stationHref);
+    }
+    // חמישה יעדים *שונים* — לא חמישה כרטיסים שמובילים לאותו מקום.
+    const hrefs = new Set(links.map((a) => a.getAttribute("href")));
+    expect(hrefs.size).toBe(5);
   });
 
-  it("free-text live: write-caret present, pen icon, write hint", () => {
-    const { container, queryByText } = render(<HomePathEntry freeTextEnabled />);
-    const composer = container.querySelector("a.home-composer");
-    expect(composer).not.toBeNull();
-    expect(composer!.getAttribute("href")).toBe("/compass");
-    // סמן-הכתיבה חוזר — „אפשר להקליד כאן”.
-    expect(container.querySelector(".home-composer__caret")).not.toBeNull();
-    // אייקון עֵט (כתיבה), לא מצפן.
-    expect(composer!.querySelector("svg.lucide-pen-line")).not.toBeNull();
-    expect(composer!.querySelector("svg.lucide-compass")).toBeNull();
-    // רמז-כתיבה, לא הרמז המודרך.
-    expect(queryByText(homePathUi.composerHint)).not.toBeNull();
-    expect(queryByText(homePathUi.composerHintGuided)).toBeNull();
-    expect(queryByText(homePathUi.composerLead)).not.toBeNull();
+  it("מציג את מודל-המסע: שלוש תחנות בקבוצה אחת, שני שערים בשנייה", () => {
+    const { container, getByText } = render(<HomePathEntry />);
+    getByText(homePathUi.stationsLabel);
+    getByText(homePathUi.gatesLabel);
+
+    const stations = container.querySelectorAll(
+      '[data-kind="station"] a.situation-card',
+    );
+    const gates = container.querySelectorAll('[data-kind="gate"] a.situation-card');
+    expect(stations).toHaveLength(3);
+    expect(gates).toHaveLength(2);
+
+    // הקיבוץ נגזר מהנתונים, ולא מסדר קשיח בתבנית.
+    expect([...stations].map((a) => a.getAttribute("href"))).toEqual(
+      homePaths.filter((p) => p.kind === "station").map((p) => p.stationHref),
+    );
+    expect([...gates].map((a) => a.getAttribute("href"))).toEqual(
+      homePaths.filter((p) => p.kind === "gate").map((p) => p.stationHref),
+    );
+  });
+
+  it("אין שום אפורדנס שמתחזה לשדה-קלט, ואין כניסה לשאלון", () => {
+    const { container } = render(<HomePathEntry />);
+    // לא שדה אמיתי, ולא חיקוי שלו (התיבה הישנה + סמן-הכתיבה שלה).
+    expect(container.querySelector("input, textarea")).toBeNull();
+    expect(container.querySelector(".home-composer")).toBeNull();
+    expect(container.querySelector(".home-composer__caret")).toBeNull();
+    // ואין קישור אל הכלי מתוך הזרימה הראשית — הוא נכנס רק מדלת מסומנת.
+    const hrefs = [...container.querySelectorAll("a")].map((a) =>
+      a.getAttribute("href"),
+    );
+    expect(hrefs).not.toContain("/compass");
   });
 });

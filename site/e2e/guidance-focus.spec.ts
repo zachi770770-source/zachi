@@ -7,7 +7,11 @@ import { test, expect, type Page } from "./fixtures";
  * ה-edge cases: מוקד בתשובה, איפוס בהתחלה-מחדש, שמירת-מוקד ברענון, ו-h1 יחיד.
  */
 
-const INTRO_MARKER = "2-3 שאלות קצרות"; // צ'יפ בקליפת-הפתיח
+// הצ'יפ בקליפת-הפתיח. `exact` נדרש: אחרי ניסוח-מחדש של המצפן, אותו צירוף
+// מילים פותח גם את פסקת-הלד, ו-getByText הלא-מדויק תפס את שניהם.
+const INTRO_MARKER = "כמה שאלות קצרות";
+const introChip = (page: import("@playwright/test").Page) =>
+  page.getByText(INTRO_MARKER, { exact: true });
 
 async function walkToResult(page: Page) {
   for (let i = 0; i < 4; i++) {
@@ -24,13 +28,13 @@ test.describe("guidance focus — guided compass", () => {
     await page.goto("/compass", { waitUntil: "networkidle" });
     // before: intro (h1 + chips) is the focus.
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByText(INTRO_MARKER)).toBeVisible();
+    await expect(introChip(page)).toBeVisible();
 
     await walkToResult(page);
 
     // after: intro collapsed, answer is the focus.
     await expect(page.locator("section.answer-view article.stuck-answer")).toBeVisible();
-    await expect(page.getByText(INTRO_MARKER)).toBeHidden();
+    await expect(introChip(page)).toBeHidden();
     // exactly one h1 exposed — the AnswerView sr-only heading (intro h1 is display:none).
     await expect(page.locator("section.answer-view h1")).toHaveCount(1);
   });
@@ -38,11 +42,11 @@ test.describe("guidance focus — guided compass", () => {
   test("restarting brings the intro back (focus is reversible)", async ({ page }) => {
     await page.goto("/compass", { waitUntil: "networkidle" });
     await walkToResult(page);
-    await expect(page.getByText(INTRO_MARKER)).toBeHidden();
+    await expect(introChip(page)).toBeHidden();
 
     // "להתחיל מחדש" returns to the station step → intro reappears.
     await page.getByRole("button", { name: /להתחיל מחדש/ }).click();
-    await expect(page.getByText(INTRO_MARKER)).toBeVisible();
+    await expect(introChip(page)).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
@@ -52,7 +56,7 @@ test.describe("guidance focus — guided compass", () => {
     // the guided engine persists station+dilemma → the answer restores on reload.
     await page.reload({ waitUntil: "networkidle" });
     await expect(page.locator("section.answer-view article.stuck-answer")).toBeVisible();
-    await expect(page.getByText(INTRO_MARKER)).toBeHidden();
+    await expect(introChip(page)).toBeHidden();
   });
 
   test("mobile: the answer is focused with no horizontal overflow", async ({ page }) => {
@@ -60,7 +64,7 @@ test.describe("guidance focus — guided compass", () => {
     await page.goto("/compass", { waitUntil: "networkidle" });
     await walkToResult(page);
     await expect(page.locator("section.answer-view article.stuck-answer")).toBeVisible();
-    await expect(page.getByText(INTRO_MARKER)).toBeHidden();
+    await expect(introChip(page)).toBeHidden();
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
@@ -69,15 +73,11 @@ test.describe("guidance focus — guided compass", () => {
 });
 
 test.describe("guidance focus — embedded engines keep their own single h1", () => {
-  test("home page keeps exactly one h1 even when the inline guided engine reaches an answer", async ({ page }) => {
+  test("home page keeps exactly one h1, and no engine is embedded in it any more", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    // open the inline guided conversation from a situation starter, then walk to an answer.
-    const starter = page.getByRole("link", { name: /לפני קשר|זוגיות|פרידה|בתוך/ }).first();
-    if (await starter.count()) {
-      await starter.click().catch(() => {});
-      await walkToResult(page).catch(() => {});
-    }
-    // the embedded engine must NOT inject a second page h1 (AnswerView h1 is gated to page surfaces).
+    // אין יותר מנוע מוטמע בעמוד הבית — ולכן גם אין מסלול שבו הוא מזריק h1 שני.
     await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("section.answer-view")).toHaveCount(0);
+    await expect(page.getByRole("radio")).toHaveCount(0);
   });
 });

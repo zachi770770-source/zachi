@@ -42,10 +42,48 @@ for (const route of STATIC_ROUTES) {
   });
 }
 
-test("unknown route renders the branded 404 page", async ({ page }) => {
+/**
+ * 404 גלובלי — שתי וריאנטות שפה.
+ *
+ * העמוד נשען על `experimental.globalNotFound`: הוא עוקף את שרשרת-הרינדור,
+ * אינו מקבל את הנתיב, ולומד את השפה רק מכותרת שה-proxy מוסיף ל-‎/en.
+ * זו רגרסיה עדינה (די בשינוי ב-matcher של ה-proxy כדי שכתובת לא-קיימת תחת
+ * ‎/en תוגש שוב בעברית מימין-לשמאל), ולכן שתי הווריאנטות נבדקות במפורש —
+ * סטטוס, מיתוג, lang, dir ודרך-חזרה ללשון הנכונה.
+ */
+test("unknown Hebrew route renders the branded Hebrew 404", async ({ page }) => {
   const response = await page.goto("/this-page-does-not-exist");
   expect(response?.status()).toBe(404);
   await expect(page.getByRole("heading", { name: "העמוד לא נמצא" })).toBeVisible();
+
+  const root = page.locator("html");
+  await expect(root).toHaveAttribute("lang", "he");
+  await expect(root).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("link", { name: "חזרה לעמוד הבית" })).toHaveAttribute(
+    "href",
+    "/"
+  );
+  await expect(page).toHaveTitle(/העמוד לא נמצא/);
+});
+
+test("unknown English route renders the branded English 404", async ({ page }) => {
+  const response = await page.goto("/en/this-page-does-not-exist");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+
+  const root = page.locator("html");
+  await expect(root).toHaveAttribute("lang", "en");
+  await expect(root).toHaveAttribute("dir", "ltr");
+  await expect(page).toHaveTitle(/Page not found/);
+
+  // דרך חזרה ברורה אל האתר האנגלי — לא אל הבית העברי.
+  const back = page.getByRole("link", { name: /^Back to / });
+  await expect(back).toBeVisible();
+  await expect(back).toHaveAttribute("href", "/en");
+
+  // ולא נותרה עברית על המסך האנגלי.
+  const body = await page.locator("body").innerText();
+  expect(body).not.toMatch(/[֐-׿]/);
 });
 
 test("header and footer links all resolve (no broken internal links)", async ({ page }) => {
@@ -228,7 +266,7 @@ test("/compass is an active deterministic closed route (closed choices, no free 
 }) => {
   const res = await page.goto("/compass", { waitUntil: "networkidle" });
   expect(res?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("מה הספר אומר על המצב שלי?");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("איפה להתחיל בספר?");
   // מסך פתיחה: בחירת תחנה — בחירות סגורות (radiogroup), ללא טקסט חופשי.
   await expect(page.getByRole("heading", { name: "איפה אתם עכשיו?" })).toBeVisible();
   await expect(page.getByRole("radiogroup")).toHaveCount(1);

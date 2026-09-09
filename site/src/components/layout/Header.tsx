@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { siteConfig } from "@/config/site";
 import { isEnglishPath } from "@/lib/language";
 import { Button } from "@/components/ui/button";
+import { HeaderCtaScope } from "@/components/layout/HeaderCtaScope";
 import { MainNav } from "@/components/layout/MainNav";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
@@ -27,13 +28,21 @@ import { BrandMark } from "@/components/shared/BrandMark";
  * ולכן הוא קישור חיצוני ולא ניווט פנימי אל „/book#purchase” העברי.
  */
 export function Header() {
-  const english = isEnglishPath(usePathname());
+  const pathname = usePathname();
+  const english = isEnglishPath(pathname);
+  // ההצגה נקבעת בשרת לפי המסלול, ולא אחרי הידרציה. בעמוד הבית הפעולה הנכונה
+  // מעל הקיפול היא הטעימה, ולכן כפתור-הרכישה נצבע שקט *כבר בצביעה הראשונה*;
+  // בכל עמוד אחר המבקר כבר בשקילת-מוצר, ולכן הוא בולט מיד. אין מסלול שבו
+  // המראה מתקן את עצמו אחרי טעינת ה-JS.
+  const buyTone = pathname === "/" ? "quiet" : "strong";
   const edition = siteConfig.englishEdition;
 
   const brandLabel = english ? edition.title : siteConfig.bookTitle;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+      {/* קובע `data-past-hero` על ה-root — ראו HeaderCtaScope. */}
+      <HeaderCtaScope />
       <div
         className="container-page flex h-16 items-center justify-between gap-1.5 sm:h-[76px] sm:gap-4"
         {...(english ? { lang: "en", dir: "ltr" } : {})}
@@ -69,7 +78,7 @@ export function Header() {
 
           {/* גובה 44px (h-11) — יעד-מגע תקין במובייל, תואם את כפתור ההמבורגר
               שלצדו, ונשאר בתוך גובה ההדר (h-16). הרוחב נשאר קומפקטי (px-3). */}
-          <Button asChild size="sm" className="h-11 px-2 text-[13px]">
+          <Button asChild size="sm" data-cta={buyTone} className="header-buy h-11 px-2 text-[13px]">
             {english ? (
               <a href={edition.url} target="_blank" rel="noopener noreferrer">
                 {edition.buyLabel}

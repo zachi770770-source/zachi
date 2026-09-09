@@ -16,16 +16,20 @@ import { recognition, whyTheBook, authorNote, closing } from "../src/content/hom
  */
 
 test.describe("home conversion arc", () => {
-  test("the six beats render in the intended emotional order", async ({ page }) => {
+  test("the beats render in the intended order — trust and product before personalisation", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
+    // הסדר הזה הוא הלב של שינוי-המבנה. קודם המבקר התבקש לסווג את עצמו (#path)
+    // *לפני* שראה מי כתב את הספר ולפני שנאמר לו מה הספר נותן. עכשיו עמוד השדרה
+    // הוא: רעיון → זיהוי → אמון → מה הספר נותן → טעימה → (ניווט אישי) → רכישה.
     const order = [
-      "main > section:first-of-type", // Hero — סקרנות
+      "main > section:first-of-type", // Hero — הרעיון
       "[aria-labelledby='recognition-heading']", // זיהוי
-      "#path", // בחירת תחנה
-      "[aria-labelledby='author-note-heading']", // אמון
-      "[aria-labelledby='why-book-heading']", // רצון
-      "#get-the-book", // פעולה
+      "[aria-labelledby='author-note-heading']", // אמון — מי כתב
+      "[aria-labelledby='why-book-heading']", // מה הספר נותן
+      "#sample-bridge", // טעימה
+      "#path", // ניווט אישי, אחרי הטיעון ולא לפניו
+      "#get-the-book", // רכישה
     ];
 
     const tops: number[] = [];

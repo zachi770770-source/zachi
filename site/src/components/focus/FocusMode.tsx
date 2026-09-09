@@ -3,179 +3,82 @@
 import * as React from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
-import { focusUi, focusSituations, getFocusSituation } from "@/content/focusMode";
+import { focusUi, getFocusSituation } from "@/content/focusMode";
 import type { HomePathId } from "@/content/homePaths";
 import { withViewTransition } from "@/lib/motion/viewTransition";
 
 /**
- * Focus Mode — חוויית „איפה זה פוגש אותך עכשיו?”.
+ * „עובדה מול סיפור” — **הדגמה אחת של רעיון אחד מהספר**, בשני שלבים.
  *
- * לא שאלון עם כרטיסים שמתחלפים: כניסה למצב היא *השתלטות* אימרסיבית — משטח כהה
- * ועמוק שבו הסביבה נסוגה — והחוויה מתקדמת כרצף של ארבע פעימות, שלכל אחת
- * composition שונה בהתאם למשמעותה, ובשלוש שכבות-תנועה שנועדו להיות הבסיס לשפת-
- * התנועה של האתר (ראו `.fm-*` ב-globals.css):
+ * מה זה היה, ומה זה עכשיו:
  *
- *   1. Enter   — המצב שנבחר עולה גדול ודומיננטי (ממשיך/morph מהכרטיס).
- *   2. Split   — הרגע נפרד לשני צדדים שמתחילים קרובים ואז *נפתחים* זה מזה;
- *                הפער מורגש גם בלי לקרוא (עובדה = Sage, סיפור = Terracotta).
- *   3. Aha     — הרגע המרכזי: משפט-ההפרדה בטיפוגרפיה גדולה, ניגודיות-רקע
- *                משתנה ו-whitespace. הסיפור נסוג לגמרי; העובדה מאושרת.
- *   4. Action  — שלב חדש ונקי (משטח בהיר), מסגור-הפעולה מהספר וה-CTA.
+ * קודם זו הייתה במה בת ארבע פעימות עם סרגל-לשוניות של ארבעה מצבים, מחוון-
+ * שלבים, וכפתור-סיום שלא ניווט לשום מקום אלא פתח שאלון נוסף — והכול ישב
+ * *בתוך הגלילה הראשית של עמוד הבית*, בין פסקה עריכתית לפסקה עריכתית. מבקר
+ * שהגיע מגוגל לספר דייטינג נתקל בתרגיל בן ארבעה שלבים, בשפה של גיליון-עבודה
+ * טיפולי, לפני שראה מה הספר בכלל מציע.
  *
- * המשכיות-אלמנט (shared-element) דרך View Transitions API (feature-detected,
- * מגודר ב-`.motion-js`): כותרת-המצב נושאת `view-transition-name: fm-title`
- * ומתמזגת מהכרטיס דרך כל הפעימות; פסקת-העובדה נושאת `fm-fact` ומתמזגת מהנתיב
- * אל אישור ה-Aha. ללא תמיכה / reduced-motion / ללא-JS — אותה זרימה בדיוק,
- * במעברי-מצב מיידיים (המצב הסופי תמיד קריא ונגיש).
+ * עכשיו:
+ *   • **opt-in בלבד** — הוא נכנס רק מתוך /method/fact-story, בלחיצה מפורשת.
+ *     הוא אינו קיים בעמוד הבית.
+ *   • **שני שלבים** — הפיצול, וההבנה. תחת 30 שניות.
+ *   • **בלי chrome של אפליקציה** — אין לשוניות-מצבים ואין מחוון-שלבים.
+ *   • **הדוגמה מוצהרת כדוגמה מהספר**, ולא מתחזה לרגע של המבקר.
+ *   • **יציאה אחת, אמיתית** — `<Link href="/book">`. לא שאלון, לא החלפת-מקטע.
  *
- * שכבת-בסיס: הרכיב עולה רק כשיפור-הדרגתי (JS). כרטיסי-המצב נשארים `<a>` אמיתיים
- * ב-`HomePathEntry`. ה-CTA „המשיכו עם הספר” ממשיך אל השיחה (`HomeConversation`).
+ * שכבת-בסיס: הרכיב הוא שיפור-הדרגתי. תוכן הכלי עצמו קיים ונקרא בעמוד גם בלי
+ * JS; זו הדגמה מעליו, לא תחליף לו.
  */
 
-const STAGE_ORDER = ["enter", "split", "aha", "action"] as const;
-type Stage = (typeof STAGE_ORDER)[number];
+type Stage = "split" | "aha";
 
 export function FocusMode({
   situationId,
-  onContinue,
-  onBack,
-  onSwitch,
+  onClose,
 }: {
   situationId: HomePathId;
-  /** ממשיך אל השיחה הדטרמיניסטית של המצב (נחשף בשלב הפעולה). */
-  onContinue: () => void;
-  /** חזרה לבחירת-המצב. */
-  onBack: () => void;
-  /** מעבר ישיר למצב אחר — בלי לחזור לרשת (החלפה אלגנטית). */
-  onSwitch?: (id: HomePathId) => void;
+  /** סגירת ההדגמה וחזרה לעמוד. */
+  onClose: () => void;
 }) {
   const s = getFocusSituation(situationId);
-  const [stage, setStage] = React.useState<Stage>("enter");
+  const [stage, setStage] = React.useState<Stage>("split");
   const stageRef = React.useRef<HTMLDivElement>(null);
-  const stepIndex = STAGE_ORDER.indexOf(stage);
 
-  // מעבר-פעימה בתוך View Transition; flushSync כדי שה-DOM החדש ייצולם למיזוג.
   const go = (next: Stage) => {
     withViewTransition(() => flushSync(() => setStage(next)));
   };
 
-  // בטעינה: ממסגרים את הבמה. הבמה האימרסיבית גבוהה ומחליפה כרטיסים נמוכים, ולכן
-  // מול מיקום-הגלילה הקודם תוכנהּ עלול לצאת מהמסך — גוללים אותה לראש התצוגה,
-  // מתחת לכותרת הדביקה (scroll-margin-top ב-CSS). פעם אחת, בכניסה למצב.
+  // פוקוס אל הבמה בכל החלפת-שלב (קורא/ת-מסך). אין כאן עוד רשת-ביטחון לגלילה:
+  // הבמה בת שני שלבים בגובה דומה, ואין קפיצת-פריסה שדורשת מסגור מחדש.
   React.useEffect(() => {
-    const el = stageRef.current;
-    if (!el || typeof el.scrollIntoView !== "function") return;
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
-  }, []);
-
-  // בכל החלפת-פעימה: פוקוס אל הבמה (קורא/ת-מסך), ורשת-ביטחון נגד סחיפת-גלילה —
-  // אם גובה-התוכן בין הפעימות הזיז את הבמה מחוץ למסגרת, מחזירים אותה. `overflow-
-  // anchor: none` ב-CSS אמור למנוע זאת, אך הסחיפה יכולה לקרות גם *אחרי* שה-View
-  // Transition מתיישב, ולכן בודקים בכמה נקודות-זמן (כולל מעבר לאורך ה-VT).
-  React.useEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    el.focus({ preventScroll: true });
-    if (typeof el.scrollIntoView !== "function") return;
-    const keepFramed = () => {
-      const top = el.getBoundingClientRect().top;
-      const headerH =
-        parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue("--header-height"),
-          10,
-        ) || 64;
-      if (top < 0 || top > headerH + 150) {
-        el.scrollIntoView({ block: "start", behavior: "auto" });
-      }
-    };
-    const raf = requestAnimationFrame(keepFramed);
-    const timers = [120, 380, 760].map((t) => window.setTimeout(keepFramed, t));
-    return () => {
-      cancelAnimationFrame(raf);
-      timers.forEach(clearTimeout);
-    };
+    stageRef.current?.focus({ preventScroll: true });
   }, [stage]);
 
   return (
     <div
       ref={stageRef}
       tabIndex={-1}
-      className="home-focus fm-stage"
+      className="home-focus fm-stage fm-stage--compact"
       role="region"
       aria-label={focusUi.regionLabel}
       data-stage={stage}
       data-situation={situationId}
     >
-      {/* עומק-רקע (controlled gradients) + נשימת-Ambient — דקורטיביים בלבד. */}
       <span className="fm-bg" aria-hidden="true" />
-      <span className="fm-ambient" aria-hidden="true" />
 
       <div className="fm-shell">
         <div className="fm-topbar">
-          <button type="button" onClick={onBack} className="fm-back">
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          <button type="button" onClick={onClose} className="fm-back">
             {focusUi.backLabel}
           </button>
-          {/* מחוון-פעימות (רצף של ארבעה מסכים) — דקורטיבי. */}
-          <span className="fm-steps" aria-hidden="true">
-            {STAGE_ORDER.map((st, i) => (
-              <span
-                key={st}
-                className="fm-steps__dot"
-                data-on={i <= stepIndex ? "true" : undefined}
-              />
-            ))}
-          </span>
-          {/* הקשר-המצב הקבוע — המצב שנבחר נשאר גלוי לאורך כל הפעימות. */}
-          <span className="fm-status" aria-hidden="true">
-            <span className="fm-status__dot" />
-            {s.title}
-          </span>
-          {/* החלפת-מצב אלגנטית: כל ארבעת המצבים נשארים בהישג-יד; הנבחר מודגש
-              והאחרים שקטים — בלי לחזור לרשת ובלי לאבד את ההקשר. */}
-          {onSwitch ? (
-            <span className="fm-switch" role="group" aria-label={focusUi.regionLabel}>
-              {focusSituations.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  className="fm-switch__chip"
-                  aria-current={f.id === situationId ? "true" : undefined}
-                  onClick={() => f.id !== situationId && onSwitch(f.id)}
-                >
-                  {f.title}
-                </button>
-              ))}
-            </span>
-          ) : null}
+          {/* מסגור-האמת: זו דוגמה מהספר, לא הרגע שלכם. */}
+          <span className="fm-status">{focusUi.exampleNote}</span>
         </div>
-
-        {stage === "enter" && (
-          <div className="fm-scene fm-scene--enter">
-            {/* סמן-מצב עריכתי (שם התחנה) לפני הקיקר המשותף — כל תוצאה מזוהה
-                מיד עם המצב שנבחר, באותה שפה עיצובית. */}
-            <p className="fm-eyebrow">
-              <span className="fm-marker">{s.marker}</span>
-              {focusUi.eyebrow}
-            </p>
-            <h3 className="fm-title fm-title--hero">{s.title}</h3>
-            <span className="fm-title-rule" aria-hidden="true" />
-            <p className="fm-lede">{focusUi.intro}</p>
-            <div className="fm-cta-row">
-              <button type="button" onClick={() => go("split")} className="fm-cta fm-cta--ghost">
-                {focusUi.enterCta}
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        )}
 
         {stage === "split" && (
           <div className="fm-scene fm-scene--split">
-            <h3 className="fm-title fm-title--mini">{s.title}</h3>
             <div className="fm-duo">
               <div className="fm-side fm-side--fact">
                 <span className="fm-side__tag">{focusUi.factTag}</span>
@@ -203,30 +106,13 @@ export function FocusMode({
               <p className="fm-aha__line">{focusUi.ahaHeadline}</p>
               <p className="fm-aha__note">{focusUi.separationLine}</p>
             </div>
+            <p className="fm-bridge">{s.bridge}</p>
+            {/* היציאה היחידה, וקישור אמיתי. */}
             <div className="fm-cta-row">
-              <button type="button" onClick={() => go("action")} className="fm-cta fm-cta--quiet">
-                {focusUi.ahaCta}
+              <Link href="/book" className="fm-cta fm-cta--brand">
+                {focusUi.continueLabel}
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {stage === "action" && (
-          <div className="fm-scene fm-scene--action">
-            <div className="fm-panel">
-              <p className="fm-eyebrow fm-eyebrow--brand">{focusUi.actionEyebrow}</p>
-              <p className="fm-lede fm-lede--ink">{focusUi.actionIntro}</p>
-              <p className="fm-bridge">{s.bridge}</p>
-              <div className="fm-actions">
-                <button type="button" onClick={onContinue} className="fm-cta fm-cta--brand">
-                  {focusUi.continueLabel}
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                </button>
-                <Link href={s.stationHref} className="fm-cta fm-cta--link">
-                  {s.stationLabel}
-                </Link>
-              </div>
+              </Link>
             </div>
           </div>
         )}

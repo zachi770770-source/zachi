@@ -28,112 +28,38 @@ const settle = (page: Page) =>
     await Promise.race([Promise.all(running), new Promise((r) => setTimeout(r, 1500))]);
   });
 
-test.describe("home — inline recognition and the travelling marker", () => {
-  test("selecting a state keeps the cards, marks it, moves the marker and shows that state's copy", async ({
-    page,
-  }) => {
-    await consent(page);
-    await page.goto("/");
-    await page.locator("#path").scrollIntoViewIfNeeded();
-    await settle(page);
-
-    const cards = page.locator("a.situation-card");
-    await expect(cards).toHaveCount(4);
-
-    await page.locator('a[data-index="0"]').click();
-    await settle(page);
-
-    // הכרטיסים נשארים — אין החלפת-תוכן חדה
-    await expect(cards).toHaveCount(4);
-    await expect(page.locator('a[data-index="0"]')).toHaveAttribute("aria-current", "true");
-
-    const panel = page.locator(".path-recognition");
-    await expect(panel).toBeVisible();
-    const firstCopy = await panel.locator(".path-recognition__lead").innerText();
-    expect(firstCopy.length).toBeGreaterThan(10);
-
-    // הסמן יושב על הכרטיס הנבחר (מרכז מול מרכז)
-    const markerCentre = async () => {
-      const b = await page.locator(".path-marker").boundingBox();
-      return b ? b.x + b.width / 2 : null;
-    };
-    const cardCentre = async (i: number) => {
-      const b = await page.locator(`a[data-index="${i}"]`).boundingBox();
-      return b ? b.x + b.width / 2 : null;
-    };
-    expect(Math.abs((await markerCentre())! - (await cardCentre(0))!)).toBeLessThan(4);
-
-    // מעבר למצב אחר — הסמן נוסע והתוכן מתחלף במלואו
-    await page.locator('a[data-index="2"]').click();
-    await settle(page);
-    expect(Math.abs((await markerCentre())! - (await cardCentre(2))!)).toBeLessThan(4);
-    const secondCopy = await panel.locator(".path-recognition__lead").innerText();
-    expect(secondCopy).not.toBe(firstCopy);
+/**
+ * הבחירה-במקום והסמן-הנוסע הוסרו יחד עם השלב שהם שירתו: כרטיס-מצב הוא עכשיו
+ * קישור, ולחיצה עליו מנווטת. הבדיקות שקיבעו את אותו שלב-ביניים הוחלפו בטענה
+ * ההתנהגותית שנכונה עכשיו — ושהיא חזקה יותר, כי היא מאמתת ניווט אמיתי ולא
+ * שינוי-מחלקה.
+ */
+test.describe("home — כרטיסי-המצב מנווטים", () => {
+  test("לחיצה על כרטיס מגיעה לעמוד-המסע, בלי שלב-ביניים", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    const card = page.locator('#path a.situation-card[href="/inside-relationship"]');
+    await card.scrollIntoViewIfNeeded();
+    await Promise.all([page.waitForURL(/\/inside-relationship$/), card.click()]);
   });
 
-  test("rapid reselection leaves no stale copy", async ({ page }) => {
-    await consent(page);
-    await page.goto("/");
-    await page.locator("#path").scrollIntoViewIfNeeded();
-    await settle(page);
-
-    await page.locator('a[data-index="1"]').click();
-    await page.locator('a[data-index="3"]').click();
-    await page.locator('a[data-index="2"]').click();
-    await settle(page);
-
-    await expect(page.locator('a[data-index="2"]')).toHaveAttribute("aria-current", "true");
-    // הכותרת חייבת להיות של המצב שנבחר אחרון — נגזרת מהכרטיס עצמו
-    const chosen = await page.locator('a[data-index="2"] span').nth(1).innerText();
-    expect(chosen.length).toBeGreaterThan(2);
-    await expect(page.locator(".path-recognition")).toHaveCount(1);
-  });
-
-  test("keyboard can reach and activate a state", async ({ page }) => {
-    await consent(page);
-    await page.goto("/");
-    await page.locator("#path").scrollIntoViewIfNeeded();
-    await settle(page);
-    await page.locator('a[data-index="0"]').focus();
-    await page.keyboard.press("Enter");
-    await settle(page);
-    await expect(page.locator('a[data-index="0"]')).toHaveAttribute("aria-current", "true");
-    await expect(page.locator(".path-recognition")).toBeVisible();
+  test("מקלדת: פוקוס על כרטיס ו-Enter מנווטים", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+    const card = page.locator('#path a.situation-card[href="/after-breakup"]');
+    await card.scrollIntoViewIfNeeded();
+    await card.focus();
+    await expect(card).toBeFocused();
+    await Promise.all([page.waitForURL(/\/after-breakup$/), page.keyboard.press("Enter")]);
   });
 });
 
-test.describe("search → build", () => {
-  test("starts scattered and ends constructed", async ({ page }) => {
-    await consent(page);
-    await page.goto("/");
-    await settle(page);
-
-    const spread = () =>
-      page.evaluate(() => {
-        const tops = [...document.querySelectorAll(".s2b__pt")].map(
-          (e) => e.getBoundingClientRect().top,
-        );
-        return Math.round(Math.max(...tops) - Math.min(...tops));
-      });
-
-    // לפני הכניסה לתצוגה: הנקודות מפוזרות אנכית
-    const top = await page.evaluate(
-      () => Math.round(document.querySelector(".s2b")!.getBoundingClientRect().top + scrollY),
-    );
-    await page.evaluate(() => scrollTo({ top: 0, behavior: "auto" }));
-    await page.waitForTimeout(300);
-    await page.evaluate((y) => scrollTo({ top: y - 300, behavior: "auto" }), top);
-    expect(await spread()).toBeGreaterThan(20); // פיזור אמיתי
-
-    await settle(page);
-    expect(await spread()).toBeLessThanOrEqual(1); // יישור מלא
-    // והציר מחבר אותן
-    const rail = await page.evaluate(
-      () => getComputedStyle(document.querySelector(".s2b__rail")!).transform,
-    );
-    expect(rail).toMatch(/matrix\(1,/);
-  });
-
+/**
+ * סצנת „מחיפוש לבנייה” הוסרה מעמוד הבית: נמדד שהיא מתייצבת מחוץ למסך וברוב
+ * הגלילות נראית כשורת-כיתוב ותשע נקודות, וכן שהיא כפילות חלשה של סצנת-התזה
+ * ב-/book (שנשארת ונבדקת שם). לכן שתי הטענות על פיזור→מבנה ירדו יחד איתה.
+ * מה שנשמר: השמירה שניווט-hash אינו נתקע — היא לא הייתה על הסצנה אלא על
+ * העמוד כולו.
+ */
+test.describe("home — ניווט", () => {
   test("hash navigation does not stall", async ({ page }) => {
     await consent(page);
     const t0 = Date.now();
@@ -224,7 +150,7 @@ test.describe("reveals never strand content", () => {
 
       const worstHidden = await page.evaluate(async () => {
         const sel =
-          ".reveal, .build-focus, .s2b__line, .quiet-demo__fact, .quiet-demo__story, .path-recognition, .peek__leaf[data-state='current']";
+          ".reveal, .build-focus, .quiet-demo__fact, .quiet-demo__story, .peek__leaf[data-state='current']";
         const hidden = () => {
           const vh = innerHeight;
           return [...document.querySelectorAll(sel)].filter((e) => {
@@ -264,29 +190,7 @@ test.describe("reveals never strand content", () => {
 test.describe("reduced motion", () => {
   // הקשר ייעודי במקום test.use — כך ההעדפה חלה בוודאות על העמוד שנבדק,
   // ולא תלויה בהגדרת-פרויקט.
-  test("search → build starts already constructed and nothing animates", async ({ browser, baseURL }) => {
-    const ctx = await browser.newContext({ reducedMotion: "reduce" });
-    const page = await ctx.newPage();
-    await consent(page);
-    await page.goto(new URL("/", baseURL).toString());
-    await page.locator(".s2b").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(900);
-
-    const state = await page.evaluate(() => {
-      const tops = [...document.querySelectorAll(".s2b__pt")].map(
-        (e) => e.getBoundingClientRect().top,
-      );
-      return {
-        spread: Math.round(Math.max(...tops) - Math.min(...tops)),
-        running: document.getAnimations().filter((a) => a.playState === "running").length,
-        lineVisible: Number(getComputedStyle(document.querySelector(".s2b__line")!).opacity),
-      };
-    });
-    expect(state.spread).toBeLessThanOrEqual(1);
-    expect(state.running).toBe(0);
-    expect(state.lineVisible).toBeGreaterThan(0.99);
-    await ctx.close();
-  });
+  // (הוסר) — סצנת „מחיפוש לבנייה” אינה קיימת עוד בעמוד הבית.
 
   test("peek turns instantly and the author portrait does not drift", async ({ browser, baseURL }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce" });

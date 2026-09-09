@@ -15,7 +15,7 @@ export function MethodSection() {
   return (
     <section
       id="method"
-      className="scroll-mt-20 py-24 sm:py-32"
+      className="scroll-mt-20 py-16 sm:py-20"
       aria-labelledby="method-heading"
     >
       <Container>

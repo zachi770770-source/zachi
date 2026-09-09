@@ -6,7 +6,7 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
 import { MethodFilterMap } from "@/components/methods/MethodFilterMap";
-import { MethodFactStory } from "@/components/methods/MethodFactStory";
+import { MethodFocusDemo } from "@/components/methods/MethodFocusDemo";
 import { MethodAnchor } from "@/components/methods/MethodAnchor";
 import { MethodQuietCheck } from "@/components/methods/MethodQuietCheck";
 import { SignatureMark } from "@/components/shared/SignatureMark";
@@ -101,7 +101,10 @@ export function MethodPage({ method }: { method: Method }) {
             „מפת הסינון” לקו-אדום-מול-גמישות; „רגע אחד — שלוש שכבות” לעובדה/סיפור/
             פעולה. לכל היותר אחד מהם קיים למושג נתון. */}
         {method.filterMap ? <MethodFilterMap map={method.filterMap} /> : null}
-        {method.factStory ? <MethodFactStory lab={method.factStory} /> : null}
+        {/* „עובדה מול סיפור” — הדגמה אחת בלבד באתר, ובבחירה מפורשת.
+            `MethodFactStory` (שבבי „מה קרה בפועל?”) הוסר: הוא היה מימוש שני
+            של אותה הפרדה, ופתח בשאלת-סיווג עצמית — הדפוס שנמחק מכל האתר. */}
+        {method.factStory ? <MethodFocusDemo situationId="existing" /> : null}
         {/* עוגן חזותי סטטי — לעמודי-המושג שאין להם אינטראקציה. תופס את אותו חריץ
             (אחרי הפתיח, לפני הגוף) כדי לשמור על מקצב זהה לשני העמודים העשירים. */}
         {method.anchor ? <MethodAnchor anchor={method.anchor} /> : null}

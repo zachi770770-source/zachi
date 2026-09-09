@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Pool } from "pg";
 
-import { POST } from "@/app/api/waitlist/route";
+import { POST } from "@/app/(he)/api/waitlist/route";
 
 /**
  * בדיקת אינטגרציה מול Postgres אמיתי. מדלגת אלא אם הוגדר WAITLIST_PG_URL,

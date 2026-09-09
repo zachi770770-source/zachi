@@ -14,7 +14,16 @@ import { attachment } from "@/content/book";
  * חמישה צעדים, בלי חמישה כרטיסים), וה-CTA עבר לצבע-המערכת (פטרול + שנהב)
  * במקום `bg-foreground` — היררכיית-הפעולות שכבר אושרה.
  */
-export function AttachmentSection() {
+export function AttachmentSection({
+  /**
+   * „book” — הבלוק מוצג מחוץ לעמוד-המדריך ולכן נושא קישור-העמקה אליו.
+   * „guide” — הבלוק כבר *בתוך* עמוד-המדריך; קישור לעצמו הוא קישור מת, ולכן
+   * הוא אינו מוצג. אותו תוכן, בלי הפניה מעגלית.
+   */
+  context = "book",
+}: {
+  context?: "book" | "guide";
+} = {}) {
   return (
     <section
       id="attachment"
@@ -77,15 +86,20 @@ export function AttachmentSection() {
               {attachment.reflectCtaLabel}
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </Link>
-            {/* קישור-עוגן אחד למדריך סגנונות ההתקשרות — הרחבה של הריקוד שמתואר כאן. */}
-            <p className="mt-4 text-[14.5px] leading-relaxed text-foreground-muted">
-              <Link
-                href="/guide/attachment-styles"
-                className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-              >
-                להבין לעומק: סגנונות התקשרות בזוגיות, חרדתי, נמנע ומה קורה ביניהם
-              </Link>
-            </p>
+            {/* קישור-עוגן אחד למדריך סגנונות ההתקשרות — הרחבה של הריקוד שמתואר
+                כאן. אינו מוצג כשהבלוק עצמו יושב בתוך אותו מדריך: קישור לעצמו
+                אינו הרחבה. הפסקה כולה יורדת, ולא רק הקישור, כדי שלא יישאר
+                ריווח של אלמנט ריק. */}
+            {context === "book" ? (
+              <p className="mt-4 text-[14.5px] leading-relaxed text-foreground-muted">
+                <Link
+                  href="/guide/attachment-styles"
+                  className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  להבין לעומק: סגנונות התקשרות בזוגיות, חרדתי, נמנע ומה קורה ביניהם
+                </Link>
+              </p>
+            ) : null}
           </div>
         </Reveal>
       </Container>

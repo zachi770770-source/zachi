@@ -1,4 +1,5 @@
 import { test, expect } from "./fixtures";
+import { sampleCtaLabel } from "../src/content/sample";
 
 /**
  * Conversion + Trust + Positioning (טרום-השקה). מאמת את כוונת-המוצר החדשה בבית:
@@ -30,7 +31,7 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     const hero = page.locator("main section").first();
     // שתי פעולות בהיררכיה ברורה: ראשית (טעימה) ומשנית (רכישה) — יחד ליד ה-CTA.
     await expect(
-      hero.getByRole("link", { name: "קראו טעימה מהספר · 2 דקות" }),
+      hero.getByRole("link", { name: sampleCtaLabel() }),
     ).toBeVisible();
     await expect(
       hero.getByRole("link", { name: /לרכישת הספר באמזון/ }),
@@ -43,38 +44,28 @@ test.describe("Conversion + Trust + Positioning (pre-launch)", () => {
     ).toHaveCount(0);
   });
 
-  test("#4 Ask-the-book entry point: the free-text composer lives in the path section, still linking to /compass (no-JS)", async ({
+  test("#4 הכניסה לכלי: דלת מסומנת אחת, ואפס אפורדנס מזויף", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "networkidle" });
-    const hero = page.locator("main section").first();
-    // אינו עוד בשער — לא מתחרה בשתי הפעולות הראשיות.
-    await expect(
-      hero.getByRole("link", { name: /ספרו לי מה קורה אצלכם/ }),
-    ).toHaveCount(0);
-    // חי במקטע השיחה (#path) כתיבת-כתיבה חופשית ראשית. ללא JS זהו קישור אמיתי אל
-    // /compass (אותו מנוע); הכיתוב מזמין לכתוב במילים שלכם.
-    const path = page.locator("#path");
-    const ask = path.getByRole("link", { name: /ספרו לי מה קורה אצלכם/ });
-    await expect(ask).toHaveAttribute("href", "/compass");
-    await expect(path.getByText(/ספרו לי מה קורה אצלכם/)).toBeVisible();
+    // הבדיקה הזו התהפכה במכוון. קודם היא אישרה שתיבה שנראית כמו שדה-כתיבה
+    // („ספרו לי מה קורה אצלכם…”) יושבת ב-#path ומקשרת ל-/compass — כלומר היא
+    // שמרה בקפידה על אפורדנס שהזמין להקליד והוביל לשאלון. עכשיו היא אוכפת את
+    // ההפך: אין תיבה כזו בשום מקום, ויש דלת אחת, מנוסחת כמו מה שהיא עושה.
+    await expect(page.getByText(/ספרו לי מה קורה אצלכם/)).toHaveCount(0);
+    await expect(page.locator("#path .home-composer")).toHaveCount(0);
+    await expect(page.locator("#path input, #path textarea")).toHaveCount(0);
+
+    const door = page.locator(".deeper-entry a[href='/compass']");
+    await expect(door).toHaveCount(1);
+    await expect(door).toContainText("איפה להתחיל בספר");
+    // והדלת אינה פעולה ראשית: קישור-טקסט, לא כפתור מלא.
+    await expect(door).not.toHaveClass(/\bbg-/);
   });
 
-  test("#4b Floating ask-the-book bubble carries an explanatory label (tooltip + aria)", async ({
-    browser,
-  }) => {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    const page = await ctx.newPage();
-    await page.goto("/", { waitUntil: "networkidle" });
-    // גוללים אל מעבר למקטע-השיחה (לתחתית העמוד): שם הבועה נחשפת — היא מוסתרת רק
-    // כשמקטע-השיחה עצמו במסך, כדי לא להתחרות בו.
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    const bubble = page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / });
-    await expect(bubble).toHaveCSS("opacity", "1", { timeout: 4000 });
-    // תווית מסבירה (title) — לא רק אייקון/מילה בודדת.
-    await expect(bubble).toHaveAttribute("title", /שאלות קצרות/);
-    await ctx.close();
-  });
+  // (הוסר) — הבועה הצפה הוסרה מכל האתר: במובייל היא כיסתה, יחד עם
+  // בר-הטעימה, את ה-CTA הסוגר של עמוד הבית. הכלי נכנס עכשיו מדלת מסומנת
+  // אחת, ובדיקת-הכניסה אליו נמצאת ב-engagement.spec.ts.
 
   // רצועת-האמון (`trust-heading`) הוסרה: תוכנה העיקרי היה גילוי-נאות, ולכן
   // הדבר היחיד שעמוד הבית אמר על המחבר היה מה שהוא *אינו*. ביט-המחבר החליף

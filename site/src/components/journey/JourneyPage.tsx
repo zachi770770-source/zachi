@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { getJourneyFlow } from "@/content/journeyFlow";
 import { Container } from "@/components/shared/Container";
 import { JourneyWayfinder } from "@/components/journey/JourneyWayfinder";
+import { BookCover } from "@/components/shared/BookCover";
 import { JourneyNext } from "@/components/journey/JourneyNext";
 import { JourneyInteraction } from "@/components/journey/JourneyInteraction";
 import { JourneyMirror } from "@/components/journey/JourneyMirror";
@@ -193,6 +194,31 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
                 זה לצד זה נקראו כשתי מערכות-התקדמות שונות באותו מסך. הסימן
                 החתום נשאר בבית ובפוטר; כאן המשמעות היא מיקום במסע. */}
             <JourneyWayfinder journeyId={journey.id} />
+            {/* הספר, מוקדם. עמוד-מסע הוא עמוד ארוך (5,200–5,900px), והכריכה
+                הופיעה בו לראשונה סביב y≈3,400 — כלומר מבקר שנחת מהבית ראה
+                כמעט שני מסכים של פרוזה לפני שראה שיש כאן מוצר בכלל. */}
+            {/* div ולא p: `BookCover` מרנדר <div>, ו-<p> אינו יכול להכיל
+                אלמנט בלוק — הפרסר היה מוציא אותו החוצה, עץ-הלקוח לא היה תואם
+                את ה-HTML מהשרת, ו-React נפל ל-hydration mismatch (#418) בכל
+                חמשת עמודי-המסע. */}
+            <div className="journey-book-early">
+              <BookLink href={previewHref} className="journey-book-early__link" morphCover>
+                <span className="journey-book-early__cover" aria-hidden="true">
+                  <BookCover />
+                </span>
+                <span>
+                  <span className="journey-book-early__label">מתוך הספר</span>
+                  {/* תווית קצרה ומובחנת. שימוש ב-`samplePrimaryLabel` כאן יצר
+                      שני קישורים עם *אותו* שם-נגישות ואותו יעד באותו עמוד —
+                      כפילות אמיתית, לא רק בעיית-בדיקה. הניסוח המפורט נשאר
+                      במקטע-הטעימה הייעודי שלמטה. */}
+                  <span className="journey-book-early__cta">
+                    קראו טעימה
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                </span>
+              </BookLink>
+            </div>
           </div>
           <div
             className={cn(
@@ -227,6 +253,31 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
           </p>
           {/* הסימן החתום „מחיפוש לבנייה” — עמוד-המסע הוא ביטוי-העל שלו. */}
           <JourneyWayfinder journeyId={journey.id} align="center" />
+            {/* הספר, מוקדם. עמוד-מסע הוא עמוד ארוך (5,200–5,900px), והכריכה
+                הופיעה בו לראשונה סביב y≈3,400 — כלומר מבקר שנחת מהבית ראה
+                כמעט שני מסכים של פרוזה לפני שראה שיש כאן מוצר בכלל. */}
+            {/* div ולא p: `BookCover` מרנדר <div>, ו-<p> אינו יכול להכיל
+                אלמנט בלוק — הפרסר היה מוציא אותו החוצה, עץ-הלקוח לא היה תואם
+                את ה-HTML מהשרת, ו-React נפל ל-hydration mismatch (#418) בכל
+                חמשת עמודי-המסע. */}
+            <div className="journey-book-early">
+              <BookLink href={previewHref} className="journey-book-early__link" morphCover>
+                <span className="journey-book-early__cover" aria-hidden="true">
+                  <BookCover />
+                </span>
+                <span>
+                  <span className="journey-book-early__label">מתוך הספר</span>
+                  {/* תווית קצרה ומובחנת. שימוש ב-`samplePrimaryLabel` כאן יצר
+                      שני קישורים עם *אותו* שם-נגישות ואותו יעד באותו עמוד —
+                      כפילות אמיתית, לא רק בעיית-בדיקה. הניסוח המפורט נשאר
+                      במקטע-הטעימה הייעודי שלמטה. */}
+                  <span className="journey-book-early__cta">
+                    קראו טעימה
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                </span>
+              </BookLink>
+            </div>
         </header>
       )}
 
@@ -293,9 +344,6 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
               </p>
             </div>
           </section>
-
-          {/* „תרגול קצר” — flat, מחובר למראה (אותו beat): „עכשיו נסו ליישם”. */}
-          <JourneyInteraction id={journey.id} />
 
           {/* E. „מה הספר יעזור לכם לראות” — שיא-התובנה של מערכת העבודה. */}
           <section
@@ -372,6 +420,12 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
             </div>
           </div>
         </div>
+
+        {/* „תרגול קצר”. ירד לכאן, מתחת לספר.
+            קודם הוא ישב באמצע העמוד, ובכך היה *הדבר השלישי* שביקש מהמבקר
+            לסווג את עצמו: פעם בבית (כרטיס-מצב), פעם בעמוד הזה, ופעם בכלי.
+            הוא לא הוסר — הוא כבר אינו חוסם את הדרך אל הספר. */}
+        <JourneyInteraction id={journey.id} />
 
         {/* ═══ tail — להעמקה נוספת (משני, crawlable) ═══ */}
         <div className="space-y-8">

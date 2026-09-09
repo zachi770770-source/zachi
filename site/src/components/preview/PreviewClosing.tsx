@@ -7,18 +7,26 @@ import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookLink } from "@/components/shared/BookLink";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
-import { AskBookLink } from "@/components/journey/AskBookLink";
-import type { AskStationId } from "@/content/askRoute";
 
 /**
- * אזור סיום לעמוד ההצצה: מחבר את הטעימה לספר המלא, עם פעולה ראשית אחת בלבד
- * (רכישה באמזון — ערוץ הרכישה היחיד), הסבר קצר מה מקבלים, וקישור משני ל-/book.
- * אין באזור יותר מפעולה ראשית אחת.
+ * סיום עמוד-הטעימה — הרגע החם ביותר באתר, ולכן גם המסודר ביותר.
  *
- * `station` (כשהקורא הגיע מעמוד-מסלול דרך `?station=`) נישא הלאה לעוזר, כדי
- * שלא ישאל שוב „איפה אתם?”.
+ * הסדר כאן אינו סגנוני; הוא הכלל. מי שסיים לקרוא קטע מהספר נמצא בשיא הנכונות,
+ * וכל דבר שממוקם *אחרי* הרכישה מוריד ממנה. קודם ישבו כאן, מתחת לכפתור-הרכישה,
+ * קישור ל-/book וקישור לשאלון — כלומר שתי הזמנות לצאת מהמסלול בדיוק בנקודה
+ * שבה הוא נסגר. הכלל החדש:
+ *
+ *   1. שורת-הסיום של הטעימה
+ *   2. ערכת-הקורא — תועלת תומכת, לא פעולה
+ *   3. „מה עוד מחכה בספר” — יציאה שלישונית ל-/book
+ *   4. **בלוק הרכישה — הפעולה האחרונה בעמוד**
+ *   5. פוטר
+ *
+ * אחרי אמזון אין שום דבר לחיץ: לא כלי, לא שאלון, לא בר צף. הקישור לשאלון
+ * („בדקו מה הספר אומר”) הוסר מכאן לגמרי — הוא החזיר את הקורא הכי-חם אחורה,
+ * אל תחילת המשפך.
  */
-export function PreviewClosing({ station }: { station?: AskStationId }) {
+export function PreviewClosing() {
   return (
     <section
       id="join"
@@ -27,6 +35,7 @@ export function PreviewClosing({ station }: { station?: AskStationId }) {
     >
       <Container>
         <div className="mx-auto max-w-2xl rounded-3xl border border-border bg-surface px-6 py-10 sm:px-10 sm:py-12">
+          {/* 1 — שורת-הסיום */}
           <div className="text-center">
             <span className="kicker justify-center">{previewClosing.eyebrow}</span>
             <h2 id="preview-closing-heading" className="type-h2 mt-4">
@@ -40,20 +49,9 @@ export function PreviewClosing({ station }: { station?: AskStationId }) {
             </p>
           </div>
 
-          {/* מי שסיים את הטעימה הוא הקורא החם ביותר — פעולה ראשית אחת וברורה:
-              רכישה עכשיו באמזון. */}
-          <div className="mt-8 flex flex-col items-center gap-3">
-            <p className="text-[17px] font-semibold text-foreground [text-wrap:pretty]">
-              רוצים להמשיך לקרוא? הספר זמין עכשיו באמזון.
-            </p>
-            <Button asChild size="lg" className="w-full sm:w-auto">
-              <AmazonBuyLink source="preview">
-                לרכישת הספר באמזון
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </AmazonBuyLink>
-            </Button>
-            {/* נקודת-ערך שקטה מתחת ל-CTA היחיד: הערכה כלולה. לא פעולה ראשית שנייה
-                — כיתוב + קישור-טקסט בלבד ל-/reader. */}
+          {/* 2 — תועלת תומכת, וכן 3 — יציאה שלישונית. שתיהן קישורי-טקסט שקטים,
+              ושתיהן *לפני* הרכישה, לא אחריה. */}
+          <div className="mt-8 flex flex-col items-center gap-3 border-t border-border pt-6 text-center">
             <p className="text-[14px] text-foreground-muted [text-wrap:pretty]">
               {readerKitOffer.ctaSubline}{" "}
               <Link
@@ -63,9 +61,6 @@ export function PreviewClosing({ station }: { station?: AskStationId }) {
                 מה כלול בערכת הקורא
               </Link>
             </p>
-          </div>
-
-          <div className="mt-8 flex flex-col items-center gap-4 border-t border-border pt-6 text-center">
             <BookLink
               href="/book"
               className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
@@ -76,13 +71,19 @@ export function PreviewClosing({ station }: { station?: AskStationId }) {
                 aria-hidden="true"
               />
             </BookLink>
-            {/* מעבר ברור לעוזר — לקורא שסיים את הטעימה ולא בטוח מאיפה להתחיל.
-                נושא את ה-station אם הגיע מעמוד-מסלול, כדי לא לשאול שוב „איפה אתם?”. */}
-            <AskBookLink
-              station={station}
-              prompt={previewClosing.compassLinkLabel}
-              className="text-center"
-            />
+          </div>
+
+          {/* 4 — הפעולה האחרונה בעמוד. אין אחריה דבר. */}
+          <div className="mt-8 flex flex-col items-center gap-3 border-t border-border pt-8">
+            <p className="text-[17px] font-semibold text-foreground [text-wrap:pretty]">
+              רוצים להמשיך לקרוא? הספר זמין עכשיו באמזון.
+            </p>
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <AmazonBuyLink source="preview">
+                לרכישת הספר באמזון
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </AmazonBuyLink>
+            </Button>
           </div>
         </div>
       </Container>

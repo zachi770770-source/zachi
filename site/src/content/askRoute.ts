@@ -520,7 +520,7 @@ export const askSafety = {
 
 /** ניסוחים מנחים — הצעה, לא ודאות. */
 export const askUi = {
-  eyebrow: "מה הספר אומר?",
+  eyebrow: "מציאת נקודת ההתחלה",
   stationTitle: "איפה אתם עכשיו?",
   dilemmaTitle: "מה הכי מעסיק אתכם כרגע?",
   openerStation: "זה הכיוון שהספר מציע לכם כרגע",

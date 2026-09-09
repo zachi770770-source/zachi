@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { navLinks } from "@/config/nav";
@@ -39,7 +38,6 @@ export function MainNav() {
       <nav aria-label={english ? "Main" : "ניווט ראשי"} className="flex items-center">
         {(english ? [] : navLinks).map((link) => {
           const active = isActivePath(pathname, link.href);
-          const isCompass = link.href === "/compass";
           return (
             <Link
               key={link.href}
@@ -50,15 +48,6 @@ export function MainNav() {
                 active ? "text-foreground" : "text-foreground-muted hover:text-foreground"
               )}
             >
-              {isCompass ? (
-                <Compass
-                  className={cn(
-                    "h-4 w-4 transition-colors",
-                    active ? "text-brand" : "text-brand-hover/80 group-hover:text-brand"
-                  )}
-                  aria-hidden="true"
-                />
-              ) : null}
               {link.label}
               <span
                 aria-hidden="true"
@@ -79,7 +68,7 @@ export function MainNav() {
       {/* מחליף-שפה לפני ה-CTA ובסגנון שקט, כדי שלא יתחרה בכפתור הרכישה. */}
       <LanguageSwitch to={english ? "he" : "en"} className="me-3" />
 
-      <Button asChild size="sm" className="h-10 px-5 text-[15px]">
+      <Button asChild size="sm" data-cta={pathname === "/" ? "quiet" : "strong"} className="header-buy h-10 px-5 text-[15px]">
         {english ? (
           <a href={edition.url} target="_blank" rel="noopener noreferrer">
             {edition.buyLabel}

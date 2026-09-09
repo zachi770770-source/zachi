@@ -41,6 +41,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // נדרש בגלל הפיצול לשני root layouts (‎(he)‎ / ‎(en)‎): במצב הזה אין layout
+    // יחיד שאפשר להרכיב ממנו 404 גלובלי, ולכן Next מגיש את עמוד-ברירת-המחדל
+    // שלו לכתובות לא-קיימות. הדגל מפעיל את `app/global-not-found.tsx`, שהוא
+    // הפתרון המתועד למקרה הזה.
+    globalNotFound: true,
+  },
   async headers() {
     return [
       {

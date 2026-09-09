@@ -52,17 +52,17 @@ for (const route of ROUTES) {
   });
 }
 
-test("the assistant drawer result offers the Amazon purchase, never a waitlist CTA", async ({
+test("the guidance result offers the Amazon purchase, never a waitlist CTA", async ({
   page,
 }) => {
+  // המגירה הצפה הוסרה; אותה טענה בדיוק נבדקת עכשיו על המנוע במקומו הקבוע.
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/before-relationship", { waitUntil: "networkidle" });
+  await page.goto("/compass?station=dating", { waitUntil: "networkidle" });
   const accept = page.getByRole("button", { name: "אישור הכל" });
   if (await accept.count()) await accept.first().click().catch(() => {});
 
-  await page.getByRole("button", { name: /מה הספר אומר על המצב שלי\?, / }).click();
-  const dialog = page.getByRole("dialog");
+  const dialog = page.locator("main");
   await dialog.getByRole("radio", { name: /שחוק.* מאפליקציות ומדייטים/ }).click();
   await expect(dialog.getByRole("article")).toBeVisible();
 

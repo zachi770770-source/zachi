@@ -5,7 +5,6 @@ import { guidesUi, type Guide } from "@/content/guides";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
-import { AskBookLink } from "@/components/journey/AskBookLink";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BookLink } from "@/components/shared/BookLink";
 import { SignatureMark } from "@/components/shared/SignatureMark";
@@ -19,7 +18,20 @@ import { ViewEvent } from "@/components/analytics/ViewEvent";
  * לפי כוונת-החיפוש, כלי מהספר, קישורים פנימיים לעמוד-האם ולמאמרים הקרובים,
  * כניסה לעוזר, ו-CTA מרוסן אחד לספר/אמזון. אין רידיזיין — אותם primitives.
  */
-export function GuidePage({ guide }: { guide: Guide }) {
+/**
+ * `afterSections` — חריץ אופציונלי אחרי מקטעי-הגוף ולפני „כלי מהספר”.
+ *
+ * נוסף כדי לקלוט בלוקים עריכתיים שהיו קודם בעמוד-המוצר (/book) ואינם שייכים
+ * למסלול-הרכישה. הכלל: **לא יוצרים מסלול חדש ולא משכפלים תוכן** — בלוק עובר
+ * לעמוד-המדריך שכבר מכסה בדיוק את אותה כוונת-חיפוש, ושם הוא נשאר.
+ */
+export function GuidePage({
+  guide,
+  afterSections,
+}: {
+  guide: Guide;
+  afterSections?: React.ReactNode;
+}) {
   // deep-link לטעימה: כשלמדריך יש כלי-ספר מאומת, הטעימה נפתחת ישירות על הכלי
   // ובהקשר התחנה (ה-hub). ה-station נגזר מ-hub.href (תמיד מפתח תקף ב-stations),
   // וה-tool מ-bookTool.id (תמיד מזהה כלי אמיתי). אחרת — הטעימה הכללית.
@@ -140,6 +152,8 @@ export function GuidePage({ guide }: { guide: Guide }) {
           </section>
         ))}
 
+        {afterSections}
+
         {/* כלי מהספר */}
         {guide.framework ? (
           <section className="reveal rounded-2xl border border-border bg-surface-muted p-6 sm:p-8">
@@ -218,10 +232,6 @@ export function GuidePage({ guide }: { guide: Guide }) {
           <h2 id="guide-cta-heading" className="sr-only">
             להמשך
           </h2>
-          <AskBookLink
-            station={guide.askStation}
-            prompt="רוצים כיוון למצב הספציפי שלכם?"
-          />
           <div className="flex flex-col items-start gap-x-8 gap-y-4 sm:flex-row sm:items-center">
             <Button asChild size="lg" className="w-full px-7 sm:w-auto">
               <AmazonBuyLink source="guide" sourceDetail={guide.slug}>
