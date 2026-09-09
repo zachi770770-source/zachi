@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { authorContent } from "@/content/author";
-import { preview } from "@/content/book";
+import { outcomes, preview } from "@/content/book";
 import { canonicalExcerpt } from "@/content/sample";
 import { authorNote, recognition, whyTheBook } from "@/content/homeStory";
 
@@ -16,8 +16,20 @@ describe("home story is source-backed, not authored marketing copy", () => {
     expect(recognition.quote).toBe(canonicalExcerpt.paragraphs[2]);
   });
 
-  it("lists the approved table of contents, not invented chapters", () => {
-    expect(whyTheBook.book.lines).toEqual(preview.tableOfContents.slice(1));
+  it("shows at most three outcome lines, each approved copy verbatim", () => {
+    // המקטע עבר מרשימת תוכן-העניינים לשלוש אמירות-תוצאה. הכלל לא נחלש: כל
+    // שורה חייבת להיות מילה במילה מתוך `outcomes.items` המאושר — אין כאן
+    // ניסוח חדש, ואי-אפשר להחליק פנימה הבטחה שיווקית שלא אושרה.
+    expect(whyTheBook.book.lines.length).toBeLessThanOrEqual(3);
+    for (const line of whyTheBook.book.lines) {
+      expect(outcomes.items).toContain(line);
+    }
+    // שלוש שאלות שונות, לא אותה שאלה שלוש פעמים.
+    expect(new Set(whyTheBook.book.lines).size).toBe(whyTheBook.book.lines.length);
+  });
+
+  it("keeps the approved table of contents intact, not invented chapters", () => {
+    expect(whyTheBook.tableOfContents).toEqual(preview.tableOfContents.slice(1));
   });
 
   it("keeps the author beat as approved site copy, free of promises", () => {

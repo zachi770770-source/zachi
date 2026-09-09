@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 
 import { HomePathEntry } from "@/components/sections/HomePathEntry";
-import { homePaths, homePathUi } from "@/content/homePaths";
+import { homePaths } from "@/content/homePaths";
 
 /**
  * המקטע הזה הוא **ניווט**, ולכן הבדיקות שומרות עכשיו על תכונה חזקה יותר ממה
@@ -37,10 +37,20 @@ describe("HomePathEntry — חמש נקודות-פתיחה, ניווט בלבד"
     expect(hrefs.size).toBe(5);
   });
 
-  it("מציג את מודל-המסע: שלוש תחנות בקבוצה אחת, שני שערים בשנייה", () => {
-    const { container, getByText } = render(<HomePathEntry />);
-    getByText(homePathUi.stationsLabel);
-    getByText(homePathUi.gatesLabel);
+  it("שומר על מבנה 3+2 בלי להסביר את הטקסונומיה למבקר", () => {
+    const { container } = render(<HomePathEntry />);
+
+    // המודל נשאר בנתונים ובמבנה — אבל השמות הפנימיים שלנו אינם על המסך.
+    // (רגרסיה: הכותרות „המסלול” / „שערי מעבר” היו כאן, וירדו בכוונה.)
+    for (const jargon of [
+      "המסלול",
+      "שערי מעבר",
+      "שלוש תחנות, לפי הסדר",
+      "לא חלק מהמסלול",
+    ]) {
+      expect(container.textContent).not.toContain(jargon);
+    }
+    expect(container.querySelectorAll("h3")).toHaveLength(0);
 
     const stations = container.querySelectorAll(
       '[data-kind="station"] a.situation-card',

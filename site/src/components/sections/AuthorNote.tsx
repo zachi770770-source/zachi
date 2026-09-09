@@ -5,57 +5,89 @@ import { Container } from "@/components/shared/Container";
 import { SignatureMark } from "@/components/shared/SignatureMark";
 import { authorNote } from "@/content/homeStory";
 
+const PHOTO_ALT = "צחי חן, מחבר הספר מדייטים לאהבה";
+/** דיוקן קטן: 220px בדסקטופ, 96px במובייל — לכן די ב-640w. */
+const PHOTO_SIZES = "(min-width: 768px) 220px, 96px";
+
 /**
- * הסיבה האנושית לתת אמון. קודם לכן עמוד הבית הכיל את המחבר רק כקישור בתוך
- * רצועת-אמון שתוכנה העיקרי היה גילוי נאות — כלומר הדבר היחיד שנאמר על צחי חן
- * היה מה שהוא *אינו*. כאן הוא אומר בעצמו למה כתב את הספר.
+ * הסיבה האנושית לתת אמון. הטקסט לא השתנה — מה שהשתנה הוא שיש כאן עכשיו *אדם*.
  *
- * הביט נשאר קצר בכוונה: כותרת, שתי שורות, חתימה, קישור, גבול. ניסיון קודם
- * העמיס כאן פסקה שמתארת מי הקוראים („רווקים חוששים…”) — זה קרא כניתוח-קהל,
- * הזמין תחושה של אבחון, ותפס 599 פיקסלים כדי לומר פחות. הטקסט המאושר כלשונו
- * ב-`authorNote` (ראו ההערה שם), ורק אחריו מגיע הטיעון על הספר.
+ * קודם לכן זה היה מלבן מעוגל עם מסגרת, בין שני מלבנים מעוגלים עם מסגרת: אותה
+ * שפה ויזואלית בדיוק כמו „למה בכלל ספר” שמעליו וכמו חמש נקודות-הפתיחה שמתחתיו.
+ * מקטע שכל תפקידו הוא אמון נראה כמו עוד לוח-מידע, ולא היה בו שום דבר אנושי —
+ * גם לא פנים. הדיוקן המאושר קיים באתר (‎/author) ולא הופיע בעמוד הבית כלל.
+ *
+ * כאן: אין מיכל. דיוקן, טיפוגרפיה, קו-הפרדה אחד וחתימה. בדסקטופ הדיוקן הוא
+ * טור משלו לצד הטקסט; במובייל הוא יורד לשורת-החתימה בגודל קטן, כדי שהפנים
+ * יישארו נוכחות בלי שהמקטע יהפוך לבלוק-ביוגרפיה.
+ *
+ * התמונה היא בדיוק אותה תמונה מאושרת של ‎/author (אותם קבצים ואותו alt) — לא
+ * נוצרה ולא הוחלפה תמונה. הגבול הלא-קליני נשאר מילה במילה.
  */
+function Portrait({ className }: { className: string }) {
+  return (
+    <picture>
+      <source
+        type="image/avif"
+        sizes={PHOTO_SIZES}
+        srcSet="/images/author/zachi-chen-640.avif 640w, /images/author/zachi-chen-960.avif 960w"
+      />
+      <source
+        type="image/webp"
+        sizes={PHOTO_SIZES}
+        srcSet="/images/author/zachi-chen-640.webp 640w, /images/author/zachi-chen-960.webp 960w"
+      />
+      <img
+        src="/images/author/zachi-chen-960.jpg"
+        width={1600}
+        height={2000}
+        alt={PHOTO_ALT}
+        loading="lazy"
+        decoding="async"
+        className={className}
+      />
+    </picture>
+  );
+}
+
 export function AuthorNote() {
   return (
     <section aria-labelledby="author-note-heading" className="py-6 sm:py-10">
       <Container>
-        <div className="reveal mx-auto max-w-2xl rounded-2xl border border-border bg-surface px-6 py-6 sm:px-9 sm:py-7">
-          <h2
-            id="author-note-heading"
-            className="font-serif text-[clamp(1.25rem,2.1vw,1.55rem)] font-bold leading-snug text-foreground [text-wrap:balance]"
-          >
-            {authorNote.title}
-          </h2>
-          <p className="mt-3 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.7] text-foreground/90 [text-wrap:pretty]">
-            {authorNote.body}
-          </p>
-          <p className="mt-3 text-[clamp(1.02rem,1.4vw,1.15rem)] leading-[1.7] text-foreground/90 [text-wrap:pretty]">
-            {authorNote.bodyClose}
-          </p>
-
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border pt-4">
-            <div className="flex items-center gap-3">
-              <SignatureMark />
-              <span className="font-serif text-[16px] font-semibold text-foreground">
-                {authorNote.signature}
-              </span>
-            </div>
-            <Link
-              href="/author"
-              className="group inline-flex min-h-[44px] items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              {authorNote.linkLabel}
-              <ArrowLeft
-                className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
-                aria-hidden="true"
-              />
-            </Link>
+        <div className="author-note reveal mx-auto max-w-3xl">
+          {/* דסקטופ/טאבלט: הדיוקן כטור עריכתי לצד הטקסט. */}
+          {/* שתי המופעים מתחלפים ב-display לפי breakpoint, ולכן בכל רגע נתון
+              רק אחד מהם קיים בעץ-הנגישות — אין כפילות alt. */}
+          <div className="author-note__portrait">
+            <Portrait className="author-note__img" />
           </div>
 
-          {/* הגבול נשאר מפורש — מה שהספר אינו, במקום שבו הוא רלוונטי. */}
-          <p className="mt-3 text-[13.5px] leading-snug text-foreground-muted">
-            {authorNote.boundary}
-          </p>
+          <div className="author-note__text">
+            <h2 id="author-note-heading" className="author-note__title">
+              {authorNote.title}
+            </h2>
+            <p className="author-note__body">{authorNote.body}</p>
+            <p className="author-note__body">{authorNote.bodyClose}</p>
+
+            <div className="author-note__byline">
+              {/* מובייל: הפנים נוכחות כאן, בגודל שורת-חתימה. */}
+              <span className="author-note__portrait-inline">
+                <Portrait className="author-note__img author-note__img--inline" />
+              </span>
+              <SignatureMark />
+              <span className="author-note__name">{authorNote.signature}</span>
+              <Link href="/author" className="author-note__link group">
+                {authorNote.linkLabel}
+                <ArrowLeft
+                  className="h-4 w-4 text-brand transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+                  aria-hidden="true"
+                />
+              </Link>
+            </div>
+
+            {/* הגבול נשאר מפורש — מה שהספר אינו, במקום שבו הוא רלוונטי. */}
+            <p className="author-note__boundary">{authorNote.boundary}</p>
+          </div>
         </div>
       </Container>
     </section>

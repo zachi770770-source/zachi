@@ -40,19 +40,26 @@ test("#path: חמש נקודות-פתיחה, כולן `<a>` אמיתיים אל 
   }
 });
 
-test("#path: מודל-המסע מוצג — שלוש תחנות ושני שערים, בשתי קבוצות מובחנות", async ({
+test("#path: המבנה 3+2 נשמר — בלי להסביר את הטקסונומיה למבקר", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   const path = page.locator("#path");
   await path.scrollIntoViewIfNeeded();
 
-  await expect(
-    path.getByRole("heading", { name: homePathUi.stationsLabel }),
-  ).toBeVisible();
-  await expect(
-    path.getByRole("heading", { name: homePathUi.gatesLabel }),
-  ).toBeVisible();
+  // רגרסיה: „המסלול” / „שערי מעבר” / „שלוש תחנות, לפי הסדר” הופיעו כאן
+  // ככותרות-קבוצה. הם שמות פנימיים של המודל שלנו ואינם אמורים להופיע לעולם
+  // בעמוד הבית — הבדיקה עומדת על כל העמוד, לא רק על המקטע.
+  const body = await page.locator("body").innerText();
+  for (const jargon of [
+    "המסלול",
+    "שערי מעבר",
+    "שלוש תחנות, לפי הסדר",
+    "לא חלק מהמסלול",
+  ]) {
+    expect(body, `ז'רגון-מערכת בעמוד הבית: ${jargon}`).not.toContain(jargon);
+  }
+
   await expect(path.locator('[data-kind="station"] a.situation-card')).toHaveCount(
     STATIONS.length,
   );
