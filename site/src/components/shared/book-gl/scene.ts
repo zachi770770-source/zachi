@@ -382,123 +382,151 @@ export function createBookScene(
   // כאן הקצה הוא *גאומטריה*: כל גיליון הוא צלע משלו, עם צבע-קודקוד שטוח
   // משלה. אין מה למרוח — כל צלע מכסה פיקסל או שניים ונשארת נפרדת, ולכן העין
   // רואה ערימה של קצוות ולא לוח. העלות: ‎~26‎ צלעות לרצועה, קריאת-ציור אחת.
-  const RIBS = 30;
+  // ── קצוות-הדפים ────────────────────────────────────────────────────────
+  // גלגול קודם חילק את הרצועה ל-30 צלעות גאומטריות, כל אחת בגוון שטוח משלה.
+  // בתמונה הנראית זה לא נקרא כגיליונות אלא כעשר שכבות עבות: לצלע אין *חריץ*
+  // — היא משטח בגוון אחיד — ושתי צלעות שכנות נבדלות רק במעט, כך שהן נמזגות
+  // לאזורים רחבים. מה שהופך קצה-ספר לקצה-ספר הוא הרווח הכהה הדק בין גיליון
+  // לגיליון, והוא חייב להיות חד ברמת הפיקסל.
+  //
+  // לכן הפעם הקצוות מחושבים *לכל פיקסל*: הרצועה היא מרובע רציף שנושא את
+  // עומק-הערימה כ-varying, והשיידר מצייר שם קווים בתדר גבוה עם ריווח לא-אחיד
+  // (שתי תנודות זרות זו לזו), קבוצות-כריכה עמוקות יותר כל ~7 גיליונות, ורעש
+  // דק מתחתיהם. אין כאן טקסטורה ולכן אין מיפמאפ שממצע את הקווים, ואין
+  // גאומטריה ולכן אין תלות במספר משולשים. `fwidth` מרכך את הקווים בדיוק כשהם
+  // יורדים מתחת לפיקסל — שם נייר אמיתי גם נראה כגוון אחיד ולא כפסים.
   const PAPER = new THREE.Color().setHex(0xeee5d0, THREE.SRGBColorSpace);
-  // ‎key‎ מגיעה מלמעלה: הקצה החופשי מקבל אותה באלכסון, הקצה התחתון פונה ממנה
-  // והלאה. בלי ההפרש הזה התחתון בהיר יותר מהדף עצמו ונקרא כמדף שהספר מונח
-  // עליו — נמדד ונפסל.
   const FORE_TINT = 0.9;
   const BOT_TINT = 0.62;
-  /** בהירות גיליון ‎i‎ בעומק ‎u‎ (0 = צמוד לדף העליון, 1 = השפה החיצונית). */
-  function ribShade(i: number, u: number, tint: number): THREE.Color {
-    // צל-מגע מתחת לדף העליון, אמצע מואר, והתגלגלות אל שפה כהה.
-    // צל-המגע עמוק בהרבה מקודם (0.68→0.44) והשפה החיצונית כהה יותר (0.26→0.4):
-    // בלי שני הגבולות האלה הרצועה נמזגת בדף מצד אחד וברקע מצד שני, ואז אין
-    // לעין שום קצה לאחוז בו — וזה, לא מספר הצלעות, מה שגרם לה להיקרא כהמשך
-    // של הדף במקום כערימה שמתחתיו.
-    let k = 0.44 + 0.56 * smooth(u / 0.16);
-    k *= 1 - 0.4 * smooth((u - 0.45) / 0.55);
-    // הפרש בין גיליון לגיליון — זה מה שהופך את הרצועה לערימה ולא למשטח.
-    const n = Math.abs((Math.sin(i * 12.9898) * 43758.5453) % 1);
-    k *= 0.9 + 0.2 * n;
-    // „חתימות”: כל חמישה גיליונות מפגש-קיפול כהה יותר, כמו בספר תפור.
-    if (i % 5 === 0) k *= 0.84;
-    return PAPER.clone().multiplyScalar(k * tint);
-  }
-  /**
-   * רצועת-צלעות. `along` הוא ציר-הגיליונות (הם רצים לאורכו), `depth` הוא ציר
-   * העובי שלאורכו נערמות הצלעות. הגאומטריה אינה מאונדקסת: לכל צלע קודקודים
-   * משלה, ולכן צבעה שטוח ואינו נמרח אל שכנתה.
-   */
-  function ribbedBand(opts: {
-    alongHalf: number;
-    alongSegs: number;
-    depth: number;
-    depthSign: 1 | -1;
-    swap: boolean; // false: ציר-האורך הוא y (קצה חופשי); true: הוא x (תחתון)
-    alongOffset: number;
-    scaleAt: (alongNorm: number) => number; // עובי יחסי לאורך הרצועה
-    tint: number;
-  }): THREE.BufferGeometry {
-    const { alongHalf, alongSegs, depth, depthSign, swap, alongOffset, scaleAt, tint } = opts;
-    const pos: number[] = [];
-    const col: number[] = [];
-    const rib: number[] = [];
-    let ribIdx = 0;
-    const put = (a: number, d: number, c: THREE.Color) => {
-      if (swap) pos.push(a, d, 0);
-      else pos.push(d, a, 0);
-      col.push(c.r, c.g, c.b);
-      rib.push(ribIdx);
-    };
-    for (let i = 0; i < RIBS; i += 1) {
-      const u0 = i / RIBS;
-      const u1 = (i + 1) / RIBS;
-      const c = ribShade(i, (u0 + u1) / 2, tint);
-      ribIdx = i;
-      for (let j = 0; j < alongSegs; j += 1) {
-        const a0 = -alongHalf + (2 * alongHalf * j) / alongSegs + alongOffset;
-        const a1 = -alongHalf + (2 * alongHalf * (j + 1)) / alongSegs + alongOffset;
-        const s0 = scaleAt(a0);
-        const s1 = scaleAt(a1);
-        const d = (u: number, sc: number) => depthSign * depth * u * sc;
-        // שני משולשים, קודקודים כפולים ⇒ צבע שטוח לצלע.
-        put(a0, d(u0, s0), c);
-        put(a1, d(u0, s1), c);
-        put(a1, d(u1, s1), c);
-        put(a0, d(u0, s0), c);
-        put(a1, d(u1, s1), c);
-        put(a0, d(u1, s0), c);
-      }
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-    g.setAttribute("aCol", new THREE.Float32BufferAttribute(col, 3));
-    g.setAttribute("aRib", new THREE.Float32BufferAttribute(rib, 1));
-    return g;
-  }
-  // חומר-הקצוות. ‎MeshBasicMaterial‎ יכול היה לצבוע את הצלעות, אבל לא להזיז
-  // עליהן אור. כאן שיידר זעיר נושא את מספר-הצלע כתכונה, ולכן אפשר להעביר
-  // *נצנוץ* לאורך שדה-הקצוות: אור שזוחל על ערימת-הנייר. זה מה שהעין קולטת
-  // כתנועה — שינוי מקומי וחד על קצה — בניגוד להארה כללית ואיטית של המשטח.
   const bandVertex = /* glsl */ `
-    attribute vec3 aCol;
-    attribute float aRib;
-    varying vec3 vCol;
-    varying float vRib;
+    attribute float aU; // 0 = צמוד לדף העליון, 1 = השפה החיצונית
+    varying float vU;
     void main() {
-      vCol = aCol;
-      vRib = aRib;
+      vU = aU;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `;
   const bandFragment = /* glsl */ `
+    precision highp float;
+    uniform vec3 uPaper;
+    uniform float uTint;
     uniform float uOpacity;
-    uniform float uGlint;  // מיקום הנצנוץ במספרי-צלע
+    uniform float uGlint;  // מיקום הנצנוץ לאורך עומק-הערימה (0..1)
     uniform float uGlintK; // עוצמתו
-    varying vec3 vCol;
-    varying float vRib;
+    uniform float uDens;   // גיליונות לרוחב הערימה — מכויל לרזולוציית המכשיר
+    varying float vU;
+
     void main() {
-      float g = exp(-pow((vRib - uGlint) / 4.5, 2.0));
-      gl_FragColor = vec4(vCol * (1.0 + uGlintK * g), uOpacity);
+      float u = clamp(vU, 0.0, 1.0);
+
+      // ריווח לא-אחיד: גיליונות אמיתיים אינם מסורק. שתי תנודות זרות מספיקות
+      // כדי שהעין לא תזהה מחזוריות.
+      // הצפיפות מכוילת אל *הפיקסל*, לא אל מספר העמודים בספר: רצועה של
+      // ‎~50px‎ יכולה להחזיק בערך 30 קווים נפרדים. בצפיפות של 118 (שנוסתה
+      // קודם) כל קו יורד לחצי פיקסל, ה-AA ממצע אותו, והרצועה חוזרת להיות
+      // לוח חלק — מה שקרה בפועל.
+      float p = u * uDens + 2.2 * sin(u * 17.0) + 0.9 * sin(u * 47.0 + 1.7);
+      float w = fwidth(p);
+      float f = fract(p);
+      // החריץ דק: כהה על ‎~20%‎ מהמחזור, בהיר על השאר. גרסה עם חריץ רחב יצרה
+      // „גרעין עץ” — רצועה כהה ומנומרת ולא נייר בהיר עם קווים.
+      float crease = smoothstep(0.0, 0.17, f) * smoothstep(1.0, 0.85, f);
+      float aa = 1.0 - smoothstep(0.75, 1.9, w);
+      float sheets = mix(0.93, mix(0.66, 1.02, crease), aa);
+
+      // הבדל-בהירות *לכל גיליון* (קבוע בתוך הגיליון, ולכן אינו מנומר):
+      // נייר אמיתי אינו אחיד, וזה מה שמונע „מסרק” מכני.
+      float idx = floor(p);
+      float n = fract(sin(idx * 127.13) * 43758.545);
+      sheets *= 0.95 + 0.1 * n;
+
+      // קבוצות-כריכה: כל ~6 גיליונות מפגש קיפול עמוק מעט יותר.
+      float q = p / 6.0;
+      float qf = fract(q);
+      float sig = smoothstep(0.0, 0.14, qf) * smoothstep(1.0, 0.9, qf);
+      sheets *= mix(1.0, mix(0.82, 1.0, sig), 1.0 - smoothstep(0.5, 1.3, fwidth(q)));
+
+      // פרופיל-הערימה: צל-מגע עמוק מתחת לדף העליון, אמצע מואר, שפה מתגלגלת
+      // אל הצל. שני הגבולות האלה הם מה שמפריד את הערימה מהדף ומהרקע.
+      float k = 0.56 + 0.44 * smoothstep(0.0, 0.14, u);
+      k *= 1.0 - 0.3 * smoothstep(0.5, 1.0, u);
+
+      // נצנוץ שזוחל על הערימה.
+      float g = exp(-pow((u - uGlint) / 0.14, 2.0));
+
+      vec3 col = uPaper * (k * sheets * uTint) * (1.0 + uGlintK * g);
+      gl_FragColor = vec4(col, uOpacity);
     }
   `;
-  const makeBandMat = (opacity: number) =>
+  const makeBandMat = (opacity: number, tint: number) =>
     new THREE.ShaderMaterial({
-      uniforms: { uOpacity: { value: opacity }, uGlint: { value: -99 }, uGlintK: { value: 0 } },
+      uniforms: {
+        uPaper: { value: PAPER },
+        uTint: { value: tint },
+        uOpacity: { value: opacity },
+        uGlint: { value: -9 },
+        uGlintK: { value: 0 },
+        uDens: { value: 30 },
+      },
       vertexShader: bandVertex,
       fragmentShader: bandFragment,
       side: THREE.DoubleSide, // בתחילת הפתיחה, כשהרצועה כמעט ניצבת, רואים את גבה
       transparent: true,
     });
-  const flareMatR = makeBandMat(1);
-  const flareMatL = makeBandMat(0);
+  const bandForeR = makeBandMat(1, FORE_TINT);
+  const bandForeL = makeBandMat(0, FORE_TINT);
+  const bandBotR = makeBandMat(1, BOT_TINT);
+  const bandBotL = makeBandMat(0, BOT_TINT);
+  const bandMats = [bandForeR, bandForeL, bandBotR, bandBotL];
+  const bandMatsL = [bandForeL, bandBotL];
+
+  /**
+   * מרובע-הערימה. `along` הוא ציר-הגיליונות, `depth` ציר-העובי. הגאומטריה
+   * צפופה רק כדי לשאת את צורת הערימה (בליטה באמצע, צלילה אל עמק-הכריכה);
+   * הקווים עצמם אינם תלויים בה כלל.
+   */
+  function stackBand(opts: {
+    alongHalf: number;
+    alongSegs: number;
+    depth: number;
+    depthSign: 1 | -1;
+    swap: boolean;
+    alongOffset: number;
+    scaleAt: (along: number) => number;
+  }): THREE.BufferGeometry {
+    const { alongHalf, alongSegs, depth, depthSign, swap, alongOffset, scaleAt } = opts;
+    const DEPTH_SEGS = 6;
+    const pos: number[] = [];
+    const us: number[] = [];
+    const put = (a: number, u: number, sc: number) => {
+      const d = depthSign * depth * u * sc;
+      if (swap) pos.push(a, d, 0);
+      else pos.push(d, a, 0);
+      us.push(u);
+    };
+    for (let i = 0; i < DEPTH_SEGS; i += 1) {
+      const u0 = i / DEPTH_SEGS;
+      const u1 = (i + 1) / DEPTH_SEGS;
+      for (let j = 0; j < alongSegs; j += 1) {
+        const a0 = -alongHalf + (2 * alongHalf * j) / alongSegs + alongOffset;
+        const a1 = -alongHalf + (2 * alongHalf * (j + 1)) / alongSegs + alongOffset;
+        const s0 = scaleAt(a0);
+        const s1 = scaleAt(a1);
+        put(a0, u0, s0); put(a1, u0, s1); put(a1, u1, s1);
+        put(a0, u0, s0); put(a1, u1, s1); put(a0, u1, s0);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("aU", new THREE.Float32BufferAttribute(us, 1));
+    return g;
+  }
+
   function makeFlare(sign: 1 | -1, edge: "fore" | "bottom"): THREE.Mesh {
     const cx = sign * W * 0.5;
-    let geo: THREE.BufferGeometry;
     let mesh: THREE.Mesh;
     if (edge === "fore") {
-      geo = ribbedBand({
+      const geo = stackBand({
         alongHalf: BLOCK_HY,
         alongSegs: 6,
         depth: FLARE,
@@ -507,26 +535,23 @@ export function createBookScene(
         alongOffset: 0,
         // גוש-דפים אמיתי מתנפח באמצע ומתכנס אל הפינות.
         scaleAt: (y) => 1 - 0.22 * (Math.abs(y) / BLOCK_HY) ** 2,
-        tint: FORE_TINT,
       });
-      mesh = new THREE.Mesh(geo, sign === 1 ? flareMatR : flareMatL);
+      mesh = new THREE.Mesh(geo, sign === 1 ? bandForeR : bandForeL);
       mesh.position.set(cx + sign * BLOCK_HX, 0, 0.002);
     } else {
       // חריגה החוצה בחצי-עובי: חריגה מלאה יצרה „לשונית” מעבר לרצועת-הקצה.
       const over = FLARE * 0.5;
-      geo = ribbedBand({
+      const geo = stackBand({
         alongHalf: BLOCK_HX + over / 2,
         alongSegs: 18,
         depth: FLARE,
         depthSign: -1,
         swap: true,
         alongOffset: (sign * over) / 2,
-        // הערימה צוללת אל עמק-הכריכה: ליד השדרה כמעט אין עובי נראה. רצועה
-        // בעובי אחיד מציירת קו ישר ובוהק מתחת לספר — נקרא כ„מדף”.
+        // הערימה צוללת אל עמק-הכריכה: ליד השדרה כמעט אין עובי נראה.
         scaleAt: (x) => 0.42 + 0.58 * clamp01(Math.abs(cx + x) / (W * 0.995)) ** 0.55,
-        tint: BOT_TINT,
       });
-      mesh = new THREE.Mesh(geo, sign === 1 ? flareMatR : flareMatL);
+      mesh = new THREE.Mesh(geo, sign === 1 ? bandBotR : bandBotL);
       mesh.position.set(cx, -BLOCK_HY, 0.002);
     }
     book.add(mesh);
@@ -796,7 +821,7 @@ export function createBookScene(
 
     const leftStruct = smooth((openL - 0.72) / 0.28);
     blockFaceL.opacity = leftStruct;
-    flareMatL.uniforms.uOpacity.value = leftStruct;
+    bandMatsL.forEach((m) => { m.uniforms.uOpacity.value = leftStruct; });
     boardMatL.opacity = leftStruct * 0.95;
     spineMat.opacity = leftStruct;
     blockL.visible = leftStruct > 0.02;
@@ -1038,21 +1063,47 @@ export function createBookScene(
     // הנצנוץ זוחל על שדה-הקצוות: מספר-הצלע נע הלוך-ושוב על פני כל הערימה
     // במחזור של 6ש. זה אירוע *מקומי* על קצה, ולכן הוא נקלט כתנועה ולא
     // כשינוי-הארה כללי שהעין מסננת.
-    const glint = (RIBS / 2) * (1 + Math.sin((t * Math.PI * 2) / 6));
-    for (const m of [flareMatR, flareMatL]) {
+    const glint = 0.5 + 0.62 * Math.sin((t * Math.PI * 2) / 6);
+    for (const m of bandMats) {
       m.uniforms.uGlint.value = glint;
-      m.uniforms.uGlintK.value = relax * 0.4;
+      m.uniforms.uGlintK.value = relax * 0.34;
     }
+    // ── אירוע-קצה נדיר ────────────────────────────────────────────────
+    // כל ‎~9.5‎ שניות קצה של אחד הגיליונות העליונים מתרומם מעט ומתיישב, ועל
+    // הגיליון שמתחתיו נופל צל רך שדועך איתו. זהו אירוע *בדיד* — יש לו
+    // התחלה, שיא וסוף — ולכן הוא נקלט גם כשלא מחפשים אותו, בניגוד לתנודה
+    // מחזורית שהעין מתרגלת אליה תוך שניות. המשרעת קטנה: קצה שזז, לא דף
+    // שמתנופף.
+    const EV_P = 9.5;
+    const evIdx = Math.floor(t / EV_P);
+    const evT = t - evIdx * EV_P;
+    const hash = (n: number) => Math.abs((Math.sin(n * 91.7) * 4375.85) % 1);
+    const evRight = hash(evIdx) > 0.45;
+    const evSheet = Math.floor(hash(evIdx + 7) * Math.min(3, FAN_PER_SIDE));
+    // מתרומם ונח: מתאפס ב-‎evT=0‎ ודועך כליל תוך ‎~3‎ שניות.
+    const evEnv = evT < 3.4 ? Math.exp(-evT * 1.3) * Math.sin(evT * 2.5) : 0;
+
     for (let i = 0; i < FAN_PER_SIDE; i += 1) {
-      // הערימה נושמת בפיגור — הגיליון העליון מוביל, אלה שמתחתיו עונים, וכך
-      // גל איטי עובר במורד הערימה במקום שכולם יזוזו יחד.
-      const lag = (i + 1) * 0.5;
+      // לכל גיליון *מחזור משלו* ולא רק פאזה משלו: בפאזה בלבד כל הערימה נעה
+      // כגוף אחד מוסט, וזה נקרא כתנועה אחת. מחזורים זרים נותנים תנועה
+      // עצמאית אמיתית בין שכבה לשכבה.
+      const per = 6.2 + i * 0.85;
       const sgn = (pose.fanRestL[i] ?? 0) < 0 ? -1 : 1;
+      const liftR = evRight && i === evSheet ? evEnv * 0.3 : 0;
+      const liftL = !evRight && i === evSheet ? -evEnv * 0.3 : 0;
       fanR[i].mat.uniforms.uCurl.value =
-        (pose.fanRestR[i] ?? 0) + relax * 0.02 + osc(7.5, -lag) * 0.1;
+        (pose.fanRestR[i] ?? 0) + relax * 0.02 + osc(per, i * 1.1) * 0.12 + liftR;
       fanL[i].mat.uniforms.uCurl.value =
-        (pose.fanRestL[i] ?? 0) + sgn * relax * 0.02 + osc(7.5, 1.9 - lag) * 0.1;
+        (pose.fanRestL[i] ?? 0) + sgn * relax * 0.02 + osc(per, 1.9 + i * 1.1) * 0.12 + liftL;
+      // הצל של האירוע נופל על הגיליון שמתחת למתרומם.
+      const sh = Math.max(0, evEnv) * 0.5;
+      fanR[i].mat.uniforms.uTurnShadow.value = evRight && i === evSheet + 1 ? sh : 0;
+      fanL[i].mat.uniforms.uTurnShadow.value = !evRight && i === evSheet + 1 ? sh : 0;
     }
+    // כשהמתרומם הוא הגיליון העליון, הצל נופל על דף-הבסיס.
+    const baseSh = evSheet === 0 ? Math.max(0, evEnv) * 0.45 : 0;
+    baseRight.mat.uniforms.uTurnShadow.value = evRight ? baseSh : 0;
+    baseLeft.mat.uniforms.uTurnShadow.value = evRight ? 0 : baseSh;
 
     // רפיון-קצה-הדפים: הערימה נפרשת עוד קצת אחרי שהדף האחרון נח, ואז נושמת
     // סביב הזווית החדשה. הקצה מורכב מצלעות נפרדות, ולכן שינוי זווית קטן משנה
@@ -1082,7 +1133,20 @@ export function createBookScene(
   function setProgress(p: number) {
     apply(clamp01(p));
   }
+  /**
+   * צפיפות-הגיליונות נקבעת לפי *פיקסלי-המכשיר* ולא לפי מספר העמודים בספר:
+   * המטרה היא שכל קו ייפול על ‎~2px‎ פיזיים. במסך רגיל זה ‎~30‎ קווים לרוחב
+   * הערימה, ובמסך צפוף פי-שניים — ‎~60‎. בצפיפות קבועה, מסך צפוף היה מקבל
+   * קווים עבים ומעטים, ומסך רגיל — קווים תת-פיקסליים שנמרחים לגוון אחיד.
+   */
+  function syncDensity(hCss: number) {
+    const d = Math.min(90, Math.max(22, Math.round((30 * hCss * opts.dpr) / 412)));
+    bandMats.forEach((m) => {
+      m.uniforms.uDens.value = d;
+    });
+  }
   function resize(w: number, h: number) {
+    syncDensity(h);
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
@@ -1103,7 +1167,7 @@ export function createBookScene(
     blockFaceR.dispose();
     blockFaceL.dispose();
     [flareForeR, flareBotR, flareForeL, flareBotL].forEach((m) => m.geometry.dispose());
-    [flareMatR, flareMatL].forEach((m) => m.dispose());
+    bandMats.forEach((m) => m.dispose());
     boardMatR.dispose();
     boardMatL.dispose();
     spineMat.dispose();
