@@ -115,6 +115,8 @@ const leafFragment = /* glsl */ `
   uniform vec3 uCam;
   uniform float uOpacity;
   uniform float uTurnShadow; // עוצמת הצל שמטיל גיליון מתהפך על הדף שמתחת
+  uniform float uSheen;  // מרכז פס-האור הרך, בציר-x העולמי
+  uniform float uSheenK; // עוצמתו (0 בזמן הרצף, נכנסת רק במצב-המנוחה)
   varying vec2 vUv;
   varying vec3 vNormalW;
   varying vec3 vWorld;
@@ -145,6 +147,11 @@ const leafFragment = /* glsl */ `
 
     // צל-נע: הגיליון המתהפך מטיל צל רך על הדף שמתחתיו (מתחזק ליד השדרה).
     light *= mix(1.0, 0.80, uTurnShadow * (1.0 - smoothstep(0.0, 0.62, vU)));
+
+    // פס-אור רך שנוסע על הנייר. זהו המנגנון הקריא ביותר במצב-המנוחה: סיבוב
+    // ה-key לבדו כמעט אינו משנה דבר על דף שטוח (הנורמל כמעט קבוע), ואילו פס
+    // רחב ורך שזוחל לרוחב הכפולה נראה מיד — וזה בדיוק מה שאור-חדר עושה.
+    light *= 1.0 + uSheenK * exp(-pow((vWorld.x - uSheen) / 0.85, 2.0));
 
     // גב-דף מעט כהה וקריר יותר (נייר דק — פחות אור חוזר).
     vec3 col = tex.rgb * light;
@@ -280,6 +287,8 @@ export function createBookScene(
         uCam: { value: camera.position },
         uOpacity: { value: 1 },
         uTurnShadow: { value: 0 },
+        uSheen: { value: 0 },
+        uSheenK: { value: 0 },
       },
       vertexShader: leafVertex,
       fragmentShader: leafFragment,
@@ -303,7 +312,7 @@ export function createBookScene(
   // הערימה אין התיבה מציירת: בזווית-הצפייה כאן פאותיה נצפות מהקצה ונעלמות,
   // ולכן קצוות-הדפים הנראים הם רצועות-הפרישה שבהמשך. התיבה עצמה היא רק הגוף
   // האטום שמאחוריהן, ולכן חומר אחד בצבע-נייר מספיק לה.
-  const BLOCK_T = 0.125; // עובי גוש-הדפים לכל צד
+  const BLOCK_T = 0.2; // עובי גוש-הדפים לכל צד — ספר עבה, לא חוברת
   const PAPER_FACE = 0xe9dfc8;
   // צד-ימין קיים תמיד ואטימותו לעולם אינה משתנה, ולכן ‎transparent:false‎:
   // הוא חוזר אל מסלול-הרינדור האטום — כתיבת-עומק וסדר קדמי-אחורי — ולכן פחות
@@ -364,102 +373,118 @@ export function createBookScene(
   const BLOCK_HX = (W * 0.99) / 2;
   const BLOCK_HY = (H * 0.985) / 2;
 
-  // טקסטורת-הרצועה. הניסיון הראשון השתמש בטקסטורת-הגוש (‎~340 קווים‎): על פני
-  // ‎~20px‎ של מסך כל הקווים התמזגו לכרטיס קרם שטוח — בדיוק ההפך מהמבוקש.
-  // מה שקריא בקנה-המידה הזה, וגם מה שרואים בצילום אמיתי של קצה-ספר, הוא
-  // *גרדיאנט* עם מספר קטן של תפרים ברורים ורעש דק מתחתיהם: צל-מגע מיד מתחת
-  // לדף העליון, בהירות באמצע הערימה, והתעגלות אל שפה כהה יותר בקצה החיצוני.
-  function flareTexture(): THREE.CanvasTexture {
-    const c = document.createElement("canvas");
-    c.width = 256; // u = ציר-העובי
-    c.height = 8;
-    const ctx = c.getContext("2d")!;
-    const g = ctx.createLinearGradient(0, 0, 256, 0);
-    g.addColorStop(0, "#b8aa8a"); // צל-מגע: הדף העליון יושב *על* הערימה
-    g.addColorStop(0.1, "#ddd2b8");
-    g.addColorStop(0.42, "#e8dfc9");
-    g.addColorStop(0.78, "#d5c8aa");
-    g.addColorStop(1, "#b6a888"); // השפה החיצונית מתגלגלת אל הצל
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 256, 8);
-    // רעש-גיליונות דק — לא נספר, אבל מונע „כרטיס”.
-    for (let x = 0; x < 256; x += 2) {
-      const n = Math.abs((Math.sin(x * 12.9898) * 43758.5453) % 1);
-      ctx.globalAlpha = 0.05 + n * 0.09;
-      ctx.fillStyle = n > 0.5 ? "#8d7f60" : "#fdf8ec";
-      ctx.fillRect(x, 0, 1, 8);
-    }
-    // תפרי-„חתימה”: תשעה בלבד, במרווחים לא-אחידים. אלה הסימנים שהעין באמת
-    // קולטת, והם מה שאומר „הרבה גיליונות” ולא „לוח”.
-    const seams = [0.07, 0.16, 0.24, 0.35, 0.46, 0.57, 0.68, 0.81, 0.92];
-    for (const sPos of seams) {
-      ctx.globalAlpha = 0.26;
-      ctx.fillStyle = "#8a7c5d";
-      ctx.fillRect(Math.round(sPos * 256), 0, 2, 8);
-      ctx.globalAlpha = 0.4;
-      ctx.fillStyle = "#fbf6ea";
-      ctx.fillRect(Math.round(sPos * 256) + 2, 0, 1, 8);
-    }
-    ctx.globalAlpha = 1;
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = 8;
-    return t;
+  // ── קצוות-הגיליונות: צלעות, לא טקסטורה ────────────────────────────────
+  // גרסה קודמת ציירה את קצה-הערימה כטקסטורת-קנבס על מרובע אחד. היא נכשלה
+  // חזותית משתי סיבות שמצטרפות זו לזו: (1) ‎mipmapping‎ — טקסטורה של מאות
+  // קווים שנדגמת על ‎~20px‎ של מסך ממוצעת לגוון אחיד, כלומר בדיוק „כרטיס
+  // קרם”; (2) גם גרדיאנט עם תשעה תפרים אינו „הרבה דפים” — הוא משטח מגוון.
+  //
+  // כאן הקצה הוא *גאומטריה*: כל גיליון הוא צלע משלו, עם צבע-קודקוד שטוח
+  // משלה. אין מה למרוח — כל צלע מכסה פיקסל או שניים ונשארת נפרדת, ולכן העין
+  // רואה ערימה של קצוות ולא לוח. העלות: ‎~26‎ צלעות לרצועה, קריאת-ציור אחת.
+  const RIBS = 30;
+  const PAPER = new THREE.Color().setHex(0xeee5d0, THREE.SRGBColorSpace);
+  // ‎key‎ מגיעה מלמעלה: הקצה החופשי מקבל אותה באלכסון, הקצה התחתון פונה ממנה
+  // והלאה. בלי ההפרש הזה התחתון בהיר יותר מהדף עצמו ונקרא כמדף שהספר מונח
+  // עליו — נמדד ונפסל.
+  const FORE_TINT = 0.9;
+  const BOT_TINT = 0.62;
+  /** בהירות גיליון ‎i‎ בעומק ‎u‎ (0 = צמוד לדף העליון, 1 = השפה החיצונית). */
+  function ribShade(i: number, u: number, tint: number): THREE.Color {
+    // צל-מגע מתחת לדף העליון, אמצע מואר, והתגלגלות אל שפה כהה.
+    let k = 0.68 + 0.32 * smooth(u / 0.14);
+    k *= 1 - 0.26 * smooth((u - 0.5) / 0.5);
+    // הפרש בין גיליון לגיליון — זה מה שהופך את הרצועה לערימה ולא למשטח.
+    const n = Math.abs((Math.sin(i * 12.9898) * 43758.5453) % 1);
+    k *= 0.9 + 0.2 * n;
+    // „חתימות”: כל חמישה גיליונות מפגש-קיפול כהה יותר, כמו בספר תפור.
+    if (i % 5 === 0) k *= 0.84;
+    return PAPER.clone().multiplyScalar(k * tint);
   }
-  const flareTex = flareTexture();
-  const flareTexRot = flareTex.clone();
-  flareTexRot.needsUpdate = true;
-  flareTexRot.center.set(0.5, 0.5);
-  flareTexRot.rotation = Math.PI / 2;
+  /**
+   * רצועת-צלעות. `along` הוא ציר-הגיליונות (הם רצים לאורכו), `depth` הוא ציר
+   * העובי שלאורכו נערמות הצלעות. הגאומטריה אינה מאונדקסת: לכל צלע קודקודים
+   * משלה, ולכן צבעה שטוח ואינו נמרח אל שכנתה.
+   */
+  function ribbedBand(opts: {
+    alongHalf: number;
+    alongSegs: number;
+    depth: number;
+    depthSign: 1 | -1;
+    swap: boolean; // false: ציר-האורך הוא y (קצה חופשי); true: הוא x (תחתון)
+    alongOffset: number;
+    scaleAt: (alongNorm: number) => number; // עובי יחסי לאורך הרצועה
+    tint: number;
+  }): THREE.BufferGeometry {
+    const { alongHalf, alongSegs, depth, depthSign, swap, alongOffset, scaleAt, tint } = opts;
+    const pos: number[] = [];
+    const col: number[] = [];
+    const put = (a: number, d: number, c: THREE.Color) => {
+      if (swap) pos.push(a, d, 0);
+      else pos.push(d, a, 0);
+      col.push(c.r, c.g, c.b);
+    };
+    for (let i = 0; i < RIBS; i += 1) {
+      const u0 = i / RIBS;
+      const u1 = (i + 1) / RIBS;
+      const c = ribShade(i, (u0 + u1) / 2, tint);
+      for (let j = 0; j < alongSegs; j += 1) {
+        const a0 = -alongHalf + (2 * alongHalf * j) / alongSegs + alongOffset;
+        const a1 = -alongHalf + (2 * alongHalf * (j + 1)) / alongSegs + alongOffset;
+        const s0 = scaleAt(a0);
+        const s1 = scaleAt(a1);
+        const d = (u: number, sc: number) => depthSign * depth * u * sc;
+        // שני משולשים, קודקודים כפולים ⇒ צבע שטוח לצלע.
+        put(a0, d(u0, s0), c);
+        put(a1, d(u0, s1), c);
+        put(a1, d(u1, s1), c);
+        put(a0, d(u0, s0), c);
+        put(a1, d(u1, s1), c);
+        put(a0, d(u1, s0), c);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    return g;
+  }
   // DoubleSide: בתחילת הפתיחה, כשהרצועה עדיין כמעט ניצבת, רואים את גבה.
-  // גוון: הרצועות אינן מוארות (MeshBasicMaterial), ולכן הבהירות נקבעת כאן.
-  // ‎key‎ מגיעה מלמעלה — הקצה התחתון פונה ממנה והלאה ולכן הוא כהה משמעותית;
-  // בלי זה הוא בהיר יותר מן הדף עצמו, וזה בדיוק מה שגרם לו להיקרא כמדף.
-  const FORE_TINT = 0.88;
-  const BOT_TINT = 0.6;
-  const flareMatR = new THREE.MeshBasicMaterial({ map: flareTex, side: THREE.DoubleSide });
-  const flareMatL = new THREE.MeshBasicMaterial({ map: flareTex, transparent: true, opacity: 0, side: THREE.DoubleSide });
-  const flareBotMatR = new THREE.MeshBasicMaterial({ map: flareTexRot, side: THREE.DoubleSide });
-  const flareBotMatL = new THREE.MeshBasicMaterial({ map: flareTexRot, transparent: true, opacity: 0, side: THREE.DoubleSide });
-  flareMatR.color.setScalar(FORE_TINT);
-  flareMatL.color.setScalar(FORE_TINT);
-  flareBotMatR.color.setScalar(BOT_TINT);
-  flareBotMatL.color.setScalar(BOT_TINT);
+  const flareMatR = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide });
+  const flareMatL = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide, transparent: true, opacity: 0 });
   function makeFlare(sign: 1 | -1, edge: "fore" | "bottom"): THREE.Mesh {
     const cx = sign * W * 0.5;
-    let geo: THREE.PlaneGeometry;
+    let geo: THREE.BufferGeometry;
     let mesh: THREE.Mesh;
     if (edge === "fore") {
-      // u רץ לאורך העובי ⇒ הגרדיאנט והתפרים רצים לרוחב הערימה.
-      geo = new THREE.PlaneGeometry(FLARE, BLOCK_HY * 2, 1, 8);
-      geo.translate((sign * FLARE) / 2, 0, 0);
-      // גוש-דפים אמיתי מתנפח קלות באמצע ומתכנס אל הפינות. בלי זה הרצועה
-      // נגמרת בזווית ישרה והפינה נקראת כמדרגה.
-      const pos = geo.attributes.position;
-      for (let i = 0; i < pos.count; i += 1) {
-        const yn = Math.abs(pos.getY(i)) / BLOCK_HY;
-        pos.setX(i, pos.getX(i) * (1 - 0.3 * yn * yn));
-      }
-      pos.needsUpdate = true;
+      geo = ribbedBand({
+        alongHalf: BLOCK_HY,
+        alongSegs: 6,
+        depth: FLARE,
+        depthSign: sign,
+        swap: false,
+        alongOffset: 0,
+        // גוש-דפים אמיתי מתנפח באמצע ומתכנס אל הפינות.
+        scaleAt: (y) => 1 - 0.3 * (Math.abs(y) / BLOCK_HY) ** 2,
+        tint: FORE_TINT,
+      });
       mesh = new THREE.Mesh(geo, sign === 1 ? flareMatR : flareMatL);
       mesh.position.set(cx + sign * BLOCK_HX, 0, 0.002);
     } else {
-      // הרצועה התחתונה חורגת החוצה ב-FLARE כדי שהפינה עם רצועת-הקצה תיסגר.
-      // חריגה החוצה בחצי-עובי בלבד: חריגה מלאה יצרה „לשונית” בולטת מעבר
-      // לרצועת-הקצה בפינה התחתונה-חיצונית.
+      // חריגה החוצה בחצי-עובי: חריגה מלאה יצרה „לשונית” מעבר לרצועת-הקצה.
       const over = FLARE * 0.5;
-      geo = new THREE.PlaneGeometry(BLOCK_HX * 2 + over, FLARE, 20, 1);
-      geo.translate((sign * over) / 2, -FLARE / 2, 0);
-      // הערימה צוללת אל עמק-הכריכה: ליד השדרה כמעט אין עובי נראה, ובקצה
-      // החופשי היא במלואה. רצועה בעובי אחיד לאורך כל הרוחב מציירת קו ישר
-      // ובוהק מתחת לספר — נמדד, והוא נקרא כ„מדף” שהספר מונח עליו.
-      const pos = geo.attributes.position;
-      for (let i = 0; i < pos.count; i += 1) {
-        const t = clamp01(Math.abs(cx + pos.getX(i)) / (W * 0.995));
-        pos.setY(i, pos.getY(i) * (0.42 + 0.58 * Math.pow(t, 0.55)));
-      }
-      pos.needsUpdate = true;
-      mesh = new THREE.Mesh(geo, sign === 1 ? flareBotMatR : flareBotMatL);
+      geo = ribbedBand({
+        alongHalf: BLOCK_HX + over / 2,
+        alongSegs: 18,
+        depth: FLARE,
+        depthSign: -1,
+        swap: true,
+        alongOffset: (sign * over) / 2,
+        // הערימה צוללת אל עמק-הכריכה: ליד השדרה כמעט אין עובי נראה. רצועה
+        // בעובי אחיד מציירת קו ישר ובוהק מתחת לספר — נקרא כ„מדף”.
+        scaleAt: (x) => 0.42 + 0.58 * clamp01(Math.abs(cx + x) / (W * 0.995)) ** 0.55,
+        tint: BOT_TINT,
+      });
+      mesh = new THREE.Mesh(geo, sign === 1 ? flareMatR : flareMatL);
       mesh.position.set(cx, -BLOCK_HY, 0.002);
     }
     book.add(mesh);
@@ -486,7 +511,10 @@ export function createBookScene(
   // ואינם מתעקלים — התוספת זניחה גם במובייל.
   const fanGeo = new THREE.PlaneGeometry(W * 0.988, H * 0.992, 24, 4);
   fanGeo.translate((W * 0.988) / 2 - 0.016, 0, 0);
-  const FAN_PER_SIDE = opts.mobile ? 2 : 3;
+  // מספר הגיליונות הממשיים שמתחת לדף העליון. שלושה נתנו „כמה מישורים”;
+  // כאן הם גם רבים יותר וגם *מדורגים*: כל גיליון עמוק יותר קצר במעט, ולכן
+  // בקצה החופשי נראית סדרת קצוות ולא קצה אחד.
+  const FAN_PER_SIDE = opts.mobile ? 4 : 7;
   function makeFanLeaf(front: THREE.Texture, back: THREE.Texture): Leaf {
     const mat = new THREE.ShaderMaterial({
       uniforms: {
@@ -502,6 +530,8 @@ export function createBookScene(
         uCam: { value: camera.position },
         uOpacity: { value: 1 },
         uTurnShadow: { value: 0 },
+        uSheen: { value: 0 },
+        uSheenK: { value: 0 },
       },
       vertexShader: leafVertex,
       fragmentShader: leafFragment,
@@ -515,8 +545,15 @@ export function createBookScene(
   const fanR: Leaf[] = [];
   const fanL: Leaf[] = [];
   for (let i = 0; i < FAN_PER_SIDE; i += 1) {
-    fanR.push(makeFanLeaf(blankR, blankR));
-    fanL.push(makeFanLeaf(blankL, blankL));
+    const r = makeFanLeaf(blankR, blankR);
+    const l = makeFanLeaf(blankL, blankL);
+    // הקיצור מצטבר כלפי מטה בערימה. הגאומטריה מוזזת כך שראשיתה בשדרה, ולכן
+    // הקנה-מידה מקצר אך ורק את הקצה החופשי — בדיוק כמו בערימת דפים אמיתית.
+    const k = 1 - (i + 1) * 0.0055;
+    r.mesh.scale.set(k, 1 - (i + 1) * 0.0022, 1);
+    l.mesh.scale.set(k, 1 - (i + 1) * 0.0022, 1);
+    fanR.push(r);
+    fanL.push(l);
   }
 
   // ── לוחות-כריכה (hardcover) — חום כהה חמים, לא שחור, עם overhang ──
@@ -569,6 +606,8 @@ export function createBookScene(
       uCam: { value: camera.position },
       uOpacity: { value: 1 },
       uTurnShadow: { value: 0 },
+      uSheen: { value: 0 },
+      uSheenK: { value: 0 },
     },
     vertexShader: leafVertex,
     fragmentShader: leafFragment,
@@ -716,7 +755,6 @@ export function createBookScene(
     const leftStruct = smooth((openL - 0.72) / 0.28);
     blockFaceL.opacity = leftStruct;
     flareMatL.opacity = leftStruct;
-    flareBotMatL.opacity = leftStruct;
     boardMatL.opacity = leftStruct * 0.95;
     spineMat.opacity = leftStruct;
     blockL.visible = leftStruct > 0.02;
@@ -773,14 +811,14 @@ export function createBookScene(
       fanCurlR.push(restR);
       fanR[i].mat.uniforms.uTheta.value = 0;
       fanR[i].mat.uniforms.uCurl.value = restR;
-      fanR[i].mesh.position.z = -0.004 - (i + 1) * 0.0115;
+      fanR[i].mesh.position.z = -0.004 - (i + 1) * 0.0135;
 
       const openFan = weightedFall(win(t, T.openFrom + 120 + i * 18, T.openTo + 120));
       const restL = lerp(0, -REST_CURL * (1 - depth * 0.55) * 1.09, openFan);
       fanCurlL.push(restL);
       fanL[i].mat.uniforms.uTheta.value = Math.PI * openFan;
       fanL[i].mat.uniforms.uCurl.value = restL + Math.sin(openFan * Math.PI) * 0.42;
-      fanL[i].mesh.position.z = -0.004 - (i + 1) * 0.0115 + Math.sin(openFan * Math.PI) * 0.026;
+      fanL[i].mesh.position.z = -0.004 - (i + 1) * 0.0135 + Math.sin(openFan * Math.PI) * 0.026;
       fanL[i].mesh.visible = openFan > 0.02;
     }
     pose.fanRestR = fanCurlR;
@@ -800,8 +838,12 @@ export function createBookScene(
       (t > T.turn1To ? settleA * 0.1 : 0);
     leafA.mat.uniforms.uTwist.value =
       0.2 + Math.sin(ta * Math.PI) * 0.55 + (t > T.turn1To ? settleA * 0.22 : 0);
+    // המרווחים בין הגיליונות שנחו הוגדלו (‎0.011/0.006‎ → ‎0.016/0.010‎ ו-‎0.022‎):
+    // במרווח הישן, ‎0.005‎ בלבד, מיון-השקיפות התהפך מדי פעם כשהספר נושם ואז
+    // הגיליון שמתחת „הבליח” דרך העליון — נתפס במובייל בשנייה העשירית של
+    // מצב-המנוחה, כטקסט כפול על הדף הימני. הסדר עצמו לא השתנה.
     leafA.mesh.position.z =
-      lerp(0.011, 0.006, ta) + Math.sin(ta * Math.PI) * Z_LIFT + Math.sin(openA * Math.PI) * 0.04;
+      lerp(0.016, 0.01, ta) + Math.sin(ta * Math.PI) * Z_LIFT + Math.sin(openA * Math.PI) * 0.04;
 
     const tb = pageTurn(win(t, T.turn2From, T.turn2To));
     const settleB = Math.exp(-7 * Math.max(0, (t - T.turn2To) / 1000)) * Math.sin((t - T.turn2To) / 45);
@@ -815,7 +857,7 @@ export function createBookScene(
     leafB.mat.uniforms.uTwist.value =
       0.2 + Math.sin(tb * Math.PI) * 0.55 + (t > T.turn2To ? settleB * 0.22 : 0);
     leafB.mesh.position.z =
-      lerp(0.006, 0.011, tb) + Math.sin(tb * Math.PI) * Z_LIFT + Math.sin(openB * Math.PI) * 0.035;
+      lerp(0.01, 0.022, tb) + Math.sin(tb * Math.PI) * Z_LIFT + Math.sin(openB * Math.PI) * 0.035;
 
     // צל-נע: הגיליון שמתהפך מחשיך רכות את הדף שמתחתיו (חזק יותר ליד השדרה).
     const shA = Math.sin(ta * Math.PI);
@@ -914,47 +956,76 @@ export function createBookScene(
      */
     const osc = (period: number, phase = 0) =>
       Math.sin((t * Math.PI * 2) / period + phase) - Math.sin(phase);
-    // שני מחזורים ארוכים וזרים זה לזה — הסכום שלהם אינו חוזר על עצמו בטווח
-    // שבו מבקר מסתכל על העמוד.
-    const slowA = osc(17);
-    const slowB = osc(23, Math.PI / 2);
-    // נשימת-הנייר: מחזור קצר יותר (9.5ש) — זה הדופק שנותן את תחושת החיים.
-    const breath = osc(9.5);
-    const breathOff = osc(9.5, 1.9); // צד שמאל, בפאזה אחרת
+    // מחזורים ארוכים וזרים זה לזה — סכומם אינו חוזר על עצמו בטווח שבו מבקר
+    // מסתכל על העמוד. קוצרו מ-17/23/9.5 כדי שהתנועה תהיה קריאה כבר בחמש
+    // השניות הראשונות ולא רק אחרי חצי דקה.
+    const slowA = osc(13);
+    const slowB = osc(19, Math.PI / 2);
+    const breath = osc(7.5);
+    const breathOff = osc(7.5, 1.9); // צד שמאל, בפאזה אחרת
 
     // התרפות חד-פעמית: מיד אחרי הדפדוף האחרון הנייר ממשיך להירגע החוצה עוד
     // ‎~1.5‎ שניות ואז נעצר. זו אינה לולאה אלא זנב של התנועה שקדמה לה — וזה מה
     // שמונע את התפר בין „הרצף נגמר” ל„משהו מתנדנד עכשיו”.
     const relax = 1 - Math.exp(-t / 0.95);
 
-    baseRight.mat.uniforms.uCurl.value = REST_CURL + relax * 0.028 + breath * 0.035;
+    // המשרעות כאן גדולות פי-שלושה מהגרסה הקודמת. הגרסה ההיא נמדדה כ„זזה”
+    // אבל נצפתה כקפואה, ומדידת-פיקסלים אינה קריטריון הקבלה: מה שצריך להיראות
+    // הוא שקצה-הדף החופשי *עולה ויורד* בכמה פיקסלים, ושהאור נוסע על הנייר.
+    baseRight.mat.uniforms.uCurl.value = REST_CURL + relax * 0.028 + breath * 0.2;
     baseLeft.mat.uniforms.uCurl.value =
-      -REST_CURL * 1.09 - relax * 0.03 + breathOff * 0.035;
+      -REST_CURL * 1.09 - relax * 0.03 + breathOff * 0.2;
+
+    // הגיליונות שנחו נושמים *בדיוק באותה פאזה* כמו דף-הבסיס שמתחתיהם. פאזה
+    // שונה הייתה מקרבת משטחים זה אל זה ומחזירה את אותו היפוך-מיון.
+    leafA.mat.uniforms.uCurl.value = REST_CURL + relax * 0.028 + breath * 0.2;
+    leafB.mat.uniforms.uCurl.value = REST_CURL + relax * 0.028 + breath * 0.2;
+
+    // פס-האור נוסע הלוך-ושוב לרוחב הכפולה במחזור של 11ש. עוצמתו נכנסת דרך
+    // `relax`, ולכן ברגע שהרצף נגמר היא אפס בדיוק ואין תפר.
+    const sheenX = 1.75 * Math.sin((t * Math.PI * 2) / 11);
+    const sheenK = relax * 0.17;
+    for (const l of [baseRight, baseLeft, leafA, leafB, ...fanR, ...fanL]) {
+      l.mat.uniforms.uSheen.value = sheenX;
+      l.mat.uniforms.uSheenK.value = sheenK;
+    }
+    coverMat.uniforms.uSheen.value = sheenX;
+    coverMat.uniforms.uSheenK.value = sheenK;
+    // שדה-הקצוות עונה לאותו אור: הצלעות אינן מוארות בשיידר, ולכן הן מקבלות
+    // את אותה נשימה דרך גוון-החומר.
+    flareMatR.color.setScalar(1 + breath * 0.05);
+    flareMatL.color.setScalar(1 + breathOff * 0.05);
     for (let i = 0; i < FAN_PER_SIDE; i += 1) {
-      // הערימה נושמת בפיגור — הגיליון העליון מוביל, אלה שמתחתיו עונים.
-      const lag = (i + 1) * 0.55;
+      // הערימה נושמת בפיגור — הגיליון העליון מוביל, אלה שמתחתיו עונים, וכך
+      // גל איטי עובר במורד הערימה במקום שכולם יזוזו יחד.
+      const lag = (i + 1) * 0.5;
       const sgn = (pose.fanRestL[i] ?? 0) < 0 ? -1 : 1;
       fanR[i].mat.uniforms.uCurl.value =
-        (pose.fanRestR[i] ?? 0) + relax * 0.02 + osc(9.5, -lag) * 0.022;
+        (pose.fanRestR[i] ?? 0) + relax * 0.02 + osc(7.5, -lag) * 0.1;
       fanL[i].mat.uniforms.uCurl.value =
-        (pose.fanRestL[i] ?? 0) + sgn * relax * 0.02 + osc(9.5, 1.9 - lag) * 0.022;
+        (pose.fanRestL[i] ?? 0) + sgn * relax * 0.02 + osc(7.5, 1.9 - lag) * 0.1;
     }
 
-    // רפיון-קצה-הדפים: הערימה נפרשת עוד קצת אחרי שהדף האחרון נח, ואז „מתנשמת”
-    // סביב הזווית החדשה. ‎~1°‎ בלבד — מתחת לסף המודע, אבל הקצה המשונן משנה שטח
-    // ולכן האור עליו נע. זה הפרט שהופך „אנימציה שנעצרה” ל„חפץ שמונח”.
-    setFlare(1, pose.flareR + relax * 0.05 + breath * 0.022);
-    setFlare(-1, pose.flareL + relax * 0.05 + breathOff * 0.022);
+    // רפיון-קצה-הדפים: הערימה נפרשת עוד קצת אחרי שהדף האחרון נח, ואז נושמת
+    // סביב הזווית החדשה. הקצה מורכב מצלעות נפרדות, ולכן שינוי זווית קטן משנה
+    // את כל שדה-הקצוות בבת אחת — זה הפרט הקריא ביותר במצב-המנוחה.
+    setFlare(1, pose.flareR + relax * 0.05 + breath * 0.05);
+    setFlare(-1, pose.flareL + relax * 0.05 + breathOff * 0.05);
 
     const sp = clamp01(scrollP);
-    book.rotation.y = pose.rotYNow + slowA * 0.0035;
-    book.rotation.x = pose.rotXNow + slowB * 0.0025 - sp * 0.03;
+    // הגוף עצמו כמעט אינו זז — ‎0.35°‎. חפץ מונח אינו מרחף, והחיים כאן הם
+    // בנייר ובאור, לא בתנועת-גוף.
+    book.rotation.y = pose.rotYNow + slowA * 0.006;
+    book.rotation.x = pose.rotXNow + slowB * 0.004 - sp * 0.03;
     frame(pose.distNow, pose.liftNow + sp * 0.06);
 
     // האור נודד — והצל נושם איתו.
-    setKeyYaw(0.13 + slowA * 0.045, slowB * 0.02);
-    shadowMat.opacity = pose.shadowNow + slowB * 0.025;
-    shadow.scale.setScalar(1 + slowA * 0.006);
+    // האור נודד ‎±11°‎ (היה ‎±2.6°‎). זה המנגנון הקריא ביותר: הנצנוץ *נוסע* על
+    // הנייר במקום לשבת עליו, והצל עונה לו. פיזיקלית זה „יש חדר סביב הספר”,
+    // ואין בו לא ריחוף ולא באונס.
+    setKeyYaw(0.13 + slowA * 0.2, slowB * 0.05);
+    shadowMat.opacity = pose.shadowNow + slowB * 0.05;
+    shadow.scale.setScalar(1 + slowA * 0.018);
   }
 
   function render() {
@@ -971,7 +1042,7 @@ export function createBookScene(
   }
   function dispose() {
     [
-      blankR, blankL, endpaper, coverLiner, coverTex, texR1, texL1, texR2, texL2, texR3, texL3, flareTex, flareTexRot,
+      blankR, blankL, endpaper, coverLiner, coverTex, texR1, texL1, texR2, texL2, texR3, texL3,
     ].forEach((t) => t.dispose());
     leafGeo.dispose();
     coverGeo.dispose();
@@ -984,7 +1055,7 @@ export function createBookScene(
     blockFaceR.dispose();
     blockFaceL.dispose();
     [flareForeR, flareBotR, flareForeL, flareBotL].forEach((m) => m.geometry.dispose());
-    [flareMatR, flareMatL, flareBotMatR, flareBotMatL].forEach((m) => m.dispose());
+    [flareMatR, flareMatL].forEach((m) => m.dispose());
     boardMatR.dispose();
     boardMatL.dispose();
     spineMat.dispose();

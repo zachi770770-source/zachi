@@ -65,10 +65,10 @@ export function HeroBookGL({
     let cleanupAmbient: (() => void) | null = null;
 
     const mobile = window.matchMedia("(max-width: 767px)").matches;
-    // הדסקטופ בלבד מקבל את שכבת-החיים: סחיפה זעירה ופרלקסת-גלילה. במובייל
-    // הרינדור המתמשך יקר, המסך קטן מכדי שהסחיפה תיקרא, והגלילה ממילא מוציאה
-    // את ה-Hero מהמסך מהר.
-    const ambientAllowed = window.matchMedia("(min-width: 1024px)").matches;
+    // שכבת-החיים רצה בשני הגדלים. קודם היא הייתה דסקטופ-בלבד, ואז הספר
+    // *נעצר* במובייל בסוף הרצף — מצב קפוא ממש. היא עדיין מגודרת ב-onScreen
+    // ובנראות-הלשונית, ובמובייל היא רצה בקצב נמוך יותר.
+    const ambientAllowed = true;
 
     const run = async () => {
       const img = new Image();
@@ -171,8 +171,9 @@ export function HeroBookGL({
           }
         }
 
-        // שכבת-החיים — 30fps ולא 60: לא נראה הבדל בתנועה כזו, והעלות נחצית.
-        if (onScreen && now - lastAmbient >= 33) {
+        // ‎30fps‎ בדסקטופ, ‎20fps‎ במובייל: בתנועה איטית כזו אין הבדל נראה,
+        // והעלות יורדת.
+        if (onScreen && now - lastAmbient >= (mobile ? 50 : 33)) {
           lastAmbient = now;
           controls.setAmbient((now - ambientT0) / 1000, scrollP);
           controls.render();
