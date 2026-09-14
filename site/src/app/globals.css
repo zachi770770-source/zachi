@@ -4810,12 +4810,65 @@ html.vt-book-nav::view-transition-group(book-cover) {
    כאן הוא מקבל את אותה כניסה בדיוק שיש ל-fallback: עלייה עדינה + scale,
    במשך `--dur-physical`, עם `--ease-settle`. ההשהיה קצרה יותר מזו של
    ה-fallback כי ה-GL ממילא מוכן מאוחר יותר (טעינה עצלה + decode). */
+/* הקנבס נחשף ב-opacity בלבד. כל תזוזה עברה לסצנה עצמה: תנועת-CSS על המכל
+   ותנועת-מצלמה בתוכו הן שתי מערכות שמתחרות על אותו אובייקט, וזה בדיוק מה
+   שגורם לספר להיקרא כאלמנט-DOM שנכנס ולא כגוף פיזי שמגיע. */
+/* ── יציבות-פריסה: תיבה אחת לשני המסלולים ────────────────────────────────
+   הכריכה הסטטית (fallback) והקנבס תפסו גבהים שונים לגמרי — 788px מול 410px —
+   והחלפתם ב-`display` באמצע הטעינה הייתה קפיצת-פריסה של 0.12 (CLS כולל 0.127
+   בדסקטופ, מעל סף ה„טוב”). תפיסת-התיבה בהידרציה רק הקדימה את הקפיצה ל-391ms;
+   מה שבאמת פותר הוא ששתי החלופות יתפסו *אותה* תיבה.
+
+   הגובה נגזר מהקנבס (‎36rem / (8/5.7) = 25.65rem‎) — כלומר גודל ספר-ה-GL
+   המאושר אינו משתנה כלל. הכריכה הסטטית מתכווצת כדי להיכנס לתיבה הזו; זהו
+   המסלול של „ללא WebGL / תנועה-מופחתת”, והוא מציג עכשיו כריכה קטנה יותר
+   באותן פרופורציות. זו הפשרה המודעת: אפס קפיצה, במחיר כריכת-fallback קטנה
+   יותר — ולא במחיר שינוי הספר שאושר. */
+@media (min-width: 641px) {
+  /* הגובה נקבע על התיבה, ו*נמסר* עד ה-<img> עצמו: הגבלת המעטפת בלבד השאירה
+     את התמונה בגובהה המלא (נמדד: מעטפת 526×410, תמונה 522×808 — גלישה של
+     400px החוצה). לכן השרשרת כולה מקבלת גובה, והתמונה שומרת על יחסיה. */
+  /* מגבילים את *רוחב* המעטפת ולא את גובה התמונה. הגבלת התמונה לבדה הותירה
+     את שאר שכבות-הכריכה (‎.book-cover__pages‎ — פאת-הדפים הדקורטיבית) ברוחב
+     המקורי, והן התנתקו מהכריכה ונראו כפס מרחף לצדה. רוחב = גובה-התיבה כפול
+     יחס-הכריכה (0.667) ⇒ כל השכבות מתכווצות יחד ושומרות על ההרכבה. */
+  .sig-hero__cover {
+    max-width: calc(var(--hero-book-h) * 0.667);
+  }
+}
+@media (min-width: 1024px) {
+  .sig-hero__object {
+    --hero-book-h: 25.65rem; /* = 36rem ÷ (8/5.7) — בדיוק גובה הקנבס */
+  }
+}
+@media (min-width: 641px) and (max-width: 1023px) {
+  .sig-hero__object {
+    --hero-book-h: 24.75rem; /* = 36rem ÷ (8/5.5) */
+  }
+}
+
+/* תופסים את התיבה ברגע שידוע שה-GL ירוץ — עוד לפני שהסצנה מוכנה. בלי זה
+   הכריכה הסטטית (788px) והקנבס (410px) מתחלפים ב-`display` באמצע הטעינה,
+   וזו קפיצת-פריסה אמיתית (נמדד: 0.096 יחיד, CLS 0.127 בסך הכול). */
+/* שימו לב: `visibility: hidden` על המעטפת נבדק ונפסל — הוא מוציא גם את
+   *הקישור* מסדר-הטאב, ובחלון שבין תפיסת-התיבה להפעלת הסצנה לא היה שום קישור
+   ממוקד אל הספר (כריכת-ה-CSS כבר מוסתרת, והקנבס עוד לא). לכן מוסתר רק הקנבס
+   עצמו, וה-<a> שעוטף אותו נשאר נגיש מהרגע הראשון. */
+.hero-bookgl[data-reserve="true"] {
+  display: block;
+}
+.hero-bookgl[data-reserve="true"] .hero-bookgl__canvas {
+  opacity: 0;
+}
+.sig-hero__object:has(.hero-bookgl[data-reserve="true"]) .sig-hero__cover {
+  display: none;
+}
+.hero-bookgl[data-active="true"] .hero-bookgl__canvas {
+  opacity: 1;
+  animation: sig-fade-in 240ms var(--ease-standard) both;
+}
 .hero-bookgl[data-active="true"] {
   display: block;
-  animation: sig-book-in var(--dur-physical) var(--ease-settle) both;
-}
-.sig-hero__object:has(.hero-bookgl[data-active="true"]) .sig-hero__cover {
-  display: none;
 }
 .hero-bookgl__link {
   position: absolute;
@@ -5151,18 +5204,6 @@ html.vt-book-nav::view-transition-group(book-cover) {
   from {
     opacity: 0;
     transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-/* כניסת ספר-ה-WebGL: מרוסנת יותר מזו של הכריכה הסטטית. הקנבס גדול בהרבה
-   מהכריכה, ואותם 52px/0.93 עליו נקראים כזינוק ולא ככניסה. */
-@keyframes sig-book-in {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.965);
   }
   to {
     opacity: 1;

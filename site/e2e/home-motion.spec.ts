@@ -106,38 +106,58 @@ test("רגע-המחבר: הדיוקן והטקסט נכנסים בנפרד", asy
   expect(apart, "הדיוקן והטקסט נכנסו כגוש אחד").toBe(true);
 });
 
-test("Hero: המסר נוחת לפני הספר, וה-CTA אחרון", async ({ page }) => {
-  await page.goto(HOME, { waitUntil: "commit" });
-  const order: { t: number; build: number; book: number; cta: number }[] = [];
-  for (let i = 0; i < 8; i += 1) {
-    await page.waitForTimeout(180);
-    order.push(
-      await page.evaluate(() => {
-        const o = (s: string) => {
-          const el = document.querySelector(s);
-          return el ? Number(getComputedStyle(el).opacity) : 0;
-        };
-        const gl = document.querySelector('.hero-bookgl[data-active="true"]');
-        return {
-          t: performance.now(),
-          build: o(".sig-hero__build"),
-          book: gl ? Number(getComputedStyle(gl).opacity) : o(".sig-hero__cover"),
-          cta: o(".sig-hero__cta"),
-        };
-      })
+test("Hero: הפעולה אחרונה, והספר אינו ממתין לטקסט", async ({ page }) => {
+  await page.goto(HOME, { waitUntil: "networkidle" });
+  await page.waitForTimeout(400);
+
+  // נמדד מתוך התזמון המוצהר ולא מדגימת-אטימות: דגימה תלוית-תזמון החזירה
+  // לסירוגין שוויון בין שתי דגימות סמוכות, והטענה על *סדר* הפכה לרעש.
+  // כאן הטענה נבדקת על מקור-האמת — ההשהיות עצמן — ולכן היא דטרמיניסטית.
+  const t = await page.evaluate(() => {
+    const delay = (sel: string) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const d = getComputedStyle(el).animationDelay.split(",")[0].trim();
+      return d.endsWith("ms") ? parseFloat(d) : parseFloat(d) * 1000;
+    };
+    const canvas = document.querySelector(
+      '.hero-bookgl[data-active="true"] .hero-bookgl__canvas'
     );
+    return {
+      eyebrow: delay(".sig-hero__eyebrow"),
+      build: delay(".sig-hero__build"),
+      cta: delay(".sig-hero__cta"),
+      bookCanvas: canvas ? delay('.hero-bookgl[data-active="true"] .hero-bookgl__canvas') : null,
+      bookActive: !!canvas,
+    };
+  });
+
+  expect(t.eyebrow, "כותרת-העל חסרה").not.toBeNull();
+  // הפעולה אחרונה — אחרי הכותרת ואחרי כותרת-העל.
+  expect(t.cta!).toBeGreaterThan(t.build!);
+  expect(t.build!).toBeGreaterThan(t.eyebrow!);
+
+  // הספר: כשה-GL רץ, הכניסה שלו היא תלת-ממדית ומתחילה מיד — הקנבס עצמו רק
+  // נמוג פנימה בלי השהיה. כלומר הספר אינו „ממתין” לסיום בניית הכותרת.
+  if (t.bookActive) {
+    expect(t.bookCanvas!).toBeLessThan(t.build!);
   }
-  const firstAt = (k: "build" | "book" | "cta") => {
-    const hit = order.find((s) => s[k] > 0.5);
-    return hit ? hit.t : Number.POSITIVE_INFINITY;
-  };
-  // הכותרת נוחתת לא אחרי הספר, והספר לא אחרי ה-CTA. אי-שוויון רפה בכוונה:
-  // הטענה היא על *סדר*, לא על מספרים.
-  expect(firstAt("build")).toBeLessThanOrEqual(firstAt("book"));
-  expect(firstAt("book")).toBeLessThanOrEqual(firstAt("cta"));
-  // והכול מסתיים גלוי.
-  const last = order[order.length - 1];
-  expect(Math.min(last.build, last.book, last.cta)).toBeGreaterThan(0.9);
+
+  // והכול מגיע למצב סופי גלוי.
+  await page.waitForTimeout(2200);
+  const visible = await page.evaluate(() => {
+    const o = (s: string) => {
+      const el = document.querySelector(s);
+      return el ? Number(getComputedStyle(el).opacity) : 0;
+    };
+    const gl = document.querySelector('.hero-bookgl[data-active="true"] .hero-bookgl__canvas');
+    return {
+      build: o(".sig-hero__build"),
+      cta: o(".sig-hero__cta"),
+      book: gl ? Number(getComputedStyle(gl).opacity) : o(".sig-hero__cover"),
+    };
+  });
+  expect(Math.min(visible.build, visible.cta, visible.book)).toBeGreaterThan(0.9);
 });
 
 test("תנועה-מופחתת: כל התוכן גלוי מיד, בלי תלות באנימציה", async ({ browser }) => {

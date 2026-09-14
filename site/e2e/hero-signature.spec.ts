@@ -100,8 +100,42 @@ test.describe("Hero signature", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const link = page.locator(".sig-hero__cover-link");
     await expect(link).toHaveCount(1);
-    await link.focus();
-    await expect(link).toBeFocused();
+    // כשספר-ה-WebGL רץ, כריכת-ה-CSS מוסתרת והקישור הממוקד הוא זה של הקנבס.
+    // הדרישה לא השתנתה — „אפשר להגיע לספר במקלדת” — רק זהות האלמנט שנושא
+    // אותה. הבדיקה בוחרת את זה שמוצג בפועל, ודורשת שתמיד יהיה כזה: בחלון
+    // שבין תפיסת-התיבה להפעלת הסצנה אסור שיישאר הספר בלי קישור ממוקד.
+    // ממתינים למצב יציב לפני הבחירה: בלי זה נוצר מירוץ שבו נבחרת כריכת-ה-CSS
+    // רגע לפני שהיא מוסתרת לטובת הקנבס, והפוקוס נופל על אלמנט שכבר אינו מוצג.
+    const glWrap = page.locator(".hero-bookgl");
+    await page
+      .waitForFunction(
+        () => document.querySelector(".hero-bookgl")?.getAttribute("data-active") === "true",
+        null,
+        { timeout: 12_000 }
+      )
+      .catch(() => {}); // אין WebGL בסביבה הזו ⇒ נשארים על כריכת-ה-CSS
+
+    const glActive = (await glWrap.getAttribute("data-active")) === "true";
+    const target = glActive ? page.locator(".hero-bookgl__link") : link;
+    await expect(target).toBeVisible();
+    await target.focus();
+    await expect(target).toBeFocused();
+
+    // ובכל מקרה: בכל רגע נתון קיים *קישור אחד* אל הספר שאפשר להגיע אליו.
+    // (הרגרסיה שנתפסה כאן: בחלון שבין תפיסת-התיבה להפעלת הסצנה הוסתרו שניהם.)
+    const reachable = await page.evaluate(() => {
+      const vis = (el: Element | null) => {
+        if (!el) return false;
+        const cs = getComputedStyle(el as HTMLElement);
+        const r = (el as HTMLElement).getBoundingClientRect();
+        return cs.display !== "none" && cs.visibility !== "hidden" && r.width > 0 && r.height > 0;
+      };
+      return [
+        vis(document.querySelector(".hero-bookgl__link")),
+        vis(document.querySelector(".sig-hero__cover-link")),
+      ].filter(Boolean).length;
+    });
+    expect(reachable, "לא נמצא קישור נגיש אל הספר").toBeGreaterThan(0);
   });
 
   test("no horizontal overflow at any width", async ({ page }) => {
