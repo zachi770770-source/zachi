@@ -65,10 +65,6 @@ export function HeroBookGL({
     let cleanupAmbient: (() => void) | null = null;
 
     const mobile = window.matchMedia("(max-width: 767px)").matches;
-    // שכבת-החיים רצה בשני הגדלים. קודם היא הייתה דסקטופ-בלבד, ואז הספר
-    // *נעצר* במובייל בסוף הרצף — מצב קפוא ממש. היא עדיין מגודרת ב-onScreen
-    // ובנראות-הלשונית, ובמובייל היא רצה בקצב נמוך יותר.
-    const ambientAllowed = true;
 
     const run = async () => {
       const img = new Image();
@@ -146,6 +142,8 @@ export function HeroBookGL({
       let intro = true;
       let ambientT0 = 0;
       let lastAmbient = 0;
+      let pausedAt = 0;
+      let pausedTotal = 0;
       let onScreen = true;
       let scrollP = 0;
 
@@ -171,18 +169,25 @@ export function HeroBookGL({
           }
           intro = false;
           ambientT0 = now;
-          if (!ambientAllowed) {
-            raf = 0; // מובייל: נעצר בהתיישבות, בדיוק כמו קודם
-            return;
-          }
         }
 
-        // ‎30fps‎ בדסקטופ, ‎20fps‎ במובייל: בתנועה איטית כזו אין הבדל נראה,
-        // והעלות יורדת.
-        if (onScreen && now - lastAmbient >= (mobile ? 50 : 33)) {
-          lastAmbient = now;
-          controls.setAmbient((now - ambientT0) / 1000, scrollP);
-          controls.render();
+        // ‎30fps‎ בדסקטופ, ‎25fps‎ במובייל. הדפדוף המתמשך צריך קצב חלק — בקצב
+        // נמוך יותר הדף „קופץ” לאורך הקשת.
+        if (!onScreen) {
+          // מחוץ למסך או לשונית מוסתרת: לא מרנדרים, וגם *עוצרים את השעון*.
+          // בלי זה הדפים ממשיכים להתהפך בלי שאיש רואה, והמבקר חוזר אל אמצע
+          // תנועה שלא ראה את תחילתה.
+          if (!pausedAt) pausedAt = now;
+        } else {
+          if (pausedAt) {
+            pausedTotal += now - pausedAt;
+            pausedAt = 0;
+          }
+          if (now - lastAmbient >= (mobile ? 40 : 33)) {
+            lastAmbient = now;
+            controls.setAmbient((now - ambientT0 - pausedTotal) / 1000, scrollP);
+            controls.render();
+          }
         }
         raf = requestAnimationFrame(tick);
       };
@@ -205,10 +210,8 @@ export function HeroBookGL({
         { threshold: 0.01 }
       );
       visIo.observe(wrap);
-      if (ambientAllowed) {
-        window.addEventListener("scroll", onScroll, { passive: true });
-        document.addEventListener("visibilitychange", onVisibility);
-      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      document.addEventListener("visibilitychange", onVisibility);
       cleanupAmbient = () => {
         visIo.disconnect();
         window.removeEventListener("scroll", onScroll);

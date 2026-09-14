@@ -303,8 +303,23 @@ export function createBookScene(
   // דפי-בסיס + גיליונות מתהפכים (front נראה ב-θ=0, back ב-θ=π).
   const baseRight = makeLeaf(texR1, blankR);
   const baseLeft = makeLeaf(blankL, texL3);
-  const leafB = makeLeaf(texR3, texL2); // front=R3, back=L2
-  const leafA = makeLeaf(texR2, texL1); // front=R2, back=L1
+
+  // ── בריכת-הגיליונות המתהפכים ───────────────────────────────────────────
+  // הספר מדפדף בלי סוף, ולכן אין כאן „שני גיליונות שמתהפכים פעם אחת” אלא
+  // בריכה ממוחזרת: כל גיליון מתהפך, נח בערימה השמאלית, וכשהוא קבור תחת
+  // שלושה שנחתו אחריו הוא מוחזר אל תחתית הערימה הימנית — מתחת לגיליונות
+  // הממתינים, כלומר מוסתר לחלוטין ברגע ההחזרה. זו הסיבה שאין „קפיצת-לולאה”:
+  // שום דבר אינו חוזר למקומו לעיני הצופה, והזרם פשוט נמשך.
+  const POOL = opts.mobile ? 4 : 5;
+  const SPREADS = [
+    { r: texR1, l: texL1 },
+    { r: texR2, l: texL2 },
+    { r: texR3, l: texL3 },
+  ];
+  const turners: Leaf[] = [];
+  for (let i = 0; i < POOL; i += 1) {
+    turners.push(makeLeaf(SPREADS[i % 3].r, SPREADS[i % 3].l));
+  }
 
   // ── גוש-הדפים ──────────────────────────────────────────────────────────
   // גוף הערימה: תיבה בעובי אמיתי (ספר של כמה מאות עמודים בקנה-המידה הזה), עם
@@ -736,13 +751,9 @@ export function createBookScene(
     openFrom: opts.mobile ? 610 : 690,
     openTo: opts.mobile ? 1760 : 2000,
     breathTo: opts.mobile ? 2000 : 2260,
-    turn1From: opts.mobile ? 2000 : 2260,
-    turn1To: opts.mobile ? 2680 : 3060,
-    // הפער לפני הדפדוף השני גדול מהראשון (80ms) כדי שהשניים לא יישמעו
-    // כמטרונום. אותו הבדל קטן הוא ההבדל בין „שני דפדופים” ל„לולאה”.
-    turn2From: opts.mobile ? 2770 : 3140,
-    turn2To: opts.mobile ? 3450 : 3940,
-    total: opts.mobile ? 3900 : 4420,
+    // הרצף הפותח נגמר ברגע שהספר פתוח ומיושב. הדפדוף עצמו כבר אינו חלק ממנו
+    // אלא זרם מתמשך שמנוהל בשכבה הרצה — ולכן אין „סוף אנימציה”.
+    total: opts.mobile ? 2320 : 2620,
   };
   const DURATION = T.total;
   const ms = (p: number) => clamp01(p) * DURATION;
@@ -788,6 +799,48 @@ export function createBookScene(
     flareL: 0,
   };
 
+  // ── לוח-הדפדוף ─────────────────────────────────────────────────────────
+  // הדפדוף אינו „שני אירועים בתוך הרצף” אלא זרם אינסופי. הזמנים נבנים פעם
+  // אחת מראש עם ריווח לא-אחיד, ובסוף כל מחזור של עשרה דפים יש הפוגת-קריאה
+  // קצרה. ההפוגה היא מה שמונע „דפדוף קדחתני”, והמיחזור (ראו בריכת-הגיליונות)
+  // הוא מה שמונע קפיצת-לולאה: הזרם פשוט נמשך, ואין לו גבול נראה.
+  const TURNS_PER_CYCLE = 10;
+  const MOVE_LEAD = 1.9; // שניות לפני תורו שבהן הגיליון מוחזר אל צד ימין
+  const rnd = (n: number) => Math.abs((Math.sin(n * 91.7) * 4375.85) % 1);
+  const turnStart: number[] = [];
+  const turnDur: number[] = [];
+  {
+    let acc = 0.5; // ההשהיה בין סוף הרצף הפותח לדף הראשון
+    for (let n = 0; n < 1400; n += 1) {
+      turnStart.push(acc);
+      turnDur.push(0.78 + 0.2 * rnd(n + 3));
+      const cycleEnd = (n + 1) % TURNS_PER_CYCLE === 0;
+      acc += 0.84 + 0.26 * rnd(n) + (cycleEnd ? 2.8 + 0.9 * rnd(n + 11) : 0);
+    }
+  }
+  /** אינדקס הדף שתורו התחיל לאחרונה (−1 לפני הראשון). */
+  function turnIndexAt(t: number): number {
+    if (t < turnStart[0]) return -1;
+    let lo = 0;
+    let hi = turnStart.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (turnStart[mid] <= t) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo;
+  }
+  // עומק בערימה → z. שתי הערימות חולקות את אותו סולם כדי שסדר-השקיפות יהיה
+  // חד-משמעי בשני הצדדים.
+  // רק שלוש שכבות מרונדרות בכל צד. גיליון עמוק יותר מזה קבור ממילא מאחורי
+  // אלה שמעליו, ורינדורו רק מסכן חיתוך-משטחים: העיקול מרים את הקצה החופשי
+  // הרבה יותר מכל מרווח-z סביר, ולכן שתי שכבות סמוכות מדי *חותכות* זו את זו
+  // והטקסט של התחתונה מבליח דרך העליונה. זה בדיוק הכפל שנראה על הדף השמאלי.
+  const VISIBLE_LAYERS = 3;
+  const Z_STEP = 0.008;
+  const zRight = (depth: number) => 0.022 - Math.min(depth, VISIBLE_LAYERS) * Z_STEP;
+  const zLeft = (rank: number) => 0.022 - Math.min(rank - 1, VISIBLE_LAYERS) * Z_STEP;
+
   function apply(p: number) {
     const t = ms(p);
 
@@ -805,8 +858,6 @@ export function createBookScene(
     const openCover = weightedFall(win(t, T.openFrom, T.openTo));
     // הגיליונות נסחפים אחרי הכריכה בהשהיות קטנות ושונות — אוויר שנלכד בין
     // דפים, לא שלוש שכבות שזזות יחד.
-    const openA = weightedFall(win(t, T.openFrom + 60, T.openTo + 60));
-    const openB = weightedFall(win(t, T.openFrom + 80, T.openTo + 80));
     const openL = weightedFall(win(t, T.openFrom + 110, T.openTo + 110));
 
     coverMat.uniforms.uTheta.value = lerp(0, Math.PI, openCover);
@@ -891,61 +942,30 @@ export function createBookScene(
     pose.fanRestR = fanCurlR;
     pose.fanRestL = fanCurlL;
 
-    // ══ 4 · דפדופים ═══════════════════════════════════════════════════════
-    // `pageTurn` היא א-סימטרית להפך מ-`weightedFall`: הדף *נתפס* מהר ומונח
-    // לאט. אחרי הנחיתה נשאר ripple ב-uTwist שדועך — נייר מתיישב, לא נעצר.
-    const ta = pageTurn(win(t, T.turn1From, T.turn1To));
-    const settleA = Math.exp(-7 * Math.max(0, (t - T.turn1To) / 1000)) * Math.sin((t - T.turn1To) / 42);
-    const thA = Math.PI * openA * (1 - ta);
-    leafA.mat.uniforms.uTheta.value = thA;
-    leafA.mat.uniforms.uCurl.value =
-      restCurlAt(ta) * openA +
-      Math.sin(ta * Math.PI) * CURL_TURN +
-      Math.sin(openA * Math.PI) * 0.5 * (1 - ta) +
-      (t > T.turn1To ? settleA * 0.1 : 0);
-    leafA.mat.uniforms.uTwist.value =
-      0.2 + Math.sin(ta * Math.PI) * 0.55 + (t > T.turn1To ? settleA * 0.22 : 0);
-    // המרווחים בין הגיליונות שנחו הוגדלו (‎0.011/0.006‎ → ‎0.016/0.010‎ ו-‎0.022‎):
-    // במרווח הישן, ‎0.005‎ בלבד, מיון-השקיפות התהפך מדי פעם כשהספר נושם ואז
-    // הגיליון שמתחת „הבליח” דרך העליון — נתפס במובייל בשנייה העשירית של
-    // מצב-המנוחה, כטקסט כפול על הדף הימני. הסדר עצמו לא השתנה.
-    leafA.mesh.position.z =
-      lerp(0.016, 0.01, ta) + Math.sin(ta * Math.PI) * Z_LIFT + Math.sin(openA * Math.PI) * 0.04;
-
-    const tb = pageTurn(win(t, T.turn2From, T.turn2To));
-    const settleB = Math.exp(-7 * Math.max(0, (t - T.turn2To) / 1000)) * Math.sin((t - T.turn2To) / 45);
-    const thB = Math.PI * openB * (1 - tb);
-    leafB.mat.uniforms.uTheta.value = thB;
-    leafB.mat.uniforms.uCurl.value =
-      restCurlAt(tb) * openB +
-      Math.sin(tb * Math.PI) * CURL_TURN +
-      Math.sin(openB * Math.PI) * 0.5 * (1 - tb) +
-      (t > T.turn2To ? settleB * 0.1 : 0);
-    leafB.mat.uniforms.uTwist.value =
-      0.2 + Math.sin(tb * Math.PI) * 0.55 + (t > T.turn2To ? settleB * 0.22 : 0);
-    leafB.mesh.position.z =
-      lerp(0.01, 0.022, tb) + Math.sin(tb * Math.PI) * Z_LIFT + Math.sin(openB * Math.PI) * 0.035;
-
-    // צל-נע: הגיליון שמתהפך מחשיך רכות את הדף שמתחתיו (חזק יותר ליד השדרה).
-    const shA = Math.sin(ta * Math.PI);
-    const shB = Math.sin(tb * Math.PI);
-    const under = Math.max(shA, shB);
-    baseRight.mat.uniforms.uTurnShadow.value = under;
-    baseLeft.mat.uniforms.uTurnShadow.value = under;
-    leafB.mat.uniforms.uTurnShadow.value = shA;
-    leafA.mat.uniforms.uTurnShadow.value = shB;
-    // הערימה שמתחת מקבלת את אותו צל-נע — בלי זה הגיליון המתהפך „מרחף” מעל
-    // ערימה מוארת אחידה, וזה בדיוק מה שמסגיר מישורים נפרדים.
+    // ══ 4 · הגיליונות הממתינים ════════════════════════════════════════════
+    // ברצף הפותח אף גיליון אינו מתהפך: כולם שוכבים על הערימה הימנית, בדיוק
+    // כמו דף-הבסיס שמתחתיהם. הדפדוף מתחיל מיד אחרי הרצף, בשכבה הרצה.
+    for (let i = 0; i < POOL; i += 1) {
+      const lf = turners[i];
+      lf.mat.uniforms.uTheta.value = 0;
+      lf.mat.uniforms.uCurl.value = REST_CURL * openCover;
+      lf.mat.uniforms.uTwist.value = 0.2;
+      lf.mat.uniforms.uTurnShadow.value = 0;
+      lf.mesh.position.z = zRight(i);
+      lf.mesh.visible = i < VISIBLE_LAYERS;
+    }
+    baseRight.mat.uniforms.uTurnShadow.value = 0;
+    baseLeft.mat.uniforms.uTurnShadow.value = 0;
     for (let i = 0; i < FAN_PER_SIDE; i += 1) {
-      fanR[i].mat.uniforms.uTurnShadow.value = under;
-      fanL[i].mat.uniforms.uTurnShadow.value = under;
+      fanR[i].mat.uniforms.uTurnShadow.value = 0;
+      fanL[i].mat.uniforms.uTurnShadow.value = 0;
     }
 
     // ══ 5 · מצלמה ═════════════════════════════════════════════════════════
     // ההגעה היא תנועת-המצלמה האמיתית (7.4→5.35), ואחריה התיישבות אחרונה אל
     // הקאדר הסופי. קודם היה כאן push-in של 10% על פני 5.2 שניות — כלומר
     // פריים כמעט קפוא.
-    const finalEase = settleCritical(win(t, T.turn2To, T.total), 6);
+    const finalEase = settleCritical(win(t, T.breathTo, T.total), 6);
     // 7.4 נבדק ונפסל: הספר הגיע קטן מדי ונקרא כאייקון. 6.35 שומר על נוכחות
     // לאורך כל ההגעה. ה-lift ההתחלתי ירד 1.46→1.28 — במיקום הגבוה יותר
     // המצלמה הביטה מלמעלה והספר נחתך בתחתית הקנבס.
@@ -1043,16 +1063,11 @@ export function createBookScene(
     baseLeft.mat.uniforms.uCurl.value =
       -REST_CURL * 1.09 - relax * 0.03 + breathOff * 0.2;
 
-    // הגיליונות שנחו נושמים *בדיוק באותה פאזה* כמו דף-הבסיס שמתחתיהם. פאזה
-    // שונה הייתה מקרבת משטחים זה אל זה ומחזירה את אותו היפוך-מיון.
-    leafA.mat.uniforms.uCurl.value = REST_CURL + relax * 0.028 + breath * 0.2;
-    leafB.mat.uniforms.uCurl.value = REST_CURL + relax * 0.028 + breath * 0.2;
-
     // פס-האור נוסע הלוך-ושוב לרוחב הכפולה במחזור של 11ש. עוצמתו נכנסת דרך
     // `relax`, ולכן ברגע שהרצף נגמר היא אפס בדיוק ואין תפר.
     const sheenX = 1.75 * Math.sin((t * Math.PI * 2) / 11);
     const sheenK = relax * 0.17;
-    for (const l of [baseRight, baseLeft, leafA, leafB, ...fanR, ...fanL]) {
+    for (const l of [baseRight, baseLeft, ...turners, ...fanR, ...fanL]) {
       l.mat.uniforms.uSheen.value = sheenX;
       l.mat.uniforms.uSheenK.value = sheenK;
     }
@@ -1068,42 +1083,123 @@ export function createBookScene(
       m.uniforms.uGlint.value = glint;
       m.uniforms.uGlintK.value = relax * 0.34;
     }
-    // ── אירוע-קצה נדיר ────────────────────────────────────────────────
-    // כל ‎~9.5‎ שניות קצה של אחד הגיליונות העליונים מתרומם מעט ומתיישב, ועל
-    // הגיליון שמתחתיו נופל צל רך שדועך איתו. זהו אירוע *בדיד* — יש לו
-    // התחלה, שיא וסוף — ולכן הוא נקלט גם כשלא מחפשים אותו, בניגוד לתנודה
-    // מחזורית שהעין מתרגלת אליה תוך שניות. המשרעת קטנה: קצה שזז, לא דף
-    // שמתנופף.
-    const EV_P = 9.5;
-    const evIdx = Math.floor(t / EV_P);
-    const evT = t - evIdx * EV_P;
-    const hash = (n: number) => Math.abs((Math.sin(n * 91.7) * 4375.85) % 1);
-    const evRight = hash(evIdx) > 0.45;
-    const evSheet = Math.floor(hash(evIdx + 7) * Math.min(3, FAN_PER_SIDE));
-    // מתרומם ונח: מתאפס ב-‎evT=0‎ ודועך כליל תוך ‎~3‎ שניות.
-    const evEnv = evT < 3.4 ? Math.exp(-evT * 1.3) * Math.sin(evT * 2.5) : 0;
+    // ── זרם-הדפדוף ────────────────────────────────────────────────────
+    // בכל רגע נתון כל גיליון בבריכה נמצא באחד משלושה מצבים, והמצב נגזר מהזמן
+    // בלבד — אין מכונת-מצבים שנשמרת בין פריימים, ולכן אפשר לקפוץ לכל רגע
+    // (וו-הבדיקה עושה בדיוק את זה) והתמונה תהיה נכונה.
+    const cur = Math.max(0, turnIndexAt(t));
+    // הדף האחרון שכבר *נחת* — הוא שקובע מה מציגה הערימה השמאלית.
+    const landed = t >= turnStart[cur] + turnDur[cur] ? cur : cur - 1;
+    const topLeft = SPREADS[((landed % 3) + 3) % 3];
+    const nextRight = SPREADS[(cur + 1) % 3];
+    let under = 0; // הצל החזק ביותר שמטיל גיליון מתהפך על מה שמתחתיו
+    for (let j = 0; j < POOL; j += 1) {
+      const lf = turners[j];
+      // הדף שהבריכה מקצה לגיליון j הוא היחיד בטווח [cur, cur+POOL) ששאריתו j.
+      const n = cur + (((j - cur) % POOL) + POOL) % POOL;
+      const tS = turnStart[n];
+      const dur = turnDur[n];
+      const prev = n - POOL;
+      const h = rnd(n + 5);
 
+      let theta = 0;
+      let curl = REST_CURL;
+      let twist = 0.2;
+      let z = zRight(n - cur);
+      let depth = n - cur; // עומק בערימה — קובע גם אם הגיליון מרונדר בכלל
+
+      if (t >= tS) {
+        // מתהפך, או נח על הערימה השמאלית.
+        const prog = clamp01((t - tS) / dur);
+        const ta = pageTurn(prog);
+        const arc = Math.sin(ta * Math.PI);
+        // זנב-התיישבות: הנייר ממשיך לרעוד רגע קצר אחרי שנחת.
+        const after = Math.max(0, t - (tS + dur));
+        const settle = Math.exp(-7 * after) * Math.sin(after * 24);
+        theta = Math.PI * ta;
+        // משרעת-העיקול משתנה מדף לדף (‎±15%‎) — בלעדיה עשרה דפדופים רצופים
+        // נקראים כמטרונום.
+        curl =
+          restCurlAt(ta) * (ta < 1 ? 1 : 1.09) +
+          arc * CURL_TURN * (0.86 + 0.28 * h) +
+          settle * 0.1;
+        twist = 0.2 + arc * (0.45 + 0.22 * h) + settle * 0.2;
+        z = lerp(zRight(0), zLeft(1), ta) + arc * Z_LIFT;
+        depth = 0;
+        if (arc > under) under = arc;
+      } else if (prev >= 0 && t < tS - MOVE_LEAD) {
+        // עדיין שוכב בערימה השמאלית מהתור הקודם שלו, קבור תחת אלה שנחתו
+        // אחריו. רק כשהוא קבור מספיק הוא יוחזר ימינה — ולכן ההחזרה מוסתרת.
+        theta = Math.PI;
+        // ככל שהגיליון עמוק יותר בערימה כך הוא שטוח יותר, ולכן הם *מקוננים*
+        // זה בזה. בעיקול זהה לכולם המשטחים חותכים זה את זה והטקסט של השכבה
+        // שמתחת מבליח דרך העליונה.
+        // ככל שהגיליון עמוק יותר כך הוא שטוח יותר, ולכן הם *מקוננים* זה בזה.
+        curl = -REST_CURL * 1.09 * (1 - 0.14 * depth);
+        // ‎+1‎: הדרגה 1 שמורה לגיליון שזה עתה נחת. בלעדיה הגיליון הישן ביותר
+        // והגיליון החדש ביותר נפלו על אותו ‎z‎ ומיון-השקיפות הבליח ביניהם.
+        const rank = cur - prev + 1;
+        depth = rank - 1;
+        z = zLeft(rank);
+      }
+
+      lf.mesh.visible = depth < VISIBLE_LAYERS;
+      lf.mat.uniforms.uTheta.value = theta;
+      lf.mat.uniforms.uCurl.value = curl;
+      lf.mat.uniforms.uTwist.value = twist;
+      lf.mesh.position.z = z;
+      lf.mat.uniforms.uTurnShadow.value = 0;
+      // ── איזו כפולה מציג כל גיליון ──────────────────────────────────
+      // רק *שלושה* משטחים באמת נצפים: הדף שמתהפך, הדף שנחשף מתחתיו מימין,
+      // והדף העליון בערימה השמאלית. כל השאר קבורים — ולכן הם מקבלים בדיוק
+      // את אותה כפולה כמו זה שמעליהם. זה לא קיצור-דרך: העיקול מקצר את הגיליון
+      // מעט, ולכן שכבה קבורה כן מציצה בשוליים, ועם תוכן שונה ההצצה הזו נראית
+      // כטקסט כפול על הדף (בדיוק מה שנמדד כאן).
+      //
+      // הכלל עקבי גם ברגע-המעבר: גיליון ממתין מציג את הכפולה הבאה, וכשמגיע
+      // תורו `cur` כבר התקדם — כך שהטקסטורה שלו אינה משתנה בזמן שהוא נראה.
+      if (t >= tS && t <= tS + dur) {
+        lf.mat.uniforms.uFront.value = SPREADS[n % 3].r;
+        lf.mat.uniforms.uBack.value = SPREADS[n % 3].l;
+      } else if (depth === 0) {
+        // נחת זה עתה — הוא הדף העליון בערימה השמאלית.
+        lf.mat.uniforms.uFront.value = SPREADS[n % 3].r;
+        lf.mat.uniforms.uBack.value = SPREADS[n % 3].l;
+      } else if (theta === 0) {
+        lf.mat.uniforms.uFront.value = nextRight.r;
+        lf.mat.uniforms.uBack.value = nextRight.l;
+      } else {
+        lf.mat.uniforms.uFront.value = topLeft.r;
+        lf.mat.uniforms.uBack.value = topLeft.l;
+      }
+    }
+    // דפי-הבסיס מקבלים את *אותה* כפולה שמציג הגיליון שמעליהם. העיקול מקצר
+    // את הגיליון מעט, ולכן הוא אינו מכסה את הבסיס עד הפיקסל האחרון; כשהתוכן
+    // זהה, ההצצה הזו פשוט אינה נראית. עם תוכן שונה היא נראתה כטקסט כפול.
+    baseLeft.mat.uniforms.uBack.value = topLeft.l;
+    baseRight.mat.uniforms.uFront.value = nextRight.r;
+
+    // כל מה שאינו מתהפך מקבל את צל-הדף העובר.
+    baseRight.mat.uniforms.uTurnShadow.value = under;
+    baseLeft.mat.uniforms.uTurnShadow.value = under;
+    for (let j = 0; j < POOL; j += 1) {
+      const lf = turners[j];
+      if (lf.mat.uniforms.uTurnShadow.value === 0) lf.mat.uniforms.uTurnShadow.value = under * 0.8;
+    }
+
+    // גיליונות-המילוי נושמים, כל אחד במחזור משלו ולא רק בפאזה משלו: בפאזה
+    // בלבד הערימה נעה כגוף אחד מוסט. את התנועה הגדולה מספק עכשיו זרם-הדפדוף,
+    // ולכן כאן נשארת רק נשימת-הנייר שמתחתיו.
     for (let i = 0; i < FAN_PER_SIDE; i += 1) {
-      // לכל גיליון *מחזור משלו* ולא רק פאזה משלו: בפאזה בלבד כל הערימה נעה
-      // כגוף אחד מוסט, וזה נקרא כתנועה אחת. מחזורים זרים נותנים תנועה
-      // עצמאית אמיתית בין שכבה לשכבה.
       const per = 6.2 + i * 0.85;
       const sgn = (pose.fanRestL[i] ?? 0) < 0 ? -1 : 1;
-      const liftR = evRight && i === evSheet ? evEnv * 0.3 : 0;
-      const liftL = !evRight && i === evSheet ? -evEnv * 0.3 : 0;
       fanR[i].mat.uniforms.uCurl.value =
-        (pose.fanRestR[i] ?? 0) + relax * 0.02 + osc(per, i * 1.1) * 0.12 + liftR;
+        (pose.fanRestR[i] ?? 0) + relax * 0.02 + osc(per, i * 1.1) * 0.1;
       fanL[i].mat.uniforms.uCurl.value =
-        (pose.fanRestL[i] ?? 0) + sgn * relax * 0.02 + osc(per, 1.9 + i * 1.1) * 0.12 + liftL;
-      // הצל של האירוע נופל על הגיליון שמתחת למתרומם.
-      const sh = Math.max(0, evEnv) * 0.5;
-      fanR[i].mat.uniforms.uTurnShadow.value = evRight && i === evSheet + 1 ? sh : 0;
-      fanL[i].mat.uniforms.uTurnShadow.value = !evRight && i === evSheet + 1 ? sh : 0;
+        (pose.fanRestL[i] ?? 0) + sgn * relax * 0.02 + osc(per, 1.9 + i * 1.1) * 0.1;
+      fanR[i].mat.uniforms.uTurnShadow.value = under;
+      fanL[i].mat.uniforms.uTurnShadow.value = under;
     }
-    // כשהמתרומם הוא הגיליון העליון, הצל נופל על דף-הבסיס.
-    const baseSh = evSheet === 0 ? Math.max(0, evEnv) * 0.45 : 0;
-    baseRight.mat.uniforms.uTurnShadow.value = evRight ? baseSh : 0;
-    baseLeft.mat.uniforms.uTurnShadow.value = evRight ? 0 : baseSh;
 
     // רפיון-קצה-הדפים: הערימה נפרשת עוד קצת אחרי שהדף האחרון נח, ואז נושמת
     // סביב הזווית החדשה. הקצה מורכב מצלעות נפרדות, ולכן שינוי זווית קטן משנה
@@ -1158,7 +1254,7 @@ export function createBookScene(
     ].forEach((t) => t.dispose());
     leafGeo.dispose();
     coverGeo.dispose();
-    [baseRight, baseLeft, leafA, leafB, ...fanR, ...fanL].forEach((l) => l.mat.dispose());
+    [baseRight, baseLeft, ...turners, ...fanR, ...fanL].forEach((l) => l.mat.dispose());
     fanGeo.dispose();
     coverMat.dispose();
     [blockR, blockL, boardR, boardL, spine, shadow].forEach((m) => {
@@ -1178,19 +1274,5 @@ export function createBookScene(
   }
 
   apply(0);
-  // TEMP-DEBUG2
-  (window as unknown as { __f?: unknown }).__f = () =>
-    [flareForeR, flareBotR, flareForeL, flareBotL].map((m) => {
-      m.updateWorldMatrix(true, false);
-      const bb = new THREE.Box3().setFromObject(m);
-      const mat = m.material as THREE.Material & { opacity: number };
-      return {
-        vis: m.visible,
-        op: mat.opacity,
-        rot: [m.rotation.x.toFixed(2), m.rotation.y.toFixed(2)].join("/"),
-        min: bb.min.toArray().map((v) => +v.toFixed(3)),
-        max: bb.max.toArray().map((v) => +v.toFixed(3)),
-      };
-    });
   return { setProgress, setAmbient, render, resize, dispose, duration: DURATION };
 }
