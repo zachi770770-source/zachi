@@ -15,9 +15,25 @@ import { compassEntry } from "@/content/compass";
  * ויזואלית זו רצועה שקטה: קישור-טקסט, לא כפתור מלא. כלל היררכיית-ה-CTA קובע
  * שכלי לעולם אינו הפעולה הראשית במסך — ולכן הוא לעולם אינו נראה כמוה.
  */
-export function DeeperEntry({ className }: { className?: string }) {
+export function DeeperEntry({
+  className,
+  reveal = false,
+}: {
+  className?: string;
+  /**
+   * חשיפה בגלילה. opt-in ולא ברירת-מחדל, כי הרכיב משותף: סבב-התנועה הזה
+   * מוגדר לעמוד הבית בלבד, ו-/book אינו אמור להשתנות בגללו.
+   */
+  reveal?: boolean;
+}) {
   return (
-    <div className={`deeper-entry${className ? ` ${className}` : ""}`}>
+    // חשיפה שקטה במכוון: `soft` הוא opacity בלבד, בלי תזוזה. דלת משנית לא
+    // אמורה „לעלות” לעין כמו מקטע ראשי — היא אמורה פשוט להיות שם כשמגיעים
+    // אליה. (עד כה לא הייתה לה שום תנועת-כניסה כלל.)
+    <div
+      className={`deeper-entry${reveal ? " reveal" : ""}${className ? ` ${className}` : ""}`}
+      data-reveal={reveal ? "soft" : undefined}
+    >
       <p className="deeper-entry__line">{compassEntry.prompt}</p>
       <Link href="/compass" className="deeper-entry__link">
         {compassEntry.label}

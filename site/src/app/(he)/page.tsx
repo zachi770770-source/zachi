@@ -80,7 +80,7 @@ export default function HomePage() {
       {/* התאמה אישית = ניווט. חמש נקודות-כניסה, לחיצה אחת כל אחת. */}
       <HomePathSelector />
       {/* הדלת היחידה אל השכבה העמוקה, בעוצמה של קישור-טקסט. */}
-      <DeeperEntry className="deeper-entry--home" />
+      <DeeperEntry className="deeper-entry--home" reveal />
       <NewsletterSection />
     </>
   );

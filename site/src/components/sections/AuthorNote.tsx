@@ -54,7 +54,10 @@ export function AuthorNote() {
   return (
     <section aria-labelledby="author-note-heading" className="py-6 sm:py-10">
       <Container>
-        <div className="author-note reveal mx-auto max-w-3xl">
+        {/* עד כה כל הבלוק עלה כגוש אחד. רגע-אמון עובד אחרת: קודם פוגשים את
+            האדם, ורק אז קוראים מה הוא אומר. הדיוקן נכנס כאובייקט (`lift`),
+            והטקסט אחריו. שני חלקים, אותה מערכת, בלי אפקט חדש. */}
+        <div className="author-note reveal mx-auto max-w-3xl" data-reveal="soft">
           {/* דסקטופ/טאבלט: הדיוקן כטור עריכתי לצד הטקסט. */}
           {/* שתי המופעים מתחלפים ב-display לפי breakpoint, ולכן בכל רגע נתון
               רק אחד מהם קיים בעץ-הנגישות — אין כפילות alt. */}

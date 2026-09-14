@@ -24,17 +24,15 @@ import { homePaths, type HomePathKind } from "@/content/homePaths";
  * `<a>` אמיתיים — עובדים ללא JS, נסרקים, ומהירים.
  */
 
-function PathRow({ kind }: { kind: HomePathKind }) {
+function PathRow({ kind, offset }: { kind: HomePathKind; offset: number }) {
   const paths = homePaths.filter((p) => p.kind === kind);
   return (
     <ul className="path-row" data-kind={kind}>
       {paths.map((p, index) => (
-        <li key={p.id}>
-          <Link
-            href={p.stationHref}
-            style={{ ["--i" as string]: String(index) }}
-            className="situation-card"
-          >
+        // `--i` רץ רציף על פני שתי השורות (0..4), כדי שהסטגר יקרא כרצף אחד של
+        // חמש בחירות ולא כשתי קבוצות שמתחילות כל אחת מחדש.
+        <li key={p.id} style={{ ["--i" as string]: String(offset + index) }}>
+          <Link href={p.stationHref} className="situation-card">
             <span className="situation-card__title">
               {p.buttonTitle}
               <ArrowLeft className="situation-card__cue" aria-hidden="true" />
@@ -49,9 +47,16 @@ function PathRow({ kind }: { kind: HomePathKind }) {
 
 export function HomePathEntry() {
   return (
-    <div className="path-rows reveal mx-auto max-w-4xl">
-      <PathRow kind="station" />
-      <PathRow kind="gate" />
+    // חמש הבחירות נכנסו עד כה כגוש אחד: המעטפת נחשפה ב-fade-up יחיד, ולכן
+    // חמישה מצבים שונים הופיעו באותו רגע. הסטגר הישן היה קשור למחלקת-הכרטיסים
+    // שירדה יחד עם כרום-הכרטיס, ולא הוחלף. כאן הוא חוזר ברמת השורות עצמן.
+    <div
+      className="path-rows reveal mx-auto max-w-4xl"
+      data-reveal="soft"
+      data-stagger-group="nested"
+    >
+      <PathRow kind="station" offset={0} />
+      <PathRow kind="gate" offset={3} />
     </div>
   );
 }
