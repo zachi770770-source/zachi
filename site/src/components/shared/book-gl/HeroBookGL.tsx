@@ -126,6 +126,12 @@ export function HeroBookGL({
           controls?.setProgress(p);
           controls?.render();
         },
+        // וו-בדיקה לשכבת-החיים: מאפשר לצלם את מצב-המנוחה בזמן נתון במקום
+        // להמתין לשעון-הקיר, וכך להפיק תיעוד בקצב-אמת ודטרמיניסטי.
+        setAmbient: (sec: number, scrollP = 0) => {
+          controls?.setAmbient(sec, scrollP);
+          controls?.render();
+        },
       };
       if (manual) {
         controls.setProgress(0);

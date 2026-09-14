@@ -312,7 +312,7 @@ export function createBookScene(
   // הערימה אין התיבה מציירת: בזווית-הצפייה כאן פאותיה נצפות מהקצה ונעלמות,
   // ולכן קצוות-הדפים הנראים הם רצועות-הפרישה שבהמשך. התיבה עצמה היא רק הגוף
   // האטום שמאחוריהן, ולכן חומר אחד בצבע-נייר מספיק לה.
-  const BLOCK_T = 0.2; // עובי גוש-הדפים לכל צד — ספר עבה, לא חוברת
+  const BLOCK_T = 0.29; // עובי גוש-הדפים לכל צד — ספר עבה, לא חוברת
   const PAPER_FACE = 0xe9dfc8;
   // צד-ימין קיים תמיד ואטימותו לעולם אינה משתנה, ולכן ‎transparent:false‎:
   // הוא חוזר אל מסלול-הרינדור האטום — כתיבת-עומק וסדר קדמי-אחורי — ולכן פחות
@@ -360,7 +360,7 @@ export function createBookScene(
   // ואז היא בדיוק פאת-הצד של הגוש — רוחב-מסך אפס, כמו שצריך. ככל שהספר נפתח
   // היא נרגעת אל ‎~41°‎ ונפרשת החוצה. זו אותה גאומטריה לאורך כל הרצף, ולא
   // „חתיכה שמופיעה”: המסה נבנית מהתנועה הפיזית עצמה.
-  const FLARE = BLOCK_T * 1.15;
+  const FLARE = BLOCK_T * 1.22;
   const FLARE_SHUT = Math.PI / 2; // ניצב — הגיליונות מהודקים, ספר סגור
   // הקצה התחתון נשאר כמעט ניצב בספר סגור (‎83°‎) ולא ניצב לגמרי: כך יש לו
   // שטח-מסך זעיר לאורך תחתית הספר הסגור, בלי שהערימה תבלוט מעבר ללוח-הכריכה
@@ -392,8 +392,12 @@ export function createBookScene(
   /** בהירות גיליון ‎i‎ בעומק ‎u‎ (0 = צמוד לדף העליון, 1 = השפה החיצונית). */
   function ribShade(i: number, u: number, tint: number): THREE.Color {
     // צל-מגע מתחת לדף העליון, אמצע מואר, והתגלגלות אל שפה כהה.
-    let k = 0.68 + 0.32 * smooth(u / 0.14);
-    k *= 1 - 0.26 * smooth((u - 0.5) / 0.5);
+    // צל-המגע עמוק בהרבה מקודם (0.68→0.44) והשפה החיצונית כהה יותר (0.26→0.4):
+    // בלי שני הגבולות האלה הרצועה נמזגת בדף מצד אחד וברקע מצד שני, ואז אין
+    // לעין שום קצה לאחוז בו — וזה, לא מספר הצלעות, מה שגרם לה להיקרא כהמשך
+    // של הדף במקום כערימה שמתחתיו.
+    let k = 0.44 + 0.56 * smooth(u / 0.16);
+    k *= 1 - 0.4 * smooth((u - 0.45) / 0.55);
     // הפרש בין גיליון לגיליון — זה מה שהופך את הרצועה לערימה ולא למשטח.
     const n = Math.abs((Math.sin(i * 12.9898) * 43758.5453) % 1);
     k *= 0.9 + 0.2 * n;
@@ -419,15 +423,19 @@ export function createBookScene(
     const { alongHalf, alongSegs, depth, depthSign, swap, alongOffset, scaleAt, tint } = opts;
     const pos: number[] = [];
     const col: number[] = [];
+    const rib: number[] = [];
+    let ribIdx = 0;
     const put = (a: number, d: number, c: THREE.Color) => {
       if (swap) pos.push(a, d, 0);
       else pos.push(d, a, 0);
       col.push(c.r, c.g, c.b);
+      rib.push(ribIdx);
     };
     for (let i = 0; i < RIBS; i += 1) {
       const u0 = i / RIBS;
       const u1 = (i + 1) / RIBS;
       const c = ribShade(i, (u0 + u1) / 2, tint);
+      ribIdx = i;
       for (let j = 0; j < alongSegs; j += 1) {
         const a0 = -alongHalf + (2 * alongHalf * j) / alongSegs + alongOffset;
         const a1 = -alongHalf + (2 * alongHalf * (j + 1)) / alongSegs + alongOffset;
@@ -445,12 +453,46 @@ export function createBookScene(
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-    g.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    g.setAttribute("aCol", new THREE.Float32BufferAttribute(col, 3));
+    g.setAttribute("aRib", new THREE.Float32BufferAttribute(rib, 1));
     return g;
   }
-  // DoubleSide: בתחילת הפתיחה, כשהרצועה עדיין כמעט ניצבת, רואים את גבה.
-  const flareMatR = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide });
-  const flareMatL = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide, transparent: true, opacity: 0 });
+  // חומר-הקצוות. ‎MeshBasicMaterial‎ יכול היה לצבוע את הצלעות, אבל לא להזיז
+  // עליהן אור. כאן שיידר זעיר נושא את מספר-הצלע כתכונה, ולכן אפשר להעביר
+  // *נצנוץ* לאורך שדה-הקצוות: אור שזוחל על ערימת-הנייר. זה מה שהעין קולטת
+  // כתנועה — שינוי מקומי וחד על קצה — בניגוד להארה כללית ואיטית של המשטח.
+  const bandVertex = /* glsl */ `
+    attribute vec3 aCol;
+    attribute float aRib;
+    varying vec3 vCol;
+    varying float vRib;
+    void main() {
+      vCol = aCol;
+      vRib = aRib;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+  const bandFragment = /* glsl */ `
+    uniform float uOpacity;
+    uniform float uGlint;  // מיקום הנצנוץ במספרי-צלע
+    uniform float uGlintK; // עוצמתו
+    varying vec3 vCol;
+    varying float vRib;
+    void main() {
+      float g = exp(-pow((vRib - uGlint) / 4.5, 2.0));
+      gl_FragColor = vec4(vCol * (1.0 + uGlintK * g), uOpacity);
+    }
+  `;
+  const makeBandMat = (opacity: number) =>
+    new THREE.ShaderMaterial({
+      uniforms: { uOpacity: { value: opacity }, uGlint: { value: -99 }, uGlintK: { value: 0 } },
+      vertexShader: bandVertex,
+      fragmentShader: bandFragment,
+      side: THREE.DoubleSide, // בתחילת הפתיחה, כשהרצועה כמעט ניצבת, רואים את גבה
+      transparent: true,
+    });
+  const flareMatR = makeBandMat(1);
+  const flareMatL = makeBandMat(0);
   function makeFlare(sign: 1 | -1, edge: "fore" | "bottom"): THREE.Mesh {
     const cx = sign * W * 0.5;
     let geo: THREE.BufferGeometry;
@@ -464,7 +506,7 @@ export function createBookScene(
         swap: false,
         alongOffset: 0,
         // גוש-דפים אמיתי מתנפח באמצע ומתכנס אל הפינות.
-        scaleAt: (y) => 1 - 0.3 * (Math.abs(y) / BLOCK_HY) ** 2,
+        scaleAt: (y) => 1 - 0.22 * (Math.abs(y) / BLOCK_HY) ** 2,
         tint: FORE_TINT,
       });
       mesh = new THREE.Mesh(geo, sign === 1 ? flareMatR : flareMatL);
@@ -562,7 +604,7 @@ export function createBookScene(
   const BOARD_T = 0.048;
   function makeBoard(sign: 1 | -1) {
     const m = new THREE.Mesh(
-      new THREE.BoxGeometry(W * 1.045, H * 1.035, BOARD_T),
+      new THREE.BoxGeometry(W * 1.06, H * 1.05, BOARD_T),
       sign === 1 ? boardMatR : boardMatL,
     );
     m.position.set(sign * W * 0.5, 0, -BLOCK_T - BOARD_T / 2 - 0.006);
@@ -754,7 +796,7 @@ export function createBookScene(
 
     const leftStruct = smooth((openL - 0.72) / 0.28);
     blockFaceL.opacity = leftStruct;
-    flareMatL.opacity = leftStruct;
+    flareMatL.uniforms.uOpacity.value = leftStruct;
     boardMatL.opacity = leftStruct * 0.95;
     spineMat.opacity = leftStruct;
     blockL.visible = leftStruct > 0.02;
@@ -993,8 +1035,14 @@ export function createBookScene(
     coverMat.uniforms.uSheenK.value = sheenK;
     // שדה-הקצוות עונה לאותו אור: הצלעות אינן מוארות בשיידר, ולכן הן מקבלות
     // את אותה נשימה דרך גוון-החומר.
-    flareMatR.color.setScalar(1 + breath * 0.05);
-    flareMatL.color.setScalar(1 + breathOff * 0.05);
+    // הנצנוץ זוחל על שדה-הקצוות: מספר-הצלע נע הלוך-ושוב על פני כל הערימה
+    // במחזור של 6ש. זה אירוע *מקומי* על קצה, ולכן הוא נקלט כתנועה ולא
+    // כשינוי-הארה כללי שהעין מסננת.
+    const glint = (RIBS / 2) * (1 + Math.sin((t * Math.PI * 2) / 6));
+    for (const m of [flareMatR, flareMatL]) {
+      m.uniforms.uGlint.value = glint;
+      m.uniforms.uGlintK.value = relax * 0.4;
+    }
     for (let i = 0; i < FAN_PER_SIDE; i += 1) {
       // הערימה נושמת בפיגור — הגיליון העליון מוביל, אלה שמתחתיו עונים, וכך
       // גל איטי עובר במורד הערימה במקום שכולם יזוזו יחד.
@@ -1009,8 +1057,8 @@ export function createBookScene(
     // רפיון-קצה-הדפים: הערימה נפרשת עוד קצת אחרי שהדף האחרון נח, ואז נושמת
     // סביב הזווית החדשה. הקצה מורכב מצלעות נפרדות, ולכן שינוי זווית קטן משנה
     // את כל שדה-הקצוות בבת אחת — זה הפרט הקריא ביותר במצב-המנוחה.
-    setFlare(1, pose.flareR + relax * 0.05 + breath * 0.05);
-    setFlare(-1, pose.flareL + relax * 0.05 + breathOff * 0.05);
+    setFlare(1, pose.flareR + relax * 0.05 + breath * 0.11);
+    setFlare(-1, pose.flareL + relax * 0.05 + breathOff * 0.11);
 
     const sp = clamp01(scrollP);
     // הגוף עצמו כמעט אינו זז — ‎0.35°‎. חפץ מונח אינו מרחף, והחיים כאן הם
