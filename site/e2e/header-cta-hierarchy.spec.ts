@@ -107,7 +107,23 @@ test("home: after passing the Hero the purchase CTA becomes prominent, in the si
     .poll(() => page.evaluate(() => document.documentElement.hasAttribute("data-past-hero")))
     .toBe(true);
 
-  const strong = await buy.evaluate((el) => getComputedStyle(el).backgroundColor);
+  // `data-past-hero` נקבע ברגע שחוצים את הקיפול, אבל צבע-הרקע של הכפתור מגיע
+  // אליו דרך מעבר-CSS. דגימה ברגע שהתכונה הופיעה תופסת את הצבע *באמצע* המעבר
+  // ומחזירה אותו עם אלפא חלקית (‎rgba(...,0.63)‎ / ‎0.97‎) — אותו גוון בדיוק, רק
+  // עוד לא מונח. לכן דוגמים עד שהערך מפסיק להשתנות. הטענות עצמן לא נחלשו.
+  let prev = "";
+  await expect
+    .poll(
+      async () => {
+        const now = await buy.evaluate((el) => getComputedStyle(el).backgroundColor);
+        const stable = now !== "" && now === prev;
+        prev = now;
+        return stable;
+      },
+      { timeout: 5000 },
+    )
+    .toBe(true);
+  const strong = prev;
   expect(strong).not.toBe(quiet);
 
   // אותו גוון בדיוק של כפתור-הרכישה בעמוד מוצר — לא ערכת-צבע שנייה להדר.
