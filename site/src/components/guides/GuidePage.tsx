@@ -11,6 +11,7 @@ import { SignatureMark } from "@/components/shared/SignatureMark";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { ArticleSchema } from "@/components/schema/ArticleSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
+import { PillarFaq } from "@/components/pillar/PillarFaq";
 
 /**
  * רכיב משותף למאמרי המדריך (אשכול „לפני קשר”). מרנדר מאמר מלא בשפה החזותית
@@ -47,6 +48,7 @@ export function GuidePage({
         description={guide.metaDescription}
         path={guide.path}
         datePublished={guide.datePublished}
+        dateModified={guide.dateModified}
       />
       <BreadcrumbSchema
         items={[
@@ -91,6 +93,19 @@ export function GuidePage({
         </h1>
         <p className="mt-6 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted">
           {guide.lead}
+        </p>
+        {/* ייחוס נראה. עד כה המחבר הופיע במדריכים רק בסכימה, כלומר היה קיים
+            למנוע החיפוש ולא לקורא. שורה אחת, בלי תארים שאין, בדיוק כמו
+            בעמודי-האב. */}
+        <p className="mt-5 text-[14px] text-foreground-muted">
+          {guidesUi.byline.prefix}{" "}
+          <Link
+            href={guidesUi.byline.href}
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            {guidesUi.byline.name}
+          </Link>
+          , {guidesUi.byline.role}
         </p>
       </header>
 
@@ -252,6 +267,13 @@ export function GuidePage({
           </div>
         </section>
       </article>
+
+      {/* שאלות שחוזרות — רק במדריכים שבהם באמת יש שאלות-המשך */}
+      {guide.faq ? (
+        <div className="reveal mx-auto mt-16 max-w-[64ch]">
+          <PillarFaq title={guide.faq.title} items={guide.faq.items} />
+        </div>
+      ) : null}
 
       {/* מאמרים קרובים באשכול + עמוד-האם */}
       <section

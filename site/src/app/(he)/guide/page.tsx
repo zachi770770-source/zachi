@@ -3,13 +3,20 @@ import { ArrowLeft, ArrowUpLeft } from "lucide-react";
 
 import { pageMetadata } from "@/lib/seo";
 import { guides } from "@/content/guides";
-import { guideIndexMeta, guideStages } from "@/content/guideIndex";
+import {
+  guideIndexMeta,
+  guideStages,
+  journey,
+  journeyMeta,
+} from "@/content/guideIndex";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { BrandMark } from "@/components/shared/BrandMark";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
+import { JourneySpine } from "@/components/pillar/JourneySpine";
+import { TrackedInternalLink } from "@/components/analytics/TrackedInternalLink";
 
 /**
  * /guide — אינדקס המדריכים.
@@ -60,6 +67,18 @@ export default function GuideIndexPage() {
         </p>
       </Reveal>
 
+      {/* ציר-המסע: הנכס העריכתי של העמוד. מאפשר לקורא שנחת ישירות מגוגל לזהות
+          איפה הוא נמצא ולצאת עם כיוון, לפני שהוא מגיע לספרייה עצמה. */}
+      <Reveal className="mx-auto mt-12 max-w-3xl border-t border-border pt-10">
+        <JourneySpine
+          title={journeyMeta.title}
+          lead={journeyMeta.lead}
+          stations={journey}
+          aside={journeyMeta.aside}
+          asideLink={journeyMeta.asideLink}
+        />
+      </Reveal>
+
       <div className="mx-auto mt-4 max-w-3xl">
         {guideStages.map((stage) => (
           <Reveal
@@ -88,20 +107,33 @@ export default function GuideIndexPage() {
                 {stage.slugs.map((slug) => {
                   const guide = guides[slug];
                   if (!guide) return null;
+                  // המדריך המומלץ להתחלה מסומן ויזואלית ובטקסט. בלי הסימון, שש
+                  // כותרות דומות משאירות את הקורא לבחור באקראי.
+                  const isStart = stage.startWith === slug;
                   return (
                     <li key={slug}>
-                      <Link
+                      <TrackedInternalLink
+                        from="guide"
                         href={guide.path}
-                        className="lift-hover group flex h-full items-start justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        className={`lift-hover group flex h-full items-start justify-between gap-3 rounded-2xl border bg-surface p-5 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+                          isStart
+                            ? "border-brand/40 hover:border-brand/60"
+                            : "border-border hover:border-secondary/35"
+                        }`}
                       >
                         <span className="font-serif text-[1.02rem] font-semibold leading-snug text-foreground">
+                          {isStart ? (
+                            <span className="mb-1 block text-[11.5px] font-semibold uppercase tracking-wide text-brand-hover">
+                              מומלץ להתחיל כאן
+                            </span>
+                          ) : null}
                           {guide.h1}
                         </span>
                         <ArrowUpLeft
                           className="mt-0.5 h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-hover:-translate-y-1 group-focus-visible:-translate-x-1.5 group-focus-visible:-translate-y-1"
                           aria-hidden="true"
                         />
-                      </Link>
+                      </TrackedInternalLink>
                     </li>
                   );
                 })}

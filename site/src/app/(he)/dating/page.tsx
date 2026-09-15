@@ -10,6 +10,11 @@ import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
+import { TrackedInternalLink } from "@/components/analytics/TrackedInternalLink";
+import { ShortAnswer } from "@/components/pillar/ShortAnswer";
+import { SectionPoints } from "@/components/pillar/SectionPoints";
+import { PillarFaq } from "@/components/pillar/PillarFaq";
+import { StageArc } from "@/components/pillar/StageArc";
 
 /**
  * /dating — עמוד-הסמכות של אשכול „דייטים והיכרות”, התאום המבני של /love.
@@ -28,7 +33,8 @@ export const metadata = pageMetadata({
 /** קישור-הקשר עריכתי אל התשובה המעמיקה של פרק. */
 function DeepLink({ href, label }: { href: string; label: string }) {
   return (
-    <Link
+    <TrackedInternalLink
+      from="dating"
       href={href}
       className="group mt-4 inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
     >
@@ -37,7 +43,7 @@ function DeepLink({ href, label }: { href: string; label: string }) {
         className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
         aria-hidden="true"
       />
-    </Link>
+    </TrackedInternalLink>
   );
 }
 
@@ -78,6 +84,18 @@ export default function DatingPage() {
           </Link>
           , {dating.byline.role}
         </p>
+        <ShortAnswer label={dating.shortAnswer.label} body={dating.shortAnswer.body} />
+      </Reveal>
+
+      {/* קשת-השלב: איפה בדיוק הקורא נמצא בתוך „דייטים” */}
+      <Reveal className="mx-auto mt-12 max-w-3xl">
+        <StageArc
+          title={dating.stageArc.title}
+          lead={dating.stageArc.lead}
+          steps={dating.stageArc.steps}
+          nextHref="/guide"
+          nextLabel="כל המדריכים, מסודרים לפי השלבים האלה"
+        />
       </Reveal>
 
       {/* בקצרה — תשובות קצרות שאפשר לחלץ */}
@@ -109,11 +127,17 @@ export default function DatingPage() {
                   {p}
                 </p>
               ))}
+              {"points" in s && s.points ? <SectionPoints points={s.points} /> : null}
               <DeepLink href={s.link.href} label={s.link.label} />
             </section>
           </Reveal>
         ))}
       </div>
+
+      {/* שאלות שחוזרות — תוכן גלוי, לא אקורדיון ולא סכימת FAQPage */}
+      <Reveal className="mx-auto mt-10 max-w-3xl">
+        <PillarFaq title={dating.faq.title} items={dating.faq.items} />
+      </Reveal>
 
       {/* רגע מעשי אחד — כלי אמיתי מהספר */}
       <Reveal className="mx-auto mt-6 max-w-3xl rounded-2xl border-s-2 border-brand bg-surface-muted/60 p-6 sm:p-8">

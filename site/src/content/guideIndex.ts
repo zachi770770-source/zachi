@@ -17,6 +17,37 @@ import { guides } from "@/content/guides";
  * מקור האמת לכותרות ולתיאורים נשאר `guides.ts` — כאן יושב רק הסדר.
  */
 
+/**
+ * תחנה בציר-המסע — הנכס העריכתי של /guide.
+ *
+ * זהו *לא* אותו דבר כמו `GuideStage` שמתחתיו, וההפרדה מכוונת:
+ *
+ *   • `journey` (כאן) הוא המסע כפי שהאתר כולו מתאר אותו, חמש תחנות מדייטים
+ *     ועד אהבה. הוא כולל את „אהבה”, שאין לה מדריכים משלה אלא עמוד-אב (/love),
+ *     ולכן היא אינה יכולה להיות קבוצה בספרייה.
+ *   • `guideStages` הוא הספרייה: ארבע קבוצות שכל אחת מחזיקה מדריכים בפועל.
+ *
+ * ניסיון לדחוס את שניהם למבנה אחד היה מאלץ אותי או להמציא ל„אהבה” מדריכים
+ * שאינם שלה, או להשמיט אותה מהמסע. שניהם היו משקרים על המבנה.
+ *
+ * כל תחנה נושאת את *האתגר* שלה, לא רק תיאור: זה מה שמאפשר לקורא לזהות איפה
+ * הוא נמצא. אדם לא יודע לומר „אני בשלב בניית קשר”, אבל הוא בהחלט מזהה את
+ * „כבר לא סתם יוצאים, עדיין לא ביחד”.
+ */
+export interface JourneyStation {
+  id: string;
+  /** שם התחנה, כפי שהאתר קורא לה. */
+  name: string;
+  /** מה קורה כאן, במשפט. */
+  what: string;
+  /** האתגר המרכזי של השלב — המשפט שבו הקורא אמור לזהות את עצמו. */
+  challenge: string;
+  /** עמוד-האב של השלב. */
+  href: string;
+  /** מאיפה להתחיל לקרוא כשמזהים את עצמכם כאן. */
+  start?: { href: string; label: string };
+}
+
 export interface GuideStage {
   id: string;
   /** H2 של השלב. */
@@ -25,6 +56,12 @@ export interface GuideStage {
   lead: string;
   /** עמוד-האם של השלב (אשכול/תחנה), כשקיים. */
   hub?: { href: string; label: string };
+  /**
+   * המדריך החזק ביותר להתחיל ממנו בקבוצה הזו. לא „הראשון ברשימה”: זה המדריך
+   * שעונה על השאלה שהכי הרבה אנשים מגיעים איתה לשלב, ולכן הוא מסומן במפורש
+   * במקום להשאיר את הקורא לבחור מתוך שש כותרות דומות.
+   */
+  startWith?: string;
   slugs: string[];
 }
 
@@ -58,10 +95,73 @@ export const guideIndexMeta = {
   },
 } as const;
 
+export const journeyMeta = {
+  title: "המסע, מקצה לקצה",
+  lead:
+    "כל מה שכתוב באתר יושב על קשת אחת: מהפגישה הראשונה ועד לאהבה שנבנית לאורך זמן. חמש התחנות כאן הן אותה קשת. מצאו את המשפט שנשמע כמו מה שקורה אצלכם עכשיו, והתחילו משם.",
+  // „פרידה” אינה תחנה שישית בקשת, כי היא אינה מה שבא אחרי אהבה. היא ענף שיכול
+  // לצאת מכל אחת מהתחנות, ולכן היא נאמרת כאן במפורש ולא נדחסת לתוך הרצף.
+  aside:
+    "ולא כל סיפור עובר את כל הקשת. כשקשר נגמר, בכל אחת מהתחנות, יש לזה מקום משלו:",
+  asideLink: { href: "/after-breakup", label: "אחרי פרידה: לעבד, ורק אז להחליט" },
+} as const;
+
+export const journey: JourneyStation[] = [
+  {
+    id: "dating",
+    name: "דייטים",
+    what: "פוגשים אנשים, בודקים, ומחליטים עם מי שווה להמשיך.",
+    challenge: "כל פגישה הופכת למבחן, והחיפוש עצמו מתחיל להתיש.",
+    href: "/dating",
+    start: { href: "/guide/first-date", label: "דייט ראשון: על מה מדברים" },
+  },
+  {
+    id: "getting-to-know",
+    name: "היכרות",
+    what: "כבר נפגשתם כמה פעמים, ומתחילים לראות מי האדם הזה כשהוא לא משתדל.",
+    challenge: "נעים, אבל שום דבר לא מתקדם, וקשה להבין למה.",
+    href: "/before-relationship",
+    start: {
+      href: "/guide/dates-not-progressing",
+      label: "למה הדייטים לא מתקדמים",
+    },
+  },
+  {
+    id: "building",
+    name: "בניית קשר",
+    what: "נוצרת רציפות, והחיפוש מתחלף בבנייה.",
+    challenge: "נפגשים בקביעות, אבל אף אחד עוד לא אמר בקול לאן זה הולך.",
+    href: "/building-relationship",
+    start: {
+      href: "/guide/from-dating-to-relationship",
+      label: "איך עוברים מדייטים לקשר",
+    },
+  },
+  {
+    id: "relationship",
+    name: "זוגיות",
+    what: "קשר קיים, עם שגרה, מריבות חוזרות ודברים שצריך לתקן.",
+    challenge: "הקרבה נדחקת הצידה בשקט, בלי שאף אחד החליט על כך.",
+    href: "/inside-relationship",
+    start: {
+      href: "/guide/healthy-relationship",
+      label: "מהי מערכת יחסים בריאה",
+    },
+  },
+  {
+    id: "love",
+    name: "אהבה",
+    what: "מה שנשאר אחרי שההתלהבות נרגעת: בחירה חוזרת, הדדיות ויכולת לתקן.",
+    challenge: "מחכים שהתחושה תכריע, במקום לתת לקשר זמן להראות מה יש בו.",
+    href: "/love",
+  },
+];
+
 export const guideStages: GuideStage[] = [
   {
     id: "dating",
     title: "דייטים והיכרות",
+    startWith: "first-date",
     lead: "השלב שבו פוגשים, בודקים, ומנסים להבין אם יש כאן משהו להמשיך איתו.",
     hub: { href: "/dating", label: "דייטים: מה באמת קורה בשלב ההיכרות" },
     slugs: [
@@ -76,6 +176,7 @@ export const guideStages: GuideStage[] = [
   {
     id: "building",
     title: "בניית קשר",
+    startWith: "from-dating-to-relationship",
     lead: "כשכבר יש עם מי, והשאלה היא איך זה הופך למשהו יציב.",
     hub: {
       href: "/building-relationship",
@@ -95,6 +196,7 @@ export const guideStages: GuideStage[] = [
   {
     id: "inside",
     title: "בתוך זוגיות",
+    startWith: "healthy-relationship",
     lead: "קשר קיים: מה שומר עליו, מה שוחק אותו, ואיך חוזרים זה אל זה.",
     hub: {
       href: "/inside-relationship",
@@ -112,6 +214,7 @@ export const guideStages: GuideStage[] = [
   {
     id: "endings",
     title: "פרידה והתחלה מחדש",
+    startWith: "over-a-breakup",
     lead: "כשקשר נגמר, או כשחוזרים אחריו אל העולם בפעם השנייה.",
     hub: { href: "/after-breakup", label: "אחרי פרידה: לעבד, ורק אז להחליט" },
     slugs: [
