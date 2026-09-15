@@ -22,6 +22,13 @@ export function PersonSchema() {
         "@type": "Person",
         "@id": entityId.person,
         name: siteConfig.author.name,
+        // האיות הלועזי שבו המהדורה האנגלית מזכה את המחבר בפועל (ASIN אמיתי,
+        // ‎content/en.ts‎, ‎siteConfig.englishEdition.author‎). בלעדיו הישות
+        // הקנונית מכירה רק את השם העברי, בעוד שסכימת המהדורה האנגלית מציגה
+        // שם לועזי תחת אותו `@id` — כאן זה נאמר מפורשות בצומת עצמו, ולכן שני
+        // האיותים נפתרים לאותו אדם אחד. נכתב רק האיות שקיים במאגר; איות לועזי
+        // נוסף לא ייכתב כאן בלי אישור שהוא באמת מופיע בפרסום.
+        alternateName: siteConfig.englishEdition.author,
         description: siteConfig.author.shortBio,
         url: `${siteConfig.url}/author`,
         mainEntityOfPage: `${siteConfig.url}/author`,

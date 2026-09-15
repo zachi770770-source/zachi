@@ -192,6 +192,9 @@ export const love = {
   stations: {
     title: "לפי איפה אתם עכשיו",
     items: [
+      // הקצה השני של המסע. /dating פותח (חיפוש), /love סוגר (בנייה), והקישור
+      // ההדדי ביניהם הוא מה שהופך את שניהם למסע אחד ולא לשני אשכולות נפרדים.
+      { href: "/dating", label: "דייטים: השלב שבו מחפשים" },
       { href: "/before-relationship", label: "לפני קשר: לבחור ולזהות התאמה" },
       { href: "/building-relationship", label: "בניית קשר: תחילת קשר על בסיס יציב" },
       { href: "/inside-relationship", label: "בתוך קשר: להעמיק קשר קיים" },

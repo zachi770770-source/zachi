@@ -25,6 +25,11 @@ const staticRoutes: SitemapRoute[] = [
   { path: "/en", priority: 0.9, changeFrequency: "monthly" },
   // „אהבה” — עמוד-הסמכות הרוחבי (hub) של אשכול-התוכן על אהבה וזוגיות.
   { path: "/love", priority: 0.9, changeFrequency: "monthly" },
+  // „דייטים” — עמוד-הסמכות של אשכול הדייטים וההיכרות, התאום המבני של /love.
+  // /dating פותח את המסע ו-/love סוגר אותו; לשניהם אותה עדיפות.
+  { path: "/dating", priority: 0.9, changeFrequency: "monthly" },
+  // „מדריכים” — אינדקס האשכול. עדיפות ביניים: הוא עמוד-גילוי, לא יעד-חיפוש.
+  { path: "/guide", priority: 0.7, changeFrequency: "monthly" },
   { path: "/before-relationship", priority: 0.8, changeFrequency: "monthly" },
   { path: "/building-relationship", priority: 0.8, changeFrequency: "monthly" },
   { path: "/inside-relationship", priority: 0.8, changeFrequency: "monthly" },

@@ -10,7 +10,9 @@
 - [עמוד הבית](https://www.zachi.co.il/): מה הספר, למי הוא מתאים, והמסלול הקצר לשלוש התחנות.
 - [הספר לעומק](https://www.zachi.co.il/book): השיטה בת שלושה שלבים וששת הכלים המעשיים.
 - [Dating to Love — the English edition](https://www.zachi.co.il/en): the English edition of the book by Zachi Hen, available on Amazon.
+- [דייטים: מה באמת קורה בשלב ההיכרות](https://www.zachi.co.il/dating): מה דייט אמור לעשות, למה סדרת פגישות נעצרת, ואיך עוברים מדייטים לקשר.
 - [אהבה: מהי אהבה ואיך היא נבנית](https://www.zachi.co.il/love): מה ההבדל בין אהבה להתאהבות, ואיך אהבה נבנית לאורך זמן.
+- [כל המדריכים](https://www.zachi.co.il/guide): אינדקס המדריכים לפי שלבי המסע — דייטים והיכרות, בניית קשר, בתוך זוגיות, ופרידה והתחלה מחדש.
 - [טעימה מהספר](https://www.zachi.co.il/preview): קטע קצר לקריאה, בחינם וללא הרשמה.
 - [מה הספר אומר על המצב שלי?](https://www.zachi.co.il/compass): שלוש שאלות סגורות שמכוונות לתחנה ולכלי המתאימים.
 - [על המחבר](https://www.zachi.co.il/author): צחי חן, ולמה נכתב הספר.
@@ -31,6 +33,11 @@
 - [בדיקת הקצב](https://www.zachi.co.il/method/pace-check): לבנות קרבה הדרגתית בתחילת קשר בלי שאינטנסיביות תהפוך להצפה.
 - [שיחה בגובה העיניים](https://www.zachi.co.il/method/eye-level-talk): להביע צורך ולהציב גבול מתוך בהירות ורוגע, בלי להאשים.
 - [יציאה נקייה](https://www.zachi.co.il/method/clean-exit): לסיים קשר בכבוד ובבהירות, בלי היעלמות או האשמות.
+
+## מדריכים — דייטים והיכרות
+- [דייט ראשון: על מה מדברים, ואיך יודעים אם הוא הצליח](https://www.zachi.co.il/guide/first-date)
+- [למה הדייטים לא מתקדמים, ומה אפשר לעשות אחרת](https://www.zachi.co.il/guide/dates-not-progressing)
+- [איך עוברים מדייטים לקשר](https://www.zachi.co.il/guide/from-dating-to-relationship)
 
 ## מדריכים — לפני קשר
 - [סגנונות התקשרות בזוגיות: דפוס חרדתי, דפוס נמנע ומה קורה ביניהם](https://www.zachi.co.il/guide/attachment-styles)
