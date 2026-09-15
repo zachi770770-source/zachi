@@ -128,6 +128,18 @@ export default function GuideIndexPage() {
             aria-hidden="true"
           />
         </Link>
+        <p className="mt-6">
+          <Link
+            href={guideIndexMeta.close.secondary.href}
+            className="group inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            {guideIndexMeta.close.secondary.label}
+            <ArrowLeft
+              className="h-4 w-4 transition-transform group-hover:-translate-x-1.5 group-focus-visible:-translate-x-1.5"
+              aria-hidden="true"
+            />
+          </Link>
+        </p>
       </Reveal>
     </Container>
   );
