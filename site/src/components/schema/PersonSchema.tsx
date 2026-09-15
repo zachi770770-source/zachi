@@ -26,6 +26,22 @@ export function PersonSchema() {
         url: `${siteConfig.url}/author`,
         mainEntityOfPage: `${siteConfig.url}/author`,
         image: `${siteConfig.url}${siteConfig.author.photo}`,
+        // הנושאים שהמחבר כותב עליהם בפועל. כל אחד מהם נתמך בתוכן קיים באתר,
+        // ולכן זו הצהרה שניתן לאמת מול העמודים עצמם ולא רשימת מילות-מפתח:
+        //   • דייטינג — /guide/dating-red-flags, /guide/finding-a-relationship
+        //   • בחירת בן/בת זוג — /guide/choosing-a-partner, /guide/compatibility
+        //   • בניית קשר זוגי — /guide/healthy-relationship, /building-relationship
+        //   • תקשורת בזוגיות — /guide/couple-communication, /method/eye-level-talk
+        //   • אהבה — /love
+        // זו *אינה* הצהרת מומחיות, תואר או הסמכה: `knowsAbout` מתאר נושא-כתיבה,
+        // וכל טענה מעבר לכך (פסיכולוג/מטפל/מוסמך) אינה נכונה ואינה נכתבת כאן.
+        knowsAbout: [
+          { "@type": "Thing", name: "דייטינג" },
+          { "@type": "Thing", name: "בחירת בן/בת זוג" },
+          { "@type": "Thing", name: "בניית קשר זוגי" },
+          { "@type": "Thing", name: "תקשורת בזוגיות" },
+          { "@type": "Thing", name: "אהבה" },
+        ],
         // מקורות חיצוניים מאמתים — נפלט רק כשקיים לפחות אחד (אחרת מושמט לגמרי).
         ...(sameAs.length ? { sameAs: sameAs.length === 1 ? sameAs[0] : sameAs } : {}),
       }}
