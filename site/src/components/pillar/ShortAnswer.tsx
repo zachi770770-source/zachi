@@ -10,11 +10,13 @@
  */
 export function ShortAnswer({ label, body }: { label: string; body: string }) {
   return (
-    <div className="mt-8 border-s-2 border-brand ps-5 sm:ps-6">
+    <div className="mt-9 border-s-2 border-brand ps-5 sm:mt-10 sm:ps-7">
       <p className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
         {label}
       </p>
-      <p className="mt-2 max-w-[62ch] text-[1.08rem] leading-[1.8] text-foreground">{body}</p>
+      <p className="mt-2.5 max-w-[60ch] text-[1.12rem] leading-[1.85] text-foreground sm:text-[1.15rem]">
+        {body}
+      </p>
     </div>
   );
 }

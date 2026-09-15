@@ -27,16 +27,18 @@ export function SectionPoints({
     return (
       // נשבר לעמודה אחת במובייל; שתיים מ-sm; שלוש מ-lg. פריט חמישי/שישי
       // פשוט ממשיך לשורה הבאה, בלי „חור” בפריסה.
-      <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      // `items-stretch` + `h-full` — כל הכרטיסים בשורה מקבלים את אותו גובה גם
+      // כשהטקסט שלהם באורך שונה. בלי זה כרטיס קצר „תלוי” גבוה משכניו, וזה
+      // הדבר שהכי מסגיר רשת שלא עוצבה.
+      <ul className="mt-7 grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {points.map((p) => (
-          <li
-            key={p.title}
-            className="rounded-2xl border border-border bg-surface p-5"
-          >
-            <h3 className="font-serif text-[1.05rem] font-semibold leading-snug text-foreground">
-              {p.title}
-            </h3>
-            <p className="mt-2 text-[0.99rem] leading-[1.75] text-foreground-muted">{p.body}</p>
+          <li key={p.title} className="h-full">
+            <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-[22px] sm:p-6">
+              <h3 className="font-serif text-[1.06rem] font-semibold leading-snug text-foreground">
+                {p.title}
+              </h3>
+              <p className="mt-2.5 text-[1rem] leading-[1.8] text-foreground-muted">{p.body}</p>
+            </div>
           </li>
         ))}
       </ul>

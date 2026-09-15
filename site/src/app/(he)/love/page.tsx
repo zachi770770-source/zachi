@@ -15,6 +15,7 @@ import { ShortAnswer } from "@/components/pillar/ShortAnswer";
 import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { ComparePair } from "@/components/pillar/ComparePair";
+import { PillarSection } from "@/components/pillar/PillarSection";
 
 /**
  * המקטעים שמקבלים פריסת-כרטיסים במקום רשימה.
@@ -24,6 +25,14 @@ import { ComparePair } from "@/components/pillar/ComparePair";
  * נפרדים ושווי-משקל, וזו הצורה שמתאימה להם. יותר מזה היה הופך את העמוד לרשת.
  */
 const CARD_SECTIONS = new Set(["how-love-is-built"]);
+
+/**
+ * המקטעים שיושבים על כרית חמה. שניים בלבד, ותמיד אלה שיש בהם מבנה: „איך אהבה
+ * נבנית” (שלושה כרטיסים) ו„אהבה בזמן קונפליקט” (בלוק-השוואה). התוצאה היא קצב
+ * שקט → שקט → הדגשה → שקט → שקט → שקט → הדגשה → שקט → שקט, במקום תשעה מקטעים
+ * זהים בזה אחר זה.
+ */
+const BAND_SECTIONS = new Set(["how-love-is-built", "love-in-conflict"]);
 
 /**
  * /love — עמוד-הסמכות המרכזי של אשכול „אהבה”. מרכז סמנטי רוחבי (hub) שמקשר
@@ -57,7 +66,7 @@ function DeepLink({ href, label }: { href: string; label: string }) {
 
 export default function LovePage() {
   return (
-    <Container className="pt-8 pb-16 sm:pt-10 sm:pb-20 lg:pt-12">
+    <Container className="pt-10 pb-16 sm:pt-14 sm:pb-20 lg:pt-16">
       <ViewEvent event="love_viewed" />
       <BreadcrumbSchema
         items={[
@@ -71,13 +80,17 @@ export default function LovePage() {
         path="/love"
       />
 
-      {/* Hero */}
+      {/* Hero — כריכה עריכתית. /love מקבל את הדרגה הגדולה (type-hero-lg) וריווח
+          נדיב: זה העמוד הרפלקטיבי, והמסך הראשון שלו אמור לנשום. מידת-השורה של
+          ה-lead צומצמה ל-52ch — ב-21px, שורה של 60ch ארוכה מדי לקריאה נוחה. */}
       <Reveal className="mx-auto max-w-3xl">
-        <BrandMark className="h-9 w-9 text-foreground/80" />
-        <span className="kicker mt-5">{love.hero.kicker}</span>
-        <h1 className="mt-4 font-serif type-hero text-foreground">{love.hero.h1}</h1>
-        <p className="type-lead mt-5 max-w-[60ch] text-foreground-muted">{love.hero.lead}</p>
-        <p className="mt-4 max-w-[62ch] text-[1.05rem] leading-relaxed text-foreground">
+        <BrandMark className="h-10 w-10 text-foreground/80" />
+        <span className="kicker mt-6">{love.hero.kicker}</span>
+        <h1 className="mt-5 font-serif type-hero-lg text-foreground">{love.hero.h1}</h1>
+        <p className="mt-6 max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted">
+          {love.hero.lead}
+        </p>
+        <p className="mt-5 max-w-[60ch] text-[1.06rem] leading-[1.9] text-foreground">
           {love.hero.intro}
         </p>
         {/* ייחוס נראה: מחבר הספר, עם קישור לעמוד המחבר. בונה אמון (E-E-A-T) בלי
@@ -113,19 +126,17 @@ export default function LovePage() {
       </Reveal>
 
       {/* פרקי-התוכן — כל פרק מקשר אל התשובה המעמיקה */}
-      <div className="mx-auto mt-4 max-w-3xl">
+      <div className="mt-14 space-y-14 sm:mt-16 sm:space-y-[4.5rem]">
         {love.sections.map((s) => (
-          <Reveal
-            key={s.id}
-            className="border-t border-border py-9 first:border-t-0 sm:py-11"
-          >
-            <section id={s.id} className="scroll-mt-24">
-              <h2 className="type-h2 font-serif text-foreground">{s.heading}</h2>
-              {s.body.map((p) => (
-                <p key={p} className="mt-4 text-[1.05rem] leading-[1.85] text-foreground">
-                  {p}
-                </p>
-              ))}
+          <Reveal key={s.id}>
+            <PillarSection
+              id={s.id}
+              heading={s.heading}
+              body={s.body}
+              marker="rule"
+              tone={BAND_SECTIONS.has(s.id) ? "band" : "plain"}
+              footer={<DeepLink href={s.link.href} label={s.link.label} />}
+            >
               {"points" in s && s.points ? (
                 <SectionPoints
                   points={s.points}
@@ -139,39 +150,38 @@ export default function LovePage() {
                   right={s.compare.right}
                 />
               ) : null}
-              <DeepLink href={s.link.href} label={s.link.label} />
-            </section>
+            </PillarSection>
           </Reveal>
         ))}
       </div>
 
       {/* שאלות שחוזרות — תוכן גלוי, לא אקורדיון ולא סכימת FAQPage */}
-      <Reveal className="mx-auto mt-10 max-w-3xl">
+      <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
         <PillarFaq title={love.faq.title} items={love.faq.items} />
       </Reveal>
 
       {/* רגע מעשי אחד — כלי אמיתי מהספר */}
-      <Reveal className="mx-auto mt-6 max-w-3xl rounded-2xl border-s-2 border-brand bg-surface-muted/60 p-6 sm:p-8">
+      <Reveal className="mx-auto mt-14 max-w-3xl rounded-3xl border-s-2 border-brand bg-surface-muted/60 p-6 sm:mt-16 sm:p-9">
         <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
           <Compass className="h-4 w-4" aria-hidden="true" />
           {love.reflection.kicker}
         </span>
-        <h2 className="mt-3 font-serif text-[1.4rem] font-semibold text-foreground">
+        <h2 className="mt-3.5 font-serif text-[1.45rem] font-semibold text-foreground">
           {love.reflection.title}
         </h2>
-        <p className="mt-3 text-[1.05rem] leading-relaxed text-foreground">{love.reflection.body}</p>
+        <p className="mt-3.5 max-w-[60ch] text-[1.06rem] leading-[1.9] text-foreground">{love.reflection.body}</p>
         <DeepLink href={love.reflection.link.href} label={love.reflection.link.label} />
       </Reveal>
 
       {/* spokes: תחנות המסע לפי המצב */}
-      <Reveal className="mx-auto mt-12 max-w-3xl">
-        <h2 className="type-h2 font-serif text-center text-foreground">{love.stations.title}</h2>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+      <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
+        <h2 className="type-section font-serif text-center text-foreground">{love.stations.title}</h2>
+        <div className="mt-8 grid items-stretch gap-4 sm:grid-cols-2">
           {love.stations.items.map((st) => (
             <Link
               key={st.href}
               href={st.href}
-              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="lift-hover group flex h-full items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-[22px] hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6"
             >
               <span className="font-serif text-[1.05rem] font-semibold text-foreground">
                 {st.label}
@@ -186,17 +196,18 @@ export default function LovePage() {
       </Reveal>
 
       {/* סגירה: הספר כשיטה המלאה */}
-      <Reveal className="mx-auto mt-14 max-w-2xl text-center">
-        <blockquote className="type-literary text-[clamp(1.35rem,2.8vw,1.8rem)] font-medium leading-snug text-foreground">
+      <Reveal className="mt-16 rounded-3xl border border-border bg-surface px-6 py-12 text-center sm:mt-20 sm:px-10 sm:py-16">
+        <span aria-hidden="true" className="mx-auto block h-px w-12 bg-brand/70" />
+        <blockquote className="type-literary mx-auto mt-7 max-w-[24ch] text-[clamp(1.5rem,3.2vw,2.1rem)] font-medium leading-[1.3] text-foreground">
           {love.close.title}
         </blockquote>
-        <p className="mx-auto mt-5 max-w-[52ch] text-[1.05rem] leading-relaxed text-foreground-muted">
+        <p className="mx-auto mt-6 max-w-[50ch] text-[1.06rem] leading-[1.9] text-foreground-muted">
           {love.close.body}
         </p>
         <AmazonBuyLink
           source="book"
           sourceDetail="love"
-          className="group mt-7 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-foreground px-7 text-[16px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="group mt-9 inline-flex min-h-[56px] items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {love.close.cta}
           <ArrowLeft

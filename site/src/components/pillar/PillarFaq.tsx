@@ -24,16 +24,16 @@ export function PillarFaq({
 }) {
   return (
     <section aria-labelledby="faq-heading" className="scroll-mt-24">
-      <h2 id="faq-heading" className="type-h2 font-serif text-foreground">
+      <h2 id="faq-heading" className="type-section font-serif text-foreground">
         {title}
       </h2>
-      <dl className="mt-6 divide-y divide-border border-t border-border">
+      <dl className="mt-7 divide-y divide-border border-t border-border">
         {items.map((item) => (
-          <div key={item.q} className="py-6">
+          <div key={item.q} className="py-7">
             <dt className="font-serif text-[1.15rem] font-semibold leading-snug text-foreground">
               {item.q}
             </dt>
-            <dd className="mt-2.5 max-w-[62ch] text-[1.02rem] leading-[1.8] text-foreground-muted">
+            <dd className="mt-3 max-w-[62ch] text-[1.02rem] leading-[1.85] text-foreground-muted">
               {item.a}
             </dd>
           </div>

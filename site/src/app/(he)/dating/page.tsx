@@ -15,6 +15,7 @@ import { ShortAnswer } from "@/components/pillar/ShortAnswer";
 import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { StageArc } from "@/components/pillar/StageArc";
+import { PillarSection } from "@/components/pillar/PillarSection";
 
 /**
  * מקטע אחד בלבד מקבל פריסת-כרטיסים. ל-/dating כבר יש מגוון חזותי (קשת-השלב
@@ -23,6 +24,12 @@ import { StageArc } from "@/components/pillar/StageArc";
  * חמישה דברים נפרדים.
  */
 const CARD_SECTIONS = new Set(["common-mistakes"]);
+
+/**
+ * כרית חמה אחת בתוך רצף המקטעים. ב-/dating הפיסוק החזק ממילא נמצא למעלה
+ * (קשת-השלב הממוספרת), ולכן די בהדגשה אחת באמצע כדי לשבור את הרצף.
+ */
+const BAND_SECTIONS = new Set(["common-mistakes"]);
 
 /**
  * /dating — עמוד-הסמכות של אשכול „דייטים והיכרות”, התאום המבני של /love.
@@ -57,7 +64,7 @@ function DeepLink({ href, label }: { href: string; label: string }) {
 
 export default function DatingPage() {
   return (
-    <Container className="pt-8 pb-16 sm:pt-10 sm:pb-20 lg:pt-12">
+    <Container className="pt-10 pb-16 sm:pt-14 sm:pb-20 lg:pt-16">
       <ViewEvent event="dating_viewed" />
       <BreadcrumbSchema
         items={[
@@ -73,11 +80,13 @@ export default function DatingPage() {
 
       {/* Hero */}
       <Reveal className="mx-auto max-w-3xl">
-        <BrandMark className="h-9 w-9 text-foreground/80" />
-        <span className="kicker mt-5">{dating.hero.kicker}</span>
-        <h1 className="mt-4 font-serif type-hero text-foreground">{dating.hero.h1}</h1>
-        <p className="type-lead mt-5 max-w-[60ch] text-foreground-muted">{dating.hero.lead}</p>
-        <p className="mt-4 max-w-[62ch] text-[1.05rem] leading-relaxed text-foreground">
+        <BrandMark className="h-10 w-10 text-foreground/80" />
+        <span className="kicker mt-6">{dating.hero.kicker}</span>
+        <h1 className="mt-5 font-serif type-hero text-foreground">{dating.hero.h1}</h1>
+        <p className="mt-6 max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted">
+          {dating.hero.lead}
+        </p>
+        <p className="mt-5 max-w-[60ch] text-[1.06rem] leading-[1.9] text-foreground">
           {dating.hero.intro}
         </p>
         {/* ייחוס נראה: מחבר הספר, עם קישור לעמוד המחבר. בונה אמון (E-E-A-T) בלי
@@ -96,7 +105,7 @@ export default function DatingPage() {
       </Reveal>
 
       {/* קשת-השלב: איפה בדיוק הקורא נמצא בתוך „דייטים” */}
-      <Reveal className="mx-auto mt-12 max-w-3xl">
+      <Reveal className="mx-auto mt-14 max-w-3xl rounded-3xl border border-brand/15 bg-brand-muted/30 px-5 py-9 sm:mt-16 sm:px-9 sm:py-12">
         <StageArc
           title={dating.stageArc.title}
           lead={dating.stageArc.lead}
@@ -122,43 +131,41 @@ export default function DatingPage() {
       </Reveal>
 
       {/* פרקי-התוכן — כל פרק מקשר אל התשובה המעמיקה */}
-      <div className="mx-auto mt-4 max-w-3xl">
-        {dating.sections.map((s) => (
-          <Reveal
-            key={s.id}
-            className="border-t border-border py-9 first:border-t-0 sm:py-11"
-          >
-            <section id={s.id} className="scroll-mt-24">
-              <h2 className="type-h2 font-serif text-foreground">{s.heading}</h2>
-              {s.body.map((p) => (
-                <p key={p} className="mt-4 text-[1.05rem] leading-[1.85] text-foreground">
-                  {p}
-                </p>
-              ))}
+      <div className="mt-14 space-y-14 sm:mt-16 sm:space-y-[4.5rem]">
+        {dating.sections.map((s, i) => (
+          <Reveal key={s.id}>
+            <PillarSection
+              id={s.id}
+              heading={s.heading}
+              body={s.body}
+              marker="numeral"
+              index={i + 1}
+              tone={BAND_SECTIONS.has(s.id) ? "band" : "plain"}
+              footer={<DeepLink href={s.link.href} label={s.link.label} />}
+            >
               {"points" in s && s.points ? (
                 <SectionPoints
                   points={s.points}
                   variant={CARD_SECTIONS.has(s.id) ? "cards" : "list"}
                 />
               ) : null}
-              <DeepLink href={s.link.href} label={s.link.label} />
-            </section>
+            </PillarSection>
           </Reveal>
         ))}
       </div>
 
       {/* שאלות שחוזרות — תוכן גלוי, לא אקורדיון ולא סכימת FAQPage */}
-      <Reveal className="mx-auto mt-10 max-w-3xl">
+      <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
         <PillarFaq title={dating.faq.title} items={dating.faq.items} />
       </Reveal>
 
       {/* רגע מעשי אחד — כלי אמיתי מהספר */}
-      <Reveal className="mx-auto mt-6 max-w-3xl rounded-2xl border-s-2 border-brand bg-surface-muted/60 p-6 sm:p-8">
+      <Reveal className="mx-auto mt-14 max-w-3xl rounded-3xl border-s-2 border-brand bg-surface-muted/60 p-6 sm:mt-16 sm:p-9">
         <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
           <Compass className="h-4 w-4" aria-hidden="true" />
           {dating.reflection.kicker}
         </span>
-        <h2 className="mt-3 font-serif text-[1.4rem] font-semibold text-foreground">
+        <h2 className="mt-3.5 font-serif text-[1.45rem] font-semibold text-foreground">
           {dating.reflection.title}
         </h2>
         <p className="mt-3 text-[1.05rem] leading-relaxed text-foreground">
@@ -168,14 +175,14 @@ export default function DatingPage() {
       </Reveal>
 
       {/* spokes: תחנות המסע לפי המצב */}
-      <Reveal className="mx-auto mt-12 max-w-3xl">
-        <h2 className="type-h2 font-serif text-center text-foreground">{dating.stations.title}</h2>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+      <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
+        <h2 className="type-section font-serif text-center text-foreground">{dating.stations.title}</h2>
+        <div className="mt-8 grid items-stretch gap-4 sm:grid-cols-2">
           {dating.stations.items.map((st) => (
             <Link
               key={st.href}
               href={st.href}
-              className="lift-hover group flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5 hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="lift-hover group flex h-full items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-[22px] hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6"
             >
               <span className="font-serif text-[1.05rem] font-semibold text-foreground">
                 {st.label}
@@ -190,17 +197,18 @@ export default function DatingPage() {
       </Reveal>
 
       {/* סגירה: הספר כשיטה המלאה */}
-      <Reveal className="mx-auto mt-14 max-w-2xl text-center">
-        <blockquote className="type-literary text-[clamp(1.35rem,2.8vw,1.8rem)] font-medium leading-snug text-foreground">
+      <Reveal className="mt-16 rounded-3xl border border-border bg-surface px-6 py-12 text-center sm:mt-20 sm:px-10 sm:py-16">
+        <span aria-hidden="true" className="mx-auto block h-px w-12 bg-brand/70" />
+        <blockquote className="type-literary mx-auto mt-7 max-w-[24ch] text-[clamp(1.5rem,3.2vw,2.1rem)] font-medium leading-[1.3] text-foreground">
           {dating.close.title}
         </blockquote>
-        <p className="mx-auto mt-5 max-w-[52ch] text-[1.05rem] leading-relaxed text-foreground-muted">
+        <p className="mx-auto mt-6 max-w-[50ch] text-[1.06rem] leading-[1.9] text-foreground-muted">
           {dating.close.body}
         </p>
         <AmazonBuyLink
           source="book"
           sourceDetail="dating"
-          className="group mt-7 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-foreground px-7 text-[16px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="group mt-9 inline-flex min-h-[56px] items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {dating.close.cta}
           <ArrowLeft

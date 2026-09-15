@@ -24,16 +24,16 @@ export function ComparePair({
       {lead ? (
         <p className="max-w-[60ch] text-[1.01rem] leading-[1.8] text-foreground-muted">{lead}</p>
       ) : null}
-      <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+      <dl className="mt-5 grid items-stretch gap-4 sm:grid-cols-2">
         {[left, right].map((side) => (
           <div
             key={side.label}
-            className="rounded-2xl border border-border bg-surface-muted/50 p-5"
+            className="flex h-full flex-col rounded-2xl border border-border bg-surface p-[22px] sm:p-6"
           >
             <dt className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
               {side.label}
             </dt>
-            <dd className="mt-2 font-serif text-[1.08rem] leading-snug text-foreground">
+            <dd className="mt-2.5 font-serif text-[1.12rem] leading-snug text-foreground">
               {side.body}
             </dd>
           </div>

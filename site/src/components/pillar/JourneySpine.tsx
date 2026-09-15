@@ -33,7 +33,7 @@ export function JourneySpine({
 }) {
   return (
     <section aria-labelledby="journey-heading" className="scroll-mt-24">
-      <h2 id="journey-heading" className="type-h2 font-serif text-foreground">
+      <h2 id="journey-heading" className="type-section font-serif text-foreground">
         {title}
       </h2>
       <p className="mt-3 max-w-[60ch] text-[1.05rem] leading-relaxed text-foreground-muted">

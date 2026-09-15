@@ -30,7 +30,7 @@ export function StageArc({
 }) {
   return (
     <section aria-labelledby="stage-arc-heading" className="scroll-mt-24">
-      <h2 id="stage-arc-heading" className="type-h2 font-serif text-foreground">
+      <h2 id="stage-arc-heading" className="type-section font-serif text-foreground">
         {title}
       </h2>
       <p className="mt-3 max-w-[60ch] text-[1.05rem] leading-relaxed text-foreground-muted">
@@ -39,7 +39,7 @@ export function StageArc({
 
       <ol className="mt-7 space-y-0">
         {steps.map((s, i) => (
-          <li key={s.name} className="relative flex gap-4 pb-7 last:pb-0">
+          <li key={s.name} className="relative flex gap-4 pb-8 last:pb-0 sm:gap-5">
             {/* הקו המקשר בין התחנות. אחרון בלי קו. */}
             {i < steps.length - 1 ? (
               <span
