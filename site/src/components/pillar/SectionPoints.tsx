@@ -7,9 +7,41 @@
  */
 export function SectionPoints({
   points,
+  variant = "list",
 }: {
   points: readonly { readonly title: string; readonly body: string }[];
+  /**
+   * `"list"` — ברירת המחדל: תת-מקטעים בזה אחר זה עם קו-צד אחד.
+   *
+   * `"cards"` — אותם תת-מקטעים בדיוק, בפריסת כרטיסים. משמש במקטע אחד או שניים
+   * לכל עמוד-אב, כנקודת-נשימה באמצע קריאה ארוכה: כשכל מקטע נראה כמו הקודם
+   * (כותרת → פסקאות → קישור), העמוד מתחיל להרגיש כמו מאמר ארוך מאוד ולא כמו
+   * עמוד-סמכות. לא להפוך את זה לברירת מחדל — רשת כרטיסים חוזרת תיצור בדיוק
+   * את אותה בעיה בכיוון ההפוך.
+   *
+   * התוכן זהה בשני המצבים, וגם ההיררכיה (H3): זהו שינוי פריסה בלבד.
+   */
+  variant?: "list" | "cards";
 }) {
+  if (variant === "cards") {
+    return (
+      // נשבר לעמודה אחת במובייל; שתיים מ-sm; שלוש מ-lg. פריט חמישי/שישי
+      // פשוט ממשיך לשורה הבאה, בלי „חור” בפריסה.
+      <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {points.map((p) => (
+          <li
+            key={p.title}
+            className="rounded-2xl border border-border bg-surface p-5"
+          >
+            <h3 className="font-serif text-[1.05rem] font-semibold leading-snug text-foreground">
+              {p.title}
+            </h3>
+            <p className="mt-2 text-[0.99rem] leading-[1.75] text-foreground-muted">{p.body}</p>
+          </li>
+        ))}
+      </ul>
+    );
+  }
   return (
     <div className="mt-6 space-y-5 border-s border-border ps-5">
       {points.map((p) => (

@@ -17,6 +17,14 @@ import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { StageArc } from "@/components/pillar/StageArc";
 
 /**
+ * מקטע אחד בלבד מקבל פריסת-כרטיסים. ל-/dating כבר יש מגוון חזותי (קשת-השלב
+ * הממוספרת, „בקצרה”, התחנות), ולכן די בנקודת-נשימה אחת בתוך רצף המקטעים.
+ * „הטעויות שחוזרות” הוא הבלוק הארוך ביותר שם, וחמשת הפריטים שלו הם ממילא
+ * חמישה דברים נפרדים.
+ */
+const CARD_SECTIONS = new Set(["common-mistakes"]);
+
+/**
  * /dating — עמוד-הסמכות של אשכול „דייטים והיכרות”, התאום המבני של /love.
  * /dating פותח את המסע (חיפוש), /love סוגר אותו (בנייה), ושניהם מקשרים זה אל
  * זה. מרונדר בשרת במלואו: כל הטקסט וכל הקישורים נמצאים ב-HTML ואינם תלויים
@@ -127,7 +135,12 @@ export default function DatingPage() {
                   {p}
                 </p>
               ))}
-              {"points" in s && s.points ? <SectionPoints points={s.points} /> : null}
+              {"points" in s && s.points ? (
+                <SectionPoints
+                  points={s.points}
+                  variant={CARD_SECTIONS.has(s.id) ? "cards" : "list"}
+                />
+              ) : null}
               <DeepLink href={s.link.href} label={s.link.label} />
             </section>
           </Reveal>

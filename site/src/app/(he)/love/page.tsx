@@ -14,6 +14,16 @@ import { TrackedInternalLink } from "@/components/analytics/TrackedInternalLink"
 import { ShortAnswer } from "@/components/pillar/ShortAnswer";
 import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
+import { ComparePair } from "@/components/pillar/ComparePair";
+
+/**
+ * המקטעים שמקבלים פריסת-כרטיסים במקום רשימה.
+ *
+ * הבחירה היא לפי מזהה-מקטע ולא לפי שדה בתוכן, כדי ש-`love.ts` יישאר תוכן בלבד
+ * ולא יחזיק החלטות עיצוב. מקטע אחד בלבד: „איך אהבה נבנית” מונה שלושה דברים
+ * נפרדים ושווי-משקל, וזו הצורה שמתאימה להם. יותר מזה היה הופך את העמוד לרשת.
+ */
+const CARD_SECTIONS = new Set(["how-love-is-built"]);
 
 /**
  * /love — עמוד-הסמכות המרכזי של אשכול „אהבה”. מרכז סמנטי רוחבי (hub) שמקשר
@@ -116,7 +126,19 @@ export default function LovePage() {
                   {p}
                 </p>
               ))}
-              {"points" in s && s.points ? <SectionPoints points={s.points} /> : null}
+              {"points" in s && s.points ? (
+                <SectionPoints
+                  points={s.points}
+                  variant={CARD_SECTIONS.has(s.id) ? "cards" : "list"}
+                />
+              ) : null}
+              {"compare" in s && s.compare ? (
+                <ComparePair
+                  lead={s.compare.lead}
+                  left={s.compare.left}
+                  right={s.compare.right}
+                />
+              ) : null}
               <DeepLink href={s.link.href} label={s.link.label} />
             </section>
           </Reveal>
