@@ -95,6 +95,7 @@ export default function DatingPage() {
         name={dating.hero.h1}
         description={dating.meta.description}
         path="/dating"
+        topic="דייטים"
       />
 
       <Reveal>

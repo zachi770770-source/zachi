@@ -101,6 +101,7 @@ export default function LovePage() {
         name={love.hero.h1}
         description={love.meta.description}
         path="/love"
+        topic="אהבה"
       />
 
       <Reveal>

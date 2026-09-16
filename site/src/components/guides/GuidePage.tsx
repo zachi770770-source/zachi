@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpLeft, Info } from "lucide-react";
 
 import { guidesUi, type Guide } from "@/content/guides";
 import { cn } from "@/lib/utils";
+import { pillarForStage } from "@/lib/pillar";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
@@ -373,14 +374,18 @@ export function GuidePage({
           </Link>
         </div>
 
-        {/* קישור אל מרכז-האשכול הרוחבי „אהבה” — התמונה המושגית הרחבה שמעל המדריך. */}
+        {/* קישור אל עמוד-האב הרוחבי — התמונה המושגית שמעל המדריך. *לא* תמיד
+            /love: הוא נגזר מהשלב שהמדריך יושב בו (ראו `lib/pillar.ts`), כך
+            שמדריך על דייט ראשון מפנה אל „דייטים” ומדריך על ריבים חוזרים אל
+            „אהבה”. קודם כולם הפנו אל /love, ו-/dating נשאר כמעט בלי קישורים
+            נכנסים בתוך האתר של עצמו. */}
         <div className="mt-3">
           <Link
-            href="/love"
+            href={pillarForStage(guide.hub.href).href}
             className="inline-flex items-center gap-2 text-[15px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            התמונה הרחבה: מהי אהבה ואיך היא נבנית
+            {pillarForStage(guide.hub.href).label}
           </Link>
         </div>
       </section>

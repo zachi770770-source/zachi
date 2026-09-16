@@ -18,6 +18,7 @@ import { JourneyNext } from "@/components/journey/JourneyNext";
 import { JourneyInteraction } from "@/components/journey/JourneyInteraction";
 import { JourneyMirror } from "@/components/journey/JourneyMirror";
 import { Button } from "@/components/ui/button";
+import { pillarForStage } from "@/lib/pillar";
 import { BookLink } from "@/components/shared/BookLink";
 import { AmazonBuyLink, type AmazonSource } from "@/components/purchase/AmazonBuyLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
@@ -113,6 +114,9 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
   const stationMethod = journey.featuredMethodSlug
     ? methods[journey.featuredMethodSlug]
     : methodByToolId[journey.sampleTool];
+
+  // עמוד-האב הרוחבי שמתאים לשלב הזה (דייטים מול אהבה).
+  const pillar = pillarForStage(journey.id);
 
   const quote = <PullQuote text={journey.pullQuote} tone={v.quoteTone} />;
 
@@ -443,13 +447,16 @@ export function JourneyPage({ journey }: { journey: JourneyPageData }) {
                 <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
                 מה עוד מחכה בספר
               </Link>
-              {/* מרכז-האשכול הרוחבי „אהבה” — התחנה היא שלב בתוך התמונה הרחבה. */}
+              {/* עמוד-האב הרוחבי של השלב — התחנה היא שלב בתוך התמונה הרחבה,
+                  ולכן היעד נגזר מהתחנה ולא קבוע על /love (ראו `lib/pillar.ts`). */}
               <Link
-                href="/love"
+                href={pillar.href}
                 className="group inline-flex items-center gap-2 text-[16px] font-semibold text-foreground underline-offset-4 hover:text-brand-hover hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
                 <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
-                מהי אהבה ואיך היא נבנית
+                {pillar.href === "/dating"
+                  ? "מה באמת קורה בשלב הדייטים"
+                  : "מהי אהבה ואיך היא נבנית"}
               </Link>
               {stationMethod ? (
                 <Link

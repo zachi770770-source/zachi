@@ -17,10 +17,20 @@ export function StationSchema({
   name,
   description,
   path,
+  topic,
 }: {
   name: string;
   description: string;
   path: string;
+  /**
+   * הנושא הרוחבי שהעמוד עוסק בו, כשיש כזה — כרגע רק שני עמודי-האב: /love
+   * עוסק ב„אהבה” ו-/dating ב„דייטים”. כשנמסר, הוא נוסף ל-`about` לצד הספר,
+   * וכך העמוד מצהיר על *שני* דברים נכונים: שהוא חלק מהספר, ומה הנושא שלו.
+   * בלי זה כל עמודי-התוכן הצהירו שהם „על הספר” בלבד, ושום עמוד לא נקשר
+   * לנושא שהוא למעשה עמוד-האב שלו. עמודי-התחנה אינם מוסרים ערך: הם שלבים
+   * במסע ולא נושאים עצמאיים.
+   */
+  topic?: string;
 }) {
   return (
     <JsonLd
@@ -43,7 +53,12 @@ export function StationSchema({
           name: siteConfig.bookTitle,
           url: siteConfig.url,
         },
-        about: { "@type": "Book", "@id": entityId.book, name: siteConfig.bookTitle },
+        about: topic
+          ? [
+              { "@type": "Book", "@id": entityId.book, name: siteConfig.bookTitle },
+              { "@type": "Thing", name: topic },
+            ]
+          : { "@type": "Book", "@id": entityId.book, name: siteConfig.bookTitle },
         author: { "@type": "Person", "@id": entityId.person, name: siteConfig.author.name },
       }}
     />

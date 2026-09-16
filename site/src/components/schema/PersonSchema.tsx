@@ -48,6 +48,10 @@ export function PersonSchema() {
           { "@type": "Thing", name: "בניית קשר זוגי" },
           { "@type": "Thing", name: "תקשורת בזוגיות" },
           { "@type": "Thing", name: "אהבה" },
+          // זוגיות — /inside-relationship, /guide/keeping-connection-alive,
+          // /guide/recurring-fights. נושא-כתיבה בפועל, ולכן נכלל; כמו השאר,
+          // זו אמירה על מה שנכתב ולא על הסמכה או תואר.
+          { "@type": "Thing", name: "זוגיות" },
         ],
         // מקורות חיצוניים מאמתים — נפלט רק כשקיים לפחות אחד (אחרת מושמט לגמרי).
         ...(sameAs.length ? { sameAs: sameAs.length === 1 ? sameAs[0] : sameAs } : {}),

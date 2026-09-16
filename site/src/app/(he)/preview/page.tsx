@@ -13,7 +13,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   title: "טעימה מהספר",
-  description: `טעימה קצרה מתוך ${siteConfig.bookTitle}, קטע לקריאה של כשתי דקות, ללא הרשמה.`,
+  description: `קטע אמיתי מתוך „${siteConfig.bookTitle}” לקריאה של כשתי דקות, בלי הרשמה ובלי תשלום. כך נכתב הספר, ומה הוא עושה עם דייטים, בחירה וזוגיות.`,
   path: "/preview",
   ogType: "article",
 });
