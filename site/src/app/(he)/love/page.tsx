@@ -185,7 +185,7 @@ export default function LovePage() {
                 מתהפך לפטרול ומשפט אחד מקבל מסך. זה הניגוד היחיד בעמוד. */}
             {s.id === "healthy-love" ? (
               <div className="pt-16 sm:pt-24">
-                <PillarStatement>{love.statement}</PillarStatement>
+                <PillarStatement variant="continuing">{love.statement}</PillarStatement>
               </div>
             ) : null}
           </Reveal>

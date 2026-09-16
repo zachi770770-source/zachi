@@ -1,4 +1,4 @@
-import { SignatureMarkRule } from "@/components/pillar/PillarSignature";
+import { PillarSignature } from "@/components/pillar/PillarSignature";
 
 /**
  * רגע הניגוד היחיד בעמוד-אב: משפט אחד על משטח פטרול, מקצה לקצה.
@@ -16,19 +16,38 @@ import { SignatureMarkRule } from "@/components/pillar/PillarSignature";
  *
  * ── מה יש בו ─────────────────────────────────────────────────────────────
  * משפט שכבר היה בגוף העמוד, ושבתוך פסקה רצה נבלע. אין כאן טקסט חדש, אין
- * כותרת, אין קישור ואין קריאה לפעולה — רק המשפט, המוטיב מעליו, והרבה אוויר.
- * הטרקוטה מופיעה כאן רק כסימן (3.45:1 מול פטרול — עובר את סף הגרפיקה), והטקסט
- * עצמו שנהב על פטרול (12.97:1).
+ * כותרת, אין קישור ואין קריאה לפעולה — רק המשפט, החתימה מעליו, והרבה אוויר.
+ * הטרקוטה מופיעה כאן רק כגרפיקה (3.45:1 מול פטרול — עובר את סף 3:1), הירוק
+ * הוא `sage` הבהיר (6.14:1), והטקסט שנהב על פטרול (12.97:1).
+ *
+ * ── למה החתימה ולא הסימן הזעיר ────────────────────────────────────────────
+ * קודם עמד כאן קו-ונקודה. הוא היה נכון, והוא גם היה הדבר היחיד שהבדיל את
+ * הבלוק הזה מכל „ציטוט על רקע כהה” בכל אתר ייעוץ או וֶלנֶס. עם הלוגו מכוסה,
+ * אי-אפשר היה לזהות של מי העמוד. החתימה המלאה פותרת את זה: היא לא מתלווה
+ * לרגע הזה, היא *אומרת* אותו — ובמצב שמתאים בדיוק למקום שאליו הקורא הגיע.
+ * ב-/dating „כמעט נפגשו”, בדיוק מעל המשפט שבו החיפוש מתחלף בבנייה; ב-/love
+ * „ממשיכים כקו אחד”. זהו האמצע של שלושה מצבים לאורך העמוד.
  *
  * ── מקצה לקצה ────────────────────────────────────────────────────────────
  * `margin-inline: calc(50% - 50vw)` מוציא את הבלוק מריפוד-הקונטיינר ומרוחב
  * העמוד כאחד. זה בטוח כאן משום ש-`html, body` כבר נושאים `overflow-x: clip`
  * ו-`max-width: 100vw`, ולכן רוחב פס-הגלילה נחתך במקום לייצר גלילה אופקית.
  */
-export function PillarStatement({ children }: { children: React.ReactNode }) {
+export function PillarStatement({
+  variant,
+  children,
+}: {
+  /** מצב החתימה, לפי המקום שאליו הקורא הגיע בעמוד הזה. */
+  variant: "approaching" | "continuing";
+  children: React.ReactNode;
+}) {
   return (
     <figure className="mx-[calc(50%-50vw)] w-screen max-w-[100vw] bg-petrol px-6 py-20 text-center sm:px-8 sm:py-28">
-      <SignatureMarkRule align="center" tone="inverse" />
+      <PillarSignature
+        variant={variant}
+        tone="inverse"
+        className="mx-auto max-w-[min(420px,82%)]"
+      />
       <blockquote className="type-literary mx-auto mt-9 max-w-[20ch] text-[clamp(1.7rem,4.4vw,2.75rem)] font-medium leading-[1.28] text-surface sm:mt-11 sm:max-w-[26ch]">
         {children}
       </blockquote>

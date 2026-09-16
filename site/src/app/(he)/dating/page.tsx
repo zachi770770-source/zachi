@@ -177,7 +177,7 @@ export default function DatingPage() {
                 מקבל מסך. זה הניגוד היחיד בעמוד — ולכן הוא עובד. */}
             {s.id === "from-dating-to-relationship" ? (
               <div className="pt-16 sm:pt-24">
-                <PillarStatement>{dating.statement}</PillarStatement>
+                <PillarStatement variant="approaching">{dating.statement}</PillarStatement>
               </div>
             ) : null}
           </Reveal>

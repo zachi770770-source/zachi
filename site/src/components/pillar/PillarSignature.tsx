@@ -8,10 +8,20 @@ import { cn } from "@/lib/utils";
  * שמתקרבים הם הצורה המינימלית של המשפט הזה. הם אינם איור ואינם קישוט: הם
  * *התוכן*, מצויר. וזה גם מה שמבדיל בין שני העמודים בלי לשנות מותג:
  *
- *   • `"converging"` (/dating) — הקווים מתקרבים לאורך כל הרוחב ונשארים
- *     במרחק. לא נפגשו עדיין. זה בדיוק השלב שהעמוד מתאר.
- *   • `"merged"` (/love) — הקווים נפגשים בנקודה, וממנה ממשיכים כקו אחד.
- *     הנקודה היא המפגש, וההמשך הוא הבנייה שאחריו.
+ *   • `"converging"` (/dating, ראש העמוד) — הקווים מתקרבים לאורך כל הרוחב
+ *     ונשארים במרחק. לא נפגשו עדיין. זה בדיוק השלב שהעמוד מתאר.
+ *   • `"approaching"` (/dating, אמצע העמוד) — אותם קווים, קרובים הרבה יותר.
+ *     44 יחידות בקצה אחד, שש בקצה השני. עדיין לא נגעו.
+ *   • `"merged"` (/love, ראש וסיום) — הקווים נפגשים בנקודה, וממנה ממשיכים
+ *     כקו אחד. הנקודה היא המפגש, וההמשך הוא הבנייה שאחריו.
+ *   • `"continuing"` (/love, אמצע העמוד) — המפגש כבר מאחור: שני קטעים קצרים
+ *     בקצה, נקודה, ומשם קו אחד ארוך. מה שממשיך הוא כבר דבר אחד.
+ *
+ * ── שלושה מצבים לאורך עמוד, לא סמל שחוזר ─────────────────────────────────
+ * החתימה מופיעה שלוש פעמים בכל עמוד-אב, ובכל פעם במצב אחר, לפי המקום שאליו
+ * הקורא הגיע: בראש, בבלוק הכהה שבאמצע, ובסיום. ב-/dating זו התקדמות אמיתית
+ * (רחוק → כמעט → נפגשו), וב-/love זו יציבות (נפגשו → ממשיכים → נפגשו). אותו
+ * DNA, שני מצבים רגשיים. זו הסיבה שהיא אינה קישוט: היא אומרת איפה אנחנו.
  *
  * ── הנקודה כמוטיב חוזר ───────────────────────────────────────────────────
  * העיגול הקטן בקצה קו הוא ה-DNA שחוזר בעמוד: כאן במפגש, בסמן של כל מקטע
@@ -31,11 +41,19 @@ import { cn } from "@/lib/utils";
  */
 export function PillarSignature({
   variant,
+  tone = "ink",
   className,
 }: {
-  variant: "converging" | "merged";
+  variant: "converging" | "approaching" | "merged" | "continuing";
+  /**
+   * `"inverse"` — על משטח פטרול. הירוק מתחלף מ-`sage-ink` (שנועד לשנהב) ל-
+   * `sage` הבהיר, שעומד על 6.14:1 מול פטרול. הטרקוטה נשארת: 3.45:1 עוברים
+   * את סף הגרפיקה (3:1), וזה כל מה שהיא כאן.
+   */
+  tone?: "ink" | "inverse";
   className?: string;
 }) {
+  const green = tone === "inverse" ? "text-[color:var(--color-sage)]" : "text-[color:var(--color-sage-ink)]";
   return (
     <svg
       viewBox="0 0 420 88"
@@ -47,46 +65,54 @@ export function PillarSignature({
       fill="none"
       className={cn("h-auto w-full", className)}
     >
-      {variant === "merged" ? (
+      {variant === "merged" || variant === "continuing" ? (
         <>
-          {/* שני הקווים נפגשים ב-(206,44) */}
+          {/* `merged` — המפגש באמצע. `continuing` — המפגש כבר מאחור, קרוב
+              לקצה, וההמשך הוא רובו של הקו. אותה צורה, שני רגעים בזמן. */}
           <path
-            d="M414 14 C 330 14, 268 44, 206 44"
+            d={variant === "continuing" ? "M414 26 C 372 26, 336 44, 296 44" : "M414 14 C 330 14, 268 44, 206 44"}
             className="text-brand"
             stroke="currentColor"
             strokeWidth={2.1}
             strokeLinecap="round"
           />
           <path
-            d="M414 74 C 330 74, 268 44, 206 44"
-            className="text-[color:var(--color-sage-ink)]"
+            d={variant === "continuing" ? "M414 62 C 372 62, 336 44, 296 44" : "M414 74 C 330 74, 268 44, 206 44"}
+            className={green}
             stroke="currentColor"
             strokeWidth={2.1}
             strokeLinecap="round"
           />
           {/* ומכאן ממשיכים כקו אחד */}
           <path
-            d="M206 44 L 16 44"
-            className="text-[color:var(--color-sage-ink)]"
+            d={variant === "continuing" ? "M296 44 L 16 44" : "M206 44 L 16 44"}
+            className={green}
             stroke="currentColor"
             strokeWidth={2.1}
             strokeLinecap="round"
           />
-          <circle cx={206} cy={44} r={5} className="text-brand" fill="currentColor" />
+          <circle
+            cx={variant === "continuing" ? 296 : 206}
+            cy={44}
+            r={5}
+            className="text-brand"
+            fill="currentColor"
+          />
         </>
       ) : (
         <>
-          {/* מתקרבים לאורך כל הרוחב, ונשארים במרחק */}
+          {/* מתקרבים לאורך כל הרוחב, ונשארים במרחק. `approaching` הוא אותו
+              מהלך בשלב מאוחר יותר: 44 יחידות בקצה אחד, שש בקצה השני. */}
           <path
-            d="M414 8 C 300 8, 208 30, 16 37"
+            d={variant === "approaching" ? "M414 22 C 300 22, 210 38, 16 41" : "M414 8 C 300 8, 208 30, 16 37"}
             className="text-brand"
             stroke="currentColor"
             strokeWidth={2.1}
             strokeLinecap="round"
           />
           <path
-            d="M414 80 C 300 80, 208 58, 16 53"
-            className="text-[color:var(--color-sage-ink)]"
+            d={variant === "approaching" ? "M414 66 C 300 66, 210 50, 16 47" : "M414 80 C 300 80, 208 58, 16 53"}
+            className={green}
             stroke="currentColor"
             strokeWidth={2.1}
             strokeLinecap="round"
