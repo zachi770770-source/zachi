@@ -16,8 +16,9 @@ import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { ComparePair } from "@/components/pillar/ComparePair";
 import { PillarSection } from "@/components/pillar/PillarSection";
-import { PillarSignature, SignatureMarkRule } from "@/components/pillar/PillarSignature";
+import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
+import { PillarStatement } from "@/components/pillar/PillarStatement";
 
 /**
  * המקטעים שמקבלים פריסת-כרטיסים במקום רשימה.
@@ -35,6 +36,25 @@ const CARD_SECTIONS = new Set(["how-love-is-built"]);
  * זהים בזה אחר זה.
  */
 const BAND_SECTIONS = new Set(["how-love-is-built", "love-in-conflict"]);
+
+/** המקטע שאחריו מגיע בלוק-ההיפוך הכהה. */
+const STATEMENT_AFTER = "healthy-love";
+
+/**
+ * הרווח שמעל כל מקטע — לא קבוע, אלא לפי המשקל של מה שנגמר ומה שמתחיל.
+ *
+ * קודם כל מקטע קיבל אותם 56px, בין אם הוא בן 450px ובין אם הוא בן 1,460px.
+ * בדסקטופ זה לא מורגש; במובייל, שבו כל בלוק כזה הוא מסך שלם או שניים, התוצאה
+ * היא שהעמוד נקרא בקצב אחיד לגמרי — בלי מקום שבו הוא מאט ובלי מקום שבו הוא
+ * נושם. הפונקציה הזאת מחזירה רווח כפול כמעט סביב כל דבר כבד (כרית, כרטיסים,
+ * בלוק-ההיפוך), כך שהקצב הוא צפוף → אוויר → הדגשה → אוויר.
+ */
+function gapBefore(prevId: string | undefined, id: string) {
+  const heavy = (x: string | undefined) =>
+    x !== undefined && (BAND_SECTIONS.has(x) || CARD_SECTIONS.has(x) || x === STATEMENT_AFTER);
+  if (prevId === undefined) return "";
+  return heavy(prevId) || heavy(id) ? "mt-20 sm:mt-28" : "mt-14 sm:mt-[4.5rem]";
+}
 
 /**
  * /love — עמוד-הסמכות המרכזי של אשכול „אהבה”. מרכז סמנטי רוחבי (hub) שמקשר
@@ -91,7 +111,7 @@ export default function LovePage() {
         <h1 className="mt-5 font-serif type-hero-lg text-foreground">{love.hero.h1}</h1>
         {/* חתימת העמוד: שני קווים שנעים זה אל זה. משמשת גם ככלל עריכתי
             בין הכותרת לפתיח, ולכן אינה קישוט שנוסף מהצד. */}
-        <PillarSignature variant="merged" className="mt-7 max-w-[min(420px,100%)]" />
+        <PillarSignature variant="merged" className="mt-8 max-w-[min(520px,100%)] sm:mt-9" />
         <p className="mt-6 max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted">
           {love.hero.lead}
         </p>
@@ -116,14 +136,14 @@ export default function LovePage() {
       </Reveal>
 
       {/* בקצרה — בלוק א-סימטרי רחב: תווית-שוליים מצד אחד, הרשת מהצד השני. */}
-      <Reveal className="mt-14 sm:mt-16">
+      <Reveal className="mt-20 sm:mt-24">
         <QuickAnswers title={love.quickAnswers.title} items={love.quickAnswers.items} />
       </Reveal>
 
       {/* פרקי-התוכן — כל פרק מקשר אל התשובה המעמיקה */}
-      <div className="mt-14 space-y-14 sm:mt-16 sm:space-y-[4.5rem]">
-        {love.sections.map((s) => (
-          <Reveal key={s.id}>
+      <div className="mt-20 sm:mt-28">
+        {love.sections.map((s, i) => (
+          <Reveal key={s.id} className={gapBefore(love.sections[i - 1]?.id, s.id)}>
             <PillarSection
               id={s.id}
               heading={s.heading}
@@ -146,17 +166,24 @@ export default function LovePage() {
                 />
               ) : null}
             </PillarSection>
+            {/* רגע ההיפוך: אחרי „מה מאפיין אהבה בריאה”, באמצע הרצף, הרקע
+                מתהפך לפטרול ומשפט אחד מקבל מסך. זה הניגוד היחיד בעמוד. */}
+            {s.id === "healthy-love" ? (
+              <div className="pt-16 sm:pt-24">
+                <PillarStatement>{love.statement}</PillarStatement>
+              </div>
+            ) : null}
           </Reveal>
         ))}
       </div>
 
       {/* שאלות שחוזרות — תוכן גלוי, לא אקורדיון ולא סכימת FAQPage */}
-      <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
+      <Reveal className="mx-auto mt-24 max-w-3xl sm:mt-32">
         <PillarFaq title={love.faq.title} items={love.faq.items} />
       </Reveal>
 
       {/* רגע מעשי אחד — כלי אמיתי מהספר */}
-      <Reveal className="-mx-6 mt-14 border-s-2 border-brand bg-surface-muted/60 p-6 sm:mx-auto sm:mt-16 sm:max-w-3xl sm:rounded-3xl sm:p-9">
+      <Reveal className="-mx-6 mt-20 border-s-2 border-brand bg-surface-muted/60 p-6 sm:mx-auto sm:mt-24 sm:max-w-3xl sm:rounded-3xl sm:p-9">
         <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
           <Compass className="h-4 w-4" aria-hidden="true" />
           {love.reflection.kicker}
@@ -169,7 +196,7 @@ export default function LovePage() {
       </Reveal>
 
       {/* spokes: תחנות המסע לפי המצב */}
-      <Reveal className="mx-auto mt-16 max-w-3xl sm:mt-20">
+      <Reveal className="mx-auto mt-20 max-w-3xl sm:mt-24">
         <h2 className="type-section font-serif text-center text-foreground">{love.stations.title}</h2>
         <div className="mt-8 grid items-stretch gap-4 sm:grid-cols-2">
           {love.stations.items.map((st) => (
@@ -190,10 +217,16 @@ export default function LovePage() {
         </div>
       </Reveal>
 
-      {/* סגירה: הספר כשיטה המלאה */}
-      <Reveal className="mx-auto mt-20 max-w-4xl rounded-3xl border border-border bg-surface px-6 py-14 text-center sm:mt-24 sm:px-12 sm:py-20">
-        <SignatureMarkRule align="center" />
-        <blockquote className="type-literary mx-auto mt-7 max-w-[24ch] text-[clamp(1.5rem,3.2vw,2.1rem)] font-medium leading-[1.3] text-foreground">
+      {/* מעבר-הסיום: אחרי התחנות, לפני הסגירה. החתימה חוזרת במלוא גודלה על
+          הרקע הפתוח, בלי מסגרת וללא טקסט סביבה — שני הקווים נפגשים, וזה כל
+          מה שקורה במסך הזה. היא אינה קישוט בראש כרטיס אלא הרגע שמכריז שהעמוד
+          הגיע לסופו, והכרטיס שאחריה הוא כבר המסקנה המעשית. */}
+      <Reveal className="mt-28 sm:mt-40">
+        <PillarSignature variant="merged" className="mx-auto max-w-[min(360px,74%)]" />
+      </Reveal>
+
+      <Reveal className="mx-auto mt-14 max-w-4xl rounded-3xl border border-border bg-surface px-6 py-14 text-center sm:mt-20 sm:px-12 sm:py-20">
+        <blockquote className="type-literary mx-auto max-w-[24ch] text-[clamp(1.5rem,3.2vw,2.1rem)] font-medium leading-[1.3] text-foreground">
           {love.close.title}
         </blockquote>
         <p className="mx-auto mt-6 max-w-[50ch] text-[1.06rem] leading-[1.9] text-foreground-muted">
