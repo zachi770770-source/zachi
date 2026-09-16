@@ -19,6 +19,7 @@ import { PillarSection } from "@/components/pillar/PillarSection";
 import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
 import { PillarStatement } from "@/components/pillar/PillarStatement";
+import { PillarPullQuote } from "@/components/pillar/PillarPullQuote";
 
 /**
  * מקטע אחד בלבד מקבל פריסת-כרטיסים. ל-/dating כבר יש מגוון חזותי (קשת-השלב
@@ -158,6 +159,11 @@ export default function DatingPage() {
               marker="numeral"
               index={i + 1}
               tone={BAND_SECTIONS.has(s.id) ? "band" : "plain"}
+              afterFirstParagraph={
+                "pullQuote" in s && s.pullQuote ? (
+                  <PillarPullQuote>{s.pullQuote}</PillarPullQuote>
+                ) : null
+              }
               footer={<DeepLink href={s.link.href} label={s.link.label} />}
             >
               {"points" in s && s.points ? (
@@ -243,7 +249,7 @@ export default function DatingPage() {
         <AmazonBuyLink
           source="book"
           sourceDetail="dating"
-          className="group mt-9 inline-flex min-h-[56px] items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="group mt-12 inline-flex min-h-[56px] sm:mt-14 items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {dating.close.cta}
           <ArrowLeft

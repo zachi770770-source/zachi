@@ -20,6 +20,7 @@ import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
 import { SectionQuestions } from "@/components/pillar/SectionQuestions";
 import { PillarStatement } from "@/components/pillar/PillarStatement";
+import { PillarPullQuote } from "@/components/pillar/PillarPullQuote";
 
 /**
  * המקטעים שמקבלים פריסת-כרטיסים במקום רשימה.
@@ -157,7 +158,12 @@ export default function LovePage() {
               marker="rule"
               tone={BAND_SECTIONS.has(s.id) ? "band" : "plain"}
               afterFirstParagraph={
-                "questions" in s && s.questions ? <SectionQuestions items={s.questions} /> : null
+                <>
+                  {"questions" in s && s.questions ? <SectionQuestions items={s.questions} /> : null}
+                  {"pullQuote" in s && s.pullQuote ? (
+                    <PillarPullQuote>{s.pullQuote}</PillarPullQuote>
+                  ) : null}
+                </>
               }
               footer={<DeepLink href={s.link.href} label={s.link.label} />}
             >
@@ -249,7 +255,7 @@ export default function LovePage() {
         <AmazonBuyLink
           source="book"
           sourceDetail="love"
-          className="group mt-9 inline-flex min-h-[56px] items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="group mt-12 inline-flex min-h-[56px] sm:mt-14 items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {love.close.cta}
           <ArrowLeft
