@@ -31,6 +31,7 @@ export function PillarSection({
   index,
   tone = "plain",
   children,
+  afterFirstParagraph,
   footer,
 }: {
   id: string;
@@ -42,6 +43,14 @@ export function PillarSection({
   tone?: "plain" | "band";
   /** מבנה אופציונלי (כרטיסים/השוואה) שנכנס אחרי הפסקאות. */
   children?: React.ReactNode;
+  /**
+   * תוכן שנכנס *בין* הפסקה הראשונה לשנייה, ולא אחרי כולן.
+   *
+   * נדרש כשהפסקה הראשונה נגמרת בנקודתיים ופותחת רשימה: הרשימה חייבת לשבת
+   * צמוד למה שהכריז עליה, והפסקה שאחריה היא כבר המשך הטיעון. בלי זה הרשימה
+   * הייתה נוחתת אחרי הפסקה השנייה, והנקודתיים היו מצביעות על כלום.
+   */
+  afterFirstParagraph?: React.ReactNode;
   /** קישור-העומק בסוף המקטע. */
   footer?: React.ReactNode;
 }) {
@@ -81,13 +90,13 @@ export function PillarSection({
         </>
       )}
 
-      {body.map((p) => (
-        <p
-          key={p}
-          className="mt-5 max-w-[62ch] text-[1.06rem] leading-[1.9] text-foreground sm:text-[1.05rem] sm:leading-[1.85]"
-        >
-          {p}
-        </p>
+      {body.map((p, i) => (
+        <div key={p}>
+          <p className="mt-5 max-w-[62ch] text-[1.06rem] leading-[1.9] text-foreground sm:text-[1.05rem] sm:leading-[1.85]">
+            {p}
+          </p>
+          {i === 0 ? afterFirstParagraph : null}
+        </div>
       ))}
       </div>
 

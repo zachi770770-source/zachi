@@ -18,6 +18,7 @@ import { ComparePair } from "@/components/pillar/ComparePair";
 import { PillarSection } from "@/components/pillar/PillarSection";
 import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
+import { SectionQuestions } from "@/components/pillar/SectionQuestions";
 import { PillarStatement } from "@/components/pillar/PillarStatement";
 
 /**
@@ -112,9 +113,14 @@ export default function LovePage() {
         {/* חתימת העמוד: שני קווים שנעים זה אל זה. משמשת גם ככלל עריכתי
             בין הכותרת לפתיח, ולכן אינה קישוט שנוסף מהצד. */}
         <PillarSignature variant="merged" className="mt-8 max-w-[min(520px,100%)] sm:mt-9" />
-        <p className="mt-6 max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted">
-          {love.hero.lead}
-        </p>
+        {love.hero.lead.map((line, i) => (
+          <p
+            key={line}
+            className={`${i === 0 ? "mt-6" : "mt-4"} max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted`}
+          >
+            {line}
+          </p>
+        ))}
         <p className="mt-5 max-w-[60ch] text-[1.06rem] leading-[1.9] text-foreground">
           {love.hero.intro}
         </p>
@@ -150,6 +156,9 @@ export default function LovePage() {
               body={s.body}
               marker="rule"
               tone={BAND_SECTIONS.has(s.id) ? "band" : "plain"}
+              afterFirstParagraph={
+                "questions" in s && s.questions ? <SectionQuestions items={s.questions} /> : null
+              }
               footer={<DeepLink href={s.link.href} label={s.link.label} />}
             >
               {"points" in s && s.points ? (
@@ -229,9 +238,14 @@ export default function LovePage() {
         <blockquote className="type-literary mx-auto max-w-[24ch] text-[clamp(1.5rem,3.2vw,2.1rem)] font-medium leading-[1.3] text-foreground">
           {love.close.title}
         </blockquote>
-        <p className="mx-auto mt-6 max-w-[50ch] text-[1.06rem] leading-[1.9] text-foreground-muted">
-          {love.close.body}
-        </p>
+        {love.close.body.map((line, i) => (
+          <p
+            key={line}
+            className={`mx-auto ${i === 0 ? "mt-6" : "mt-3.5"} max-w-[50ch] text-start text-[1.06rem] leading-[1.9] text-foreground-muted`}
+          >
+            {line}
+          </p>
+        ))}
         <AmazonBuyLink
           source="book"
           sourceDetail="love"

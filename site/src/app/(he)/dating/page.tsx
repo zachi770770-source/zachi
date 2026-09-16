@@ -105,9 +105,14 @@ export default function DatingPage() {
         {/* חתימת העמוד: שני קווים שנעים זה אל זה. משמשת גם ככלל עריכתי
             בין הכותרת לפתיח, ולכן אינה קישוט שנוסף מהצד. */}
         <PillarSignature variant="converging" className="mt-8 max-w-[min(520px,100%)] sm:mt-9" />
-        <p className="mt-6 max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted">
-          {dating.hero.lead}
-        </p>
+        {dating.hero.lead.map((line, i) => (
+          <p
+            key={line}
+            className={`${i === 0 ? "mt-6" : "mt-4"} max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted`}
+          >
+            {line}
+          </p>
+        ))}
         <p className="mt-5 max-w-[60ch] text-[1.06rem] leading-[1.9] text-foreground">
           {dating.hero.intro}
         </p>
@@ -227,9 +232,14 @@ export default function DatingPage() {
         <blockquote className="type-literary mx-auto max-w-[24ch] text-[clamp(1.5rem,3.2vw,2.1rem)] font-medium leading-[1.3] text-foreground">
           {dating.close.title}
         </blockquote>
-        <p className="mx-auto mt-6 max-w-[50ch] text-[1.06rem] leading-[1.9] text-foreground-muted">
-          {dating.close.body}
-        </p>
+        {dating.close.body.map((line, i) => (
+          <p
+            key={line}
+            className={`mx-auto ${i === 0 ? "mt-6" : "mt-3.5"} max-w-[50ch] text-start text-[1.06rem] leading-[1.9] text-foreground-muted`}
+          >
+            {line}
+          </p>
+        ))}
         <AmazonBuyLink
           source="book"
           sourceDetail="dating"
