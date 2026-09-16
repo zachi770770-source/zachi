@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ArrowLeft, ArrowUpLeft, Compass } from "lucide-react";
+import { ArrowLeft, Compass } from "lucide-react";
 
 import { pageMetadata } from "@/lib/seo";
 import { dating } from "@/content/dating";
@@ -14,6 +13,7 @@ import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { StageArc } from "@/components/pillar/StageArc";
 import { PillarSection } from "@/components/pillar/PillarSection";
+import { JourneyRail } from "@/components/pillar/JourneyRail";
 import { PillarHero } from "@/components/pillar/PillarHero";
 import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
@@ -121,9 +121,15 @@ export default function DatingPage() {
         />
       </Reveal>
 
-      {/* בקצרה — בלוק א-סימטרי רחב: תווית-שוליים מצד אחד, הרשת מהצד השני. */}
+      {/* בקצרה — תווית-שוליים מצד אחד, ומצד שני השאלות כעצירות על מסלול:
+          השאלה היא הרגע הטיפוגרפי, והתשובה קטנה מתחתיה. ההיררכיה ההפוכה של
+          „שאלות שחוזרות” בהמשך, כדי ששני הבלוקים לא ייקראו כאותו רכיב. */}
       <Reveal className="mt-20 sm:mt-24">
-        <QuickAnswers title={dating.quickAnswers.title} items={dating.quickAnswers.items} />
+        <QuickAnswers
+          title={dating.quickAnswers.title}
+          items={dating.quickAnswers.items}
+          tone="seeking"
+        />
       </Reveal>
 
       {/* פרקי-התוכן — כל פרק מקשר אל התשובה המעמיקה */}
@@ -164,7 +170,7 @@ export default function DatingPage() {
 
       {/* שאלות שחוזרות — תוכן גלוי, לא אקורדיון ולא סכימת FAQPage */}
       <Reveal className="mx-auto mt-24 max-w-3xl sm:mt-32">
-        <PillarFaq title={dating.faq.title} items={dating.faq.items} />
+        <PillarFaq title={dating.faq.title} items={dating.faq.items} variant="dialogue" />
       </Reveal>
 
       {/* רגע מעשי אחד — כלי אמיתי מהספר */}
@@ -182,26 +188,11 @@ export default function DatingPage() {
         <DeepLink href={dating.reflection.link.href} label={dating.reflection.link.label} />
       </Reveal>
 
-      {/* spokes: תחנות המסע לפי המצב */}
+      {/* spokes: תחנות המסע לפי המצב — עצירות על מסלול אחד, לא רשת כרטיסים.
+          ב-/dating הנקודות חלולות והקו ממשיך מעבר לאחרונה ונמוג: עוד מחפשים. */}
       <Reveal className="mx-auto mt-20 max-w-3xl sm:mt-24">
-        <h2 className="type-section font-serif text-center text-foreground">{dating.stations.title}</h2>
-        <div className="mt-8 grid items-stretch gap-4 sm:grid-cols-2">
-          {dating.stations.items.map((st) => (
-            <Link
-              key={st.href}
-              href={st.href}
-              className="lift-hover group flex h-full items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-[22px] hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6"
-            >
-              <span className="font-serif text-[1.05rem] font-semibold text-foreground">
-                {st.label}
-              </span>
-              <ArrowUpLeft
-                className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-hover:-translate-y-1 group-focus-visible:-translate-x-1.5 group-focus-visible:-translate-y-1"
-                aria-hidden="true"
-              />
-            </Link>
-          ))}
-        </div>
+        <h2 className="type-section font-serif text-foreground">{dating.stations.title}</h2>
+        <JourneyRail items={dating.stations.items} tone="seeking" />
       </Reveal>
 
       {/* מעבר-הסיום: אחרי התחנות, לפני הסגירה. החתימה חוזרת במלוא גודלה על

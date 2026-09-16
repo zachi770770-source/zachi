@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ArrowLeft, ArrowUpLeft, Compass } from "lucide-react";
+import { ArrowLeft, Compass } from "lucide-react";
 
 import { pageMetadata } from "@/lib/seo";
 import { love } from "@/content/love";
@@ -14,6 +13,7 @@ import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { ComparePair } from "@/components/pillar/ComparePair";
 import { PillarSection } from "@/components/pillar/PillarSection";
+import { JourneyRail } from "@/components/pillar/JourneyRail";
 import { PillarHero } from "@/components/pillar/PillarHero";
 import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
@@ -116,9 +116,15 @@ export default function LovePage() {
         />
       </Reveal>
 
-      {/* בקצרה — בלוק א-סימטרי רחב: תווית-שוליים מצד אחד, הרשת מהצד השני. */}
+      {/* בקצרה — תווית-שוליים מצד אחד, ומצד שני השאלות כעצירות על מסלול:
+          השאלה היא הרגע הטיפוגרפי, והתשובה קטנה מתחתיה. ההיררכיה ההפוכה של
+          „שאלות שחוזרות” בהמשך, כדי ששני הבלוקים לא ייקראו כאותו רכיב. */}
       <Reveal className="mt-20 sm:mt-24">
-        <QuickAnswers title={love.quickAnswers.title} items={love.quickAnswers.items} />
+        <QuickAnswers
+          title={love.quickAnswers.title}
+          items={love.quickAnswers.items}
+          tone="settled"
+        />
       </Reveal>
 
       {/* פרקי-התוכן — כל פרק מקשר אל התשובה המעמיקה */}
@@ -168,7 +174,7 @@ export default function LovePage() {
 
       {/* שאלות שחוזרות — תוכן גלוי, לא אקורדיון ולא סכימת FAQPage */}
       <Reveal className="mx-auto mt-24 max-w-3xl sm:mt-32">
-        <PillarFaq title={love.faq.title} items={love.faq.items} />
+        <PillarFaq title={love.faq.title} items={love.faq.items} variant="dialogue" />
       </Reveal>
 
       {/* רגע מעשי אחד — כלי אמיתי מהספר */}
@@ -184,26 +190,13 @@ export default function LovePage() {
         <DeepLink href={love.reflection.link.href} label={love.reflection.link.label} />
       </Reveal>
 
-      {/* spokes: תחנות המסע לפי המצב */}
+      {/* spokes: תחנות המסע לפי המצב — עצירות על מסלול אחד, לא רשת כרטיסים.
+          הכותרת יורדת מהמרכז אל קצה-ההתחלה: היא פותחת את המסלול שמתחילה
+          מתחתיה, ולכן היא צריכה לשבת על אותו ציר. ב-/love הנקודות מלאות והקו
+          נעצר באחרונה — הגיעו. */}
       <Reveal className="mx-auto mt-20 max-w-3xl sm:mt-24">
-        <h2 className="type-section font-serif text-center text-foreground">{love.stations.title}</h2>
-        <div className="mt-8 grid items-stretch gap-4 sm:grid-cols-2">
-          {love.stations.items.map((st) => (
-            <Link
-              key={st.href}
-              href={st.href}
-              className="lift-hover group flex h-full items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-[22px] hover:border-secondary/35 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-6"
-            >
-              <span className="font-serif text-[1.05rem] font-semibold text-foreground">
-                {st.label}
-              </span>
-              <ArrowUpLeft
-                className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:-translate-x-1.5 group-hover:-translate-y-1 group-focus-visible:-translate-x-1.5 group-focus-visible:-translate-y-1"
-                aria-hidden="true"
-              />
-            </Link>
-          ))}
-        </div>
+        <h2 className="type-section font-serif text-foreground">{love.stations.title}</h2>
+        <JourneyRail items={love.stations.items} tone="settled" />
       </Reveal>
 
       {/* מעבר-הסיום: אחרי התחנות, לפני הסגירה. החתימה חוזרת במלוא גודלה על
