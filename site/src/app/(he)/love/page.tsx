@@ -16,6 +16,8 @@ import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { ComparePair } from "@/components/pillar/ComparePair";
 import { PillarSection } from "@/components/pillar/PillarSection";
+import { PillarSignature, SignatureMarkRule } from "@/components/pillar/PillarSignature";
+import { QuickAnswers } from "@/components/pillar/QuickAnswers";
 
 /**
  * המקטעים שמקבלים פריסת-כרטיסים במקום רשימה.
@@ -87,6 +89,9 @@ export default function LovePage() {
         <BrandMark className="h-10 w-10 text-foreground/80" />
         <span className="kicker mt-6">{love.hero.kicker}</span>
         <h1 className="mt-5 font-serif type-hero-lg text-foreground">{love.hero.h1}</h1>
+        {/* חתימת העמוד: שני קווים שנעים זה אל זה. משמשת גם ככלל עריכתי
+            בין הכותרת לפתיח, ולכן אינה קישוט שנוסף מהצד. */}
+        <PillarSignature variant="merged" className="mt-7 max-w-[min(420px,100%)]" />
         <p className="mt-6 max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted">
           {love.hero.lead}
         </p>
@@ -110,19 +115,9 @@ export default function LovePage() {
         <ShortAnswer label={love.shortAnswer.label} body={love.shortAnswer.body} />
       </Reveal>
 
-      {/* בקצרה — תשובות קצרות שאפשר לחלץ */}
-      <Reveal className="mx-auto mt-12 max-w-3xl rounded-2xl border border-border bg-surface-muted/50 p-6 sm:p-8">
-        <h2 className="text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
-          {love.quickAnswers.title}
-        </h2>
-        <dl className="mt-5 grid gap-5 sm:grid-cols-2">
-          {love.quickAnswers.items.map((item) => (
-            <div key={item.q}>
-              <dt className="font-serif text-[1.1rem] font-semibold text-foreground">{item.q}</dt>
-              <dd className="mt-1.5 text-[15px] leading-relaxed text-foreground-muted">{item.a}</dd>
-            </div>
-          ))}
-        </dl>
+      {/* בקצרה — בלוק א-סימטרי רחב: תווית-שוליים מצד אחד, הרשת מהצד השני. */}
+      <Reveal className="mt-14 sm:mt-16">
+        <QuickAnswers title={love.quickAnswers.title} items={love.quickAnswers.items} />
       </Reveal>
 
       {/* פרקי-התוכן — כל פרק מקשר אל התשובה המעמיקה */}
@@ -161,7 +156,7 @@ export default function LovePage() {
       </Reveal>
 
       {/* רגע מעשי אחד — כלי אמיתי מהספר */}
-      <Reveal className="mx-auto mt-14 max-w-3xl rounded-3xl border-s-2 border-brand bg-surface-muted/60 p-6 sm:mt-16 sm:p-9">
+      <Reveal className="-mx-6 mt-14 border-s-2 border-brand bg-surface-muted/60 p-6 sm:mx-auto sm:mt-16 sm:max-w-3xl sm:rounded-3xl sm:p-9">
         <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-wide text-brand-hover">
           <Compass className="h-4 w-4" aria-hidden="true" />
           {love.reflection.kicker}
@@ -196,8 +191,8 @@ export default function LovePage() {
       </Reveal>
 
       {/* סגירה: הספר כשיטה המלאה */}
-      <Reveal className="mt-16 rounded-3xl border border-border bg-surface px-6 py-12 text-center sm:mt-20 sm:px-10 sm:py-16">
-        <span aria-hidden="true" className="mx-auto block h-px w-12 bg-brand/70" />
+      <Reveal className="mx-auto mt-20 max-w-4xl rounded-3xl border border-border bg-surface px-6 py-14 text-center sm:mt-24 sm:px-12 sm:py-20">
+        <SignatureMarkRule align="center" />
         <blockquote className="type-literary mx-auto mt-7 max-w-[24ch] text-[clamp(1.5rem,3.2vw,2.1rem)] font-medium leading-[1.3] text-foreground">
           {love.close.title}
         </blockquote>

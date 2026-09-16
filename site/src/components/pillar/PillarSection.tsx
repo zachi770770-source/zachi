@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { SignatureMarkRule } from "@/components/pillar/PillarSignature";
 
 /**
  * מקטע-תוכן בעמוד-אב, עם שני דברים שקובעים את קצב העמוד: **סמן** ו**גוון**.
@@ -63,18 +64,19 @@ export function PillarSection({
           הרוחב. */}
       <div className={cn(band && "mx-auto max-w-3xl")}>
       {marker === "numeral" ? (
-        <div className="flex items-baseline gap-3.5">
+        <div className="flex items-baseline gap-3">
           <span
             aria-hidden="true"
-            className="font-serif text-[0.95rem] font-semibold tabular-nums text-brand"
+            className="flex shrink-0 items-baseline gap-1.5 font-serif text-[0.95rem] font-semibold tabular-nums text-brand"
           >
             {String(index ?? 0).padStart(2, "0")}
+            <span className="h-[4px] w-[4px] translate-y-[-3px] rounded-full bg-brand" />
           </span>
           <h2 className="type-section font-serif text-foreground">{heading}</h2>
         </div>
       ) : (
         <>
-          <span aria-hidden="true" className="block h-px w-10 bg-brand/70" />
+          <SignatureMarkRule />
           <h2 className="type-section mt-5 font-serif text-foreground">{heading}</h2>
         </>
       )}
