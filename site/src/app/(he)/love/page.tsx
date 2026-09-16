@@ -5,17 +5,16 @@ import { pageMetadata } from "@/lib/seo";
 import { love } from "@/content/love";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
-import { BrandMark } from "@/components/shared/BrandMark";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { TrackedInternalLink } from "@/components/analytics/TrackedInternalLink";
-import { ShortAnswer } from "@/components/pillar/ShortAnswer";
 import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { ComparePair } from "@/components/pillar/ComparePair";
 import { PillarSection } from "@/components/pillar/PillarSection";
+import { PillarHero } from "@/components/pillar/PillarHero";
 import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
 import { SectionQuestions } from "@/components/pillar/SectionQuestions";
@@ -104,42 +103,16 @@ export default function LovePage() {
         path="/love"
       />
 
-      {/* Hero — כריכה עריכתית. /love מקבל את הדרגה הגדולה (type-hero-lg) וריווח
-          נדיב: זה העמוד הרפלקטיבי, והמסך הראשון שלו אמור לנשום. מידת-השורה של
-          ה-lead צומצמה ל-52ch — ב-21px, שורה של 60ch ארוכה מדי לקריאה נוחה. */}
-      <Reveal className="mx-auto max-w-3xl">
-        <BrandMark className="h-10 w-10 text-foreground/80" />
-        <span className="kicker mt-6">{love.hero.kicker}</span>
-        <h1 className="mt-5 font-serif type-hero-lg text-foreground">{love.hero.h1}</h1>
-        {/* חתימת העמוד: שני קווים שנעים זה אל זה. משמשת גם ככלל עריכתי
-            בין הכותרת לפתיח, ולכן אינה קישוט שנוסף מהצד. */}
-        <PillarSignature variant="merged" className="mt-8 max-w-[min(520px,100%)] sm:mt-9" />
-        {love.hero.lead.map((line, i) => (
-          <p
-            key={line}
-            className={`${i === 0 ? "mt-6" : "mt-4"} max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted`}
-          >
-            {line}
-          </p>
-        ))}
-        <p className="mt-5 max-w-[60ch] text-[1.06rem] leading-[1.9] text-foreground">
-          {love.hero.intro}
-        </p>
-        {/* ייחוס נראה: מחבר הספר, עם קישור לעמוד המחבר. בונה אמון (E-E-A-T) בלי
-            להמציא תארים. */}
-        <p className="mt-5 text-[14px] text-foreground-muted">
-          {love.byline.prefix}{" "}
-          <Link
-            href={love.byline.href}
-            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
-            {love.byline.name}
-          </Link>
-          , {love.byline.role}
-        </p>
-        {/* תשובה ישירה לשאלה הראשית, לפני הגוף: מי שהגיע מחיפוש מקבל תשובה
-            מלאה בלי לגלול. */}
-        <ShortAnswer label={love.shortAnswer.label} body={love.shortAnswer.body} />
+      <Reveal>
+        <PillarHero
+          tone="settled"
+          kicker={love.hero.kicker}
+          h1={love.hero.h1}
+          lead={love.hero.lead}
+          intro={love.hero.intro}
+          byline={love.byline}
+          shortAnswer={love.shortAnswer}
+        />
       </Reveal>
 
       {/* בקצרה — בלוק א-סימטרי רחב: תווית-שוליים מצד אחד, הרשת מהצד השני. */}
@@ -255,7 +228,7 @@ export default function LovePage() {
         <AmazonBuyLink
           source="book"
           sourceDetail="love"
-          className="group mt-12 inline-flex min-h-[56px] sm:mt-14 items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="group mt-12 inline-flex min-h-[60px] items-center justify-center gap-2.5 rounded-full bg-foreground px-10 text-[17.5px] font-semibold tracking-[-0.01em] text-surface transition-[background-color,transform] duration-200 hover:bg-[color:var(--color-petrol)] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-brand active:translate-y-px motion-reduce:transition-none sm:mt-14"
         >
           {love.close.cta}
           <ArrowLeft

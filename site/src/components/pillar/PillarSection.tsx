@@ -76,7 +76,7 @@ export function PillarSection({
         <div className="flex items-baseline gap-3">
           <span
             aria-hidden="true"
-            className="flex shrink-0 items-baseline gap-1.5 font-serif text-[0.95rem] font-semibold tabular-nums text-brand"
+            className="flex shrink-0 items-baseline gap-1.5 font-serif text-[0.95rem] font-semibold tabular-nums text-brand-hover"
           >
             {String(index ?? 0).padStart(2, "0")}
             <span className="h-[4px] w-[4px] translate-y-[-3px] rounded-full bg-brand" />

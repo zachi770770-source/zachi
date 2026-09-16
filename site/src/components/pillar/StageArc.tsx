@@ -49,7 +49,7 @@ export function StageArc({
             ) : null}
             <span
               aria-hidden="true"
-              className="relative z-[1] mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-serif text-[15px] font-semibold text-brand"
+              className="relative z-[1] mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-serif text-[15px] font-semibold text-brand-hover"
             >
               {i + 1}
             </span>

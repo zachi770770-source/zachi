@@ -534,6 +534,34 @@
     letter-spacing: -0.01em;
     text-wrap: balance;
   }
+  /* ── כותרות עמודי-האב ────────────────────────────────────────────────
+   * שתי דרגות בסריף (Frank Ruhl Libre), לא ב-Heebo. זה התיקון המהותי:
+   * `--font-quote` מצביע על `--font-body`, ולכן כל כותרת באתר נקבעה עד כה
+   * בסאנס במשקל 700 — וזה מקור התחושה ה„בלוקית”. כאן הכותרת חוזרת לסריף,
+   * במשקל 400/500 ובגודל קטן ב-9px מהקודם, ומקבלת סמכות מהצורה ולא מהמסה.
+   *
+   *   settled (/love)  — 400, גובה-שורה נדיב. שקט, מיושב.
+   *   seeking (/dating) — 500, גובה-שורה הדוק. מכוון, בתנועה.
+   *
+   * `text-wrap: balance` מונע שורה יתומה בת מילה אחת בכותרת דו/תלת-שורתית. */
+  .type-pillar-h1-settled,
+  .type-pillar-h1-seeking {
+    letter-spacing: -0.004em;
+    text-wrap: balance;
+  }
+  .type-pillar-h1-settled {
+    font-weight: 400;
+    font-size: clamp(2rem, 3.6vw, 2.85rem); /* 32px → 45.6px */
+    line-height: 1.24;
+    max-inline-size: 15ch;
+  }
+  .type-pillar-h1-seeking {
+    font-weight: 500;
+    font-size: clamp(2.1rem, 3.8vw, 3rem); /* 33.6px → 48px */
+    line-height: 1.16;
+    max-inline-size: 16ch;
+  }
+
   .type-hero-lg {
     font-weight: 700;
     font-size: clamp(2.1rem, 4.6vw, 3.6rem); /* 33.6px → 57.6px, כמו JourneyPage */

@@ -5,17 +5,16 @@ import { pageMetadata } from "@/lib/seo";
 import { dating } from "@/content/dating";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
-import { BrandMark } from "@/components/shared/BrandMark";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { TrackedInternalLink } from "@/components/analytics/TrackedInternalLink";
-import { ShortAnswer } from "@/components/pillar/ShortAnswer";
 import { SectionPoints } from "@/components/pillar/SectionPoints";
 import { PillarFaq } from "@/components/pillar/PillarFaq";
 import { StageArc } from "@/components/pillar/StageArc";
 import { PillarSection } from "@/components/pillar/PillarSection";
+import { PillarHero } from "@/components/pillar/PillarHero";
 import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
 import { PillarStatement } from "@/components/pillar/PillarStatement";
@@ -98,38 +97,16 @@ export default function DatingPage() {
         path="/dating"
       />
 
-      {/* Hero */}
-      <Reveal className="mx-auto max-w-3xl">
-        <BrandMark className="h-10 w-10 text-foreground/80" />
-        <span className="kicker mt-6">{dating.hero.kicker}</span>
-        <h1 className="mt-5 font-serif type-hero text-foreground">{dating.hero.h1}</h1>
-        {/* חתימת העמוד: שני קווים שנעים זה אל זה. משמשת גם ככלל עריכתי
-            בין הכותרת לפתיח, ולכן אינה קישוט שנוסף מהצד. */}
-        <PillarSignature variant="converging" className="mt-8 max-w-[min(520px,100%)] sm:mt-9" />
-        {dating.hero.lead.map((line, i) => (
-          <p
-            key={line}
-            className={`${i === 0 ? "mt-6" : "mt-4"} max-w-[50ch] text-[clamp(1.2rem,1.85vw,1.5rem)] leading-[1.6] text-foreground-muted`}
-          >
-            {line}
-          </p>
-        ))}
-        <p className="mt-5 max-w-[60ch] text-[1.06rem] leading-[1.9] text-foreground">
-          {dating.hero.intro}
-        </p>
-        {/* ייחוס נראה: מחבר הספר, עם קישור לעמוד המחבר. בונה אמון (E-E-A-T) בלי
-            להמציא תארים. */}
-        <p className="mt-5 text-[14px] text-foreground-muted">
-          {dating.byline.prefix}{" "}
-          <Link
-            href={dating.byline.href}
-            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-          >
-            {dating.byline.name}
-          </Link>
-          , {dating.byline.role}
-        </p>
-        <ShortAnswer label={dating.shortAnswer.label} body={dating.shortAnswer.body} />
+      <Reveal>
+        <PillarHero
+          tone="seeking"
+          kicker={dating.hero.kicker}
+          h1={dating.hero.h1}
+          lead={dating.hero.lead}
+          intro={dating.hero.intro}
+          byline={dating.byline}
+          shortAnswer={dating.shortAnswer}
+        />
       </Reveal>
 
       {/* קשת-השלב: איפה בדיוק הקורא נמצא בתוך „דייטים” */}
@@ -249,7 +226,7 @@ export default function DatingPage() {
         <AmazonBuyLink
           source="book"
           sourceDetail="dating"
-          className="group mt-12 inline-flex min-h-[56px] sm:mt-14 items-center justify-center gap-2.5 rounded-full bg-foreground px-9 text-[17px] font-semibold text-surface transition-colors hover:bg-foreground/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="group mt-12 inline-flex min-h-[60px] items-center justify-center gap-2.5 rounded-full bg-foreground px-10 text-[17.5px] font-semibold tracking-[-0.01em] text-surface transition-[background-color,transform] duration-200 hover:bg-[color:var(--color-petrol)] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-brand active:translate-y-px motion-reduce:transition-none sm:mt-14"
         >
           {dating.close.cta}
           <ArrowLeft

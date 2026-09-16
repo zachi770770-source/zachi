@@ -167,3 +167,59 @@ export function SignatureMarkRule({
     </span>
   );
 }
+
+/**
+ * „החצייה” — החתימה בקנה-מידה של קומפוזיציה, לא של סימן.
+ *
+ * זו אותה שפה של שני מסלולים, אבל כאן היא אינה אובייקט שמונח ליד הטקסט: היא
+ * חוצה את ההירו לרוחבו ומפרידה בין זוג הכותרת-והפתיח שמעליה לבין גוף-הפתיחה
+ * שמתחתיה. אם מוציאים אותה, הקומפוזיציה מתפרקת — וזה ההבדל בין מוטיב מותג
+ * שמונח על העמוד לבין מוטיב שנושא אותו.
+ *
+ *   • `"apart"` (/dating) — שני מסלולים חוצים את מלוא הרוחב ונגמרים בשתי
+ *     נקודות נפרדות. לא נגעו. חיפוש שעוד נמשך.
+ *   • `"joined"` (/love) — הם נפגשים בנקודה ליד קצה-הקריאה וממשיכים כקו אחד
+ *     לאורך כל הרוחב. המפגש כבר קרה; מה שנמשך הוא אחד.
+ *
+ * `preserveAspectRatio="none"` מותר כאן משום שהצורה היא קו כמעט-אופקי: מתיחה
+ * אופקית אינה מעוותת אותה, והיא נשארת חדה בכל רוחב. הגובה קבוע (54), ולכן
+ * המקום מוקצה מראש ואין CLS.
+ */
+export function CrossingRule({
+  variant,
+  className,
+}: {
+  variant: "apart" | "joined";
+  className?: string;
+}) {
+  const S = { stroke: "currentColor", fill: "none", strokeLinecap: "round" as const };
+  return (
+    <svg
+      viewBox="0 0 1000 54"
+      width={1000}
+      height={54}
+      preserveAspectRatio="none"
+      role="presentation"
+      aria-hidden="true"
+      focusable="false"
+      fill="none"
+      className={cn("block h-[54px] w-full", className)}
+    >
+      {variant === "joined" ? (
+        <>
+          <path d="M988 10 C 900 10, 872 27, 828 27" {...S} strokeWidth={1.5} className="text-brand" />
+          <path d="M988 44 C 900 44, 872 27, 828 27" {...S} strokeWidth={1.5} className="text-[color:var(--color-sage-ink)]" />
+          <path d="M828 27 L 12 27" {...S} strokeWidth={1.8} className="text-[color:var(--color-sage-ink)]" />
+          <circle cx={828} cy={27} r={4} className="text-brand" fill="currentColor" />
+        </>
+      ) : (
+        <>
+          <path d="M988 8 C 700 8, 380 19, 12 24" {...S} strokeWidth={1.5} className="text-brand" />
+          <path d="M988 46 C 700 46, 380 35, 12 31" {...S} strokeWidth={1.5} className="text-[color:var(--color-sage-ink)]" />
+          <circle cx={988} cy={8} r={3.4} className="text-brand" fill="currentColor" />
+          <circle cx={988} cy={46} r={3.4} className="text-[color:var(--color-sage-ink)]" fill="currentColor" />
+        </>
+      )}
+    </svg>
+  );
+}
