@@ -54,6 +54,12 @@ export function RecognitionBeat() {
           </figcaption>
         </figure>
 
+        {/* משפט-הגשר: הפעם היחידה שרוחב-הקהל נאמר במפורש. טקסט עריכתי שקט
+            מיד אחרי הציטוט — לא באנר, לא כרטיסים, לא רשימת קהלים. */}
+        <p className="recog__bridge mx-auto mt-8 max-w-2xl text-center text-[clamp(1rem,1.3vw,1.1rem)] leading-relaxed text-foreground-muted [text-wrap:pretty]">
+          {recognition.audienceBridge}
+        </p>
+
         {/* המסלול השקט אל שני עמודי-האב — בהקשר שבו הוא הגיוני (מיד אחרי
             הרעיון), ולא כשורה יתומה בתחתית העמוד. הסדר הוא סדר המסע: הדייטים
             פותחים, האהבה סוגרת. */}

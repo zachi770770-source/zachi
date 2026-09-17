@@ -32,6 +32,10 @@ export function WhyTheBook() {
           <h2 id="why-book-heading" className="type-h2 mt-3 [text-wrap:balance]">
             {whyTheBook.title}
           </h2>
+          {/* ההבחנה אתר/ספר שורדת — אבל קטנה ומתחת לכותרת, לא במקומה. */}
+          <p className="s2p__subtitle mx-auto mt-3 max-w-[38ch] text-[15px] leading-relaxed text-foreground-muted">
+            {whyTheBook.subtitle}
+          </p>
         </div>
 
         <div className="s2p__body mx-auto mt-7 max-w-3xl sm:mt-9">

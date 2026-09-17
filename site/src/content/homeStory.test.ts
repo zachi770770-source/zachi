@@ -68,6 +68,7 @@ describe("home story is source-backed, not authored marketing copy", () => {
     const authored = [
       recognition.line,
       whyTheBook.title,
+      whyTheBook.subtitle,
       whyTheBook.site.line,
       whyTheBook.book.note,
       authorNote.body,
@@ -77,5 +78,37 @@ describe("home story is source-backed, not authored marketing copy", () => {
     // שורת-המשנה מונה את ארבע התחנות ולכן רשאית לנקוב ב„מחפשים קשר” כשלב-חיים —
     // אך עדיין אסור לה לשחזר את צד ה„מציאה” של תזת ה-H1.
     expect(recognition.support).not.toMatch(/מוצאים|למצוא/);
+    // משפט-הגשר מונה קהלים ולכן רשאי לומר „מחפשים” — באותו היתר ומאותה סיבה.
+    expect(recognition.audienceBridge).not.toMatch(/מוצאים|למצוא/);
+  });
+
+  /**
+   * הליקוי שהפאס הזה בא לתקן: העמוד נקרא כספר-דייטינג, ומי שנשוי חמש-עשרה
+   * שנה לא ראה בחצי הראשון שום סימן שהספר מדבר גם אליו. הבדיקה מקבעת שרוחב
+   * הקהל נאמר במפורש — פעם אחת, במשפט אחד, ולא כארבעה כרטיסי-קהל.
+   */
+  it("names every audience once, in one editorial sentence", () => {
+    const bridge = recognition.audienceBridge;
+    for (const stage of ["מחפשים", "מתחילים מחדש", "בתחילתו של קשר", "שנים יחד"]) {
+      expect(bridge).toContain(stage);
+    }
+    // משפט אחד, לא באנר ולא רשימה.
+    expect(bridge.split(".").filter((s) => s.trim()).length).toBe(1);
+  });
+
+  it("keeps the practical value spanning the whole journey, in three lines", () => {
+    // לבחור → לבנות → להעמיק קשר קיים. אם השלוש יתכווצו שוב לשלב אחד, העמוד
+    // ייגמר מבחינת הקורא הוותיק לפני שהתחיל.
+    expect(whyTheBook.book.lines).toHaveLength(3);
+    expect(whyTheBook.book.lines[0]).toContain("פחד או הרגל");
+    expect(whyTheBook.book.lines[1]).toContain("אמון וקרבה");
+    expect(whyTheBook.book.lines[2]).toContain("קשר קיים");
+  });
+
+  it("leads with the reader, not with the product", () => {
+    // „האתר עונה על שאלה. הספר מלווה תהליך.” נכון — אבל הנושא שלו הוא המוצר.
+    // הוא שורד כטקסט-משנה; הכותרת מדברת אל הקורא.
+    expect(whyTheBook.title).not.toContain("האתר");
+    expect(whyTheBook.subtitle).toContain("האתר");
   });
 });
