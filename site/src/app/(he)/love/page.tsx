@@ -17,6 +17,7 @@ import { JourneyRail } from "@/components/pillar/JourneyRail";
 import { PillarHero } from "@/components/pillar/PillarHero";
 import { PillarSignature } from "@/components/pillar/PillarSignature";
 import { QuickAnswers } from "@/components/pillar/QuickAnswers";
+import { LoveFramework } from "@/components/pillar/LoveFramework";
 import { SectionQuestions } from "@/components/pillar/SectionQuestions";
 import { PillarStatement } from "@/components/pillar/PillarStatement";
 import { PillarPullQuote } from "@/components/pillar/PillarPullQuote";
@@ -125,6 +126,13 @@ export default function LovePage() {
           items={love.quickAnswers.items}
           tone="settled"
         />
+      </Reveal>
+
+      {/* המסגרת מתוך הספר — הנכס שיש סיבה עניינית לצטט אותו.
+          ממוקמת מיד אחרי „בקצרה” ולפני הפרקים: הקורא כבר קיבל את התשובה
+          הקצרה, וזה הרגע שבו „ואיך זה עובד בפועל” היא השאלה הבאה. */}
+      <Reveal className="mt-20 sm:mt-24">
+        <LoveFramework />
       </Reveal>
 
       {/* פרקי-התוכן — כל פרק מקשר אל התשובה המעמיקה */}

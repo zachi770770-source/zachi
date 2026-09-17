@@ -345,6 +345,11 @@ const relationshipDoubts: Guide = {
   },
   related: [
     {
+      href: "/love",
+      label: "איך יודעים שיש אהבה",
+      sub: "מה באמת מעיד על קשר, מעבר לתחושה.",
+    },
+    {
       href: "/guide/attachment-styles",
       label: "סגנונות התקשרות בזוגיות: חרדתי ונמנע",
       sub: "כשהספק הוא דפוס רגשי חוזר.",
@@ -425,6 +430,11 @@ const compatibility: Guide = {
     sub: "אם אתם כבר בונים משהו, עמוד בניית הקשר ממשיך מכאן.",
   },
   related: [
+    {
+      href: "/love",
+      label: "אהבה או התאהבות: מה ההבדל",
+      sub: "למה עוצמה אינה עדות להתאמה.",
+    },
     {
       href: "/guide/relationship-doubts",
       label: "ספקות בזוגיות: פחד או חוסר התאמה",
@@ -509,6 +519,11 @@ const healthyRelationship: Guide = {
   method: { href: "/method/core-values", label: "קו אדום מול גמישות: שלושה ערכי-ברזל", sub: "המושג שמאחורי „מה לא מוותרים”." },
   secondary: { href: "/building-relationship", label: "בניית קשר", sub: "השלב שבו הבסיס הזה נקבע." },
   related: [
+    {
+      href: "/love",
+      label: "אהבה בריאה: מה מאפיין אותה",
+      sub: "מה מבדיל קשר שמבהיר מקשר שמערפל.",
+    },
     { href: "/guide/couple-communication", label: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", sub: "איך אומרים צורך שנשמע." },
     { href: "/guide/recurring-fights", label: "ריבים חוזרים: איך יוצאים מהלולאה", sub: "הצורך שמתחת לריב." },
   ],
@@ -699,6 +714,11 @@ const fearOfCommitment: Guide = {
   hub: HUB_BUILDING,
   bookTool: { id: "gate-questions", name: "בדיקת הקצב" },
   related: [
+    {
+      href: "/love",
+      label: "פחד מאהבה, או פחד מקרבה",
+      sub: "מה עומד מתחת להיסוס כשקשר נעשה אמיתי.",
+    },
     { href: "/guide/attachment-styles", label: "סגנונות התקשרות בזוגיות: חרדתי ונמנע", sub: "הצד הנמנע כדפוס רגשי רחב." },
     { href: "/guide/relationship-doubts", label: "ספקות בזוגיות: פחד או חוסר התאמה", sub: "אותה הבחנה, במבט רחב." },
     { href: "/guide/how-fast-is-too-fast", label: "כמה מהר זה מהר מדי בתחילת קשר", sub: "קצב שמרגיע פחד." },
@@ -763,6 +783,11 @@ const coupleCommunication: Guide = {
   hub: HUB_INSIDE,
   bookTool: { id: "twenty-maintenance", name: "שיחה בגובה העיניים" },
   related: [
+    {
+      href: "/love",
+      label: "אמון וביטחון: איך אהבה נבנית בפועל",
+      sub: "למה תגובות קטנות קובעות יותר משיחות גדולות.",
+    },
     { href: "/guide/recurring-fights", label: "ריבים חוזרים: איך יוצאים מהלולאה", sub: "הצורך שמתחת לריב." },
     { href: "/guide/healthy-relationship", label: "מהי מערכת יחסים בריאה", sub: "התמונה השלמה." },
   ],
@@ -817,6 +842,11 @@ const attractedToUnavailable: Guide = {
   bookTool: { id: "fact-story-action", name: "עובדה, סיפור, פעולה" },
   method: { href: "/method/fact-story", label: "עובדה, סיפור, פעולה: לעצור פרשנות", sub: "הכלי שמפריד את הקסם מהעובדה." },
   related: [
+    {
+      href: "/love",
+      label: "למה משיכה חוזרת אל אותו דפוס",
+      sub: "הקשר בין הכאב המוכר לבין מי שנמשכים אליו.",
+    },
     { href: "/guide/attachment-styles", label: "סגנונות התקשרות בזוגיות: חרדתי ונמנע", sub: "הדפוס הרחב מאחורי המשיכה ללא-זמינים." },
     { href: "/guide/dating-red-flags", label: "דגלים אדומים בדייטים, ומה באמת קו אדום", sub: "כשהמשיכה מובילה לקו אדום." },
     { href: "/guide/ready-for-a-relationship", label: "האם אני מוכן/ה לזוגיות", sub: "הדפוס שמתחיל לפני הקשר." },
@@ -868,6 +898,11 @@ const recurringFights: Guide = {
   hub: HUB_INSIDE,
   bookTool: { id: "twenty-maintenance", name: "שיחה בגובה העיניים" },
   related: [
+    {
+      href: "/love",
+      label: "אהבה בזמן קונפליקט",
+      sub: "מה קורה לקשר בין הריב לתיקון.",
+    },
     { href: "/guide/couple-communication", label: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", sub: "איך אומרים את הצורך." },
     { href: "/guide/healthy-relationship", label: "מהי מערכת יחסים בריאה", sub: "ריב שאפשר לצאת ממנו." },
   ],
@@ -1193,6 +1228,11 @@ const wordsVsActions: Guide = {
   bookTool: { id: "fact-story-action", name: "עובדה, סיפור, פעולה" },
   method: { href: "/method/fact-story", label: "עובדה, סיפור, פעולה: לעצור פרשנות", sub: "להפריד הבטחה ממה שקרה." },
   related: [
+    {
+      href: "/love",
+      label: "מה מחזיק אהבה לאורך זמן",
+      sub: "איפה בדיוק נמדד הפער בין מילים למעשים.",
+    },
     { href: "/guide/choosing-a-partner", label: "איך לבחור בן או בת זוג", sub: "עקביות כמדד לבחירה." },
     { href: "/guide/couple-communication", label: "תקשורת זוגית: לומר בלי להאשים", sub: "איך אומרים את הפער." },
   ],
@@ -1295,6 +1335,11 @@ const keepingConnectionAlive: Guide = {
   hub: HUB_INSIDE,
   bookTool: { id: "twenty-maintenance", name: "שיחה בגובה העיניים" },
   related: [
+    {
+      href: "/love",
+      label: "איך שומרים על אהבה לאורך זמן",
+      sub: "מה מחזיק קשר אחרי שהשגרה נכנסת.",
+    },
     { href: "/guide/healthy-relationship", label: "מהי מערכת יחסים בריאה", sub: "הבסיס שמחזיק לאורך זמן." },
     { href: "/guide/recurring-fights", label: "ריבים חוזרים: איך יוצאים מהלולאה", sub: "כשהשגרה הופכת לחיכוך." },
   ],
@@ -1426,6 +1471,11 @@ const attachmentStyles: Guide = {
     sub: "הכלי מהספר להבדיל בין חרדה לבין מה שקרה באמת.",
   },
   related: [
+    {
+      href: "/love",
+      label: "גבולות וקרבה בתוך אהבה",
+      sub: "איך ביטחון נבנה, ומה שובר אותו.",
+    },
     {
       href: "/guide/attracted-to-unavailable",
       label: "למה אני נמשך/ת לאנשים לא זמינים",
@@ -1793,6 +1843,11 @@ const fromDatingToRelationship: Guide = {
     sub: "השלב שקדם לזה.",
   },
   related: [
+    {
+      href: "/love",
+      label: "מהי אהבה ואיך היא נבנית",
+      sub: "עמוד-האב: מהתחלה ועד קשר שמחזיק.",
+    },
     {
       href: "/guide/defining-the-relationship",
       label: "בלעדיות: מתי ואיך מדברים על „מה אנחנו”",
