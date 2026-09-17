@@ -4,6 +4,7 @@ import { love } from "@/content/love";
 import { BOOK_EXCERPTS } from "@/content/bookExcerpts";
 import { canonicalExcerpt } from "@/content/sample";
 import { guides } from "@/content/guides";
+import { method } from "@/content/book";
 
 /**
  * ‎/love‎ הוא הבעלים היחיד של מונח-הראש „אהבה”.
@@ -71,28 +72,57 @@ describe("‏/love — המסגרת היא ציטוט, לא ניסוח חדש", 
     ...canonicalExcerpt.paragraphs.flatMap((p) => runs(p.split(". "))),
   ];
 
-  it("יש בה שישה שלבים לפי סדר", () => {
-    expect(love.framework.steps).toHaveLength(6);
-    expect(love.framework.steps.map((s) => s.name)).toEqual([
-      "משיכה",
-      "עקביות",
-      "אמון",
-      "ביטחון",
-      "גבולות",
-      "תיקון ובחירה חוזרת",
-    ]);
+  it("יש בה שישה מרכיבים", () => {
+    expect(love.framework.parts).toHaveLength(6);
+    expect(new Set(love.framework.parts.map((x) => x.name)).size).toBe(6);
   });
 
   it("כל ציטוט הוא מחרוזת מאושרת מהמקור, מילה במילה", () => {
-    for (const step of love.framework.steps) {
-      const found = approved.some((a) => a.trim() === step.quote.trim());
-      expect(found, `ציטוט שאינו מהמקור המאושר: "${step.quote}"`).toBe(true);
+    for (const part of love.framework.parts) {
+      const found = approved.some((a) => a.trim() === part.quote.trim());
+      expect(found, `ציטוט שאינו מהמקור המאושר: "${part.quote}"`).toBe(true);
     }
   });
 
   it("אין כפילות בין הציטוטים", () => {
-    const q = love.framework.steps.map((s) => s.quote);
+    const q = love.framework.parts.map((x) => x.quote);
     expect(new Set(q).size).toBe(q.length);
+  });
+
+  /**
+   * הבדיקה שנולדה מהליקוי.
+   *
+   * הגרסה הראשונה של הנכס הציגה את ששת המרכיבים כרצף בן שישה שלבים שכל אחד
+   * נשען על קודמו. כל ציטוט בנפרד היה אותנטי, ולכן בדיקת-הציטוטים עברה —
+   * אבל *הסידור* היה טענה שנוצרה כאן ולא בכתב-היד. הרצף היחיד שהמחבר אכן
+   * הגדיר הוא בן שלושה שלבים („מזהים את הרעש → עוברים את השער → מתחילים
+   * לבנות”, ‎book.ts:method‎), והוא גם מבנה שלושת חלקי הספר.
+   *
+   * לכן: אותנטיות של חלקים אינה אותנטיות של מבנה, והבדיקה הזו שומרת על
+   * ההבחנה הזו.
+   */
+  it("אינה טוענת טענת-רצף שאין לה כיסוי בכתב-היד", () => {
+    const copy = [
+      love.framework.kicker,
+      love.framework.title,
+      love.framework.lead,
+      ...love.framework.parts.map((x) => x.note),
+    ].join(" ");
+    for (const claim of ["לפי הסדר", "נשען על", "שלב ראשון", "שלבים", "רצף"]) {
+      expect(copy, `טענת-רצף ללא כיסוי: "${claim}"`).not.toContain(claim);
+    }
+  });
+
+  it("הרצף היחיד שהמחבר הגדיר נשאר בן שלושה שלבים, ואינו נגרר לכאן", () => {
+    expect(method.steps).toHaveLength(3);
+    expect(method.steps.map((s) => s.title)).toEqual([
+      "מזהים את הרעש",
+      "עוברים את השער",
+      "מתחילים לבנות",
+    ]);
+    // ושמות השלבים האלה אינם מופיעים בנכס — הוא אינו מתחזה למסלול הזה.
+    const names = love.framework.parts.map((x) => x.name);
+    for (const s of method.steps) expect(names).not.toContain(s.title);
   });
 });
 
