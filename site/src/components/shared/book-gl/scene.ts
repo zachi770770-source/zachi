@@ -382,8 +382,10 @@ export function createBookScene(
   // צד-ימין קיים תמיד ואטימותו לעולם אינה משתנה, ולכן ‎transparent:false‎:
   // הוא חוזר אל מסלול-הרינדור האטום — כתיבת-עומק וסדר קדמי-אחורי — ולכן פחות
   // שכבות נצבעות מיותר. אותו שיקול חל על שאר חומרי צד-ימין למטה.
-  const blockFaceR = new THREE.MeshBasicMaterial({ color: PAPER_FACE });
-  const blockFaceL = new THREE.MeshBasicMaterial({ color: PAPER_FACE, transparent: true, opacity: 0 });
+  // ספר עברי: כשהוא סגור כל המסה נמצאת *משמאל* לשדרה, ולכן חצי-ימין הוא
+  // שנבנה תוך כדי הפתיחה. הצד השקוף-בהתחלה התחלף בהתאם.
+  const blockFaceR = new THREE.MeshBasicMaterial({ color: PAPER_FACE, transparent: true, opacity: 0 });
+  const blockFaceL = new THREE.MeshBasicMaterial({ color: PAPER_FACE });
   function makeBlock(sign: 1 | -1) {
     const geo = new THREE.BoxGeometry(W * 0.99, H * 0.985, BLOCK_T);
     // טריז: הקצה החופשי דק ב-18% מהשדרה. `sign` קובע לאיזה כיוון ה„חוץ”.
@@ -538,12 +540,14 @@ export function createBookScene(
       side: THREE.DoubleSide, // בתחילת הפתיחה, כשהרצועה כמעט ניצבת, רואים את גבה
       transparent: true,
     });
-  const bandForeR = makeBandMat(1, FORE_TINT);
-  const bandForeL = makeBandMat(0, FORE_TINT);
-  const bandBotR = makeBandMat(1, BOT_TINT);
-  const bandBotL = makeBandMat(0, BOT_TINT);
+  // כמו הגוש והלוח: בספר עברי הערימה הסגורה יושבת *משמאל*, ולכן רצועות-הקצה
+  // של צד-שמאל קיימות מהרגע הראשון, ואלו של צד-ימין נבנות תוך כדי הפתיחה.
+  const bandForeR = makeBandMat(0, FORE_TINT);
+  const bandForeL = makeBandMat(1, FORE_TINT);
+  const bandBotR = makeBandMat(0, BOT_TINT);
+  const bandBotL = makeBandMat(1, BOT_TINT);
   const bandMats = [bandForeR, bandForeL, bandBotR, bandBotL];
-  const bandMatsL = [bandForeL, bandBotL];
+  const bandMatsR = [bandForeR, bandBotR];
 
   /**
    * מרובע-הערימה. `along` הוא ציר-הגיליונות, `depth` ציר-העובי. הגאומטריה
@@ -626,7 +630,7 @@ export function createBookScene(
   const flareBotR = makeFlare(1, "bottom");
   const flareForeL = makeFlare(-1, "fore");
   const flareBotL = makeFlare(-1, "bottom");
-  const flaresL = [flareForeL, flareBotL];
+  const flaresR = [flareForeR, flareBotR];
   /** פרישת-הערימה: ‎k=0‎ ספר סגור (הגיליונות מהודקים), ‎k=1‎ פתוח ונרגע. */
   function setFlare(sign: 1 | -1, k: number) {
     const fore = sign === 1 ? flareForeR : flareForeL;
@@ -691,8 +695,8 @@ export function createBookScene(
   }
 
   // ── לוחות-כריכה (hardcover) — חום כהה חמים, לא שחור, עם overhang ──
-  const boardMatR = new THREE.MeshBasicMaterial({ color: 0x3a2f26 });
-  const boardMatL = new THREE.MeshBasicMaterial({ color: 0x3a2f26, transparent: true, opacity: 0 });
+  const boardMatR = new THREE.MeshBasicMaterial({ color: 0x3a2f26, transparent: true, opacity: 0 });
+  const boardMatL = new THREE.MeshBasicMaterial({ color: 0x3a2f26 });
   const BOARD_T = 0.048;
   function makeBoard(sign: 1 | -1) {
     const m = new THREE.Mesh(
@@ -714,7 +718,8 @@ export function createBookScene(
   const SLAB = BLOCK_T + BOARD_T;
   const spineSlabMat = new THREE.MeshBasicMaterial({ color: 0x453629, transparent: true, opacity: 1 });
   const spineSlab = new THREE.Mesh(new THREE.BoxGeometry(0.052, H * 1.035, SLAB), spineSlabMat);
-  spineSlab.position.set(-0.016, 0, 0.03 - SLAB / 2);
+  // השדרה בצד ימין — שם היא נמצאת בספר עברי.
+  spineSlab.position.set(0.016, 0, 0.03 - SLAB / 2);
   book.add(spineSlab);
 
   // endpaper בעמק-הכריכה (מונע „חור” כהה בין הגושים).
@@ -723,13 +728,21 @@ export function createBookScene(
   spine.position.set(0, 0, -0.035);
   book.add(spine);
 
-  // ── הכריכה הקדמית (נפתחת) — פנים=אמנות-המותג, גב=endpaper (לא שחור) ──
+  // ── הכריכה הקדמית (נפתחת) — אמנות-המותג בחוץ, endpaper בפנים (לא שחור) ──
+  //
+  // איזו פאה נושאת את האמנות תלוי בכיוון הפתיחה. בספר עברי הכריכה מונחת
+  // *משמאל* לשדרה כשהספר סגור — כלומר ‎uTheta = PI‎ — ואז הגיליון מסובב
+  // 180° סביב השדרה והמצלמה רואה את פאת-ה„גב” שלו. לכן אמנות-הכריכה יושבת
+  // ב-‎uBack‎: היא זו שנראית כשהספר סגור. הפרגמנט-שיידר ממילא מהפך את ה-UV
+  // לפאה האחורית (‎1-uv.x‎), ולכן האמנות נקראת ישרה — הטקסטורה עצמה לא
+  // שונתה ולא שוקפה. אחרי הפתיחה הכריכה שוכבת מימין ‎(uTheta = 0)‎, פניה
+  // כלפי מטה, והמצלמה רואה את הבטנה — בדיוק כמו בספר אמיתי.
   const coverGeo = new THREE.PlaneGeometry(W, H, 24, 6);
   coverGeo.translate(W / 2, 0, 0);
   const coverMat = new THREE.ShaderMaterial({
     uniforms: {
-      uFront: { value: coverTex },
-      uBack: { value: coverLiner },
+      uFront: { value: coverLiner },
+      uBack: { value: coverTex },
       uTheta: { value: 0 },
       uCurl: { value: 0 },
       uTwist: { value: 0.05 },
@@ -926,7 +939,8 @@ export function createBookScene(
     // דפים, לא שלוש שכבות שזזות יחד.
     const openL = weightedFall(win(t, T.openFrom + 110, T.openTo + 110));
 
-    coverMat.uniforms.uTheta.value = lerp(0, Math.PI, openCover);
+    // ספר עברי: הכריכה מונחת משמאל כשהספר סגור, ונפתחת ימינה.
+    coverMat.uniforms.uTheta.value = lerp(Math.PI, 0, openCover);
     // בועת-העיקול בשיא באמצע התנופה: הלוח „נאנח” ומתיישר בנחיתה.
     coverMat.uniforms.uCurl.value = Math.sin(openCover * Math.PI) * 0.2;
     cover.position.z = openCover < 0.5 ? 0.03 : lerp(0.03, -0.014, (openCover - 0.5) / 0.5);
@@ -936,26 +950,27 @@ export function createBookScene(
     // אמנות-הכריכה בזמן שהיא מסתובבת, במקום לשבת עליה קפוא.
     setKeyYaw(lerp(-0.09, 0.13, openCover), lerp(0.06, 0, arrive));
 
-    const leftStruct = smooth((openL - 0.72) / 0.28);
-    blockFaceL.opacity = leftStruct;
-    bandMatsL.forEach((m) => { m.uniforms.uOpacity.value = leftStruct; });
-    boardMatL.opacity = leftStruct * 0.95;
-    spineMat.opacity = leftStruct;
-    blockL.visible = leftStruct > 0.02;
-    boardL.visible = leftStruct > 0.02;
-    flaresL.forEach((m) => {
-      m.visible = leftStruct > 0.02;
+    // חצי-ימין הוא שנבנה תוך כדי הפתיחה; חצי-שמאל קיים מהרגע הראשון.
+    const openStruct = smooth((openL - 0.72) / 0.28);
+    blockFaceR.opacity = openStruct;
+    bandMatsR.forEach((m) => { m.uniforms.uOpacity.value = openStruct; });
+    boardMatR.opacity = openStruct * 0.95;
+    spineMat.opacity = openStruct;
+    blockR.visible = openStruct > 0.02;
+    boardR.visible = openStruct > 0.02;
+    flaresR.forEach((m) => {
+      m.visible = openStruct > 0.02;
     });
-    blockR.visible = true;
-    boardR.visible = true;
+    blockL.visible = true;
+    boardL.visible = true;
     const spineFade = 1 - smooth(openCover / 0.34);
     spineSlabMat.opacity = spineFade;
     spineSlab.visible = spineFade > 0.02;
 
     // פריסת-הערימה נוסעת עם אותה תנועה שפותחת את הכריכה: ניצבת כל עוד הספר
     // סגור (ואז היא בדיוק פאת-הצד של הגוש), ונרגעת החוצה ככל שהוא נפתח.
-    pose.flareR = openCover;
-    pose.flareL = openL;
+    pose.flareL = openCover;
+    pose.flareR = openL;
     setFlare(1, pose.flareR);
     setFlare(-1, pose.flareL);
 
@@ -971,17 +986,16 @@ export function createBookScene(
     // למישור הכריכה (‎uCurl 0.4‎ מרים את הקצה החופשי ל-z≈0.09 מול כריכה ב-0.03)
     // — ואז הדף נראה מצויר על גבי הכריכה וחותך אותה בערך בחציה. זה נתפס
     // בבדיקה החזותית של מצב-ההגעה, שבו הספר הסגור נראה לראשונה לאורך זמן.
-    baseRight.mat.uniforms.uTheta.value = 0;
-    baseRight.mat.uniforms.uCurl.value = REST_CURL * openCover;
-    baseRight.mesh.position.z = 0.002;
+    baseLeft.mat.uniforms.uTheta.value = Math.PI;
+    baseLeft.mat.uniforms.uCurl.value = -REST_CURL * 1.09 * openCover;
+    baseLeft.mesh.position.z = 0.002;
 
-    // ── עמוד-שמאל הבסיסי (L3) ──
-    baseLeft.mat.uniforms.uTheta.value = Math.PI * openL;
-    // אותו כלל לעמוד-שמאל: שטוח כשהספר סגור, ומקבל את עיקול-המנוחה שלו רק
-    // ככל שהוא נפתח.
-    baseLeft.mat.uniforms.uCurl.value =
-      lerp(0, -REST_CURL * 1.09, openL) + Math.sin(openL * Math.PI) * 0.5;
-    baseLeft.mesh.position.z = 0.002 + Math.sin(openL * Math.PI) * 0.03;
+    // ── עמוד-ימין, זה שנפתח יחד עם הכריכה ──
+    // אותו כלל: שטוח כשהספר סגור, ומקבל את עיקול-המנוחה שלו רק ככל שהוא נפתח.
+    baseRight.mat.uniforms.uTheta.value = Math.PI * (1 - openL);
+    baseRight.mat.uniforms.uCurl.value =
+      lerp(0, REST_CURL, openL) - Math.sin(openL * Math.PI) * 0.5;
+    baseRight.mesh.position.z = 0.002 + Math.sin(openL * Math.PI) * 0.03;
 
     // ── גיליונות-המילוי ──
     // נסחפים עם הפתיחה בדיוק כמו הדפים האמיתיים, בהשהיות זעירות, ועם עיקול
@@ -991,19 +1005,19 @@ export function createBookScene(
     const fanCurlL: number[] = [];
     for (let i = 0; i < FAN_PER_SIDE; i += 1) {
       const depth = (i + 1) / (FAN_PER_SIDE + 1); // 0..1 — עמוק יותר בערימה
-      const restR = REST_CURL * (1 - depth * 0.55) * openCover;
-      fanCurlR.push(restR);
-      fanR[i].mat.uniforms.uTheta.value = 0;
-      fanR[i].mat.uniforms.uCurl.value = restR;
-      fanR[i].mesh.position.z = -0.004 - (i + 1) * 0.0135;
+      const restL = -REST_CURL * (1 - depth * 0.55) * 1.09 * openCover;
+      fanCurlL.push(restL);
+      fanL[i].mat.uniforms.uTheta.value = Math.PI;
+      fanL[i].mat.uniforms.uCurl.value = restL;
+      fanL[i].mesh.position.z = -0.004 - (i + 1) * 0.0135;
 
       const openFan = weightedFall(win(t, T.openFrom + 120 + i * 18, T.openTo + 120));
-      const restL = lerp(0, -REST_CURL * (1 - depth * 0.55) * 1.09, openFan);
-      fanCurlL.push(restL);
-      fanL[i].mat.uniforms.uTheta.value = Math.PI * openFan;
-      fanL[i].mat.uniforms.uCurl.value = restL + Math.sin(openFan * Math.PI) * 0.42;
-      fanL[i].mesh.position.z = -0.004 - (i + 1) * 0.0135 + Math.sin(openFan * Math.PI) * 0.026;
-      fanL[i].mesh.visible = openFan > 0.02;
+      const restR = lerp(0, REST_CURL * (1 - depth * 0.55), openFan);
+      fanCurlR.push(restR);
+      fanR[i].mat.uniforms.uTheta.value = Math.PI * (1 - openFan);
+      fanR[i].mat.uniforms.uCurl.value = restR - Math.sin(openFan * Math.PI) * 0.42;
+      fanR[i].mesh.position.z = -0.004 - (i + 1) * 0.0135 + Math.sin(openFan * Math.PI) * 0.026;
+      fanR[i].mesh.visible = openFan > 0.02;
     }
     pose.fanRestR = fanCurlR;
     pose.fanRestL = fanCurlL;
@@ -1013,8 +1027,8 @@ export function createBookScene(
     // כמו דף-הבסיס שמתחתיהם. הדפדוף מתחיל מיד אחרי הרצף, בשכבה הרצה.
     for (let i = 0; i < POOL; i += 1) {
       const lf = turners[i];
-      lf.mat.uniforms.uTheta.value = 0;
-      lf.mat.uniforms.uCurl.value = REST_CURL * openCover;
+      lf.mat.uniforms.uTheta.value = Math.PI;
+      lf.mat.uniforms.uCurl.value = -REST_CURL * 1.09 * openCover;
       lf.mat.uniforms.uTwist.value = 0.2;
       lf.mat.uniforms.uTurnShadow.value = 0;
       lf.mesh.position.z = zRight(i);
@@ -1067,11 +1081,12 @@ export function createBookScene(
     // הכריכה, ולכן זו עדיין תנועה אחת ולא תיקון-זווית נפרד.
     book.rotation.y =
       lerp(lerp(-0.32, 0.2, arrive), pose.rotY, Math.max(tip, finalEase)) + wob;
-    // מרכוז: ספר *סגור* תופס x∈[0,W] ולכן מרכזו ב-0.5 — צריך היסט ‎-0.5‎ כדי
-    // שיישב באמצע הקאדר; ספר *פתוח* תופס x∈[-W,W] ומרכזו כבר ב-0. לכן ההיסט
-    // חייב להיות קשור לפתיחת-הכריכה ולא להגעה. (באג שנתפס בבדיקה חזותית:
-    // כשהוא היה קשור להגעה, הספר עמד סגור ומוסט ימינה למשך 130ms.)
-    book.position.x = lerp(-0.5, 0, openCover);
+    // מרכוז: ספר עברי *סגור* תופס x∈[-W,0] — כל המסה משמאל לשדרה — ולכן
+    // מרכזו ב-‎-0.5‎, וצריך היסט ‎+0.5‎ כדי שיישב באמצע הקאדר; ספר *פתוח* תופס
+    // x∈[-W,W] ומרכזו כבר ב-0. לכן ההיסט חייב להיות קשור לפתיחת-הכריכה ולא
+    // להגעה. (באג שנתפס בבדיקה חזותית: כשהוא היה קשור להגעה, הספר עמד סגור
+    // ומוסט הצידה למשך 130ms.)
+    book.position.x = lerp(0.5, 0, openCover);
 
     // התנוחה שהתקבלה נשמרת לשכבת-החיים.
     pose.distNow = dist;
