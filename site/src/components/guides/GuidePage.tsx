@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpLeft, Info } from "lucide-react";
 
 import { guidesUi, type Guide } from "@/content/guides";
 import { cn } from "@/lib/utils";
+import { pillarForStage } from "@/lib/pillar";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
@@ -11,6 +12,7 @@ import { SignatureMark } from "@/components/shared/SignatureMark";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { ArticleSchema } from "@/components/schema/ArticleSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
+import { PillarFaq } from "@/components/pillar/PillarFaq";
 
 /**
  * רכיב משותף למאמרי המדריך (אשכול „לפני קשר”). מרנדר מאמר מלא בשפה החזותית
@@ -47,6 +49,7 @@ export function GuidePage({
         description={guide.metaDescription}
         path={guide.path}
         datePublished={guide.datePublished}
+        dateModified={guide.dateModified}
       />
       <BreadcrumbSchema
         items={[
@@ -91,6 +94,19 @@ export function GuidePage({
         </h1>
         <p className="mt-6 text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-foreground-muted">
           {guide.lead}
+        </p>
+        {/* ייחוס נראה. עד כה המחבר הופיע במדריכים רק בסכימה, כלומר היה קיים
+            למנוע החיפוש ולא לקורא. שורה אחת, בלי תארים שאין, בדיוק כמו
+            בעמודי-האב. */}
+        <p className="mt-5 text-[14px] text-foreground-muted">
+          {guidesUi.byline.prefix}{" "}
+          <Link
+            href={guidesUi.byline.href}
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            {guidesUi.byline.name}
+          </Link>
+          , {guidesUi.byline.role}
         </p>
       </header>
 
@@ -253,6 +269,13 @@ export function GuidePage({
         </section>
       </article>
 
+      {/* שאלות שחוזרות — רק במדריכים שבהם באמת יש שאלות-המשך */}
+      {guide.faq ? (
+        <div className="reveal mx-auto mt-16 max-w-[64ch]">
+          <PillarFaq title={guide.faq.title} items={guide.faq.items} />
+        </div>
+      ) : null}
+
       {/* מאמרים קרובים באשכול + עמוד-האם */}
       <section
         aria-labelledby="guide-related-heading"
@@ -351,14 +374,18 @@ export function GuidePage({
           </Link>
         </div>
 
-        {/* קישור אל מרכז-האשכול הרוחבי „אהבה” — התמונה המושגית הרחבה שמעל המדריך. */}
+        {/* קישור אל עמוד-האב הרוחבי — התמונה המושגית שמעל המדריך. *לא* תמיד
+            /love: הוא נגזר מהשלב שהמדריך יושב בו (ראו `lib/pillar.ts`), כך
+            שמדריך על דייט ראשון מפנה אל „דייטים” ומדריך על ריבים חוזרים אל
+            „אהבה”. קודם כולם הפנו אל /love, ו-/dating נשאר כמעט בלי קישורים
+            נכנסים בתוך האתר של עצמו. */}
         <div className="mt-3">
           <Link
-            href="/love"
+            href={pillarForStage(guide.hub.href).href}
             className="inline-flex items-center gap-2 text-[15px] font-medium text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            התמונה הרחבה: מהי אהבה ואיך היא נבנית
+            {pillarForStage(guide.hub.href).label}
           </Link>
         </div>
       </section>

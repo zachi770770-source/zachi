@@ -30,11 +30,18 @@ export function BookSchema() {
         //  • בחירת בן/בת זוג — /guide/choosing-a-partner
         //  • בניית קשר זוגי — tagline/description („אהבה נבנית”), /guide/healthy-relationship
         //  • תקשורת בזוגיות — /guide/couple-communication
+        //  • אהבה — /love (עמוד-אב שלם), וגם שם הספר עצמו
+        //  • זוגיות — /inside-relationship, /guide/keeping-connection-alive
+        // „אהבה” ו„זוגיות” נוספו כי הם שני הדברים שהספר עוסק בהם במפורש —
+        // הוא קרוי „מדייטים לאהבה” ויש לו עמוד-אב שלם על כל אחד מהם — ובכל
+        // זאת נעדרו מהרשימה. זו השלמה של תיאור אמיתי, לא הרחבת מילות-מפתח.
         about: [
           { "@type": "Thing", name: "דייטינג" },
           { "@type": "Thing", name: "בחירת בן/בת זוג" },
           { "@type": "Thing", name: "בניית קשר זוגי" },
           { "@type": "Thing", name: "תקשורת בזוגיות" },
+          { "@type": "Thing", name: "אהבה" },
+          { "@type": "Thing", name: "זוגיות" },
         ],
         inLanguage: "he",
         bookFormat: "https://schema.org/EBook",

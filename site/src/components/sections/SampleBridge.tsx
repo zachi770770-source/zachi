@@ -24,9 +24,18 @@ export function SampleBridge() {
       aria-label="טעימה מהספר"
     >
       <Container>
-        <div className="sample-bridge__inner">
-          <p className="sample-bridge__line">{sampleReader.principle.emphasis}</p>
-          <BookLink href="/preview" className="sample-bridge__cta">
+        {/* הגשר היה המקטע היחיד בעמוד בלי שום תנועת-כניסה (נמדד: opacity=1
+            תמיד). כגשר הוא לא אמור „להופיע” — הוא אמור *להימשך*: שני הקווים
+            האופקיים נפתחים מהמרכז החוצה, ורק אחריהם השורה והפעולה. */}
+        <div className="sample-bridge__inner reveal" data-stagger-group>
+          <p className="sample-bridge__line" style={{ ["--i" as string]: "0" }}>
+            {sampleReader.principle.emphasis}
+          </p>
+          <BookLink
+            href="/preview"
+            className="sample-bridge__cta"
+            style={{ ["--i" as string]: "1" }}
+          >
             {sampleCtaLabel()}
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           </BookLink>

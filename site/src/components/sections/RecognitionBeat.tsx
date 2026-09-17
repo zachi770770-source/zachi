@@ -54,16 +54,25 @@ export function RecognitionBeat() {
           </figcaption>
         </figure>
 
-        {/* המסלול השקט אל עמוד-הסמכות „אהבה” — נשמר, בהקשר שבו הוא הגיוני
-            (אחרי הרעיון), ולא כשורה יתומה בתחתית העמוד. */}
+        {/* המסלול השקט אל שני עמודי-האב — בהקשר שבו הוא הגיוני (מיד אחרי
+            הרעיון), ולא כשורה יתומה בתחתית העמוד. הסדר הוא סדר המסע: הדייטים
+            פותחים, האהבה סוגרת. */}
         <p className="recog__love mx-auto mt-8 max-w-2xl text-center text-[14px] leading-relaxed text-foreground-muted">
-          {recognition.loveLinkPrompt}{" "}
+          {recognition.pillarsPrompt}{" "}
+          <Link
+            href="/dating"
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            {recognition.datingLinkLabel}
+          </Link>
+          ,{" ו"}
           <Link
             href="/love"
             className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             {recognition.loveLinkLabel}
           </Link>
+          .
         </p>
       </Container>
     </section>

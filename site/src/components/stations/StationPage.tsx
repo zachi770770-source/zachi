@@ -7,6 +7,7 @@ import {
   stationsUi,
   type Station,
 } from "@/content/stations";
+import { pillarForStage } from "@/lib/pillar";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { AskBookLink } from "@/components/journey/AskBookLink";
@@ -42,6 +43,8 @@ export function StationPage({ station }: { station: Station }) {
   const relatedTitle = station.relatedTitle ?? stationsUi.otherStationsTitle;
   // איור מאושר לתחנה — רק כשההתאמה הסמנטית נקייה.
   const illustration = stationPageIllustration[station.id];
+  // עמוד-האב הרוחבי שמתאים לשלב הזה (דייטים מול אהבה).
+  const pillar = pillarForStage(station.id);
 
   return (
     <Container className="pt-7 pb-10 sm:pt-8 sm:pb-14 lg:pt-10 lg:pb-16">
@@ -84,13 +87,15 @@ export function StationPage({ station }: { station: Station }) {
         <p className="mt-6 text-[clamp(1.1rem,1.6vw,1.35rem)] leading-relaxed text-foreground-muted">
           {station.lead}
         </p>
-        {/* קישור-הקשר אל מרכז-האשכול „אהבה” — התחנה היא שלב בתוך התמונה הרחבה. */}
+        {/* קישור-הקשר אל עמוד-האב הרוחבי — התחנה היא שלב בתוך התמונה הרחבה,
+            ולכן היעד נגזר מהשלב עצמו ולא קבוע: „לפני קשר” ו„מתחילים מחדש”
+            מפנים אל „דייטים”, השאר אל „אהבה”. ראו `lib/pillar.ts`. */}
         <p className="mt-4 text-[15px] leading-relaxed text-foreground-muted">
           <Link
-            href="/love"
+            href={pillar.href}
             className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
-            לבנות אהבה: איך אהבה נבנית לאורך המסלול
+            {pillar.label}
           </Link>
         </p>
         {/* מחוון מסע מרוסן — התחנה הנוכחית מתוך שלוש. דקורטיבי, לתחנות המרכזיות

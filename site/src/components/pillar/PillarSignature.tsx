@@ -1,0 +1,225 @@
+import { cn } from "@/lib/utils";
+
+/**
+ * החתימה הוויזואלית של עמודי-האב: שני קווים שנעים זה אל זה.
+ *
+ * ── למה דווקא זה ─────────────────────────────────────────────────────────
+ * כל האתר עומד על משפט אחד: „דייטינג הוא חיפוש. אהבה היא בנייה.” שני קווים
+ * שמתקרבים הם הצורה המינימלית של המשפט הזה. הם אינם איור ואינם קישוט: הם
+ * *התוכן*, מצויר. וזה גם מה שמבדיל בין שני העמודים בלי לשנות מותג:
+ *
+ *   • `"converging"` (/dating, ראש העמוד) — הקווים מתקרבים לאורך כל הרוחב
+ *     ונשארים במרחק. לא נפגשו עדיין. זה בדיוק השלב שהעמוד מתאר.
+ *   • `"approaching"` (/dating, אמצע העמוד) — אותם קווים, קרובים הרבה יותר.
+ *     44 יחידות בקצה אחד, שש בקצה השני. עדיין לא נגעו.
+ *   • `"merged"` (/love, ראש וסיום) — הקווים נפגשים בנקודה, וממנה ממשיכים
+ *     כקו אחד. הנקודה היא המפגש, וההמשך הוא הבנייה שאחריו.
+ *   • `"continuing"` (/love, אמצע העמוד) — המפגש כבר מאחור: שני קטעים קצרים
+ *     בקצה, נקודה, ומשם קו אחד ארוך. מה שממשיך הוא כבר דבר אחד.
+ *
+ * ── שלושה מצבים לאורך עמוד, לא סמל שחוזר ─────────────────────────────────
+ * החתימה מופיעה שלוש פעמים בכל עמוד-אב, ובכל פעם במצב אחר, לפי המקום שאליו
+ * הקורא הגיע: בראש, בבלוק הכהה שבאמצע, ובסיום. ב-/dating זו התקדמות אמיתית
+ * (רחוק → כמעט → נפגשו), וב-/love זו יציבות (נפגשו → ממשיכים → נפגשו). אותו
+ * DNA, שני מצבים רגשיים. זו הסיבה שהיא אינה קישוט: היא אומרת איפה אנחנו.
+ *
+ * ── הנקודה כמוטיב חוזר ───────────────────────────────────────────────────
+ * העיגול הקטן בקצה קו הוא ה-DNA שחוזר בעמוד: כאן במפגש, בסמן של כל מקטע
+ * ב-/love, אחרי המספר ב-/dating, ומעל ציטוט-הסיום. תמיד אותה משמעות — נקודה
+ * שבה משהו נפגש או מתחיל. לכן הוא אינו קישוט גם כשהוא זעיר.
+ *
+ * ── מימוש ────────────────────────────────────────────────────────────────
+ * SVG מוטבע, ללא JS, ללא אנימציה, ללא נכס חיצוני. `width`/`height` מפורשים
+ * יחד עם `viewBox` נותנים יחס-צדדים אינטרינזי, ולכן הדפדפן מקצה את המקום עוד
+ * לפני הצביעה ואין CLS. הקומפוזיציה מתקדמת מימין לשמאל, ככיוון הקריאה.
+ * מסומן דקורטיבי — המשמעות נמסרת בטקסט שסביבו.
+ *
+ * ── עובי הקו ─────────────────────────────────────────────────────────────
+ * 2.1 ולא 1.5. בעובי הקודם החתימה הייתה נכונה אבל כמעט בלתי-נראית במבט
+ * ראשון, ומוטיב שלא נקלט אינו מוטיב. זה עדיין קו דק — לא איור — אבל עכשיו
+ * הוא הדבר שרואים אחרי הכותרת.
+ */
+export function PillarSignature({
+  variant,
+  tone = "ink",
+  className,
+}: {
+  variant: "converging" | "approaching" | "merged" | "continuing";
+  /**
+   * `"inverse"` — על משטח פטרול. הירוק מתחלף מ-`sage-ink` (שנועד לשנהב) ל-
+   * `sage` הבהיר, שעומד על 6.14:1 מול פטרול. הטרקוטה נשארת: 3.45:1 עוברים
+   * את סף הגרפיקה (3:1), וזה כל מה שהיא כאן.
+   */
+  tone?: "ink" | "inverse";
+  className?: string;
+}) {
+  const green = tone === "inverse" ? "text-[color:var(--color-sage)]" : "text-[color:var(--color-sage-ink)]";
+  return (
+    <svg
+      viewBox="0 0 420 88"
+      width={420}
+      height={88}
+      role="presentation"
+      aria-hidden="true"
+      focusable="false"
+      fill="none"
+      className={cn("h-auto w-full", className)}
+    >
+      {variant === "merged" || variant === "continuing" ? (
+        <>
+          {/* `merged` — המפגש באמצע. `continuing` — המפגש כבר מאחור, קרוב
+              לקצה, וההמשך הוא רובו של הקו. אותה צורה, שני רגעים בזמן. */}
+          <path
+            d={variant === "continuing" ? "M414 26 C 372 26, 336 44, 296 44" : "M414 14 C 330 14, 268 44, 206 44"}
+            className="text-brand"
+            stroke="currentColor"
+            strokeWidth={2.1}
+            strokeLinecap="round"
+          />
+          <path
+            d={variant === "continuing" ? "M414 62 C 372 62, 336 44, 296 44" : "M414 74 C 330 74, 268 44, 206 44"}
+            className={green}
+            stroke="currentColor"
+            strokeWidth={2.1}
+            strokeLinecap="round"
+          />
+          {/* ומכאן ממשיכים כקו אחד */}
+          <path
+            d={variant === "continuing" ? "M296 44 L 16 44" : "M206 44 L 16 44"}
+            className={green}
+            stroke="currentColor"
+            strokeWidth={2.1}
+            strokeLinecap="round"
+          />
+          <circle
+            cx={variant === "continuing" ? 296 : 206}
+            cy={44}
+            r={5}
+            className="text-brand"
+            fill="currentColor"
+          />
+        </>
+      ) : (
+        <>
+          {/* מתקרבים לאורך כל הרוחב, ונשארים במרחק. `approaching` הוא אותו
+              מהלך בשלב מאוחר יותר: 44 יחידות בקצה אחד, שש בקצה השני. */}
+          <path
+            d={variant === "approaching" ? "M414 22 C 300 22, 210 38, 16 41" : "M414 8 C 300 8, 208 30, 16 37"}
+            className="text-brand"
+            stroke="currentColor"
+            strokeWidth={2.1}
+            strokeLinecap="round"
+          />
+          <path
+            d={variant === "approaching" ? "M414 66 C 300 66, 210 50, 16 47" : "M414 80 C 300 80, 208 58, 16 53"}
+            className={green}
+            stroke="currentColor"
+            strokeWidth={2.1}
+            strokeLinecap="round"
+          />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/**
+ * המוטיב הזעיר: קו קצר שמסתיים בנקודה.
+ *
+ * אותה אמירה של החתימה הגדולה, בגודל של תווית. משמש כסמן-מקטע וכפתיחה
+ * לציטוט-הסיום. ב-RTL הקו נמתח ימינה והנקודה יושבת בקצהו השמאלי, כלומר
+ * בכיוון שאליו הקריאה ממשיכה.
+ *
+ * המידות כאן אינן שרירותיות: 56px קו ו-7px נקודה. בגרסה הקודמת (36px ו-5px,
+ * בקו שקוף למחצה) המוטיב היה נוכח בקוד אך לא בעין — הוא נקרא כרווח לפני
+ * הכותרת ולא כסימן. עכשיו הוא נקלט במבט אחד, ועדיין קטן בהרבה מכל אלמנט
+ * טיפוגרפי שלידו.
+ *
+ * `tone="inverse"` הוא אותו סימן על משטח פטרול. הטרקוטה על פטרול עומדת על
+ * 3.45:1 — מספיק לגרפיקה (3:1) ולא מספיק לטקסט, ולכן הצבע הזה משמש שם רק
+ * לסימן עצמו והטקסט נשאר שנהב.
+ */
+export function SignatureMarkRule({
+  className,
+  align = "start",
+  tone = "ink",
+}: {
+  className?: string;
+  align?: "start" | "center";
+  tone?: "ink" | "inverse";
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "flex items-center gap-2",
+        align === "center" && "justify-center",
+        className,
+      )}
+    >
+      <span
+        className={cn(
+          "h-[1.5px] w-14",
+          tone === "inverse" ? "bg-brand/85" : "bg-brand",
+        )}
+      />
+      <span className="h-[7px] w-[7px] rounded-full bg-brand" />
+    </span>
+  );
+}
+
+/**
+ * „החצייה” — החתימה בקנה-מידה של קומפוזיציה, לא של סימן.
+ *
+ * זו אותה שפה של שני מסלולים, אבל כאן היא אינה אובייקט שמונח ליד הטקסט: היא
+ * חוצה את ההירו לרוחבו ומפרידה בין זוג הכותרת-והפתיח שמעליה לבין גוף-הפתיחה
+ * שמתחתיה. אם מוציאים אותה, הקומפוזיציה מתפרקת — וזה ההבדל בין מוטיב מותג
+ * שמונח על העמוד לבין מוטיב שנושא אותו.
+ *
+ *   • `"apart"` (/dating) — שני מסלולים חוצים את מלוא הרוחב ונגמרים בשתי
+ *     נקודות נפרדות. לא נגעו. חיפוש שעוד נמשך.
+ *   • `"joined"` (/love) — הם נפגשים בנקודה ליד קצה-הקריאה וממשיכים כקו אחד
+ *     לאורך כל הרוחב. המפגש כבר קרה; מה שנמשך הוא אחד.
+ *
+ * `preserveAspectRatio="none"` מותר כאן משום שהצורה היא קו כמעט-אופקי: מתיחה
+ * אופקית אינה מעוותת אותה, והיא נשארת חדה בכל רוחב. הגובה קבוע (54), ולכן
+ * המקום מוקצה מראש ואין CLS.
+ */
+export function CrossingRule({
+  variant,
+  className,
+}: {
+  variant: "apart" | "joined";
+  className?: string;
+}) {
+  const S = { stroke: "currentColor", fill: "none", strokeLinecap: "round" as const };
+  return (
+    <svg
+      viewBox="0 0 1000 54"
+      width={1000}
+      height={54}
+      preserveAspectRatio="none"
+      role="presentation"
+      aria-hidden="true"
+      focusable="false"
+      fill="none"
+      className={cn("block h-[54px] w-full", className)}
+    >
+      {variant === "joined" ? (
+        <>
+          <path d="M988 10 C 900 10, 872 27, 828 27" {...S} strokeWidth={1.5} className="text-brand" />
+          <path d="M988 44 C 900 44, 872 27, 828 27" {...S} strokeWidth={1.5} className="text-[color:var(--color-sage-ink)]" />
+          <path d="M828 27 L 12 27" {...S} strokeWidth={1.8} className="text-[color:var(--color-sage-ink)]" />
+          <circle cx={828} cy={27} r={4} className="text-brand" fill="currentColor" />
+        </>
+      ) : (
+        <>
+          <path d="M988 8 C 700 8, 380 19, 12 24" {...S} strokeWidth={1.5} className="text-brand" />
+          <path d="M988 46 C 700 46, 380 35, 12 31" {...S} strokeWidth={1.5} className="text-[color:var(--color-sage-ink)]" />
+          <circle cx={988} cy={8} r={3.4} className="text-brand" fill="currentColor" />
+          <circle cx={988} cy={46} r={3.4} className="text-[color:var(--color-sage-ink)]" fill="currentColor" />
+        </>
+      )}
+    </svg>
+  );
+}

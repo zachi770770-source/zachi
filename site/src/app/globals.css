@@ -505,6 +505,24 @@
     text-wrap: balance;
   }
 
+  /* כותרת-מקטע בעמודי-האב (/love, /dating).
+   *
+   * למה דרגה חדשה ולא .type-h2: ב-.type-h2 הכותרת מגיעה ל-64px, וזה נכון
+   * לכותרת אחת בעמוד. בעמוד-אב יש תשעה מקטעים, וכשכולם ב-64px הכותרות מפסיקות
+   * להיות היררכיה והופכות לקצב אחד חוזר — בדיוק התחושה של „מאמר ארוך מאוד”.
+   * כאן הן יורדות לדרגה עריכתית (27px → 39px), וכך נפתח מרווח אמיתי בין ה-H1
+   * (54–58px) לבין הכותרות שמתחתיו, והעין מקבלת סולם ולא רצף.
+   *
+   * ‎line-height‎ מעט רפוי יותר מ-.type-h2 כי כותרות המקטעים כאן הן משפטים
+   * שלמים בעברית, לא שתיים-שלוש מילים. */
+  .type-section {
+    font-weight: 700;
+    font-size: clamp(1.7rem, 2.8vw, 2.45rem); /* 27.2px → 39.2px */
+    line-height: 1.16;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
   /* מערכת ה-Hero המאוחדת. אותה משפחה של ה-JourneyPage (font-serif נשאר על
      האלמנט; כאן רק סקאלה, משקל, leading ואיזון). שתי דרגות באותה מערכת:
      .type-hero      — עמודי-תוכן (method/guide/faq/compass/author), ~54px.
@@ -516,6 +534,34 @@
     letter-spacing: -0.01em;
     text-wrap: balance;
   }
+  /* ── כותרות עמודי-האב ────────────────────────────────────────────────
+   * שתי דרגות בסריף (Frank Ruhl Libre), לא ב-Heebo. זה התיקון המהותי:
+   * `--font-quote` מצביע על `--font-body`, ולכן כל כותרת באתר נקבעה עד כה
+   * בסאנס במשקל 700 — וזה מקור התחושה ה„בלוקית”. כאן הכותרת חוזרת לסריף,
+   * במשקל 400/500 ובגודל קטן ב-9px מהקודם, ומקבלת סמכות מהצורה ולא מהמסה.
+   *
+   *   settled (/love)  — 400, גובה-שורה נדיב. שקט, מיושב.
+   *   seeking (/dating) — 500, גובה-שורה הדוק. מכוון, בתנועה.
+   *
+   * `text-wrap: balance` מונע שורה יתומה בת מילה אחת בכותרת דו/תלת-שורתית. */
+  .type-pillar-h1-settled,
+  .type-pillar-h1-seeking {
+    letter-spacing: -0.004em;
+    text-wrap: balance;
+  }
+  .type-pillar-h1-settled {
+    font-weight: 400;
+    font-size: clamp(2rem, 3.6vw, 2.85rem); /* 32px → 45.6px */
+    line-height: 1.24;
+    max-inline-size: 15ch;
+  }
+  .type-pillar-h1-seeking {
+    font-weight: 500;
+    font-size: clamp(2.1rem, 3.8vw, 3rem); /* 33.6px → 48px */
+    line-height: 1.16;
+    max-inline-size: 16ch;
+  }
+
   .type-hero-lg {
     font-weight: 700;
     font-size: clamp(2.1rem, 4.6vw, 3.6rem); /* 33.6px → 57.6px, כמו JourneyPage */
@@ -643,6 +689,61 @@
   .motion-js .reveal[data-stagger] {
     transition-delay: calc(var(--i, 0) * var(--reveal-stagger));
   }
+
+  /* ── וריאנטים של חשיפה ───────────────────────────────────────────────────
+     עד כאן לכל מקטע בעמוד הייתה *אותה* חשיפה בדיוק: fade-up של 16px. זה
+     אחיד, אבל זה גם אומר שגלילה לאורך העמוד היא שבע פעמים אותו אפקט — ואז
+     התנועה מפסיקה לומר משהו. הווריאנטים כאן הם אוצר-מילים אחד ומשותף, לא
+     אוסף אפקטים: אותם טוקנים, אותו easing, רק *אופי* שונה לפי תפקיד המקטע.
+
+       data-reveal="soft"  — רק opacity, בלי תזוזה. לרגעים שקטים (גשר, דלת)
+                             ולטקסט ארוך שלא אמור „לזוז” מתחת לעין.
+       data-reveal="lift"  — תזוזה גדולה מעט יותר + התיישבות. לרגעים שהם
+                             אובייקט (דיוקן, כריכה).
+       data-reveal="side"  — כניסה מכיוון תחילת-השורה (RTL: מימין). לשימוש
+                             נקודתי בלבד, כשהתנועה מלווה קריאה.
+     ברירת-המחדל (בלי data-reveal) נשארת בדיוק כפי שהייתה. */
+  .motion-js .reveal[data-reveal="soft"] {
+    transform: none;
+  }
+  .motion-js .reveal[data-reveal="lift"] {
+    --reveal-dist: 22px;
+    --reveal-dur: var(--dur-physical);
+    transform: translateY(var(--reveal-dist)) scale(0.985);
+    transition-timing-function: var(--ease-settle);
+  }
+  .motion-js .reveal[data-reveal="lift"].is-visible {
+    transform: none;
+  }
+  .motion-js .reveal[data-reveal="side"] {
+    transform: translate3d(var(--reveal-side, 18px), 0, 0);
+  }
+  .motion-js .reveal[data-reveal="side"].is-visible {
+    transform: none;
+  }
+
+  /* ── קבוצת-סטגר ──────────────────────────────────────────────────────────
+     `data-stagger-group` על ההורה: הילדים נחשפים יחד איתו, בזה-אחר-זה, בלי
+     שכל ילד יצטרך `.reveal` משלו ו-IntersectionObserver משלו. הילד מקבל
+     `--i` ב-JSX. זה המנגנון שמחליף את הסטגר שאבד כשכרטיסי-המצב הפכו לשורות. */
+  /* `data-stagger-group="nested"` — כשהפריטים אינם ילדים ישירים אלא נכדים
+     (רשימה בתוך שורה). אותו חוזה בדיוק, רמה אחת עמוק יותר. */
+  .motion-js [data-stagger-group]:not([data-stagger-group="nested"]) > *,
+  .motion-js [data-stagger-group="nested"] > * > * {
+    opacity: 0;
+    transform: translateY(var(--stagger-dist, 14px));
+    transition:
+      opacity var(--dur-editorial) var(--ease-settle),
+      transform var(--dur-editorial) var(--ease-settle);
+    transition-delay: calc(var(--stagger-base, 60ms) + var(--i, 0) * var(--stagger-step, 90ms));
+    will-change: opacity, transform;
+  }
+  .motion-js [data-stagger-group]:not([data-stagger-group="nested"]).is-visible > *,
+  .motion-js [data-stagger-group="nested"].is-visible > * > * {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
   /* מובייל: תנועה וסטגר מופחתים — תחושת מהירות, בלי לעכב תוכן. */
   @media (max-width: 640px) {
     /* מובייל: אותה חשיפה, מרוסנת יותר. הערכים כאן נשארים ספרותיים בכוונה —
@@ -652,6 +753,23 @@
       --reveal-dur: 460ms;
       --reveal-dist: 12px;
       --reveal-stagger: 55ms;
+    }
+    /* אותה הפחתה חלה על הווריאנטים ועל קבוצות-הסטגר: משרעת קטנה יותר וקצב
+       מהיר יותר. במסך צר תזוזה של 22px היא כבר „קפיצה”, ו-90ms בין פריטים
+       הופכים חמש שורות לתור-המתנה. */
+    .motion-js .reveal[data-reveal="lift"] {
+      --reveal-dist: 14px;
+      --reveal-dur: 620ms;
+    }
+    .motion-js .reveal[data-reveal="side"] {
+      --reveal-side: 12px;
+    }
+    .motion-js [data-stagger-group]:not([data-stagger-group="nested"]) > *,
+    .motion-js [data-stagger-group="nested"] > * > * {
+      --stagger-dist: 10px;
+      --stagger-step: 60ms;
+      --stagger-base: 40ms;
+      transition-duration: 460ms;
     }
   }
   /* אין כאן „גיבוי-על” מבוסס-זמן: אנימציית reveal-failsafe שחשפה כל .reveal
@@ -2657,6 +2775,21 @@
   .reveal {
     opacity: 1 !important;
     transform: none !important;
+  }
+  /* אותה ערובה לכל מה שנוסף בסבב-התנועה: ילדי קבוצות-סטגר, שני חלקי
+     רגע-המחבר וקווי-הגשר. הכללים עצמם מגודרים ב-`.motion-js` (שאינו מתווסף
+     כלל תחת תנועה-מופחתת), וזו שכבת-ביטחון למקרה שההעדפה משתנה באמצע
+     הפעלה — התוכן חייב להיות גלוי, תמיד. */
+  [data-stagger-group] > *,
+  [data-stagger-group] > * > *,
+  .author-note__portrait,
+  .author-note__text {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .sample-bridge__inner::before,
+  .sample-bridge__inner::after {
+    transform: scaleX(1) !important;
   }
   /* כניסת ה-Hero (PHASE MOTION 2) — מצב סופי מיידי, ללא תנועה. */
   .hero-line__in,
@@ -4715,11 +4848,73 @@ html.vt-book-nav::view-transition-group(book-cover) {
     aspect-ratio: 8 / 5.7; /* ‎+14% נוכחות */
   }
 }
-.hero-bookgl[data-active="true"] {
+/* כניסת ספר-ה-WebGL.
+   קודם זה היה מתג `display` בלבד: ברגע ש-Three.js סיים לאתחל, הקנבס פשוט
+   *הופיע* — בלי כניסה, באמצע כוריאוגרפיה שכל שאר ה-Hero משתתף בה. בדסקטופ
+   זהו המסלול הראשי (כריכת-ה-CSS מוסתרת אז), ולכן האובייקט החשוב בעמוד היה
+   היחיד שנכנס בקפיצה.
+   כאן הוא מקבל את אותה כניסה בדיוק שיש ל-fallback: עלייה עדינה + scale,
+   במשך `--dur-physical`, עם `--ease-settle`. ההשהיה קצרה יותר מזו של
+   ה-fallback כי ה-GL ממילא מוכן מאוחר יותר (טעינה עצלה + decode). */
+/* הקנבס נחשף ב-opacity בלבד. כל תזוזה עברה לסצנה עצמה: תנועת-CSS על המכל
+   ותנועת-מצלמה בתוכו הן שתי מערכות שמתחרות על אותו אובייקט, וזה בדיוק מה
+   שגורם לספר להיקרא כאלמנט-DOM שנכנס ולא כגוף פיזי שמגיע. */
+/* ── יציבות-פריסה: תיבה אחת לשני המסלולים ────────────────────────────────
+   הכריכה הסטטית (fallback) והקנבס תפסו גבהים שונים לגמרי — 788px מול 410px —
+   והחלפתם ב-`display` באמצע הטעינה הייתה קפיצת-פריסה של 0.12 (CLS כולל 0.127
+   בדסקטופ, מעל סף ה„טוב”). תפיסת-התיבה בהידרציה רק הקדימה את הקפיצה ל-391ms;
+   מה שבאמת פותר הוא ששתי החלופות יתפסו *אותה* תיבה.
+
+   הגובה נגזר מהקנבס (‎36rem / (8/5.7) = 25.65rem‎) — כלומר גודל ספר-ה-GL
+   המאושר אינו משתנה כלל. הכריכה הסטטית מתכווצת כדי להיכנס לתיבה הזו; זהו
+   המסלול של „ללא WebGL / תנועה-מופחתת”, והוא מציג עכשיו כריכה קטנה יותר
+   באותן פרופורציות. זו הפשרה המודעת: אפס קפיצה, במחיר כריכת-fallback קטנה
+   יותר — ולא במחיר שינוי הספר שאושר. */
+@media (min-width: 641px) {
+  /* הגובה נקבע על התיבה, ו*נמסר* עד ה-<img> עצמו: הגבלת המעטפת בלבד השאירה
+     את התמונה בגובהה המלא (נמדד: מעטפת 526×410, תמונה 522×808 — גלישה של
+     400px החוצה). לכן השרשרת כולה מקבלת גובה, והתמונה שומרת על יחסיה. */
+  /* מגבילים את *רוחב* המעטפת ולא את גובה התמונה. הגבלת התמונה לבדה הותירה
+     את שאר שכבות-הכריכה (‎.book-cover__pages‎ — פאת-הדפים הדקורטיבית) ברוחב
+     המקורי, והן התנתקו מהכריכה ונראו כפס מרחף לצדה. רוחב = גובה-התיבה כפול
+     יחס-הכריכה (0.667) ⇒ כל השכבות מתכווצות יחד ושומרות על ההרכבה. */
+  .sig-hero__cover {
+    max-width: calc(var(--hero-book-h) * 0.667);
+  }
+}
+@media (min-width: 1024px) {
+  .sig-hero__object {
+    --hero-book-h: 25.65rem; /* = 36rem ÷ (8/5.7) — בדיוק גובה הקנבס */
+  }
+}
+@media (min-width: 641px) and (max-width: 1023px) {
+  .sig-hero__object {
+    --hero-book-h: 24.75rem; /* = 36rem ÷ (8/5.5) */
+  }
+}
+
+/* תופסים את התיבה ברגע שידוע שה-GL ירוץ — עוד לפני שהסצנה מוכנה. בלי זה
+   הכריכה הסטטית (788px) והקנבס (410px) מתחלפים ב-`display` באמצע הטעינה,
+   וזו קפיצת-פריסה אמיתית (נמדד: 0.096 יחיד, CLS 0.127 בסך הכול). */
+/* שימו לב: `visibility: hidden` על המעטפת נבדק ונפסל — הוא מוציא גם את
+   *הקישור* מסדר-הטאב, ובחלון שבין תפיסת-התיבה להפעלת הסצנה לא היה שום קישור
+   ממוקד אל הספר (כריכת-ה-CSS כבר מוסתרת, והקנבס עוד לא). לכן מוסתר רק הקנבס
+   עצמו, וה-<a> שעוטף אותו נשאר נגיש מהרגע הראשון. */
+.hero-bookgl[data-reserve="true"] {
   display: block;
 }
-.sig-hero__object:has(.hero-bookgl[data-active="true"]) .sig-hero__cover {
+.hero-bookgl[data-reserve="true"] .hero-bookgl__canvas {
+  opacity: 0;
+}
+.sig-hero__object:has(.hero-bookgl[data-reserve="true"]) .sig-hero__cover {
   display: none;
+}
+.hero-bookgl[data-active="true"] .hero-bookgl__canvas {
+  opacity: 1;
+  animation: sig-fade-in 240ms var(--ease-standard) both;
+}
+.hero-bookgl[data-active="true"] {
+  display: block;
 }
 .hero-bookgl__link {
   position: absolute;
@@ -5013,8 +5208,12 @@ html.vt-book-nav::view-transition-group(book-cover) {
 .motion-js .sig-hero__glow {
   animation: sig-fade-in 1000ms var(--ease-standard) 240ms both;
 }
+/* הספר נכנס *אחרי* שהמסר נחת, לא לפניו. קודם הוא התחיל ב-220ms — כלומר
+   האובייקט עלה בזמן שהכותרת עוד לא התחילה (440ms), והעין נמשכה לפינה במקום
+   למשפט. עכשיו: eyebrow → מילות-הכותרת → „אהבה בונים” → הספר → CTA.
+   1050ms של תנועה פיזית מתחילים ב-760ms ונוחתים יחד עם קו-החתימה. */
 .motion-js .sig-hero__cover {
-  animation: sig-cover-rise 1050ms var(--ease-settle) 220ms both;
+  animation: sig-cover-rise 1050ms var(--ease-settle) 760ms both;
 }
 .motion-js .sig-hero__eyebrow {
   animation: sig-rise 700ms var(--ease-settle) 340ms both;
@@ -5571,7 +5770,10 @@ html.vt-book-nav::view-transition-group(book-cover) {
   transition:
     opacity 380ms var(--ease-settle),
     transform 380ms var(--ease-settle);
-  transition-delay: calc(var(--dur-editorial) + var(--i, 0) * var(--motion-stagger));
+  /* נמדד: השורה הראשונה התחילה רק ב-‎560ms‎ אחרי כניסת המקטע, והשלישית סיימה
+     סביב ‎1.6s‎ — כלומר הטענה נחתמה אחרי שהקורא כבר עבר הלאה. ‎460ms‎ מצמיד
+     את השורה הראשונה לציר שנמשך במקום לחכות שיסתיים. */
+  transition-delay: calc(460ms + var(--i, 0) * var(--motion-stagger));
 }
 .motion-js .s2p.is-visible .s2p__station {
   opacity: 1;
@@ -5581,14 +5783,17 @@ html.vt-book-nav::view-transition-group(book-cover) {
 .motion-js .s2p .s2p__node {
   transform: scale(0.4);
   transition: transform 380ms var(--ease-emphasized);
-  transition-delay: calc(var(--dur-editorial) + var(--i, 0) * var(--motion-stagger));
+  /* נמדד: השורה הראשונה התחילה רק ב-‎560ms‎ אחרי כניסת המקטע, והשלישית סיימה
+     סביב ‎1.6s‎ — כלומר הטענה נחתמה אחרי שהקורא כבר עבר הלאה. ‎460ms‎ מצמיד
+     את השורה הראשונה לציר שנמשך במקום לחכות שיסתיים. */
+  transition-delay: calc(460ms + var(--i, 0) * var(--motion-stagger));
 }
 .motion-js .s2p.is-visible .s2p__node {
   transform: none;
 }
 .motion-js .s2p .s2p__note {
   opacity: 0;
-  transition: opacity 260ms var(--ease-standard) 900ms;
+  transition: opacity 260ms var(--ease-standard) 800ms;
 }
 .motion-js .s2p.is-visible .s2p__note {
   opacity: 1;
@@ -6666,6 +6871,47 @@ html.vt-book-nav::view-transition-group(book-cover) {
   line-height: 1.5;
   color: var(--color-foreground-muted);
 }
+/* ── כניסת רגע-המחבר ──
+   שני חלקים ולא גוש אחד: הדיוקן נכנס כאובייקט (עלייה + scale עדין), והטקסט
+   אחריו. `--dur-physical` לדיוקן כי הוא הדבר הפיזי במקטע; הטקסט ב-editorial.
+   הכול opacity/transform, מגודר ב-.motion-js, ומתאפס תחת reduced-motion. */
+.motion-js .author-note .author-note__portrait,
+.motion-js .author-note .author-note__text {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.motion-js .author-note .author-note__portrait {
+  transform: translateY(18px) scale(0.97);
+  transition:
+    opacity var(--dur-physical) var(--ease-settle) 60ms,
+    transform var(--dur-physical) var(--ease-settle) 60ms;
+}
+.motion-js .author-note .author-note__text {
+  transform: translateY(14px);
+  transition:
+    opacity var(--dur-editorial) var(--ease-settle) 260ms,
+    transform var(--dur-editorial) var(--ease-settle) 260ms;
+}
+.motion-js .author-note.is-visible .author-note__portrait,
+.motion-js .author-note.is-visible .author-note__text {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+@media (max-width: 640px) {
+  /* במובייל הדיוקן הוא עיגול קטן בשורת-החתימה, ולכן אין טעם בכניסה „פיזית”
+     נפרדת — שני החלקים נכנסים כמעט יחד, בקצב מובייל. */
+  .motion-js .author-note .author-note__portrait {
+    transform: translateY(10px) scale(0.99);
+    transition-duration: 460ms;
+  }
+  .motion-js .author-note .author-note__text {
+    transform: translateY(10px);
+    transition-duration: 460ms;
+    transition-delay: 120ms;
+  }
+}
+
 @media (min-width: 768px) {
   .author-note {
     grid-template-columns: 220px minmax(0, 1fr);
@@ -6719,6 +6965,7 @@ html.vt-book-nav::view-transition-group(book-cover) {
    שורה אחת מהספר + קישור, בשורה אחת בדסקטופ. מחליף את בר-הטעימה הצף:
    אותה הזמנה, בתוך הזרימה, ובלי לכסות את ה-CTA הסוגר במובייל. */
 .sample-bridge__inner {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -6727,8 +6974,38 @@ html.vt-book-nav::view-transition-group(book-cover) {
   max-width: 62rem;
   margin-inline: auto;
   padding-block: 1.1rem;
-  border-block: 1px solid var(--color-border);
   text-align: center;
+}
+/* שני הקווים האופקיים של הגשר. הם היו `border-block` פשוט; כאן הם
+   pseudo-elements ממוקמים-מוחלט (ולכן אינם פריטי-flex ואינם משנים פריסה),
+   כדי שיוכלו *להימשך* מהמרכז החוצה כשהגשר נכנס לתצוגה. transform בלבד. */
+.sample-bridge__inner::before,
+.sample-bridge__inner::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 1px;
+  background: var(--color-border);
+  transform-origin: center;
+}
+.sample-bridge__inner::before {
+  inset-block-start: 0;
+}
+.sample-bridge__inner::after {
+  inset-block-end: 0;
+}
+.motion-js .sample-bridge__inner::before,
+.motion-js .sample-bridge__inner::after {
+  transform: scaleX(0);
+  transition: transform var(--dur-editorial) var(--ease-emphasized);
+}
+.motion-js .sample-bridge__inner.is-visible::before,
+.motion-js .sample-bridge__inner.is-visible::after {
+  transform: scaleX(1);
+}
+/* הקו התחתון נמשך מעט אחרי העליון — הגשר „נפרש” ולא נדלק בבת אחת. */
+.motion-js .sample-bridge__inner.is-visible::after {
+  transition-delay: 90ms;
 }
 .sample-bridge__line {
   font-family: var(--font-serif);
@@ -6862,3 +7139,74 @@ html.vt-book-nav::view-transition-group(book-cover) {
   font-weight: 600;
   color: var(--color-foreground);
 }
+
+/* ===================================================================
+ * מיקרו-אינטראקציות של עמוד הבית — שכבה אחת, לא אוסף מקרים
+ * ===================================================================
+ * נמדד לפני: על חלק מהקישורים בעמוד לא הייתה שום `transition` (הערך המחושב
+ * היה `all 0s`) — CTA משני ב-Hero, „ראו מה יש בספר”, „עוד על המחבר”, הדלת
+ * אל המצפן והקישור ב„רוצים להתחיל מהבסיס”. כלומר קו-תחתון וצבע נדלקו
+ * מיידית, בזמן שכפתורים מלאים באותו מסך עברו ב-220ms. אותה משפחה, שתי
+ * התנהגויות — וזה מה שגורם לאתר להרגיש „לא מלוטש”.
+ *
+ * כאן הם מקבלים את אותו סולם בדיוק: צבע ב---dur-micro, והחץ (אם יש) נע
+ * מרחק --motion-dist-sm לכיוון הקריאה. אין אפקט חדש, רק עקביות.
+ * הכול transform/color, ללא layout. */
+.sig-hero__cta-secondary,
+.deeper-entry__link,
+.author-note__link,
+.s2p__link,
+.sample-bridge__cta,
+.recog__love a,
+.sig-close__secondary-link {
+  transition:
+    color var(--dur-micro) var(--ease-standard),
+    background-color var(--dur-micro) var(--ease-standard),
+    border-color var(--dur-micro) var(--ease-standard),
+    opacity var(--dur-micro) var(--ease-standard);
+}
+/* החץ נע לכיוון הקריאה (RTL: שמאלה) בריחוף ובפוקוס — אותו מרחק לכל האתר. */
+.sig-hero__cta-secondary svg,
+.deeper-entry__link svg,
+.author-note__link svg,
+.sample-bridge__cta svg {
+  transition: transform var(--dur-micro) var(--ease-settle);
+}
+.sig-hero__cta-secondary:hover svg,
+.sig-hero__cta-secondary:focus-visible svg,
+.deeper-entry__link:hover svg,
+.deeper-entry__link:focus-visible svg,
+.author-note__link:hover svg,
+.author-note__link:focus-visible svg,
+.sample-bridge__cta:hover svg,
+.sample-bridge__cta:focus-visible svg {
+  transform: translateX(calc(-1 * var(--motion-dist-sm)));
+}
+
+/* משוב-לחיצה אחיד. קיים היה רק „הרמה” בריחוף (‎-2px‎) בלי שום תגובה ללחיצה
+   עצמה — ובמגע, שבו אין ריחוף כלל, זה אומר שלכפתור הראשי לא הייתה שום
+   תגובה פיזית. `:active` קצר ומדוד: שקיעה של 1px, בלי scale דרמטי. */
+.sig-hero__cta-primary:active,
+.sig-close__buy:active,
+.sample-bridge__cta:active,
+.situation-card:active {
+  transform: translateY(1px);
+  transition-duration: 90ms;
+}
+
+/* שורת-מצב: הריחוף היה רקע+גבול בלבד. תוספת של היסט זעיר לכיוון הקריאה
+   הופכת את השורה למשהו שאפשר „להיכנס אליו”, בלי כרום של כרטיס. */
+.situation-card {
+  transition:
+    background-color var(--dur-ui) var(--ease-standard),
+    border-color var(--dur-ui) var(--ease-standard),
+    transform var(--dur-ui) var(--ease-settle);
+}
+@media (hover: hover) {
+  .situation-card:hover {
+    transform: translateX(calc(-0.5 * var(--motion-dist-sm)));
+  }
+}
+
+/* תנועה-מופחתת: כל השכבה הזו מתבטלת יחד עם השאר דרך הבלוק הגלובלי של
+   prefers-reduced-motion (משך 0). אין כאן דבר שדורש חריג משלו. */

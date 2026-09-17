@@ -43,14 +43,28 @@ export function HeroBookGL({
       return;
     }
 
+    /**
+     * „ספר-ה-GL עומד לרוץ” — מסומן *מיד*, לפני טעינת הסצנה.
+     *
+     * למה: כריכת-ה-CSS (fallback) והקנבס תפסו גבהים שונים והתחלפו ב-`display`
+     * באמצע הטעינה. נמדד: קפיצת-פריסה של 0.096, ו-CLS כולל 0.127 בדסקטופ —
+     * מעל סף ה„טוב”. הבדיקות למעלה (תנועה-מופחתת + זמינות WebGL) סינכרוניות,
+     * ולכן אפשר לתפוס את התיבה כבר כאן.
+     *
+     * נכתב ישירות ל-DOM ולא דרך state: זהו סימון-תצוגה טהור שאינו משפיע על
+     * שום החלטת-רינדור, ו-setState סינכרוני בתוך effect גורר רינדור מדורג
+     * מיותר (וגם נחסם בכלל-הלינט של React).
+     */
+    wrap.dataset.reserve = "true";
+
     let controls: BookControls | null = null;
     let raf = 0;
     let ro: ResizeObserver | null = null;
     let cancelled = false;
     let start = 0;
+    let cleanupAmbient: (() => void) | null = null;
 
     const mobile = window.matchMedia("(max-width: 767px)").matches;
-    const DURATION = mobile ? 4300 : 5200;
 
     const run = async () => {
       const img = new Image();
@@ -69,15 +83,36 @@ export function HeroBookGL({
 
       const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
       controls = createBookScene(canvas, img, { dpr, mobile });
+      // אורך הרצף מגיע מהסצנה — מקור-אמת אחד. קודם הוא היה קבוע כאן, במקום
+      // שאינו יודע דבר על הכוריאוגרפיה עצמה.
+      const DURATION = controls.duration;
 
       const sizeToWrap = () => {
         const r = wrap.getBoundingClientRect();
         if (r.width > 0 && r.height > 0) controls?.resize(r.width, r.height);
       };
-      sizeToWrap();
 
+      // סדר קריטי: המכל מוסתר ב-`display:none` עד ש-`data-active` נקבע, ולכן
+      // מדידה *לפני* ההפעלה מחזירה 0×0 והסצנה נשארת על aspect=1 — הספר נמתח
+      // אופקית ביחס-הקנבס (1.4×) עד שה-ResizeObserver מדביק. נמדד בלכידת-
+      // פריימים, ובפרודקשן זה פריים ראשון שגוי. לכן: מפעילים, מודדים, ורק
+      // אז מרנדרים.
       setActive(true);
       onActive?.(true);
+      await new Promise<void>((r) => requestAnimationFrame(() => r()));
+      if (cancelled) return;
+      sizeToWrap();
+
+      // resize: render בודד (בלי להחיות מחדש את הרצף). מותקן *לפני* מסלול
+      // ה-QA, כדי ששינוי-גודל יתוקן גם שם.
+      ro = new ResizeObserver(() => {
+        const r = wrap.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          controls?.resize(r.width, r.height);
+          if (!raf) controls?.render();
+        }
+      });
+      ro.observe(wrap);
 
       // וו-בדיקה (QA): מאפשר לכוון progress דטרמיניסטית ללכידת פרימים. לא
       // מפעיל שום התנהגות בפרודקשן — נקרא רק אם נקבע לפני הטעינה.
@@ -87,6 +122,12 @@ export function HeroBookGL({
           controls?.setProgress(p);
           controls?.render();
         },
+        // וו-בדיקה לשכבת-החיים: מאפשר לצלם את מצב-המנוחה בזמן נתון במקום
+        // להמתין לשעון-הקיר, וכך להפיק תיעוד בקצב-אמת ודטרמיניסטי.
+        setAmbient: (sec: number, scrollP = 0) => {
+          controls?.setAmbient(sec, scrollP);
+          controls?.render();
+        },
       };
       if (manual) {
         controls.setProgress(0);
@@ -94,30 +135,89 @@ export function HeroBookGL({
         return;
       }
 
-      // רצף מונע-progress; נעצר בהתיישבות (idle).
+      // ── מצב-הסצנה: רצף → חיים ────────────────────────────────────────
+      // קודם הלולאה פשוט נעצרה בסוף הרצף, והספר הפך לתמונה קפואה. עכשיו היא
+      // עוברת למצב שני, מרוסן בהרבה: סחיפה של 0.35° ופרלקסת-גלילה של 1.7°,
+      // ב-30fps, ורק כשהספר באמת על המסך ובלשונית פעילה.
+      let intro = true;
+      let ambientT0 = 0;
+      let lastAmbient = 0;
+      let pausedAt = 0;
+      let pausedTotal = 0;
+      let onScreen = true;
+      let scrollP = 0;
+
+      const heroProgress = () => {
+        const hero = wrap.closest<HTMLElement>(".sig-hero") ?? wrap;
+        const r = hero.getBoundingClientRect();
+        const vh = window.innerHeight || 1;
+        // 0 בראש ה-Hero, 1 כשתחתיתו מגיעה לראש החלון.
+        return Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh * 0.2)));
+      };
+
       const tick = (now: number) => {
         if (cancelled || !controls) return;
         if (!start) start = now;
-        const p = Math.min((now - start) / DURATION, 1);
-        controls.setProgress(p);
-        controls.render();
-        if (p < 1) {
-          raf = requestAnimationFrame(tick);
-        } else {
-          raf = 0; // idle — אין יותר לולאה
+
+        if (intro) {
+          const p = Math.min((now - start) / DURATION, 1);
+          controls.setProgress(p);
+          controls.render();
+          if (p < 1) {
+            raf = requestAnimationFrame(tick);
+            return;
+          }
+          intro = false;
+          ambientT0 = now;
         }
+
+        // ‎30fps‎ בדסקטופ, ‎25fps‎ במובייל. הדפדוף המתמשך צריך קצב חלק — בקצב
+        // נמוך יותר הדף „קופץ” לאורך הקשת.
+        if (!onScreen) {
+          // מחוץ למסך או לשונית מוסתרת: לא מרנדרים, וגם *עוצרים את השעון*.
+          // בלי זה הדפים ממשיכים להתהפך בלי שאיש רואה, והמבקר חוזר אל אמצע
+          // תנועה שלא ראה את תחילתה.
+          if (!pausedAt) pausedAt = now;
+        } else {
+          if (pausedAt) {
+            pausedTotal += now - pausedAt;
+            pausedAt = 0;
+          }
+          if (now - lastAmbient >= (mobile ? 40 : 33)) {
+            lastAmbient = now;
+            controls.setAmbient((now - ambientT0 - pausedTotal) / 1000, scrollP);
+            controls.render();
+          }
+        }
+        raf = requestAnimationFrame(tick);
       };
       raf = requestAnimationFrame(tick);
 
-      // resize: render בודד (בלי להחיות מחדש את הרצף).
-      ro = new ResizeObserver(() => {
-        const r = wrap.getBoundingClientRect();
-        if (r.width > 0 && r.height > 0) {
-          controls?.resize(r.width, r.height);
-          if (!raf) controls?.render();
-        }
-      });
-      ro.observe(wrap);
+      const onScroll = () => {
+        scrollP = heroProgress();
+      };
+      const onVisibility = () => {
+        onScreen = !document.hidden && vis;
+      };
+      let vis = true;
+      const visIo = new IntersectionObserver(
+        (entries) => {
+          vis = entries.some((e) => e.isIntersecting);
+          onScreen = !document.hidden && vis;
+          // חזרה למסך אחרי הפסקה: מרנדרים פריים אחד כדי שלא יישאר פריים ישן.
+          if (onScreen && !intro) controls?.render();
+        },
+        { threshold: 0.01 }
+      );
+      visIo.observe(wrap);
+      window.addEventListener("scroll", onScroll, { passive: true });
+      document.addEventListener("visibilitychange", onVisibility);
+      cleanupAmbient = () => {
+        visIo.disconnect();
+        window.removeEventListener("scroll", onScroll);
+        document.removeEventListener("visibilitychange", onVisibility);
+      };
+
     };
 
     run();
@@ -126,6 +226,7 @@ export function HeroBookGL({
       cancelled = true;
       if (raf) cancelAnimationFrame(raf);
       ro?.disconnect();
+      cleanupAmbient?.();
       controls?.dispose();
       onActive?.(false);
     };
@@ -133,7 +234,11 @@ export function HeroBookGL({
   }, [coverSrc]);
 
   return (
-    <div ref={wrapRef} className="hero-bookgl" data-active={active ? "true" : undefined}>
+    <div
+      ref={wrapRef}
+      className="hero-bookgl"
+      data-active={active ? "true" : undefined}
+    >
       <Link
         href="/preview"
         aria-label={coverAlt}

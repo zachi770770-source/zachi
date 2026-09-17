@@ -51,9 +51,23 @@ export function MotionRoot() {
       });
     };
 
+    /**
+     * „כבר בתצוגה” — ולכן נחשף מיד, בלי אנימציה שאיש לא יראה.
+     *
+     * לסריקה הראשונה (בטעינה) יש סף מחמיר יותר: 85% מגובה-החלון. נמדד שבדסקטופ
+     * ביט-הזיהוי נחשף ב-`scrollY=0` כשראשו 36px *מתחת* לקיפול — הכוריאוגרפיה
+     * שלו רצה מחוץ למסך והמבקר גלל אל תוצאה סטטית. הסיבה: הסריקה הראשונה רצה
+     * לפני שהפריסה התייצבה (גופנים), וברגע ההוא ראשו כן היה מעל הקיפול.
+     *
+     * בסריקות שאחרי — כלומר בגלילה — הסף חוזר להיות מלא (`top < vh`). זה
+     * הכרחי: אלמנט שרק ראשו נכנס בשולי-המסך אינו מגיע לסף ה-IntersectionObserver
+     * (8% משטחו), ובסף מחמיר הוא היה נשאר ריק מול העין. הבדיקה שתפסה את זה
+     * סורקת עמוד הלוך-ושוב ודורשת שדבר הנראה על המסך לא יישאר בלתי-נראה.
+     */
+    let firstScan = true;
     const inOrAboveView = (el: Element) => {
       const vh = window.innerHeight || document.documentElement.clientHeight;
-      return el.getBoundingClientRect().top < vh;
+      return el.getBoundingClientRect().top < vh * (firstScan ? 0.85 : 1);
     };
 
     const process = (el: Element) => {
@@ -65,6 +79,7 @@ export function MotionRoot() {
     const scan = () => {
       document.querySelectorAll<HTMLElement>(".reveal:not(.is-visible)").forEach(process);
       if (buildIo) setupBuildText();
+      firstScan = false;
     };
 
     // גיבוי מגודר-מיקום: חושף אך ורק רכיבים ש*מצטלבים כרגע* עם אזור-הצפייה
@@ -126,6 +141,10 @@ export function MotionRoot() {
       // לתצוגה — מבטיח „הגיע לתצוגה ⇒ נראה” גם בקצוות שה-IO עלול לפספס.
       window.addEventListener("scroll", scheduleScan, { passive: true });
       window.addEventListener("resize", scheduleScan);
+      // הפריסה זזה אחרי הסריקה הראשונה (טעינת גופנים היא הגורם הנפוץ). סריקה
+      // חוזרת כשהם מוכנים מבטיחה ש„מה שבתצוגה” נמדד על הפריסה הסופית ולא על
+      // זו הזמנית. אינה חושפת דבר שמתחת לקיפול — אותו תנאי מיקום בדיוק.
+      document.fonts?.ready?.then(scheduleScan).catch(() => {});
       // fail-safe *כשל-אמיתי בלבד* — לא טיימר גלובלי לפי-זמן. אחרי השהיה קצרה
       // חושפים אך ורק רכיבים שכבר נמצאים בתוך/קרוב לאזור-הצפייה אך נשארו
       // מוסתרים (race נדיר שבו callback ה-IO לא נורה על אלמנט שכבר בתצוגה
