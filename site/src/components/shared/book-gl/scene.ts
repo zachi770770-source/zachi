@@ -1162,8 +1162,10 @@ export function createBookScene(
     // ב-90–95%. כשהתוכן זהה, אותה הצצה פשוט אינה נראית. אין כאן שינוי תנועה:
     // רק *איזו* טקסטורה מציג הדף התחתון ב-14% האחרונים.
     const landed = t >= turnStart[cur] + turnDur[cur] * 0.86 ? cur : cur - 1;
-    const topLeft = SPREADS[((landed % 3) + 3) % 3];
-    const nextRight = SPREADS[(cur + 1) % 3];
+    // `topDst` — הכפולה שמציגה ערימת-היעד (ימין). `nextSrc` — מה שנחשף על
+    // ערימת-המקור (שמאל) אחרי שהגיליון עזב אותה.
+    const topDst = SPREADS[((landed % 3) + 3) % 3];
+    const nextSrc = SPREADS[(cur + 1) % 3];
     let under = 0; // הצל החזק ביותר שמטיל גיליון מתהפך על מה שמתחתיו
     for (let j = 0; j < POOL; j += 1) {
       const lf = turners[j];
@@ -1174,8 +1176,10 @@ export function createBookScene(
       const prev = n - POOL;
       const h = rnd(n + 5);
 
-      let theta = 0;
-      let curl = REST_CURL;
+      // מקור = שמאל. גיליון ממתין שוכב על הערימה השמאלית (θ=π), בעיקול
+      // השלילי שהוא עיקול-המנוחה של אותו צד.
+      let theta = Math.PI;
+      let curl = -REST_CURL * 1.09;
       let twist = 0.2;
       let z = zRight(n - cur);
       let depth = n - cur; // עומק בערימה — קובע גם אם הגיליון מרונדר בכלל
@@ -1190,16 +1194,18 @@ export function createBookScene(
         // זנב-התיישבות: הנייר ממשיך לרעוד רגע קצר אחרי שנחת.
         const after = Math.max(0, t - (tS + dur));
         const settle = Math.exp(-7 * after) * Math.sin(after * 24);
-        theta = Math.PI * ta;
+        // שמאל → ימין: הזווית יורדת מ-π (שטוח שמאלה) ל-0 (שטוח ימינה).
+        theta = Math.PI * (1 - ta);
         // משרעת-העיקול משתנה מדף לדף (‎±15%‎) — בלעדיה עשרה דפדופים רצופים
         // נקראים כמטרונום.
         // העיקול נבנה משני מקורות: הקשת (עיקר החצייה) ומעטפת-ההיפרדות, שנותנת
         // לגיליון להתכופף כבר בזמן שהוא נתלש — נייר נכנע לפני שהוא מסתובב.
         curl =
-          restCurlAt(ta) * (ta < 1 ? 1 : 1.09) +
+          restCurlAt(1 - ta) * (ta < 1 ? 1 : 1.09) -
           (arc * 0.78 + sep * 0.34) * CURL_TURN * (0.86 + 0.28 * h) +
           // הדחיסה: משתטח מעט מעבר לעיקול-המנוחה בזמן שהוא נלחץ אל הערימה.
-          -landPress(prog) * 0.1 +
+          // הסימן התהפך עם הכיוון — הנחיתה היא עכשיו אל הערימה הימנית.
+          landPress(prog) * 0.1 +
           settle * 0.1;
         twist = 0.2 + arc * (0.45 + 0.22 * h) + sep * 0.16 + settle * 0.2;
         // ההרמה נגזרת מהמעטפת ולא מהקשת: כך הגיליון עוזב את הערימה בתוך 22%
@@ -1216,14 +1222,14 @@ export function createBookScene(
         // צל-המגע נפתח עם ההיפרדות ונסגר עם הנחיתה, במקום להופיע רק בשיא.
         if (sep > under) under = sep;
       } else if (prev >= 0 && t < tS - MOVE_LEAD) {
-        // עדיין שוכב בערימה השמאלית מהתור הקודם שלו, קבור תחת אלה שנחתו
-        // אחריו. רק כשהוא קבור מספיק הוא יוחזר ימינה — ולכן ההחזרה מוסתרת.
-        theta = Math.PI;
+        // עדיין שוכב בערימה הימנית מהתור הקודם שלו, קבור תחת אלה שנחתו
+        // אחריו. רק כשהוא קבור מספיק הוא יוחזר שמאלה — ולכן ההחזרה מוסתרת.
+        theta = 0;
         // ככל שהגיליון עמוק יותר בערימה כך הוא שטוח יותר, ולכן הם *מקוננים*
         // זה בזה. בעיקול זהה לכולם המשטחים חותכים זה את זה והטקסט של השכבה
         // שמתחת מבליח דרך העליונה.
         // ככל שהגיליון עמוק יותר כך הוא שטוח יותר, ולכן הם *מקוננים* זה בזה.
-        curl = -REST_CURL * 1.09 * (1 - 0.14 * depth);
+        curl = REST_CURL * (1 - 0.14 * depth);
         // ‎+1‎: הדרגה 1 שמורה לגיליון שזה עתה נחת. בלעדיה הגיליון הישן ביותר
         // והגיליון החדש ביותר נפלו על אותו ‎z‎ ומיון-השקיפות הבליח ביניהם.
         const rank = cur - prev + 1;
@@ -1253,19 +1259,21 @@ export function createBookScene(
         // נחת זה עתה — הוא הדף העליון בערימה השמאלית.
         lf.mat.uniforms.uFront.value = SPREADS[n % 3].r;
         lf.mat.uniforms.uBack.value = SPREADS[n % 3].l;
-      } else if (theta === 0) {
-        lf.mat.uniforms.uFront.value = nextRight.r;
-        lf.mat.uniforms.uBack.value = nextRight.l;
+      } else if (theta === Math.PI) {
+        // ממתין על ערימת-המקור (שמאל): מציג את הכפולה שתיחשף אחריו.
+        lf.mat.uniforms.uFront.value = nextSrc.r;
+        lf.mat.uniforms.uBack.value = nextSrc.l;
       } else {
-        lf.mat.uniforms.uFront.value = topLeft.r;
-        lf.mat.uniforms.uBack.value = topLeft.l;
+        // קבור בערימת-היעד (ימין).
+        lf.mat.uniforms.uFront.value = topDst.r;
+        lf.mat.uniforms.uBack.value = topDst.l;
       }
     }
     // דפי-הבסיס מקבלים את *אותה* כפולה שמציג הגיליון שמעליהם. העיקול מקצר
     // את הגיליון מעט, ולכן הוא אינו מכסה את הבסיס עד הפיקסל האחרון; כשהתוכן
     // זהה, ההצצה הזו פשוט אינה נראית. עם תוכן שונה היא נראתה כטקסט כפול.
-    baseLeft.mat.uniforms.uBack.value = topLeft.l;
-    baseRight.mat.uniforms.uFront.value = nextRight.r;
+    baseRight.mat.uniforms.uFront.value = topDst.r;
+    baseLeft.mat.uniforms.uBack.value = nextSrc.l;
 
     // כל מה שאינו מתהפך מקבל את צל-הדף העובר.
     baseRight.mat.uniforms.uTurnShadow.value = under;
