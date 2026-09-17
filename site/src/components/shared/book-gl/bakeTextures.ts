@@ -14,7 +14,6 @@ const PAPER_LO = "#e7dfcd";
 const INK = "#221c16";
 const INK_SOFT = "#5b5142";
 const ACCENT = "#3f5c4e"; // Sage
-const TERRA = "#a4552f"; // Terracotta — דגש מבוקר בלבד
 
 export const PAGE_ASPECT = 0.7; // רוחב:גובה של עמוד יחיד
 const TEX_H = 1400;
@@ -22,28 +21,23 @@ const TEX_W = Math.round(TEX_H * PAGE_ASPECT);
 
 export type PageSide = "left" | "right";
 
+/**
+ * שני סוגי-דף בלבד, וזו הנקודה.
+ *
+ * הספר על עמוד-הבית הוא טריילר, ולכן לכל כפולה יש **מחשבה דומיננטית אחת**:
+ * `quote` נושא אותה, ו-`verso` הוא הדף הפונה — שקט, עם שוליים ונשימה. אין
+ * „דף-קריאה” עם פסקאות תומכות: מילוי כזה הוא בדיוק מה שגורם לספר להיקרא
+ * כתפאורה ולא כציטוט שכדאי לעצור בשבילו.
+ *
+ * אין שדה `pageNo` באף אחד מהם. עימוד דקורטיבי ליד ציטוט אמיתי נקרא כשיוך
+ * („הציטוט הזה נמצא בעמוד 25”), ואת העימוד של המהדורה הסופית אי-אפשר לאמת
+ * מכאן. הדרך היחידה לא להמציא שיוך היא לא לצייר מספר.
+ */
 export type PageSpec =
-  | {
-      kind: "statement";
-      big: string[]; // שורות ההצהרה הגדולה
-      sub?: string;
-      pageNo?: string;
-    }
-  | {
-      kind: "reading";
-      kicker?: string;
-      heading?: string;
-      paras: string[];
-      header?: string; // running header
-      pageNo?: string;
-    }
-  | {
-      kind: "thesis";
-      big: string[];
-      sub?: string;
-      mark?: boolean; // דגש-מותג קטן
-      pageNo?: string;
-    }
+  /** הדף הנושא — ציטוט מאושר, בניסוח ובשבירות-השורה שנמסרו. */
+  | { kind: "quote"; lines: readonly string[] }
+  /** הדף הפונה — קו-דגש דק וכותרת רצה שקטה. בעיקר אוויר. */
+  | { kind: "verso"; header?: string }
   | { kind: "blank" };
 
 function fontFamily() {
@@ -83,9 +77,21 @@ interface Margins {
   textRight: number; // קו-הימין של הטקסט (RTL)
   usableW: number;
 }
-function margins(side: PageSide): Margins {
-  const outer = TEX_W * 0.10;
-  const gutter = TEX_W * 0.175; // שוליים-פנימיים נדיבים (צד-השדרה)
+/**
+ * שולי הציטוט אינם סימטריים, וזה לא קישוט.
+ *
+ * ה-shader מעקם את הגיליון עם עקמומיות *עולה* לכיוון הקצה החופשי
+ * (`k = curl * (0.42 + 0.92 * uu)`), ולכן הרצועה שליד הקצה החופשי מתקצרת
+ * בפרספקטיבה כמעט עד היעלמות. טקסט שנכנס לרצועה הזו פשוט אינו נראה —
+ * נמדד: ציטוט שיושב עד ‎0.088‎ מהקצה נקרא קטוע בצד ימין בזמן הצפייה, בעוד
+ * שהטקסטורה עצמה שלמה לחלוטין.
+ *
+ * לכן שוליים רחבים בקצה החופשי וצרים יותר בשדרה — וזו גם בדיוק המוסכמה
+ * הטיפוגרפית של ספר מודפס אמיתי.
+ */
+function margins(side: PageSide, variant: "text" | "quote" = "text"): Margins {
+  const outer = TEX_W * (variant === "quote" ? 0.135 : 0.10);
+  const gutter = TEX_W * (variant === "quote" ? 0.115 : 0.175); // צד-השדרה
   const rightPad = side === "left" ? gutter : outer;
   const leftPad = side === "left" ? outer : gutter;
   return {
@@ -98,178 +104,167 @@ function margins(side: PageSide): Margins {
   };
 }
 
-/** מודד כמה שורות ייווצרו מעטיפת-טקסט (בלי לצייר) — לצורך מירכוז אנכי. */
-function countWrapped(ctx: CanvasRenderingContext2D, text: string, maxW: number): number {
-  const words = text.split(" ");
-  let line = "";
-  let n = 0;
-  for (const w of words) {
-    const test = line ? line + " " + w : w;
-    if (ctx.measureText(test).width > maxW && line) {
-      n++;
-      line = w;
-    } else {
-      line = test;
-    }
-  }
-  if (line) n++;
-  return Math.max(n, 1);
-}
-
-/** ציור שורות טקסט עטופות (RTL) מ-y נתון; מחזיר את ה-y הבא. */
-function drawWrapped(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxW: number,
-  lineH: number,
-): number {
-  const words = text.split(" ");
-  let line = "";
-  for (const w of words) {
-    const test = line ? line + " " + w : w;
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line, x, y);
-      y += lineH;
-      line = w;
-    } else {
-      line = test;
-    }
-  }
-  if (line) {
-    ctx.fillText(line, x, y);
-    y += lineH;
-  }
-  return y;
-}
-
-function furniture(ctx: CanvasRenderingContext2D, m: Margins, header?: string, pageNo?: string) {
+/** כותרת רצה שקטה. אין כאן מספר-עמוד, ובכוונה — ראו ההערה ב-`PageSpec`. */
+function runningHead(ctx: CanvasRenderingContext2D, m: Margins, header?: string) {
+  if (!header) return;
   ctx.textAlign = "right";
-  if (header) {
-    ctx.font = `500 ${Math.round(TEX_W * 0.03)}px ${fontFamily()}`;
-    ctx.fillStyle = INK_SOFT;
-    ctx.globalAlpha = 0.65;
-    ctx.fillText(header, m.textRight, TEX_H * 0.075);
-    ctx.globalAlpha = 1;
+  ctx.font = `500 ${Math.round(TEX_W * 0.030)}px ${fontFamily()}`;
+  ctx.fillStyle = INK_SOFT;
+  ctx.globalAlpha = 0.5;
+  ctx.fillText(header, m.textRight, TEX_H * 0.085);
+  ctx.globalAlpha = 1;
+}
+
+/** קו-הדגש הדק (Sage) — אותו סימן-מותג שכבר קיים בזהות. */
+function accentRule(ctx: CanvasRenderingContext2D, x: number, y: number, w: number) {
+  ctx.strokeStyle = ACCENT;
+  ctx.lineWidth = Math.max(3, TEX_W * 0.006);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - w, y);
+  ctx.stroke();
+}
+
+/**
+ * סימני-פיסוק אינם מילים.
+ *
+ * ציטוט 10 נגמר בשורה „…כמו מכונות מזל —”, והפריסה הרגילה שלחה את הקו המפריד
+ * לשורה משל עצמו. שורה שכל תוכנה סימן-פיסוק אינה שורה טיפוגרפית אלא תקלה.
+ * לכן אסימון שכולו פיסוק מודבק אל האסימון שלפניו *לפני* הפריסה, והשניים
+ * נשברים יחד או לא נשברים בכלל.
+ *
+ * הטקסט השמור אינו משתנה: זו שאלה של איפה נשברת השורה, לא של מה כתוב בה.
+ */
+const PUNCT_ONLY = /^[—–\-.,;:!?…"'”“„»«)(\]\[]+$/u;
+function glueOrphanPunctuation(words: string[]): string[] {
+  const out: string[] = [];
+  for (const w of words) {
+    if (out.length && PUNCT_ONLY.test(w)) out[out.length - 1] += " " + w;
+    else out.push(w);
   }
-  if (pageNo) {
-    ctx.font = `500 ${Math.round(TEX_W * 0.032)}px ${fontFamily()}`;
-    ctx.fillStyle = INK_SOFT;
-    ctx.globalAlpha = 0.55;
-    ctx.textAlign = "center";
-    ctx.fillText(pageNo, TEX_W / 2, TEX_H - TEX_H * 0.06);
-    ctx.globalAlpha = 1;
+  return out;
+}
+
+/** פריסת שורה אחת שנמסרה — לשורות-משנה שנכנסות ברוחב הנתון. */
+function wrapLine(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+  const words = glueOrphanPunctuation(text.split(" "));
+  const out: string[] = [];
+  let line = "";
+  for (const w of words) {
+    const test = line ? line + " " + w : w;
+    if (ctx.measureText(test).width > maxW && line) {
+      out.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
   }
+  if (line) out.push(line);
+  return out.length ? out : [text];
+}
+
+/** גובה השורות: בתוך שורה שנמסרה, ובין שורות שנמסרו. */
+const LINE_H = 1.28;
+const AUTHORED_GAP = 0.34; // רווח נוסף *בין* שורות שנמסרו — שבירה חזקה יותר
+
+interface QuoteFit {
+  size: number;
+  /** הקבוצות: לכל שורה שנמסרה, שורות-המשנה שלה בפועל. */
+  groups: string[][];
+  height: number;
+}
+
+/**
+ * התאמת-גודל לציטוט.
+ *
+ * שני מצבים, ובהבדל ביניהם נמצא כל ההבדל בין „ציטוט שנוחת” ל„פסקה קטנה”:
+ *
+ *   1. **בלי פריסה.** מחפשים את הגודל הגדול ביותר שבו *כל* שורה שנמסרה
+ *      נכנסת ברוחב. זה המצב הרצוי: שבירות-השורה של הציטוט נשמרות בדיוק,
+ *      והציטוטים הקצרים („החלפתם פרצוף. / לא החלפתם דפוס.”) מקבלים את
+ *      הסקאלה הגדולה ואת האוויר שמגיע להם.
+ *   2. **עם פריסה.** ציטוט ארוך אינו יכול להיכנס בשורה אחת בגודל שנקרא
+ *      בגודל-צפייה רגיל. במקרה כזה שורה שנמסרה נפרסת לשורות-משנה — סדר
+ *      המילים והניסוח אינם משתנים, רק השבירה הוויזואלית — והשבירות שנמסרו
+ *      נשארות חזקות יותר דרך `AUTHORED_GAP`.
+ *
+ * הרצפה `NOWRAP_FLOOR` היא שמכריעה בין השניים: מתחתיה, „לשמור על השבירה”
+ * היה אומר טיפוגרפיה שלא נקראת — וזו לא שמירה על הציטוט אלא ויתור עליו.
+ */
+function fitQuote(
+  ctx: CanvasRenderingContext2D,
+  lines: readonly string[],
+  usableW: number,
+  availH: number,
+): QuoteFit {
+  const MAX = TEX_W * 0.150;
+  const NOWRAP_FLOOR = TEX_W * 0.072;
+  const WRAP_MAX = TEX_W * 0.092;
+  const ABS_FLOOR = TEX_W * 0.056;
+
+  const measure = (size: number, wrap: boolean): QuoteFit => {
+    ctx.font = `800 ${Math.round(size)}px ${fontFamily()}`;
+    const groups = lines.map((l) => (wrap ? wrapLine(ctx, l, usableW) : [l]));
+    const rows = groups.reduce((n, g) => n + g.length, 0);
+    const height = rows * size * LINE_H + (groups.length - 1) * size * AUTHORED_GAP;
+    return { size: Math.round(size), groups, height };
+  };
+
+  // 1 — בלי פריסה, מהגדול לקטן.
+  for (let size = MAX; size >= NOWRAP_FLOOR; size -= 1) {
+    const fit = measure(size, false);
+    const widest = Math.max(...lines.map((l) => ctx.measureText(l).width));
+    if (widest <= usableW && fit.height <= availH) return fit;
+  }
+  // 2 — עם פריסה, מהגדול לקטן.
+  for (let size = WRAP_MAX; size >= ABS_FLOOR; size -= 1) {
+    const fit = measure(size, true);
+    if (fit.height <= availH) return fit;
+  }
+  return measure(ABS_FLOOR, true);
 }
 
 function render(ctx: CanvasRenderingContext2D, spec: PageSpec, side: PageSide) {
   if (spec.kind === "blank") return;
-  const m = margins(side);
   ctx.direction = "rtl";
   ctx.textAlign = "right";
   ctx.textBaseline = "alphabetic";
 
-  if (spec.kind === "statement") {
-    // הצהרה גדולה, ניגודיות-קנה-מידה, ממורכזת אנכית, עם קו-דק דק מתחת.
-    const bigSize = Math.round(TEX_W * 0.188);
-    const bigLH = bigSize * 1.12;
-    const subSize = Math.round(TEX_W * 0.068);
-    const blockH = spec.big.length * bigLH + (spec.sub ? subSize * 3.4 : 0);
-    let y = TEX_H / 2 - blockH / 2 + bigSize;
-    ctx.font = `800 ${bigSize}px ${fontFamily()}`;
+  if (spec.kind === "quote") {
+    const m = margins(side, "quote");
+    const availH = TEX_H - m.top - m.bottom;
+    const fit = fitQuote(ctx, spec.lines, m.usableW, availH);
+    const ruleGap = fit.size * 0.95;
+    const ruleH = ruleGap + Math.max(3, TEX_W * 0.006);
+    // מירכוז אנכי של הבלוק כולו (ציטוט + קו-הדגש) — הציטוט יושב באמצע הדף,
+    // והשוליים סביבו נקראים ככוונה ולא כעמוד ריק-למחצה.
+    let y = TEX_H / 2 - (fit.height + ruleH) / 2 + fit.size;
+
+    ctx.font = `800 ${fit.size}px ${fontFamily()}`;
     ctx.fillStyle = INK;
-    for (const line of spec.big) {
-      ctx.fillText(line, m.textRight, y);
-      y += bigLH;
-    }
-    // קו-דגש דק (Sage) מתחת להצהרה.
-    y += bigLH * 0.12;
-    ctx.strokeStyle = ACCENT;
-    ctx.lineWidth = Math.max(3, TEX_W * 0.006);
-    ctx.beginPath();
-    ctx.moveTo(m.textRight, y);
-    ctx.lineTo(m.textRight - TEX_W * 0.26, y);
-    ctx.stroke();
-    if (spec.sub) {
-      y += subSize * 2.1;
-      ctx.font = `500 ${subSize}px ${fontFamily()}`;
-      ctx.fillStyle = INK_SOFT;
-      drawWrapped(ctx, spec.sub, m.textRight, y, m.usableW, subSize * 1.5);
-    }
-    furniture(ctx, m, undefined, spec.pageNo);
+    fit.groups.forEach((group, gi) => {
+      for (const row of group) {
+        ctx.fillText(row, m.textRight, y);
+        y += fit.size * LINE_H;
+      }
+      if (gi < fit.groups.length - 1) y += fit.size * AUTHORED_GAP;
+    });
+
+    y += ruleGap - fit.size * LINE_H + fit.size * 0.3;
+    accentRule(ctx, m.textRight, y, TEX_W * 0.24);
     return;
   }
 
-  if (spec.kind === "reading") {
-    // עמוד-קריאה עריכתי: kicker → heading → פסקאות.
-    // מדידה מראש: עמוד „קצר” (פסקה תומכת) ממורכז אנכית במקום להיצמד לראש —
-    // כך שהחלל סביבו נקרא כשוליים מכוונים ולא כעמוד ריק-למחצה.
-    const ps0 = Math.round(TEX_W * 0.069);
-    const hs0 = Math.round(TEX_W * 0.107);
-    let contentH = 0;
-    if (spec.kicker) contentH += TEX_W * 0.11;
-    if (spec.heading) {
-      ctx.font = `800 ${hs0}px ${fontFamily()}`;
-      contentH += countWrapped(ctx, spec.heading, m.usableW) * hs0 * 1.18 + TEX_W * 0.05;
-    }
-    ctx.font = `400 ${ps0}px ${fontFamily()}`;
-    for (const para of spec.paras) {
-      contentH += countWrapped(ctx, para, m.usableW) * ps0 * 1.62 + ps0 * 0.7;
-    }
-    const short = contentH < TEX_H * 0.42;
-    let y = short ? TEX_H / 2 - contentH / 2 + ps0 : m.top + TEX_W * 0.05;
-    if (spec.kicker) {
-      ctx.font = `700 ${Math.round(TEX_W * 0.056)}px ${fontFamily()}`;
-      ctx.fillStyle = TERRA;
-      ctx.fillText(spec.kicker, m.textRight, y);
-      y += TEX_W * 0.11;
-    }
-    if (spec.heading) {
-      const hs = Math.round(TEX_W * 0.107);
-      ctx.font = `800 ${hs}px ${fontFamily()}`;
-      ctx.fillStyle = INK;
-      y = drawWrapped(ctx, spec.heading, m.textRight, y, m.usableW, hs * 1.18);
-      y += TEX_W * 0.05;
-    }
-    const ps = Math.round(TEX_W * 0.069);
-    ctx.font = `400 ${ps}px ${fontFamily()}`;
-    ctx.fillStyle = INK;
-    for (const para of spec.paras) {
-      y = drawWrapped(ctx, para, m.textRight, y, m.usableW, ps * 1.62);
-      y += ps * 0.7;
-    }
-    furniture(ctx, m, spec.header, spec.pageNo);
-    return;
-  }
-
-  if (spec.kind === "thesis") {
-    // נחיתה סופית — הצהרה שקטה ובטוחה, ממורכזת, עם דגש-מותג קטן.
-    const bigSize = Math.round(TEX_W * 0.205);
-    const bigLH = bigSize * 1.1;
-    const subSize = Math.round(TEX_W * 0.066);
-    const blockH = spec.big.length * bigLH + (spec.sub ? subSize * 3 : 0);
-    let y = TEX_H / 2 - blockH / 2 + bigSize;
-    if (spec.mark) {
-      // דגש-מותג: נקודת-טרקוטה קטנה מעל ההצהרה.
-      ctx.fillStyle = TERRA;
-      ctx.beginPath();
-      ctx.arc(m.textRight - TEX_W * 0.02, y - bigSize * 1.15, TEX_W * 0.018, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.font = `800 ${bigSize}px ${fontFamily()}`;
-    ctx.fillStyle = INK;
-    for (const line of spec.big) {
-      ctx.fillText(line, m.textRight, y);
-      y += bigLH;
-    }
-    if (spec.sub) {
-      y += subSize * 1.6;
-      ctx.font = `500 ${subSize}px ${fontFamily()}`;
-      ctx.fillStyle = INK_SOFT;
-      drawWrapped(ctx, spec.sub, m.textRight, y, m.usableW, subSize * 1.5);
-    }
-    furniture(ctx, m, undefined, spec.pageNo);
+  if (spec.kind === "verso") {
+    // הדף הפונה. קו-דגש דק וכותרת רצה שקטה — ותו לא.
+    //
+    // כאן *לא* מופיע שם-פרק. שמות-הפרקים של הספר אינם ידועים לי, והמצאת
+    // שם כזה היא בדיוק סוג-השיוך שאסור להמציא. פסקת-מילוי הייתה גרועה עוד
+    // יותר: היא מתחרה בציטוט שממול, וזו הסיבה שהכפולה נקראה קודם כ„מאמר”.
+    // ספרים אמיתיים מלאים בחלל לבן — וזה מה שיש כאן.
+    const m = margins(side, "text");
+    runningHead(ctx, m, spec.header);
+    accentRule(ctx, m.textRight, TEX_H * 0.5, TEX_W * 0.16);
     return;
   }
 }

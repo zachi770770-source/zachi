@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+import { excerptAt } from "@/content/bookExcerpts";
+
 import {
   bakePage,
   bakeBlank,
@@ -7,7 +9,6 @@ import {
   bakeCoverLiner,
   coverTextureFromImage,
   PAGE_ASPECT,
-  type PageSpec,
 } from "./bakeTextures";
 
 /**
@@ -24,45 +25,11 @@ const H = W / PAGE_ASPECT; // גובה עמוד
 const SEG_X = 96; // חלוקה לאורך הרוחב — עיקול חלק, בלי faceting
 const SEG_Y = 14; // חלוקה אנכית — מאפשרת עיקול מורכב (compound curve)
 
-// ── מיפוי שלושת ה-spreads (ניסוחי-התֵּמה המאושרים בלבד) ──
-// spread 1: הצהרה + פסקה תומכת | spread 2: spread קריאה עריכתי | spread 3: נחיתת-תזה
-const R1: PageSpec = {
-  kind: "statement",
-  big: ["דייטינג", "הוא חיפוש."],
-  sub: "למצוא זה רק ההתחלה.",
-  pageNo: "9",
-};
-const L1: PageSpec = {
-  kind: "reading",
-  paras: ["אהבה היא בנייה.", "לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת."],
-  pageNo: "8",
-};
-const R2: PageSpec = {
-  kind: "reading",
-  kicker: "עובדה",
-  heading: "עובדה היא מה שקרה.",
-  paras: ["למצוא זה רק ההתחלה."],
-  header: "מדייטים לאהבה",
-  pageNo: "25",
-};
-const L2: PageSpec = {
-  kind: "reading",
-  kicker: "סיפור",
-  heading: "סיפור הוא מה שאנחנו מספרים לעצמנו.",
-  paras: ["לבחור אחרת מתחיל בלראות אחרת."],
-  pageNo: "24",
-};
-const R3: PageSpec = {
-  kind: "thesis",
-  big: ["אהבה", "היא בנייה."],
-  mark: true,
-  pageNo: "41",
-};
-const L3: PageSpec = {
-  kind: "reading",
-  paras: ["לבחור אחרת מתחיל בלראות אחרת."],
-  pageNo: "40",
-};
+/**
+ * הכותרת הרצה על הדף הפונה. מחרוזת אמיתית ומאושרת — שם הספר — ולא שם-פרק:
+ * את שמות-הפרקים אי-אפשר לאמת מכאן, והמצאת שם כזה היא המצאת שיוך.
+ */
+const RUNNING_HEAD = "מדייטים לאהבה";
 
 // ── shader: עיקול-קשת (inextensible) + עיקול מורכב לאורך הגובה ──
 const leafVertex = /* glsl */ `
@@ -164,6 +131,15 @@ const leafFragment = /* glsl */ `
 interface Leaf {
   mesh: THREE.Mesh;
   mat: THREE.ShaderMaterial;
+}
+
+/**
+ * כפולה: `r` הדף הימני — הציטוט, ו-`l` הדף השמאלי — ה-verso השקט. בספר עברי
+ * הדף הימני נקרא ראשון, ולכן שם יושבת המחשבה הדומיננטית.
+ */
+interface Spread {
+  r: THREE.Texture;
+  l: THREE.Texture;
 }
 
 export interface BookControls {
@@ -311,12 +287,45 @@ export function createBookScene(
   const endpaper = bakeEndpaper();   // כהה — עמק-השדרה
   const coverLiner = bakeCoverLiner(); // קרם — הצד הפנימי של הכריכה
   const coverTex = coverTextureFromImage(coverImg);
-  const texR1 = bakePage(R1, "right");
-  const texL1 = bakePage(L1, "left");
-  const texR2 = bakePage(R2, "right");
-  const texL2 = bakePage(L2, "left");
-  const texR3 = bakePage(R3, "right");
-  const texL3 = bakePage(L3, "left");
+
+  // ── תוכן: ציטוט אחד לכפולה ─────────────────────────────────────────────
+  //
+  // הדף הפונה זהה בכל הכפולות, ולכן הוא נצרב **פעם אחת** ומשותף לכולן: קו-דגש
+  // דק וכותרת רצה שקטה. זה גם מה שנכון עיצובית (מחשבה דומיננטית אחת לכפולה)
+  // וגם מה שמאפשר מאגר של 24 ציטוטים בלי לשלם על 48 טקסטורות.
+  const versoL = bakePage({ kind: "verso", header: RUNNING_HEAD }, "left");
+
+  /**
+   * טקסטורות-הציטוט נצרבות לפי דרישה ומשוחררות כשהן יוצאות מהחלון החי.
+   *
+   * צריבה של כל 24 הציטוטים מראש הייתה עולה ‎24 × 980 × 1400 × 4B ≈ 130MB‎ של
+   * זיכרון-מרקם — מחיר שאין שום סיבה לשלם, כי בכל רגע נתון *שלוש* כפולות
+   * בלבד נוגעות במסך: זו שנחתה, זו שמתהפכת, וזו שתיחשף אחריה.
+   *
+   * ‎k = -1‎ היא הכפולה שהספר פתוח בה בסוף רצף-הפתיחה, כלומר לפני הדפדוף
+   * הראשון; הדפדוף ה-‎k‎ נוחת על הציטוט ה-‎k+1‎ בסדר. לכן המבקר רואה את ציטוט
+   * מס' 1 מיד כשהספר נפתח, והרצף העריכתי מתחיל בדיוק איפה שהוא אמור.
+   */
+  const quoteCache = new Map<number, THREE.CanvasTexture>();
+  function quoteAt(k: number): THREE.CanvasTexture {
+    const key = Math.max(-1, Math.floor(k));
+    let tex = quoteCache.get(key);
+    if (!tex) {
+      tex = bakePage({ kind: "quote", lines: excerptAt(key + 1).lines }, "right");
+      quoteCache.set(key, tex);
+    }
+    return tex;
+  }
+  /** משחרר טקסטורות שיצאו מהחלון החי. נקרא פעם בפריים. */
+  function releaseQuotes(from: number, to: number) {
+    for (const [k, tex] of quoteCache) {
+      if (k < from || k > to) {
+        tex.dispose();
+        quoteCache.delete(k);
+      }
+    }
+  }
+  const spreadAt = (k: number): Spread => ({ r: quoteAt(k), l: versoL });
 
   const leafGeo = new THREE.PlaneGeometry(W, H, SEG_X, SEG_Y);
   // חפיפה קטנה מעבר לשדרה: מונעת „תפר” בהיר בעמק-הכריכה בין שני העמודים.
@@ -351,8 +360,9 @@ export function createBookScene(
   }
 
   // דפי-בסיס + גיליונות מתהפכים (front נראה ב-θ=0, back ב-θ=π).
-  const baseRight = makeLeaf(texR1, blankR);
-  const baseLeft = makeLeaf(blankL, texL3);
+  // הספר נפתח על ציטוט מס’ 1 — תחילת הרצף העריכתי.
+  const baseRight = makeLeaf(quoteAt(-1), blankR);
+  const baseLeft = makeLeaf(blankL, versoL);
 
   // ── בריכת-הגיליונות המתהפכים ───────────────────────────────────────────
   // הספר מדפדף בלי סוף, ולכן אין כאן „שני גיליונות שמתהפכים פעם אחת” אלא
@@ -361,14 +371,9 @@ export function createBookScene(
   // הממתינים, כלומר מוסתר לחלוטין ברגע ההחזרה. זו הסיבה שאין „קפיצת-לולאה”:
   // שום דבר אינו חוזר למקומו לעיני הצופה, והזרם פשוט נמשך.
   const POOL = opts.mobile ? 4 : 5;
-  const SPREADS = [
-    { r: texR1, l: texL1 },
-    { r: texR2, l: texL2 },
-    { r: texR3, l: texL3 },
-  ];
   const turners: Leaf[] = [];
   for (let i = 0; i < POOL; i += 1) {
-    turners.push(makeLeaf(SPREADS[i % 3].r, SPREADS[i % 3].l));
+    turners.push(makeLeaf(quoteAt(i), versoL));
   }
 
   // ── גוש-הדפים ──────────────────────────────────────────────────────────
@@ -382,8 +387,10 @@ export function createBookScene(
   // צד-ימין קיים תמיד ואטימותו לעולם אינה משתנה, ולכן ‎transparent:false‎:
   // הוא חוזר אל מסלול-הרינדור האטום — כתיבת-עומק וסדר קדמי-אחורי — ולכן פחות
   // שכבות נצבעות מיותר. אותו שיקול חל על שאר חומרי צד-ימין למטה.
-  const blockFaceR = new THREE.MeshBasicMaterial({ color: PAPER_FACE });
-  const blockFaceL = new THREE.MeshBasicMaterial({ color: PAPER_FACE, transparent: true, opacity: 0 });
+  // ספר עברי: כשהוא סגור כל המסה נמצאת *משמאל* לשדרה, ולכן חצי-ימין הוא
+  // שנבנה תוך כדי הפתיחה. הצד השקוף-בהתחלה התחלף בהתאם.
+  const blockFaceR = new THREE.MeshBasicMaterial({ color: PAPER_FACE, transparent: true, opacity: 0 });
+  const blockFaceL = new THREE.MeshBasicMaterial({ color: PAPER_FACE });
   function makeBlock(sign: 1 | -1) {
     const geo = new THREE.BoxGeometry(W * 0.99, H * 0.985, BLOCK_T);
     // טריז: הקצה החופשי דק ב-18% מהשדרה. `sign` קובע לאיזה כיוון ה„חוץ”.
@@ -538,12 +545,14 @@ export function createBookScene(
       side: THREE.DoubleSide, // בתחילת הפתיחה, כשהרצועה כמעט ניצבת, רואים את גבה
       transparent: true,
     });
-  const bandForeR = makeBandMat(1, FORE_TINT);
-  const bandForeL = makeBandMat(0, FORE_TINT);
-  const bandBotR = makeBandMat(1, BOT_TINT);
-  const bandBotL = makeBandMat(0, BOT_TINT);
+  // כמו הגוש והלוח: בספר עברי הערימה הסגורה יושבת *משמאל*, ולכן רצועות-הקצה
+  // של צד-שמאל קיימות מהרגע הראשון, ואלו של צד-ימין נבנות תוך כדי הפתיחה.
+  const bandForeR = makeBandMat(0, FORE_TINT);
+  const bandForeL = makeBandMat(1, FORE_TINT);
+  const bandBotR = makeBandMat(0, BOT_TINT);
+  const bandBotL = makeBandMat(1, BOT_TINT);
   const bandMats = [bandForeR, bandForeL, bandBotR, bandBotL];
-  const bandMatsL = [bandForeL, bandBotL];
+  const bandMatsR = [bandForeR, bandBotR];
 
   /**
    * מרובע-הערימה. `along` הוא ציר-הגיליונות, `depth` ציר-העובי. הגאומטריה
@@ -626,7 +635,7 @@ export function createBookScene(
   const flareBotR = makeFlare(1, "bottom");
   const flareForeL = makeFlare(-1, "fore");
   const flareBotL = makeFlare(-1, "bottom");
-  const flaresL = [flareForeL, flareBotL];
+  const flaresR = [flareForeR, flareBotR];
   /** פרישת-הערימה: ‎k=0‎ ספר סגור (הגיליונות מהודקים), ‎k=1‎ פתוח ונרגע. */
   function setFlare(sign: 1 | -1, k: number) {
     const fore = sign === 1 ? flareForeR : flareForeL;
@@ -691,8 +700,8 @@ export function createBookScene(
   }
 
   // ── לוחות-כריכה (hardcover) — חום כהה חמים, לא שחור, עם overhang ──
-  const boardMatR = new THREE.MeshBasicMaterial({ color: 0x3a2f26 });
-  const boardMatL = new THREE.MeshBasicMaterial({ color: 0x3a2f26, transparent: true, opacity: 0 });
+  const boardMatR = new THREE.MeshBasicMaterial({ color: 0x3a2f26, transparent: true, opacity: 0 });
+  const boardMatL = new THREE.MeshBasicMaterial({ color: 0x3a2f26 });
   const BOARD_T = 0.048;
   function makeBoard(sign: 1 | -1) {
     const m = new THREE.Mesh(
@@ -714,7 +723,8 @@ export function createBookScene(
   const SLAB = BLOCK_T + BOARD_T;
   const spineSlabMat = new THREE.MeshBasicMaterial({ color: 0x453629, transparent: true, opacity: 1 });
   const spineSlab = new THREE.Mesh(new THREE.BoxGeometry(0.052, H * 1.035, SLAB), spineSlabMat);
-  spineSlab.position.set(-0.016, 0, 0.03 - SLAB / 2);
+  // השדרה בצד ימין — שם היא נמצאת בספר עברי.
+  spineSlab.position.set(0.016, 0, 0.03 - SLAB / 2);
   book.add(spineSlab);
 
   // endpaper בעמק-הכריכה (מונע „חור” כהה בין הגושים).
@@ -723,13 +733,21 @@ export function createBookScene(
   spine.position.set(0, 0, -0.035);
   book.add(spine);
 
-  // ── הכריכה הקדמית (נפתחת) — פנים=אמנות-המותג, גב=endpaper (לא שחור) ──
+  // ── הכריכה הקדמית (נפתחת) — אמנות-המותג בחוץ, endpaper בפנים (לא שחור) ──
+  //
+  // איזו פאה נושאת את האמנות תלוי בכיוון הפתיחה. בספר עברי הכריכה מונחת
+  // *משמאל* לשדרה כשהספר סגור — כלומר ‎uTheta = PI‎ — ואז הגיליון מסובב
+  // 180° סביב השדרה והמצלמה רואה את פאת-ה„גב” שלו. לכן אמנות-הכריכה יושבת
+  // ב-‎uBack‎: היא זו שנראית כשהספר סגור. הפרגמנט-שיידר ממילא מהפך את ה-UV
+  // לפאה האחורית (‎1-uv.x‎), ולכן האמנות נקראת ישרה — הטקסטורה עצמה לא
+  // שונתה ולא שוקפה. אחרי הפתיחה הכריכה שוכבת מימין ‎(uTheta = 0)‎, פניה
+  // כלפי מטה, והמצלמה רואה את הבטנה — בדיוק כמו בספר אמיתי.
   const coverGeo = new THREE.PlaneGeometry(W, H, 24, 6);
   coverGeo.translate(W / 2, 0, 0);
   const coverMat = new THREE.ShaderMaterial({
     uniforms: {
-      uFront: { value: coverTex },
-      uBack: { value: coverLiner },
+      uFront: { value: coverLiner },
+      uBack: { value: coverTex },
       uTheta: { value: 0 },
       uCurl: { value: 0 },
       uTwist: { value: 0.05 },
@@ -825,7 +843,9 @@ export function createBookScene(
   const SEAT_Z = 0.012;
 
   // עיקול-מנוחה תלוי-צד: ימין +, שמאל − (כדי ששני העמודים יתרוממו כלפי חוץ).
-  const restCurlAt = (t: number) => lerp(-REST_CURL, REST_CURL, t);
+  // צד-שמאל נושא מקדם ‎1.09‎ — הערימה שם מעט יותר עמוקה.
+  const REST_CURL_SRC = -REST_CURL * 1.09; // ערימת-המקור (שמאל)
+  const REST_CURL_DST = REST_CURL; // ערימת-היעד (ימין)
 
   // כיוון-התאורה הבסיסי, ומנוע-סיבוב סביב ציר-Y. התאורה כאן היא uniform ולא
   // אור-סצנה, ולכן סיבובה זול לחלוטין — וזה מה שהופך סיבוב של גוף מואר
@@ -926,7 +946,8 @@ export function createBookScene(
     // דפים, לא שלוש שכבות שזזות יחד.
     const openL = weightedFall(win(t, T.openFrom + 110, T.openTo + 110));
 
-    coverMat.uniforms.uTheta.value = lerp(0, Math.PI, openCover);
+    // ספר עברי: הכריכה מונחת משמאל כשהספר סגור, ונפתחת ימינה.
+    coverMat.uniforms.uTheta.value = lerp(Math.PI, 0, openCover);
     // בועת-העיקול בשיא באמצע התנופה: הלוח „נאנח” ומתיישר בנחיתה.
     coverMat.uniforms.uCurl.value = Math.sin(openCover * Math.PI) * 0.2;
     cover.position.z = openCover < 0.5 ? 0.03 : lerp(0.03, -0.014, (openCover - 0.5) / 0.5);
@@ -936,26 +957,27 @@ export function createBookScene(
     // אמנות-הכריכה בזמן שהיא מסתובבת, במקום לשבת עליה קפוא.
     setKeyYaw(lerp(-0.09, 0.13, openCover), lerp(0.06, 0, arrive));
 
-    const leftStruct = smooth((openL - 0.72) / 0.28);
-    blockFaceL.opacity = leftStruct;
-    bandMatsL.forEach((m) => { m.uniforms.uOpacity.value = leftStruct; });
-    boardMatL.opacity = leftStruct * 0.95;
-    spineMat.opacity = leftStruct;
-    blockL.visible = leftStruct > 0.02;
-    boardL.visible = leftStruct > 0.02;
-    flaresL.forEach((m) => {
-      m.visible = leftStruct > 0.02;
+    // חצי-ימין הוא שנבנה תוך כדי הפתיחה; חצי-שמאל קיים מהרגע הראשון.
+    const openStruct = smooth((openL - 0.72) / 0.28);
+    blockFaceR.opacity = openStruct;
+    bandMatsR.forEach((m) => { m.uniforms.uOpacity.value = openStruct; });
+    boardMatR.opacity = openStruct * 0.95;
+    spineMat.opacity = openStruct;
+    blockR.visible = openStruct > 0.02;
+    boardR.visible = openStruct > 0.02;
+    flaresR.forEach((m) => {
+      m.visible = openStruct > 0.02;
     });
-    blockR.visible = true;
-    boardR.visible = true;
+    blockL.visible = true;
+    boardL.visible = true;
     const spineFade = 1 - smooth(openCover / 0.34);
     spineSlabMat.opacity = spineFade;
     spineSlab.visible = spineFade > 0.02;
 
     // פריסת-הערימה נוסעת עם אותה תנועה שפותחת את הכריכה: ניצבת כל עוד הספר
     // סגור (ואז היא בדיוק פאת-הצד של הגוש), ונרגעת החוצה ככל שהוא נפתח.
-    pose.flareR = openCover;
-    pose.flareL = openL;
+    pose.flareL = openCover;
+    pose.flareR = openL;
     setFlare(1, pose.flareR);
     setFlare(-1, pose.flareL);
 
@@ -971,17 +993,16 @@ export function createBookScene(
     // למישור הכריכה (‎uCurl 0.4‎ מרים את הקצה החופשי ל-z≈0.09 מול כריכה ב-0.03)
     // — ואז הדף נראה מצויר על גבי הכריכה וחותך אותה בערך בחציה. זה נתפס
     // בבדיקה החזותית של מצב-ההגעה, שבו הספר הסגור נראה לראשונה לאורך זמן.
-    baseRight.mat.uniforms.uTheta.value = 0;
-    baseRight.mat.uniforms.uCurl.value = REST_CURL * openCover;
-    baseRight.mesh.position.z = 0.002;
+    baseLeft.mat.uniforms.uTheta.value = Math.PI;
+    baseLeft.mat.uniforms.uCurl.value = -REST_CURL * 1.09 * openCover;
+    baseLeft.mesh.position.z = 0.002;
 
-    // ── עמוד-שמאל הבסיסי (L3) ──
-    baseLeft.mat.uniforms.uTheta.value = Math.PI * openL;
-    // אותו כלל לעמוד-שמאל: שטוח כשהספר סגור, ומקבל את עיקול-המנוחה שלו רק
-    // ככל שהוא נפתח.
-    baseLeft.mat.uniforms.uCurl.value =
-      lerp(0, -REST_CURL * 1.09, openL) + Math.sin(openL * Math.PI) * 0.5;
-    baseLeft.mesh.position.z = 0.002 + Math.sin(openL * Math.PI) * 0.03;
+    // ── עמוד-ימין, זה שנפתח יחד עם הכריכה ──
+    // אותו כלל: שטוח כשהספר סגור, ומקבל את עיקול-המנוחה שלו רק ככל שהוא נפתח.
+    baseRight.mat.uniforms.uTheta.value = Math.PI * (1 - openL);
+    baseRight.mat.uniforms.uCurl.value =
+      lerp(0, REST_CURL, openL) - Math.sin(openL * Math.PI) * 0.5;
+    baseRight.mesh.position.z = 0.002 + Math.sin(openL * Math.PI) * 0.03;
 
     // ── גיליונות-המילוי ──
     // נסחפים עם הפתיחה בדיוק כמו הדפים האמיתיים, בהשהיות זעירות, ועם עיקול
@@ -991,19 +1012,19 @@ export function createBookScene(
     const fanCurlL: number[] = [];
     for (let i = 0; i < FAN_PER_SIDE; i += 1) {
       const depth = (i + 1) / (FAN_PER_SIDE + 1); // 0..1 — עמוק יותר בערימה
-      const restR = REST_CURL * (1 - depth * 0.55) * openCover;
-      fanCurlR.push(restR);
-      fanR[i].mat.uniforms.uTheta.value = 0;
-      fanR[i].mat.uniforms.uCurl.value = restR;
-      fanR[i].mesh.position.z = -0.004 - (i + 1) * 0.0135;
+      const restL = -REST_CURL * (1 - depth * 0.55) * 1.09 * openCover;
+      fanCurlL.push(restL);
+      fanL[i].mat.uniforms.uTheta.value = Math.PI;
+      fanL[i].mat.uniforms.uCurl.value = restL;
+      fanL[i].mesh.position.z = -0.004 - (i + 1) * 0.0135;
 
       const openFan = weightedFall(win(t, T.openFrom + 120 + i * 18, T.openTo + 120));
-      const restL = lerp(0, -REST_CURL * (1 - depth * 0.55) * 1.09, openFan);
-      fanCurlL.push(restL);
-      fanL[i].mat.uniforms.uTheta.value = Math.PI * openFan;
-      fanL[i].mat.uniforms.uCurl.value = restL + Math.sin(openFan * Math.PI) * 0.42;
-      fanL[i].mesh.position.z = -0.004 - (i + 1) * 0.0135 + Math.sin(openFan * Math.PI) * 0.026;
-      fanL[i].mesh.visible = openFan > 0.02;
+      const restR = lerp(0, REST_CURL * (1 - depth * 0.55), openFan);
+      fanCurlR.push(restR);
+      fanR[i].mat.uniforms.uTheta.value = Math.PI * (1 - openFan);
+      fanR[i].mat.uniforms.uCurl.value = restR - Math.sin(openFan * Math.PI) * 0.42;
+      fanR[i].mesh.position.z = -0.004 - (i + 1) * 0.0135 + Math.sin(openFan * Math.PI) * 0.026;
+      fanR[i].mesh.visible = openFan > 0.02;
     }
     pose.fanRestR = fanCurlR;
     pose.fanRestL = fanCurlL;
@@ -1013,8 +1034,8 @@ export function createBookScene(
     // כמו דף-הבסיס שמתחתיהם. הדפדוף מתחיל מיד אחרי הרצף, בשכבה הרצה.
     for (let i = 0; i < POOL; i += 1) {
       const lf = turners[i];
-      lf.mat.uniforms.uTheta.value = 0;
-      lf.mat.uniforms.uCurl.value = REST_CURL * openCover;
+      lf.mat.uniforms.uTheta.value = Math.PI;
+      lf.mat.uniforms.uCurl.value = -REST_CURL * 1.09 * openCover;
       lf.mat.uniforms.uTwist.value = 0.2;
       lf.mat.uniforms.uTurnShadow.value = 0;
       lf.mesh.position.z = zRight(i);
@@ -1067,11 +1088,12 @@ export function createBookScene(
     // הכריכה, ולכן זו עדיין תנועה אחת ולא תיקון-זווית נפרד.
     book.rotation.y =
       lerp(lerp(-0.32, 0.2, arrive), pose.rotY, Math.max(tip, finalEase)) + wob;
-    // מרכוז: ספר *סגור* תופס x∈[0,W] ולכן מרכזו ב-0.5 — צריך היסט ‎-0.5‎ כדי
-    // שיישב באמצע הקאדר; ספר *פתוח* תופס x∈[-W,W] ומרכזו כבר ב-0. לכן ההיסט
-    // חייב להיות קשור לפתיחת-הכריכה ולא להגעה. (באג שנתפס בבדיקה חזותית:
-    // כשהוא היה קשור להגעה, הספר עמד סגור ומוסט ימינה למשך 130ms.)
-    book.position.x = lerp(-0.5, 0, openCover);
+    // מרכוז: ספר עברי *סגור* תופס x∈[-W,0] — כל המסה משמאל לשדרה — ולכן
+    // מרכזו ב-‎-0.5‎, וצריך היסט ‎+0.5‎ כדי שיישב באמצע הקאדר; ספר *פתוח* תופס
+    // x∈[-W,W] ומרכזו כבר ב-0. לכן ההיסט חייב להיות קשור לפתיחת-הכריכה ולא
+    // להגעה. (באג שנתפס בבדיקה חזותית: כשהוא היה קשור להגעה, הספר עמד סגור
+    // ומוסט הצידה למשך 130ms.)
+    book.position.x = lerp(0.5, 0, openCover);
 
     // התנוחה שהתקבלה נשמרת לשכבת-החיים.
     pose.distNow = dist;
@@ -1162,8 +1184,14 @@ export function createBookScene(
     // ב-90–95%. כשהתוכן זהה, אותה הצצה פשוט אינה נראית. אין כאן שינוי תנועה:
     // רק *איזו* טקסטורה מציג הדף התחתון ב-14% האחרונים.
     const landed = t >= turnStart[cur] + turnDur[cur] * 0.86 ? cur : cur - 1;
-    const topLeft = SPREADS[((landed % 3) + 3) % 3];
-    const nextRight = SPREADS[(cur + 1) % 3];
+    // `topDst` — הכפולה שמציגה ערימת-היעד (ימין). `nextSrc` — מה שנחשף על
+    // ערימת-המקור (שמאל) אחרי שהגיליון עזב אותה.
+    const topDst = spreadAt(landed);
+    const nextSrc = spreadAt(cur + 1);
+    // צריבה מראש בזמן ההפוגה שבין דפדופים: כך הצריבה היחידה שכל דפדוף דורש
+    // אינה נופלת על הפריים שבו הגיליון מתחיל לעוף.
+    if (t < turnStart[cur]) quoteAt(cur + 1);
+    releaseQuotes(cur - 2, cur + 2);
     let under = 0; // הצל החזק ביותר שמטיל גיליון מתהפך על מה שמתחתיו
     for (let j = 0; j < POOL; j += 1) {
       const lf = turners[j];
@@ -1174,8 +1202,10 @@ export function createBookScene(
       const prev = n - POOL;
       const h = rnd(n + 5);
 
-      let theta = 0;
-      let curl = REST_CURL;
+      // מקור = שמאל. גיליון ממתין שוכב על הערימה השמאלית (θ=π), בעיקול
+      // השלילי שהוא עיקול-המנוחה של אותו צד.
+      let theta = Math.PI;
+      let curl = -REST_CURL * 1.09;
       let twist = 0.2;
       let z = zRight(n - cur);
       let depth = n - cur; // עומק בערימה — קובע גם אם הגיליון מרונדר בכלל
@@ -1190,16 +1220,35 @@ export function createBookScene(
         // זנב-התיישבות: הנייר ממשיך לרעוד רגע קצר אחרי שנחת.
         const after = Math.max(0, t - (tS + dur));
         const settle = Math.exp(-7 * after) * Math.sin(after * 24);
-        theta = Math.PI * ta;
+        // שמאל → ימין: הזווית יורדת מ-π (שטוח שמאלה) ל-0 (שטוח ימינה).
+        theta = Math.PI * (1 - ta);
         // משרעת-העיקול משתנה מדף לדף (‎±15%‎) — בלעדיה עשרה דפדופים רצופים
         // נקראים כמטרונום.
         // העיקול נבנה משני מקורות: הקשת (עיקר החצייה) ומעטפת-ההיפרדות, שנותנת
         // לגיליון להתכופף כבר בזמן שהוא נתלש — נייר נכנע לפני שהוא מסתובב.
+        // עיקול-המנוחה נוסע *עם* הגיליון: מעיקול-המנוחה של ערימת-המקור (שמאל,
+        // שלילי) אל זה של ערימת-היעד (ימין, חיובי).
+        //
+        // כאן ישב הליקוי שגרם להסתרת תחילת-השורות: הביטוי היה
+        // ‎restCurlAt(1 - ta)‎, כלומר הוא התחיל ב-‎+REST_CURL‎ וסיים ב-‎-REST_CURL‎.
+        // זו הייתה השארית האחרונה של הכיוון הישן (ימין → שמאל): אחרי היפוך
+        // הכיוון ב-‎f3f6540‎ הזווית התהפכה אבל האינטרפולציה של העיקול לא.
+        // התוצאה נמדדה: גיליון שזה עתה נחת על הערימה הימנית ישב בעיקול
+        // ‎-0.344‎, בעוד שכל שכניו על אותה ערימה — דף-הבסיס ‎(+0.228)‎ והגיליונות
+        // הקבורים ‎(+0.176, +0.232)‎ — מתעקלים לכיוון ההפוך. כלומר הוא התכופף
+        // *לתוך* הערימה במקום להתרומם ממנה, ולכן הרצועה שליד הקצה החופשי
+        // צללה מתחת לשכבות שמתחתיה והטקסט שם פשוט נעלם. זה גם הסביר למה
+        // הליקוי נראה רק במנוחה: באמצע הדפדוף הגיליון מורם, ואין מה שיסתיר.
+        //
+        // דרך-אגב תוקנה כאן גם קפיצה שלא נתפסה קודם: ב-‎ta=0‎ הביטוי הישן נתן
+        // ‎+0.4‎ בעוד שהגיליון הממתין יושב על ‎-0.436‎ — כלומר קפיצת-עיקול של
+        // ‎0.84‎ בפריים הראשון של כל דפדוף. עכשיו שני הקצוות מתלכדים בדיוק.
         curl =
-          restCurlAt(ta) * (ta < 1 ? 1 : 1.09) +
+          lerp(REST_CURL_SRC, REST_CURL_DST, ta) -
           (arc * 0.78 + sep * 0.34) * CURL_TURN * (0.86 + 0.28 * h) +
           // הדחיסה: משתטח מעט מעבר לעיקול-המנוחה בזמן שהוא נלחץ אל הערימה.
-          -landPress(prog) * 0.1 +
+          // הסימן התהפך עם הכיוון — הנחיתה היא עכשיו אל הערימה הימנית.
+          landPress(prog) * 0.1 +
           settle * 0.1;
         twist = 0.2 + arc * (0.45 + 0.22 * h) + sep * 0.16 + settle * 0.2;
         // ההרמה נגזרת מהמעטפת ולא מהקשת: כך הגיליון עוזב את הערימה בתוך 22%
@@ -1216,14 +1265,14 @@ export function createBookScene(
         // צל-המגע נפתח עם ההיפרדות ונסגר עם הנחיתה, במקום להופיע רק בשיא.
         if (sep > under) under = sep;
       } else if (prev >= 0 && t < tS - MOVE_LEAD) {
-        // עדיין שוכב בערימה השמאלית מהתור הקודם שלו, קבור תחת אלה שנחתו
-        // אחריו. רק כשהוא קבור מספיק הוא יוחזר ימינה — ולכן ההחזרה מוסתרת.
-        theta = Math.PI;
+        // עדיין שוכב בערימה הימנית מהתור הקודם שלו, קבור תחת אלה שנחתו
+        // אחריו. רק כשהוא קבור מספיק הוא יוחזר שמאלה — ולכן ההחזרה מוסתרת.
+        theta = 0;
         // ככל שהגיליון עמוק יותר בערימה כך הוא שטוח יותר, ולכן הם *מקוננים*
         // זה בזה. בעיקול זהה לכולם המשטחים חותכים זה את זה והטקסט של השכבה
         // שמתחת מבליח דרך העליונה.
         // ככל שהגיליון עמוק יותר כך הוא שטוח יותר, ולכן הם *מקוננים* זה בזה.
-        curl = -REST_CURL * 1.09 * (1 - 0.14 * depth);
+        curl = REST_CURL * (1 - 0.14 * depth);
         // ‎+1‎: הדרגה 1 שמורה לגיליון שזה עתה נחת. בלעדיה הגיליון הישן ביותר
         // והגיליון החדש ביותר נפלו על אותו ‎z‎ ומיון-השקיפות הבליח ביניהם.
         const rank = cur - prev + 1;
@@ -1247,25 +1296,27 @@ export function createBookScene(
       // הכלל עקבי גם ברגע-המעבר: גיליון ממתין מציג את הכפולה הבאה, וכשמגיע
       // תורו `cur` כבר התקדם — כך שהטקסטורה שלו אינה משתנה בזמן שהוא נראה.
       if (t >= tS && t <= tS + dur) {
-        lf.mat.uniforms.uFront.value = SPREADS[n % 3].r;
-        lf.mat.uniforms.uBack.value = SPREADS[n % 3].l;
+        lf.mat.uniforms.uFront.value = spreadAt(n).r;
+        lf.mat.uniforms.uBack.value = spreadAt(n).l;
       } else if (depth === 0) {
         // נחת זה עתה — הוא הדף העליון בערימה השמאלית.
-        lf.mat.uniforms.uFront.value = SPREADS[n % 3].r;
-        lf.mat.uniforms.uBack.value = SPREADS[n % 3].l;
-      } else if (theta === 0) {
-        lf.mat.uniforms.uFront.value = nextRight.r;
-        lf.mat.uniforms.uBack.value = nextRight.l;
+        lf.mat.uniforms.uFront.value = spreadAt(n).r;
+        lf.mat.uniforms.uBack.value = spreadAt(n).l;
+      } else if (theta === Math.PI) {
+        // ממתין על ערימת-המקור (שמאל): מציג את הכפולה שתיחשף אחריו.
+        lf.mat.uniforms.uFront.value = nextSrc.r;
+        lf.mat.uniforms.uBack.value = nextSrc.l;
       } else {
-        lf.mat.uniforms.uFront.value = topLeft.r;
-        lf.mat.uniforms.uBack.value = topLeft.l;
+        // קבור בערימת-היעד (ימין).
+        lf.mat.uniforms.uFront.value = topDst.r;
+        lf.mat.uniforms.uBack.value = topDst.l;
       }
     }
     // דפי-הבסיס מקבלים את *אותה* כפולה שמציג הגיליון שמעליהם. העיקול מקצר
     // את הגיליון מעט, ולכן הוא אינו מכסה את הבסיס עד הפיקסל האחרון; כשהתוכן
     // זהה, ההצצה הזו פשוט אינה נראית. עם תוכן שונה היא נראתה כטקסט כפול.
-    baseLeft.mat.uniforms.uBack.value = topLeft.l;
-    baseRight.mat.uniforms.uFront.value = nextRight.r;
+    baseRight.mat.uniforms.uFront.value = topDst.r;
+    baseLeft.mat.uniforms.uBack.value = nextSrc.l;
 
     // כל מה שאינו מתהפך מקבל את צל-הדף העובר.
     baseRight.mat.uniforms.uTurnShadow.value = under;
@@ -1338,8 +1389,10 @@ export function createBookScene(
   }
   function dispose() {
     [
-      blankR, blankL, endpaper, coverLiner, coverTex, texR1, texL1, texR2, texL2, texR3, texL3,
+      blankR, blankL, endpaper, coverLiner, coverTex, versoL,
     ].forEach((t) => t.dispose());
+    quoteCache.forEach((t) => t.dispose());
+    quoteCache.clear();
     leafGeo.dispose();
     coverGeo.dispose();
     [baseRight, baseLeft, ...turners, ...fanR, ...fanL].forEach((l) => l.mat.dispose());
