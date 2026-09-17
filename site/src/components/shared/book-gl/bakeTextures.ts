@@ -90,8 +90,8 @@ interface Margins {
  * הטיפוגרפית של ספר מודפס אמיתי.
  */
 function margins(side: PageSide, variant: "text" | "quote" = "text"): Margins {
-  const outer = TEX_W * (variant === "quote" ? 0.235 : 0.10);
-  const gutter = TEX_W * (variant === "quote" ? 0.105 : 0.175); // צד-השדרה
+  const outer = TEX_W * (variant === "quote" ? 0.135 : 0.10);
+  const gutter = TEX_W * (variant === "quote" ? 0.115 : 0.175); // צד-השדרה
   const rightPad = side === "left" ? gutter : outer;
   const leftPad = side === "left" ? outer : gutter;
   return {
@@ -125,9 +125,29 @@ function accentRule(ctx: CanvasRenderingContext2D, x: number, y: number, w: numb
   ctx.stroke();
 }
 
+/**
+ * סימני-פיסוק אינם מילים.
+ *
+ * ציטוט 10 נגמר בשורה „…כמו מכונות מזל —”, והפריסה הרגילה שלחה את הקו המפריד
+ * לשורה משל עצמו. שורה שכל תוכנה סימן-פיסוק אינה שורה טיפוגרפית אלא תקלה.
+ * לכן אסימון שכולו פיסוק מודבק אל האסימון שלפניו *לפני* הפריסה, והשניים
+ * נשברים יחד או לא נשברים בכלל.
+ *
+ * הטקסט השמור אינו משתנה: זו שאלה של איפה נשברת השורה, לא של מה כתוב בה.
+ */
+const PUNCT_ONLY = /^[—–\-.,;:!?…"'”“„»«)(\]\[]+$/u;
+function glueOrphanPunctuation(words: string[]): string[] {
+  const out: string[] = [];
+  for (const w of words) {
+    if (out.length && PUNCT_ONLY.test(w)) out[out.length - 1] += " " + w;
+    else out.push(w);
+  }
+  return out;
+}
+
 /** פריסת שורה אחת שנמסרה — לשורות-משנה שנכנסות ברוחב הנתון. */
 function wrapLine(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
-  const words = text.split(" ");
+  const words = glueOrphanPunctuation(text.split(" "));
   const out: string[] = [];
   let line = "";
   for (const w of words) {
