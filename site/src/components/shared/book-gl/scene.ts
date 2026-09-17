@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+import { excerptAt } from "@/content/bookExcerpts";
+
 import {
   bakePage,
   bakeBlank,
@@ -7,7 +9,6 @@ import {
   bakeCoverLiner,
   coverTextureFromImage,
   PAGE_ASPECT,
-  type PageSpec,
 } from "./bakeTextures";
 
 /**
@@ -24,45 +25,11 @@ const H = W / PAGE_ASPECT; // גובה עמוד
 const SEG_X = 96; // חלוקה לאורך הרוחב — עיקול חלק, בלי faceting
 const SEG_Y = 14; // חלוקה אנכית — מאפשרת עיקול מורכב (compound curve)
 
-// ── מיפוי שלושת ה-spreads (ניסוחי-התֵּמה המאושרים בלבד) ──
-// spread 1: הצהרה + פסקה תומכת | spread 2: spread קריאה עריכתי | spread 3: נחיתת-תזה
-const R1: PageSpec = {
-  kind: "statement",
-  big: ["דייטינג", "הוא חיפוש."],
-  sub: "למצוא זה רק ההתחלה.",
-  pageNo: "9",
-};
-const L1: PageSpec = {
-  kind: "reading",
-  paras: ["אהבה היא בנייה.", "לזהות מה חוזר שוב ושוב בקשרים, ולבחור אחרת."],
-  pageNo: "8",
-};
-const R2: PageSpec = {
-  kind: "reading",
-  kicker: "עובדה",
-  heading: "עובדה היא מה שקרה.",
-  paras: ["למצוא זה רק ההתחלה."],
-  header: "מדייטים לאהבה",
-  pageNo: "25",
-};
-const L2: PageSpec = {
-  kind: "reading",
-  kicker: "סיפור",
-  heading: "סיפור הוא מה שאנחנו מספרים לעצמנו.",
-  paras: ["לבחור אחרת מתחיל בלראות אחרת."],
-  pageNo: "24",
-};
-const R3: PageSpec = {
-  kind: "thesis",
-  big: ["אהבה", "היא בנייה."],
-  mark: true,
-  pageNo: "41",
-};
-const L3: PageSpec = {
-  kind: "reading",
-  paras: ["לבחור אחרת מתחיל בלראות אחרת."],
-  pageNo: "40",
-};
+/**
+ * הכותרת הרצה על הדף הפונה. מחרוזת אמיתית ומאושרת — שם הספר — ולא שם-פרק:
+ * את שמות-הפרקים אי-אפשר לאמת מכאן, והמצאת שם כזה היא המצאת שיוך.
+ */
+const RUNNING_HEAD = "מדייטים לאהבה";
 
 // ── shader: עיקול-קשת (inextensible) + עיקול מורכב לאורך הגובה ──
 const leafVertex = /* glsl */ `
@@ -164,6 +131,15 @@ const leafFragment = /* glsl */ `
 interface Leaf {
   mesh: THREE.Mesh;
   mat: THREE.ShaderMaterial;
+}
+
+/**
+ * כפולה: `r` הדף הימני — הציטוט, ו-`l` הדף השמאלי — ה-verso השקט. בספר עברי
+ * הדף הימני נקרא ראשון, ולכן שם יושבת המחשבה הדומיננטית.
+ */
+interface Spread {
+  r: THREE.Texture;
+  l: THREE.Texture;
 }
 
 export interface BookControls {
@@ -311,12 +287,45 @@ export function createBookScene(
   const endpaper = bakeEndpaper();   // כהה — עמק-השדרה
   const coverLiner = bakeCoverLiner(); // קרם — הצד הפנימי של הכריכה
   const coverTex = coverTextureFromImage(coverImg);
-  const texR1 = bakePage(R1, "right");
-  const texL1 = bakePage(L1, "left");
-  const texR2 = bakePage(R2, "right");
-  const texL2 = bakePage(L2, "left");
-  const texR3 = bakePage(R3, "right");
-  const texL3 = bakePage(L3, "left");
+
+  // ── תוכן: ציטוט אחד לכפולה ─────────────────────────────────────────────
+  //
+  // הדף הפונה זהה בכל הכפולות, ולכן הוא נצרב **פעם אחת** ומשותף לכולן: קו-דגש
+  // דק וכותרת רצה שקטה. זה גם מה שנכון עיצובית (מחשבה דומיננטית אחת לכפולה)
+  // וגם מה שמאפשר מאגר של 24 ציטוטים בלי לשלם על 48 טקסטורות.
+  const versoL = bakePage({ kind: "verso", header: RUNNING_HEAD }, "left");
+
+  /**
+   * טקסטורות-הציטוט נצרבות לפי דרישה ומשוחררות כשהן יוצאות מהחלון החי.
+   *
+   * צריבה של כל 24 הציטוטים מראש הייתה עולה ‎24 × 980 × 1400 × 4B ≈ 130MB‎ של
+   * זיכרון-מרקם — מחיר שאין שום סיבה לשלם, כי בכל רגע נתון *שלוש* כפולות
+   * בלבד נוגעות במסך: זו שנחתה, זו שמתהפכת, וזו שתיחשף אחריה.
+   *
+   * ‎k = -1‎ היא הכפולה שהספר פתוח בה בסוף רצף-הפתיחה, כלומר לפני הדפדוף
+   * הראשון; הדפדוף ה-‎k‎ נוחת על הציטוט ה-‎k+1‎ בסדר. לכן המבקר רואה את ציטוט
+   * מס' 1 מיד כשהספר נפתח, והרצף העריכתי מתחיל בדיוק איפה שהוא אמור.
+   */
+  const quoteCache = new Map<number, THREE.CanvasTexture>();
+  function quoteAt(k: number): THREE.CanvasTexture {
+    const key = Math.max(-1, Math.floor(k));
+    let tex = quoteCache.get(key);
+    if (!tex) {
+      tex = bakePage({ kind: "quote", lines: excerptAt(key + 1).lines }, "right");
+      quoteCache.set(key, tex);
+    }
+    return tex;
+  }
+  /** משחרר טקסטורות שיצאו מהחלון החי. נקרא פעם בפריים. */
+  function releaseQuotes(from: number, to: number) {
+    for (const [k, tex] of quoteCache) {
+      if (k < from || k > to) {
+        tex.dispose();
+        quoteCache.delete(k);
+      }
+    }
+  }
+  const spreadAt = (k: number): Spread => ({ r: quoteAt(k), l: versoL });
 
   const leafGeo = new THREE.PlaneGeometry(W, H, SEG_X, SEG_Y);
   // חפיפה קטנה מעבר לשדרה: מונעת „תפר” בהיר בעמק-הכריכה בין שני העמודים.
@@ -351,8 +360,9 @@ export function createBookScene(
   }
 
   // דפי-בסיס + גיליונות מתהפכים (front נראה ב-θ=0, back ב-θ=π).
-  const baseRight = makeLeaf(texR1, blankR);
-  const baseLeft = makeLeaf(blankL, texL3);
+  // הספר נפתח על ציטוט מס’ 1 — תחילת הרצף העריכתי.
+  const baseRight = makeLeaf(quoteAt(-1), blankR);
+  const baseLeft = makeLeaf(blankL, versoL);
 
   // ── בריכת-הגיליונות המתהפכים ───────────────────────────────────────────
   // הספר מדפדף בלי סוף, ולכן אין כאן „שני גיליונות שמתהפכים פעם אחת” אלא
@@ -361,14 +371,9 @@ export function createBookScene(
   // הממתינים, כלומר מוסתר לחלוטין ברגע ההחזרה. זו הסיבה שאין „קפיצת-לולאה”:
   // שום דבר אינו חוזר למקומו לעיני הצופה, והזרם פשוט נמשך.
   const POOL = opts.mobile ? 4 : 5;
-  const SPREADS = [
-    { r: texR1, l: texL1 },
-    { r: texR2, l: texL2 },
-    { r: texR3, l: texL3 },
-  ];
   const turners: Leaf[] = [];
   for (let i = 0; i < POOL; i += 1) {
-    turners.push(makeLeaf(SPREADS[i % 3].r, SPREADS[i % 3].l));
+    turners.push(makeLeaf(quoteAt(i), versoL));
   }
 
   // ── גוש-הדפים ──────────────────────────────────────────────────────────
@@ -1179,8 +1184,12 @@ export function createBookScene(
     const landed = t >= turnStart[cur] + turnDur[cur] * 0.86 ? cur : cur - 1;
     // `topDst` — הכפולה שמציגה ערימת-היעד (ימין). `nextSrc` — מה שנחשף על
     // ערימת-המקור (שמאל) אחרי שהגיליון עזב אותה.
-    const topDst = SPREADS[((landed % 3) + 3) % 3];
-    const nextSrc = SPREADS[(cur + 1) % 3];
+    const topDst = spreadAt(landed);
+    const nextSrc = spreadAt(cur + 1);
+    // צריבה מראש בזמן ההפוגה שבין דפדופים: כך הצריבה היחידה שכל דפדוף דורש
+    // אינה נופלת על הפריים שבו הגיליון מתחיל לעוף.
+    if (t < turnStart[cur]) quoteAt(cur + 1);
+    releaseQuotes(cur - 2, cur + 2);
     let under = 0; // הצל החזק ביותר שמטיל גיליון מתהפך על מה שמתחתיו
     for (let j = 0; j < POOL; j += 1) {
       const lf = turners[j];
@@ -1268,12 +1277,12 @@ export function createBookScene(
       // הכלל עקבי גם ברגע-המעבר: גיליון ממתין מציג את הכפולה הבאה, וכשמגיע
       // תורו `cur` כבר התקדם — כך שהטקסטורה שלו אינה משתנה בזמן שהוא נראה.
       if (t >= tS && t <= tS + dur) {
-        lf.mat.uniforms.uFront.value = SPREADS[n % 3].r;
-        lf.mat.uniforms.uBack.value = SPREADS[n % 3].l;
+        lf.mat.uniforms.uFront.value = spreadAt(n).r;
+        lf.mat.uniforms.uBack.value = spreadAt(n).l;
       } else if (depth === 0) {
         // נחת זה עתה — הוא הדף העליון בערימה השמאלית.
-        lf.mat.uniforms.uFront.value = SPREADS[n % 3].r;
-        lf.mat.uniforms.uBack.value = SPREADS[n % 3].l;
+        lf.mat.uniforms.uFront.value = spreadAt(n).r;
+        lf.mat.uniforms.uBack.value = spreadAt(n).l;
       } else if (theta === Math.PI) {
         // ממתין על ערימת-המקור (שמאל): מציג את הכפולה שתיחשף אחריו.
         lf.mat.uniforms.uFront.value = nextSrc.r;
@@ -1361,8 +1370,10 @@ export function createBookScene(
   }
   function dispose() {
     [
-      blankR, blankL, endpaper, coverLiner, coverTex, texR1, texL1, texR2, texL2, texR3, texL3,
+      blankR, blankL, endpaper, coverLiner, coverTex, versoL,
     ].forEach((t) => t.dispose());
+    quoteCache.forEach((t) => t.dispose());
+    quoteCache.clear();
     leafGeo.dispose();
     coverGeo.dispose();
     [baseRight, baseLeft, ...turners, ...fanR, ...fanL].forEach((l) => l.mat.dispose());
