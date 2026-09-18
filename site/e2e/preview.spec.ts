@@ -58,18 +58,26 @@ test("/preview has a clear transition to the compass and buys via Amazon (no loc
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
 });
 
-test("/preview mobile: אין שום בקרה צפה — הקריאה מחזיקה את המסך לבדה", async ({
+test("/preview mobile: רק סרגל-הקורא והמשגר המאושר מרחפים — שום שכבה אחרת", async ({
   browser,
 }) => {
-  // הבדיקה התהפכה במכוון. קודם היא שמרה על בר-CTA דביק בתוך עמוד-הקריאה;
-  // הבר הוסר, יחד עם בועת-המצפן, מפני שעמוד-הטעימה הוא חוויית קריאה שקטה
-  // וכל שכבת-שיווק שמרחפת מעליה מתחרה בה.
+  // ── היסטוריה של הטענה הזו, כדי שלא תתהפך שוב בטעות ───────────────────────
+  // גלגול 1: הבדיקה שמרה על בר-CTA דביק בתוך עמוד-הקריאה.
+  // גלגול 2: הבר הוסר, יחד עם בועת-המצפן, והטענה התהפכה ל„אין שום בקרה צפה”.
+  //          הניסוח הראשון היה רחב מדי ותפס גם את סרגל-הקורא, שהוא פקדי
+  //          חוויית-הקריאה ולא CTA מתחרה, ולכן הוחרג במפורש.
+  // גלגול 3 (כאן): דרישת-המוצר השתנתה — „שאל את הספר” נדרש בכל עמוד עברי
+  //          ציבורי, ‎/preview‎ בכלל זה וגם במובייל. הדרישה הנוכחית גוברת על
+  //          הטענה הקודמת, ולכן היא עודכנה **במכוון**, לא הוחלשה כדי לעבור.
   //
-  // מה *כן* מותר לרחף: ההדר, וסרגל-הקורא עצמו (חזרה, גודל-כתב, מצב-קריאה).
-  // הסרגל אינו CTA מתחרה אלא הפקדים של חוויית-הקריאה, והוא חלק מהחוויה
-  // המאושרת. הניסוח הראשון שלי כאן היה רחב מדי ותפס אותו — זו הייתה שגיאת
-  // ניסוח, ולכן הוא הוחרג במפורש ולא „הוחלש”: הטענה עדיין אוסרת כל שכבה
-  // צפה אחרת, בכל מיקום-גלילה.
+  // האינווריאנט החדש, והוא עדיין הדוק: ב-‎/preview‎ במובייל מותרים בדיוק
+  // ההדר, סרגל-הקורא, והמשגר המאושר — ושום שכבה צפה אחרת, בכל מיקום-גלילה.
+  // שתי השכבות שהוסרו בגלגול 2 עדיין אסורות במפורש בסוף הבדיקה.
+  //
+  // אין כאן התנגשות גיאומטרית: סרגל-הקורא הוא ‎sticky‎ בראש המסך
+  // (‎top: var(--header-height)‎) והמשגר ‎fixed‎ בתחתיתו. אי-החפיפה נטענת למטה
+  // כמדידת-מלבנים, ולא כהנחה.
+  const LAUNCHER = "שאל את הספר";
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   // הסכמת-העוגיות היא השכבה הצפה היחידה שמותרת באתר, והיא מופיעה במובייל
   // אחרי השהיה — כלומר לחיצה חד-פעמית בתחילת הבדיקה אינה אמינה. מציבים את
@@ -100,16 +108,95 @@ test("/preview mobile: אין שום בקרה צפה — הקריאה מחזיק
           if (cs.visibility === "hidden" || cs.opacity === "0") return false;
           const r = el.getBoundingClientRect();
           if (r.width < 40 || r.height < 20) return false;
-          return !el.closest("header") && !el.closest(".reader-toolbar");
+          if (el.closest("header") || el.closest(".reader-toolbar")) return false;
+          // המשגר המאושר — שכבה צפה מותרת, ורק היא.
+          if (el.closest('a[href="/compass"][title="שאל את הספר"]')) return false;
+          return true;
         })
         .map((el) => el.tagName + "." + String(el.className).slice(0, 40)),
     );
     expect(floats, `floating layers at ${frac * 100}% of /preview`).toEqual([]);
+
+    // המשגר באמת שם, ואינו חופף לסרגל-הקורא — מדידת-מלבנים, לא הנחה.
+    const boxes = await page.evaluate(() => {
+      const box = (el: Element | null) => {
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, h: r.height };
+      };
+      return {
+        launcher: box(document.querySelector('a[href="/compass"][title="שאל את הספר"]')),
+        toolbar: box(document.querySelector(".reader-toolbar")),
+      };
+    });
+    expect(boxes.launcher, `launcher missing at ${frac * 100}%`).not.toBeNull();
+    const l = boxes.launcher!;
+    const t = boxes.toolbar;
+    if (t && t.h > 0) {
+      const disjoint = l.bottom <= t.top || t.bottom <= l.top || l.right <= t.left || t.right <= l.left;
+      expect(disjoint, `launcher overlaps reader toolbar at ${frac * 100}%`).toBe(true);
+    }
   }
 
-  // ובמפורש: שתי השכבות שהוסרו אינן חוזרות בשום צורה.
+  // המשגר קיים פעם אחת בלבד, ומנווט אל /compass.
+  const launcher = page.getByRole("link", { name: new RegExp(LAUNCHER) });
+  await expect(launcher).toHaveCount(1);
+  await expect(launcher).toBeVisible();
+
+  // ובמפורש: שתי השכבות שהוסרו בגלגול 2 אינן חוזרות בשום צורה.
   await expect(page.locator(".compass-pill")).toHaveCount(0);
   await expect(page.getByRole("complementary", { name: "בר הטעימה" })).toHaveCount(0);
+  await ctx.close();
+});
+
+test("/preview mobile: המשגר אינו מסתיר את סוף העמוד", async ({ browser }) => {
+  // הליקוי שנמדד לפני התיקון: המשגר הוא `fixed`, כלומר מחוץ לזרימת המסמך,
+  // ולכן בגלילה מלאה הוא ישב לצמיתות מעל שורת הזכויות/הנגישות בפוטר — טקסט
+  // שאין שום מיקום-גלילה שמשחרר אותו. הפוטר שומר עכשיו את טווח-הנחיתה דרך
+  // `--floating-ui-clearance`, והבדיקה הזו מקבעת את זה.
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => {
+    try {
+      localStorage.setItem(
+        "cookie-consent",
+        JSON.stringify({ necessary: true, analytics: true, marketing: true }),
+      );
+    } catch {}
+  });
+  const page = await ctx.newPage();
+  await page.goto("/preview", { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+  await page.waitForTimeout(400);
+
+  const covered = await page.evaluate(() => {
+    const L = document.querySelector<HTMLElement>(
+      'a[href="/compass"][title="שאל את הספר"]',
+    );
+    if (!L) return ["launcher missing"];
+    const r = L.getBoundingClientRect();
+    const pts: [number, number][] = [
+      [r.left + 4, r.top + 4],
+      [r.right - 4, r.top + 4],
+      [r.left + 4, r.bottom - 4],
+      [r.right - 4, r.bottom - 4],
+      [r.left + r.width / 2, r.top + r.height / 2],
+    ];
+    L.style.pointerEvents = "none";
+    const hits = new Set<string>();
+    for (const [x, y] of pts) {
+      const el = document.elementFromPoint(x, y);
+      if (!el || L.contains(el)) continue;
+      const text = (el.textContent || "").trim();
+      if (text) hits.add(el.tagName + " :: " + text.slice(0, 50));
+    }
+    L.style.pointerEvents = "";
+    return [...hits];
+  });
+
+  expect(covered, "המשגר מכסה טקסט בסוף העמוד").toEqual([]);
   await ctx.close();
 });
 
