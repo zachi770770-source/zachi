@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { excerptAt } from "@/content/bookExcerpts";
+import { canonicalExcerpt } from "@/content/sample";
 
 import {
   bakePage,
@@ -288,12 +289,41 @@ export function createBookScene(
   const coverLiner = bakeCoverLiner(); // קרם — הצד הפנימי של הכריכה
   const coverTex = coverTextureFromImage(coverImg);
 
-  // ── תוכן: ציטוט אחד לכפולה ─────────────────────────────────────────────
+  // ── תוכן: כפולה מלאה — ציטוט מימין, עמוד-קריאה משמאל ───────────────────
   //
-  // הדף הפונה זהה בכל הכפולות, ולכן הוא נצרב **פעם אחת** ומשותף לכולן: קו-דגש
-  // דק וכותרת רצה שקטה. זה גם מה שנכון עיצובית (מחשבה דומיננטית אחת לכפולה)
-  // וגם מה שמאפשר מאגר של 24 ציטוטים בלי לשלם על 48 טקסטורות.
-  const versoL = bakePage({ kind: "verso", header: RUNNING_HEAD }, "left");
+  // קודם היה כאן ‎verso‎ יחיד: קו-דגש וכותרת רצה, נצרב פעם אחת ומשותף לכל
+  // הכפולות. התוצאה הייתה שהדף השמאלי של *כל* כפולה בספר זהה וכמעט ריק, ולכן
+  // הכפולה נקראה כציטוט מרחף מול נייר ריק ולא כספר פתוח.
+  //
+  // עכשיו הדף השמאלי הוא עמוד-קריאה אמיתי, עם פסקאות ורבטים מכתב-היד — אותן
+  // פסקאות-מבוא קנוניות שכבר מוצגות במלואן ב-‎/preview‎. אין כאן טקסט שנכתב
+  // לצורך העיצוב, ואין מילוי מומצא.
+  //
+  // ── למה טבעת של ארבעה, ולא אחד לכל כפולה ─────────────────────────────
+  // טקסטורת-עמוד היא ‎980 × 1400 × 4B ≈ 5.5MB‎. עמוד-פרוזה ייחודי לכל אחת מ-24
+  // הכפולות היה מוסיף חלון-חי שני בגודל דומה לזה של הציטוטים. טבעת של ארבעה
+  // מספיקה כדי שהדף הפונה יתחלף כמעט בכל דפדוף — וזה כל מה שצריך כדי לשבור
+  // את „אותו דף בדיוק, כל פעם” — בעלות חסומה של ארבע טקסטורות.
+  const PROSE_PAGES = 4;
+  const proseCache = new Map<number, THREE.CanvasTexture>();
+  function versoAt(k: number): THREE.CanvasTexture {
+    const j = ((Math.floor(k) % PROSE_PAGES) + PROSE_PAGES) % PROSE_PAGES;
+    let tex = proseCache.get(j);
+    if (!tex) {
+      const src = canonicalExcerpt.paragraphs;
+      const start = (j * 2) % src.length;
+      tex = bakePage(
+        {
+          kind: "prose",
+          header: RUNNING_HEAD,
+          paragraphs: [src[start], src[(start + 1) % src.length]],
+        },
+        "left",
+      );
+      proseCache.set(j, tex);
+    }
+    return tex;
+  }
 
   /**
    * טקסטורות-הציטוט נצרבות לפי דרישה ומשוחררות כשהן יוצאות מהחלון החי.
@@ -325,7 +355,7 @@ export function createBookScene(
       }
     }
   }
-  const spreadAt = (k: number): Spread => ({ r: quoteAt(k), l: versoL });
+  const spreadAt = (k: number): Spread => ({ r: quoteAt(k), l: versoAt(k) });
 
   const leafGeo = new THREE.PlaneGeometry(W, H, SEG_X, SEG_Y);
   // חפיפה קטנה מעבר לשדרה: מונעת „תפר” בהיר בעמק-הכריכה בין שני העמודים.
@@ -362,7 +392,7 @@ export function createBookScene(
   // דפי-בסיס + גיליונות מתהפכים (front נראה ב-θ=0, back ב-θ=π).
   // הספר נפתח על ציטוט מס’ 1 — תחילת הרצף העריכתי.
   const baseRight = makeLeaf(quoteAt(-1), blankR);
-  const baseLeft = makeLeaf(blankL, versoL);
+  const baseLeft = makeLeaf(blankL, versoAt(-1));
 
   // ── בריכת-הגיליונות המתהפכים ───────────────────────────────────────────
   // הספר מדפדף בלי סוף, ולכן אין כאן „שני גיליונות שמתהפכים פעם אחת” אלא
@@ -373,7 +403,7 @@ export function createBookScene(
   const POOL = opts.mobile ? 4 : 5;
   const turners: Leaf[] = [];
   for (let i = 0; i < POOL; i += 1) {
-    turners.push(makeLeaf(quoteAt(i), versoL));
+    turners.push(makeLeaf(quoteAt(i), versoAt(i)));
   }
 
   // ── גוש-הדפים ──────────────────────────────────────────────────────────
@@ -1389,10 +1419,12 @@ export function createBookScene(
   }
   function dispose() {
     [
-      blankR, blankL, endpaper, coverLiner, coverTex, versoL,
+      blankR, blankL, endpaper, coverLiner, coverTex,
     ].forEach((t) => t.dispose());
     quoteCache.forEach((t) => t.dispose());
     quoteCache.clear();
+    proseCache.forEach((t) => t.dispose());
+    proseCache.clear();
     leafGeo.dispose();
     coverGeo.dispose();
     [baseRight, baseLeft, ...turners, ...fanR, ...fanL].forEach((l) => l.mat.dispose());

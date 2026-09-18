@@ -36,7 +36,21 @@ export type PageSide = "left" | "right";
 export type PageSpec =
   /** הדף הנושא — ציטוט מאושר, בניסוח ובשבירות-השורה שנמסרו. */
   | { kind: "quote"; lines: readonly string[] }
-  /** הדף הפונה — קו-דגש דק וכותרת רצה שקטה. בעיקר אוויר. */
+  /**
+   * הדף הפונה — עמוד-קריאה אמיתי: פסקאות ורבטים מכתב-היד, מיושרות לשני
+   * הצדדים, בגודל-גוף.
+   *
+   * ── למה זה השתנה ────────────────────────────────────────────────────────
+   * קודם היה כאן ‎verso‎: קו-דגש דק וכותרת רצה, ותו לא. ההנמקה הייתה „ספרים
+   * אמיתיים מלאים בחלל לבן”, וזה נכון — אבל *לא* כשאותו דף-כמעט-ריק הוא
+   * הדף השמאלי של **כל** כפולה בספר. הוא נצרב פעם אחת ושותף לכולן, ולכן
+   * הכפולה נקראה כציטוט בודד שמרחף מול נייר ריק, ולא כספר פתוח.
+   *
+   * הטקסט כאן אינו חדש ואינו מילוי: אלו פסקאות המבוא הקנוניות שכבר מוצגות
+   * במלואן ב-‎/preview‎, ורבטים. אין כאן ניסוח שנכתב לצורך העיצוב.
+   */
+  | { kind: "prose"; paragraphs: readonly string[]; header?: string }
+  /** הדף הפונה הישן — קו-דגש דק וכותרת רצה שקטה. בעיקר אוויר. */
   | { kind: "verso"; header?: string }
   | { kind: "blank" };
 
@@ -97,8 +111,11 @@ function margins(side: PageSide, variant: "text" | "quote" = "text"): Margins {
   return {
     outer,
     gutter,
-    top: TEX_H * 0.13,
-    bottom: TEX_H * 0.12,
+    // שוליים אנכיים: צומצמו מ-0.13/0.12 כדי שגוש-הציטוט יתפוס יותר מגובה
+    // הדף ולא ירחף כאי קטן במרכז נייר ריק. השוליים *האופקיים* לא נגעו —
+    // שם רוחב הקצה-החופשי הוא מה שמונע חיתוך ב-shader (ראו למעלה).
+    top: TEX_H * (variant === "quote" ? 0.105 : 0.10),
+    bottom: TEX_H * (variant === "quote" ? 0.095 : 0.095),
     textRight: TEX_W - rightPad,
     usableW: TEX_W - leftPad - rightPad,
   };
@@ -199,7 +216,9 @@ function fitQuote(
 ): QuoteFit {
   const MAX = TEX_W * 0.150;
   const NOWRAP_FLOOR = TEX_W * 0.072;
-  const WRAP_MAX = TEX_W * 0.092;
+  // הועלה מ-0.092: ציטוט ארוך שנפרס קיבל טיפוגרפיה קטנה מדי ביחס לדף
+  // הפרוזה שממולו, והכפולה יצאה לא-מאוזנת — הצד הנושא נקרא חלש מהצד הפונה.
+  const WRAP_MAX = TEX_W * 0.100;
   const ABS_FLOOR = TEX_W * 0.056;
 
   const measure = (size: number, wrap: boolean): QuoteFit => {
@@ -252,6 +271,70 @@ function render(ctx: CanvasRenderingContext2D, spec: PageSpec, side: PageSide) {
 
     y += ruleGap - fit.size * LINE_H + fit.size * 0.3;
     accentRule(ctx, m.textRight, y, TEX_W * 0.24);
+    return;
+  }
+
+  if (spec.kind === "prose") {
+    const m = margins(side, "text");
+    runningHead(ctx, m, spec.header);
+
+    const size = Math.round(TEX_W * 0.0395);
+    const lineH = size * 1.66;
+    const paraGap = size * 0.5;
+    const indent = size * 1.7;
+    const bottomLimit = TEX_H - m.bottom;
+
+    ctx.font = `400 ${size}px ${fontFamily()}`;
+    ctx.fillStyle = INK;
+    const spaceW = ctx.measureText(" ").width;
+
+    /**
+     * יישור-לשני-הצדדים, ידנית.
+     *
+     * ‎canvas‎ אינו יודע ליישר פסקה, ובלי יישור הדף נקרא כטיוטה: קצה שמאל
+     * משונן ומסגרת-הטקסט לא נסגרת — וזה בדיוק ה„חצי-ריק” שביקשו לתקן.
+     * לכן כל שורה שאינה אחרונה-בפסקה נמתחת: המילים מצוירות אחת-אחת מימין
+     * לשמאל, והעודף מתחלק שווה בין הרווחים.
+     *
+     * שורה עם עודף גדול מדי (שורה אחרונה, או שורה עם מילה ארוכה) אינה
+     * נמתחת — מתיחה כזו יוצרת „נהרות” לבנים, שנראים גרוע יותר מקצה משונן.
+     */
+    const drawJustified = (words: string[], y: number, startRight: number, width: number) => {
+      const natural =
+        words.reduce((w, t) => w + ctx.measureText(t).width, 0) + (words.length - 1) * spaceW;
+      const extra = width - natural;
+      if (words.length < 2 || extra <= 0 || extra > width * 0.2) {
+        ctx.fillText(words.join(" "), startRight, y);
+        return;
+      }
+      const perGap = extra / (words.length - 1);
+      let x = startRight;
+      for (const w of words) {
+        ctx.fillText(w, x, y);
+        x -= ctx.measureText(w).width + spaceW + perGap;
+      }
+    };
+
+    let y = m.top + size;
+    for (let pi = 0; pi < spec.paragraphs.length && y <= bottomLimit; pi += 1) {
+      const firstRight = m.textRight - (pi === 0 ? 0 : indent);
+      const firstW = m.usableW - (pi === 0 ? 0 : indent);
+      // השורה הראשונה בפסקה צרה יותר (כניסת-פסקה), ולכן נפרסת בנפרד.
+      const head = wrapLine(ctx, spec.paragraphs[pi], firstW);
+      const rest = head.length > 1 ? wrapLine(ctx, head.slice(1).join(" "), m.usableW) : [];
+      const rows: Array<{ text: string; right: number; width: number }> = [
+        { text: head[0], right: firstRight, width: firstW },
+        ...rest.map((t) => ({ text: t, right: m.textRight, width: m.usableW })),
+      ];
+      rows.forEach((row, ri) => {
+        if (y > bottomLimit) return;
+        const last = ri === rows.length - 1;
+        if (last) ctx.fillText(row.text, row.right, y);
+        else drawJustified(row.text.split(" "), y, row.right, row.width);
+        y += lineH;
+      });
+      y += paraGap;
+    }
     return;
   }
 
