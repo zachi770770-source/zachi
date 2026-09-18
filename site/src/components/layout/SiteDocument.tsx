@@ -3,6 +3,7 @@ import { Heebo, Frank_Ruhl_Libre } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CookieConsent } from "@/components/layout/CookieConsent";
+import { CompassLauncher } from "@/components/compass/CompassLauncher";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 import { Analytics } from "@vercel/analytics/next";
@@ -81,14 +82,15 @@ export function SiteDocument({
           </main>
           <SiteChrome>
             <Footer />
-            {/* ה-CompassLauncher (בועה צפה בכל עמוד) הוסר.
-                שלוש סיבות שנמדדו, לא הועדפו:
-                  • הוא הופיע גם בתוך /preview — חוויית קריאה שכל כולה שקט.
-                  • במובייל הוא ישב יחד עם בר-הטעימה מעל ה-CTA הסוגר של עמוד
-                    הבית והסתיר את „עוד לא בטוחים? קראו טעימה מהספר”.
-                  • שני הצפים יחד תפסו ~13% מגובה מסך של 844px.
-                הכלי עצמו לא הוסר — הוא נכנס דרך `DeeperEntry` ודרך הפוטר.
-                נותרה שכבה צפה אחת בכל האתר: הסכמת-העוגיות. */}
+            {/* „שאל את הספר” — נקודת-כניסה צפה גלובלית אל /compass.
+                הוסר ב-5d9eb82 ומשוחזר כאן לבקשה מפורשת, אבל **רק כקישור**:
+                הגרסה הישנה נשאה גם מגירת-Dialog שהריצה את מנוע AskRoute בתוך
+                שכבה צפה — ממשק שני לאותה חוויה. שתיים מהסיבות המקוריות להסרה
+                כבר אינן קיימות (בר-הטעימה ו-PreviewStickyCta הוסרו מאז), ולכן
+                נשארת שכבה צפה אחת נוספת בלבד, שמתרוממת מעל הסכמת-העוגיות דרך
+                --cookie-banner-height ואינה חופפת לה.
+                מרונדר בתוך SiteChrome ⇒ אינו מופיע ב-/admin. */}
+            <CompassLauncher />
             <CookieConsent />
           </SiteChrome>
           <AnalyticsScripts />
