@@ -149,12 +149,31 @@ test("/preview mobile: רק סרגל-הקורא והמשגר המאושר מרח
   await ctx.close();
 });
 
-test("/preview mobile: המשגר אינו מסתיר את סוף העמוד", async ({ browser }) => {
-  // הליקוי שנמדד לפני התיקון: המשגר הוא `fixed`, כלומר מחוץ לזרימת המסמך,
-  // ולכן בגלילה מלאה הוא ישב לצמיתות מעל שורת הזכויות/הנגישות בפוטר — טקסט
-  // שאין שום מיקום-גלילה שמשחרר אותו. הפוטר שומר עכשיו את טווח-הנחיתה דרך
-  // `--floating-ui-clearance`, והבדיקה הזו מקבעת את זה.
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+/**
+ * המשגר אינו מסתיר את סוף העמוד.
+ *
+ * ── הליקוי שנמדד ─────────────────────────────────────────────────────────
+ * המשגר הוא `fixed`, כלומר מחוץ לזרימת המסמך, ולכן בלי ריווח ייעודי הוא יושב
+ * בגלילה מלאה מעל סוף הפוטר — טקסט שאין שום מיקום-גלילה שמשחרר אותו. המדידה
+ * ב-768 בלי הריווח: המשגר `x 24–191, y 758–812` מול „הצהרת נגישות”
+ * `x 32–108, y 759–778` — קישור אינטראקטיבי מכוסה לחלוטין. הפוטר שומר עכשיו
+ * את טווח-הנחיתה דרך `--floating-ui-clearance`.
+ *
+ * ── למה שני רוחבים, ולמה על גליפים ───────────────────────────────────────
+ * שתי טעויות-מדידה נפלו כאן לפני שהבדיקה הזו קיבלה את צורתה, ושתיהן שווֹת
+ * תיעוד כי שתיהן *עברו* על קוד שבור:
+ *
+ *   1. גלאי לפי `elementFromPoint` בפינות המשגר החזיר את ה-DIV של בלוק-המותג
+ *      בפוטר — מכל שהמלבן שלו משתרע מתחת למשגר בעוד הטקסט שלו למעלה לגמרי.
+ *      „המכל נוגע” אינו „הטקסט מוסתר”. לכן נמדדים כאן מלבני-הטקסט עצמם, דרך
+ *      `Range.getClientRects` על צמתי-טקסט.
+ *   2. הרצה ב-390 בלבד: שם הפוטר נערם אחרת והשורות יורדות מתחת למשגר, ולכן
+ *      אין חפיפה גם בלי הריווח — ובקרת-שלילה (ביטול הריווח) *עברה*. 768 הוא
+ *      הרוחב שבו הליקוי מתגלה, ולכן שני הרוחבים נבדקים.
+ */
+for (const width of [390, 768]) {
+  test(`/preview @ ${width}: המשגר אינו מסתיר את סוף העמוד`, async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width, height: 844 } });
   await ctx.addInitScript(() => {
     try {
       localStorage.setItem(
@@ -177,28 +196,28 @@ test("/preview mobile: המשגר אינו מסתיר את סוף העמוד", a
     );
     if (!L) return ["launcher missing"];
     const r = L.getBoundingClientRect();
-    const pts: [number, number][] = [
-      [r.left + 4, r.top + 4],
-      [r.right - 4, r.top + 4],
-      [r.left + 4, r.bottom - 4],
-      [r.right - 4, r.bottom - 4],
-      [r.left + r.width / 2, r.top + r.height / 2],
-    ];
-    L.style.pointerEvents = "none";
     const hits = new Set<string>();
-    for (const [x, y] of pts) {
-      const el = document.elementFromPoint(x, y);
-      if (!el || L.contains(el)) continue;
-      const text = (el.textContent || "").trim();
-      if (text) hits.add(el.tagName + " :: " + text.slice(0, 50));
+    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      const text = (n.textContent || "").trim();
+      if (!text || L.contains(n)) continue;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      for (const b of range.getClientRects()) {
+        if (b.width < 1 || b.height < 1) continue;
+        if (b.left < r.right && r.left < b.right && b.top < r.bottom && r.top < b.bottom) {
+          hits.add(text.slice(0, 50));
+          break;
+        }
+      }
     }
-    L.style.pointerEvents = "";
     return [...hits];
   });
 
-  expect(covered, "המשגר מכסה טקסט בסוף העמוד").toEqual([]);
-  await ctx.close();
-});
+    expect(covered, `המשגר מכסה טקסט בסוף העמוד @ ${width}`).toEqual([]);
+    await ctx.close();
+  });
+}
 
 test("/preview closing: Amazon is the primary and only purchase action (no waitlist, no form)", async ({ page }) => {
   await page.goto("/preview", { waitUntil: "networkidle" });
