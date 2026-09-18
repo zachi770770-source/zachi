@@ -21,16 +21,38 @@ import { InstagramIcon, FacebookIcon } from "@/components/shared/SocialIcons";
  * לאתר העברי, הכל באנגלית.
  */
 export function Footer() {
-  const english = isEnglishPath(usePathname());
+  const pathname = usePathname();
+  const english = isEnglishPath(pathname);
   if (english) return <EnglishFooter />;
   const hasSocial = siteConfig.social.instagram || siteConfig.social.facebook;
+
+  /**
+   * טווח-הנחיתה של „שאל את הספר”.
+   *
+   * המשגר הוא ‎position: fixed‎ — הוא מחוץ לזרימת המסמך, ולכן שום דבר לא שומר
+   * לו מקום. בלעדי הריווח הזה, בגלילה מלאה הוא יושב לצמיתות מעל השורה האחרונה
+   * של הפוטר (זכויות-יוצרים והצהרת-הנגישות): נמדד ב-390 וב-768 — טקסט שאין שום
+   * מיקום-גלילה שמשחרר אותו. זה בדיוק מה ש-‎--floating-ui-clearance‎ הוגדר
+   * בשבילו ב-‎globals.css‎, והוא נשאר בלי צרכן מאז שהוסרו הפקדים הצפים הקודמים.
+   *
+   * התנאי זהה לתנאי-הרינדור של המשגר (עברית, לא ‎/compass‎) ונגזר מ-‎pathname‎
+   * בלבד — כלומר זהה בשרת ובלקוח, ולכן אין הידרציה שמזיזה את הפוטר.
+   */
+  const reserveLauncherLanding = !pathname?.startsWith("/compass");
 
   const linkClass =
     "inline-block py-1 text-[15px] text-secondary-foreground/80 transition-colors hover:text-secondary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-muted";
 
   return (
     <footer className="border-t border-secondary-foreground/15 bg-secondary text-secondary-foreground">
-      <Container className="flex flex-col gap-5 py-7 sm:gap-12 sm:py-16">
+      <Container
+        className="flex flex-col gap-5 py-7 sm:gap-12 sm:py-16"
+        style={
+          reserveLauncherLanding
+            ? { paddingBottom: "var(--floating-ui-clearance)" }
+            : undefined
+        }
+      >
         <div className="grid grid-cols-2 gap-x-6 gap-y-6 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-10">
           {/* בלוק המותג — רוחב מלא במובייל; שני טורי הקישורים יושבים זה לצד זה מתחתיו */}
           <div className="col-span-2 flex max-w-sm flex-col gap-2.5 lg:col-span-1">
