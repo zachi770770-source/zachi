@@ -9,7 +9,13 @@ import { expect, test } from "@playwright/test";
  */
 const LABEL = "שאל את הספר";
 
-/** עמודים רגילים שבהם המשגר חייב להופיע — כולל מאמר-מדריך ועמוד-כלי. */
+/**
+ * עמודים רגילים שבהם המשגר חייב להופיע — כולל מאמר-מדריך, עמוד-כלי ועמוד
+ * הטעימה. ‎/preview‎ היה מוחרג כאן במובייל בסבב קודם, בגלל בדיקה ישנה שאסרה
+ * שם כל שכבה צפה; דרישת-המוצר הנוכחית („בכל עמוד עברי ציבורי”) גוברת, והבדיקה
+ * ההיא עודכנה במכוון. ‎e2e/preview.spec.ts‎ מחזיק את הצד השני של החוזה: שם
+ * מותרים בדיוק ההדר, סרגל-הקורא והמשגר — ושום שכבה אחרת.
+ */
 const PAGES = [
   "/",
   "/love",
@@ -19,7 +25,7 @@ const PAGES = [
   "/guide/healthy-relationship",
   "/method/quiet-check",
   "/author",
-  "/preview", // בדסקטופ בלבד — ראו ההחרגה למטה
+  "/preview",
   "/reader",
 ];
 
@@ -66,21 +72,6 @@ test.describe("משגר „שאל את הספר” — נוכחות גלובלי
 });
 
 test.describe("משגר „שאל את הספר” — היכן שהוא לא אמור להיות", () => {
-  test("אינו מופיע ב-/preview במובייל — עמוד-הקריאה נשאר נקי משכבות צפות", async ({
-    browser,
-  }) => {
-    // התנגשות אמיתית: `e2e/preview.spec.ts` שומר שבמובייל לא תרחף שם שום
-    // בקרה. ההחרגה צרה ככל האפשר — מובייל בלבד — והבדיקה ההיא לא שונתה.
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    const page = await ctx.newPage();
-    await page.goto("/preview");
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(400);
-    const fixedLauncher = page.locator('a[href="/compass"]').filter({ hasText: LABEL });
-    await expect(fixedLauncher).toHaveCount(0);
-    await ctx.close();
-  });
-
   test("אינו מופיע ב-/compass — העמוד עצמו הוא החוויה", async ({ page }) => {
     await page.goto("/compass");
     await revealOnMobile(page);
