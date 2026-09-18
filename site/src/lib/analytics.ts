@@ -108,6 +108,13 @@ export type AnalyticsEventName =
   //      • „קליק-רכישה אחרי שיחה” → amazon_purchase_clicked
   //                                 { source:"home", source_detail:"conversation_close" }
   | "compass_ask"
+  // ── „שאל את הספר” כשיחה (CompassConsole ב-/compass). מזהים בלבד, ללא תוכן:
+  //    טקסט השאלה החופשית לעולם אינו נשלח לאנליטיקה.
+  | "compass_open"
+  | "compass_free_text_started"
+  | "compass_question_submitted"
+  | "compass_answer_rendered"
+  | "compass_followup_submitted"
   | "compass_answer_success"
   | "compass_refused"
   | "compass_limit"

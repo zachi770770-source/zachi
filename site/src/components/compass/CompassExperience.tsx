@@ -28,10 +28,13 @@ type Mode = "free-text" | "guided";
  */
 export function CompassExperience({
   maxQuestionChars,
+  maxUserTurns,
   uiPreview = false,
   initialStation,
 }: {
   maxQuestionChars: number;
+  /** מכסת תורות-המשתמש בשיחה אחת — נאכפת בשרת, מוצגת בממשק. */
+  maxUserTurns?: number;
   uiPreview?: boolean;
   initialStation?: AskStationId;
 }) {
@@ -79,6 +82,7 @@ export function CompassExperience({
         <div className="mt-8 sm:mt-10">
           <CompassConsole
             maxQuestionChars={maxQuestionChars}
+            maxUserTurns={maxUserTurns}
             uiPreview={uiPreview}
           />
 

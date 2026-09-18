@@ -39,17 +39,39 @@ const CARD_SHELL =
  * (/api/compass); הרכיב אינו יודע על ספק המודל, על שכבת הידע או על המכסה
  * מעבר למספר שנותר. אין שמירה מקומית של תוכן, ואין שליחת מזהה אישי.
  */
+/** תור בשיחה — אותו מבנה שסכימת-הוולידציה של ‎/api/compass‎ כבר מקבלת. */
+type Turn = { role: "user" | "assistant"; content: string };
+
 export function CompassConsole({
   maxQuestionChars,
+  maxUserTurns = 3,
   uiPreview = false,
 }: {
   maxQuestionChars: number;
+  /**
+   * מספר תורות-המשתמש המרבי בשיחה אחת. מגיע מ-‎COMPASS_LIMITS.maxUserTurns‎
+   * דרך העמוד — אותו מספר שהשרת אוכף — כדי שהממשק לא יציע המשך שייחסם.
+   */
+  maxUserTurns?: number;
   /**
    * מצב בדיקות (Preview/Staging): הטופס נראה וניתן לבדיקה, אך השליחה נעצרת
    * מקומית בהודעה מרוסנת — *ללא* קריאת רשת ו*ללא* המצאת תשובה. ברירת מחדל: כבוי.
    */
   uiPreview?: boolean;
 }) {
+  /**
+   * ── שיחה, לא תיבת-חיפוש ─────────────────────────────────────────────────
+   * ‎/api/compass‎ תומך ב-‎mode:"conversation"‎ מאז שנבנה — עם ‎context‎ של
+   * התורות הקודמות, תור-סיום, ובדיקות-שרת משלו — אבל **לא היה לו שום צרכן
+   * בצד הלקוח**. העמוד שלח ‎single‎ בלבד, ולכן „שאל את הספר” היה שאלה אחת
+   * ותשובה אחת, בלי המשך.
+   *
+   * כאן נפתח בדיוק המסלול הקיים: התמליל נשמר בזיכרון-הרכיב בלבד (לא
+   * ב-localStorage ולא בשרת), נשלח כ-‎context‎, ומתאפס ב„שאלה חדשה”.
+   */
+  const [turns, setTurns] = React.useState<Turn[]>([]);
+  const userTurns = turns.filter((t) => t.role === "user").length;
+  const conversationFull = userTurns >= maxUserTurns;
   const [availability, setAvailability] = React.useState<Availability>(
     uiPreview ? "ready" : "loading",
   );
@@ -69,6 +91,20 @@ export function CompassConsole({
   const inflight = React.useRef<AbortController | null>(null);
   const reqId = React.useRef(0);
   const mounted = React.useRef(true);
+  /** „התחיל להקליד” נמדד פעם אחת לכל טעינת-עמוד, לא בכל תו. */
+  const startedRef = React.useRef(false);
+  React.useEffect(() => {
+    trackEvent("compass_open"); // אנונימי: נפתח מסך השאלה החופשית
+  }, []);
+
+  /** „שאלה חדשה” — מנקה את השיחה ומחזיר את הטופס למצב פתיחה. */
+  const startNew = React.useCallback(() => {
+    setTurns([]);
+    setAnswer(null);
+    setQuestion("");
+    startedRef.current = false;
+  }, []);
+
   React.useEffect(() => {
     mounted.current = true;
     return () => {
@@ -136,6 +172,10 @@ export function CompassConsole({
 
       setQuestion(q);
       trackEvent("compass_ask"); // אנונימי, ללא תוכן
+      trackEvent("compass_question_submitted"); // אנונימי, ללא תוכן
+      // שאלת-המשך נספרת בנפרד: זה ההבדל בין „תיבת-חיפוש” ל„שיחה”, ובלי מדידה
+      // נפרדת אי-אפשר לדעת אם ההמשך בכלל קורה.
+      if (turns.length) trackEvent("compass_followup_submitted");
 
       // מצב בדיקות: לא ניגשים לרשת ולא ממציאים תשובה — עוצרים בהודעה מרוסנת.
       if (uiPreview) {
@@ -159,7 +199,11 @@ export function CompassConsole({
         const res = await fetch("/api/compass", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: q, company }),
+          body: JSON.stringify(
+            turns.length
+              ? { question: q, company, mode: "conversation", context: turns }
+              : { question: q, company },
+          ),
           signal: ctrl.signal,
         });
         const data = await res.json().catch(() => null);
@@ -182,7 +226,15 @@ export function CompassConsole({
             focus: typeof data.focus === "string" ? data.focus : undefined,
           });
           setQuestion("");
+          // התמליל גדל רק על תשובה אמיתית: סירוב/מגבלה/בטיחות אינם „תור”
+          // שראוי להזין בחזרה כהקשר.
+          setTurns((prev) => [
+            ...prev,
+            { role: "user", content: q },
+            { role: "assistant", content: String(data.answer ?? "") },
+          ]);
           trackEvent("compass_answer_success"); // רק על תשובה מוצלחת אמיתית
+          trackEvent("compass_answer_rendered"); // אנונימי, ללא תוכן
         } else if (data.status === "safety") {
           // שער-הבטיחות נורה בשרת: מסר-בטיחות בלבד. אין ציטוט, אין שורת-פוקוס,
           // אין CTA ואין המשך „רגיל”. במכוון ללא trackEvent: לא מדווחים, ולו
@@ -210,7 +262,7 @@ export function CompassConsole({
         if (inflight.current === ctrl) inflight.current = null;
       }
     },
-    [company, submitting, outOfQuestions, uiPreview]
+    [company, submitting, outOfQuestions, uiPreview, turns]
   );
 
   const onSubmit = React.useCallback(
@@ -301,8 +353,61 @@ export function CompassConsole({
 
   return (
     <div className="mx-auto max-w-2xl">
+      {/* ── תמליל השיחה ──────────────────────────────────────────────────────
+          התורות הקודמות, כדי שהמשך-שאלה ייקרא כשיחה ולא כתיבת-חיפוש שהתאפסה.
+          התור האחרון אינו מוצג כאן: הוא כרטיס-התשובה שמתחת לטופס, ולכן הצגתו
+          כאן הייתה כפילות. נשמר בזיכרון-הרכיב בלבד — לא בשרת ולא ב-localStorage. */}
+      {turns.length > 2 ? (
+        <ol className="mb-6 space-y-4">
+          {turns.slice(0, -2).map((t, i) => (
+            <li
+              key={`${t.role}-${i}`}
+              className={
+                t.role === "user"
+                  ? "rounded-lg border border-border bg-surface-muted px-4 py-3"
+                  : "border-s-2 border-s-brand ps-4"
+              }
+            >
+              <span className="kicker">
+                {t.role === "user" ? "שאלתם" : "הספר"}
+              </span>
+              <p className="mt-1.5 text-[1rem] leading-[1.75] text-foreground [text-wrap:pretty]">
+                {t.content}
+              </p>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+
+      {/* השיחה מיצתה את מכסת-התורות שהשרת אוכף: לא מציעים המשך שייחסם ממילא. */}
+      {conversationFull ? (
+        <div className="mb-6 rounded-lg border border-border bg-surface-muted px-4 py-3.5">
+          <p className="text-[15px] leading-relaxed text-foreground-muted">
+            כאן השיחה הזו נעצרת. אפשר להתחיל שאלה חדשה.
+          </p>
+          <button
+            type="button"
+            onClick={startNew}
+            className="mt-3 inline-flex min-h-[44px] items-center text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            שאלה חדשה
+          </button>
+        </div>
+      ) : turns.length ? (
+        <div className="mb-4 flex justify-start">
+          <button
+            type="button"
+            onClick={startNew}
+            className="inline-flex min-h-[44px] items-center text-[14.5px] font-semibold text-foreground-muted underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            שאלה חדשה
+          </button>
+        </div>
+      ) : null}
+
       {/* כרטיס השאלה — עריכתי, מזמין וקומפקטי */}
       <form
+        hidden={conversationFull}
         ref={formRef}
         onSubmit={onSubmit}
         className="rounded-lg border border-border bg-surface p-5 sm:p-7"
@@ -360,7 +465,13 @@ export function CompassConsole({
         <textarea
           id="compass-question"
           value={question}
-          onChange={(e) => setQuestion(e.target.value.slice(0, maxQuestionChars))}
+          onChange={(e) => {
+            if (!startedRef.current && e.target.value.trim().length > 0) {
+              startedRef.current = true;
+              trackEvent("compass_free_text_started"); // אנונימי, ללא תוכן
+            }
+            setQuestion(e.target.value.slice(0, maxQuestionChars));
+          }}
           onKeyDown={onKeyDown}
           maxLength={maxQuestionChars}
           rows={3}

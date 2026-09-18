@@ -60,6 +60,7 @@ export default async function CompassPage({
         <div className="enter-stagger">
           <CompassExperience
             maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
+            maxUserTurns={COMPASS_LIMITS.maxUserTurns}
             uiPreview={surface === "free-text-preview"}
             initialStation={initialStation}
           />
