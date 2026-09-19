@@ -47,7 +47,10 @@
    *     שורת הזכויות/הנגישות — נמדד ב-390 וב-768.
    */
   --fab-bottom: max(5.5rem, calc(env(safe-area-inset-bottom) + 5rem));
-  --fab-height: 3.125rem;
+  /* גובה המשגר בפועל. עודכן מ-3.125rem כשהבועה הוגדלה ל-CTA צף אמיתי:
+     טווח-הנחיתה של הפוטר נגזר מכאן, ולכן גובה מעודכן הוא מה שמונע חזרה של
+     חסימת שורת-הזכויות. נמדד בדפדפן, לא מוערך. */
+  --fab-height: 4rem;
   --fab-gap: 0.75rem;
   --floating-ui-clearance: calc(var(--fab-bottom) + var(--fab-height) + var(--fab-gap));
 
@@ -161,7 +164,7 @@
 @media (min-width: 768px) {
   :root {
     --fab-bottom: 2rem;
-    --fab-height: 3.375rem;
+    --fab-height: 4.5rem;
   }
 }
 

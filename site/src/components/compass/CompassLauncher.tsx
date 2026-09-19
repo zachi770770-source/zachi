@@ -122,13 +122,13 @@ export function CompassLauncher() {
         opacity: hiddenOnFold ? 0 : 1,
         pointerEvents: hiddenOnFold ? "none" : undefined,
       }}
-      className="group fixed end-4 top-auto z-40 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface py-2 pe-4 ps-2 text-[14px] font-semibold leading-none text-foreground shadow-[0_10px_30px_-12px_rgb(var(--shadow-tint)/0.35)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-secondary/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none md:end-6 md:pe-5 md:text-[15px]"
+      className="group fixed end-4 top-auto z-40 inline-flex items-center gap-2.5 rounded-full border border-border-strong bg-surface py-2.5 pe-5 ps-2.5 text-[15.5px] font-semibold leading-none text-foreground shadow-[0_18px_44px_-14px_rgb(var(--shadow-tint)/0.45)] transition-[transform,border-color,opacity] duration-300 hover:-translate-y-0.5 hover:border-secondary/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none md:end-6 md:gap-3 md:py-3 md:pe-7 md:ps-3 md:text-[17px]"
     >
       <span
         aria-hidden="true"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand md:h-9 md:w-9"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand md:h-12 md:w-12"
       >
-        <Compass className="h-[18px] w-[18px] md:h-5 md:w-5" />
+        <Compass className="h-5 w-5 md:h-[22px] md:w-[22px]" />
       </span>
       <span className="whitespace-nowrap">שאל את הספר</span>
     </Link>
