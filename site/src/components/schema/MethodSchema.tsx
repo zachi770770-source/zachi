@@ -32,6 +32,11 @@ export function MethodSchema({
         inDefinedTermSet: {
           "@type": "DefinedTermSet",
           name: `הכלים של ${siteConfig.bookTitle}`,
+          // אוסף-המושגים עצמו מיוחס למחבר. הכלים הם המקור-המקורי היחיד של
+          // האתר, והקישור הזה הוא מה שהופך אותם לנכס של *הישות* צחי חן ולא
+          // לרשימת מונחים חסרת-בעלים. אותו `@id` של ה-Person, בלי כפילות
+          // ובלי שום טענת-הסמכה: יחס-יצירה, לא תואר.
+          creator: { "@id": entityId.person },
           about: { "@id": entityId.book },
         },
         // נושא-של: הספר (קישור-ישות ישיר).

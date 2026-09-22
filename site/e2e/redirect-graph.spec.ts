@@ -66,6 +66,11 @@ test("sitemap advertises the production host only", async ({ request }) => {
 /** הכתובות הישנות שנשמרות ככוונה (src/proxy.ts) — 301 קבוע ליעד חי. */
 const INTENTIONAL_REDIRECTS: Array<[string, string]> = [
   ["/about", "/author"],
+  // האתר שקדם לזה על אותו דומיין. ‎/About-Us.html‎ עדיין מופיעה בתוצאות-חיפוש
+  // לדומיין („צחי חן מרצה ומנטור להצלחה - אודותיי”) ומאז המעבר החזירה 404.
+  // שתי צורות-האות נבדקות, כי כתובות ישנות מצוטטות בשתיהן.
+  ["/About-Us.html", "/author"],
+  ["/about-us.html", "/author"],
   ["/articles", "/book"],
   ["/articles/stop-auditioning-dates", "/guide/finding-a-relationship"],
   ["/articles/why-attracted-unavailable", "/guide/attracted-to-unavailable"],
@@ -81,6 +86,32 @@ for (const [from, to] of INTENTIONAL_REDIRECTS) {
     expect(dest.status(), `${to} must be a direct 200 (no chain)`).toBe(200);
   });
 }
+
+test("the legacy About-Us.html lands on /author with /author's own canonical", async ({
+  request,
+}) => {
+  // מעבר ל-301 עצמו: מה שגוגל רואה בסוף הוא עמוד-המחבר, עם canonical משל עצמו.
+  // זו הנקודה שבה הכתובת הישנה מפסיקה להיות 404 ומתחילה להזרים סמכות לישות.
+  const hop = await request.get("/About-Us.html", { maxRedirects: 0 });
+  expect(hop.status()).toBe(301);
+  const target = new URL(hop.headers()["location"], "http://localhost").pathname;
+  expect(target).toBe("/author");
+
+  const dest = await request.get(target, { maxRedirects: 0 });
+  expect(dest.status(), "no second hop").toBe(200);
+  const html = await dest.text();
+  const canonical = html.match(/<link[^>]+rel="canonical"[^>]+href="([^"]+)"/i)?.[1];
+  expect(canonical).toBe(`${PROD_ORIGIN}/author`);
+});
+
+test("no other legacy .html URL was mass-redirected", async ({ request }) => {
+  // ההפניה היחידה מהאתר הקודם היא זו שיש לה עדות. עמודי הייעוץ העסקי/ההרצאות
+  // אינם עוסקים בזוגיות, ואין להם מקבילה — הם חייבים להישאר 404.
+  for (const path of ["/Services.html", "/Contact-Us.html", "/index.html"]) {
+    const res = await request.get(path, { maxRedirects: 0 });
+    expect(res.status(), `${path} must not be redirected without evidence`).toBe(404);
+  }
+});
 
 test("an unmapped legacy article URL stays 410 Gone, never a redirect", async ({ request }) => {
   const res = await request.get("/articles/no-such-old-post", { maxRedirects: 0 });

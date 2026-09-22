@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { authorContent } from "@/content/author";
+import { methodOrder, methods } from "@/content/methods";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/shared/BookCover";
@@ -118,6 +119,50 @@ export default function AuthorPage() {
         ))}
       </div>
 
+      {/* מה יש בספר — החוליה שחיברה בין „למה כתבתי” לבין „מה זה בפועל”. עמוד
+          המחבר הוא עמוד-הישות של האתר, והוא היה מספר רק את הסיפור האישי. */}
+      <section
+        aria-labelledby="book-about-heading"
+        className="reveal mx-auto mt-14 max-w-[64ch] border-t border-border pt-10"
+      >
+        <h2
+          id="book-about-heading"
+          className="font-serif text-2xl font-semibold text-foreground"
+        >
+          {authorContent.bookTitle}
+        </h2>
+        {authorContent.bookBody.map((p) => (
+          <p
+            key={p}
+            className="mt-4 text-[1.075rem] leading-[1.85] text-foreground/90 sm:text-[1.15rem]"
+          >
+            {p}
+          </p>
+        ))}
+
+        <h3 className="mt-9 font-serif text-xl font-semibold text-foreground">
+          {authorContent.methodsTitle}
+        </h3>
+        <p className="mt-3 text-[1.03rem] leading-[1.8] text-foreground-muted">
+          {authorContent.methodsIntro}
+        </p>
+        {/* ששת עמודי-המושג. השמות והנתיבים נשלפים מ-`methods` ואינם מועתקים,
+            כדי שהרשימה לא תוכל להיסחף משמות הכלים שבספר. */}
+        <ul className="mt-4 space-y-2.5">
+          {methodOrder.map((slug) => (
+            <li key={slug} className="text-[1.02rem] leading-relaxed">
+              <Link
+                href={methods[slug].path}
+                className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                {methods[slug].term}
+              </Link>
+              <span className="text-foreground-muted"> — {methods[slug].definition}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {/* „למה כתבתי את הספר הזה” — שמע בקולו של המחבר (או placeholder + תמלול) */}
       <AuthorAudio />
 
@@ -169,6 +214,38 @@ export default function AuthorPage() {
         <p className="mt-5 border-t border-border pt-4 text-[15px] leading-relaxed text-foreground-muted">
           {authorContent.disclosure}
         </p>
+      </section>
+
+      {/* מכאן אפשר להמשיך — עמוד-הישות מעביר קוראים אל שני עמודי-האב ואל
+          הספר. עד כה היה מכאן קישור אחד בלבד (אל /love), והעמוד היה קצה. */}
+      <section
+        aria-labelledby="explore-heading"
+        className="reveal mx-auto mt-12 max-w-[64ch] border-t border-border pt-10"
+      >
+        <h2
+          id="explore-heading"
+          className="font-serif text-2xl font-semibold text-foreground"
+        >
+          {authorContent.exploreTitle}
+        </h2>
+        <p className="mt-3 text-[1.03rem] leading-[1.8] text-foreground-muted">
+          {authorContent.exploreIntro}
+        </p>
+        <ul className="mt-5 space-y-4">
+          {authorContent.explore.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="text-[1.05rem] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                {item.label}
+              </Link>
+              <span className="mt-0.5 block text-[15px] leading-relaxed text-foreground-muted">
+                {item.sub}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* קריאה לפעולה — עטיפה אמיתית לצד הפעולה, שהיא גם מקור המעבר המשותף
