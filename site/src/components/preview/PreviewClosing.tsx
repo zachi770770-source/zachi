@@ -71,6 +71,20 @@ export function PreviewClosing() {
                 aria-hidden="true"
               />
             </BookLink>
+            {/* ‎/faq‎ נשא אפס קישורים מגוף-התוכן של האתר — הוא היה נגיש מהתפריט
+                ומהפוטר בלבד. כאן הוא שייך: מי שסיים לקרוא טעימה שואל בדיוק את
+                מה שהעמוד ההוא עונה עליו, „למי זה מתאים” ו„מה מקבלים”. ממוקם
+                *לפני* בלוק-הרכישה יחד עם שאר היציאות השקטות, כדי לא להפר את
+                הכלל שהפעולה האחרונה בעמוד נשארת אחרונה. */}
+            <p className="text-[14px] text-foreground-muted [text-wrap:pretty]">
+              מתלבטים?{" "}
+              <Link
+                href="/faq"
+                className="font-medium text-brand-hover underline underline-offset-2 hover:text-foreground"
+              >
+                למי הספר מתאים, ומה מקבלים ברכישה
+              </Link>
+            </p>
           </div>
 
           {/* 4 — הפעולה האחרונה בעמוד. אין אחריה דבר. */}
