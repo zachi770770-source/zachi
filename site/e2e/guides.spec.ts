@@ -10,11 +10,15 @@ import { test, expect, type Page } from "@playwright/test";
 const ASIN = "B0GJ3SL9H2";
 
 const GUIDES = [
-  { path: "/guide/finding-a-relationship", h1: "איך למצוא זוגיות בלי להפוך כל דייט למבחן", hub: "/before-relationship" },
+  // ה-H1 כאן הורחב ל„זוגיות ואהבה”: העמוד קיבל בעלות גם על „איך למצוא אהבה”,
+  // ומקטע שמפריד בין „למצוא” ל„לבנות” כדי שלא יתחרה ב-/love.
+  { path: "/guide/finding-a-relationship", h1: "איך למצוא זוגיות ואהבה בלי להפוך כל דייט למבחן", hub: "/before-relationship" },
   { path: "/guide/choosing-a-partner", h1: "איך לבחור בן או בת זוג, ומה באמת כדאי לבדוק", hub: "/before-relationship" },
   { path: "/guide/relationship-doubts", h1: "ספקות בזוגיות: איך יודעים אם זה פחד או חוסר התאמה", hub: "/before-relationship" },
   { path: "/guide/compatibility", h1: "התאמה זוגית: מה באמת חשוב יותר מפרפרים בבטן", hub: "/before-relationship" },
-  { path: "/guide/healthy-relationship", h1: "מהי מערכת יחסים בריאה, ואיך יודעים שאתם בונים אחת", hub: "/inside-relationship" },
+  // „מערכת יחסים בריאה” → „זוגיות בריאה”: העמוד הוא הבעלים של מונח-הראש
+  // „זוגיות”, ולכן ה-H1 נפתח בו. הגוף עדיין מכסה את שני הניסוחים.
+  { path: "/guide/healthy-relationship", h1: "מהי זוגיות בריאה, ואיך יודעים שאתם בונים אחת", hub: "/inside-relationship" },
   { path: "/guide/dating-red-flags", h1: "דגלים אדומים בדייטים, ומה באמת נחשב קו אדום", hub: "/before-relationship" },
   { path: "/guide/getting-back-with-ex", h1: "חזרה לאקס: איך יודעים אם זה נכון", hub: "/after-breakup" },
   { path: "/guide/fear-of-commitment", h1: "פחד ממחויבות, שלך או של בן/בת הזוג", hub: "/building-relationship" },
