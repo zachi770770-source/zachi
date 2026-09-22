@@ -84,14 +84,27 @@ export function ThesisSection() {
             <p className="thesis-promise mt-8 max-w-[54ch] text-[clamp(1.05rem,1.4vw,1.28rem)] leading-relaxed text-foreground-muted">
               {bigIdea.promise}
             </p>
-            {/* קישור-הקשר אל עמוד-הסמכות „אהבה” — הרחבה מושגית של התזה. */}
-            <Link
-              href="/love"
-              className="thesis-promise mt-6 inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            >
-              מהי אהבה ואיך היא נבנית
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            {/* קישורי-ההקשר אל שני עמודי-הסמכות — הרחבה מושגית של התזה.
+                התזה שמעליהם נושאת שני חצאים, „דייטינג הוא חיפוש” ו„אהבה היא
+                בנייה”, ולכל חצי יש עמוד-אב משלו. עד כה רק חצי אחד היה מקושר,
+                כך שהעמוד המסחרי של ספר ששמו „מדייטים לאהבה” לא הציע שום דרך
+                אל הצד שהוא קרוי על שמו. שני קישורים, שני עוגנים שונים. */}
+            <div className="thesis-promise mt-6 flex flex-wrap items-center justify-center gap-x-7 gap-y-3">
+              <Link
+                href="/dating"
+                className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                מה קורה בשלב החיפוש
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/love"
+                className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                מהי אהבה ואיך היא נבנית
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
           </Reveal>
 
           {/* שלושה עקרונות בנייה + הסתייגות — „נבנים” בזה-אחר-זה כמבנה. */}
