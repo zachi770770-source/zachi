@@ -67,6 +67,27 @@ export default function GuideIndexPage() {
         </p>
       </Reveal>
 
+      {/* פסקת-התמצאות: מה בעצם יש באשכול הזה, בשפה שבה אנשים שואלים. יושבת
+          מעל ציר-המסע ומתחת ל-lead, כדי שקורא שנחת מגוגל יבין במשפט אחד אם
+          הוא במקום הנכון — לפני שהוא פוגש עשרים ושלוש כותרות. */}
+      <Reveal className="mx-auto mt-8 max-w-3xl">
+        <p className="max-w-[62ch] text-[1.02rem] leading-[1.85] text-foreground-muted">
+          {guideIndexMeta.orientation.body}
+        </p>
+        <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+          {guideIndexMeta.orientation.links.map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                className="text-[15.5px] font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              >
+                {l.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
+
       {/* ציר-המסע: הנכס העריכתי של העמוד. מאפשר לקורא שנחת ישירות מגוגל לזהות
           איפה הוא נמצא ולצאת עם כיוון, לפני שהוא מגיע לספרייה עצמה. */}
       <Reveal className="mx-auto mt-12 max-w-3xl border-t border-border pt-10">

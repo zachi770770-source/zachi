@@ -181,6 +181,18 @@ export default function BookPage() {
             דפוסים חוזרים בזוגיות: מה מניע אותם, וסגנונות ההתקשרות שמאחוריהם
           </Link>
         </p>
+        {/* ‎/faq‎ נשא אפס קישורים מתוך גוף-התוכן של האתר: הוא היה נגיש מהתפריט
+            ומהפוטר בלבד. זה המקום הטבעי היחיד שבו הקורא באמת עוצר עם שאלות —
+            מיד אחרי מסלול-הרכישה — ולכן הקישור כאן, ולא בכל עמוד. */}
+        <p className="mx-auto mt-4 max-w-2xl text-center text-[15.5px] leading-relaxed text-foreground-muted">
+          נשארו שאלות על הספר, על המהדורה או על הרכישה?{" "}
+          <Link
+            href="/faq"
+            className="font-semibold text-brand-hover underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            השאלות שחוזרות הכי הרבה, עם תשובות
+          </Link>
+        </p>
         <div className="mt-10">
           <DeeperEntry />
         </div>
