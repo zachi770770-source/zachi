@@ -51,8 +51,11 @@ describe("sitemap lastmod", () => {
     for (const slug of guideOrder) {
       const e = byPath.get(guides[slug].path);
       expect(e?.lastModified, guides[slug].path).toBeDefined();
+      // אותו תאריך שה-Article schema מצהיר כ-dateModified (עם נפילה לפרסום).
       expect(new Date(e!.lastModified as Date).toISOString().slice(0, 10)).toBe(
-        new Date(guides[slug].datePublished).toISOString().slice(0, 10),
+        new Date(guides[slug].dateModified ?? guides[slug].datePublished)
+          .toISOString()
+          .slice(0, 10),
       );
     }
     for (const slug of methodOrder) {

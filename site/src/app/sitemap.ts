@@ -46,12 +46,15 @@ const staticRoutes: SitemapRoute[] = [
   { path: "/shipping-returns", priority: 0.3, changeFrequency: "yearly" },
   { path: "/accessibility", priority: 0.2, changeFrequency: "yearly" },
   // אשכול-התוכן „לפני קשר” — ארבעה מדריכים ממוקדי-חיפוש. lastmod אמיתי מתוך
-  // תאריך הפרסום של המאמר (ולא זמן ה-build), כדי שאות הרעננות יהיה נכון-תוכן.
+  // תאריך-התוכן של המאמר (ולא זמן ה-build), כדי שאות הרעננות יהיה נכון-תוכן.
+  // `dateModified` קודם ל-`datePublished`: זה אותו תאריך שה-Article schema של
+  // העמוד כבר מצהיר, ובלעדיו ה-sitemap היה אומר „לא השתנה מאז הפרסום” על
+  // מדריך שהסכימה שלו אומרת שעודכן — שני אותות סותרים על אותו עמוד.
   ...guideOrder.map((slug) => ({
     path: guides[slug].path,
     priority: 0.7,
     changeFrequency: "monthly" as const,
-    lastModified: guides[slug].datePublished,
+    lastModified: guides[slug].dateModified ?? guides[slug].datePublished,
   })),
   // עמודי-מושג /method/* — ההגדרות הקנוניות של הכלים המקוריים של הספר.
   ...methodOrder.map((slug) => ({
