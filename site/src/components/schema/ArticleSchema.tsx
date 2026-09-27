@@ -6,7 +6,7 @@ import { entityId } from "@/components/schema/ids";
  * Article structured data למאמרי המדריך (cluster „לפני קשר”). בניגוד לעמודי
  * התחנות (WebPage, ללא תאריכים), מאמר הוא תוכן מתוארך אמיתי — ולכן `Article`
  * עם `datePublished`/`dateModified` אמיתיים (מתוך נתוני המאמר), מחבר אמיתי
- * (צחי חן), ושיוך לספר. אין נתונים מומצאים.
+ * (צחי חן), ושיוך לספר. אין נתונים מומצאים — ולכן גם אין publisher.
  */
 export function ArticleSchema({
   headline,
@@ -41,14 +41,9 @@ export function ArticleSchema({
           "@id": entityId.person,
           name: siteConfig.author.name,
         },
-        publisher: {
-          "@type": "Organization",
-          name: siteConfig.bookTitle,
-          logo: {
-            "@type": "ImageObject",
-            url: `${siteConfig.url}${siteConfig.images.cover}`,
-          },
-        },
+        // אין `publisher` בכוונה. בעבר נפלט כאן Organization בשם הספר עם כריכת
+        // הספר כלוגו — ישות שאינה קיימת: אין הוצאה או ארגון מוגדרים מאחורי
+        // האתר. השדה אופציונלי ב-Article, והמחבר (Person) הוא הישות האמיתית.
         // המאמר עוסק בישות הספר (אותו `@id`).
         about: { "@type": "Book", "@id": entityId.book, name: siteConfig.bookTitle },
         isPartOf: { "@id": entityId.website },
