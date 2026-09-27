@@ -3,6 +3,7 @@ import { render, cleanup } from "@testing-library/react";
 
 import { ArticleSchema } from "@/components/schema/ArticleSchema";
 import { entityId } from "@/components/schema/ids";
+import { ProfilePageSchema } from "@/components/schema/ProfilePageSchema";
 import { GuidePage } from "@/components/guides/GuidePage";
 import { guideOrder, guides } from "@/content/guides";
 
@@ -44,5 +45,14 @@ describe("BreadcrumbList במדריכים", () => {
       .filter((li) => li.getAttribute("aria-hidden") !== "true")
       .map((li) => li.textContent?.trim());
     expect(crumbs.itemListElement.map((i: { name: string }) => i.name)).toEqual(visible);
+  });
+});
+
+describe("ProfilePageSchema", () => {
+  it("mainEntity הוא ה-Person הקנוני, בלי שדות-מחבר חדשים", () => {
+    const { container } = render(<ProfilePageSchema />);
+    const [page] = jsonLd(container);
+    expect(page["@type"]).toBe("ProfilePage");
+    expect(page.mainEntity).toEqual({ "@id": entityId.person });
   });
 });
