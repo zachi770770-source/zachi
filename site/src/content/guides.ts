@@ -601,6 +601,7 @@ const healthyRelationship: Guide = {
       label: "כשאותו חיכוך חוזר: סגנונות התקשרות בזוגיות",
       sub: "הדפוס הרגשי שמסביר חלק גדול מהחזרות.",
     },
+    { href: "/guide/keeping-connection-alive", label: "איך שומרים על קרבה ותשוקה אחרי שהשגרה נכנסת", sub: "קשר טוב לא נשמר מעצמו." },
   ],
   faq: {
     title: "שאלות שחוזרות על זוגיות בריאה",
@@ -871,6 +872,7 @@ const coupleCommunication: Guide = {
     },
     { href: "/guide/recurring-fights", label: "ריבים חוזרים: איך יוצאים מהלולאה", sub: "הצורך שמתחת לריב." },
     { href: "/guide/healthy-relationship", label: "מהי מערכת יחסים בריאה", sub: "התמונה השלמה." },
+    { href: "/guide/keeping-connection-alive", label: "איך שומרים על קרבה ותשוקה אחרי שהשגרה נכנסת", sub: "אחרי שהשלב הראשוני נרגע." },
   ],
   datePublished: PUBLISHED,
   // עודכן מהותית בפאזה 4: פסקת-הפתיחה נכתבה מחדש.
@@ -988,6 +990,7 @@ const recurringFights: Guide = {
     { href: "/guide/couple-communication", label: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", sub: "איך אומרים את הצורך." },
     { href: "/guide/healthy-relationship", label: "מהי זוגיות בריאה, ואיך יודעים שבונים אחת", sub: "ריב שאפשר לצאת ממנו." },
     { href: "/guide/attachment-styles", label: "מה מניע את אותו ריב שחוזר בכל פעם", sub: "הדפוס הרגשי שמתחת ללולאה." },
+    { href: "/guide/keeping-connection-alive", label: "איך שומרים על קרבה ותשוקה אחרי שהשגרה נכנסת", sub: "איך „אנחנו” נבנה מחדש בקטן." },
   ],
   datePublished: PUBLISHED,
   // עודכן מהותית בפאזה 4: פסקת-הפתיחה נכתבה מחדש.
@@ -1040,6 +1043,9 @@ const howToEndARelationship: Guide = {
   // המשני, כדי שלא יוצגו פעמיים קישורים לאותו עמוד-אם.
   hub: HUB_AFTER,
   bookTool: { id: "emergency-kit", name: "יציאה נקייה" },
+  // מקום-המושג הקיים („מושג מהספר”) היה ריק כאן, אף שהמדריך כולו הוא יישום
+  // של הכלי „יציאה נקייה” (ראו bookTool). עמוד-המושג מקשר חזרה לכאן.
+  method: { href: "/method/clean-exit", label: "יציאה נקייה: לסיים קשר בכבוד ובבהירות", sub: "המושג המלא מאחורי הכלי." },
   secondary: HUB_STARTING,
   related: [
     { href: "/guide/getting-back-with-ex", label: "חזרה לאקס: איך יודעים אם זה נכון", sub: "כשמתלבטים אם בכלל לסיים." },
