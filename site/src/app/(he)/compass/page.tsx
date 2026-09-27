@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
 import { compassQuiz } from "@/content/compass";
 import { askStations, type AskStationId } from "@/content/askRoute";
@@ -9,14 +10,24 @@ import { Container } from "@/components/shared/Container";
 import { GuidedCompass } from "@/components/compass/GuidedCompass";
 import { CompassExperience } from "@/components/compass/CompassExperience";
 
-export const metadata = pageMetadata({
-  // metaTitle כבר כולל „| מדייטים לאהבה”; absoluteTitle מונע הכפלת הסיומת ע"י תבנית ה-<title>.
-  title: compassQuiz.metaTitle,
-  absoluteTitle: true,
-  description: compassQuiz.metaDescription,
-  path: "/compass",
-  ogType: "article",
-});
+export const metadata: Metadata = {
+  ...pageMetadata({
+    // metaTitle כבר כולל „| מדייטים לאהבה”; absoluteTitle מונע הכפלת הסיומת ע"י תבנית ה-<title>.
+    title: compassQuiz.metaTitle,
+    absoluteTitle: true,
+    description: compassQuiz.metaDescription,
+    path: "/compass",
+    ogType: "article",
+  }),
+  // המצפן הוא כלי-ניווט אינטראקטיבי („מאיפה להתחיל בספר”), בלי כוונת-חיפוש
+  // עצמאית — ולכן noindex, אבל follow: הקישורים שהוא מוביל אליהם (תחנות, כלים,
+  // הספר) ממשיכים להיסרק. הוסר גם מה-sitemap. מחוץ לפרודקשן נשמר ה-nofollow
+  // של ה-layout, כדי ש-Preview לא יפתח סריקה של עצמו.
+  robots:
+    process.env.VERCEL_ENV === "production"
+      ? { index: false, follow: true }
+      : { index: false, follow: false },
+};
 
 /**
  * עמוד „שאל את הספר” (/compass) — דו-מצבי לפי מצב-התצוגה שנקבע בשרת

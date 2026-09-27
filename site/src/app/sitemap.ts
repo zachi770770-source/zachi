@@ -36,8 +36,8 @@ const staticRoutes: SitemapRoute[] = [
   { path: "/after-breakup", priority: 0.8, changeFrequency: "monthly" },
   { path: "/starting-again", priority: 0.8, changeFrequency: "monthly" },
   { path: "/preview", priority: 0.8, changeFrequency: "monthly" },
-  // „המצפן” — חוויית שלוש-שאלות דטרמיניסטית, תמיד פעילה וניתנת לאינדוקס.
-  { path: "/compass", priority: 0.6, changeFrequency: "monthly" },
+  // „המצפן” (/compass) *אינו* כאן בכוונה: זה כלי-ניווט עם noindex, follow,
+  // ו-sitemap מצהיר רק על עמודים שמבקשים אינדוקס.
   { path: "/author", priority: 0.6, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.4, changeFrequency: "yearly" },

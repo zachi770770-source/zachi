@@ -82,3 +82,10 @@ describe("sitemap lastmod", () => {
     }
   });
 });
+
+describe("sitemap — רק עמודים שמבקשים אינדוקס", () => {
+  it("/compass (noindex, follow) אינו ב-sitemap", () => {
+    const paths = sitemap().map((e) => pathOf(e.url));
+    expect(paths).not.toContain("/compass");
+  });
+});
