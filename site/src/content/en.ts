@@ -18,7 +18,10 @@ import { siteConfig } from "@/config/site";
  */
 export const en = {
   meta: {
-    title: `${siteConfig.englishEdition.title}: ${siteConfig.englishEdition.subtitle}`,
+    // כותרת-חיפוש קצרה (59 תווים). קודם זה היה שם המוצר המלא באמזון (120 תווים),
+    // שנחתך בתוצאות. שם הספר והמחבר נשארים מ-siteConfig; תת-הכותרת המלאה עדיין
+    // מוצגת בעמוד עצמו ובסכימה (alternativeHeadline).
+    title: `${siteConfig.englishEdition.title} by ${siteConfig.englishEdition.author}: A Practical Relationship Guide`,
     description:
       "Dating is a search. Love is built. A practical guide by Zachi Hen to choosing the right partner, recognising red flags, and building a relationship that lasts. Available on Amazon.",
   },
