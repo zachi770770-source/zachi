@@ -1035,9 +1035,12 @@ const howToEndARelationship: Guide = {
     },
   ],
   askStation: "after-breakup",
-  hub: HUB_STARTING,
+  // עמוד-האם הוא „אחרי פרידה” (כפי שכתוב בכותרת-המקטע למעלה): סיום קשר הוא
+  // תחילת שלב-הפרידה, לא חזרה להיכרויות. „מתחילים מחדש” עובר להיות הקישור
+  // המשני, כדי שלא יוצגו פעמיים קישורים לאותו עמוד-אם.
+  hub: HUB_AFTER,
   bookTool: { id: "emergency-kit", name: "יציאה נקייה" },
-  secondary: { href: "/after-breakup", label: "אחרי פרידה", sub: "לעבד את מה שנגמר." },
+  secondary: HUB_STARTING,
   related: [
     { href: "/guide/getting-back-with-ex", label: "חזרה לאקס: איך יודעים אם זה נכון", sub: "כשמתלבטים אם בכלל לסיים." },
     { href: "/guide/over-a-breakup", label: "איך יודעים שסיימתי לעבד פרידה", sub: "מה שבא אחרי." },
@@ -1999,7 +2002,9 @@ const fromDatingToRelationship: Guide = {
     note: "התשובה לשלישית היא בדרך כלל זו שיודעת הכי מהר אם צריך שיחה.",
   },
   askStation: "building",
-  hub: HUB_BUILDING,
+  // עמוד-האם הוא „דייטים”: המדריך שייך לאשכול הדייטים (לצד דייט ראשון ודייטים
+  // שלא מתקדמים), ו-/dating כבר מקשר אליו כשלב המעבר.
+  hub: HUB_DATING,
   secondary: {
     href: "/before-relationship",
     label: "לפני קשר: הבחירה, הפחד וההתאמה",
