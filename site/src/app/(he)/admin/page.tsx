@@ -21,8 +21,12 @@ import { ReaderBonusSection } from "@/components/admin/ReaderBonusSection";
 // עמוד ניהולי מוגן — תמיד דינמי, לעולם לא נאינדקס.
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "לוח בקרה | מדייטים לאהבה",
+  // הסיומת „| מדייטים לאהבה” מתווספת מתבנית ה-layout — כאן רק שם העמוד.
+  title: "לוח בקרה",
   robots: { index: false, follow: false },
+  // canonical לעצמו. בלעדיו נירש מה-layout canonical לדף הבית — אות סותר
+  // לצד noindex, כאילו העמוד הוא עותק של הבית.
+  alternates: { canonical: "/admin" },
 };
 
 export default async function AdminDashboardPage({

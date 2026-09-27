@@ -16,8 +16,12 @@ export const dynamic = "force-dynamic";
 const SESSION_COOKIE = "reader_session";
 
 export const metadata: Metadata = {
-  title: "ערכת הקורא | מדייטים לאהבה",
+  // הסיומת „| מדייטים לאהבה” מתווספת מתבנית ה-layout — כאן רק שם העמוד.
+  title: "ערכת הקורא",
   robots: { index: false, follow: false },
+  // canonical לעצמו. בלעדיו נירש מה-layout canonical לדף הבית — אות סותר
+  // לצד noindex, כאילו העמוד הוא עותק של הבית.
+  alternates: { canonical: "/reader/kit" },
 };
 
 /**
