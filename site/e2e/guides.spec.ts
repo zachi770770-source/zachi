@@ -25,7 +25,9 @@ const GUIDES = [
   { path: "/guide/couple-communication", h1: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", hub: "/inside-relationship" },
   { path: "/guide/attracted-to-unavailable", h1: "למה אני נמשך/ת לאנשים לא זמינים", hub: "/before-relationship" },
   { path: "/guide/recurring-fights", h1: "ריבים חוזרים: איך יוצאים מהלולאה", hub: "/inside-relationship" },
-  { path: "/guide/how-to-end-a-relationship", h1: "לסיים קשר בכבוד, בלי היעלמות", hub: "/starting-again" },
+  // עמוד-האם עבר מ„מתחילים מחדש” ל„אחרי פרידה” (החלטת-IA מאושרת). ה-fixture
+  // שיקף את השיוך הקודם, ולכן עודכן — ההתנהגות לא שונתה כדי לרצות אותו.
+  { path: "/guide/how-to-end-a-relationship", h1: "לסיים קשר בכבוד, בלי היעלמות", hub: "/after-breakup" },
   { path: "/guide/how-fast-is-too-fast", h1: "כמה מהר זה מהר מדי בתחילת קשר", hub: "/building-relationship" },
   { path: "/guide/defining-the-relationship", h1: "בלעדיות: מתי ואיך מדברים על „מה אנחנו”", hub: "/building-relationship" },
   { path: "/guide/hot-and-cold", h1: "חם-קר בקשר: כשמישהו מתקרב ומתרחק", hub: "/building-relationship" },
