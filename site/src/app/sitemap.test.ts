@@ -88,4 +88,10 @@ describe("sitemap — רק עמודים שמבקשים אינדוקס", () => {
     const paths = sitemap().map((e) => pathOf(e.url));
     expect(paths).not.toContain("/compass");
   });
+
+  it("/reader (עמוד ציבורי, indexable, בניווט הגלובלי) נמצא ב-sitemap", () => {
+    const paths = sitemap().map((e) => pathOf(e.url));
+    expect(paths).toContain("/reader");
+    expect(paths).not.toContain("/reader/kit");
+  });
 });

@@ -38,6 +38,9 @@ const staticRoutes: SitemapRoute[] = [
   { path: "/preview", priority: 0.8, changeFrequency: "monthly" },
   // „המצפן” (/compass) *אינו* כאן בכוונה: זה כלי-ניווט עם noindex, follow,
   // ו-sitemap מצהיר רק על עמודים שמבקשים אינדוקס.
+  // „ערכת הקורא” — עמוד-התוכן הציבורי שמתאר את הערכה (מקושר מהניווט הגלובלי).
+  // העמוד המוגן /reader/kit נשאר מחוץ ל-sitemap (noindex).
+  { path: "/reader", priority: 0.5, changeFrequency: "monthly" },
   { path: "/author", priority: 0.6, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.4, changeFrequency: "yearly" },
