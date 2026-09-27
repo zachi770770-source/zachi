@@ -109,7 +109,9 @@ export const siteConfig = {
     cover: "/images/book-cover-final.webp",
     coverAlt: `כריכת הספר "מדייטים לאהבה"`,
     mockup3d: "/images/book-cover-final.webp",
-    mockup3dAlt: `הדמיית תלת-ממד של הספר "מדייטים לאהבה"`,
+    // `mockup3d` מצביע כרגע לאותה כריכה שטוחה כמו `cover`, ולכן ה-alt מתאר את
+    // מה שבאמת בתמונה. אם תתווסף הדמיית תלת-ממד אמיתית — לעדכן את שניהם יחד.
+    mockup3dAlt: `כריכת הספר "מדייטים לאהבה"`,
     workbookMockup: "/images/bonus/workbook-mockup.svg",
     workbookMockupAlt: "הדמיית חוברת העבודה הדיגיטלית המצורפת לספר",
   },
