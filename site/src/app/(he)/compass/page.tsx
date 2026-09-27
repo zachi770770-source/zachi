@@ -1,6 +1,6 @@
 import { pageMetadata } from "@/lib/seo";
-import { compass, compassQuiz } from "@/content/compass";
-import { askStations, askUi, type AskStationId } from "@/content/askRoute";
+import { compassQuiz } from "@/content/compass";
+import { askStations, type AskStationId } from "@/content/askRoute";
 import {
   COMPASS_LIMITS,
   resolveCompassSurface,
@@ -8,7 +8,6 @@ import {
 import { Container } from "@/components/shared/Container";
 import { GuidedCompass } from "@/components/compass/GuidedCompass";
 import { CompassExperience } from "@/components/compass/CompassExperience";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   // metaTitle כבר כולל „| מדייטים לאהבה”; absoluteTitle מונע הכפלת הסיומת ע"י תבנית ה-<title>.
@@ -51,12 +50,6 @@ export default async function CompassPage({
   if (surface !== "guided") {
     return (
       <Container className="pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-12 lg:pb-20">
-        <BreadcrumbSchema
-          items={[
-            { name: "בית", path: "/" },
-            { name: compass.freeText.label, path: "/compass" },
-          ]}
-        />
         <div className="enter-stagger">
           <CompassExperience
             maxQuestionChars={COMPASS_LIMITS.maxQuestionChars}
@@ -71,13 +64,6 @@ export default async function CompassPage({
   // ── מצב מודרך (ברירת מחדל / פרודקשן) — עם „מצב-תגובה”: הפתיח מתקפל בתשובה ──────
   return (
     <Container className="pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-12 lg:pb-20">
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: askUi.eyebrow, path: "/compass" },
-        ]}
-      />
-
       <GuidedCompass initialStation={initialStation} />
     </Container>
   );

@@ -5,7 +5,6 @@ import { dating } from "@/content/dating";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { TrackedInternalLink } from "@/components/analytics/TrackedInternalLink";
@@ -85,12 +84,6 @@ export default function DatingPage() {
   return (
     <Container className="pt-10 pb-16 sm:pt-14 sm:pb-20 lg:pt-16">
       <ViewEvent event="dating_viewed" />
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "דייטים", path: "/dating" },
-        ]}
-      />
       <StationSchema
         name={dating.hero.h1}
         description={dating.meta.description}

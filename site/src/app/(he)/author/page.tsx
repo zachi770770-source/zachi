@@ -14,7 +14,6 @@ import { BookLink } from "@/components/shared/BookLink";
 import { AuthorAudio } from "@/components/author/AuthorAudio";
 import { AuthorPageView } from "@/components/author/AuthorPageView";
 import { PersonSchema } from "@/components/schema/PersonSchema";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { ParallaxScroll } from "@/components/shared/ParallaxScroll";
 
 export const metadata = pageMetadata({
@@ -39,12 +38,6 @@ export default function AuthorPage() {
     <Container className="py-12 sm:py-16 lg:py-20">
       <AuthorPageView />
       <PersonSchema />
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "על המחבר", path: "/author" },
-        ]}
-      />
 
       {/* Hero — תמונת המחבר לצד הכותרת */}
       <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16">

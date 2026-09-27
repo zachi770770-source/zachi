@@ -3,7 +3,6 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/lib/seo";
 import { Container } from "@/components/shared/Container";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   title: "הצהרת נגישות",
@@ -27,12 +26,6 @@ const adaptations = [
 export default function AccessibilityPage() {
   return (
     <Container className="py-10 sm:py-16">
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "הצהרת נגישות", path: "/accessibility" },
-        ]}
-      />
       <div className="prose-book mx-auto">
         <h1 className="font-serif text-3xl font-semibold sm:text-4xl">
           הצהרת נגישות

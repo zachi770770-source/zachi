@@ -55,7 +55,9 @@ export function GuidePage({
         items={[
           { name: "בית", path: "/" },
           { name: guide.hub.label, path: guide.hub.href },
-          { name: guide.h1, path: guide.path },
+          // אותו טקסט שמוצג בפירורי-הלחם הגלויים למטה (metaTitle), ולא ה-H1:
+          // ה-BreadcrumbList חייב לשקף את מה שהקורא רואה.
+          { name: guide.metaTitle, path: guide.path },
         ]}
       />
 

@@ -12,7 +12,6 @@ import {
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { BrandMark } from "@/components/shared/BrandMark";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { JourneySpine } from "@/components/pillar/JourneySpine";
@@ -36,12 +35,6 @@ export default function GuideIndexPage() {
   return (
     <Container className="pt-8 pb-16 sm:pt-10 sm:pb-20 lg:pt-12">
       <ViewEvent event="guide_index_viewed" />
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "מדריכים", path: "/guide" },
-        ]}
-      />
       <StationSchema
         name={guideIndexMeta.h1}
         description={guideIndexMeta.description}

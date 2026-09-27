@@ -17,7 +17,6 @@ import { ToolsBento } from "@/components/sections/ToolsBento";
 import { OutcomesSection } from "@/components/sections/OutcomesSection";
 import { PurchaseSection } from "@/components/sections/PurchaseSection";
 import { ReaderKitOffer } from "@/components/reader/ReaderKitOffer";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { BookSchema } from "@/components/schema/BookSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { BuildSpine } from "@/components/shared/BuildSpine";
@@ -49,12 +48,6 @@ export default function BookPage() {
       {/* עמוד הספר הקנוני נושא את סכימת ה-Book (בנוסף לבית) — הישות המבנית
           מופיעה על ה-URL הייעודי של המוצר. */}
       <BookSchema />
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "הספר", path: "/book" },
-        ]}
-      />
 
       <header className="border-b border-border bg-surface-muted">
         <Container className="py-9 sm:py-11 lg:py-12">

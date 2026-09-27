@@ -6,7 +6,6 @@ import { faqItems } from "@/content/faq";
 import { Container } from "@/components/shared/Container";
 import { Faq } from "@/components/faq/Faq";
 import { FaqSchema } from "@/components/schema/FaqSchema";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   title: "שאלות נפוצות",
@@ -20,12 +19,6 @@ export default function FaqPage() {
   return (
     <Container className="py-10 sm:py-16">
       <FaqSchema />
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "שאלות נפוצות", path: "/faq" },
-        ]}
-      />
       {/* ה-Hero (מ-PR #45) נשמר כפי שאושר, בעמודת max-w-2xl. גוף השאלות מקבל
           עמודה מעט רחבה יותר כדי לתת מקום לשוליים העריכתיים ולנשימה בין השאלות. */}
       <div className="mx-auto mt-6 max-w-2xl">
