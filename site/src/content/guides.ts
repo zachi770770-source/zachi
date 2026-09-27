@@ -601,6 +601,7 @@ const healthyRelationship: Guide = {
       label: "כשאותו חיכוך חוזר: סגנונות התקשרות בזוגיות",
       sub: "הדפוס הרגשי שמסביר חלק גדול מהחזרות.",
     },
+    { href: "/guide/keeping-connection-alive", label: "איך שומרים על קרבה ותשוקה אחרי שהשגרה נכנסת", sub: "קשר טוב לא נשמר מעצמו." },
   ],
   faq: {
     title: "שאלות שחוזרות על זוגיות בריאה",
@@ -871,6 +872,7 @@ const coupleCommunication: Guide = {
     },
     { href: "/guide/recurring-fights", label: "ריבים חוזרים: איך יוצאים מהלולאה", sub: "הצורך שמתחת לריב." },
     { href: "/guide/healthy-relationship", label: "מהי מערכת יחסים בריאה", sub: "התמונה השלמה." },
+    { href: "/guide/keeping-connection-alive", label: "איך שומרים על קרבה ותשוקה אחרי שהשגרה נכנסת", sub: "אחרי שהשלב הראשוני נרגע." },
   ],
   datePublished: PUBLISHED,
   // עודכן מהותית בפאזה 4: פסקת-הפתיחה נכתבה מחדש.
@@ -988,6 +990,7 @@ const recurringFights: Guide = {
     { href: "/guide/couple-communication", label: "תקשורת זוגית: לומר מה מרגישים בלי להאשים", sub: "איך אומרים את הצורך." },
     { href: "/guide/healthy-relationship", label: "מהי זוגיות בריאה, ואיך יודעים שבונים אחת", sub: "ריב שאפשר לצאת ממנו." },
     { href: "/guide/attachment-styles", label: "מה מניע את אותו ריב שחוזר בכל פעם", sub: "הדפוס הרגשי שמתחת ללולאה." },
+    { href: "/guide/keeping-connection-alive", label: "איך שומרים על קרבה ותשוקה אחרי שהשגרה נכנסת", sub: "איך „אנחנו” נבנה מחדש בקטן." },
   ],
   datePublished: PUBLISHED,
   // עודכן מהותית בפאזה 4: פסקת-הפתיחה נכתבה מחדש.
@@ -1035,9 +1038,15 @@ const howToEndARelationship: Guide = {
     },
   ],
   askStation: "after-breakup",
-  hub: HUB_STARTING,
+  // עמוד-האם הוא „אחרי פרידה” (כפי שכתוב בכותרת-המקטע למעלה): סיום קשר הוא
+  // תחילת שלב-הפרידה, לא חזרה להיכרויות. „מתחילים מחדש” עובר להיות הקישור
+  // המשני, כדי שלא יוצגו פעמיים קישורים לאותו עמוד-אם.
+  hub: HUB_AFTER,
   bookTool: { id: "emergency-kit", name: "יציאה נקייה" },
-  secondary: { href: "/after-breakup", label: "אחרי פרידה", sub: "לעבד את מה שנגמר." },
+  // מקום-המושג הקיים („מושג מהספר”) היה ריק כאן, אף שהמדריך כולו הוא יישום
+  // של הכלי „יציאה נקייה” (ראו bookTool). עמוד-המושג מקשר חזרה לכאן.
+  method: { href: "/method/clean-exit", label: "יציאה נקייה: לסיים קשר בכבוד ובבהירות", sub: "המושג המלא מאחורי הכלי." },
+  secondary: HUB_STARTING,
   related: [
     { href: "/guide/getting-back-with-ex", label: "חזרה לאקס: איך יודעים אם זה נכון", sub: "כשמתלבטים אם בכלל לסיים." },
     { href: "/guide/over-a-breakup", label: "איך יודעים שסיימתי לעבד פרידה", sub: "מה שבא אחרי." },
@@ -1999,7 +2008,9 @@ const fromDatingToRelationship: Guide = {
     note: "התשובה לשלישית היא בדרך כלל זו שיודעת הכי מהר אם צריך שיחה.",
   },
   askStation: "building",
-  hub: HUB_BUILDING,
+  // עמוד-האם הוא „דייטים”: המדריך שייך לאשכול הדייטים (לצד דייט ראשון ודייטים
+  // שלא מתקדמים), ו-/dating כבר מקשר אליו כשלב המעבר.
+  hub: HUB_DATING,
   secondary: {
     href: "/before-relationship",
     label: "לפני קשר: הבחירה, הפחד וההתאמה",
@@ -2015,6 +2026,13 @@ const fromDatingToRelationship: Guide = {
       href: "/dating",
       label: "השלב שממנו מגיעים לכאן: מה קורה בדייטים",
       sub: "עמוד-האב של שלב ההיכרות, מקצה לקצה.",
+    },
+    // הצד השני של המעבר: התחנה שאליה השלב הזה מוביל. עמוד-האם של המדריך הוא
+    // /dating, ולכן בלי הכרטיס הזה לא היה מכאן קישור ישיר אל „בניית קשר”.
+    {
+      href: "/building-relationship",
+      label: "בניית קשר: כשהקשר מתחיל להיות אמיתי",
+      sub: "השלב שהמעבר הזה מוביל אליו.",
     },
     {
       href: "/guide/dates-not-progressing",

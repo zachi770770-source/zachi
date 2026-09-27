@@ -55,11 +55,11 @@ export function pageMetadata({
     ? title
     : `${title} | ${siteConfig.bookTitle}`;
 
-  // תמונת השיתוף (opengraph-image ברמת ה-root, 1200×630) נירשת לעמוד הבית
-  // דרך file-convention, אך אינה מוחלת אוטומטית על עמודים מקוננים שמגדירים
-  // אובייקט openGraph משלהם. לכן מוסיפים אותה במפורש לכל עמוד שאינו הבית,
-  // כדי שלכל קישור משותף (og:image + twitter:image) תהיה תצוגה מקדימה.
-  const isHome = path === "/";
+  // תמונת השיתוף (opengraph-image ברמת ה-root, 1200×630) מוצהרת במפורש בכל
+  // עמוד, **כולל עמוד הבית**. בעבר הבית הוחרג בהנחה שה-file-convention מחיל
+  // אותה עליו, אבל מאז הפיצול לשני root layouts (‎(he)‎/‎(en)‎) ה-HTML של `/`
+  // יצא בלי og:image ובלי twitter:image כלל (נמדד ב-build של פרודקשן). לכן
+  // אין כאן שום חריג: לכל קישור משותף יש תצוגה מקדימה.
   const ogImage = ogImageOverride ?? {
     url: "/opengraph-image",
     width: 1200,
@@ -83,13 +83,13 @@ export function pageMetadata({
       siteName,
       title: socialTitle,
       description,
-      ...(isHome ? {} : { images: [ogImage] }),
+      images: [ogImage],
     },
     twitter: {
       card: isPortraitOgImage ? "summary" : "summary_large_image",
       title: socialTitle,
       description,
-      ...(isHome ? {} : { images: [ogImage.url] }),
+      images: [ogImage.url],
     },
   };
 }

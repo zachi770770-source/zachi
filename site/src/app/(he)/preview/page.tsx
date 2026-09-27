@@ -9,7 +9,6 @@ import { SampleReader, type ToolSample } from "@/components/preview/SampleReader
 import { CanonicalReading } from "@/components/preview/CanonicalReading";
 import { MarkSampleSeen } from "@/components/preview/MarkSampleSeen";
 import { PreviewClosing } from "@/components/preview/PreviewClosing";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = pageMetadata({
   title: "טעימה מהספר",
@@ -65,13 +64,6 @@ export default async function PreviewPage({
 
   return (
     <>
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "טעימה מהספר", path: "/preview" },
-        ]}
-      />
-
       <MarkSampleSeen />
 
       <Container className="py-10 sm:py-14">

@@ -5,7 +5,6 @@ import { love } from "@/content/love";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { AmazonBuyLink } from "@/components/purchase/AmazonBuyLink";
-import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { StationSchema } from "@/components/schema/StationSchema";
 import { ViewEvent } from "@/components/analytics/ViewEvent";
 import { TrackedInternalLink } from "@/components/analytics/TrackedInternalLink";
@@ -92,12 +91,6 @@ export default function LovePage() {
   return (
     <Container className="pt-10 pb-16 sm:pt-14 sm:pb-20 lg:pt-16">
       <ViewEvent event="love_viewed" />
-      <BreadcrumbSchema
-        items={[
-          { name: "בית", path: "/" },
-          { name: "אהבה", path: "/love" },
-        ]}
-      />
       <StationSchema
         name={love.hero.h1}
         description={love.meta.description}

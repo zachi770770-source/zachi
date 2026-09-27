@@ -86,7 +86,7 @@ describe("/en discovery", () => {
 
   it("does not disturb the existing Hebrew sitemap entries", () => {
     const paths = sitemap().map((e) => new URL(e.url).pathname);
-    for (const p of ["/", "/book", "/love", "/author", "/preview", "/faq", "/compass"]) {
+    for (const p of ["/", "/book", "/love", "/author", "/preview", "/faq"]) {
       expect(paths, `${p} must remain in the sitemap`).toContain(p);
     }
   });

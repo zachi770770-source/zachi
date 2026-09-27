@@ -36,8 +36,11 @@ const staticRoutes: SitemapRoute[] = [
   { path: "/after-breakup", priority: 0.8, changeFrequency: "monthly" },
   { path: "/starting-again", priority: 0.8, changeFrequency: "monthly" },
   { path: "/preview", priority: 0.8, changeFrequency: "monthly" },
-  // „המצפן” — חוויית שלוש-שאלות דטרמיניסטית, תמיד פעילה וניתנת לאינדוקס.
-  { path: "/compass", priority: 0.6, changeFrequency: "monthly" },
+  // „המצפן” (/compass) *אינו* כאן בכוונה: זה כלי-ניווט עם noindex, follow,
+  // ו-sitemap מצהיר רק על עמודים שמבקשים אינדוקס.
+  // „ערכת הקורא” — עמוד-התוכן הציבורי שמתאר את הערכה (מקושר מהניווט הגלובלי).
+  // העמוד המוגן /reader/kit נשאר מחוץ ל-sitemap (noindex).
+  { path: "/reader", priority: 0.5, changeFrequency: "monthly" },
   { path: "/author", priority: 0.6, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.4, changeFrequency: "yearly" },
@@ -46,12 +49,15 @@ const staticRoutes: SitemapRoute[] = [
   { path: "/shipping-returns", priority: 0.3, changeFrequency: "yearly" },
   { path: "/accessibility", priority: 0.2, changeFrequency: "yearly" },
   // אשכול-התוכן „לפני קשר” — ארבעה מדריכים ממוקדי-חיפוש. lastmod אמיתי מתוך
-  // תאריך הפרסום של המאמר (ולא זמן ה-build), כדי שאות הרעננות יהיה נכון-תוכן.
+  // תאריך-התוכן של המאמר (ולא זמן ה-build), כדי שאות הרעננות יהיה נכון-תוכן.
+  // `dateModified` קודם ל-`datePublished`: זה אותו תאריך שה-Article schema של
+  // העמוד כבר מצהיר, ובלעדיו ה-sitemap היה אומר „לא השתנה מאז הפרסום” על
+  // מדריך שהסכימה שלו אומרת שעודכן — שני אותות סותרים על אותו עמוד.
   ...guideOrder.map((slug) => ({
     path: guides[slug].path,
     priority: 0.7,
     changeFrequency: "monthly" as const,
-    lastModified: guides[slug].datePublished,
+    lastModified: guides[slug].dateModified ?? guides[slug].datePublished,
   })),
   // עמודי-מושג /method/* — ההגדרות הקנוניות של הכלים המקוריים של הספר.
   ...methodOrder.map((slug) => ({
