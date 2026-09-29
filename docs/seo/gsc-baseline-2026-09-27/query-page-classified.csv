@@ -1,0 +1,68 @@
+﻿period,query,page,country,brand_or_nonbrand,cluster,intended_owner_page,clicks,impressions,ctr,position,classification,evidence_note
+2026-08-31_to_2026-09-27,איך להכיר בן זוג,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,3,0,57.6667,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,איך למצוא בן זוג,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,2,0,61.5,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,איך למצוא בן זוג,/before-relationship,United States,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,59.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,איך מוצאים בן זוג,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,48.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,איך מכירים בן זוג,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,50.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,איפה מכירים בן זוג,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,52.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,באהבה,/love,Israel,Non-brand,Love,/love,0,4,0,34.5,STRONG MATCH,LOW DATA; position improving
+2026-08-31_to_2026-09-27,בדיקת ספק לפני התקשרות,/guide/relationship-doubts,Israel,Non-brand,Off-topic,—,0,10,0,50.2,DO NOT TARGET,"procurement/contracting intent (""ספק"" = supplier), not relationship doubt"
+2026-08-31_to_2026-09-27,בן זוגך,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,42.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,גישת ההתקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,15,0,67.7333,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,דגלים אדומים בזוגיות,/guide/dating-red-flags,Israel,Non-brand,Dating,/guide/dating-red-flags,0,3,0,34.6667,STRONG MATCH,new; LOW DATA
+2026-08-31_to_2026-09-27,דייט ראשון,/guide/first-date,Israel,Non-brand,Dating,/guide/first-date,0,3,0,34.0,STRONG MATCH,new; LOW DATA
+2026-08-31_to_2026-09-27,דפוס התקשרות אמביוולנטי,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,54.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,דפוס חוזר,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,11.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,דפוסי התקשרות בולבי,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,3,0,64.3333,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,דרכי התקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,36.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,ההתקשרות,/guide/attachment-styles,Israel,Non-brand,Ambiguous,—,0,3,0,92.6667,LOW DATA,ambiguous (attachment vs. contracting); pos >90
+2026-08-31_to_2026-09-27,היקשרות בטוחה,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,67.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,לאהבה,/love,Israel,Non-brand,Love,/love,0,3,0,18.6667,STRONG MATCH,LOW DATA; position improving
+2026-08-31_to_2026-09-27,לדבר בגובה העיניים,/method/eye-level-talk,Israel,Non-brand,Relationship,/method/eye-level-talk,0,1,0,35.0,STRONG MATCH,LOW DATA
+2026-08-31_to_2026-09-27,למקבל דייטים,/guide,Israel,Non-brand,Noise,—,0,1,0,20.0,LOW DATA,non-meaningful query
+2026-08-31_to_2026-09-27,מה זה אהבה,/love,Israel,Non-brand,Love,/love,0,1,0,67.0,STRONG MATCH,LOW DATA; position improving
+2026-08-31_to_2026-09-27,מזה אהבה,/love,Israel,Non-brand,Love,/love,0,1,0,26.0,STRONG MATCH,LOW DATA; position improving
+2026-08-31_to_2026-09-27,מתי יהיה לי חבר,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,61.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-31_to_2026-09-27,[redacted: personal name],/before-relationship,Israel,Non-brand,Noise,—,0,1,0,70.0,LOW DATA,non-meaningful query
+2026-08-31_to_2026-09-27,סוגי התקשרות בולבי,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,5,0,72.2,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,ספרים אחרים,/book,Israel,Non-brand,Noise,—,0,1,0,5.0,LOW DATA,non-meaningful query
+2026-08-31_to_2026-09-27,צחי חן,/,Israel,Brand,Brand / author,/author (brand),0,16,0,4.75,BRAND ONLY,WATCH: pos ~5 with 0 clicks
+2026-08-31_to_2026-09-27,צחי חן,/author,Israel,Brand,Brand / author,/author (brand),0,1,0,16.0,BRAND ONLY,WATCH: pos ~5 with 0 clicks
+2026-08-31_to_2026-09-27,קשר טוב,/articles/spark-vs-compatibility,Israel,Non-brand,Legacy URL,—,0,1,0,70.0,LOW DATA,old /articles/* URL (410 in code); confirm in Page Indexing
+2026-08-31_to_2026-09-27,תאוריית ההיקשרות בזוגיות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,14,0,72.2857,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-31_to_2026-09-27,תאוריית ההתקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,90.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,תציג לי,/,Israel,Non-brand,Noise,—,1,1,1,1.0,LOW DATA,non-meaningful query
+2026-08-03_to_2026-08-30,אהבה הגדרה,/love,Israel,Non-brand,Love,/love,0,1,0,59.0,STRONG MATCH,LOW DATA; position improving
+2026-08-03_to_2026-08-30,איך להכיר בן זוג,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,54.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-03_to_2026-08-30,איך למצוא זוגיות,/guide/finding-a-relationship,Israel,Non-brand,Finding a partner,/guide/finding-a-relationship,0,1,0,38.0,STRONG MATCH,LOW DATA
+2026-08-03_to_2026-08-30,איך למצוא זוגיות ב 8 ימים,/guide/finding-a-relationship,Israel,Non-brand,Finding a partner,/guide/finding-a-relationship,0,1,0,54.0,STRONG MATCH,LOW DATA
+2026-08-03_to_2026-08-30,באהבה,/love,Israel,Non-brand,Love,/love,0,1,0,40.0,STRONG MATCH,LOW DATA; position improving
+2026-08-03_to_2026-08-30,גישת ההתקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,16,0,61.9375,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,דפוס התקשרות לא מאורגן,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,2,0,32.5,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,דפוסי היקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,2,0,77.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,דפוסי התקשרות בולבי,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,20,0,68.3,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,ההתקשרות,/guide/attachment-styles,Israel,Non-brand,Ambiguous,—,0,13,0,93.8462,LOW DATA,ambiguous (attachment vs. contracting); pos >90
+2026-08-03_to_2026-08-30,התקשרות אמביוולנטית,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,60.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,התקשרות בטוחה,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,82.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,התקשרות חרדתית,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,47.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,התקשרות נמנעת בבגרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,52.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,זימון זוגיות,/guide/finding-a-relationship,Israel,Non-brand,Off-intent,—,0,5,0,48.4,DO NOT TARGET,"spiritual ""summoning"" intent"
+2026-08-03_to_2026-08-30,טיפוס נמנע בזוגיות,/guide/attachment-styles,Israel,Non-brand,Noise,—,0,1,0,36.0,LOW DATA,non-meaningful query
+2026-08-03_to_2026-08-30,להתנות אהבה,/love,Israel,Non-brand,Love,/love,0,1,0,26.0,STRONG MATCH,LOW DATA; position improving
+2026-08-03_to_2026-08-30,מה ההבדל בין התאהבות לאהבה,/love,Israel,Non-brand,Love,/love,0,1,0,29.0,STRONG MATCH,LOW DATA; position improving
+2026-08-03_to_2026-08-30,מה היא אהבה,/love,Israel,Non-brand,Love,/love,0,1,0,72.0,STRONG MATCH,LOW DATA; position improving
+2026-08-03_to_2026-08-30,מהי פרידה,/after-breakup,Israel,Non-brand,Breakup,/after-breakup,0,1,0,83.0,WEAK MATCH,definitional intent; LOW DATA
+2026-08-03_to_2026-08-30,מציאת בן זוג,/before-relationship,Israel,Non-brand,Finding a partner,"— (unowned; relates to ""היכרויות"")",0,1,0,60.0,WEAK MATCH,"Google picks /before-relationship (choosing), not /guide/finding-a-relationship; pos 42–62; WATCH"
+2026-08-03_to_2026-08-30,סגנונות התקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,96.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,סוגי היקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,66.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,סוגי התקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,76.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,סוגי התקשרות בולבי,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,21,0,77.8095,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,עוד...,/book,Israel,Non-brand,Noise,—,0,1,0,1.0,LOW DATA,non-meaningful query
+2026-08-03_to_2026-08-30,צחי חן,/,Israel,Brand,Brand / author,/author (brand),0,13,0,5.4615,BRAND ONLY,WATCH: pos ~5 with 0 clicks
+2026-08-03_to_2026-08-30,צחי חן,/,Vietnam,Brand,Brand / author,/author (brand),0,1,0,3.0,BRAND ONLY,WATCH: pos ~5 with 0 clicks
+2026-08-03_to_2026-08-30,צחי חן,/contact,Israel,Brand,Brand / author,/author (brand),0,3,0,11.0,BRAND ONLY,WATCH: pos ~5 with 0 clicks
+2026-08-03_to_2026-08-30,תאוריית ההיקשרות בזוגיות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,21,0,74.9048,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,תאוריית ההתקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,95.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,תיאוריית ההתקשרות וזוגיות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,4,0,77.75,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,תיאורית ההתקשרות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,1,0,85.0,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority
+2026-08-03_to_2026-08-30,תיאורית ההתקשרות וזוגיות,/guide/attachment-styles,Israel,Non-brand,Attachment,/guide/attachment-styles,0,4,0,78.25,WEAK MATCH,academic/Bowlby-theory intent vs. practical guide; pos 32–96; do not chase academic authority

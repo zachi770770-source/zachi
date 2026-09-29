@@ -1,0 +1,35 @@
+﻿query_under_review,brand_or_nonbrand,cluster,intended_owner_page,other_candidate_pages,where_defined,gsc_status
+מדייטים לאהבה,Brand,Brand / book,/,/book,siteConfig.bookTitle; home title,NO DATA YET
+צחי חן,Brand,Brand / author,/author,/,e2e seo-metadata: /author owns 'צחי חן',NO DATA YET
+Zachi Hen,Brand,Brand / author (EN),/en,/author (Person.alternateName),siteConfig.englishEdition.author,NO DATA YET
+Dating to Love,Brand,Brand / book (EN),/en,,siteConfig.englishEdition.title,NO DATA YET
+ספר זוגיות,Non-brand,Book / commercial,/book,/,e2e seo-metadata: /book owns 'ספר זוגיות',NO DATA YET
+ספר על זוגיות,Non-brand,Book / commercial,/book,/,task 8 list,NO DATA YET
+ספר על דייטים,Non-brand,Book / commercial,/book,/,task 8 list,NO DATA YET
+ספר דייטינג,Non-brand,Book / commercial,/book,/,task 8 list,NO DATA YET
+דייטים,Non-brand,Dating,/dating,/guide/*,searchIntent.seo.test OWNERS,NO DATA YET
+דייט ראשון,Non-brand,Dating,/guide/first-date,/dating,searchIntent.seo.test OWNERS,NO DATA YET
+איך להתנהג בדייט,Non-brand,Dating,/guide/first-date,/dating,task 3B list (no code owner),NO DATA YET
+היכרויות,Non-brand,Dating,— (unclear),/dating; /starting-again,stage-0 keyword map: unclear target,NO DATA YET
+אפליקציות היכרויות,Non-brand,Dating,— (no page),,stage-0 keyword map: content gap,NO DATA YET
+דגלים אדומים בדייט,Non-brand,Dating,/guide/dating-red-flags,/method/core-values,stage-0 keyword map,NO DATA YET
+איך לבחור בן זוג,Non-brand,Choosing a partner,/guide/choosing-a-partner,/before-relationship; /guide/compatibility,e2e: /before-relationship title 'בן או בת זוג',NO DATA YET
+איך לבחור בת זוג,Non-brand,Choosing a partner,/guide/choosing-a-partner,/before-relationship,task 3B list,NO DATA YET
+זוגיות,Non-brand,Relationship,— (no single owner),/inside-relationship; /book; guides,stage-0 keyword map: unclear target,NO DATA YET
+בניית קשר,Non-brand,Relationship,/building-relationship,/guide/from-dating-to-relationship,e2e seo-metadata: /building-relationship,NO DATA YET
+מדייטים לזוגיות / מעבר מדייטים לקשר,Non-brand,Relationship,/guide/from-dating-to-relationship,/dating; /building-relationship,guide metaTitle; PR #142 hub move,NO DATA YET
+תקשורת בזוגיות,Non-brand,Relationship,/guide/couple-communication,/inside-relationship; /method/eye-level-talk,stage-0 cannibalization map,NO DATA YET
+ספקות בזוגיות,Non-brand,Relationship,/guide/relationship-doubts,/guide/fear-of-commitment,PR #142 title change,NO DATA YET
+מערכת יחסים בריאה / זוגיות בריאה,Non-brand,Relationship,/guide/healthy-relationship,/inside-relationship,searchIntent.seo.test OWNERS,NO DATA YET
+סגנונות התקשרות,Non-brand,Relationship,/guide/attachment-styles,,stage-0 keyword map,NO DATA YET
+חרדת נטישה,Non-brand,Relationship,— (no dedicated page),/guide/attachment-styles,stage-0 keyword map,NO DATA YET
+פחד ממחויבות,Non-brand,Relationship,/guide/fear-of-commitment,/guide/relationship-doubts,stage-0 keyword map,NO DATA YET
+פרק ב,Non-brand,Starting again / divorce,/starting-again,,e2e: /starting-again 'מחדש'; page body,NO DATA YET
+גרושים / זוגיות אחרי גירושים,Non-brand,Starting again / divorce,/starting-again,,starting-again title 'גירושים',NO DATA YET
+להתחיל מחדש / דייטים אחרי גירושין,Non-brand,Starting again / divorce,/starting-again,/guide/over-a-breakup,e2e seo-metadata,NO DATA YET
+איך מתגברים על פרידה,Non-brand,Breakup,/after-breakup,/guide/over-a-breakup,e2e: /after-breakup 'פרידה',NO DATA YET
+חזרה לאקס,Non-brand,Breakup,/guide/getting-back-with-ex,/after-breakup,stage-0 keyword map,NO DATA YET
+איך לסיים קשר,Non-brand,Breakup,/guide/how-to-end-a-relationship,/method/clean-exit,PR #142 hub move → /after-breakup,NO DATA YET
+אהבה,Non-brand,Love,/love,/,searchIntent.seo.test OWNERS,NO DATA YET
+מהי אהבה,Non-brand,Love,/love,,love metaTitle,NO DATA YET
+איך בונים אהבה,Non-brand,Love,/love,/building-relationship,love metaTitle,NO DATA YET
