@@ -26,5 +26,13 @@
 - PR #142 מוזג ב-27.09, היום האחרון בתקופה. כל השפעה שלו תופיע רק בתקופה הבאה. עמודים שהוא שינה: `/`, `/building-relationship`, `/starting-again`, `/after-breakup`, `/guide/from-dating-to-relationship`, `/guide/relationship-doubts`, `/guide/how-to-end-a-relationship`, `/en`, `/reader`, `/compass`, `/author`.
 - שאילתה אחת שהייתה שם של אדם פרטי הוחלפה ב-`[redacted: personal name]` (1 חשיפה, מקום 70, `/before-relationship`). הריפו ציבורי. המספרים לא שונו.
 
+## שינויים שנכנסו אחרי ה-baseline
+כדי שבהשוואה הבאה אפשר יהיה להפריד בין השפעות:
+
+| תאריך | שינוי | עמודים | commit |
+|---|---|---|---|
+| 27.09.2026 | PR #142: תיקוני SEO טכניים, שינוי hub לשני מדריכים, titles ל-relationship-doubts ול-/en, קישורים פנימיים | ראו רשימה למעלה | merge `a820b9d` |
+| 29.09.2026 | מקטע חדש ב-attachment-styles: תיאוריית ההתקשרות וארבעת הדפוסים (title, description ו-H1 לא שונו; `dateModified` = 2026-09-29) | `/guide/attachment-styles` בלבד | `9aae85f` |
+
 ## להשוואה ב-25.10
 להוציא את אותם דוחות לאותם אורכי תקופה (28 יום): Performance סיכום, Pages, Query × Page × Country, ובנוסף Page Indexing.
