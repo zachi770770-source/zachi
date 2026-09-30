@@ -32,7 +32,7 @@
 | תאריך | שינוי | עמודים | commit |
 |---|---|---|---|
 | 27.09.2026 | PR #142: תיקוני SEO טכניים, שינוי hub לשני מדריכים, titles ל-relationship-doubts ול-/en, קישורים פנימיים | ראו רשימה למעלה | merge `a820b9d` |
-| 29.09.2026 | מקטע חדש ב-attachment-styles: תיאוריית ההתקשרות וארבעת הדפוסים (title, description ו-H1 לא שונו; `dateModified` = 2026-09-29) | `/guide/attachment-styles` בלבד | `9aae85f` |
+| 30.09.2026 | PR #144: מקטע חדש ב-attachment-styles: תיאוריית ההתקשרות וארבעת הדפוסים (title, description ו-H1 לא שונו; `dateModified` = 2026-09-29, יום כתיבת התוכן; באוויר מ-30.09 כי ה-deploy נחסם ב-29.09 במגבלת Vercel) | `/guide/attachment-styles` בלבד | `9aae85f` |
 
 ## להשוואה ב-25.10
 להוציא את אותם דוחות לאותם אורכי תקופה (28 יום): Performance סיכום, Pages, Query × Page × Country, ובנוסף Page Indexing.
