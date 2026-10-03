@@ -52,16 +52,28 @@ export function normWord(w: string): string {
     .replace(/[ךםןףץ]/g, (c) => FINALS[c]);
 }
 
+/**
+ * „מ” בראש מילה שאחריו נשארות בדיוק 3 אותיות היא כמעט תמיד אות-שורש או
+ * תחילית-משקל (בינוני: משלם, מדבר, מחפש; שם-עצם: מקום, משפט) — לא מילת-היחס
+ * „מ־”. קילוף שלה יוצר מילה אחרת לגמרי: „משלם” → „שלם”, „מדבר” → „דבר”,
+ * „משהו” → „שהו”. לכן „מ” (לבדה או בסוף צירוף כמו „ומ”) נקלפת רק כשנשארות
+ * לפחות 4 אותיות („מהבית”, „מהדייט” עוברות דרך „מה”).
+ */
+const MEM_MIN_REMAINDER = 4;
+
 /** מרחיב מילה בודדת: הצורה המנורמלת + הצורה ללא תחילית (כשיש, ושארית ≥3). */
 export function expandWord(w: string): string[] {
   const n = normWord(w);
   if (n.length < 2) return n ? [n] : [];
   const out = new Set<string>([n]);
   for (const p of PREFIXES) {
-    if (n.length >= p.length + 3 && n.startsWith(p)) {
-      out.add(n.slice(p.length));
-      break; // שכבת-תחילית אחת בלבד
-    }
+    if (!n.startsWith(p)) continue;
+    const min = p.endsWith("מ") ? MEM_MIN_REMAINDER : 3;
+    // תחילית שאינה עומדת בתנאי השארית אינה עוצרת את החיפוש: „ומשלם” מדלגת על
+    // „ומ” ונקלפת ב„ו” בלבד ל„משלם”.
+    if (n.length < p.length + min) continue;
+    out.add(n.slice(p.length));
+    break; // שכבת-תחילית אחת בלבד
   }
   return [...out];
 }

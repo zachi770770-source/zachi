@@ -55,3 +55,30 @@ describe("expandText / tokenize", () => {
     expect(out).toEqual(expect.arrayContaining(["בפגישות", "פגישות", "ראשונות"]));
   });
 });
+
+describe("„מ” בראש מילה עם שארית של 3 אותיות אינה נקלפת", () => {
+  // מ+3 אותיות היא כמעט תמיד אות-שורש/תחילית-משקל, לא מילת-היחס. קילוף יוצר
+  // מילה אחרת: משלם≠שלם, מדבר≠דבר, משהו≠שהו, מקום≠קום.
+  it.each(["משלם", "מדבר", "משהו", "מקום", "משפט", "מבין"])("%s נשארת שלמה", (w) => {
+    expect(expandWord(w)).toEqual([normWord(w)]);
+  });
+
+  it("„מ” עדיין נקלפת כשנשארות 4 אותיות או יותר", () => {
+    expect(expandWord("מדייטים")).toEqual(expect.arrayContaining(["מדייטימ", "דייטימ"]));
+  });
+
+  it("צירוף שמסתיים ב„מ” מדלג לתחילית הקצרה יותר: „ומשלם” → „משלם”, לא „שלם”", () => {
+    const out = expandWord("ומשלם");
+    expect(out).toEqual(expect.arrayContaining(["ומשלמ", "משלמ"]));
+    expect(out).not.toContain("שלמ");
+  });
+
+  it("„מה” (מ+ה) אינה מושפעת: „מהבית” → „בית”", () => {
+    expect(expandWord("מהבית")).toEqual(expect.arrayContaining(["מהבית", "בית"]));
+  });
+
+  it("ה-הידיעה ו-ב/ל/ש לא השתנו: „הקשר” → „קשר”, „לשלם” → „שלם”", () => {
+    expect(expandWord("הקשר")).toEqual(expect.arrayContaining(["הקשר", "קשר"]));
+    expect(expandWord("לשלם")).toEqual(expect.arrayContaining(["לשלמ", "שלמ"]));
+  });
+});
