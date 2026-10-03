@@ -190,31 +190,69 @@ async function main(url: string) {
     const practical = [];
     for (const q of PRACTICAL_QUESTIONS) practical.push(await diagnose(q));
 
-    // ── benchmark מלא (אותו קובץ ואותו מדד כמו retrieval.bench.test.ts) ──────
+    // ── benchmark מלא (אותו קובץ כמו retrieval.bench.test.ts) ──────────────────
+    // לכל שאלה: הקטעים הסופיים (מזהים+פרקים), הדרגה של הקטע הראשון מהפרק המצופה
+    // (gold rank, 1..5 או null), ו-10 המועמדים הראשונים אחרי השער (לזיהוי שינוי
+    // מהותי במועמדים בין גרסאות). „unanswerable” היא קבוצת השלילה.
     const bench = JSON.parse(
       readFileSync(resolve(process.cwd(), "src/lib/compass/__fixtures__/retrievalBenchmark.json"), "utf8"),
     ) as { questions: Array<{ id: string; kind: string; q: string; expect: number[] }> };
-    const benchRows = [];
+    type BenchRow = {
+      id: string;
+      kind: string;
+      expect: number[];
+      original: string[];
+      derived: string[];
+      matched: boolean;
+      finalIds: Array<string | null>;
+      chapters: number[];
+      scores: number[];
+      goldRank: number | null;
+      falseMatch: boolean | null;
+    };
+    const benchRows: BenchRow[] = [];
     for (const b of bench.questions) {
       const r = await searchCompass(db as never, b.q);
+      const finalIds: Array<string | null> = [];
+      for (const m of r.results) finalIds.push(await idOf(m));
       const chapters = r.results.map((m) => m.chapterNumber);
+      const idx = chapters.findIndex((c) => b.expect.includes(c));
+      const { original, derived } = splitQueryTerms(b.q);
       benchRows.push({
         id: b.id,
         kind: b.kind,
         expect: b.expect,
+        original,
+        derived,
         matched: r.matched,
+        finalIds,
         chapters,
-        reached: b.expect.length > 0 ? chapters.some((c) => b.expect.includes(c)) : null,
+        scores: r.results.map((m) => m.score),
+        goldRank: b.expect.length > 0 && idx >= 0 ? idx + 1 : null,
         falseMatch: b.expect.length === 0 ? r.matched : null,
       });
     }
+    const metricsFor = (rows: BenchRow[]) => {
+      const n = rows.length || 1;
+      const hit = (k: number) => rows.filter((r) => r.goldRank !== null && r.goldRank <= k).length;
+      return {
+        n: rows.length,
+        hit1: hit(1),
+        hit3: hit(3),
+        hit5: hit(5),
+        mrr: Number((rows.reduce((a, r) => a + (r.goldRank ? 1 / r.goldRank : 0), 0) / n).toFixed(4)),
+      };
+    };
     const answerable = benchRows.filter((r) => r.expect.length > 0);
     const unanswerable = benchRows.filter((r) => r.expect.length === 0);
+    const byKind: Record<string, ReturnType<typeof metricsFor>> = {};
+    for (const k of [...new Set(answerable.map((r) => r.kind))]) {
+      byKind[k] = metricsFor(answerable.filter((r) => r.kind === k));
+    }
     const metrics = {
-      reached: answerable.filter((r) => r.reached).length,
-      answerable: answerable.length,
-      falseMatches: unanswerable.filter((r) => r.falseMatch).length,
-      unanswerable: unanswerable.length,
+      answerable: metricsFor(answerable),
+      byKind,
+      negative: { n: unanswerable.length, falseMatches: unanswerable.filter((r) => r.falseMatch).length },
     };
 
     const report = {
@@ -237,7 +275,7 @@ async function main(url: string) {
       );
     }
     console.log(
-      `\nbenchmark: reached ${metrics.reached}/${metrics.answerable}, false matches ${metrics.falseMatches}/${metrics.unanswerable}`,
+      `\nbenchmark: ${JSON.stringify(metrics.answerable)} negative=${JSON.stringify(metrics.negative)}`,
     );
   } finally {
     await db.query("rollback").catch(() => {});
