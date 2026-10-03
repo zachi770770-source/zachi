@@ -1,0 +1,74 @@
+name: compass-diagnose
+
+# אבחון-אחזור ל„שאל את הספר” מול הספר המיובא האמיתי — לקריאה בלבד.
+#
+# • הפעלה ידנית בלבד (workflow_dispatch). אין טריגר אוטומטי.
+# • מריץ את אותו אבחון פעמיים: על `main` (לפני) ועל ה-ref שנבחר (אחרי), כדי
+#   להשוות מונחים, החלטות-שער, מועמדים ו-benchmark.
+# • מתחבר דרך הסוד COMPASS_PG_URL_READONLY בלבד. האבחון עצמו פותח
+#   `begin transaction read only` ומגדיר default_transaction_read_only=on, כך
+#   שכל ניסיון כתיבה נכשל במסד. מומלץ שהסוד יצביע על משתמש עם SELECT בלבד.
+# • הפלט (לוג + artifact) מכיל מונחים, מזהי קטעים, כותרות, ציונים ומדדים
+#   בלבד — לא את גוף הספר ולא את מחרוזת החיבור.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: diagnose (${{ matrix.side }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - side: before
+            ref: main
+          - side: after
+            ref: ${{ github.ref }}
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.ref }}
+
+      # הקובץ החדש של האבחון קיים רק בענף; בצד ה-before מעתיקים אותו מהענף
+      # כדי שהמדידה תרוץ על קוד-האחזור של main עם אותו כלי מדידה בדיוק.
+      - name: Use the diagnostic from the dispatched ref
+        if: matrix.side == 'before'
+        working-directory: ${{ github.workspace }}
+        run: |
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git show "${{ github.sha }}:site/src/lib/compass/retrieval.diagnose.test.ts" \
+            > site/src/lib/compass/retrieval.diagnose.test.ts
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      - name: Run read-only diagnostic
+        env:
+          COMPASS_PG_URL_READONLY: ${{ secrets.COMPASS_PG_URL_READONLY }}
+          COMPASS_DIAGNOSE_OUT: compass-diagnose-${{ matrix.side }}.json
+        run: |
+          if [ -z "${COMPASS_PG_URL_READONLY}" ]; then
+            echo "::error::Secret COMPASS_PG_URL_READONLY is not set"
+            exit 1
+          fi
+          npx vitest run src/lib/compass/retrieval.diagnose.test.ts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compass-diagnose-${{ matrix.side }}
+          path: site/compass-diagnose-${{ matrix.side }}.json
+          retention-days: 14
