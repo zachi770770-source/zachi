@@ -191,9 +191,9 @@ async function main(url: string) {
     for (const q of PRACTICAL_QUESTIONS) practical.push(await diagnose(q));
 
     // ── benchmark מלא (אותו קובץ כמו retrieval.bench.test.ts) ──────────────────
-    // לכל שאלה: הקטעים הסופיים (מזהים+פרקים), הדרגה של הקטע הראשון מהפרק המצופה
-    // (gold rank, 1..5 או null), ו-10 המועמדים הראשונים אחרי השער (לזיהוי שינוי
-    // מהותי במועמדים בין גרסאות). „unanswerable” היא קבוצת השלילה.
+    // לכל שאלה: מונחי השאילתה, הקטעים הסופיים (מזהים, פרקים וציונים — להשוואת
+    // מועמדים בין גרסאות), והדרגה של הקטע הראשון מהפרק המצופה (gold rank, 1..5
+    // או null). „unanswerable” היא קבוצת השלילה.
     const bench = JSON.parse(
       readFileSync(resolve(process.cwd(), "src/lib/compass/__fixtures__/retrievalBenchmark.json"), "utf8"),
     ) as { questions: Array<{ id: string; kind: string; q: string; expect: number[] }> };
