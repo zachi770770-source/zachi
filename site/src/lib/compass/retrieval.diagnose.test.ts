@@ -232,15 +232,21 @@ async function main(url: string) {
         falseMatch: b.expect.length === 0 ? r.matched : null,
       });
     }
+    // count = מספר המקרים; rate = count / n (n = מספר המקרים בקבוצה). MRR כרגיל.
+    const rate = (count: number, n: number) => ({
+      count,
+      rate: n > 0 ? Number((count / n).toFixed(4)) : 0,
+    });
     const metricsFor = (rows: BenchRow[]) => {
-      const n = rows.length || 1;
-      const hit = (k: number) => rows.filter((r) => r.goldRank !== null && r.goldRank <= k).length;
+      const n = rows.length;
+      const hit = (k: number) =>
+        rate(rows.filter((r) => r.goldRank !== null && r.goldRank <= k).length, n);
       return {
-        n: rows.length,
+        n,
         hit1: hit(1),
         hit3: hit(3),
         hit5: hit(5),
-        mrr: Number((rows.reduce((a, r) => a + (r.goldRank ? 1 / r.goldRank : 0), 0) / n).toFixed(4)),
+        mrr: n > 0 ? Number((rows.reduce((a, r) => a + (r.goldRank ? 1 / r.goldRank : 0), 0) / n).toFixed(4)) : 0,
       };
     };
     const answerable = benchRows.filter((r) => r.expect.length > 0);
@@ -252,7 +258,10 @@ async function main(url: string) {
     const metrics = {
       answerable: metricsFor(answerable),
       byKind,
-      negative: { n: unanswerable.length, falseMatches: unanswerable.filter((r) => r.falseMatch).length },
+      negative: {
+        n: unanswerable.length,
+        falseMatches: rate(unanswerable.filter((r) => r.falseMatch).length, unanswerable.length),
+      },
     };
 
     const report = {
